@@ -343,26 +343,20 @@ class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Analytics event: [PaymentAnalyticsEvent.PaymentIntentCancelSource]
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun cancelPaymentIntentSource(
         paymentIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
-    ): PaymentIntent? {
+    ): Result<PaymentIntent> {
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getCancelPaymentIntentSourceUrl(paymentIntentId),
-                options,
-                mapOf("source" to sourceId)
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getCancelPaymentIntentSourceUrl(paymentIntentId),
+                options = options,
+                params = mapOf("source" to sourceId),
             ),
-            PaymentIntentJsonParser()
+            jsonParser = PaymentIntentJsonParser(),
         ) {
             fireAnalyticsRequest(PaymentAnalyticsEvent.PaymentIntentCancelSource)
         }

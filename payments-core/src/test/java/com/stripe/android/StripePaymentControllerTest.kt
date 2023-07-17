@@ -273,11 +273,11 @@ internal class StripePaymentControllerTest {
             paymentIntentId: String,
             sourceId: String,
             options: ApiRequest.Options
-        ): PaymentIntent {
+        ): Result<PaymentIntent> {
             cancelPaymentIntentArgs.add(
                 Triple(paymentIntentId, sourceId, options)
             )
-            return cancelPaymentIntentResponse
+            return Result.success(cancelPaymentIntentResponse)
         }
 
         override suspend fun cancelSetupIntentSource(

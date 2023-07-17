@@ -1141,21 +1141,19 @@ internal class StripeApiRepositoryTest {
     @Test
     fun cancelPaymentIntentSource_whenAlreadyCanceled_throwsInvalidRequestException() =
         runTest {
-            val exception = assertFailsWith<InvalidRequestException> {
-                stripeApiRepository.cancelPaymentIntentSource(
-                    "pi_1FejpSH8dsfnfKo38L276wr6",
-                    "src_1FejpbH8dsfnfKo3KR7EqCzJ",
-                    ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
-                )
-            }
-            assertEquals(
+            val exception = stripeApiRepository.cancelPaymentIntentSource(
+                paymentIntentId = "pi_1FejpSH8dsfnfKo38L276wr6",
+                sourceId = "src_1FejpbH8dsfnfKo3KR7EqCzJ",
+                options = ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY),
+            ).exceptionOrNull() as InvalidRequestException
+
+            assertThat(exception.message).isEqualTo(
                 "This PaymentIntent could be not be fulfilled via this session because" +
                     " a different payment method was attached to it. " +
                     "Another session could be attempting to fulfill this PaymentIntent." +
                     " Please complete that session or try again.",
-                exception.message
             )
-            assertEquals("payment_intent_unexpected_state", exception.stripeError?.code)
+            assertThat(exception.stripeError?.code).isEqualTo("payment_intent_unexpected_state")
         }
 
     @Test

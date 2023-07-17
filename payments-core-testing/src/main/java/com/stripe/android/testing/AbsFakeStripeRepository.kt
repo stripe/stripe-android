@@ -75,8 +75,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         paymentIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
-    ): PaymentIntent? {
-        TODO("Not yet implemented")
+    ): Result<PaymentIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun confirmSetupIntent(
