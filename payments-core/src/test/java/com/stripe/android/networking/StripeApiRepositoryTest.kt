@@ -1549,10 +1549,10 @@ internal class StripeApiRepositoryTest {
                 workContext = testDispatcher
             )
 
-            val invalidRequestException = assertFailsWith<InvalidRequestException> {
-                stripeRepository.createRadarSession(DEFAULT_OPTIONS)
-            }
-            assertThat(invalidRequestException.message)
+            val invalidRequestException = stripeRepository.createRadarSession(DEFAULT_OPTIONS).exceptionOrNull()
+
+            assertThat(invalidRequestException).isInstanceOf(InvalidRequestException::class.java)
+            assertThat(invalidRequestException?.message)
                 .isEqualTo("Could not obtain fraud data required to create a Radar Session.")
         }
 
@@ -1560,13 +1560,13 @@ internal class StripeApiRepositoryTest {
     fun `createRadarSession() with advancedFraudSignalsEnabled set to false should throw an exception`() =
         runTest {
             verifyNoInteractions(fraudDetectionDataRepository)
-
             Stripe.advancedFraudSignalsEnabled = false
+
             val stripeRepository = create()
-            val invalidRequestException = assertFailsWith<InvalidRequestException> {
-                stripeRepository.createRadarSession(DEFAULT_OPTIONS)
-            }
-            assertThat(invalidRequestException.message)
+            val invalidRequestException = stripeRepository.createRadarSession(DEFAULT_OPTIONS).exceptionOrNull()
+
+            assertThat(invalidRequestException).isInstanceOf(InvalidRequestException::class.java)
+            assertThat(invalidRequestException?.message)
                 .isEqualTo("Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session.")
         }
 

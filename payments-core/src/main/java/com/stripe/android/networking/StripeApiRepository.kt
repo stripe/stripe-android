@@ -1031,13 +1031,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
             require(Stripe.advancedFraudSignalsEnabled) {
                 "Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session."
             }
-        }
 
-        return validation.mapCatching {
-            val fraudData = requireNotNull(fraudDetectionDataRepository.getLatest()) {
+            requireNotNull(fraudDetectionDataRepository.getLatest()) {
                 "Could not obtain fraud data required to create a Radar Session."
             }
+        }
 
+        return validation.mapCatching { fraudData ->
             val params = fraudData.params + buildPaymentUserAgentPair()
 
             fetchStripeModelResult(
@@ -1051,9 +1051,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 fireAnalyticsRequest(
                     paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.RadarSessionCreate)
                 )
-            }.getOrElse {
-                throw StripeException.create(it)
             }
+        }.getOrElse {
+            Result.failure(StripeException.create(it))
         }
     }
 
