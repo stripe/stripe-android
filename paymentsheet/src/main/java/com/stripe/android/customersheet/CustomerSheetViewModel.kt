@@ -20,6 +20,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
@@ -67,6 +68,9 @@ internal class CustomerSheetViewModel @Inject constructor(
         lpmRepository.initializeWithCardSpec(
             configuration.billingDetailsCollectionConfiguration.toInternal()
         )
+
+        configuration.appearance.parseAppearance()
+
         if (viewState.value is CustomerSheetViewState.Loading) {
             loadPaymentMethods()
         }
@@ -132,7 +136,6 @@ internal class CustomerSheetViewModel @Inject constructor(
                         // TODO (jameswoo) translate
                         "Confirm"
                     },
-                    primaryButtonEnabled = paymentSelection != null,
                     errorMessage = errorMessage,
                 )
             )
@@ -250,7 +253,6 @@ internal class CustomerSheetViewModel @Inject constructor(
                         paymentSelection = paymentSelection,
                         // TODO (jameswoo) translate
                         primaryButtonLabel = "Continue",
-                        primaryButtonEnabled = true,
                     )
                 }
             }
@@ -259,7 +261,6 @@ internal class CustomerSheetViewModel @Inject constructor(
                     it.copy(
                         paymentSelection = null,
                         primaryButtonLabel = null,
-                        primaryButtonEnabled = false,
                     )
                 }
             }
@@ -280,6 +281,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                 } ?: error("${currentViewState.paymentMethodCode} is not supported")
             }
             is CustomerSheetViewState.SelectPaymentMethod -> {
+                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                    it.copy(isProcessing = true)
+                }
                 when (val paymentSelection = currentViewState.paymentSelection) {
                     is PaymentSelection.GooglePay -> selectGooglePay()
                     is PaymentSelection.Saved -> selectSavedPaymentMethod(paymentSelection)
@@ -401,7 +405,6 @@ internal class CustomerSheetViewModel @Inject constructor(
                 ),
                 // TODO (jameswoo) translate
                 primaryButtonLabel = "Continue",
-                primaryButtonEnabled = true,
             )
         }
     }
@@ -422,7 +425,10 @@ internal class CustomerSheetViewModel @Inject constructor(
                     t = cause,
                 )
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                    it.copy(errorMessage = displayMessage)
+                    it.copy(
+                        errorMessage = displayMessage,
+                        isProcessing = false,
+                    )
                 }
             }
         }

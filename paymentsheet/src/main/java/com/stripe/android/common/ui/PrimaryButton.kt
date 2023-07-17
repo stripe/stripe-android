@@ -47,7 +47,7 @@ internal fun PrimaryButton(
         Color(StripeTheme.primaryButtonStyle.getBorderStrokeColor(context))
     )
     val shape = RoundedCornerShape(
-        StripeTheme.primaryButtonStyle.shape.cornerRadius
+        StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
     )
     val fontFamily = StripeTheme.primaryButtonStyle.typography.fontFamily
     val textStyle = TextStyle(

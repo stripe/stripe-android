@@ -106,7 +106,6 @@ class CustomerSheetViewModelTest {
                         isEditing = false,
                         isGooglePayEnabled = false,
                         primaryButtonLabel = "Confirm",
-                        primaryButtonEnabled = true,
                         errorMessage = null,
                     )
                 )
@@ -255,8 +254,6 @@ class CustomerSheetViewModelTest {
             val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
             assertThat(viewState.primaryButtonLabel)
                 .isNull()
-            assertThat(viewState.primaryButtonEnabled)
-                .isFalse()
         }
     }
 
@@ -276,8 +273,6 @@ class CustomerSheetViewModelTest {
             var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
             assertThat(viewState.primaryButtonLabel)
                 .isNull()
-            assertThat(viewState.primaryButtonEnabled)
-                .isFalse()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnItemSelected(
@@ -312,8 +307,6 @@ class CustomerSheetViewModelTest {
             var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
             assertThat(viewState.primaryButtonLabel)
                 .isNull()
-            assertThat(viewState.primaryButtonEnabled)
-                .isFalse()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnItemSelected(
@@ -353,8 +346,6 @@ class CustomerSheetViewModelTest {
 
             assertThat(viewState.primaryButtonLabel)
                 .isNull()
-            assertThat(viewState.primaryButtonEnabled)
-                .isFalse()
         }
     }
 
@@ -381,8 +372,6 @@ class CustomerSheetViewModelTest {
 
             assertThat(viewState.primaryButtonLabel)
                 .isNull()
-            assertThat(viewState.primaryButtonEnabled)
-                .isFalse()
         }
     }
 
@@ -554,7 +543,10 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
             assertThat(viewState.errorMessage).isNull()
+            assertThat(viewState.primaryButtonEnabled).isTrue()
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.primaryButtonEnabled).isFalse()
             viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
             assertThat(viewState.errorMessage).isEqualTo("Something went wrong")
         }
@@ -677,7 +669,6 @@ class CustomerSheetViewModelTest {
                     isEditing = false,
                     isGooglePayEnabled = false,
                     primaryButtonLabel = null,
-                    primaryButtonEnabled = false,
                 ),
                 initialViewState
             ),
@@ -738,7 +729,6 @@ class CustomerSheetViewModelTest {
                     isEditing = false,
                     isGooglePayEnabled = false,
                     primaryButtonLabel = null,
-                    primaryButtonEnabled = false,
                 ),
                 initialViewState
             ),

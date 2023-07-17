@@ -119,7 +119,6 @@ internal class CustomerSheetActivityTest {
         runActivityScenario(
             viewState = createSelectPaymentMethodViewState(
                 primaryButtonLabel = "Testing Primary Button",
-                primaryButtonEnabled = true,
             ),
         ) {
             page.waitForText("Testing Primary Button")
@@ -215,7 +214,6 @@ internal class CustomerSheetActivityTest {
         isEditing: Boolean = false,
         isGooglePayEnabled: Boolean = false,
         primaryButtonLabel: String? = null,
-        primaryButtonEnabled: Boolean = false,
     ): CustomerSheetViewState.SelectPaymentMethod {
         return CustomerSheetViewState.SelectPaymentMethod(
             title = title,
@@ -226,7 +224,6 @@ internal class CustomerSheetActivityTest {
             isEditing = isEditing,
             isGooglePayEnabled = isGooglePayEnabled,
             primaryButtonLabel = primaryButtonLabel,
-            primaryButtonEnabled = primaryButtonEnabled,
         )
     }
 
