@@ -285,32 +285,16 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         authSessionCookie: String?,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options
-    ): ConsumerSession? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun logoutConsumer(
-        consumerSessionClientSecret: String,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSession? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun createPaymentDetails(
-        consumerSessionClientSecret: String,
-        financialConnectionsAccountId: String,
-        requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails? {
-        TODO("Not yet implemented")
+    ): Result<ConsumerSession> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
         requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails? {
-        TODO("Not yet implemented")
+    ): Result<ConsumerPaymentDetails> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun attachFinancialConnectionsSessionToPaymentIntent(

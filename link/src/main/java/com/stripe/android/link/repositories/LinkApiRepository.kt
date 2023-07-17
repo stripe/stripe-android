@@ -7,6 +7,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkScope
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSignUpConsentAction
@@ -60,23 +61,19 @@ internal class LinkApiRepository @Inject constructor(
         authSessionCookie: String?,
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSession> = withContext(workContext) {
-        runCatching {
-            requireNotNull(
-                stripeRepository.consumerSignUp(
-                    email,
-                    phone,
-                    country,
-                    name,
-                    locale,
-                    authSessionCookie,
-                    consentAction,
-                    ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
-                    )
-                )
+        stripeRepository.consumerSignUp(
+            email,
+            phone,
+            country,
+            name,
+            locale,
+            authSessionCookie,
+            consentAction,
+            ApiRequest.Options(
+                publishableKeyProvider(),
+                stripeAccountIdProvider()
             )
-        }
+        )
     }
 
     override suspend fun createCardPaymentDetails(
@@ -86,36 +83,32 @@ internal class LinkApiRepository @Inject constructor(
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<LinkPaymentDetails.New> = withContext(workContext) {
-        runCatching {
-            requireNotNull(
-                stripeRepository.createPaymentDetails(
-                    consumerSessionClientSecret,
-                    ConsumerPaymentDetailsCreateParams.Card(
-                        paymentMethodCreateParams.toParamMap(),
-                        userEmail
-                    ),
-                    consumerPublishableKey?.let {
-                        ApiRequest.Options(it)
-                    } ?: ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
-                    )
-                )?.paymentDetails?.first()?.let { paymentDetails ->
-                    val extraParams = ConsumerPaymentDetailsCreateParams.Card
-                        .extraConfirmationParams(paymentMethodCreateParams)
+        stripeRepository.createPaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
+                cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap(),
+                email = userEmail,
+            ),
+            requestOptions = consumerPublishableKey?.let {
+                ApiRequest.Options(it)
+            } ?: ApiRequest.Options(
+                apiKey = publishableKeyProvider(),
+                stripeAccount = stripeAccountIdProvider(),
+            ),
+        ).mapCatching {
+            val paymentDetails = it.paymentDetails.first()
+            val extraParams = extraConfirmationParams(paymentMethodCreateParams)
 
-                    val createParams = PaymentMethodCreateParams.createLink(
-                        paymentDetailsId = paymentDetails.id,
-                        consumerSessionClientSecret = consumerSessionClientSecret,
-                        extraParams = extraParams,
-                    )
+            val createParams = PaymentMethodCreateParams.createLink(
+                paymentDetailsId = paymentDetails.id,
+                consumerSessionClientSecret = consumerSessionClientSecret,
+                extraParams = extraParams,
+            )
 
-                    LinkPaymentDetails.New(
-                        paymentDetails = paymentDetails,
-                        paymentMethodCreateParams = createParams,
-                        originalParams = paymentMethodCreateParams,
-                    )
-                }
+            LinkPaymentDetails.New(
+                paymentDetails = paymentDetails,
+                paymentMethodCreateParams = createParams,
+                originalParams = paymentMethodCreateParams,
             )
         }
     }

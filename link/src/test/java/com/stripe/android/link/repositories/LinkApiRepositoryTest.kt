@@ -139,7 +139,7 @@ class LinkApiRepositoryTest {
                 consentAction = any(),
                 requestOptions = any()
             )
-        ).thenReturn(consumerSession)
+        ).thenReturn(Result.success(consumerSession))
 
         val result = linkRepository.consumerSignUp(
             "email",
@@ -167,7 +167,7 @@ class LinkApiRepositoryTest {
                 consentAction = any(),
                 requestOptions = any()
             )
-        ).thenThrow(RuntimeException("error"))
+        ).thenReturn(Result.failure(RuntimeException("error")))
 
         val result = linkRepository.consumerSignUp(
             "email",
@@ -258,12 +258,11 @@ class LinkApiRepositoryTest {
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS
         whenever(
             stripeRepository.createPaymentDetails(
-                any(),
-                any<ConsumerPaymentDetailsCreateParams>(),
-                any()
+                consumerSessionClientSecret = any(),
+                paymentDetailsCreateParams = any(),
+                requestOptions = any(),
             )
-        )
-            .thenReturn(paymentDetails)
+        ).thenReturn(Result.success(paymentDetails))
 
         val result = linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
@@ -304,12 +303,11 @@ class LinkApiRepositoryTest {
     fun `createPaymentDetails for card catches exception and returns failure`() = runTest {
         whenever(
             stripeRepository.createPaymentDetails(
-                any(),
-                any<ConsumerPaymentDetailsCreateParams>(),
-                any()
+                consumerSessionClientSecret = any(),
+                paymentDetailsCreateParams = any(),
+                requestOptions = any(),
             )
-        )
-            .thenThrow(RuntimeException("error"))
+        ).thenReturn(Result.failure(RuntimeException("error")))
 
         val result = linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,

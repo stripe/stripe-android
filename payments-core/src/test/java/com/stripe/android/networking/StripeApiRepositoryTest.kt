@@ -1660,39 +1660,6 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun `logoutConsumer() sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                ConsumerFixtures.CONSUMER_LOGGED_OUT_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val clientSecret = "secret"
-            val cookie = "cookie1"
-            create().logoutConsumer(
-                clientSecret,
-                cookie,
-                DEFAULT_OPTIONS
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-
-            with(params) {
-                assertEquals(this["request_surface"], "android_payment_element")
-                withNestedParams("credentials") {
-                    assertEquals(this["consumer_session_client_secret"], clientSecret)
-                }
-                withNestedParams("cookies") {
-                    assertEquals(this["verification_session_client_secrets"], listOf(cookie))
-                }
-            }
-        }
-
-    @Test
     fun `createDeferredFinancialConnectionsSession() sends all parameters`() =
         runTest {
             val stripeResponse = StripeResponse(
@@ -1731,41 +1698,6 @@ internal class StripeApiRepositoryTest {
                 assertEquals(null, this["on_behalf_of"])
                 assertEquals(1000, this["amount"])
                 assertEquals("usd", this["currency"])
-            }
-        }
-
-    @Test
-    fun `createPaymentDetails() for financial connections sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val clientSecret = "secret"
-            val accountId = "account"
-            create().createPaymentDetails(
-                clientSecret,
-                accountId,
-                DEFAULT_OPTIONS
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-
-            with(params) {
-                assertEquals(this["request_surface"], "android_payment_element")
-                withNestedParams("credentials") {
-                    assertEquals(this["consumer_session_client_secret"], clientSecret)
-                }
-                assertEquals(this["is_default"], true)
-                assertEquals(this["type"], "bank_account")
-                withNestedParams("bank_account") {
-                    assertEquals(this["account"], accountId)
-                }
             }
         }
 
