@@ -35,7 +35,7 @@ class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = CustomerSheetViewState.SelectPaymentMethod(
-                    title = "Screenshot testing",
+                    title = null,
                     savedPaymentMethods = emptyList(),
                     paymentSelection = null,
                     isLiveMode = false,

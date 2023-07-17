@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.PrimaryButton
@@ -82,9 +81,8 @@ internal fun SelectPaymentMethod(
         modifier = modifier
     ) {
         H4Text(
-            text = viewState.title ?: stringResource(
-                R.string.stripe_paymentsheet_select_payment_method
-            ),
+            // TODO translate string
+            text = viewState.title ?: "Manage your payment method",
             modifier = Modifier
                 .padding(bottom = 20.dp)
                 .padding(horizontal = horizontalPadding)
@@ -147,9 +145,8 @@ internal fun AddCard(
         modifier = modifier.padding(horizontal = horizontalPadding)
     ) {
         H4Text(
-            text = stringResource(
-                R.string.stripe_paymentsheet_add_payment_method_title
-            ),
+            // TODO (jameswoo) translate
+            text = "Save a new payment method",
             modifier = Modifier
                 .padding(bottom = 20.dp)
         )

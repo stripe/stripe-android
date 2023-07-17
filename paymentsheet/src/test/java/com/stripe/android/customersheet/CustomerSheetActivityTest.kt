@@ -86,7 +86,7 @@ internal class CustomerSheetActivityTest {
                 title = null
             ),
         ) {
-            page.waitForText("Select your payment method")
+            page.waitForText("Manage your payment method")
         }
     }
 
@@ -130,7 +130,7 @@ internal class CustomerSheetActivityTest {
         runActivityScenario(
             viewState = createAddPaymentMethodViewState(),
         ) {
-            page.waitForText("Add your payment information")
+            page.waitForText("Save a new payment method")
             page.waitForTextExactly("Save")
         }
     }

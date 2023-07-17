@@ -34,7 +34,6 @@ import java.util.Stack
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
-import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSheetViewModelScope
@@ -134,9 +133,8 @@ internal class CustomerSheetViewModel @Inject constructor(
                     isEditing = false,
                     isGooglePayEnabled = configuration.googlePayEnabled,
                     primaryButtonLabel = paymentSelection?.let {
-                        resources.getString(
-                            com.stripe.android.ui.core.R.string.stripe_continue_button_label
-                        )
+                        // TODO (jameswoo) translate
+                        "Confirm"
                     },
                     errorMessage = errorMessage,
                 )
@@ -253,9 +251,8 @@ internal class CustomerSheetViewModel @Inject constructor(
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
                     it.copy(
                         paymentSelection = paymentSelection,
-                        primaryButtonLabel = resources.getString(
-                            com.stripe.android.ui.core.R.string.stripe_continue_button_label
-                        ),
+                        // TODO (jameswoo) translate
+                        primaryButtonLabel = "Continue",
                     )
                 }
             }
@@ -406,9 +403,8 @@ internal class CustomerSheetViewModel @Inject constructor(
                 paymentSelection = PaymentSelection.Saved(
                     paymentMethod = paymentMethod
                 ),
-                primaryButtonLabel = resources.getString(
-                    PaymentsUiCoreR.string.stripe_continue_button_label
-                ),
+                // TODO (jameswoo) translate
+                primaryButtonLabel = "Continue",
             )
         }
     }
@@ -418,7 +414,6 @@ internal class CustomerSheetViewModel @Inject constructor(
             customerAdapter.setSelectedPaymentOption(
                 savedPaymentSelection.toPaymentOption()
             ).onSuccess {
-                // TODO (jameswoo) Figure out what to do if these are null
                 _result.tryEmit(
                     InternalCustomerSheetResult.Selected(
                         paymentSelection = savedPaymentSelection,
