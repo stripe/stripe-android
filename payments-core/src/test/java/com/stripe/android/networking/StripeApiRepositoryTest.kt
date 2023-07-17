@@ -1162,12 +1162,12 @@ internal class StripeApiRepositoryTest {
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenAnswer { throw UnknownHostException() }
 
-            assertFailsWith<APIConnectionException> {
-                create().createSource(
-                    SourceParams.createCardParams(CARD_PARAMS),
-                    DEFAULT_OPTIONS
-                )
-            }
+            val exception = create().createSource(
+                sourceParams = SourceParams.createCardParams(CARD_PARAMS),
+                options = DEFAULT_OPTIONS,
+            ).exceptionOrNull()
+
+            assertThat(exception).isInstanceOf(APIConnectionException::class.java)
         }
 
     @Test

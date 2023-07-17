@@ -10,7 +10,6 @@ import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeResponse
-import com.stripe.android.exception.CardException
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -133,17 +132,11 @@ interface StripeRepository {
         options: ApiRequest.Options
     ): Result<SetupIntent>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createSource(
         sourceParams: SourceParams,
         options: ApiRequest.Options
-    ): Source?
+    ): Result<Source>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun retrieveSource(
@@ -152,30 +145,17 @@ interface StripeRepository {
         options: ApiRequest.Options
     ): Result<Source>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
-    ): PaymentMethod?
+    ): Result<PaymentMethod>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class
-    )
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createToken(
         tokenParams: TokenParams,
         options: ApiRequest.Options
-    ): Token?
+    ): Result<Token>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun addCustomerSource(
