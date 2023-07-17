@@ -114,8 +114,18 @@ internal class CustomerSheetViewModel @Inject constructor(
                 Pair(paymentMethods, selection)
             }
 
-            val paymentMethods = result.getOrNull()?.first ?: emptyList()
-            val paymentSelection = result.getOrNull()?.second
+            val paymentMethods = result.getOrNull()?.first?.toMutableList()
+
+            val paymentSelection = result.getOrNull()?.second?.apply {
+                // The order of the payment method carousel should be as follows:
+                // Add card, Google Pay (if enabled), selected PM, additional PMs
+                val selectedPaymentMethod = (this as? PaymentSelection.Saved)?.paymentMethod
+                paymentMethods?.remove(selectedPaymentMethod)
+                selectedPaymentMethod?.let {
+                    paymentMethods?.add(0, selectedPaymentMethod)
+                }
+            }
+
             val failure = result.failureOrNull()
             val errorMessage = if (result.isFailure) {
                 failure?.displayMessage ?: failure?.cause?.stripeErrorMessage(application)
@@ -126,7 +136,7 @@ internal class CustomerSheetViewModel @Inject constructor(
             transition(
                 to = CustomerSheetViewState.SelectPaymentMethod(
                     title = configuration.headerTextForSelectionScreen,
-                    savedPaymentMethods = paymentMethods,
+                    savedPaymentMethods = paymentMethods ?: emptyList(),
                     paymentSelection = paymentSelection,
                     isLiveMode = isLiveMode,
                     isProcessing = false,
