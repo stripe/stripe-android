@@ -14,6 +14,8 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -909,6 +911,61 @@ class CustomerSheetViewModelTest {
             viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
             assertThat(viewState.errorMessage).isEqualTo("We could not save this payment method. Please try again.")
             assertThat(viewState.isProcessing).isFalse()
+        }
+    }
+
+    @Test
+    fun `When card form is complete, primary button should be enabled`() = runTest {
+        val initialViewState = CustomerSheetViewState.AddPaymentMethod(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            formViewData = FormViewModel.ViewData(),
+            enabled = true,
+            isLiveMode = false,
+            isProcessing = false,
+        )
+        val viewModel = createViewModel(
+            backstack = buildBackstack(initialViewState),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            assertThat(viewState.primaryButtonEnabled).isFalse()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnFormDataUpdated(
+                    formData = FormViewModel.ViewData(
+                        completeFormValues = FormFieldValues(
+                            fieldValuePairs = mapOf(
+                                IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                            ),
+                            showsMandate = false,
+                            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+                        )
+                    )
+                )
+            )
+
+            viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            assertThat(viewState.primaryButtonEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `When card form is not complete, primary button should be disabled`() = runTest {
+        val initialViewState = CustomerSheetViewState.AddPaymentMethod(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            formViewData = FormViewModel.ViewData(),
+            enabled = true,
+            isLiveMode = false,
+            isProcessing = false,
+        )
+        val viewModel = createViewModel(
+            backstack = buildBackstack(initialViewState),
+        )
+
+        viewModel.viewState.test {
+            val viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            assertThat(viewState.primaryButtonEnabled).isFalse()
         }
     }
 

@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -143,14 +142,6 @@ internal fun AddCard(
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    LaunchedEffect(viewState.formViewData.completeFormValues) {
-        viewActionHandler(
-            CustomerSheetViewAction.OnFormValuesChanged(
-                viewState.formViewData.completeFormValues
-            )
-        )
-    }
-
     Column(
         modifier = modifier.padding(horizontal = horizontalPadding)
     ) {
@@ -181,8 +172,8 @@ internal fun AddCard(
 
         PrimaryButton(
             // TODO (jameswoo) add to lokalize
-            label = "Add",
-            isEnabled = true,
+            label = "Save",
+            isEnabled = viewState.primaryButtonEnabled,
             isLoading = viewState.isProcessing,
             onButtonClick = {
                 viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)

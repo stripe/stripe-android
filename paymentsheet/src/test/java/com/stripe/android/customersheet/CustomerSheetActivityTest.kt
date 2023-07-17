@@ -132,7 +132,7 @@ internal class CustomerSheetActivityTest {
             viewState = createAddPaymentMethodViewState(),
         ) {
             page.waitForText("Add your payment information")
-            page.waitForTextExactly("Add")
+            page.waitForTextExactly("Save")
         }
     }
 
