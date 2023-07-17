@@ -25,17 +25,17 @@ internal class DefaultAlipayRepository(
         }
 
         val nextActionData = paymentIntent.nextActionData
+
         if (nextActionData is StripeIntent.NextActionData.AlipayRedirect) {
             val output = authenticator.onAuthenticationRequest(nextActionData.data)
+            val result = output[ALIPAY_RESULT_FIELD]
+
+            if (result == AlipayAuthResult.RESULT_CODE_SUCCESS) {
+                pingAlipayEndpointBeforeRetrievingPaymentIntentStatus(nextActionData, requestOptions)
+            }
 
             val outcome = when (output[ALIPAY_RESULT_FIELD]) {
-                AlipayAuthResult.RESULT_CODE_SUCCESS -> {
-                    nextActionData.authCompleteUrl?.let { authCompleteUrl ->
-                        // TODO This is bad
-                        stripeRepository.retrieveObject(authCompleteUrl, requestOptions).getOrThrow()
-                    }
-                    StripeIntentResult.Outcome.SUCCEEDED
-                }
+                AlipayAuthResult.RESULT_CODE_SUCCESS -> StripeIntentResult.Outcome.SUCCEEDED
                 AlipayAuthResult.RESULT_CODE_FAILED -> StripeIntentResult.Outcome.FAILED
                 AlipayAuthResult.RESULT_CODE_CANCELLED -> StripeIntentResult.Outcome.CANCELED
                 else -> StripeIntentResult.Outcome.UNKNOWN
@@ -44,6 +44,17 @@ internal class DefaultAlipayRepository(
             return AlipayAuthResult(outcome)
         } else {
             throw RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")
+        }
+    }
+
+    private suspend fun pingAlipayEndpointBeforeRetrievingPaymentIntentStatus(
+        redirect: StripeIntent.NextActionData.AlipayRedirect,
+        requestOptions: ApiRequest.Options,
+    ) {
+        // Alipay requires us to hit an endpoint before retrieving the PaymentIntent to ensure the
+        // status is up-to-date.
+        if (redirect.authCompleteUrl != null) {
+            stripeRepository.retrieveObject(redirect.authCompleteUrl, requestOptions)
         }
     }
 
