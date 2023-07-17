@@ -414,8 +414,8 @@ suspend fun Stripe.createFile(
     fileParams: StripeFileParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): StripeFile = runApiRequest {
-    stripeRepository.createFile(
+): StripeFile {
+    return stripeRepository.createFile(
         fileParams,
         ApiRequest.Options(
             apiKey = publishableKey,
