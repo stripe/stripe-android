@@ -99,8 +99,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         setupIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
-    ): SetupIntent? {
-        TODO("Not yet implemented")
+    ): Result<SetupIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun createSource(

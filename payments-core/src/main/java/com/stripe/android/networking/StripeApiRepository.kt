@@ -455,18 +455,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Analytics event: [PaymentAnalyticsEvent.SetupIntentCancelSource]
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun cancelSetupIntentSource(
         setupIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
-    ): SetupIntent? {
-        return fetchStripeModel(
+    ): Result<SetupIntent> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getCancelSetupIntentSourceUrl(setupIntentId),
                 options,

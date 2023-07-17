@@ -14,6 +14,7 @@ import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
@@ -283,7 +284,7 @@ internal class StripePaymentControllerTest {
             setupIntentId: String,
             sourceId: String,
             options: ApiRequest.Options
-        ) = SetupIntentFixtures.CANCELLED
+        ): Result<SetupIntent> = Result.success(SetupIntentFixtures.CANCELLED)
 
         override suspend fun confirmPaymentIntent(
             confirmPaymentIntentParams: ConfirmPaymentIntentParams,

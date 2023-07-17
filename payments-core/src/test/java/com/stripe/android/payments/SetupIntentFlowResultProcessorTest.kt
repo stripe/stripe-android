@@ -45,7 +45,7 @@ internal class SetupIntentFlowResultProcessorTest {
                 SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
             )
             whenever(mockStripeRepository.cancelSetupIntentSource(any(), any(), any())).thenReturn(
-                SetupIntentFixtures.CANCELLED
+                Result.success(SetupIntentFixtures.CANCELLED)
             )
 
             val setupIntentResult = processor.processResult(
