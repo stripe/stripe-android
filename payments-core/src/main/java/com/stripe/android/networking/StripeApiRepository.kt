@@ -991,40 +991,33 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun createFile(
         fileParams: StripeFileParams,
         requestOptions: ApiRequest.Options
-    ): StripeFile {
-        val response = makeFileUploadRequest(
-            FileUploadRequest(fileParams, requestOptions, appInfo)
-        ) {
-            fireAnalyticsRequest(PaymentAnalyticsEvent.FileCreate)
+    ): Result<StripeFile> {
+        val response = runCatching {
+            makeFileUploadRequest(
+                fileUploadRequest = FileUploadRequest(fileParams, requestOptions, appInfo),
+                onResponse = { fireAnalyticsRequest(PaymentAnalyticsEvent.FileCreate) },
+            )
         }
-        return StripeFileJsonParser().parse(response.responseJson())
+
+        return response.mapCatching {
+            StripeFileJsonParser().parse(it.responseJson())
+        }
     }
 
-    @Throws(
-        IllegalArgumentException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class,
-        AuthenticationException::class
-    )
     override suspend fun retrieveObject(
         url: String,
         requestOptions: ApiRequest.Options
-    ): StripeResponse<String> {
+    ): Result<StripeResponse<String>> {
         if (!StripeUrlUtils.isStripeUrl(url)) {
-            throw IllegalArgumentException("Unrecognized domain: $url")
-        }
-        val response = makeApiRequest(
-            apiRequestFactory.createGet(
-                url,
-                requestOptions
-            )
-        ) {
-            fireAnalyticsRequest(PaymentAnalyticsEvent.StripeUrlRetrieve)
+            return Result.failure(IllegalArgumentException("Unrecognized domain: $url"))
         }
 
-        return response
+        return runCatching {
+            makeApiRequest(
+                apiRequest = apiRequestFactory.createGet(url, requestOptions),
+                onResponse = { fireAnalyticsRequest(PaymentAnalyticsEvent.StripeUrlRetrieve) },
+            )
+        }
     }
 
     /**
@@ -1033,30 +1026,34 @@ class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
-    ): RadarSession? {
-        return runCatching {
+    ): Result<RadarSession> {
+        val validation = runCatching {
             require(Stripe.advancedFraudSignalsEnabled) {
                 "Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session."
             }
-            requireNotNull(fraudDetectionDataRepository.getLatest()) {
+        }
+
+        return validation.mapCatching {
+            val fraudData = requireNotNull(fraudDetectionDataRepository.getLatest()) {
                 "Could not obtain fraud data required to create a Radar Session."
             }
-        }.map {
-            val params = it.params.plus(buildPaymentUserAgentPair())
-            fetchStripeModel(
-                apiRequestFactory.createPost(
-                    getApiUrl("radar/session"),
-                    requestOptions,
-                    params
+
+            val params = fraudData.params + buildPaymentUserAgentPair()
+
+            fetchStripeModelResult(
+                apiRequest = apiRequestFactory.createPost(
+                    url = getApiUrl("radar/session"),
+                    options = requestOptions,
+                    params = params,
                 ),
-                RadarSessionJsonParser()
+                jsonParser = RadarSessionJsonParser(),
             ) {
                 fireAnalyticsRequest(
                     paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.RadarSessionCreate)
                 )
+            }.getOrElse {
+                throw StripeException.create(it)
             }
-        }.getOrElse {
-            throw StripeException.create(it)
         }
     }
 

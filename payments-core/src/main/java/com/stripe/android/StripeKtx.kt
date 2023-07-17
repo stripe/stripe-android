@@ -422,7 +422,7 @@ suspend fun Stripe.createFile(
             stripeAccount = stripeAccountId,
             idempotencyKey = idempotencyKey
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -444,14 +444,12 @@ suspend fun Stripe.createFile(
     APIException::class
 )
 suspend fun Stripe.createRadarSession(): RadarSession {
-    return runApiRequest {
-        stripeRepository.createRadarSession(
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            )
+    return stripeRepository.createRadarSession(
+        ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId,
         )
-    }
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**

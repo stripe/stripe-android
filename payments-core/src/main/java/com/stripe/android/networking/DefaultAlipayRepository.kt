@@ -10,6 +10,7 @@ import com.stripe.android.model.StripeIntent
 internal class DefaultAlipayRepository(
     private val stripeRepository: StripeRepository
 ) : AlipayRepository {
+
     override suspend fun authenticate(
         paymentIntent: PaymentIntent,
         authenticator: AlipayAuthenticator,
@@ -25,21 +26,22 @@ internal class DefaultAlipayRepository(
 
         val nextActionData = paymentIntent.nextActionData
         if (nextActionData is StripeIntent.NextActionData.AlipayRedirect) {
-            val output =
-                authenticator.onAuthenticationRequest(nextActionData.data)
-            return AlipayAuthResult(
-                when (output[ALIPAY_RESULT_FIELD]) {
-                    AlipayAuthResult.RESULT_CODE_SUCCESS -> {
-                        nextActionData.authCompleteUrl?.let { authCompleteUrl ->
-                            stripeRepository.retrieveObject(authCompleteUrl, requestOptions)
-                        }
-                        StripeIntentResult.Outcome.SUCCEEDED
+            val output = authenticator.onAuthenticationRequest(nextActionData.data)
+
+            val outcome = when (output[ALIPAY_RESULT_FIELD]) {
+                AlipayAuthResult.RESULT_CODE_SUCCESS -> {
+                    nextActionData.authCompleteUrl?.let { authCompleteUrl ->
+                        // TODO This is bad
+                        stripeRepository.retrieveObject(authCompleteUrl, requestOptions).getOrThrow()
                     }
-                    AlipayAuthResult.RESULT_CODE_FAILED -> StripeIntentResult.Outcome.FAILED
-                    AlipayAuthResult.RESULT_CODE_CANCELLED -> StripeIntentResult.Outcome.CANCELED
-                    else -> StripeIntentResult.Outcome.UNKNOWN
+                    StripeIntentResult.Outcome.SUCCEEDED
                 }
-            )
+                AlipayAuthResult.RESULT_CODE_FAILED -> StripeIntentResult.Outcome.FAILED
+                AlipayAuthResult.RESULT_CODE_CANCELLED -> StripeIntentResult.Outcome.CANCELED
+                else -> StripeIntentResult.Outcome.UNKNOWN
+            }
+
+            return AlipayAuthResult(outcome)
         } else {
             throw RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")
         }

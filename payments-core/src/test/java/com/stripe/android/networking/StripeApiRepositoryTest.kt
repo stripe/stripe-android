@@ -1221,7 +1221,7 @@ internal class StripeApiRepositoryTest {
         val response = create().retrieveObject(
             StripeApiRepository.paymentMethodsUrl,
             DEFAULT_OPTIONS
-        )
+        ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(any())
         assertThat(response.body).isEqualTo(responseBody)
@@ -1529,9 +1529,8 @@ internal class StripeApiRepositoryTest {
                 ),
                 workContext = testDispatcher
             )
-            val radarSession = requireNotNull(
-                stripeRepository.createRadarSession(DEFAULT_OPTIONS)
-            )
+            val radarSession = stripeRepository.createRadarSession(DEFAULT_OPTIONS).getOrThrow()
+
             assertThat(radarSession.id)
                 .startsWith("rse_")
 

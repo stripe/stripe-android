@@ -317,18 +317,18 @@ interface StripeRepository {
     suspend fun createFile(
         fileParams: StripeFileParams,
         requestOptions: ApiRequest.Options
-    ): StripeFile
+    ): Result<StripeFile>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun retrieveObject(
         url: String,
         requestOptions: ApiRequest.Options
-    ): StripeResponse<String>
+    ): Result<StripeResponse<String>>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
-    ): RadarSession?
+    ): Result<RadarSession>
 
     // Link endpoints
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

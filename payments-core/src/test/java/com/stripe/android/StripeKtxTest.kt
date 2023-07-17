@@ -223,7 +223,7 @@ internal class StripeKtxTest {
 
             whenever(
                 mockApiRepository.createFile(any(), any())
-            ).thenReturn(expectedFile)
+            ).thenReturn(Result.success(expectedFile))
 
             val actualFile = stripe.createFile(
                 mock(),
