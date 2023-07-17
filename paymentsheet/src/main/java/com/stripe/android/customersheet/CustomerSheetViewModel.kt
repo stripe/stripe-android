@@ -20,6 +20,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
@@ -68,6 +69,9 @@ internal class CustomerSheetViewModel @Inject constructor(
         lpmRepository.initializeWithCardSpec(
             configuration.billingDetailsCollectionConfiguration.toInternal()
         )
+
+        configuration.appearance.parseAppearance()
+
         if (viewState.value is CustomerSheetViewState.Loading) {
             loadPaymentMethods()
         }
