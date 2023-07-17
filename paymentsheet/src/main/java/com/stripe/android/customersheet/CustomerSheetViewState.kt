@@ -44,7 +44,6 @@ internal sealed class CustomerSheetViewState(
         override val isEditing: Boolean,
         val isGooglePayEnabled: Boolean,
         val primaryButtonLabel: String?,
-        val primaryButtonEnabled: Boolean,
         val errorMessage: String? = null,
     ) : CustomerSheetViewState(
         savedPaymentMethods = savedPaymentMethods,
@@ -52,7 +51,10 @@ internal sealed class CustomerSheetViewState(
         isProcessing = isProcessing,
         isEditing = isEditing,
         screen = PaymentSheetScreen.SelectSavedPaymentMethods,
-    )
+    ) {
+        val primaryButtonEnabled: Boolean
+            get() = !isProcessing
+    }
 
     data class AddPaymentMethod(
         val paymentMethodCode: PaymentMethodCode,
@@ -64,11 +66,11 @@ internal sealed class CustomerSheetViewState(
     ) : CustomerSheetViewState(
         savedPaymentMethods = emptyList(),
         isLiveMode = isLiveMode,
-        isProcessing = false,
+        isProcessing = isProcessing,
         isEditing = false,
         screen = PaymentSheetScreen.AddAnotherPaymentMethod,
     ) {
         val primaryButtonEnabled: Boolean
-            get() = formViewData.completeFormValues != null
+            get() = formViewData.completeFormValues != null && !isProcessing
     }
 }

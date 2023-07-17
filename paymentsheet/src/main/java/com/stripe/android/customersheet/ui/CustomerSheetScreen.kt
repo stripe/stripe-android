@@ -122,6 +122,7 @@ internal fun SelectPaymentMethod(
                 PrimaryButton(
                     label = it,
                     isEnabled = viewState.primaryButtonEnabled,
+                    isLoading = viewState.isProcessing,
                     onButtonClick = {
                         viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
                     },
