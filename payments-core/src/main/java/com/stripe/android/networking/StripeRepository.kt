@@ -342,28 +342,14 @@ interface StripeRepository {
         authSessionCookie: String?,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options
-    ): ConsumerSession?
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    suspend fun logoutConsumer(
-        consumerSessionClientSecret: String,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSession?
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    suspend fun createPaymentDetails(
-        consumerSessionClientSecret: String,
-        financialConnectionsAccountId: String,
-        requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails?
+    ): Result<ConsumerSession>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
         requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails?
+    ): Result<ConsumerPaymentDetails>
 
     // ACHv2 endpoints
 

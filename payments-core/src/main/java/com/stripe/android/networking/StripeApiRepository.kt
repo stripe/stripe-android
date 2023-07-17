@@ -1072,12 +1072,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
         authSessionCookie: String?,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options
-    ): ConsumerSession? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                consumerSignUpUrl,
-                requestOptions,
-                mapOf(
+    ): Result<ConsumerSession> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = consumerSignUpUrl,
+                options = requestOptions,
+                params = mapOf(
                     "request_surface" to "android_payment_element",
                     "email_address" to email.lowercase(),
                     "phone_number" to phoneNumber,
@@ -1100,79 +1100,20 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     } ?: emptyMap()
                 )
             ),
-            ConsumerSessionJsonParser()
-        ) {
-            // no-op
-        }
-    }
-
-    /**
-     * Logs out the consumer and invalidates the cookie.
-     */
-    override suspend fun logoutConsumer(
-        consumerSessionClientSecret: String,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSession? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                logoutConsumerUrl,
-                requestOptions,
-                mapOf(
-                    "request_surface" to "android_payment_element",
-                    "credentials" to mapOf(
-                        "consumer_session_client_secret" to consumerSessionClientSecret
-                    )
-                ).plus(
-                    authSessionCookie?.let {
-                        mapOf(
-                            "cookies" to
-                                mapOf("verification_session_client_secrets" to listOf(it))
-                        )
-                    } ?: emptyMap()
-                )
-            ),
-            ConsumerSessionJsonParser()
-        ) {
-            // no-op
-        }
-    }
-
-    override suspend fun createPaymentDetails(
-        consumerSessionClientSecret: String,
-        financialConnectionsAccountId: String,
-        requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                consumerPaymentDetailsUrl,
-                requestOptions,
-                mapOf(
-                    "request_surface" to "android_payment_element",
-                    "credentials" to mapOf(
-                        "consumer_session_client_secret" to consumerSessionClientSecret
-                    ),
-                    "type" to "bank_account",
-                    "bank_account" to mapOf("account" to financialConnectionsAccountId),
-                    "is_default" to true
-                )
-            ),
-            ConsumerPaymentDetailsJsonParser()
-        ) {
-            // no-op
-        }
+            jsonParser = ConsumerSessionJsonParser(),
+        )
     }
 
     override suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
         requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                consumerPaymentDetailsUrl,
-                requestOptions,
-                mapOf(
+    ): Result<ConsumerPaymentDetails> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = consumerPaymentDetailsUrl,
+                options = requestOptions,
+                params = mapOf(
                     "request_surface" to "android_payment_element",
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
@@ -1182,10 +1123,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     paymentDetailsCreateParams.toParamMap()
                 )
             ),
-            ConsumerPaymentDetailsJsonParser()
-        ) {
-            // no-op
-        }
+            jsonParser = ConsumerPaymentDetailsJsonParser(),
+        )
     }
 
     override suspend fun createFinancialConnectionsSessionForDeferredPayments(
@@ -1565,7 +1504,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private suspend fun <ModelType : StripeModel> fetchStripeModelResult(
         apiRequest: ApiRequest,
         jsonParser: ModelJsonParser<ModelType>,
-        onResponse: () -> Unit
+        onResponse: () -> Unit = {},
     ): Result<ModelType> {
         return runCatching {
             val response = makeApiRequest(apiRequest, onResponse).responseJson()
