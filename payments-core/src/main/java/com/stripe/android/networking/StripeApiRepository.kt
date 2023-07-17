@@ -96,7 +96,6 @@ import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.json.JSONException
 import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -844,87 +843,64 @@ class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Analytics event: [PaymentAnalyticsEvent.IssuingRetrievePin]
      */
-    @Throws(
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        AuthenticationException::class,
-        CardException::class,
-        JSONException::class
-    )
     override suspend fun retrieveIssuingCardPin(
         cardId: String,
         verificationId: String,
         userOneTimeCode: String,
         requestOptions: ApiRequest.Options
-    ): String? {
-        val issuingCardPin = fetchStripeModel(
-            apiRequestFactory.createGet(
-                getIssuingCardPinUrl(cardId),
-                requestOptions,
-                mapOf(
+    ): Result<String> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = getIssuingCardPinUrl(cardId),
+                options = requestOptions,
+                params = mapOf(
                     "verification" to createVerificationParam(verificationId, userOneTimeCode)
-                )
+                ),
             ),
-            IssuingCardPinJsonParser()
-        ) {
-            fireAnalyticsRequest(PaymentAnalyticsEvent.IssuingRetrievePin)
-        }
-
-        return issuingCardPin?.pin
+            jsonParser = IssuingCardPinJsonParser(),
+            onResponse = { fireAnalyticsRequest(PaymentAnalyticsEvent.IssuingRetrievePin) },
+        ).map { it.pin }
     }
 
     /**
      * Analytics event: [PaymentAnalyticsEvent.IssuingUpdatePin]
      */
-    @Throws(
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        AuthenticationException::class,
-        CardException::class
-    )
     override suspend fun updateIssuingCardPin(
         cardId: String,
         newPin: String,
         verificationId: String,
         userOneTimeCode: String,
         requestOptions: ApiRequest.Options
-    ) {
-        makeApiRequest(
-            apiRequestFactory.createPost(
-                getIssuingCardPinUrl(cardId),
-                requestOptions,
-                mapOf(
-                    "verification" to createVerificationParam(verificationId, userOneTimeCode),
-                    "pin" to newPin
-                )
+    ): Throwable? {
+        return runCatching {
+            makeApiRequest(
+                apiRequest = apiRequestFactory.createPost(
+                    url = getIssuingCardPinUrl(cardId),
+                    options = requestOptions,
+                    params = mapOf(
+                        "verification" to createVerificationParam(verificationId, userOneTimeCode),
+                        "pin" to newPin,
+                    ),
+                ),
+                onResponse = { fireAnalyticsRequest(PaymentAnalyticsEvent.IssuingUpdatePin) },
             )
-        ) {
-            fireAnalyticsRequest(PaymentAnalyticsEvent.IssuingUpdatePin)
-        }
+        }.exceptionOrNull()
     }
 
     override suspend fun getFpxBankStatus(
         options: ApiRequest.Options
-    ): BankStatuses {
-        return runCatching {
-            val fpxBankStatuses = fetchStripeModel(
-                apiRequestFactory.createGet(
-                    getApiUrl("fpx/bank_statuses"),
-
-                    // don't pass connected account
-                    options.copy(stripeAccount = null),
-
-                    mapOf("account_holder_type" to "individual")
-                ),
-                FpxBankStatusesJsonParser()
-            ) {
-                fireAnalyticsRequest(PaymentAnalyticsEvent.FpxBankStatusesRetrieve)
-            }
-
-            requireNotNull(fpxBankStatuses)
-        }.getOrDefault(BankStatuses())
+    ): Result<BankStatuses> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = getApiUrl("fpx/bank_statuses"),
+                // don't pass connected account
+                options = options.copy(stripeAccount = null),
+                params = mapOf("account_holder_type" to "individual"),
+            ),
+            jsonParser = FpxBankStatusesJsonParser(),
+        ) {
+            fireAnalyticsRequest(PaymentAnalyticsEvent.FpxBankStatusesRetrieve)
+        }
     }
 
     override suspend fun getCardMetadata(

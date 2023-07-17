@@ -218,8 +218,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         verificationId: String,
         userOneTimeCode: String,
         requestOptions: ApiRequest.Options
-    ): String? {
-        TODO("Not yet implemented")
+    ): Result<String> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun updateIssuingCardPin(
@@ -228,14 +228,14 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         verificationId: String,
         userOneTimeCode: String,
         requestOptions: ApiRequest.Options
-    ) {
+    ): Throwable? {
         TODO("Not yet implemented")
     }
 
     override suspend fun getFpxBankStatus(
         options: ApiRequest.Options
-    ): BankStatuses {
-        TODO("Not yet implemented")
+    ): Result<BankStatuses> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun getCardMetadata(bin: Bin, options: ApiRequest.Options): CardMetadata {

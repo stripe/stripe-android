@@ -40,7 +40,6 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
-import org.json.JSONException
 import java.util.Locale
 
 /**
@@ -260,29 +259,14 @@ interface StripeRepository {
         requestOptions: ApiRequest.Options
     ): Result<Customer>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class,
-        JSONException::class
-    )
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun retrieveIssuingCardPin(
         cardId: String,
         verificationId: String,
         userOneTimeCode: String,
         requestOptions: ApiRequest.Options
-    ): String?
+    ): Result<String>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class
-    )
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun updateIssuingCardPin(
         cardId: String,
@@ -290,10 +274,10 @@ interface StripeRepository {
         verificationId: String,
         userOneTimeCode: String,
         requestOptions: ApiRequest.Options
-    )
+    ): Throwable?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    suspend fun getFpxBankStatus(options: ApiRequest.Options): BankStatuses
+    suspend fun getFpxBankStatus(options: ApiRequest.Options): Result<BankStatuses>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun getCardMetadata(
