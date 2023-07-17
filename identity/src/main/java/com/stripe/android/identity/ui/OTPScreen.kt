@@ -318,7 +318,7 @@ private fun postErrorAndNavigateToFinalErrorScreen(
 }
 
 private const val EMPTY_PHONE_NUMBER = ""
-internal const val PHONE_NUMBER_PATTERN = "&phone_number&"
+internal const val PHONE_NUMBER_PATTERN = "{phone_number}"
 internal const val OTP_TITLE_TAG = "OtpTitleTag"
 internal const val OTP_BODY_TAG = "OtpBodyTag"
 internal const val OTP_ELEMENT_TAG = "OtpElementTag"
