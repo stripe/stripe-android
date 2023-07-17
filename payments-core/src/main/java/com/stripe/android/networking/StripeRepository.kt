@@ -305,13 +305,13 @@ interface StripeRepository {
     suspend fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,
         requestOptions: ApiRequest.Options
-    ): Stripe3ds2AuthResult?
+    ): Result<Stripe3ds2AuthResult>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun complete3ds2Auth(
         sourceId: String,
         requestOptions: ApiRequest.Options
-    ): Stripe3ds2AuthResult?
+    ): Result<Stripe3ds2AuthResult>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createFile(
