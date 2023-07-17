@@ -954,14 +954,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,
         requestOptions: ApiRequest.Options
-    ): Stripe3ds2AuthResult? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getApiUrl("3ds2/authenticate"),
-                requestOptions,
-                authParams.toParamMap()
+    ): Result<Stripe3ds2AuthResult> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getApiUrl("3ds2/authenticate"),
+                options = requestOptions,
+                params = authParams.toParamMap(),
             ),
-            Stripe3ds2AuthResultJsonParser()
+            jsonParser = Stripe3ds2AuthResultJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2Start)
@@ -972,17 +972,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun complete3ds2Auth(
         sourceId: String,
         requestOptions: ApiRequest.Options
-    ): Stripe3ds2AuthResult? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getApiUrl("3ds2/challenge_complete"),
-                requestOptions,
-                mapOf("source" to sourceId)
+    ): Result<Stripe3ds2AuthResult> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getApiUrl("3ds2/challenge_complete"),
+                options = requestOptions,
+                params = mapOf("source" to sourceId),
             ),
-            Stripe3ds2AuthResultJsonParser()
-        ) {
-            // no-op
-        }
+            jsonParser = Stripe3ds2AuthResultJsonParser(),
+        )
     }
 
     /**
@@ -1565,7 +1563,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private suspend fun <ModelType : StripeModel> fetchStripeModelResult(
         apiRequest: ApiRequest,
         jsonParser: ModelJsonParser<ModelType>,
-        onResponse: () -> Unit
+        onResponse: () -> Unit = {},
     ): Result<ModelType> {
         return runCatching {
             val response = makeApiRequest(apiRequest, onResponse).responseJson()

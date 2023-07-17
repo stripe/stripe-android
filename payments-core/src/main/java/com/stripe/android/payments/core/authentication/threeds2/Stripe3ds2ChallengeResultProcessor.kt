@@ -141,13 +141,11 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
         requestOptions: ApiRequest.Options,
         remainingRetries: Int = MAX_RETRIES
     ): Boolean {
-        return runCatching {
-            // complete3ds2Auth() result can be ignored
-            stripeRepository.complete3ds2Auth(
-                challengeResult.intentData.sourceId,
-                requestOptions
-            )
-        }.fold(
+        // complete3ds2Auth() result can be ignored
+        return stripeRepository.complete3ds2Auth(
+            challengeResult.intentData.sourceId,
+            requestOptions
+        ).fold(
             onSuccess = {
                 val attemptedRetries = MAX_RETRIES - remainingRetries
                 logger.debug(

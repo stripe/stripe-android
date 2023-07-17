@@ -474,13 +474,10 @@ internal class StripeApiRepositoryTest {
                 "stripe://payment-auth-return"
             )
 
-            val invalidRequestException =
-                assertFailsWith<InvalidRequestException> {
-                    stripeApiRepository.start3ds2Auth(
-                        authParams,
-                        DEFAULT_OPTIONS
-                    )
-                }
+            val invalidRequestException = stripeApiRepository.start3ds2Auth(
+                authParams,
+                DEFAULT_OPTIONS
+            ).exceptionOrNull() as InvalidRequestException
 
             assertEquals("source", invalidRequestException.stripeError?.param)
             assertEquals("resource_missing", invalidRequestException.stripeError?.code)
@@ -489,13 +486,11 @@ internal class StripeApiRepositoryTest {
     @Test
     fun complete3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException() =
         runTest {
-            val invalidRequestException =
-                assertFailsWith<InvalidRequestException> {
-                    stripeApiRepository.complete3ds2Auth(
-                        "src_123",
-                        DEFAULT_OPTIONS
-                    )
-                }
+            val invalidRequestException = stripeApiRepository.complete3ds2Auth(
+                "src_123",
+                DEFAULT_OPTIONS
+            ).exceptionOrNull() as InvalidRequestException
+
             assertThat(invalidRequestException.statusCode)
                 .isEqualTo(HttpURLConnection.HTTP_NOT_FOUND)
             assertEquals("source", invalidRequestException.stripeError?.param)

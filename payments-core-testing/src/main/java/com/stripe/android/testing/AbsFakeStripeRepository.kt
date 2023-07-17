@@ -245,15 +245,15 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,
         requestOptions: ApiRequest.Options
-    ): Stripe3ds2AuthResult? {
-        TODO("Not yet implemented")
+    ): Result<Stripe3ds2AuthResult> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun complete3ds2Auth(
         sourceId: String,
         requestOptions: ApiRequest.Options
-    ): Stripe3ds2AuthResult? {
-        TODO("Not yet implemented")
+    ): Result<Stripe3ds2AuthResult> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun createFile(
