@@ -105,7 +105,7 @@ class CustomerSheetViewModelTest {
                         isProcessing = false,
                         isEditing = false,
                         isGooglePayEnabled = false,
-                        primaryButtonLabel = "Continue",
+                        primaryButtonLabel = "Confirm",
                         primaryButtonEnabled = true,
                         errorMessage = null,
                     )
