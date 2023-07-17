@@ -20,7 +20,7 @@ internal class HeaderTextFactory(
             when (screen) {
                 PaymentSheetScreen.SelectSavedPaymentMethods -> {
                     if (isWalletEnabled && isPaymentIntent) {
-                        R.string.stripe_paymentsheet_pay_using
+                        null
                     } else {
                         R.string.stripe_paymentsheet_select_payment_method
                     }

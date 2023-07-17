@@ -17,7 +17,7 @@ class HeaderTextFactoryTest {
             types = emptyList(),
         )
 
-        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_pay_using)
+        assertThat(resource).isNull()
     }
 
     @Test
