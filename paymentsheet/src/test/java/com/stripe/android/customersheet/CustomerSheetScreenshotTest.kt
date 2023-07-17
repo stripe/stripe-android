@@ -165,4 +165,21 @@ class CustomerSheetScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun testAddPaymentMethodEnabled() {
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = CustomerSheetViewState.AddPaymentMethod(
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
+                    formViewData = FormViewModel.ViewData(),
+                    enabled = true,
+                    primaryButtonEnabled = true,
+                    isLiveMode = false,
+                    isProcessing = false,
+                ),
+                paymentMethodNameProvider = { it!! }
+            )
+        }
+    }
 }

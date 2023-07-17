@@ -940,22 +940,41 @@ class CustomerSheetViewModelTest {
             assertThat(viewState.primaryButtonEnabled).isFalse()
 
             viewModel.handleViewAction(
-                CustomerSheetViewAction.OnFormValuesChanged(
-                    formFieldValues = FormFieldValues(
-                        fieldValuePairs = mapOf(
-                            IdentifierSpec.Generic("Test") to FormFieldEntry(
-                                value = "Test",
-                                isComplete = true,
-                            )
-                        ),
-                        showsMandate = false,
-                        userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                CustomerSheetViewAction.OnFormDataUpdated(
+                    formData = FormViewModel.ViewData(
+                        completeFormValues = FormFieldValues(
+                            fieldValuePairs = mapOf(
+                                IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                            ),
+                            showsMandate = false,
+                            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+                        )
                     )
                 )
             )
 
             viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
             assertThat(viewState.primaryButtonEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `When card form is not complete, primary button should be disabled`() = runTest {
+        val initialViewState = CustomerSheetViewState.AddPaymentMethod(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            formViewData = FormViewModel.ViewData(),
+            enabled = true,
+            primaryButtonEnabled = false,
+            isLiveMode = false,
+            isProcessing = false,
+        )
+        val viewModel = createViewModel(
+            backstack = buildBackstack(initialViewState),
+        )
+
+        viewModel.viewState.test {
+            val viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            assertThat(viewState.primaryButtonEnabled).isFalse()
         }
     }
 

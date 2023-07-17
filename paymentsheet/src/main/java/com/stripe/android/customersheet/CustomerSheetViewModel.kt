@@ -17,7 +17,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -83,8 +82,7 @@ internal class CustomerSheetViewModel @Inject constructor(
             is CustomerSheetViewAction.OnItemRemoved -> onItemRemoved(viewAction.paymentMethod)
             is CustomerSheetViewAction.OnItemSelected -> onItemSelected(viewAction.selection)
             is CustomerSheetViewAction.OnPrimaryButtonPressed -> onPrimaryButtonPressed()
-            is CustomerSheetViewAction.OnFormValuesChanged ->
-                onFormValuesChanged(viewAction.formFieldValues)
+            is CustomerSheetViewAction.OnFormDataUpdated -> onFormDataUpdated(viewAction.formData)
         }
     }
 
@@ -174,11 +172,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
         viewModelScope.launch {
             formViewModel.viewDataFlow.collect { data ->
-                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
-                    it.copy(
-                        formViewData = data
-                    )
-                }
+                handleViewAction(CustomerSheetViewAction.OnFormDataUpdated(data))
             }
         }
     }
@@ -210,12 +204,12 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    private fun onFormValuesChanged(formFieldValues: FormFieldValues?) {
-        val isComplete = formFieldValues?.fieldValuePairs?.all {
-            it.value.isComplete
-        }
+    private fun onFormDataUpdated(formData: FormViewModel.ViewData) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
-            it.copy(primaryButtonEnabled = isComplete ?: false)
+            it.copy(
+                formViewData = formData,
+                primaryButtonEnabled = formData.completeFormValues != null
+            )
         }
     }
 
