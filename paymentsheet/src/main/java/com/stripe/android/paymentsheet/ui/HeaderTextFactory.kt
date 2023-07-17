@@ -13,13 +13,12 @@ internal class HeaderTextFactory(
     fun create(
         screen: PaymentSheetScreen,
         isWalletEnabled: Boolean,
-        isPaymentIntent: Boolean,
         types: List<PaymentMethodCode>,
     ): Int? {
         return if (isCompleteFlow) {
             when (screen) {
                 PaymentSheetScreen.SelectSavedPaymentMethods -> {
-                    if (isWalletEnabled && isPaymentIntent) {
+                    if (isWalletEnabled) {
                         null
                     } else {
                         R.string.stripe_paymentsheet_select_payment_method
