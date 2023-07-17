@@ -235,14 +235,12 @@ internal class CustomerSheetActivityTest {
         isLiveMode: Boolean = false,
         formViewData: FormViewModel.ViewData = FormViewModel.ViewData(),
         enabled: Boolean = true,
-        primaryButtonEnabled: Boolean = false,
         isProcessing: Boolean = false,
     ): CustomerSheetViewState.AddPaymentMethod {
         return CustomerSheetViewState.AddPaymentMethod(
             paymentMethodCode = paymentMethodCode,
             formViewData = formViewData,
             enabled = enabled,
-            primaryButtonEnabled = primaryButtonEnabled,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
         )

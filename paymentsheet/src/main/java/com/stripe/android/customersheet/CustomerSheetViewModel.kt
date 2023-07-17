@@ -164,7 +164,6 @@ internal class CustomerSheetViewModel @Inject constructor(
                 paymentMethodCode = paymentMethodCode,
                 formViewData = FormViewModel.ViewData(),
                 enabled = true,
-                primaryButtonEnabled = false,
                 isLiveMode = isLiveMode,
                 isProcessing = false,
             )
@@ -172,7 +171,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
         viewModelScope.launch {
             formViewModel.viewDataFlow.collect { data ->
-                handleViewAction(CustomerSheetViewAction.OnFormDataUpdated(data))
+                onFormDataUpdated(data)
             }
         }
     }
@@ -208,7 +207,6 @@ internal class CustomerSheetViewModel @Inject constructor(
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
                 formViewData = formData,
-                primaryButtonEnabled = formData.completeFormValues != null
             )
         }
     }

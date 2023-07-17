@@ -591,7 +591,6 @@ class CustomerSheetViewModelTest {
                         )
                     ),
                     enabled = true,
-                    primaryButtonEnabled = true,
                     isLiveMode = false,
                     isProcessing = false,
                 )
@@ -626,7 +625,6 @@ class CustomerSheetViewModelTest {
                         )
                     ),
                     enabled = true,
-                    primaryButtonEnabled = false,
                     isLiveMode = false,
                     isProcessing = false,
                 )
@@ -666,7 +664,6 @@ class CustomerSheetViewModelTest {
             ),
             enabled = true,
             isLiveMode = false,
-            primaryButtonEnabled = true,
             isProcessing = false,
         )
         val viewModel = createViewModel(
@@ -727,7 +724,6 @@ class CustomerSheetViewModelTest {
                 ),
             ),
             enabled = true,
-            primaryButtonEnabled = true,
             isLiveMode = false,
             isProcessing = false,
         )
@@ -787,7 +783,6 @@ class CustomerSheetViewModelTest {
                 ),
             ),
             enabled = true,
-            primaryButtonEnabled = false,
             isLiveMode = false,
             isProcessing = false,
         )
@@ -838,7 +833,6 @@ class CustomerSheetViewModelTest {
                 ),
             ),
             enabled = true,
-            primaryButtonEnabled = false,
             isLiveMode = false,
             isProcessing = false,
         )
@@ -880,7 +874,6 @@ class CustomerSheetViewModelTest {
                 ),
             ),
             enabled = true,
-            primaryButtonEnabled = false,
             isLiveMode = false,
             isProcessing = false,
         )
@@ -927,7 +920,6 @@ class CustomerSheetViewModelTest {
             paymentMethodCode = PaymentMethod.Type.Card.code,
             formViewData = FormViewModel.ViewData(),
             enabled = true,
-            primaryButtonEnabled = false,
             isLiveMode = false,
             isProcessing = false,
         )
@@ -964,7 +956,6 @@ class CustomerSheetViewModelTest {
             paymentMethodCode = PaymentMethod.Type.Card.code,
             formViewData = FormViewModel.ViewData(),
             enabled = true,
-            primaryButtonEnabled = false,
             isLiveMode = false,
             isProcessing = false,
         )
