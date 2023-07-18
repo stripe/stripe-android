@@ -106,8 +106,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun createSource(
         sourceParams: SourceParams,
         options: ApiRequest.Options
-    ): Source? {
-        TODO("Not yet implemented")
+    ): Result<Source> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrieveSource(
@@ -121,15 +121,15 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
-    ): PaymentMethod? {
-        TODO("Not yet implemented")
+    ): Result<PaymentMethod> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun createToken(
         tokenParams: TokenParams,
         options: ApiRequest.Options
-    ): Token? {
-        TODO("Not yet implemented")
+    ): Result<Token> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun addCustomerSource(

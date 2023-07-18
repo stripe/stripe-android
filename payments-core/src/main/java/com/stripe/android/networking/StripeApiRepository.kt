@@ -471,22 +471,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
      * Analytics event: [PaymentAnalyticsEvent.SourceCreate]
      *
      * @param sourceParams a [SourceParams] object with [Source] creation params
-     * @return a [Source] if one could be created from the input params,
-     * or `null` if not
+     * @return a [Result] containing the generated [Source] or the encountered [Exception]
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun createSource(
         sourceParams: SourceParams,
         options: ApiRequest.Options
-    ): Source? {
+    ): Result<Source> {
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 sourcesUrl,
                 options,
@@ -510,8 +503,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
      *
      * @param sourceId the [Source.id] field for the Source to query
      * @param clientSecret the [Source.clientSecret] field for the Source to query
-     * @return a [Source] if one could be retrieved for the input params, or `null` if
-     * no such Source could be found.
+     * @return a [Result] containing the retrieved [Source] or the encountered [Exception]
      */
     override suspend fun retrieveSource(
         sourceId: String,
@@ -535,19 +527,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Analytics event: [PaymentAnalyticsEvent.PaymentMethodCreate]
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
-    ): PaymentMethod? {
+    ): Result<PaymentMethod> {
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 paymentMethodsUrl,
                 options,
@@ -575,22 +561,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
      * @param options a [ApiRequest.Options] object that contains connection data like the api
      * key, api version, etc
      *
-     * @return a [Token] that can be used to perform other operations with this card
+     * @return a [Result] containing the generated [Token] or the encountered [Exception]
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        CardException::class,
-        APIException::class
-    )
     override suspend fun createToken(
         tokenParams: TokenParams,
         options: ApiRequest.Options
-    ): Token? {
+    ): Result<Token> {
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 tokensUrl,
                 options,
@@ -1631,12 +1610,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         // For user key auth, we must create the PM first.
-        val paymentMethodId = requireNotNull(
-            createPaymentMethod(paymentMethodCreateParams, options)?.id
-        )
+        val paymentMethod = createPaymentMethod(
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            options = options,
+        ).getOrThrow()
+
         return ConfirmPaymentIntentParams.createForDashboard(
             clientSecret = clientSecret,
-            paymentMethodId = paymentMethodId
+            paymentMethodId = paymentMethod.id!!,
         )
     }
 

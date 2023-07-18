@@ -345,17 +345,13 @@ internal class CustomerSheetViewModel @Inject constructor(
     private suspend fun createPaymentMethod(
         createParams: PaymentMethodCreateParams
     ): Result<PaymentMethod> {
-        return kotlin.runCatching {
-            requireNotNull(
-                stripeRepository.createPaymentMethod(
-                    paymentMethodCreateParams = createParams,
-                    options = ApiRequest.Options(
-                        apiKey = paymentConfiguration.publishableKey,
-                        stripeAccount = paymentConfiguration.stripeAccountId,
-                    )
-                )
+        return stripeRepository.createPaymentMethod(
+            paymentMethodCreateParams = createParams,
+            options = ApiRequest.Options(
+                apiKey = paymentConfiguration.publishableKey,
+                stripeAccount = paymentConfiguration.stripeAccountId,
             )
-        }
+        )
     }
 
     private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {

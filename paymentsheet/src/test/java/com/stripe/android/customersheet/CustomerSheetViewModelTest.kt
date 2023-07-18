@@ -9,7 +9,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -81,12 +81,12 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        CARD_PAYMENT_METHOD
                     )
                 ),
                 selectedPaymentOption = CustomerAdapter.Result.success(
                     CustomerAdapter.PaymentOption.fromId(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+                        CARD_PAYMENT_METHOD.id!!
                     )
                 )
             )
@@ -97,10 +97,10 @@ class CustomerSheetViewModelTest {
                     CustomerSheetViewState.SelectPaymentMethod(
                         title = null,
                         savedPaymentMethods = listOf(
-                            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                            CARD_PAYMENT_METHOD,
                         ),
                         paymentSelection = PaymentSelection.Saved(
-                            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                            paymentMethod = CARD_PAYMENT_METHOD,
                         ),
                         isLiveMode = false,
                         isProcessing = false,
@@ -188,12 +188,12 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        CARD_PAYMENT_METHOD
                     )
                 ),
                 selectedPaymentOption = CustomerAdapter.Result.success(
                     CustomerAdapter.PaymentOption.fromId(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+                        CARD_PAYMENT_METHOD.id!!
                     )
                 )
             )
@@ -221,12 +221,12 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        CARD_PAYMENT_METHOD
                     )
                 ),
                 selectedPaymentOption = CustomerAdapter.Result.success(
                     CustomerAdapter.PaymentOption.fromId(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+                        CARD_PAYMENT_METHOD.id!!
                     )
                 )
             )
@@ -246,7 +246,7 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        CARD_PAYMENT_METHOD
                     )
                 ),
                 selectedPaymentOption = CustomerAdapter.Result.success(null)
@@ -265,7 +265,7 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        CARD_PAYMENT_METHOD
                     )
                 ),
                 selectedPaymentOption = CustomerAdapter.Result.success(null)
@@ -279,7 +279,7 @@ class CustomerSheetViewModelTest {
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnItemSelected(
                     selection = PaymentSelection.Saved(
-                        paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        paymentMethod = CARD_PAYMENT_METHOD
                     )
                 )
             )
@@ -301,7 +301,7 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        CARD_PAYMENT_METHOD
                     )
                 ),
                 selectedPaymentOption = CustomerAdapter.Result.success(null)
@@ -337,7 +337,7 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        CARD_PAYMENT_METHOD
                     )
                 ),
                 selectedPaymentOption = CustomerAdapter.Result.success(null)
@@ -362,7 +362,7 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        CARD_PAYMENT_METHOD
                     )
                 ),
                 selectedPaymentOption = CustomerAdapter.Result.success(null)
@@ -431,12 +431,12 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        CARD_PAYMENT_METHOD
                     )
                 ),
                 selectedPaymentOption = CustomerAdapter.Result.success(
                     CustomerAdapter.PaymentOption.fromId(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+                        CARD_PAYMENT_METHOD.id!!
                     )
                 )
             )
@@ -448,7 +448,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnItemRemoved(
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    CARD_PAYMENT_METHOD
                 )
             )
 
@@ -464,7 +464,7 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        CARD_PAYMENT_METHOD
                     )
                 ),
                 onDetachPaymentMethod = {
@@ -486,7 +486,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnItemRemoved(
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    CARD_PAYMENT_METHOD
                 )
             )
 
@@ -503,12 +503,12 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        CARD_PAYMENT_METHOD
                     )
                 ),
                 selectedPaymentOption = CustomerAdapter.Result.success(
                     CustomerAdapter.PaymentOption.fromId(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+                        CARD_PAYMENT_METHOD.id!!
                     )
                 )
             )
@@ -530,12 +530,12 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        CARD_PAYMENT_METHOD
                     )
                 ),
                 selectedPaymentOption = CustomerAdapter.Result.success(
                     CustomerAdapter.PaymentOption.fromId(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+                        CARD_PAYMENT_METHOD.id!!
                     )
                 ),
                 onSetSelectedPaymentOption = {
@@ -594,9 +594,7 @@ class CustomerSheetViewModelTest {
                 )
             ),
             stripeRepository = FakeStripeRepository(
-                onCreatePaymentMethod = {
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                }
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
             )
         )
 
@@ -628,13 +626,9 @@ class CustomerSheetViewModelTest {
                 )
             ),
             stripeRepository = FakeStripeRepository(
-                onCreatePaymentMethod = {
-                    throw APIException(
-                        stripeError = StripeError(
-                            message = "Could not create payment method."
-                        )
-                    )
-                }
+                createPaymentMethodResult = Result.failure(
+                    APIException(stripeError = StripeError(message = "Could not create payment method."))
+                ),
             )
         )
 
@@ -686,9 +680,7 @@ class CustomerSheetViewModelTest {
                 },
             ),
             stripeRepository = FakeStripeRepository(
-                onCreatePaymentMethod = {
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                },
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                 onConfirmSetupIntent = {
                     SetupIntentFixtures.SI_SUCCEEDED
                 }
@@ -707,7 +699,7 @@ class CustomerSheetViewModelTest {
             val newViewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
             assertThat(newViewState.errorMessage).isNull()
             assertThat(newViewState.isProcessing).isFalse()
-            assertThat(newViewState.savedPaymentMethods.contains(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+            assertThat(newViewState.savedPaymentMethods.contains(CARD_PAYMENT_METHOD))
         }
     }
 
@@ -743,14 +735,12 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = false,
                 onAttachPaymentMethod = {
-                    CustomerAdapter.Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD)
                 },
                 onSetupIntentClientSecretForCustomerAttach = null,
             ),
             stripeRepository = FakeStripeRepository(
-                onCreatePaymentMethod = {
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                },
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
             ),
         )
 
@@ -766,7 +756,7 @@ class CustomerSheetViewModelTest {
             val newViewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
             assertThat(newViewState.errorMessage).isNull()
             assertThat(newViewState.isProcessing).isFalse()
-            assertThat(newViewState.savedPaymentMethods.contains(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+            assertThat(newViewState.savedPaymentMethods.contains(CARD_PAYMENT_METHOD))
         }
     }
 
@@ -793,9 +783,7 @@ class CustomerSheetViewModelTest {
                 },
             ),
             stripeRepository = FakeStripeRepository(
-                onCreatePaymentMethod = {
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                },
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                 onConfirmSetupIntent = {
                     throw APIException(
                         stripeError = StripeError(
@@ -841,9 +829,7 @@ class CustomerSheetViewModelTest {
                 onSetupIntentClientSecretForCustomerAttach = null,
             ),
             stripeRepository = FakeStripeRepository(
-                onCreatePaymentMethod = {
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                },
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
             ),
         )
 
@@ -892,9 +878,7 @@ class CustomerSheetViewModelTest {
                 },
             ),
             stripeRepository = FakeStripeRepository(
-                onCreatePaymentMethod = {
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                },
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
             ),
         )
 
