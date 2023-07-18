@@ -862,12 +862,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options
     ): Result<CardMetadata> {
         return fetchStripeModelResult(
-            apiRequestFactory.createGet(
-                getEdgeUrl("card-metadata"),
-                options.copy(stripeAccount = null),
-                mapOf("key" to options.apiKey, "bin_prefix" to bin.value)
+            apiRequest = apiRequestFactory.createGet(
+                url = getEdgeUrl("card-metadata"),
+                options = options.copy(stripeAccount = null),
+                params = mapOf("key" to options.apiKey, "bin_prefix" to bin.value),
             ),
-            CardMetadataJsonParser(bin)
+            jsonParser = CardMetadataJsonParser(bin),
         ).onFailure {
             fireAnalyticsRequest(PaymentAnalyticsEvent.CardMetadataLoadFailure)
         }
