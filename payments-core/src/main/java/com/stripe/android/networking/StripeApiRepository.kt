@@ -176,24 +176,28 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): StripeIntent {
+    ): Result<StripeIntent> {
         return when {
             PaymentIntent.ClientSecret.isMatch(clientSecret) -> {
-                requireNotNull(
-                    retrievePaymentIntent(clientSecret, options, expandFields)
-                ) {
-                    "Could not retrieve PaymentIntent."
+                runCatching {
+                    requireNotNull(
+                        retrievePaymentIntent(clientSecret, options, expandFields)
+                    ) {
+                        "Could not retrieve PaymentIntent."
+                    }
                 }
             }
             SetupIntent.ClientSecret.isMatch(clientSecret) -> {
-                requireNotNull(
-                    retrieveSetupIntent(clientSecret, options, expandFields)
-                ) {
-                    "Could not retrieve SetupIntent."
+                runCatching {
+                    requireNotNull(
+                        retrieveSetupIntent(clientSecret, options, expandFields)
+                    ) {
+                        "Could not retrieve SetupIntent."
+                    }
                 }
             }
             else -> {
-                error("Invalid client secret.")
+                Result.failure(IllegalStateException("Invalid client secret."))
             }
         }
     }

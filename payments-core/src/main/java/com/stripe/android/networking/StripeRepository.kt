@@ -52,7 +52,7 @@ interface StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
-    ): StripeIntent
+    ): Result<StripeIntent>
 
     @Throws(
         AuthenticationException::class,

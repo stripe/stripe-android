@@ -292,12 +292,10 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private suspend fun retrieveStripeIntent(clientSecret: String): Result<StripeIntent> {
-        return runCatching {
-            stripeRepository.retrieveStripeIntent(
-                clientSecret = clientSecret,
-                options = requestOptions,
-            )
-        }
+        return stripeRepository.retrieveStripeIntent(
+            clientSecret = clientSecret,
+            options = requestOptions,
+        )
     }
 
     private fun createConfirmStep(
