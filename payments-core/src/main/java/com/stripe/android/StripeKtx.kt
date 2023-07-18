@@ -696,7 +696,7 @@ private inline fun <reified ApiObject : StripeModel> runApiRequest(
 /**
  * Get the [PaymentIntentResult] from [Intent] returned via
  * Activity#onActivityResult(int, int, Intent)}} for PaymentIntent automatic confirmation
- * (see [confirmPayment]) or manual confirmation (see [handleNextActionForPayment]})
+ * (see [Stripe.confirmPayment]) or manual confirmation (see [Stripe.handleNextActionForPayment]})
  *
  * @param requestCode [Int] code passed from Activity#onActivityResult
  * @param data [Intent] intent from Activity#onActivityResult
@@ -759,7 +759,7 @@ suspend fun Stripe.getSetupIntentResult(
 /**
  * Get the [Source] from [Intent] returned via
  * Activity#onActivityResult(int, int, Intent)}} for [Source] authentication.
- * (see [authenticateSource])
+ * (see [Stripe.authenticateSource])
  *
  * @param requestCode [Int] code passed from Activity#onActivityResult
  * @param data [Intent] intent from Activity#onActivityResult
@@ -810,14 +810,13 @@ internal inline fun <reified ApiObject : StripeModel> runApiRequest(
  * This function should only be called when the PaymentIntent is in the `requires_action` state
  * and `NextActionType` is VerifyWithMicrodeposits.
  *
- * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+ * See the [Verify bank account with micro-deposits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
  *
  * @param clientSecret The client secret of the PaymentIntent
  * @param firstAmount The amount, in cents of USD, equal to the value of the first micro-deposit
  * sent to the bank account
  * @param secondAmount The amount, in cents of USD, equal to the value of the second micro-deposit
  * sent to the bank account
- * @param callback a [ApiResultCallback] to receive the result or error
  *
  * @return a [PaymentIntent] object
  *
@@ -854,12 +853,11 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
  * This function should only be called when the PaymentIntent is in the `requires_action` state
  * and `NextActionType` is VerifyWithMicrodeposits.
  *
- * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+ * See the [Verify bank account with micro-deposits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
  *
  * @param clientSecret The client secret of the PaymentIntent
  * @param descriptorCode A unique, 6-digit descriptor code that starts with SM that was sent as
  * statement descriptor to the bank account
- * @param callback a [ApiResultCallback] to receive the result or error
  *
  * @return a [PaymentIntent] object
  *
@@ -894,14 +892,13 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
  * This function should only be called when the SetupIntent is in the `requires_action` state
  * and `NextActionType` is VerifyWithMicrodeposits.
  *
- * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+ * See the [Verify bank account with micro-deposits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
  *
  * @param clientSecret The client secret of the SetupIntent
  * @param firstAmount The amount, in cents of USD, equal to the value of the first micro-deposit
  * sent to the bank account
  * @param secondAmount The amount, in cents of USD, equal to the value of the second micro-deposit
  * sent to the bank account
- * @param callback a [ApiResultCallback] to receive the result or error
  *
  * @return a [SetupIntent] object
  *
@@ -938,12 +935,11 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
  * This function should only be called when the SetupIntent is in the `requires_action` state
  * and `NextActionType` is VerifyWithMicrodeposits.
  *
- * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+ * See the [Verify bank account with micro-deposits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
  *
  * @param clientSecret The client secret of the SetupIntent
  * @param descriptorCode A unique, 6-digit descriptor code that starts with SM that was sent as
  * statement descriptor to the bank account
- * @param callback a [ApiResultCallback] to receive the result or error
  *
  * @return a [SetupIntent] object
  *
