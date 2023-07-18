@@ -1009,9 +1009,7 @@ class CustomerSheetViewModelTest {
                 initialViewState
             ),
             stripeRepository = FakeStripeRepository(
-                onCreatePaymentMethod = {
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                },
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                 onConfirmSetupIntent = {
                     SetupIntentFixtures.SI_SUCCEEDED
                 }
@@ -1045,11 +1043,11 @@ class CustomerSheetViewModelTest {
                 CustomerSheetViewState.SelectPaymentMethod(
                     title = null,
                     savedPaymentMethods = listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                        CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                        CARD_PAYMENT_METHOD.copy(id = "pm_2"),
                     ),
                     paymentSelection = PaymentSelection.Saved(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                        CARD_PAYMENT_METHOD.copy(id = "pm_2"),
                     ),
                     isLiveMode = false,
                     isProcessing = false,
@@ -1062,7 +1060,7 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 onDetachPaymentMethod = {
                     CustomerAdapter.Result.success(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2")
+                        CARD_PAYMENT_METHOD.copy(id = "pm_2")
                     )
                 }
             )
@@ -1075,7 +1073,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnItemRemoved(
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2")
+                    CARD_PAYMENT_METHOD.copy(id = "pm_2")
                 )
             )
 
@@ -1086,7 +1084,7 @@ class CustomerSheetViewModelTest {
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnItemSelected(
                     PaymentSelection.Saved(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1")
+                        CARD_PAYMENT_METHOD.copy(id = "pm_1")
                     )
                 )
             )
@@ -1103,9 +1101,9 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
+                        CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                        CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                        CARD_PAYMENT_METHOD.copy(id = "pm_3"),
                     )
                 ),
                 selectedPaymentOption = CustomerAdapter.Result.success(
@@ -1126,9 +1124,9 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
+                        CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                        CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                        CARD_PAYMENT_METHOD.copy(id = "pm_3"),
                     )
                 ),
                 selectedPaymentOption = CustomerAdapter.Result.success(null)
