@@ -255,23 +255,20 @@ constructor(
         requestOptions: ApiRequest.Options,
         type: PaymentController.StripeIntentType
     ) {
-        runCatching {
-            val stripeIntent = when (type) {
-                PaymentController.StripeIntentType.PaymentIntent -> {
-                    stripeRepository.retrievePaymentIntent(
-                        clientSecret,
-                        requestOptions
-                    )
-                }
-                PaymentController.StripeIntentType.SetupIntent -> {
-                    stripeRepository.retrieveSetupIntent(
-                        clientSecret,
-                        requestOptions
+        val stripeIntentResult = when (type) {
+            PaymentController.StripeIntentType.PaymentIntent -> {
+                runCatching {
+                    requireNotNull(
+                        stripeRepository.retrievePaymentIntent(clientSecret, requestOptions)
                     )
                 }
             }
-            requireNotNull(stripeIntent)
-        }.fold(
+            PaymentController.StripeIntentType.SetupIntent -> {
+                stripeRepository.retrieveSetupIntent(clientSecret, requestOptions)
+            }
+        }
+
+        stripeIntentResult.fold(
             onSuccess = { stripeIntent ->
                 handleNextAction(
                     host = host,

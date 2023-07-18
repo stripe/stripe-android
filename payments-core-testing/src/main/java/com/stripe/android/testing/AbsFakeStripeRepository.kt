@@ -91,7 +91,7 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): SetupIntent? {
+    ): Result<SetupIntent> {
         TODO("Not yet implemented")
     }
 

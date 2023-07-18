@@ -376,13 +376,11 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
         clientSecret: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): Result<SetupIntent> = runCatching {
-        requireNotNull(
-            stripeRepository.retrieveSetupIntent(
-                clientSecret,
-                requestOptions,
-                expandFields
-            )
+    ): Result<SetupIntent> {
+        return stripeRepository.retrieveSetupIntent(
+            clientSecret,
+            requestOptions,
+            expandFields
         )
     }
 
@@ -390,13 +388,11 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
         clientSecret: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): Result<SetupIntent> = runCatching {
-        requireNotNull(
-            stripeRepository.retrieveSetupIntent(
-                clientSecret,
-                requestOptions,
-                expandFields
-            )
+    ): Result<SetupIntent> {
+        return stripeRepository.retrieveSetupIntent(
+            clientSecret,
+            requestOptions,
+            expandFields
         )
     }
 

@@ -710,7 +710,7 @@ class Stripe internal constructor(
         expand: List<String> = emptyList(),
         callback: ApiResultCallback<SetupIntent>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.retrieveSetupIntent(
                 clientSecret,
                 ApiRequest.Options(
@@ -747,7 +747,7 @@ class Stripe internal constructor(
         clientSecret: String,
         stripeAccountId: String? = this.stripeAccountId,
         expand: List<String> = emptyList(),
-    ): SetupIntent? {
+    ): SetupIntent {
         return runBlocking {
             stripeRepository.retrieveSetupIntent(
                 SetupIntent.ClientSecret(clientSecret).value,
@@ -756,7 +756,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId
                 ),
                 expand,
-            )
+            ).getOrElse { throw StripeException.create(it) }
         }
     }
 

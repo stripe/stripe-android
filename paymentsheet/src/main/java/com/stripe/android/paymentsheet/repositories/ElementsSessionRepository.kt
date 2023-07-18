@@ -99,15 +99,11 @@ internal sealed class ElementsSessionRepository {
                     }
                 }
                 is ElementsSessionParams.SetupIntentType -> {
-                    runCatching {
-                        requireNotNull(
-                            stripeRepository.retrieveSetupIntent(
-                                clientSecret = params.clientSecret,
-                                options = requestOptions,
-                                expandFields = listOf("payment_method")
-                            )
-                        )
-                    }.map {
+                    stripeRepository.retrieveSetupIntent(
+                        clientSecret = params.clientSecret,
+                        options = requestOptions,
+                        expandFields = listOf("payment_method")
+                    ).map {
                         ElementsSession(
                             linkSettings = null,
                             paymentMethodSpecs = null,
