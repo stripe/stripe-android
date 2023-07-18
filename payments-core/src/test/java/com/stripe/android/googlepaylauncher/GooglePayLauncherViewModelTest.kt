@@ -273,8 +273,8 @@ class GooglePayLauncherViewModelTest {
             clientSecret: String,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ): PaymentIntent {
-            return PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        ): Result<PaymentIntent> {
+            return Result.success(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         }
 
         override suspend fun retrieveSetupIntent(

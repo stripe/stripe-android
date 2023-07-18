@@ -32,6 +32,7 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
+import com.stripe.android.utils.mapResult
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -198,7 +199,7 @@ constructor(
     ): Result<PaymentIntentResult> {
         val paymentIntentResult = confirmPaymentIntent(confirmPaymentIntentParams, requestOptions)
 
-        return paymentIntentResult.mapCatching { paymentIntent ->
+        return paymentIntentResult.mapResult { paymentIntent ->
             authenticateAlipay(
                 paymentIntent,
                 authenticator,
@@ -257,11 +258,7 @@ constructor(
     ) {
         val stripeIntentResult = when (type) {
             PaymentController.StripeIntentType.PaymentIntent -> {
-                runCatching {
-                    requireNotNull(
-                        stripeRepository.retrievePaymentIntent(clientSecret, requestOptions)
-                    )
-                }
+                stripeRepository.retrievePaymentIntent(clientSecret, requestOptions)
             }
             PaymentController.StripeIntentType.SetupIntent -> {
                 stripeRepository.retrieveSetupIntent(clientSecret, requestOptions)
@@ -406,26 +403,26 @@ constructor(
         paymentIntent: PaymentIntent,
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
-    ): PaymentIntentResult {
+    ): Result<PaymentIntentResult> {
         val outcome = alipayRepository.authenticate(
             paymentIntent = paymentIntent,
             authenticator = authenticator,
             requestOptions = requestOptions,
         ).outcome
 
-        val refreshedPaymentIntent = requireNotNull(
-            stripeRepository.retrievePaymentIntent(
-                paymentIntent.clientSecret.orEmpty(),
-                requestOptions,
-                expandFields = EXPAND_PAYMENT_METHOD
-            )
+        val refreshedPaymentIntentResult = stripeRepository.retrievePaymentIntent(
+            paymentIntent.clientSecret.orEmpty(),
+            requestOptions,
+            expandFields = EXPAND_PAYMENT_METHOD
         )
 
-        return PaymentIntentResult(
-            refreshedPaymentIntent,
-            outcome,
-            failureMessageFactory.create(refreshedPaymentIntent, outcome)
-        )
+        return refreshedPaymentIntentResult.map { refreshedPaymentIntent ->
+            PaymentIntentResult(
+                refreshedPaymentIntent,
+                outcome,
+                failureMessageFactory.create(refreshedPaymentIntent, outcome)
+            )
+        }
     }
 
     private suspend fun handleError(

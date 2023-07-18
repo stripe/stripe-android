@@ -77,14 +77,10 @@ internal class GooglePayLauncherViewModel(
     ): Result<String> {
         val transactionInfoResult = when (args) {
             is GooglePayLauncherContract.PaymentIntentArgs -> {
-                runCatching {
-                    requireNotNull(
-                        stripeRepository.retrievePaymentIntent(
-                            args.clientSecret,
-                            requestOptions
-                        )
-                    )
-                }.map { intent ->
+                stripeRepository.retrievePaymentIntent(
+                    args.clientSecret,
+                    requestOptions
+                ).map { intent ->
                     createTransactionInfo(
                         stripeIntent = intent,
                         currencyCode = intent.currency.orEmpty(),

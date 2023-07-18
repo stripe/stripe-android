@@ -60,7 +60,7 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent? {
+    ): Result<PaymentIntent> {
         TODO("Not yet implemented")
     }
 

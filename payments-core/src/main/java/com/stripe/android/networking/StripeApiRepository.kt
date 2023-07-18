@@ -180,13 +180,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): Result<StripeIntent> {
         return when {
             PaymentIntent.ClientSecret.isMatch(clientSecret) -> {
-                runCatching {
-                    requireNotNull(
-                        retrievePaymentIntent(clientSecret, options, expandFields)
-                    ) {
-                        "Could not retrieve PaymentIntent."
-                    }
-                }
+                retrievePaymentIntent(clientSecret, options, expandFields)
             }
             SetupIntent.ClientSecret.isMatch(clientSecret) -> {
                 retrieveSetupIntent(clientSecret, options, expandFields)
@@ -271,34 +265,32 @@ class StripeApiRepository @JvmOverloads internal constructor(
      *
      * @param clientSecret client_secret of the PaymentIntent to retrieve
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun retrievePaymentIntent(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent? {
-        val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
-        val params: Map<String, Any?> =
-            if (options.apiKeyIsUserKey) {
-                createExpandParam(expandFields)
-            } else {
-                createClientSecretParam(clientSecret, expandFields)
-            }
+    ): Result<PaymentIntent> {
+        val paymentIntentId = runCatching {
+            PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+        }.getOrElse {
+            return Result.failure(it)
+        }
+
+        val params = if (options.apiKeyIsUserKey) {
+            createExpandParam(expandFields)
+        } else {
+            createClientSecretParam(clientSecret, expandFields)
+        }
 
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
-            apiRequestFactory.createGet(
-                getRetrievePaymentIntentUrl(paymentIntentId),
-                options,
-                params
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = getRetrievePaymentIntentUrl(paymentIntentId),
+                options = options,
+                params = params,
             ),
-            PaymentIntentJsonParser()
+            jsonParser = PaymentIntentJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.PaymentIntentRetrieve)
