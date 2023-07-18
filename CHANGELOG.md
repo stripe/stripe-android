@@ -2,6 +2,11 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.27.2 - 2023-07-18
+
+### PaymentSheet
+* [FIXED] Fixed various bugs in Link private beta.
+
 ## 20.27.1 - 2023-07-17
 
 ### PaymentSheet
