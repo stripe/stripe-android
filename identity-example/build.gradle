@@ -7,7 +7,7 @@ assemble.dependsOn('lint')
 android {
     defaultConfig {
         applicationId "com.stripe.android.identity.example"
-        versionCode 15
+        versionCode 16
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
