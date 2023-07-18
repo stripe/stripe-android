@@ -43,6 +43,7 @@ internal sealed class CustomerSheetViewState(
         override val isProcessing: Boolean,
         override val isEditing: Boolean,
         val isGooglePayEnabled: Boolean,
+        val primaryButtonVisible: Boolean,
         val primaryButtonLabel: String?,
         val errorMessage: String? = null,
     ) : CustomerSheetViewState(

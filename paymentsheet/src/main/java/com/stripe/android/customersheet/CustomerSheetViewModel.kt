@@ -64,6 +64,8 @@ internal class CustomerSheetViewModel @Inject constructor(
             .firstOrNull()
             ?.paymentSelection
 
+    private var originalPaymentSelection: PaymentSelection? = null
+
     init {
         lpmRepository.initializeWithCardSpec(
             configuration.billingDetailsCollectionConfiguration.toInternal()
@@ -138,6 +140,8 @@ internal class CustomerSheetViewModel @Inject constructor(
                 null
             }
 
+            originalPaymentSelection = paymentSelection
+
             transition(
                 to = CustomerSheetViewState.SelectPaymentMethod(
                     title = configuration.headerTextForSelectionScreen,
@@ -147,10 +151,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                     isProcessing = false,
                     isEditing = false,
                     isGooglePayEnabled = configuration.googlePayEnabled,
-                    primaryButtonLabel = paymentSelection?.let {
-                        // TODO (jameswoo) translate
-                        "Confirm"
-                    },
+                    primaryButtonVisible = false,
+                    // TODO (jameswoo) translate
+                    primaryButtonLabel = "Confirm",
                     errorMessage = errorMessage,
                 )
             )
@@ -214,8 +217,11 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private fun onEditPressed() {
         updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-            val isEditing = it.isEditing
-            it.copy(isEditing = !isEditing)
+            val isEditing = !it.isEditing
+            it.copy(
+                isEditing = isEditing,
+                primaryButtonVisible = !isEditing,
+            )
         }
     }
 
@@ -238,8 +244,14 @@ internal class CustomerSheetViewModel @Inject constructor(
                             pm.id != paymentMethod.id!!
                         },
                         paymentSelection = viewState.paymentSelection.takeUnless { selection ->
-                            selection is PaymentSelection.Saved &&
+                            val removedPaymentSelection = selection is PaymentSelection.Saved &&
                                 selection.paymentMethod == paymentMethod
+
+                            if (removedPaymentSelection && originalPaymentSelection == selection) {
+                                originalPaymentSelection = null
+                            }
+
+                            removedPaymentSelection
                         },
                     )
                 }
@@ -266,19 +278,13 @@ internal class CustomerSheetViewModel @Inject constructor(
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
                     it.copy(
                         paymentSelection = paymentSelection,
+                        primaryButtonVisible = originalPaymentSelection != paymentSelection,
                         // TODO (jameswoo) translate
-                        primaryButtonLabel = "Continue",
+                        primaryButtonLabel = "Confirm",
                     )
                 }
             }
-            else -> {
-                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                    it.copy(
-                        paymentSelection = null,
-                        primaryButtonLabel = null,
-                    )
-                }
-            }
+            else -> error("Unsupported payment selection $paymentSelection")
         }
     }
 
@@ -302,6 +308,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 when (val paymentSelection = currentViewState.paymentSelection) {
                     is PaymentSelection.GooglePay -> selectGooglePay()
                     is PaymentSelection.Saved -> selectSavedPaymentMethod(paymentSelection)
+                    null -> selectSavedPaymentMethod(null)
                     else -> error("$paymentSelection is not supported")
                 }
             }
@@ -418,16 +425,17 @@ internal class CustomerSheetViewModel @Inject constructor(
                 paymentSelection = PaymentSelection.Saved(
                     paymentMethod = paymentMethod
                 ),
+                primaryButtonVisible = true,
                 // TODO (jameswoo) translate
-                primaryButtonLabel = "Continue",
+                primaryButtonLabel = "Confirm",
             )
         }
     }
 
-    private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved) {
+    private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved?) {
         viewModelScope.launch {
             customerAdapter.setSelectedPaymentOption(
-                savedPaymentSelection.toPaymentOption()
+                savedPaymentSelection?.toPaymentOption()
             ).onSuccess {
                 _result.tryEmit(
                     InternalCustomerSheetResult.Selected(
@@ -481,6 +489,12 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private inline fun <reified T : CustomerSheetViewState> updateViewState(block: (T) -> T) {
+        // TODO (jameswoo) viewstate should be derived from backstack
+        val index = backstack.indexOfFirst {
+            it is T
+        }
+        backstack.removeAt(index)
+        backstack.insertElementAt(_viewState.value, index)
         (_viewState.value as? T)?.let {
             _viewState.update {
                 block(it as T)

@@ -115,7 +115,7 @@ internal fun SelectPaymentMethod(
             }
         }
 
-        AnimatedVisibility(visible = viewState.primaryButtonLabel != null) {
+        AnimatedVisibility(visible = viewState.primaryButtonVisible) {
             viewState.primaryButtonLabel?.let {
                 PrimaryButton(
                     label = it,

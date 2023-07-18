@@ -115,13 +115,19 @@ internal class CustomerSheetActivityTest {
     }
 
     @Test
-    fun `When primaryButtonLabel is not null, primary button is visible`() {
+    fun `When payment selection is different from original, primary button is visible`() {
         runActivityScenario(
             viewState = createSelectPaymentMethodViewState(
-                primaryButtonLabel = "Testing Primary Button",
+                isGooglePayEnabled = true,
+                paymentSelection = null,
+                primaryButtonVisible = false,
+                savedPaymentMethods = listOf(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                ),
             ),
         ) {
-            page.waitForText("Testing Primary Button")
+            page.clickPaymentOptionItem("Google Pay")
+            page.waitForText("Confirm")
         }
     }
 
@@ -213,6 +219,7 @@ internal class CustomerSheetActivityTest {
         isProcessing: Boolean = false,
         isEditing: Boolean = false,
         isGooglePayEnabled: Boolean = false,
+        primaryButtonVisible: Boolean = true,
         primaryButtonLabel: String? = null,
     ): CustomerSheetViewState.SelectPaymentMethod {
         return CustomerSheetViewState.SelectPaymentMethod(
@@ -223,6 +230,7 @@ internal class CustomerSheetActivityTest {
             isProcessing = isProcessing,
             isEditing = isEditing,
             isGooglePayEnabled = isGooglePayEnabled,
+            primaryButtonVisible = primaryButtonVisible,
             primaryButtonLabel = primaryButtonLabel,
         )
     }
