@@ -273,7 +273,7 @@ internal class StripeKtxTest {
             val expectedApiObj = mock<SetupIntent>()
             whenever(
                 mockApiRepository.confirmSetupIntent(any(), any(), any())
-            ).thenReturn(expectedApiObj)
+            ).thenReturn(Result.success(expectedApiObj))
             val actualObj = stripe.confirmSetupIntent(mock())
 
             assertSame(expectedApiObj, actualObj)
@@ -284,21 +284,9 @@ internal class StripeKtxTest {
         runTest {
             whenever(
                 mockApiRepository.confirmSetupIntent(any(), any(), any())
-            ).thenThrow(mock<AuthenticationException>())
+            ).thenReturn(Result.failure(mock<AuthenticationException>()))
 
             assertFailsWith<AuthenticationException> {
-                stripe.confirmSetupIntent(mock())
-            }
-        }
-
-    @Test
-    fun `When repository returns null then confirmSetupIntentSuspend should throw InvalidRequestException`(): Unit =
-        runTest {
-            whenever(
-                mockApiRepository.confirmSetupIntent(any(), any(), any())
-            ).thenReturn(null)
-
-            assertFailsWithMessage<InvalidRequestException>("Failed to parse SetupIntent.") {
                 stripe.confirmSetupIntent(mock())
             }
         }
@@ -309,7 +297,7 @@ internal class StripeKtxTest {
             val expectedApiObj = mock<PaymentIntent>()
             whenever(
                 mockApiRepository.confirmPaymentIntent(any(), any(), any())
-            ).thenReturn(expectedApiObj)
+            ).thenReturn(Result.success(expectedApiObj))
             val actualObj = stripe.confirmPaymentIntent(mock())
 
             assertSame(expectedApiObj, actualObj)
@@ -320,21 +308,9 @@ internal class StripeKtxTest {
         runTest {
             whenever(
                 mockApiRepository.confirmPaymentIntent(any(), any(), any())
-            ).thenThrow(mock<AuthenticationException>())
+            ).thenReturn(Result.failure(mock<AuthenticationException>()))
 
             assertFailsWith<AuthenticationException> {
-                stripe.confirmPaymentIntent(mock())
-            }
-        }
-
-    @Test
-    fun `When repository returns null then confirmPaymentIntentSuspend should throw InvalidRequestException`(): Unit =
-        runTest {
-            whenever(
-                mockApiRepository.confirmPaymentIntent(any(), any(), any())
-            ).thenReturn(null)
-
-            assertFailsWithMessage<InvalidRequestException>("Failed to parse PaymentIntent.") {
                 stripe.confirmPaymentIntent(mock())
             }
         }
@@ -344,7 +320,7 @@ internal class StripeKtxTest {
         runTest {
             whenever(
                 mockPaymentController.confirmAndAuthenticateAlipay(any(), any(), any())
-            ).thenThrow(mock<AuthenticationException>())
+            ).thenReturn(Result.failure(mock<AuthenticationException>()))
 
             assertFailsWith<AuthenticationException> {
                 stripe.confirmAlipayPayment(
@@ -362,7 +338,7 @@ internal class StripeKtxTest {
 
             whenever(
                 mockPaymentController.confirmAndAuthenticateAlipay(any(), any(), any())
-            ).thenReturn(expectedApiObj)
+            ).thenReturn(Result.success(expectedApiObj))
 
             val actualObj = stripe.confirmAlipayPayment(
                 mock(),
@@ -449,7 +425,7 @@ internal class StripeKtxTest {
 
             whenever(
                 mockPaymentController.confirmWeChatPay(any(), any())
-            ).thenReturn(expectedApiObj)
+            ).thenReturn(Result.success(expectedApiObj))
 
             val actualObj = stripe.confirmWeChatPayPayment(
                 mock(),
@@ -464,7 +440,7 @@ internal class StripeKtxTest {
         runTest {
             whenever(
                 mockPaymentController.confirmWeChatPay(any(), any())
-            ).thenThrow(mock<AuthenticationException>())
+            ).thenReturn(Result.failure(mock<AuthenticationException>()))
 
             assertFailsWith<AuthenticationException> {
                 stripe.confirmWeChatPayPayment(
@@ -481,7 +457,7 @@ internal class StripeKtxTest {
         runTest {
             whenever(
                 mockPaymentController.confirmWeChatPay(any(), any())
-            ).thenThrow(mock<IllegalArgumentException>())
+            ).thenReturn(Result.failure(mock<IllegalArgumentException>()))
 
             assertFailsWith<InvalidRequestException> {
                 stripe.confirmWeChatPayPayment(
@@ -528,7 +504,9 @@ internal class StripeKtxTest {
 
     @Test
     fun `Verify confirmSetupIntent passes expand fields on to repository`(): Unit = runTest {
-        whenever(mockApiRepository.confirmSetupIntent(isA(), isA(), isA())).doReturn(mock())
+        whenever(mockApiRepository.confirmSetupIntent(isA(), isA(), isA())).thenReturn(
+            Result.success(mock())
+        )
 
         val expandFields = listOf("payment_method")
 

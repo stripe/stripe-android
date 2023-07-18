@@ -681,9 +681,7 @@ class CustomerSheetViewModelTest {
             ),
             stripeRepository = FakeStripeRepository(
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                onConfirmSetupIntent = {
-                    SetupIntentFixtures.SI_SUCCEEDED
-                }
+                confirmSetupIntentResult = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
         )
 
@@ -784,13 +782,9 @@ class CustomerSheetViewModelTest {
             ),
             stripeRepository = FakeStripeRepository(
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                onConfirmSetupIntent = {
-                    throw APIException(
-                        stripeError = StripeError(
-                            message = "Could not attach payment method."
-                        )
-                    )
-                },
+                confirmSetupIntentResult = Result.failure(
+                    APIException(stripeError = StripeError(message = "Could not attach payment method."))
+                ),
             ),
         )
 
@@ -1010,9 +1004,7 @@ class CustomerSheetViewModelTest {
             ),
             stripeRepository = FakeStripeRepository(
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                onConfirmSetupIntent = {
-                    SetupIntentFixtures.SI_SUCCEEDED
-                }
+                confirmSetupIntentResult = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
             customerAdapter = FakeCustomerAdapter(
                 onSetupIntentClientSecretForCustomerAttach = {

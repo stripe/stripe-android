@@ -205,7 +205,7 @@ internal class StripePaymentControllerTest {
                 ),
                 mock(),
                 REQUEST_OPTIONS
-            )
+            ).getOrThrow()
 
             assertThat(stripeRepository.confirmPaymentIntentArgs).hasSize(1)
             assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.shouldUseStripeSdk()).isTrue()
@@ -290,11 +290,11 @@ internal class StripePaymentControllerTest {
             confirmPaymentIntentParams: ConfirmPaymentIntentParams,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ): PaymentIntent {
+        ): Result<PaymentIntent> {
             confirmPaymentIntentArgs.add(
                 Triple(confirmPaymentIntentParams, options, expandFields)
             )
-            return confirmPaymentIntentResponse
+            return Result.success(confirmPaymentIntentResponse)
         }
     }
 
