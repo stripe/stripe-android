@@ -35,7 +35,13 @@ class CustomerSheetExampleViewModel(
     )
     val state: StateFlow<CustomerSheetExampleViewState> = _state
 
-    internal val customerAdapter: CustomerAdapter = CustomerAdapter.create(
+    private val _isSetupIntentEnabled = MutableStateFlow(true)
+    val isSetupIntentEnabled: StateFlow<Boolean> = _isSetupIntentEnabled
+
+    private val _isDeveloperModeEnabled = MutableStateFlow(false)
+    val isDeveloperModeEnabled: StateFlow<Boolean> = _isDeveloperModeEnabled
+
+    private val _customerAdapter: CustomerAdapter = CustomerAdapter.create(
         context = getApplication(),
         customerEphemeralKeyProvider = {
             fetchCustomerEphemeralKey().fold(
@@ -70,6 +76,10 @@ class CustomerSheetExampleViewModel(
                 }
             )
         },
+    )
+
+    internal val customerAdapter = CustomerSheetExampleAdapter(
+        _customerAdapter
     )
 
     init {
@@ -169,6 +179,15 @@ class CustomerSheetExampleViewModel(
                 }
             }
         }
+    }
+
+    fun toggleSetupIntentEnabled(isSetupIntentEnabled: Boolean) {
+        _isSetupIntentEnabled.update { isSetupIntentEnabled }
+        customerAdapter.overrideCanCreateSetupIntents = isSetupIntentEnabled
+    }
+
+    fun toggleDeveloperMode() {
+        _isDeveloperModeEnabled.update { !it }
     }
 
     private fun updateDataViewState(
