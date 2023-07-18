@@ -16,6 +16,7 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
