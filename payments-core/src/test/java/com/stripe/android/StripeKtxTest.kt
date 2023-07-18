@@ -223,7 +223,7 @@ internal class StripeKtxTest {
 
             whenever(
                 mockApiRepository.createFile(any(), any())
-            ).thenReturn(expectedFile)
+            ).thenReturn(Result.success(expectedFile))
 
             val actualFile = stripe.createFile(
                 mock(),
@@ -235,11 +235,11 @@ internal class StripeKtxTest {
         }
 
     @Test
-    fun `When repository returns null then createFile should throw InvalidRequestException`(): Unit =
+    fun `When repository returns failure then createFile should throw InvalidRequestException`(): Unit =
         runTest {
             whenever(
                 mockApiRepository.createFile(any(), any())
-            ).thenReturn(null)
+            ).thenReturn(Result.failure(IllegalArgumentException("Failed to parse StripeFile.")))
 
             assertFailsWithMessage<InvalidRequestException>("Failed to parse StripeFile.") {
                 stripe.createFile(

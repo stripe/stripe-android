@@ -259,21 +259,21 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun createFile(
         fileParams: StripeFileParams,
         requestOptions: ApiRequest.Options
-    ): StripeFile {
-        TODO("Not yet implemented")
+    ): Result<StripeFile> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrieveObject(
         url: String,
         requestOptions: ApiRequest.Options
-    ): StripeResponse<String> {
-        TODO("Not yet implemented")
+    ): Result<StripeResponse<String>> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
-    ): RadarSession {
-        TODO("Not yet implemented")
+    ): Result<RadarSession> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun consumerSignUp(
