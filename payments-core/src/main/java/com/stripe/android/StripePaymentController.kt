@@ -147,26 +147,26 @@ constructor(
                     ?: defaultReturnUrl.value
             }
 
-        runCatching {
-            when (confirmStripeIntentParams) {
-                is ConfirmPaymentIntentParams -> {
-                    confirmPaymentIntent(
-                        confirmStripeIntentParams.also {
-                            it.returnUrl = returnUrl
-                        },
-                        requestOptions
-                    )
-                }
-                is ConfirmSetupIntentParams -> {
-                    confirmSetupIntent(
-                        confirmStripeIntentParams.also {
-                            it.returnUrl = returnUrl
-                        },
-                        requestOptions
-                    )
-                }
+        val result = when (confirmStripeIntentParams) {
+            is ConfirmPaymentIntentParams -> {
+                confirmPaymentIntent(
+                    confirmStripeIntentParams.also {
+                        it.returnUrl = returnUrl
+                    },
+                    requestOptions
+                )
             }
-        }.fold(
+            is ConfirmSetupIntentParams -> {
+                confirmSetupIntent(
+                    confirmStripeIntentParams.also {
+                        it.returnUrl = returnUrl
+                    },
+                    requestOptions
+                )
+            }
+        }
+
+        result.fold(
             onSuccess = { intent ->
                 intent.nextActionData?.let {
                     if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
@@ -195,31 +195,32 @@ constructor(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
-    ): PaymentIntentResult {
-        return authenticateAlipay(
-            confirmPaymentIntent(
-                confirmPaymentIntentParams,
+    ): Result<PaymentIntentResult> {
+        val paymentIntentResult = confirmPaymentIntent(confirmPaymentIntentParams, requestOptions)
+
+        return paymentIntentResult.mapCatching { paymentIntent ->
+            authenticateAlipay(
+                paymentIntent,
+                authenticator,
                 requestOptions
-            ),
-            authenticator,
-            requestOptions
-        )
+            )
+        }
     }
 
     override suspend fun confirmWeChatPay(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         requestOptions: ApiRequest.Options
-    ): WeChatPayNextAction {
-        confirmPaymentIntent(
-            confirmPaymentIntentParams,
-            requestOptions
-        ).let { paymentIntent ->
+    ): Result<WeChatPayNextAction> {
+        val paymentIntentResult = confirmPaymentIntent(confirmPaymentIntentParams, requestOptions)
+
+        return paymentIntentResult.mapCatching { paymentIntent ->
             require(paymentIntent.nextActionData is StripeIntent.NextActionData.WeChatPayRedirect) {
                 "Unable to confirm Payment Intent with WeChatPay SDK"
             }
-            return WeChatPayNextAction(
-                paymentIntent,
-                paymentIntent.nextActionData.weChat
+
+            WeChatPayNextAction(
+                paymentIntent = paymentIntent,
+                weChat = paymentIntent.nextActionData.weChat,
             )
         }
     }
@@ -227,35 +228,25 @@ constructor(
     private suspend fun confirmPaymentIntent(
         confirmStripeIntentParams: ConfirmPaymentIntentParams,
         requestOptions: ApiRequest.Options
-    ): PaymentIntent {
-        return requireNotNull(
-            stripeRepository.confirmPaymentIntent(
-                // mark this request as `use_stripe_sdk=true`
-                confirmStripeIntentParams
-                    .withShouldUseStripeSdk(shouldUseStripeSdk = true),
-                requestOptions,
-                expandFields = EXPAND_PAYMENT_METHOD
-            )
-        ) {
-            REQUIRED_ERROR
-        }
+    ): Result<PaymentIntent> {
+        return stripeRepository.confirmPaymentIntent(
+            // mark this request as `use_stripe_sdk=true`
+            confirmPaymentIntentParams = confirmStripeIntentParams.withShouldUseStripeSdk(true),
+            options = requestOptions,
+            expandFields = EXPAND_PAYMENT_METHOD
+        )
     }
 
     private suspend fun confirmSetupIntent(
         confirmStripeIntentParams: ConfirmSetupIntentParams,
         requestOptions: ApiRequest.Options
-    ): SetupIntent {
-        return requireNotNull(
-            stripeRepository.confirmSetupIntent(
-                // mark this request as `use_stripe_sdk=true`
-                confirmStripeIntentParams
-                    .withShouldUseStripeSdk(shouldUseStripeSdk = true),
-                requestOptions,
-                expandFields = EXPAND_PAYMENT_METHOD
-            )
-        ) {
-            REQUIRED_ERROR
-        }
+    ): Result<SetupIntent> {
+        return stripeRepository.confirmSetupIntent(
+            // mark this request as `use_stripe_sdk=true`
+            confirmSetupIntentParams = confirmStripeIntentParams.withShouldUseStripeSdk(true),
+            options = requestOptions,
+            expandFields = EXPAND_PAYMENT_METHOD
+        )
     }
 
     override suspend fun startAuth(
@@ -419,8 +410,12 @@ constructor(
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
     ): PaymentIntentResult {
-        val outcome =
-            alipayRepository.authenticate(paymentIntent, authenticator, requestOptions).outcome
+        val outcome = alipayRepository.authenticate(
+            paymentIntent = paymentIntent,
+            authenticator = authenticator,
+            requestOptions = requestOptions,
+        ).outcome
+
         val refreshedPaymentIntent = requireNotNull(
             stripeRepository.retrievePaymentIntent(
                 paymentIntent.clientSecret.orEmpty(),
@@ -537,7 +532,5 @@ constructor(
 
         internal val EXPAND_PAYMENT_METHOD = listOf("payment_method")
         internal val CHALLENGE_DELAY = TimeUnit.SECONDS.toMillis(2L)
-
-        private const val REQUIRED_ERROR = "API request returned an invalid response."
     }
 }

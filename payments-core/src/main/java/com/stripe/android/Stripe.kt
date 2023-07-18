@@ -199,7 +199,7 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<PaymentIntentResult>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             paymentController.confirmAndAuthenticateAlipay(
                 confirmPaymentIntentParams,
                 authenticator,
@@ -240,7 +240,7 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<WeChatPayNextAction>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             paymentController.confirmWeChatPay(
                 confirmPaymentIntentParams,
                 ApiRequest.Options(
@@ -488,7 +488,7 @@ class Stripe internal constructor(
     fun confirmPaymentIntentSynchronous(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         idempotencyKey: String? = null
-    ): PaymentIntent? {
+    ): PaymentIntent {
         return runBlocking {
             stripeRepository.confirmPaymentIntent(
                 confirmPaymentIntentParams,
@@ -497,7 +497,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrElse { throw StripeException.create(it) }
         }
     }
 
@@ -784,7 +784,7 @@ class Stripe internal constructor(
     fun confirmSetupIntentSynchronous(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         idempotencyKey: String? = null
-    ): SetupIntent? {
+    ): SetupIntent {
         return runBlocking {
             stripeRepository.confirmSetupIntent(
                 confirmSetupIntentParams,
@@ -793,7 +793,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrElse { throw StripeException.create(it) }
         }
     }
 
@@ -1621,7 +1621,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            ).getOrThrow()
+            ).getOrElse { throw StripeException.create(it) }
         }
     }
 

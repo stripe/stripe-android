@@ -122,9 +122,8 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
                         ?: defaultReturnUrl.value
                 }
-            runCatching {
-                confirmIntent(confirmStripeIntentParams, returnUrl)
-            }.fold(
+
+            confirmIntent(confirmStripeIntentParams, returnUrl).fold(
                 onSuccess = { intent ->
                     intent.nextActionData?.let {
                         if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
@@ -153,31 +152,28 @@ internal class PaymentLauncherViewModel @Inject constructor(
     private suspend fun confirmIntent(
         confirmStripeIntentParams: ConfirmStripeIntentParams,
         returnUrl: String?
-    ): StripeIntent =
-        confirmStripeIntentParams.also {
+    ): Result<StripeIntent> {
+        val decoratedParams = confirmStripeIntentParams.also {
             it.returnUrl = returnUrl
-        }.withShouldUseStripeSdk(shouldUseStripeSdk = true).let { decoratedParams ->
-            requireNotNull(
-                when (decoratedParams) {
-                    is ConfirmPaymentIntentParams -> {
-                        stripeApiRepository.confirmPaymentIntent(
-                            decoratedParams,
-                            apiRequestOptionsProvider.get(),
-                            expandFields = EXPAND_PAYMENT_METHOD
-                        )
-                    }
-                    is ConfirmSetupIntentParams -> {
-                        stripeApiRepository.confirmSetupIntent(
-                            decoratedParams,
-                            apiRequestOptionsProvider.get(),
-                            expandFields = EXPAND_PAYMENT_METHOD
-                        )
-                    }
-                }
-            ) {
-                REQUIRED_ERROR
+        }.withShouldUseStripeSdk(true)
+
+        return when (decoratedParams) {
+            is ConfirmPaymentIntentParams -> {
+                stripeApiRepository.confirmPaymentIntent(
+                    confirmPaymentIntentParams = decoratedParams,
+                    options = apiRequestOptionsProvider.get(),
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
+            }
+            is ConfirmSetupIntentParams -> {
+                stripeApiRepository.confirmSetupIntent(
+                    confirmSetupIntentParams = decoratedParams,
+                    options = apiRequestOptionsProvider.get(),
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
             }
         }
+    }
 
     /**
      * Fetches a [StripeIntent] and handles its next action.
