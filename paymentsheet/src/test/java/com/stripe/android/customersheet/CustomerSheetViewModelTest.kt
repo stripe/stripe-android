@@ -959,6 +959,52 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When there is a payment selection, the selected PM should be first in the list`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
+                    )
+                ),
+                selectedPaymentOption = CustomerAdapter.Result.success(
+                    CustomerAdapter.PaymentOption.fromId("pm_3")
+                )
+            )
+        )
+
+        viewModel.viewState.test {
+            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.savedPaymentMethods.indexOfFirst { it.id == "pm_3" }).isEqualTo(0)
+        }
+    }
+
+    @Test
+    fun `When there is no payment selection, the order of the payment methods is preserved`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
+                    )
+                ),
+                selectedPaymentOption = CustomerAdapter.Result.success(null)
+            )
+        )
+
+        viewModel.viewState.test {
+            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.savedPaymentMethods.indexOfFirst { it.id == "pm_1" }).isEqualTo(0)
+            assertThat(viewState.savedPaymentMethods.indexOfFirst { it.id == "pm_2" }).isEqualTo(1)
+            assertThat(viewState.savedPaymentMethods.indexOfFirst { it.id == "pm_3" }).isEqualTo(2)
+        }
+    }
+
     private fun buildBackstack(vararg states: CustomerSheetViewState): Stack<CustomerSheetViewState> {
         return Stack<CustomerSheetViewState>().apply {
             states.forEach {
