@@ -1,9 +1,12 @@
 package com.stripe.android.paymentsheet.example.samples.ui.customersheet
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -51,6 +55,8 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
                 )
 
                 val viewState by viewModel.state.collectAsState()
+                val isDeveloperModeEnabled by viewModel.isDeveloperModeEnabled.collectAsState()
+                val isSetupIntentEnabled by viewModel.isSetupIntentEnabled.collectAsState()
 
                 LaunchedEffect(Unit) {
                     val result = customerSheet.retrievePaymentOptionSelection()
@@ -62,6 +68,13 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
                         .fillMaxSize()
                         .padding(16.dp)
                 ) {
+                    AnimatedVisibility(visible = isDeveloperModeEnabled) {
+                        DeveloperConfigurations(
+                            isSetupIntentEnabled = isSetupIntentEnabled,
+                            toggleSetupIntentEnabled = viewModel::toggleSetupIntentEnabled,
+                        )
+                    }
+
                     Text(
                         text = "Payment Methods",
                         fontSize = 18.sp
@@ -91,6 +104,21 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_customersheet, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        return if (id == R.id.developer_mode) {
+            viewModel.toggleDeveloperMode()
+            true
+        } else {
+            super.onOptionsItemSelected(item)
         }
     }
 
@@ -149,6 +177,39 @@ private fun CustomerPaymentMethods(
             Text(
                 text = it,
                 color = Color.Red,
+            )
+        }
+    }
+}
+
+@Composable
+fun DeveloperConfigurations(
+    isSetupIntentEnabled: Boolean,
+    toggleSetupIntentEnabled: (Boolean) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Developer Configurations",
+            fontSize = 18.sp
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                if (isSetupIntentEnabled) {
+                    "SetupIntent"
+                } else {
+                    "CreateAndAttach"
+                }
+            )
+            Switch(
+                checked = isSetupIntentEnabled,
+                onCheckedChange = {
+                    toggleSetupIntentEnabled(it)
+                }
             )
         }
     }
