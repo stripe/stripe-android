@@ -21,6 +21,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Stack
+import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -105,6 +106,7 @@ class CustomerSheetViewModelTest {
                         isProcessing = false,
                         isEditing = false,
                         isGooglePayEnabled = false,
+                        primaryButtonVisible = false,
                         primaryButtonLabel = "Confirm",
                         errorMessage = null,
                     )
@@ -239,7 +241,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When no selection, primary button label should be null`() = runTest {
+    fun `When no selection, the primary button is not visible`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
@@ -252,13 +254,13 @@ class CustomerSheetViewModelTest {
         )
         viewModel.viewState.test {
             val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat(viewState.primaryButtonLabel)
-                .isNull()
+            assertThat(viewState.primaryButtonVisible)
+                .isFalse()
         }
     }
 
     @Test
-    fun `When CustomerViewAction#OnItemSelected with payment method, primary button label should not be null`() = runTest {
+    fun `When Stripe payment method is selected, the primary button is visible`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
@@ -271,8 +273,8 @@ class CustomerSheetViewModelTest {
         )
         viewModel.viewState.test {
             var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat(viewState.primaryButtonLabel)
-                .isNull()
+            assertThat(viewState.primaryButtonVisible)
+                .isFalse()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnItemSelected(
@@ -285,14 +287,16 @@ class CustomerSheetViewModelTest {
             viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
 
             assertThat(viewState.primaryButtonLabel)
-                .isNotNull()
+                .isEqualTo("Confirm")
             assertThat(viewState.primaryButtonEnabled)
+                .isTrue()
+            assertThat(viewState.primaryButtonVisible)
                 .isTrue()
         }
     }
 
     @Test
-    fun `When CustomerViewAction#OnItemSelected with Google Pay, primary button label should not be null`() = runTest {
+    fun `When Google Pay is selected, the primary button is visible`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
@@ -306,7 +310,9 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
             assertThat(viewState.primaryButtonLabel)
-                .isNull()
+                .isEqualTo("Confirm")
+            assertThat(viewState.primaryButtonVisible)
+                .isFalse()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnItemSelected(
@@ -317,14 +323,16 @@ class CustomerSheetViewModelTest {
             viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
 
             assertThat(viewState.primaryButtonLabel)
-                .isNotNull()
+                .isEqualTo("Confirm")
             assertThat(viewState.primaryButtonEnabled)
+                .isTrue()
+            assertThat(viewState.primaryButtonVisible)
                 .isTrue()
         }
     }
 
     @Test
-    fun `When CustomerViewAction#OnItemSelected with Link, primary button label should be null`() = runTest {
+    fun `When CustomerViewAction#OnItemSelected with Link, exception should be thrown`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
@@ -336,16 +344,15 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            viewModel.handleViewAction(
-                CustomerSheetViewAction.OnItemSelected(
-                    selection = PaymentSelection.Link
+            assertThat(awaitItem()).isInstanceOf(CustomerSheetViewState.SelectPaymentMethod::class.java)
+            val error = assertFailsWith<IllegalStateException> {
+                viewModel.handleViewAction(
+                    CustomerSheetViewAction.OnItemSelected(
+                        selection = PaymentSelection.Link
+                    )
                 )
-            )
-
-            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-
-            assertThat(viewState.primaryButtonLabel)
-                .isNull()
+            }
+            assertThat(error.message).contains("Unsupported payment selection")
         }
     }
 
@@ -362,16 +369,15 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            viewModel.handleViewAction(
-                CustomerSheetViewAction.OnItemSelected(
-                    selection = null
+            assertThat(awaitItem()).isInstanceOf(CustomerSheetViewState.SelectPaymentMethod::class.java)
+            val error = assertFailsWith<IllegalStateException> {
+                viewModel.handleViewAction(
+                    CustomerSheetViewAction.OnItemSelected(
+                        selection = null
+                    )
                 )
-            )
-
-            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-
-            assertThat(viewState.primaryButtonLabel)
-                .isNull()
+            }
+            assertThat(error.message).contains("Unsupported payment selection")
         }
     }
 
@@ -668,6 +674,7 @@ class CustomerSheetViewModelTest {
                     isProcessing = false,
                     isEditing = false,
                     isGooglePayEnabled = false,
+                    primaryButtonVisible = false,
                     primaryButtonLabel = null,
                 ),
                 initialViewState
@@ -728,6 +735,7 @@ class CustomerSheetViewModelTest {
                     isProcessing = false,
                     isEditing = false,
                     isGooglePayEnabled = false,
+                    primaryButtonVisible = false,
                     primaryButtonLabel = null,
                 ),
                 initialViewState
@@ -956,6 +964,152 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             val viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
             assertThat(viewState.primaryButtonEnabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `When editing, primary button is not visible`() = runTest {
+        val initialViewState = CustomerSheetViewState.SelectPaymentMethod(
+            title = null,
+            savedPaymentMethods = listOf(),
+            paymentSelection = null,
+            isLiveMode = false,
+            isProcessing = false,
+            isEditing = false,
+            isGooglePayEnabled = false,
+            primaryButtonVisible = true,
+            primaryButtonLabel = null,
+        )
+        val viewModel = createViewModel(
+            backstack = buildBackstack(initialViewState),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.primaryButtonVisible).isTrue()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+
+            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.primaryButtonVisible).isFalse()
+        }
+    }
+
+    @Test
+    fun `When a new payment method is added, the primary button is visible`() = runTest {
+        val initialViewState = CustomerSheetViewState.AddPaymentMethod(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            formViewData = FormViewModel.ViewData(
+                completeFormValues = FormFieldValues(
+                    showsMandate = false,
+                    userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                ),
+            ),
+            enabled = true,
+            isLiveMode = false,
+            isProcessing = false,
+        )
+        val viewModel = createViewModel(
+            backstack = buildBackstack(
+                CustomerSheetViewState.SelectPaymentMethod(
+                    title = null,
+                    savedPaymentMethods = listOf(),
+                    paymentSelection = null,
+                    isLiveMode = false,
+                    isProcessing = false,
+                    isEditing = false,
+                    isGooglePayEnabled = false,
+                    primaryButtonVisible = false,
+                    primaryButtonLabel = null,
+                ),
+                initialViewState
+            ),
+            stripeRepository = FakeStripeRepository(
+                onCreatePaymentMethod = {
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                },
+                onConfirmSetupIntent = {
+                    SetupIntentFixtures.SI_SUCCEEDED
+                }
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onSetupIntentClientSecretForCustomerAttach = {
+                    CustomerAdapter.Result.success("seti_123")
+                }
+            )
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(CustomerSheetViewState.AddPaymentMethod::class.java)
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+            val addPaymentMethodViewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            assertThat(addPaymentMethodViewState.isProcessing)
+                .isTrue()
+
+            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.primaryButtonVisible)
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `When removing the originally selected payment selection, primary button is not visible`() = runTest {
+        val viewModel = createViewModel(
+            backstack = buildBackstack(
+                CustomerSheetViewState.SelectPaymentMethod(
+                    title = null,
+                    savedPaymentMethods = listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                    ),
+                    paymentSelection = PaymentSelection.Saved(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                    ),
+                    isLiveMode = false,
+                    isProcessing = false,
+                    isEditing = false,
+                    isGooglePayEnabled = false,
+                    primaryButtonVisible = false,
+                    primaryButtonLabel = null,
+                ),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onDetachPaymentMethod = {
+                    CustomerAdapter.Result.success(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2")
+                    )
+                }
+            )
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.primaryButtonVisible)
+                .isFalse()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemRemoved(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2")
+                )
+            )
+
+            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat((viewState).primaryButtonVisible)
+                .isFalse()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    PaymentSelection.Saved(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1")
+                    )
+                )
+            )
+
+            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat((viewState).primaryButtonVisible)
+                .isTrue()
         }
     }
 
