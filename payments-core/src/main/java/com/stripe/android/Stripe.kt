@@ -1101,7 +1101,7 @@ class Stripe internal constructor(
         @Size(min = 1) sourceId: String,
         @Size(min = 1) clientSecret: String,
         stripeAccountId: String? = this.stripeAccountId
-    ): Source? {
+    ): Source {
         return runBlocking {
             stripeRepository.retrieveSource(
                 sourceId,
@@ -1110,7 +1110,7 @@ class Stripe internal constructor(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
                 )
-            ).getOrThrow()
+            ).getOrElse { throw StripeException.create(it) }
         }
     }
 
@@ -1666,7 +1666,7 @@ class Stripe internal constructor(
      * This function should only be called when the PaymentIntent is in the `requires_action` state
      * and `NextActionType` is VerifyWithMicrodeposits.
      *
-     * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+     * See the [Verify bank account with micro-deposits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
      *
      * @param clientSecret The client secret of the PaymentIntent
      * @param firstAmount The amount, in cents of USD, equal to the value of the first micro-deposit
@@ -1701,7 +1701,7 @@ class Stripe internal constructor(
      * This function should only be called when the PaymentIntent is in the `requires_action` state
      * and `NextActionType` is VerifyWithMicrodeposits.
      *
-     * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+     * See the [Verify bank account with micro-deposits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
      *
      * @param clientSecret The client secret of the PaymentIntent
      * @param descriptorCode A unique, 6-digit descriptor code that starts with SM that was sent as
@@ -1732,7 +1732,7 @@ class Stripe internal constructor(
      * This function should only be called when the SetupIntent is in the `requires_action` state
      * and `NextActionType` is VerifyWithMicrodeposits.
      *
-     * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+     * See the [Verify bank account with micro-deposits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
      *
      * @param clientSecret The client secret of the SetupIntent
      * @param firstAmount The amount, in cents of USD, equal to the value of the first micro-deposit
@@ -1767,7 +1767,7 @@ class Stripe internal constructor(
      * This function should only be called when the SetupIntent is in the `requires_action` state
      * and `NextActionType` is VerifyWithMicrodeposits.
      *
-     * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+     * See the [Verify bank account with micro-deposits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
      *
      * @param clientSecret The client secret of the SetupIntent
      * @param descriptorCode A unique, 6-digit descriptor code that starts with SM that was sent as
