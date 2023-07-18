@@ -31,6 +31,8 @@ class FpxViewModelTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
-        override suspend fun getFpxBankStatus(options: ApiRequest.Options) = BankStatuses()
+        override suspend fun getFpxBankStatus(options: ApiRequest.Options): Result<BankStatuses> {
+            return Result.success(BankStatuses())
+        }
     }
 }

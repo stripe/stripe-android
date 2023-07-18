@@ -1107,7 +1107,7 @@ internal class StripeApiRepositoryTest {
     fun getFpxBankStatus_withFpxKey() = runTest {
         val fpxBankStatuses = stripeApiRepository.getFpxBankStatus(
             ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
-        )
+        ).getOrThrow()
         assertThat(fpxBankStatuses.size())
             .isEqualTo(26)
     }
@@ -1119,7 +1119,7 @@ internal class StripeApiRepositoryTest {
                 apiKey = ApiKeyFixtures.FPX_PUBLISHABLE_KEY,
                 stripeAccount = "acct_1234"
             )
-        )
+        ).getOrThrow()
         assertThat(fpxBankStatuses.size())
             .isEqualTo(26)
     }
