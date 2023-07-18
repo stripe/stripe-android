@@ -114,15 +114,20 @@ internal class CustomerSheetViewModel @Inject constructor(
                 Pair(paymentMethods, selection)
             }
 
-            val paymentMethods = result.getOrNull()?.first?.toMutableList()
+            var paymentMethods = result.getOrNull()?.first
+            val paymentSelection = result.getOrNull()?.second
 
-            val paymentSelection = result.getOrNull()?.second?.apply {
-                // The order of the payment method carousel should be as follows:
-                // Add card, Google Pay (if enabled), selected PM, additional PMs
+            paymentSelection?.apply {
                 val selectedPaymentMethod = (this as? PaymentSelection.Saved)?.paymentMethod
-                paymentMethods?.remove(selectedPaymentMethod)
-                selectedPaymentMethod?.let {
-                    paymentMethods?.add(0, selectedPaymentMethod)
+                // The order of the payment methods should be selected PM and then any additional PMs
+                // The carousel always starts with Add and Google Pay (if enabled)
+                paymentMethods = paymentMethods?.sortedWith { left, right ->
+                    // We only care to move the selected payment method, all others stay in the order they were before
+                    when {
+                        left.id == selectedPaymentMethod?.id -> -1
+                        right.id == selectedPaymentMethod?.id -> 1
+                        else -> 0
+                    }
                 }
             }
 
