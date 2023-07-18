@@ -324,12 +324,10 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
         clientSecret: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): Result<PaymentIntent> = runCatching {
-        requireNotNull(
-            stripeRepository.refreshPaymentIntent(
-                clientSecret,
-                requestOptions,
-            )
+    ): Result<PaymentIntent> {
+        return stripeRepository.refreshPaymentIntent(
+            clientSecret,
+            requestOptions,
         )
     }
 

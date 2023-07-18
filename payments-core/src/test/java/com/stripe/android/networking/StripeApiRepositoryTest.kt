@@ -1589,12 +1589,10 @@ internal class StripeApiRepositoryTest {
                     )
                 )
 
-            requireNotNull(
-                create().refreshPaymentIntent(
-                    clientSecret,
-                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-                )
-            )
+            create().refreshPaymentIntent(
+                clientSecret,
+                ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            ).getOrThrow()
 
             verify(stripeNetworkClient).executeRequest(
                 argWhere<ApiRequest> {

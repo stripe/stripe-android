@@ -67,7 +67,7 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun refreshPaymentIntent(
         clientSecret: String,
         options: ApiRequest.Options
-    ): PaymentIntent? {
+    ): Result<PaymentIntent> {
         TODO("Not yet implemented")
     }
 
