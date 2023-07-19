@@ -860,21 +860,17 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun getCardMetadata(
         bin: Bin,
         options: ApiRequest.Options
-    ): CardMetadata? {
-        return runCatching {
-            fetchStripeModel(
-                apiRequestFactory.createGet(
-                    getEdgeUrl("card-metadata"),
-                    options.copy(stripeAccount = null),
-                    mapOf("key" to options.apiKey, "bin_prefix" to bin.value)
-                ),
-                CardMetadataJsonParser(bin)
-            ) {
-                // no-op
-            }
-        }.onFailure {
+    ): Result<CardMetadata> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = getEdgeUrl("card-metadata"),
+                options = options.copy(stripeAccount = null),
+                params = mapOf("key" to options.apiKey, "bin_prefix" to bin.value),
+            ),
+            jsonParser = CardMetadataJsonParser(bin),
+        ).onFailure {
             fireAnalyticsRequest(PaymentAnalyticsEvent.CardMetadataLoadFailure)
-        }.getOrNull()
+        }
     }
 
     /**
@@ -1436,14 +1432,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 throw APIException(stripeError, requestId, responseCode)
             }
         }
-    }
-
-    private suspend fun <ModelType : StripeModel> fetchStripeModel(
-        apiRequest: ApiRequest,
-        jsonParser: ModelJsonParser<ModelType>,
-        onResponse: () -> Unit
-    ): ModelType? {
-        return jsonParser.parse(makeApiRequest(apiRequest, onResponse).responseJson())
     }
 
     private suspend fun <ModelType : StripeModel> fetchStripeModelResult(

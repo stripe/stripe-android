@@ -1127,8 +1127,7 @@ internal class StripeApiRepositoryTest {
             stripeApiRepository.getCardMetadata(
                 BinFixtures.VISA,
                 ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
-            )
-        requireNotNull(cardMetadata)
+            ).getOrThrow()
         assertThat(cardMetadata.bin)
             .isEqualTo(BinFixtures.VISA)
         assertThat(cardMetadata.accountRanges)
