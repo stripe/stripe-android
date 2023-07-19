@@ -1434,14 +1434,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    private suspend fun <ModelType : StripeModel> fetchStripeModel(
-        apiRequest: ApiRequest,
-        jsonParser: ModelJsonParser<ModelType>,
-        onResponse: () -> Unit
-    ): ModelType? {
-        return jsonParser.parse(makeApiRequest(apiRequest, onResponse).responseJson())
-    }
-
     private suspend fun <ModelType : StripeModel> fetchStripeModelResult(
         apiRequest: ApiRequest,
         jsonParser: ModelJsonParser<ModelType>,
