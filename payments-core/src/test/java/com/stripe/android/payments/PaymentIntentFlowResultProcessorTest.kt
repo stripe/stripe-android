@@ -105,7 +105,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                 PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
             )
             whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
-                PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS
+                Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS)
             )
 
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
@@ -147,7 +147,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                 PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
             )
             whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
-                PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS
+                Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS)
             )
 
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
@@ -187,7 +187,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                 PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
             )
             whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
-                PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE
+                Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE)
             )
 
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"

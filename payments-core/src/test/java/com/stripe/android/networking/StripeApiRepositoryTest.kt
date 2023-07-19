@@ -1566,14 +1566,13 @@ internal class StripeApiRepositoryTest {
     @Test
     fun `retrieveStripeIntent() with invalid client secret should throw exception`() =
         runTest {
-            val error = assertFailsWith<IllegalStateException> {
-                stripeApiRepository.retrieveStripeIntent(
-                    "invalid!",
-                    DEFAULT_OPTIONS
-                )
-            }
-            assertThat(error.message)
-                .isEqualTo("Invalid client secret.")
+            val error = stripeApiRepository.retrieveStripeIntent(
+                clientSecret = "invalid!",
+                options = DEFAULT_OPTIONS,
+            ).exceptionOrNull()
+
+            assertThat(error).isInstanceOf(IllegalStateException::class.java)
+            assertThat(error?.message).isEqualTo("Invalid client secret.")
         }
 
     @Test
@@ -1589,12 +1588,10 @@ internal class StripeApiRepositoryTest {
                     )
                 )
 
-            requireNotNull(
-                create().refreshPaymentIntent(
-                    clientSecret,
-                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-                )
-            )
+            create().refreshPaymentIntent(
+                clientSecret,
+                ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            ).getOrThrow()
 
             verify(stripeNetworkClient).executeRequest(
                 argWhere<ApiRequest> {

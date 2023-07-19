@@ -52,7 +52,7 @@ interface StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
-    ): StripeIntent
+    ): Result<StripeIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun confirmPaymentIntent(
@@ -74,17 +74,11 @@ interface StripeRepository {
         expandFields: List<String> = emptyList()
     ): PaymentIntent?
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun refreshPaymentIntent(
         clientSecret: String,
         options: ApiRequest.Options
-    ): PaymentIntent?
+    ): Result<PaymentIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun cancelPaymentIntentSource(

@@ -155,12 +155,11 @@ class PaymentLauncherViewModelTest {
 
         whenever(
             stripeApiRepository.retrieveStripeIntent(
-                eq(CLIENT_SECRET),
-                eq(apiRequestOptions),
-                any()
+                clientSecret = eq(CLIENT_SECRET),
+                options = eq(apiRequestOptions),
+                expandFields = any(),
             )
-        )
-            .thenReturn(stripeIntent)
+        ).thenReturn(Result.success(stripeIntent))
 
         whenever(authenticatorRegistry.getAuthenticator(eq(stripeIntent)))
             .thenReturn(stripeIntentAuthenticator)
@@ -388,7 +387,7 @@ class PaymentLauncherViewModelTest {
                     eq(apiRequestOptions),
                     any()
                 )
-            ).thenReturn(null)
+            ).thenReturn(Result.failure(APIConnectionException()))
 
             val viewModel = createViewModel()
             viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)

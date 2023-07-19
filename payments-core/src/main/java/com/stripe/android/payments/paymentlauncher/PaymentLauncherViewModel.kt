@@ -182,14 +182,11 @@ internal class PaymentLauncherViewModel @Inject constructor(
         if (hasStarted) return
         viewModelScope.launch {
             savedStateHandle.set(KEY_HAS_STARTED, true)
-            runCatching {
-                requireNotNull(
-                    stripeApiRepository.retrieveStripeIntent(
-                        clientSecret,
-                        apiRequestOptionsProvider.get()
-                    )
-                )
-            }.fold(
+
+            stripeApiRepository.retrieveStripeIntent(
+                clientSecret = clientSecret,
+                options = apiRequestOptionsProvider.get(),
+            ).fold(
                 onSuccess = { intent ->
                     authenticatorRegistry
                         .getAuthenticator(intent)

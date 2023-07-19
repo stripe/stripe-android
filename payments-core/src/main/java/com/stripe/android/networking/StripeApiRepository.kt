@@ -177,24 +177,28 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): StripeIntent {
+    ): Result<StripeIntent> {
         return when {
             PaymentIntent.ClientSecret.isMatch(clientSecret) -> {
-                requireNotNull(
-                    retrievePaymentIntent(clientSecret, options, expandFields)
-                ) {
-                    "Could not retrieve PaymentIntent."
+                runCatching {
+                    requireNotNull(
+                        retrievePaymentIntent(clientSecret, options, expandFields)
+                    ) {
+                        "Could not retrieve PaymentIntent."
+                    }
                 }
             }
             SetupIntent.ClientSecret.isMatch(clientSecret) -> {
-                requireNotNull(
-                    retrieveSetupIntent(clientSecret, options, expandFields)
-                ) {
-                    "Could not retrieve SetupIntent."
+                runCatching {
+                    requireNotNull(
+                        retrieveSetupIntent(clientSecret, options, expandFields)
+                    ) {
+                        "Could not retrieve SetupIntent."
+                    }
                 }
             }
             else -> {
-                error("Invalid client secret.")
+                Result.failure(IllegalStateException("Invalid client secret."))
             }
         }
     }
@@ -315,27 +319,25 @@ class StripeApiRepository @JvmOverloads internal constructor(
      *
      * @param clientSecret client_secret of the PaymentIntent to retrieve
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun refreshPaymentIntent(
         clientSecret: String,
         options: ApiRequest.Options
-    ): PaymentIntent? {
-        val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+    ): Result<PaymentIntent> {
+        val paymentIntentId = runCatching {
+            PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+        }.getOrElse {
+            return Result.failure(it)
+        }
 
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getRefreshPaymentIntentUrl(paymentIntentId),
-                options,
-                createClientSecretParam(clientSecret, emptyList())
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getRefreshPaymentIntentUrl(paymentIntentId),
+                options = options,
+                params = createClientSecretParam(clientSecret, emptyList()),
             ),
-            PaymentIntentJsonParser()
+            jsonParser = PaymentIntentJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.PaymentIntentRefresh)
@@ -1195,9 +1197,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
         secondAmount: Int,
         requestOptions: ApiRequest.Options
     ): Result<PaymentIntent> {
+        val paymentIntentId = runCatching {
+            PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+        }.getOrElse {
+            return Result.failure(it)
+        }
+
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
-                getVerifyMicrodepositsOnPaymentIntentUrl(PaymentIntent.ClientSecret(clientSecret).paymentIntentId),
+                getVerifyMicrodepositsOnPaymentIntentUrl(paymentIntentId),
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret,
@@ -1218,9 +1226,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
         descriptorCode: String,
         requestOptions: ApiRequest.Options
     ): Result<PaymentIntent> {
+        val paymentIntentId = runCatching {
+            PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+        }.getOrElse {
+            return Result.failure(it)
+        }
+
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
-                getVerifyMicrodepositsOnPaymentIntentUrl(PaymentIntent.ClientSecret(clientSecret).paymentIntentId),
+                getVerifyMicrodepositsOnPaymentIntentUrl(paymentIntentId),
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret,
@@ -1242,9 +1256,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
         secondAmount: Int,
         requestOptions: ApiRequest.Options
     ): Result<SetupIntent> {
+        val setupIntentId = runCatching {
+            SetupIntent.ClientSecret(clientSecret).setupIntentId
+        }.getOrElse {
+            return Result.failure(it)
+        }
+
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
-                getVerifyMicrodepositsOnSetupIntentUrl(SetupIntent.ClientSecret(clientSecret).setupIntentId),
+                getVerifyMicrodepositsOnSetupIntentUrl(setupIntentId),
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret,
@@ -1252,9 +1272,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 )
             ),
             SetupIntentJsonParser()
-        ) {
-            // no-op
-        }
+        )
     }
 
     /**
@@ -1265,9 +1283,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
         descriptorCode: String,
         requestOptions: ApiRequest.Options
     ): Result<SetupIntent> {
+        val setupIntentId = runCatching {
+            SetupIntent.ClientSecret(clientSecret).setupIntentId
+        }.getOrElse {
+            return Result.failure(it)
+        }
+
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
-                getVerifyMicrodepositsOnSetupIntentUrl(SetupIntent.ClientSecret(clientSecret).setupIntentId),
+                getVerifyMicrodepositsOnSetupIntentUrl(setupIntentId),
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret,
@@ -1275,9 +1299,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 )
             ),
             SetupIntentJsonParser()
-        ) {
-            // no-op
-        }
+        )
     }
 
     override suspend fun retrievePaymentMethodMessage(
