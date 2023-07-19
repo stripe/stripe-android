@@ -324,11 +324,15 @@ data class ConfirmPaymentIntentParams internal constructor(
          * Create the parameters necessary for confirming a [PaymentIntent] based on its [clientSecret]
          * and [paymentMethodType]
          *
-         * Use this initializer for PaymentIntents that already have a PaymentMethod attached.
+         * Use this initializer for PaymentIntents that already have a [PaymentMethod] attached.
          *
          * @param clientSecret client secret from the PaymentIntent that is to be confirmed
          * @param paymentMethodType the known type of the PaymentIntent's attached PaymentMethod
          */
+        @Deprecated(
+            message = "This method can produce incorrect ConfirmPaymentIntentParams and should " +
+                "no longer be used. Use create(clientSecret, paymentMethodType, setupFutureUsage) instead.",
+        )
         @JvmStatic
         fun create(
             clientSecret: String,
@@ -339,6 +343,37 @@ data class ConfirmPaymentIntentParams internal constructor(
                 // infers default [MandateDataParams] based on the attached [paymentMethodType]
                 mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
                     .takeIf { paymentMethodType.requiresMandate }
+            )
+        }
+
+        /**
+         * Create the parameters necessary for confirming a [PaymentIntent] based on its [clientSecret]
+         * and [paymentMethodType]
+         *
+         * Use this initializer for PaymentIntents that already have a [PaymentMethod] attached.
+         *
+         * @param clientSecret client secret from the PaymentIntent that is to be confirmed
+         * @param paymentMethodType the known type of the PaymentIntent's attached PaymentMethod
+         */
+        @JvmStatic
+        fun create(
+            clientSecret: String,
+            paymentMethodType: PaymentMethod.Type,
+            setupFutureUsage: SetupFutureUsage?,
+        ): ConfirmPaymentIntentParams {
+            val isSettingUpFutureUsage = setupFutureUsage in setOf(OnSession, OffSession)
+
+            val canAttachMandateData = if (isSettingUpFutureUsage) {
+                paymentMethodType.requiresMandateForSetup
+            } else {
+                paymentMethodType.requiresMandateForPayment
+            }
+
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                mandateData = MandateDataParams(
+                    type = MandateDataParams.Type.Online.DEFAULT,
+                ).takeIf { canAttachMandateData },
             )
         }
 

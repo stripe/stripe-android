@@ -165,6 +165,11 @@ constructor(
         @JvmField val code: String,
         @JvmField val isReusable: Boolean,
         @JvmField val isVoucher: Boolean,
+        @Deprecated(
+            message = "This field can return an incorrect value, as some payment method " +
+                "types require mandates only for setups. Use requiresMandateForPayment " +
+                "or requiresMandateForSetup based on your use case.",
+        )
         @JvmField val requiresMandate: Boolean,
         private val hasDelayedSettlement: Boolean
     ) : Parcelable {
@@ -371,6 +376,82 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false,
         );
+
+        /**
+         * Whether this type of payment methods requires a mandate when it's being used for a single
+         * payment.
+         */
+        val requiresMandateForPayment: Boolean
+            get() = when (this) {
+                PaymentMethod.Type.AuBecsDebit,
+                PaymentMethod.Type.BacsDebit,
+                PaymentMethod.Type.Bancontact,
+                PaymentMethod.Type.Eps,
+                PaymentMethod.Type.Ideal,
+                PaymentMethod.Type.Link,
+                PaymentMethod.Type.SepaDebit,
+                PaymentMethod.Type.Sofort,
+                PaymentMethod.Type.USBankAccount -> true
+                PaymentMethod.Type.Affirm,
+                PaymentMethod.Type.AfterpayClearpay,
+                PaymentMethod.Type.Alipay,
+                PaymentMethod.Type.Blik,
+                PaymentMethod.Type.Card,
+                PaymentMethod.Type.CardPresent,
+                PaymentMethod.Type.CashAppPay,
+                PaymentMethod.Type.Fpx,
+                PaymentMethod.Type.Giropay,
+                PaymentMethod.Type.GrabPay,
+                PaymentMethod.Type.Klarna,
+                PaymentMethod.Type.MobilePay,
+                PaymentMethod.Type.Netbanking,
+                PaymentMethod.Type.Oxxo,
+                PaymentMethod.Type.PayPal,
+                PaymentMethod.Type.P24,
+                PaymentMethod.Type.RevolutPay,
+                PaymentMethod.Type.Upi,
+                PaymentMethod.Type.WeChatPay,
+                PaymentMethod.Type.Zip -> false
+            }
+
+        // TODO Confirm that this is true, because iOS seems a little different
+        /**
+         * Whether this type of payment methods requires a mandate when it's being used with a
+         * [PaymentIntent] that includes future on-session or off-session payments or when it's
+         * being used with a [SetupIntent].
+         */
+        val requiresMandateForSetup: Boolean
+            get() = when (this) {
+                PaymentMethod.Type.AuBecsDebit,
+                PaymentMethod.Type.BacsDebit,
+                PaymentMethod.Type.Bancontact,
+                PaymentMethod.Type.CashAppPay,
+                PaymentMethod.Type.Eps,
+                PaymentMethod.Type.Ideal,
+                PaymentMethod.Type.Link,
+                PaymentMethod.Type.PayPal,
+                PaymentMethod.Type.SepaDebit,
+                PaymentMethod.Type.Sofort,
+                PaymentMethod.Type.USBankAccount -> true
+                PaymentMethod.Type.Affirm,
+                PaymentMethod.Type.AfterpayClearpay,
+                PaymentMethod.Type.Alipay,
+                PaymentMethod.Type.Blik,
+                PaymentMethod.Type.Card,
+                PaymentMethod.Type.CardPresent,
+                PaymentMethod.Type.Fpx,
+                PaymentMethod.Type.Giropay,
+                PaymentMethod.Type.GrabPay,
+                PaymentMethod.Type.Klarna,
+                PaymentMethod.Type.MobilePay,
+                PaymentMethod.Type.Netbanking,
+                PaymentMethod.Type.Oxxo,
+                PaymentMethod.Type.P24,
+                PaymentMethod.Type.RevolutPay,
+                PaymentMethod.Type.Upi,
+                PaymentMethod.Type.WeChatPay,
+                PaymentMethod.Type.Zip -> false
+            }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
         fun hasDelayedSettlement(): Boolean = hasDelayedSettlement

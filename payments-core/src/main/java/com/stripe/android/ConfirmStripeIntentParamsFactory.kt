@@ -68,8 +68,9 @@ internal class ConfirmPaymentIntentParamsFactory(
                     null
                 }
             },
-            mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
-                .takeIf { paymentMethod.type?.requiresMandate == true },
+            mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT).takeIf {
+                paymentMethod.type?.requiresMandateForPayment == true
+            },
             shipping = shipping
         )
     }
@@ -117,9 +118,9 @@ internal class ConfirmSetupIntentParamsFactory(
         return ConfirmSetupIntentParams.create(
             paymentMethodId = paymentMethod.id.orEmpty(),
             clientSecret = clientSecret,
-            mandateData = paymentMethod.type?.requiresMandate?.let {
-                MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
-            }
+            mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT).takeIf {
+                paymentMethod.type?.requiresMandateForSetup == true
+            },
         )
     }
 
