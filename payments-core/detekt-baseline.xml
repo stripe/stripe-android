@@ -180,6 +180,7 @@
     <ID>MaxLineLength:StripeEditTextTest.kt$StripeEditTextTest$editText.defaultColorStateList = ColorStateList.valueOf(ContextCompat.getColor(context, android.R.color.primary_text_dark))</ID>
     <ID>MaxLineLength:StripeIntent.kt$StripeIntent.Status$*</ID>
     <ID>MaxLineLength:StripeKtx.kt$*</ID>
+    <ID>MaxLineLength:StripeKtxTest.kt$StripeKtxTest$`Given repository returns non-empty value when calling retrieveAPI with String param then return correct result`</ID>
     <ID>MaxLineLength:StripeKtxTest.kt$StripeKtxTest$`Given repository returns non-empty value when calling retrieveAPI with String param then returns correct result`</ID>
     <ID>MaxLineLength:StripeKtxTest.kt$StripeKtxTest$assertFailsWith</ID>
     <ID>MaxLineLength:StripeKtxTest.kt$StripeKtxTest$private inline</ID>
@@ -199,7 +200,6 @@
     <ID>ReturnCount:WalletJsonParser.kt$WalletJsonParser$override fun parse(json: JSONObject): Wallet?</ID>
     <ID>SwallowedException:ActivityUtils.kt$e: IllegalArgumentException</ID>
     <ID>SwallowedException:PaymentUtils.kt$PaymentUtils$e: ClassCastException</ID>
-    <ID>SwallowedException:Stripe.kt$Stripe$exception: CardException</ID>
     <ID>ThrowsCount:StripeApiRepository.kt$StripeApiRepository$@Throws( InvalidRequestException::class, AuthenticationException::class, CardException::class, APIException::class ) private fun handleApiError(response: StripeResponse&lt;String>)</ID>
     <ID>TooGenericExceptionThrown:DefaultAlipayRepository.kt$DefaultAlipayRepository$throw RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")</ID>
     <ID>TooGenericExceptionThrown:PaymentFlowViewModelTest.kt$PaymentFlowViewModelTest.ThrowingShippingMethodsFactory$throw RuntimeException("Always throws an exception")</ID>

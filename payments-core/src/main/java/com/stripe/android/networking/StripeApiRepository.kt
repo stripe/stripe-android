@@ -189,13 +189,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 }
             }
             SetupIntent.ClientSecret.isMatch(clientSecret) -> {
-                runCatching {
-                    requireNotNull(
-                        retrieveSetupIntent(clientSecret, options, expandFields)
-                    ) {
-                        "Could not retrieve SetupIntent."
-                    }
-                }
+                retrieveSetupIntent(clientSecret, options, expandFields)
             }
             else -> {
                 Result.failure(IllegalStateException("Invalid client secret."))
@@ -419,28 +413,26 @@ class StripeApiRepository @JvmOverloads internal constructor(
      *
      * @param clientSecret client_secret of the SetupIntent to retrieve
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun retrieveSetupIntent(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): SetupIntent? {
-        val setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId
+    ): Result<SetupIntent> {
+        val setupIntentId = runCatching {
+            SetupIntent.ClientSecret(clientSecret).setupIntentId
+        }.getOrElse {
+            return Result.failure(it)
+        }
 
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
-            apiRequestFactory.createGet(
-                getRetrieveSetupIntentUrl(setupIntentId),
-                options,
-                createClientSecretParam(clientSecret, expandFields)
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = getRetrieveSetupIntentUrl(setupIntentId),
+                options = options,
+                params = createClientSecretParam(clientSecret, expandFields),
             ),
-            SetupIntentJsonParser()
+            jsonParser = SetupIntentJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.SetupIntentRetrieve)

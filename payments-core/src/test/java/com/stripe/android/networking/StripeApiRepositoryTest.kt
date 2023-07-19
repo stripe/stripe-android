@@ -81,7 +81,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
@@ -1233,12 +1232,10 @@ internal class StripeApiRepositoryTest {
                 sdkVersion = "AndroidBindings/13.0.0"
             )
 
-            val ex = assertFailsWith<InvalidRequestException> {
-                stripeRepository.retrieveSetupIntent(
-                    "seti_1CkiBMLENEVhOs7YMtUehLau_secret_invalid",
-                    DEFAULT_OPTIONS
-                )
-            }
+            val ex = stripeRepository.retrieveSetupIntent(
+                "seti_1CkiBMLENEVhOs7YMtUehLau_secret_invalid",
+                DEFAULT_OPTIONS
+            ).exceptionOrNull() as InvalidRequestException
             assertEquals(
                 "No such setupintent: 'seti_1CkiBMLENEVhOs7YMtUehLau'",
                 ex.stripeError?.message

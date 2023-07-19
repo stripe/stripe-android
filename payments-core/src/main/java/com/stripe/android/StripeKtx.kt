@@ -501,15 +501,15 @@ suspend fun Stripe.retrieveSetupIntent(
     clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId,
     expand: List<String> = emptyList(),
-): SetupIntent = runApiRequest {
-    stripeRepository.retrieveSetupIntent(
+): SetupIntent {
+    return stripeRepository.retrieveSetupIntent(
         clientSecret,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         ),
         expand,
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
