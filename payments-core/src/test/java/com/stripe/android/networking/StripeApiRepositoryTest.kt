@@ -2226,6 +2226,18 @@ internal class StripeApiRepositoryTest {
         }
     }
 
+    @Test
+    fun `Verify that retrieveCardMetadata returns failure for BINs that are too short`() = runTest {
+        val repository = create()
+
+        val exception = repository.retrieveCardMetadata(
+            cardNumber = "4242 4",
+            requestOptions = DEFAULT_OPTIONS,
+        ).exceptionOrNull()
+
+        assertThat(exception).isInstanceOf(InvalidRequestException::class.java)
+    }
+
     /**
      * Helper DSL to validate nested params.
      */

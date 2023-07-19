@@ -2,7 +2,6 @@ package com.stripe.android
 
 import android.content.Intent
 import androidx.annotation.Size
-import com.stripe.android.cards.CardNumber
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
@@ -960,26 +959,15 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
 )
 suspend fun Stripe.retrievePossibleBrands(
     cardNumber: String
-): PossibleBrands = runApiRequest {
-    CardNumber.Unvalidated(cardNumber).bin ?: throw InvalidRequestException(
-        message = "cardNumber cannot be less than 6 characters"
-    )
-
-    val cardMetaData = stripeRepository.retrieveCardMetadata(
+): PossibleBrands {
+    return stripeRepository.retrieveCardMetadata(
         cardNumber = cardNumber,
         requestOptions = ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         )
-    )
-
-    val brands = cardMetaData?.accountRanges?.map {
-        it.brand
-    }
-
-    brands?.let {
-        PossibleBrands(
-            brands = brands.toSet().toList()
-        )
-    }
+    ).map { metadata ->
+        val brands = metadata.accountRanges.map { it.brand }
+        PossibleBrands(brands = brands.distinct())
+    }.getOrElse { throw StripeException.create(it) }
 }
