@@ -752,7 +752,7 @@ internal class StripeApiRepositoryTest {
                 create(setOf(productUsage)).confirmSetupIntent(
                     confirmSetupIntentParams,
                     ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-                )
+                ).getOrNull()
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -795,7 +795,7 @@ internal class StripeApiRepositoryTest {
                 create(setOf(productUsage)).confirmSetupIntent(
                     confirmSetupIntentParams,
                     ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-                )
+                ).getOrNull()
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())

@@ -54,18 +54,12 @@ interface StripeRepository {
         expandFields: List<String> = emptyList()
     ): StripeIntent
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
-    ): PaymentIntent?
+    ): Result<PaymentIntent>
 
     @Throws(
         AuthenticationException::class,
@@ -110,7 +104,7 @@ interface StripeRepository {
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
-    ): SetupIntent?
+    ): Result<SetupIntent>
 
     @Throws(
         AuthenticationException::class,

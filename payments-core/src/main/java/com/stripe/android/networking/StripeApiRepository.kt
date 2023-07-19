@@ -93,6 +93,7 @@ import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
 import com.stripe.android.model.parsers.TokenJsonParser
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.utils.StripeUrlUtils
+import com.stripe.android.utils.mapResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -207,29 +208,25 @@ class StripeApiRepository @JvmOverloads internal constructor(
      * @return a [PaymentIntent] reflecting the updated state after applying the parameter
      * provided
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent? {
-        return confirmPaymentIntentInternal(
-            confirmPaymentIntentParams = confirmPaymentIntentParams.maybeForDashboard(options),
-            options = options,
-            expandFields = expandFields
-        )
+    ): Result<PaymentIntent> {
+        return confirmPaymentIntentParams.maybeForDashboard(options).mapResult {
+            confirmPaymentIntentInternal(
+                confirmPaymentIntentParams = it,
+                options = options,
+                expandFields = expandFields
+            )
+        }
     }
 
     private suspend fun confirmPaymentIntentInternal(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent? {
+    ): Result<PaymentIntent> {
         val params = fraudDetectionDataParamsUtils.addFraudDetectionData(
             // Add payment_user_agent if the Payment Method is being created on this call
             maybeAddPaymentUserAgent(
@@ -241,15 +238,22 @@ class StripeApiRepository @JvmOverloads internal constructor(
             ).plus(createExpandParam(expandFields)),
             fraudDetectionData
         )
-        val apiUrl = getConfirmPaymentIntentUrl(
+
+        val paymentIntentId = runCatching {
             PaymentIntent.ClientSecret(confirmPaymentIntentParams.clientSecret).paymentIntentId
-        )
+        }.getOrElse {
+            return Result.failure(it)
+        }
 
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
-            apiRequestFactory.createPost(apiUrl, options, params),
-            PaymentIntentJsonParser()
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getConfirmPaymentIntentUrl(paymentIntentId),
+                options = options,
+                params = params,
+            ),
+            jsonParser = PaymentIntentJsonParser(),
         ) {
             val paymentMethodType =
                 confirmPaymentIntentParams.paymentMethodCreateParams?.typeCode
@@ -370,23 +374,20 @@ class StripeApiRepository @JvmOverloads internal constructor(
      * @return a [SetupIntent] reflecting the updated state after applying the parameter
      * provided
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): SetupIntent? {
-        val setupIntentId =
+    ): Result<SetupIntent> {
+        val setupIntentId = runCatching {
             SetupIntent.ClientSecret(confirmSetupIntentParams.clientSecret).setupIntentId
+        }.getOrElse {
+            return Result.failure(it)
+        }
 
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getConfirmSetupIntentUrl(setupIntentId),
                 options,
@@ -1604,21 +1605,23 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     private suspend fun ConfirmPaymentIntentParams.maybeForDashboard(
         options: ApiRequest.Options
-    ): ConfirmPaymentIntentParams {
+    ): Result<ConfirmPaymentIntentParams> {
         if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
-            return this
+            return Result.success(this)
         }
 
         // For user key auth, we must create the PM first.
-        val paymentMethod = createPaymentMethod(
+        val paymentMethodResult = createPaymentMethod(
             paymentMethodCreateParams = paymentMethodCreateParams,
             options = options,
-        ).getOrThrow()
-
-        return ConfirmPaymentIntentParams.createForDashboard(
-            clientSecret = clientSecret,
-            paymentMethodId = paymentMethod.id!!,
         )
+
+        return paymentMethodResult.mapCatching { paymentMethod ->
+            ConfirmPaymentIntentParams.createForDashboard(
+                clientSecret = clientSecret,
+                paymentMethodId = paymentMethod.id!!,
+            )
+        }
     }
 
     private sealed class DnsCacheData {

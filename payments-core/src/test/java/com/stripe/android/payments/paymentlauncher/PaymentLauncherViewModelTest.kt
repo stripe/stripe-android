@@ -16,6 +16,7 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
@@ -140,11 +141,11 @@ class PaymentLauncherViewModelTest {
 
         whenever(
             stripeApiRepository.confirmPaymentIntent(any(), any(), any())
-        ).thenReturn(paymentIntent)
+        ).thenReturn(Result.success(paymentIntent))
 
         whenever(
             stripeApiRepository.confirmSetupIntent(any(), any(), any())
-        ).thenReturn(setupIntent)
+        ).thenReturn(Result.success(setupIntent))
 
         whenever(authenticatorRegistry.getAuthenticator(eq(paymentIntent)))
             .thenReturn(piAuthenticator)
@@ -344,7 +345,7 @@ class PaymentLauncherViewModelTest {
     fun `verify when stripeApiRepository fails then confirmPaymentIntent will post Failed result`() =
         runTest {
             whenever(stripeApiRepository.confirmPaymentIntent(any(), any(), any()))
-                .thenReturn(null)
+                .thenReturn(Result.failure(APIConnectionException()))
             val viewModel = createViewModel()
             viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
@@ -356,7 +357,7 @@ class PaymentLauncherViewModelTest {
     fun `verify when stripeApiRepository fails then confirmSetupIntent will post Failed result`() =
         runTest {
             whenever(stripeApiRepository.confirmSetupIntent(any(), any(), any()))
-                .thenReturn(null)
+                .thenReturn(Result.failure(APIConnectionException()))
 
             val viewModel = createViewModel()
             viewModel.confirmStripeIntent(confirmSetupIntentParams, authHost)

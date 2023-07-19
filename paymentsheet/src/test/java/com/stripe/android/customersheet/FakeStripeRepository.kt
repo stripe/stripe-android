@@ -9,7 +9,7 @@ import com.stripe.android.testing.AbsFakeStripeRepository
 
 class FakeStripeRepository(
     private val createPaymentMethodResult: Result<PaymentMethod> = Result.failure(NotImplementedError()),
-    private val onConfirmSetupIntent: (() -> SetupIntent?)? = null,
+    private val confirmSetupIntentResult: Result<SetupIntent> = Result.failure(NotImplementedError())
 ) : AbsFakeStripeRepository() {
 
     override suspend fun createPaymentMethod(
@@ -23,7 +23,7 @@ class FakeStripeRepository(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): SetupIntent? {
-        return onConfirmSetupIntent?.invoke()
+    ): Result<SetupIntent> {
+        return confirmSetupIntentResult
     }
 }

@@ -367,18 +367,16 @@ internal class CustomerSheetViewModel @Inject constructor(
     private suspend fun attachWithSetupIntent(paymentMethod: PaymentMethod) {
         customerAdapter.setupIntentClientSecretForCustomerAttach()
             .mapCatching { clientSecret ->
-                requireNotNull(
-                    stripeRepository.confirmSetupIntent(
-                        confirmSetupIntentParams = ConfirmSetupIntentParams.create(
-                            paymentMethodId = paymentMethod.id!!,
-                            clientSecret = clientSecret,
-                        ),
-                        options = ApiRequest.Options(
-                            apiKey = paymentConfiguration.publishableKey,
-                            stripeAccount = paymentConfiguration.stripeAccountId,
-                        ),
-                    )
-                )
+                stripeRepository.confirmSetupIntent(
+                    confirmSetupIntentParams = ConfirmSetupIntentParams.create(
+                        paymentMethodId = paymentMethod.id!!,
+                        clientSecret = clientSecret,
+                    ),
+                    options = ApiRequest.Options(
+                        apiKey = paymentConfiguration.publishableKey,
+                        stripeAccount = paymentConfiguration.stripeAccountId,
+                    ),
+                ).getOrThrow()
             }.onSuccess {
                 handlePaymentMethodAttachSuccess(paymentMethod)
             }.onFailure { cause, displayMessage ->
