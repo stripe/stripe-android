@@ -35,12 +35,6 @@ class CustomerSheetExampleViewModel(
     )
     val state: StateFlow<CustomerSheetExampleViewState> = _state
 
-    private val _isSetupIntentEnabled = MutableStateFlow(true)
-    val isSetupIntentEnabled: StateFlow<Boolean> = _isSetupIntentEnabled
-
-    private val _isDeveloperModeEnabled = MutableStateFlow(false)
-    val isDeveloperModeEnabled: StateFlow<Boolean> = _isDeveloperModeEnabled
-
     private val _customerAdapter: CustomerAdapter = CustomerAdapter.create(
         context = getApplication(),
         customerEphemeralKeyProvider = {
@@ -181,15 +175,6 @@ class CustomerSheetExampleViewModel(
         }
     }
 
-    fun toggleSetupIntentEnabled(isSetupIntentEnabled: Boolean) {
-        _isSetupIntentEnabled.update { isSetupIntentEnabled }
-        customerAdapter.overrideCanCreateSetupIntents = isSetupIntentEnabled
-    }
-
-    fun toggleDeveloperMode() {
-        _isDeveloperModeEnabled.update { !it }
-    }
-
     private fun updateDataViewState(
         transform: (CustomerSheetExampleViewState.Data) -> CustomerSheetExampleViewState.Data,
     ) {
@@ -204,5 +189,25 @@ class CustomerSheetExampleViewModel(
 
     private companion object {
         const val backendUrl = "https://glistening-heavenly-radon.glitch.me"
+    }
+
+    /**
+     * This section of code is used to help developers see the different modes of [CustomerSheet]
+     * usage. This code is not essential to a real [CustomerSheet] integration.
+     */
+
+    private val _isSetupIntentEnabled = MutableStateFlow(true)
+    val isSetupIntentEnabled: StateFlow<Boolean> = _isSetupIntentEnabled
+
+    private val _isDeveloperModeEnabled = MutableStateFlow(false)
+    val isDeveloperModeEnabled: StateFlow<Boolean> = _isDeveloperModeEnabled
+
+    fun toggleSetupIntentEnabled(isSetupIntentEnabled: Boolean) {
+        _isSetupIntentEnabled.update { isSetupIntentEnabled }
+        customerAdapter.overrideCanCreateSetupIntents = isSetupIntentEnabled
+    }
+
+    fun toggleDeveloperMode() {
+        _isDeveloperModeEnabled.update { !it }
     }
 }

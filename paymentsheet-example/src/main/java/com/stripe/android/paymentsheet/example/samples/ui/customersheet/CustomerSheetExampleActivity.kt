@@ -55,8 +55,11 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
                 )
 
                 val viewState by viewModel.state.collectAsState()
+
+                //region developer experience - unnecessary for CustomerSheet integration
                 val isDeveloperModeEnabled by viewModel.isDeveloperModeEnabled.collectAsState()
                 val isSetupIntentEnabled by viewModel.isSetupIntentEnabled.collectAsState()
+                //endregion
 
                 LaunchedEffect(Unit) {
                     val result = customerSheet.retrievePaymentOptionSelection()
@@ -68,12 +71,14 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
                         .fillMaxSize()
                         .padding(16.dp)
                 ) {
+                    //region developer experience - unnecessary for CustomerSheet integration
                     AnimatedVisibility(visible = isDeveloperModeEnabled) {
                         DeveloperConfigurations(
                             isSetupIntentEnabled = isSetupIntentEnabled,
                             toggleSetupIntentEnabled = viewModel::toggleSetupIntentEnabled,
                         )
                     }
+                    //endregion
 
                     Text(
                         text = "Payment Methods",
@@ -182,6 +187,7 @@ private fun CustomerPaymentMethods(
     }
 }
 
+//region developer experience - unnecessary for CustomerSheet integration
 @Composable
 fun DeveloperConfigurations(
     isSetupIntentEnabled: Boolean,
@@ -214,3 +220,4 @@ fun DeveloperConfigurations(
         }
     }
 }
+//endregion
