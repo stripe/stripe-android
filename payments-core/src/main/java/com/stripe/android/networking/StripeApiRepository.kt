@@ -1334,23 +1334,30 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun retrieveCardMetadata(
         cardNumber: String,
         requestOptions: ApiRequest.Options
-    ): CardMetadata? {
+    ): Result<CardMetadata> {
         val unvalidatedNumber = CardNumber.Unvalidated(cardNumber)
 
-        val bin = unvalidatedNumber.bin ?: return null
+        val bin = unvalidatedNumber.bin ?: return Result.failure(
+            InvalidRequestException(
+                message = "cardNumber cannot be less than 6 characters",
+            )
+        )
 
         val cardAccountRangeRepository =
             cardAccountRangeRepositoryFactory.createWithStripeRepository(
                 stripeRepository = this,
                 publishableKey = publishableKeyProvider()
             )
+
         val accountRanges = cardAccountRangeRepository.getAccountRanges(
             cardNumber = unvalidatedNumber
-        ) ?: listOf()
+        ).orEmpty()
 
-        return CardMetadata(
-            bin = bin,
-            accountRanges = accountRanges
+        return Result.success(
+            CardMetadata(
+                bin = bin,
+                accountRanges = accountRanges
+            )
         )
     }
 

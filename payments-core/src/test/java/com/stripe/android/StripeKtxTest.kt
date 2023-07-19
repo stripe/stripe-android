@@ -586,9 +586,11 @@ internal class StripeKtxTest {
     @Test
     fun `Verify retrievePossibleCardBrands passes card number on to repository`() = runTest {
         whenever(mockApiRepository.retrieveCardMetadata(any(), any())).thenReturn(
-            CardMetadata(
-                bin = mock(),
-                accountRanges = listOf()
+            Result.success(
+                CardMetadata(
+                    bin = mock(),
+                    accountRanges = listOf()
+                )
             )
         )
 
@@ -601,13 +603,16 @@ internal class StripeKtxTest {
     }
 
     @Test
-    fun `Verify retrievePossibleCardBrands throws an error when less than 6 characters`() = runTest {
+    fun `Verify retrievePossibleCardBrands throws an error if repository returns failure`() = runTest {
+        whenever(mockApiRepository.retrieveCardMetadata(any(), any())).thenReturn(
+            Result.failure(InvalidRequestException(message = "cardNumber cannot be less than 6 characters"))
+        )
+
         val error = assertFailsWith<InvalidRequestException> {
             stripe.retrievePossibleBrands("4242")
         }
 
-        assertThat(error.message)
-            .isEqualTo("cardNumber cannot be less than 6 characters")
+        assertThat(error.message).isEqualTo("cardNumber cannot be less than 6 characters")
     }
 
     private inline fun <reified ApiObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>

@@ -396,7 +396,7 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun retrieveCardMetadata(
         cardNumber: String,
         requestOptions: ApiRequest.Options
-    ): CardMetadata? {
+    ): Result<CardMetadata> {
         TODO("Not yet implemented")
     }
 

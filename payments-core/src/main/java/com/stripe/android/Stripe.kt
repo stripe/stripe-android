@@ -9,7 +9,6 @@ import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.cards.CardNumber
 import com.stripe.android.core.ApiKeyValidator
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
@@ -1795,45 +1794,17 @@ class Stripe internal constructor(
         cardNumber: String,
         callback: ApiResultCallback<PossibleBrands>
     ) {
-        CardNumber.Unvalidated(cardNumber).bin ?: run {
-            callback.onError(
-                InvalidRequestException(
-                    message = "cardNumber cannot be less than 6 characters"
-                )
-            )
-            return
-        }
-
-        executeAsync(callback) {
-            val cardMetaData = stripeRepository.retrieveCardMetadata(
+        executeAsyncForResult(callback) {
+            stripeRepository.retrieveCardMetadata(
                 cardNumber = cardNumber,
                 requestOptions = ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
                 )
-            )
-
-            val brands = cardMetaData?.accountRanges?.map {
-                it.brand
+            ).map { metadata ->
+                val brands = metadata.accountRanges.map { it.brand }
+                PossibleBrands(brands = brands.distinct())
             }
-
-            brands?.let {
-                PossibleBrands(
-                    brands = brands.toSet().toList()
-                )
-            }
-        }
-    }
-
-    private fun <T : StripeModel> executeAsync(
-        callback: ApiResultCallback<T>,
-        apiMethod: suspend () -> T?
-    ) {
-        CoroutineScope(workContext).launch {
-            val result = runCatching {
-                requireNotNull(apiMethod())
-            }
-            dispatchResult(result, callback)
         }
     }
 
