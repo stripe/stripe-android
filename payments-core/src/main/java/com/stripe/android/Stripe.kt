@@ -414,7 +414,7 @@ class Stripe internal constructor(
         expand: List<String> = emptyList(),
         callback: ApiResultCallback<PaymentIntent>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.retrievePaymentIntent(
                 clientSecret,
                 ApiRequest.Options(
@@ -451,7 +451,7 @@ class Stripe internal constructor(
         clientSecret: String,
         stripeAccountId: String? = this.stripeAccountId,
         expand: List<String> = emptyList(),
-    ): PaymentIntent? {
+    ): PaymentIntent {
         return runBlocking {
             stripeRepository.retrievePaymentIntent(
                 PaymentIntent.ClientSecret(clientSecret).value,
@@ -460,7 +460,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId
                 ),
                 expand,
-            )
+            ).getOrElse { throw StripeException.create(it) }
         }
     }
 

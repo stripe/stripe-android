@@ -462,15 +462,15 @@ suspend fun Stripe.retrievePaymentIntent(
     clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId,
     expand: List<String> = emptyList(),
-): PaymentIntent = runApiRequest {
-    stripeRepository.retrievePaymentIntent(
+): PaymentIntent {
+    return stripeRepository.retrievePaymentIntent(
         clientSecret,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         ),
         expand,
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**

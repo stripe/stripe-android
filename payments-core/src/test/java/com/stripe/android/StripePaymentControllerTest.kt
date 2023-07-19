@@ -256,11 +256,11 @@ internal class StripePaymentControllerTest {
             clientSecret: String,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ): PaymentIntent {
+        ): Result<PaymentIntent> {
             retrievePaymentIntentArgs.add(
                 Triple(clientSecret, options, expandFields)
             )
-            return retrievePaymentIntentResponse
+            return Result.success(retrievePaymentIntentResponse)
         }
 
         override suspend fun retrieveSource(

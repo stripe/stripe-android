@@ -5,9 +5,8 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.CoroutineDispatcher
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.mock
 
 internal fun exponentialDelayProvider(): () -> Long {
     var attempt = 1
@@ -20,7 +19,7 @@ internal fun exponentialDelayProvider(): () -> Long {
 }
 
 internal fun createIntentStatusPoller(
-    enqueuedStatuses: List<StripeIntent.Status?>,
+    enqueuedStatuses: List<StripeIntent.Status>,
     dispatcher: CoroutineDispatcher,
     maxAttempts: Int = 10,
 ): DefaultIntentStatusPoller {
@@ -41,7 +40,7 @@ internal fun createIntentStatusPoller(
 }
 
 private class FakeStripeRepository(
-    enqueuedStatuses: List<StripeIntent.Status?>
+    enqueuedStatuses: List<StripeIntent.Status>
 ) : AbsFakeStripeRepository() {
 
     private val queue = enqueuedStatuses.toMutableList()
@@ -50,10 +49,9 @@ private class FakeStripeRepository(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent {
+    ): Result<PaymentIntent> {
         val intentStatus = queue.removeFirst()
-        return mock {
-            on { status } doReturn intentStatus
-        }
+        val paymentIntent = PaymentIntentFactory.create(status = intentStatus)
+        return Result.success(paymentIntent)
     }
 }

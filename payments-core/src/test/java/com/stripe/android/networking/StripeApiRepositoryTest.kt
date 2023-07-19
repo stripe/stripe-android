@@ -834,12 +834,10 @@ internal class StripeApiRepositoryTest {
             val clientSecret = "temporarily put a private key here simulate the backend"
             val publishableKey = "put a public key that matches the private key here"
 
-            requireNotNull(
-                stripeApiRepository.retrievePaymentIntent(
-                    clientSecret,
-                    ApiRequest.Options(publishableKey)
-                )
-            )
+            stripeApiRepository.retrievePaymentIntent(
+                clientSecret,
+                ApiRequest.Options(publishableKey)
+            ).getOrThrow()
         }
 
     @Test
