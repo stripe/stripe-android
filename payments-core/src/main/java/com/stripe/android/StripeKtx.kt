@@ -30,6 +30,7 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Token
 import com.stripe.android.model.WeChatPayNextAction
+import com.stripe.android.utils.mapResult
 
 /**
  * Confirm and authenticate a [PaymentIntent] using the Alipay SDK
@@ -59,14 +60,16 @@ suspend fun Stripe.confirmAlipayPayment(
     authenticator: AlipayAuthenticator,
     stripeAccountId: String? = this.stripeAccountId
 ): PaymentIntentResult {
-    return paymentController.confirmAndAuthenticateAlipay(
-        confirmPaymentIntentParams,
-        authenticator,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+    return runApiRequest {
+        paymentController.confirmAndAuthenticateAlipay(
+            confirmPaymentIntentParams,
+            authenticator,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
         )
-    ).getOrElse { throw StripeException.create(it) }
+    }
 }
 
 /**
@@ -98,14 +101,16 @@ suspend fun Stripe.createPaymentMethod(
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
 ): PaymentMethod {
-    return stripeRepository.createPaymentMethod(
-        paymentMethodCreateParams,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
+    return runApiRequest {
+        stripeRepository.createPaymentMethod(
+            paymentMethodCreateParams,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            )
         )
-    ).getOrElse { throw StripeException.create(it) }
+    }
 }
 
 /**
@@ -137,14 +142,16 @@ suspend fun Stripe.createSource(
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
 ): Source {
-    return stripeRepository.createSource(
-        sourceParams,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
+    return runApiRequest {
+        stripeRepository.createSource(
+            sourceParams,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            )
         )
-    ).getOrElse { throw StripeException.create(it) }
+    }
 }
 
 /**
@@ -396,14 +403,16 @@ suspend fun Stripe.createFile(
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
 ): StripeFile {
-    return stripeRepository.createFile(
-        fileParams,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
+    return runApiRequest {
+        stripeRepository.createFile(
+            fileParams,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            )
         )
-    ).getOrElse { throw StripeException.create(it) }
+    }
 }
 
 /**
@@ -425,12 +434,14 @@ suspend fun Stripe.createFile(
     APIException::class
 )
 suspend fun Stripe.createRadarSession(): RadarSession {
-    return stripeRepository.createRadarSession(
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
+    return runApiRequest {
+        stripeRepository.createRadarSession(
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+            )
         )
-    ).getOrElse { throw StripeException.create(it) }
+    }
 }
 
 /**
@@ -462,14 +473,16 @@ suspend fun Stripe.retrievePaymentIntent(
     stripeAccountId: String? = this.stripeAccountId,
     expand: List<String> = emptyList(),
 ): PaymentIntent {
-    return stripeRepository.retrievePaymentIntent(
-        clientSecret,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
-        ),
-        expand,
-    ).getOrElse { throw StripeException.create(it) }
+    return runApiRequest {
+        stripeRepository.retrievePaymentIntent(
+            clientSecret,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            ),
+            expand,
+        )
+    }
 }
 
 /**
@@ -501,14 +514,16 @@ suspend fun Stripe.retrieveSetupIntent(
     stripeAccountId: String? = this.stripeAccountId,
     expand: List<String> = emptyList(),
 ): SetupIntent {
-    return stripeRepository.retrieveSetupIntent(
-        clientSecret,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
-        ),
-        expand,
-    ).getOrElse { throw StripeException.create(it) }
+    return runApiRequest {
+        stripeRepository.retrieveSetupIntent(
+            clientSecret,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            ),
+            expand,
+        )
+    }
 }
 
 /**
@@ -540,14 +555,16 @@ suspend fun Stripe.retrieveSource(
     @Size(min = 1) clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId
 ): Source {
-    return stripeRepository.retrieveSource(
-        sourceId,
-        clientSecret,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+    return runApiRequest {
+        stripeRepository.retrieveSource(
+            sourceId,
+            clientSecret,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
         )
-    ).getOrElse { throw StripeException.create(it) }
+    }
 }
 
 /**
@@ -578,15 +595,17 @@ suspend fun Stripe.confirmSetupIntent(
     idempotencyKey: String? = null,
     expand: List<String> = emptyList(),
 ): SetupIntent {
-    return stripeRepository.confirmSetupIntent(
-        confirmSetupIntentParams,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
-        ),
-        expand,
-    ).getOrElse { throw StripeException.create(it) }
+    return runApiRequest {
+        stripeRepository.confirmSetupIntent(
+            confirmSetupIntentParams,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            ),
+            expand,
+        )
+    }
 }
 
 /**
@@ -609,13 +628,15 @@ suspend fun Stripe.confirmWeChatPayPayment(
     confirmPaymentIntentParams: ConfirmPaymentIntentParams,
     stripeAccountId: String? = this.stripeAccountId
 ): WeChatPayNextAction {
-    return paymentController.confirmWeChatPay(
-        confirmPaymentIntentParams,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+    return runApiRequest {
+        paymentController.confirmWeChatPay(
+            confirmPaymentIntentParams,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
         )
-    ).getOrElse { throw StripeException.create(it) }
+    }
 }
 
 /**
@@ -644,14 +665,16 @@ suspend fun Stripe.confirmPaymentIntent(
     confirmPaymentIntentParams: ConfirmPaymentIntentParams,
     idempotencyKey: String? = null
 ): PaymentIntent {
-    return stripeRepository.confirmPaymentIntent(
-        confirmPaymentIntentParams,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
-            idempotencyKey = idempotencyKey
+    return runApiRequest {
+        stripeRepository.confirmPaymentIntent(
+            confirmPaymentIntentParams,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            )
         )
-    ).getOrElse { throw StripeException.create(it) }
+    }
 }
 
 /**
@@ -660,13 +683,10 @@ suspend fun Stripe.confirmPaymentIntent(
  * @return the result if the API result and JSON parsing are successful; otherwise, throw an exception.
  */
 private inline fun <reified ApiObject : StripeModel> runApiRequest(
-    block: () -> ApiObject?
-): ApiObject =
-    runCatching {
-        requireNotNull(block()) {
-            "Failed to parse ${ApiObject::class.java.simpleName}."
-        }
-    }.getOrElse { throw StripeException.create(it) }
+    block: () -> Result<ApiObject>,
+): ApiObject {
+    return block().getOrElse { throw StripeException.create(it) }
+}
 
 /**
  * Get the [PaymentIntentResult] from [Intent] returned via
@@ -696,7 +716,7 @@ suspend fun Stripe.getPaymentIntentResult(
             requestCode,
             data
         )
-    ) { paymentController.getPaymentIntentResult(data).getOrThrow() }
+    ) { paymentController.getPaymentIntentResult(data) }
 }
 
 /**
@@ -728,7 +748,7 @@ suspend fun Stripe.getSetupIntentResult(
             requestCode,
             data
         )
-    ) { paymentController.getSetupIntentResult(data).getOrThrow() }
+    ) { paymentController.getSetupIntentResult(data) }
 }
 
 /**
@@ -759,7 +779,7 @@ suspend fun Stripe.getAuthenticateSourceResult(
             requestCode,
             data
         )
-    ) { paymentController.getAuthenticateSourceResult(data).getOrThrow() }
+    ) { paymentController.getAuthenticateSourceResult(data) }
 }
 
 /**
@@ -770,14 +790,18 @@ suspend fun Stripe.getAuthenticateSourceResult(
  */
 internal inline fun <reified ApiObject : StripeModel> runApiRequest(
     isValidParam: Boolean,
-    block: () -> ApiObject
-): ApiObject =
-    runCatching {
+    block: () -> Result<ApiObject>,
+): ApiObject {
+    return runCatching {
         require(isValidParam) {
             "Incorrect requestCode and data for ${ApiObject::class.java.simpleName}."
         }
+    }.mapResult {
         block()
-    }.getOrElse { throw StripeException.create(it) }
+    }.getOrElse {
+        throw StripeException.create(it)
+    }
+}
 
 /**
  * Suspend function to verify a customer's bank account with micro-deposits
@@ -811,15 +835,17 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
     firstAmount: Int,
     secondAmount: Int
 ): PaymentIntent {
-    return stripeRepository.verifyPaymentIntentWithMicrodeposits(
-        clientSecret = clientSecret,
-        firstAmount = firstAmount,
-        secondAmount = secondAmount,
-        requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+    return runApiRequest {
+        stripeRepository.verifyPaymentIntentWithMicrodeposits(
+            clientSecret = clientSecret,
+            firstAmount = firstAmount,
+            secondAmount = secondAmount,
+            requestOptions = ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
         )
-    ).getOrElse { throw StripeException.create(it) }
+    }
 }
 
 /**
@@ -851,14 +877,16 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
     clientSecret: String,
     descriptorCode: String
 ): PaymentIntent {
-    return stripeRepository.verifyPaymentIntentWithMicrodeposits(
-        clientSecret = clientSecret,
-        descriptorCode = descriptorCode,
-        requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+    return runApiRequest {
+        stripeRepository.verifyPaymentIntentWithMicrodeposits(
+            clientSecret = clientSecret,
+            descriptorCode = descriptorCode,
+            requestOptions = ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
         )
-    ).getOrElse { throw StripeException.create(it) }
+    }
 }
 
 /**
@@ -893,15 +921,17 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
     firstAmount: Int,
     secondAmount: Int
 ): SetupIntent {
-    return stripeRepository.verifySetupIntentWithMicrodeposits(
-        clientSecret = clientSecret,
-        firstAmount = firstAmount,
-        secondAmount = secondAmount,
-        requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+    return runApiRequest {
+        stripeRepository.verifySetupIntentWithMicrodeposits(
+            clientSecret = clientSecret,
+            firstAmount = firstAmount,
+            secondAmount = secondAmount,
+            requestOptions = ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
         )
-    ).getOrElse { throw StripeException.create(it) }
+    }
 }
 
 /**
@@ -933,14 +963,16 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
     clientSecret: String,
     descriptorCode: String
 ): SetupIntent {
-    return stripeRepository.verifySetupIntentWithMicrodeposits(
-        clientSecret = clientSecret,
-        descriptorCode = descriptorCode,
-        requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+    return runApiRequest {
+        stripeRepository.verifySetupIntentWithMicrodeposits(
+            clientSecret = clientSecret,
+            descriptorCode = descriptorCode,
+            requestOptions = ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
         )
-    ).getOrElse { throw StripeException.create(it) }
+    }
 }
 
 /**
@@ -960,14 +992,16 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
 suspend fun Stripe.retrievePossibleBrands(
     cardNumber: String
 ): PossibleBrands {
-    return stripeRepository.retrieveCardMetadata(
-        cardNumber = cardNumber,
-        requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
-        )
-    ).map { metadata ->
-        val brands = metadata.accountRanges.map { it.brand }
-        PossibleBrands(brands = brands.distinct())
-    }.getOrElse { throw StripeException.create(it) }
+    return runApiRequest {
+        stripeRepository.retrieveCardMetadata(
+            cardNumber = cardNumber,
+            requestOptions = ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
+        ).map { metadata ->
+            val brands = metadata.accountRanges.map { it.brand }
+            PossibleBrands(brands = brands.distinct())
+        }
+    }
 }
