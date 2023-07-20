@@ -1621,6 +1621,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             ConfirmPaymentIntentParams.createForDashboard(
                 clientSecret = clientSecret,
                 paymentMethodId = paymentMethod.id!!,
+                paymentMethodOptions = paymentMethodOptions,
             )
         }
     }
