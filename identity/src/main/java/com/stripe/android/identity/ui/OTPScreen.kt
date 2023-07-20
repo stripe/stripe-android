@@ -70,10 +70,6 @@ internal fun OTPScreen(
             factory = otpViewModelFactory
         )
 
-        LaunchedEffect(Unit) {
-            otpViewModel.initialize()
-        }
-
         val viewState by otpViewModel.viewState.collectAsState()
         val otpStaticPage = requireNotNull(verificationPage.phoneOtp)
         val focusRequester = remember { FocusRequester() }
@@ -301,6 +297,7 @@ private fun OTPViewStateEffect(
     }
 
     DisposableEffect(Unit) {
+        viewModel.initialize()
         onDispose {
             viewModel.resetViewState()
         }
