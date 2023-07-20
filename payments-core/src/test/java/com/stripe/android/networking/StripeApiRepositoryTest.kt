@@ -2269,6 +2269,7 @@ internal class StripeApiRepositoryTest {
             )
         )
 
+        // Once to create the payment method and once for confirming the payment intent
         verify(stripeNetworkClient, times(2))
             .executeRequest(apiRequestArgumentCaptor.capture())
 
@@ -2276,7 +2277,6 @@ internal class StripeApiRepositoryTest {
         val params = requireNotNull(request.params)
 
         with(params) {
-            println(params)
             withNestedParams("payment_method_options") {
                 withNestedParams("card") {
                     assertEquals(true, this["moto"])
