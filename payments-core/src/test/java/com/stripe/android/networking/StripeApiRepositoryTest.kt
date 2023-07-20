@@ -46,6 +46,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.SourceFixtures
@@ -2236,6 +2237,53 @@ internal class StripeApiRepositoryTest {
         ).exceptionOrNull()
 
         assertThat(exception).isInstanceOf(InvalidRequestException::class.java)
+    }
+
+    @Test
+    fun `Verify that the payment method options are persisted for dashboard card payments`() = runTest {
+        // Dashboard payments create a payment first
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    PaymentMethodFixtures.CARD_JSON.toString(),
+                    emptyMap()
+                )
+            )
+
+        val confirmPaymentIntentParams =
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                clientSecret = "pi_12345_secret_fake",
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+                    moto = true
+                )
+            )
+
+        // Dashboard uses user key
+        create().confirmPaymentIntent(
+            confirmPaymentIntentParams = confirmPaymentIntentParams,
+            options = DEFAULT_OPTIONS.copy(
+                apiKey = "uk_12345"
+            )
+        )
+
+        verify(stripeNetworkClient, times(2))
+            .executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.secondValue
+        val params = requireNotNull(request.params)
+
+        with(params) {
+            println(params)
+            withNestedParams("payment_method_options") {
+                withNestedParams("card") {
+                    assertEquals(true, this["moto"])
+                    assertEquals("off_session", this["setup_future_usage"])
+                }
+            }
+        }
     }
 
     /**

@@ -530,13 +530,18 @@ data class ConfirmPaymentIntentParams internal constructor(
 
         internal fun createForDashboard(
             clientSecret: String,
-            paymentMethodId: String
+            paymentMethodId: String,
+            paymentMethodOptions: PaymentMethodOptionsParams?,
         ): ConfirmPaymentIntentParams {
             // Dashboard only supports a specific payment flow today.
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 paymentMethodId = paymentMethodId,
-                paymentMethodOptions = PaymentMethodOptionsParams.Card(moto = true),
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                    moto = true,
+                    setupFutureUsage =
+                    (paymentMethodOptions as? PaymentMethodOptionsParams.Card)?.setupFutureUsage
+                ),
                 savePaymentMethod = false,
                 useStripeSdk = true
             )
