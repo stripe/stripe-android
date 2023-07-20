@@ -484,16 +484,16 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private inline fun <reified T : CustomerSheetViewState> updateViewState(block: (T) -> T) {
         // TODO (jameswoo) viewstate should be derived from backstack
-        val index = backstack.indexOfFirst {
-            it is T
-        }
+        val index = backstack.indexOf(_viewState.value)
         backstack.removeAt(index)
-        backstack.insertElementAt(_viewState.value, index)
+
         (_viewState.value as? T)?.let {
             _viewState.update {
                 block(it as T)
             }
         }
+
+        backstack.insertElementAt(_viewState.value, index)
     }
 
     object Factory : ViewModelProvider.Factory {
