@@ -1133,6 +1133,46 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `Moving from screen to screen preserves state`() = runTest {
+        val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(
+            title = null,
+            savedPaymentMethods = listOf(),
+            paymentSelection = null,
+            isLiveMode = false,
+            isProcessing = false,
+            isEditing = false,
+            isGooglePayEnabled = false,
+            primaryButtonVisible = false,
+            primaryButtonLabel = null,
+        )
+        val viewModel = createViewModel(
+            backstack = buildBackstack(
+                selectPaymentMethodViewState
+            ),
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem())
+                .isEqualTo(selectPaymentMethodViewState)
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+
+            assertThat(awaitItem())
+                .isEqualTo(selectPaymentMethodViewState.copy(isEditing = true))
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            assertThat(awaitItem())
+                .isInstanceOf(CustomerSheetViewState.AddPaymentMethod::class.java)
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
+
+            assertThat(awaitItem())
+                .isEqualTo(selectPaymentMethodViewState.copy(isEditing = true))
+        }
+    }
+
     private fun buildBackstack(vararg states: CustomerSheetViewState): Stack<CustomerSheetViewState> {
         return Stack<CustomerSheetViewState>().apply {
             states.forEach {
