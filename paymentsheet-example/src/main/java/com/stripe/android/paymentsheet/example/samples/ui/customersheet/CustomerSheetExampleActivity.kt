@@ -40,7 +40,7 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        supportActionBar?.title = getString(R.string.customer_toolbar_title)
+        supportActionBar?.title = getString(R.string.customersheet_example_title)
 
         setContent {
             PaymentSheetExampleTheme {

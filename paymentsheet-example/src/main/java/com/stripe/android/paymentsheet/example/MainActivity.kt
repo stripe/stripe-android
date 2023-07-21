@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetP
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetExampleActivity
+import com.stripe.android.paymentsheet.example.samples.ui.customersheet.playground.CustomerSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow.CustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
@@ -77,9 +78,18 @@ class MainActivity : AppCompatActivity() {
                 section = MenuItem.Section.CustomFlow,
             ),
             MenuItem(
-                titleResId = R.string.customer_title,
+                titleResId = R.string.customersheet_example_title,
                 subtitleResId = R.string.customer_subtitle,
                 klass = CustomerSheetExampleActivity::class.java,
+                section = MenuItem.Section.CustomerSheet,
+                badge = MenuItem.Badge(
+                    labelResId = R.string.under_construction_badge_label,
+                )
+            ),
+            MenuItem(
+                titleResId = R.string.customersheet_playground_title,
+                subtitleResId = R.string.customer_subtitle,
+                klass = CustomerSheetPlaygroundActivity::class.java,
                 section = MenuItem.Section.CustomerSheet,
                 badge = MenuItem.Badge(
                     labelResId = R.string.under_construction_badge_label,
