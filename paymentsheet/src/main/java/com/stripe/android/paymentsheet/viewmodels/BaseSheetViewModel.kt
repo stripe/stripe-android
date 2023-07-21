@@ -255,7 +255,6 @@ internal abstract class BaseSheetViewModel(
             PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
-                    activeLinkSession = linkHandler.activeLinkSession.value,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = stripeIntent.value?.clientSecret == null,
                 )
@@ -264,7 +263,6 @@ internal abstract class BaseSheetViewModel(
             AddAnotherPaymentMethod -> {
                 eventReporter.onShowNewPaymentOptionForm(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
-                    activeLinkSession = linkHandler.activeLinkSession.value,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = stripeIntent.value?.clientSecret == null,
                 )
@@ -425,7 +423,6 @@ internal abstract class BaseSheetViewModel(
             headerTextFactory.create(
                 screen = screen,
                 isWalletEnabled = isLinkAvailable || googlePayState is GooglePayState.Available,
-                isPaymentIntent = stripeIntent is PaymentIntent,
                 types = stripeIntent.paymentMethodTypes,
             )
         } else {
@@ -435,7 +432,7 @@ internal abstract class BaseSheetViewModel(
 
     abstract val shouldCompleteLinkFlowInline: Boolean
 
-    fun payWithLinkInline(userInput: UserInput?) {
+    private fun payWithLinkInline(userInput: UserInput?) {
         viewModelScope.launch {
             linkHandler.payWithLinkInline(
                 userInput = userInput,
@@ -447,7 +444,6 @@ internal abstract class BaseSheetViewModel(
 
     fun createFormArguments(
         selectedItem: LpmRepository.SupportedPaymentMethod,
-        showLinkInlineSignup: Boolean
     ): FormArguments = FormArgumentsFactory.create(
         paymentMethod = selectedItem,
         stripeIntent = requireNotNull(stripeIntent.value),
@@ -455,7 +451,6 @@ internal abstract class BaseSheetViewModel(
         merchantName = merchantName,
         amount = amount.value,
         newLpm = newPaymentSelection,
-        isShowingLinkInlineSignup = showLinkInlineSignup
     )
 
     fun handleBackPressed() {

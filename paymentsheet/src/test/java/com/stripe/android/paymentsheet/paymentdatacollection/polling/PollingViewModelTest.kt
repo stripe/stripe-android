@@ -215,7 +215,6 @@ private fun createPollingViewModel(
             timeLimit = timeLimit,
             initialDelay = initialDelay,
             maxAttempts = 10,
-            injectorKey = "injector",
         ),
         poller = poller,
         timeProvider = timeProvider,

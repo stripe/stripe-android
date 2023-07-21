@@ -42,7 +42,9 @@ dependencies {
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.fragment
+    testImplementation testLibs.androidx.junit
     testImplementation testLibs.androidx.lifecycle
+    testImplementation testLibs.espresso.intents
     testImplementation testLibs.json
     testImplementation testLibs.junit
     testImplementation testLibs.kotlin.annotations

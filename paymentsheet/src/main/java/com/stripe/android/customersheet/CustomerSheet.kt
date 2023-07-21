@@ -2,14 +2,18 @@ package com.stripe.android.customersheet
 
 import android.app.Application
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.customersheet.injection.CustomerSheetComponent
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.PaymentOptionFactory
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.AnimationConstants
 import javax.inject.Inject
 
@@ -23,14 +27,29 @@ import javax.inject.Inject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CustomerSheet @Inject internal constructor(
     private val application: Application,
-    activityResultCaller: ActivityResultCaller,
+    lifecycleOwner: LifecycleOwner,
+    activityResultRegistryOwner: ActivityResultRegistryOwner,
+    private val paymentOptionFactory: PaymentOptionFactory,
     private val callback: CustomerSheetResultCallback,
 ) {
 
-    private val customerSheetActivityLauncher = activityResultCaller.registerForActivityResult(
-        CustomerSheetContract(),
-        ::onCustomerSheetResult
-    )
+    private val customerSheetActivityLauncher =
+        activityResultRegistryOwner.activityResultRegistry.register(
+            "CustomerSheet",
+            CustomerSheetContract(),
+            ::onCustomerSheetResult,
+        )
+
+    init {
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    customerSheetActivityLauncher.unregister()
+                    super.onDestroy(owner)
+                }
+            }
+        )
+    }
 
     /**
      * Presents a sheet to manage the customer through a [CustomerAdapter]. Results of the sheet
@@ -58,9 +77,36 @@ class CustomerSheet @Inject internal constructor(
         CustomerSessionViewModel.clear()
     }
 
+    /**
+     * Retrieves the customer's saved payment option selection or null if the customer does not have
+     * a persisted payment option selection.
+     */
+    suspend fun retrievePaymentOptionSelection(): CustomerSheetResult {
+        val adapter = CustomerSessionViewModel.component.customerAdapter
+        val selectedPaymentOption = adapter.retrieveSelectedPaymentOption()
+        val paymentMethods = adapter.retrievePaymentMethods()
+
+        val selection = selectedPaymentOption.mapCatching { paymentOption ->
+            paymentOption?.toPaymentSelection {
+                paymentMethods.getOrNull()?.find {
+                    it.id == paymentOption.id
+                }
+            }?.toPaymentOptionSelection(paymentOptionFactory)
+        }
+
+        return selection.fold(
+            onSuccess = {
+                CustomerSheetResult.Selected(it)
+            },
+            onFailure = { cause, _ ->
+                CustomerSheetResult.Error(cause)
+            }
+        )
+    }
+
     private fun onCustomerSheetResult(result: InternalCustomerSheetResult?) {
         requireNotNull(result)
-        callback.onResult(result.toPublicResult())
+        callback.onResult(result.toPublicResult(paymentOptionFactory))
     }
 
     /**
@@ -83,6 +129,29 @@ class CustomerSheet @Inject internal constructor(
          * The text to display at the top of the presented bottom sheet.
          */
         val headerTextForSelectionScreen: String? = null,
+
+        /**
+         * [CustomerSheet] pre-populates fields with the values provided. If
+         * [PaymentSheet.BillingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod]
+         * is true, these values will be attached to the payment method even if they are not
+         * collected by the [CustomerSheet] UI.
+         */
+        val defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
+
+        /**
+         * Describes how billing details should be collected. All values default to
+         * [PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic].
+         * If [PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never] is
+         * used for a required field for the Payment Method used while adding this payment method
+         * you must provide an appropriate value as part of [defaultBillingDetails].
+         */
+        val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+            PaymentSheet.BillingDetailsCollectionConfiguration(),
+
+        /**
+         * Your customer-facing business name. The default value is the name of your app.
+         */
+        val merchantDisplayName: String? = null,
     ) {
         @ExperimentalCustomerSheetApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -90,6 +159,11 @@ class CustomerSheet @Inject internal constructor(
             private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
             private var googlePayEnabled: Boolean = false
             private var headerTextForSelectionScreen: String? = null
+            private var defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails()
+            private var billingDetailsCollectionConfiguration:
+                PaymentSheet.BillingDetailsCollectionConfiguration =
+                    PaymentSheet.BillingDetailsCollectionConfiguration()
+            private var merchantDisplayName: String? = null
 
             fun appearance(appearance: PaymentSheet.Appearance) = apply {
                 this.appearance = appearance
@@ -103,10 +177,27 @@ class CustomerSheet @Inject internal constructor(
                 this.headerTextForSelectionScreen = headerTextForSelectionScreen
             }
 
+            fun defaultBillingDetails(details: PaymentSheet.BillingDetails) = apply {
+                this.defaultBillingDetails = details
+            }
+
+            fun billingDetailsCollectionConfiguration(
+                configuration: PaymentSheet.BillingDetailsCollectionConfiguration
+            ) = apply {
+                this.billingDetailsCollectionConfiguration = configuration
+            }
+
+            fun merchantDisplayName(name: String?) = apply {
+                this.merchantDisplayName = name
+            }
+
             fun build() = Configuration(
                 appearance = appearance,
                 googlePayEnabled = googlePayEnabled,
                 headerTextForSelectionScreen = headerTextForSelectionScreen,
+                defaultBillingDetails = defaultBillingDetails,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                merchantDisplayName = merchantDisplayName,
             )
         }
     }
@@ -130,8 +221,9 @@ class CustomerSheet @Inject internal constructor(
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             return getInstance(
+                lifecycleOwner = activity,
                 viewModelStoreOwner = activity,
-                activityResultCaller = activity,
+                activityResultRegistryOwner = activity,
                 configuration = configuration,
                 customerAdapter = customerAdapter,
                 callback = callback,
@@ -153,17 +245,20 @@ class CustomerSheet @Inject internal constructor(
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             return getInstance(
+                lifecycleOwner = fragment,
                 viewModelStoreOwner = fragment,
-                activityResultCaller = fragment,
+                activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
+                    ?: fragment.requireActivity(),
                 configuration = configuration,
                 customerAdapter = customerAdapter,
                 callback = callback,
             )
         }
 
-        private fun getInstance(
+        internal fun getInstance(
+            lifecycleOwner: LifecycleOwner,
             viewModelStoreOwner: ViewModelStoreOwner,
-            activityResultCaller: ActivityResultCaller,
+            activityResultRegistryOwner: ActivityResultRegistryOwner,
             configuration: Configuration,
             customerAdapter: CustomerAdapter,
             callback: CustomerSheetResultCallback,
@@ -179,10 +274,30 @@ class CustomerSheet @Inject internal constructor(
 
             val customerSheetComponent: CustomerSheetComponent =
                 customerSessionComponent.customerSheetComponentBuilder
-                    .activityResultCaller(activityResultCaller)
+                    .lifecycleOwner(lifecycleOwner)
+                    .activityResultRegistryOwner(activityResultRegistryOwner)
                     .build()
 
             return customerSheetComponent.customerSheet
+        }
+
+        internal fun PaymentSelection?.toPaymentOptionSelection(
+            paymentOptionFactory: PaymentOptionFactory
+        ): PaymentOptionSelection? {
+            return when (this) {
+                is PaymentSelection.GooglePay -> {
+                    PaymentOptionSelection.GooglePay(
+                        paymentOption = paymentOptionFactory.create(this)
+                    )
+                }
+                is PaymentSelection.Saved -> {
+                    PaymentOptionSelection.PaymentMethod(
+                        paymentMethod = this.paymentMethod,
+                        paymentOption = paymentOptionFactory.create(this)
+                    )
+                }
+                else -> null
+            }
         }
     }
 }

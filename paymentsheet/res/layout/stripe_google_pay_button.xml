@@ -4,16 +4,14 @@
         android:id="@+id/google_pay_button_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/stripe_paymentsheet_googlepay_button_margin_horizontal"
         android:clipToPadding="false"
         android:paddingTop="2sp"
         android:contentDescription="@string/stripe_google_pay">
+
         <com.stripe.android.paymentsheet.ui.PrimaryButton
             android:id="@+id/google_pay_primary_button"
             android:layout_width="match_parent"
             android:layout_height="@dimen/stripe_paymentsheet_googlepay_button_height"
-            android:layout_marginTop="@dimen/stripe_paymentsheet_googlepay_button_margin"
-            android:layout_marginHorizontal="@dimen/stripe_paymentsheet_googlepay_button_margin"
             android:visibility="invisible" />
 
         <com.google.android.gms.wallet.button.PayButton
@@ -22,4 +20,3 @@
             android:layout_height="wrap_content" />
     </RelativeLayout>
 </merge>
-

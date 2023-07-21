@@ -4,14 +4,15 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.customersheet.injection.DaggerStripeCustomerAdapterComponent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 
 /**
- * [CustomerAdapter] A bridge to your backend to fetch Customer-related information. Typically,
+ * A bridge to your backend to fetch customer-related information. Typically,
  * you will not need to implement this interface yourself. You should instead use
- * [CustomerAdaper.create], which manages retrieving and updating a Stripe customer for you.
+ * [CustomerAdapter.create], which manages retrieving and updating a Stripe customer for you.
  *
- * The methods in this interface should act on a Stripe [Customer] object.
+ * The methods in this interface should act on a Stripe `Customer` object.
  *
  * Implement this interface if you would prefer retrieving and updating your Stripe customer object
  * via your own backend instead of using the default implementation.
@@ -23,7 +24,10 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 interface CustomerAdapter {
 
     /**
-     * Whether this backend adapter is able to create setup intents.
+     * Whether this backend adapter is able to create setup intents. A [SetupIntent] is recommended
+     * when attaching a new card to a Customer, and required for non-card payments methods. If you
+     * are implementing your own [CustomerAdapter], return true if
+     * [setupIntentClientSecretForCustomerAttach] is implemented, Otherwise, return false.
      */
     val canCreateSetupIntents: Boolean
 
@@ -117,6 +121,32 @@ interface CustomerAdapter {
 
         internal data class StripeId(override val id: String) : PaymentOption(id)
 
+        internal fun toPaymentSelection(
+            paymentMethodProvider: (paymentMethodId: String) -> PaymentMethod?,
+        ): PaymentSelection? {
+            return when (this) {
+                is GooglePay -> {
+                    PaymentSelection.GooglePay
+                }
+                is Link -> {
+                    PaymentSelection.Link
+                }
+                is StripeId -> {
+                    paymentMethodProvider(id)?.let {
+                        PaymentSelection.Saved(it)
+                    }
+                }
+            }
+        }
+
+        internal fun toSavedSelection(): SavedSelection {
+            return when (this) {
+                is GooglePay -> SavedSelection.GooglePay
+                is Link -> SavedSelection.Link
+                is StripeId -> SavedSelection.PaymentMethod(id)
+            }
+        }
+
         @ExperimentalCustomerSheetApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
@@ -128,16 +158,7 @@ interface CustomerAdapter {
                 }
             }
 
-            internal fun PaymentOption.toSavedSelection(): SavedSelection {
-                return when (this) {
-                    is GooglePay -> SavedSelection.GooglePay
-                    is Link -> SavedSelection.Link
-                    is StripeId -> SavedSelection.PaymentMethod(id)
-                }
-            }
-
-            internal fun SavedSelection.toPaymentOption():
-                PaymentOption? {
+            internal fun SavedSelection.toPaymentOption(): PaymentOption? {
                 return when (this) {
                     is SavedSelection.GooglePay -> GooglePay
                     is SavedSelection.Link -> Link
@@ -145,28 +166,77 @@ interface CustomerAdapter {
                     is SavedSelection.PaymentMethod -> StripeId(id)
                 }
             }
+
+            internal fun PaymentSelection.toPaymentOption(): PaymentOption? {
+                return when (this) {
+                    is PaymentSelection.GooglePay -> GooglePay
+                    is PaymentSelection.Saved -> StripeId(paymentMethod.id!!)
+                    else -> null
+                }
+            }
+        }
+    }
+
+    @ExperimentalCustomerSheetApi
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @JvmInline
+    value class Result<out T> internal constructor(
+        internal val value: Any?
+    ) {
+
+        val isSuccess: Boolean get() = value !is Failure
+        val isFailure: Boolean get() = value is Failure
+
+        internal data class Failure(
+            val cause: Throwable,
+            val displayMessage: String? = null
+        )
+
+        @ExperimentalCustomerSheetApi
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+            @ExperimentalCustomerSheetApi
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun <T> success(value: T): Result<T> {
+                return Result(value)
+            }
+
+            @ExperimentalCustomerSheetApi
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun <T> failure(cause: Throwable, displayMessage: String?): Result<T> {
+                return Result(createFailure(cause, displayMessage))
+            }
+
+            private fun createFailure(cause: Throwable, displayMessage: String? = null): Any {
+                return Failure(cause, displayMessage)
+            }
         }
     }
 }
 
 /**
  * Callback to provide the customer's ID and an ephemeral key from your server.
+ * Return [CustomerAdapter.Result.failure] with a [CustomerAdapter.Result.Failure.displayMessage]
+ * if something went wrong during the retrieval of the ephemeral key.
  */
 @ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface CustomerEphemeralKeyProvider {
 
-    suspend fun provide(): Result<CustomerEphemeralKey>
+    suspend fun provideCustomerEphemeralKey(): CustomerAdapter.Result<CustomerEphemeralKey>
 }
 
 /**
  * Callback to provide the [SetupIntent] client secret given a customer ID from your server.
+ * Return [CustomerAdapter.Result.failure] with a with a
+ * [CustomerAdapter.Result.Failure.displayMessage]  if something went wrong during the retrieval of
+ * the [SetupIntent] client secret.
  */
 @ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface SetupIntentClientSecretProvider {
 
-    suspend fun provide(customerId: String): Result<String>
+    suspend fun provideSetupIntentClientSecret(customerId: String): CustomerAdapter.Result<String>
 }
 
 @ExperimentalCustomerSheetApi

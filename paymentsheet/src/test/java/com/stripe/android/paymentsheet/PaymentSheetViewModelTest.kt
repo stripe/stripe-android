@@ -12,6 +12,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.model.AccountStatus
@@ -138,11 +139,15 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `init should fire analytics event`() {
+        val beforeSessionId = AnalyticsRequestFactory.sessionId
         createViewModel()
         verify(eventReporter).onInit(
             configuration = eq(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY),
             isDecoupling = eq(false),
         )
+
+        // Creating the view model should regenerate the analytics sessionId.
+        assertThat(beforeSessionId).isNotEqualTo(AnalyticsRequestFactory.sessionId)
     }
 
     @Test
@@ -308,7 +313,6 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
@@ -318,7 +322,6 @@ internal class PaymentSheetViewModelTest {
             linkState = null,
         )
 
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
     }
 
@@ -901,7 +904,6 @@ internal class PaymentSheetViewModelTest {
 
         val observedArgs = viewModel.createFormArguments(
             selectedItem = LpmRepository.HardcodedCard,
-            showLinkInlineSignup = false,
         )
 
         assertThat(observedArgs).isEqualTo(
@@ -929,7 +931,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(false),
-            activeLinkSession = eq(false),
             currency = eq("usd"),
             isDecoupling = eq(false),
         )
@@ -953,7 +954,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(true),
-            activeLinkSession = eq(false),
             currency = eq("usd"),
             isDecoupling = eq(false),
         )
@@ -977,7 +977,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(true),
-            activeLinkSession = eq(true),
             currency = eq("usd"),
             isDecoupling = eq(false),
         )
@@ -996,7 +995,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onShowExistingPaymentOptions(
             linkEnabled = eq(false),
-            activeLinkSession = eq(false),
             currency = eq("usd"),
             isDecoupling = eq(false),
         )
@@ -1005,7 +1003,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(false),
-            activeLinkSession = eq(false),
             currency = eq("usd"),
             isDecoupling = eq(false),
         )
@@ -1270,7 +1267,6 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
         IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
@@ -1285,7 +1281,6 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
         IntentConfirmationInterceptor.createIntentCallback =
@@ -1301,7 +1296,7 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
+    @OptIn(DelicatePaymentSheetApi::class)
     @Test
     fun `Sends correct analytics event based on force-success usage`() = runTest {
         val clientSecrets = listOf(
@@ -1460,7 +1455,6 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     private fun createViewModelForDeferredIntent(
         args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         paymentIntent: PaymentIntent = PAYMENT_INTENT,

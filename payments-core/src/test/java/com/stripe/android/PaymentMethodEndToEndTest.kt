@@ -29,9 +29,9 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod =
             Stripe(context, ApiKeyFixtures.BACS_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.BacsDebit)
-        assertThat(paymentMethod?.bacsDebit)
+        assertThat(paymentMethod.bacsDebit)
             .isEqualTo(
                 PaymentMethod.BacsDebit(
                     fingerprint = "UkSG0HfCGxxrja1H",
@@ -47,9 +47,9 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod =
             Stripe(context, ApiKeyFixtures.SOFORT_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.Sofort)
-        assertThat(paymentMethod?.sofort)
+        assertThat(paymentMethod.sofort)
             .isEqualTo(
                 PaymentMethod.Sofort(
                     country = "DE"
@@ -63,7 +63,7 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod =
             Stripe(context, ApiKeyFixtures.P24_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.P24)
     }
 
@@ -73,7 +73,7 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod =
             Stripe(context, ApiKeyFixtures.BANCONTACT_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.Bancontact)
     }
 
@@ -99,7 +99,7 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod =
             Stripe(context, ApiKeyFixtures.NETBANKING_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.Netbanking)
     }
 
@@ -111,8 +111,8 @@ internal class PaymentMethodEndToEndTest {
                 context,
                 ApiKeyFixtures.US_BANK_ACCOUNT_PUBLISHABLE_KEY
             ).createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod?.type).isEqualTo(PaymentMethod.Type.USBankAccount)
-        assertThat(paymentMethod?.usBankAccount).isEqualTo(
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.USBankAccount)
+        assertThat(paymentMethod.usBankAccount).isEqualTo(
             PaymentMethod.USBankAccount(
                 accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL,
                 accountType = PaymentMethod.USBankAccount.USBankAccountType.CHECKING,
@@ -139,7 +139,7 @@ internal class PaymentMethodEndToEndTest {
                 context,
                 ApiKeyFixtures.US_BANK_ACCOUNT_PUBLISHABLE_KEY
             ).createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.USBankAccount)
     }
 
@@ -166,7 +166,7 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod =
             Stripe(context, ApiKeyFixtures.GIROPAY_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.Giropay)
     }
 
@@ -191,7 +191,7 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod =
             Stripe(context, ApiKeyFixtures.EPS_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.Eps)
     }
 
@@ -216,7 +216,7 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod =
             Stripe(context, ApiKeyFixtures.UPI_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.Upi)
     }
 
@@ -227,7 +227,7 @@ internal class PaymentMethodEndToEndTest {
         )
         val paymentMethod = Stripe(context, ApiKeyFixtures.OXXO_PUBLISHABLE_KEY)
             .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.Oxxo)
     }
 
@@ -270,7 +270,7 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod =
             Stripe(context, ApiKeyFixtures.ALIPAY_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.Alipay)
     }
 
@@ -286,8 +286,8 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod = repository.createPaymentMethod(
             params,
             ApiRequest.Options(ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY)
-        )
-        assertThat(paymentMethod?.type)
+        ).getOrThrow()
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.GrabPay)
     }
 
@@ -300,9 +300,8 @@ internal class PaymentMethodEndToEndTest {
         ).createPaymentMethod(
             PaymentMethodCreateParams.createPayPal(),
             ApiRequest.Options(ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY)
-        )
+        ).getOrThrow()
 
-        requireNotNull(paymentMethod)
         assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.PayPal)
     }
@@ -315,7 +314,7 @@ internal class PaymentMethodEndToEndTest {
                     billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS
                 )
             )
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.AfterpayClearpay)
     }
 
@@ -367,7 +366,7 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod =
             Stripe(context, ApiKeyFixtures.BLIK_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.Blik)
     }
 
@@ -381,7 +380,7 @@ internal class PaymentMethodEndToEndTest {
                 betas = setOf(StripeApiBeta.WeChatPayV1)
             )
                 .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.WeChatPay)
     }
 
@@ -425,7 +424,7 @@ internal class PaymentMethodEndToEndTest {
             Stripe(context, ApiKeyFixtures.KLARNA_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
 
-        assertThat(paymentMethod?.type).isEqualTo(PaymentMethod.Type.Klarna)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Klarna)
     }
 
     @Test
@@ -436,7 +435,7 @@ internal class PaymentMethodEndToEndTest {
                     billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS
                 )
             )
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.Affirm)
     }
 
@@ -446,6 +445,6 @@ internal class PaymentMethodEndToEndTest {
         val params = PaymentMethodCreateParamsFixtures.CASH_APP_PAY
 
         val paymentMethod = stripe.createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod?.type).isEqualTo(PaymentMethod.Type.CashAppPay)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.CashAppPay)
     }
 }

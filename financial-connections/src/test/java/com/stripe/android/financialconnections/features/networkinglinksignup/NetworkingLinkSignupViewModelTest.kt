@@ -8,7 +8,6 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
@@ -16,6 +15,7 @@ import com.stripe.android.financialconnections.model.NetworkingLinkSignupBody
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
+import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -37,7 +37,7 @@ class NetworkingLinkSignupViewModelTest {
     private val getManifest = mock<GetManifest>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val getAuthorizationSessionAccounts = mock<GetCachedAccounts>()
-    private val goNext = mock<GoNext>()
+    private val navigationManager = TestNavigationManager()
     private val lookupAccount = mock<LookupAccount>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
     private val sync = mock<SynchronizeFinancialConnectionsSession>()
@@ -50,7 +50,7 @@ class NetworkingLinkSignupViewModelTest {
         logger = Logger.noop(),
         eventTracker = eventTracker,
         initialState = state,
-        goNext = goNext,
+        navigationManager = navigationManager,
         getCachedAccounts = getAuthorizationSessionAccounts,
         lookupAccount = lookupAccount,
         uriUtils = UriUtils(Logger.noop()),

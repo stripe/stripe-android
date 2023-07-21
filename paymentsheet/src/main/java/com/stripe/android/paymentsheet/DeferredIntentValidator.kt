@@ -8,7 +8,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal object DeferredIntentValidator {
 
     /**

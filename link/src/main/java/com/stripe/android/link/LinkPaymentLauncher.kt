@@ -4,9 +4,8 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.annotation.RestrictTo
-import com.stripe.android.link.injection.LinkLauncherSubcomponent
+import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,10 +15,10 @@ import javax.inject.Singleton
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LinkPaymentLauncher @Inject internal constructor(
-    linkLauncherSubcomponentBuilder: LinkLauncherSubcomponent.Builder,
+    linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
     private val linkActivityContract: LinkActivityContract,
 ) {
-    private val analyticsHelper = linkLauncherSubcomponentBuilder.build().linkAnalyticsHelper
+    private val analyticsHelper = linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
 
     private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
@@ -56,16 +55,12 @@ class LinkPaymentLauncher @Inject internal constructor(
      * Launch the Link UI to process a payment.
      *
      * @param configuration The payment and customer settings
-     * @param prefilledNewCardParams The card information prefilled by the user. If non null, Link
-     *  will launch into adding a new card, with the card information pre-filled.
      */
     fun present(
         configuration: LinkConfiguration,
-        prefilledNewCardParams: PaymentMethodCreateParams? = null,
     ) {
         val args = LinkActivityContract.Args(
             configuration,
-            prefilledNewCardParams,
         )
         linkActivityResultLauncher?.launch(args)
         analyticsHelper.onLinkLaunched()

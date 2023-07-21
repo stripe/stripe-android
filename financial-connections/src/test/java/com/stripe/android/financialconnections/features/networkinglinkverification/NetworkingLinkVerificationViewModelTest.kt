@@ -12,11 +12,12 @@ import com.stripe.android.financialconnections.TestFinancialConnectionsAnalytics
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.LINK_ACCOUNT_PICKER
+import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,7 +39,7 @@ class NetworkingLinkVerificationViewModelTest {
     val mavericksTestRule = MavericksTestRule()
 
     private val getManifest = mock<GetManifest>()
-    private val goNext = mock<GoNext>()
+    private val navigationManager = TestNavigationManager()
     private val confirmVerification = mock<ConfirmVerification>()
     private val fetchNetworkedAccounts = mock<FetchNetworkedAccounts>()
     private val lookupConsumerAndStartVerification = mock<LookupConsumerAndStartVerification>()
@@ -48,7 +49,7 @@ class NetworkingLinkVerificationViewModelTest {
     private fun buildViewModel(
         state: NetworkingLinkVerificationState = NetworkingLinkVerificationState()
     ) = NetworkingLinkVerificationViewModel(
-        goNext = goNext,
+        navigationManager = navigationManager,
         getManifest = getManifest,
         lookupConsumerAndStartVerification = lookupConsumerAndStartVerification,
         confirmVerification = confirmVerification,
@@ -120,7 +121,8 @@ class NetworkingLinkVerificationViewModelTest {
         onConsumerNotFoundCaptor.firstValue()
 
         assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
-        verify(goNext).invoke(INSTITUTION_PICKER)
+        navigationManager.assertNavigatedTo(NavigationDirections.institutionPicker)
+
         analyticsTracker.assertContainsEvent(
             "linked_accounts.networking.verification.error",
             mapOf(
@@ -172,7 +174,7 @@ class NetworkingLinkVerificationViewModelTest {
             }
 
             verify(confirmVerification).sms(any(), eq("111111"))
-            verify(goNext).invoke(linkVerifiedManifest.nextPane)
+            navigationManager.assertNavigatedTo(linkVerifiedManifest.nextPane.toNavigationCommand())
         }
 
     @Test
@@ -216,6 +218,6 @@ class NetworkingLinkVerificationViewModelTest {
             }
 
             verify(confirmVerification).sms(any(), eq("111111"))
-            verify(goNext).invoke(LINK_ACCOUNT_PICKER)
+            navigationManager.assertNavigatedTo(NavigationDirections.linkAccountPicker)
         }
 }

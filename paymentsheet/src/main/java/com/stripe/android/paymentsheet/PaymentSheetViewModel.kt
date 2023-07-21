@@ -15,11 +15,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -42,7 +39,6 @@ import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
-import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
@@ -77,7 +73,6 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as StripeR
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     application: Application,
@@ -222,6 +217,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
+        AnalyticsRequestFactory.regenerateSessionId()
         eventReporter.onInit(
             configuration = config,
             isDecoupling = isDecoupling,
@@ -241,10 +237,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
             LinkHandler.ProcessingState.Cancelled -> {
-                _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
+                resetViewState()
             }
             is LinkHandler.ProcessingState.PaymentMethodCollected -> {
-                setContentVisible(true)
                 updateSelection(
                     PaymentSelection.Saved(
                         paymentMethod = processingState.paymentMethod,
@@ -254,14 +249,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 checkout()
             }
             is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
-                setContentVisible(true)
                 onPaymentResult(processingState.result)
             }
             is LinkHandler.ProcessingState.Error -> {
                 onError(processingState.message)
             }
             LinkHandler.ProcessingState.Launched -> {
-                setContentVisible(false)
                 startProcessing(CheckoutIdentifier.SheetBottomBuy)
             }
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
@@ -280,6 +273,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             LinkHandler.ProcessingState.Started -> {
                 updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
+            }
+            LinkHandler.ProcessingState.CompleteWithoutLink -> {
+                checkout()
             }
         }
     }
@@ -633,41 +629,23 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     internal class Factory(
         private val starterArgsSupplier: () -> PaymentSheetContractV2.Args,
-    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
-
-        internal data class FallbackInitializeParam(val application: Application)
-
-        @Inject
-        lateinit var subComponentBuilderProvider: Provider<PaymentSheetViewModelSubcomponent.Builder>
+    ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val args = starterArgsSupplier()
-
             val application = extras.requireApplication()
             val savedStateHandle = extras.createSavedStateHandle()
 
-            injectWithFallback(
-                injectorKey = args.injectorKey,
-                fallbackInitializeParam = FallbackInitializeParam(application),
-            )
-
-            val subcomponent = subComponentBuilderProvider.get()
-                .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
+            val component = DaggerPaymentSheetLauncherComponent
+                .builder()
+                .application(application)
+                .build()
+                .paymentSheetViewModelSubcomponentBuilder
+                .paymentSheetViewModelModule(PaymentSheetViewModelModule(starterArgsSupplier()))
                 .savedStateHandle(savedStateHandle)
                 .build()
 
-            return subcomponent.viewModel as T
-        }
-
-        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector {
-            val component = DaggerPaymentSheetLauncherComponent
-                .builder()
-                .application(arg.application)
-                .injectorKey(DUMMY_INJECTOR_KEY)
-                .build()
-            component.inject(this)
-            return component
+            return component.viewModel as T
         }
     }
 
@@ -682,7 +660,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean
     get() = when (this) {
         is PaymentSheet.InitializationMode.PaymentIntent -> true

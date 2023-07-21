@@ -59,7 +59,6 @@ fun rememberPaymentSheetFlowController(
  * @param paymentOptionCallback Called when the customer's desired payment method changes.
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
  */
-@ExperimentalPaymentSheetDecouplingApi
 @Composable
 fun rememberPaymentSheetFlowController(
     createIntentCallback: CreateIntentCallback,
@@ -73,7 +72,6 @@ fun rememberPaymentSheetFlowController(
     )
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 @Composable
 private fun UpdateIntentConfirmationInterceptor(
     createIntentCallback: CreateIntentCallback,

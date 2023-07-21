@@ -6,7 +6,6 @@ import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -37,7 +36,6 @@ internal class PaymentSheetTestRunnerContext(
     }
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal fun runPaymentSheetTest(
     createIntentCallback: CreateIntentCallback? = null,
     resultCallback: PaymentSheetResultCallback,

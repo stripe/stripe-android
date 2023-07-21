@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +28,7 @@ import com.stripe.android.paymentsheet.PaymentOptionUi
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.key
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.uicore.DefaultStripeTheme
@@ -34,7 +36,7 @@ import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.R as StripeR
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun PaymentOptions(
     state: PaymentOptionsState,
@@ -54,7 +56,10 @@ internal fun PaymentOptions(
             userScrollEnabled = !isProcessing,
             contentPadding = PaddingValues(horizontal = 17.dp),
         ) {
-            items(state.items) { item ->
+            items(
+                items = state.items,
+                key = { it.key },
+            ) { item ->
                 val isEnabled = !isProcessing && (!isEditing || item.isEnabledDuringEditing)
                 val isSelected = item == state.selectedItem && !isEditing
 
@@ -70,6 +75,7 @@ internal fun PaymentOptions(
                     modifier = Modifier
                         .semantics { testTagsAsResourceId = true }
                         .testTag(item.viewType.name)
+                        .animateItemPlacement(),
                 )
             }
         }

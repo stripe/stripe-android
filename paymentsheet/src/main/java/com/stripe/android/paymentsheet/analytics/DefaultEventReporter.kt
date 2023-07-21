@@ -48,7 +48,6 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onShowExistingPaymentOptions(
         linkEnabled: Boolean,
-        activeLinkSession: Boolean,
         currency: String?,
         isDecoupling: Boolean,
     ) {
@@ -57,7 +56,6 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.ShowExistingPaymentOptions(
                 mode = mode,
                 linkEnabled = linkEnabled,
-                activeLinkSession = activeLinkSession,
                 currency = currency,
                 isDecoupled = isDecoupling,
             )
@@ -66,7 +64,6 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onShowNewPaymentOptionForm(
         linkEnabled: Boolean,
-        activeLinkSession: Boolean,
         currency: String?,
         isDecoupling: Boolean,
     ) {
@@ -75,7 +72,6 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.ShowNewPaymentOptionForm(
                 mode = mode,
                 linkEnabled = linkEnabled,
-                activeLinkSession = activeLinkSession,
                 currency = currency,
                 isDecoupled = isDecoupling,
             )

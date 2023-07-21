@@ -10,16 +10,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
-import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -151,14 +147,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 TODO("This can't happen. Will follow up to remodel the states better.")
             }
             is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
-                setContentVisible(true)
                 onPaymentResult(processingState.result)
             }
             is LinkHandler.ProcessingState.Error -> {
                 onError(processingState.message)
             }
             LinkHandler.ProcessingState.Launched -> {
-                setContentVisible(false)
             }
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
                 processingState.details?.let {
@@ -176,6 +170,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
             LinkHandler.ProcessingState.Started -> {
                 updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
+            }
+            LinkHandler.ProcessingState.CompleteWithoutLink -> {
+                onUserSelection()
             }
         }
     }
@@ -314,15 +311,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     internal class Factory(
         private val starterArgsSupplier: () -> PaymentOptionContract.Args,
-    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
-        internal data class FallbackInitializeParam(
-            val application: Application,
-            val productUsage: Set<String>
-        )
-
-        @Inject
-        lateinit var subComponentBuilderProvider:
-            Provider<PaymentOptionsViewModelSubcomponent.Builder>
+    ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -330,27 +319,17 @@ internal class PaymentOptionsViewModel @Inject constructor(
             val savedStateHandle = extras.createSavedStateHandle()
             val starterArgs = starterArgsSupplier()
 
-            injectWithFallback(
-                starterArgs.injectorKey,
-                FallbackInitializeParam(application, starterArgs.productUsage)
-            )
-
-            val subcomponent = subComponentBuilderProvider.get()
+            val component = DaggerPaymentOptionsViewModelFactoryComponent.builder()
+                .context(application)
+                .productUsage(starterArgs.productUsage)
+                .build()
+                .paymentOptionsViewModelSubcomponentBuilder
                 .application(application)
                 .args(starterArgs)
                 .savedStateHandle(savedStateHandle)
                 .build()
 
-            return subcomponent.viewModel as T
-        }
-
-        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector {
-            val component = DaggerPaymentOptionsViewModelFactoryComponent.builder()
-                .context(arg.application)
-                .productUsage(arg.productUsage)
-                .build()
-            component.inject(this)
-            return component
+            return component.viewModel as T
         }
     }
 }

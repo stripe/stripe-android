@@ -7,7 +7,6 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -208,7 +207,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link)
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
@@ -219,7 +217,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link)
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
     }
 
@@ -563,7 +560,6 @@ internal class PaymentOptionsViewModelTest {
                 linkState = null,
             ),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            injectorKey = DUMMY_INJECTOR_KEY,
             enableLogging = false,
             productUsage = mock()
         )

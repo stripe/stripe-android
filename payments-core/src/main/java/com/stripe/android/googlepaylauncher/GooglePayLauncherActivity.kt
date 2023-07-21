@@ -62,9 +62,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
 
         if (!viewModel.hasLaunched) {
             lifecycleScope.launch {
-                runCatching {
-                    viewModel.createLoadPaymentDataTask()
-                }.fold(
+                viewModel.createLoadPaymentDataTask().fold(
                     onSuccess = {
                         payWithGoogle(it)
                         viewModel.hasLaunched = true

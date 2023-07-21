@@ -310,13 +310,11 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
         clientSecret: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): Result<PaymentIntent> = runCatching {
-        requireNotNull(
-            stripeRepository.retrievePaymentIntent(
-                clientSecret,
-                requestOptions,
-                expandFields,
-            )
+    ): Result<PaymentIntent> {
+        return stripeRepository.retrievePaymentIntent(
+            clientSecret,
+            requestOptions,
+            expandFields,
         )
     }
 
@@ -324,12 +322,10 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
         clientSecret: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): Result<PaymentIntent> = runCatching {
-        requireNotNull(
-            stripeRepository.refreshPaymentIntent(
-                clientSecret,
-                requestOptions,
-            )
+    ): Result<PaymentIntent> {
+        return stripeRepository.refreshPaymentIntent(
+            clientSecret,
+            requestOptions,
         )
     }
 
@@ -337,13 +333,11 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
         stripeIntentId: String,
         requestOptions: ApiRequest.Options,
         sourceId: String
-    ): Result<PaymentIntent> = runCatching {
-        requireNotNull(
-            stripeRepository.cancelPaymentIntentSource(
-                stripeIntentId,
-                sourceId,
-                requestOptions
-            )
+    ): Result<PaymentIntent> {
+        return stripeRepository.cancelPaymentIntentSource(
+            paymentIntentId = stripeIntentId,
+            sourceId = sourceId,
+            options = requestOptions,
         )
     }
 
@@ -380,13 +374,11 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
         clientSecret: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): Result<SetupIntent> = runCatching {
-        requireNotNull(
-            stripeRepository.retrieveSetupIntent(
-                clientSecret,
-                requestOptions,
-                expandFields
-            )
+    ): Result<SetupIntent> {
+        return stripeRepository.retrieveSetupIntent(
+            clientSecret,
+            requestOptions,
+            expandFields
         )
     }
 
@@ -394,13 +386,11 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
         clientSecret: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): Result<SetupIntent> = runCatching {
-        requireNotNull(
-            stripeRepository.retrieveSetupIntent(
-                clientSecret,
-                requestOptions,
-                expandFields
-            )
+    ): Result<SetupIntent> {
+        return stripeRepository.retrieveSetupIntent(
+            clientSecret,
+            requestOptions,
+            expandFields
         )
     }
 
@@ -408,13 +398,11 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
         stripeIntentId: String,
         requestOptions: ApiRequest.Options,
         sourceId: String
-    ): Result<SetupIntent> = runCatching {
-        requireNotNull(
-            stripeRepository.cancelSetupIntentSource(
-                stripeIntentId,
-                sourceId,
-                requestOptions
-            )
+    ): Result<SetupIntent> {
+        return stripeRepository.cancelSetupIntentSource(
+            setupIntentId = stripeIntentId,
+            sourceId = sourceId,
+            options = requestOptions,
         )
     }
 

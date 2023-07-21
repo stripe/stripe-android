@@ -11,7 +11,6 @@ import com.stripe.android.model.PaymentIntent.CaptureMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Usage
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -82,15 +81,11 @@ internal sealed class ElementsSessionRepository {
         ): Result<ElementsSession> = withContext(workContext) {
             when (params) {
                 is ElementsSessionParams.PaymentIntentType -> {
-                    runCatching {
-                        requireNotNull(
-                            stripeRepository.retrievePaymentIntent(
-                                clientSecret = params.clientSecret,
-                                options = requestOptions,
-                                expandFields = listOf("payment_method")
-                            )
-                        )
-                    }.map {
+                    stripeRepository.retrievePaymentIntent(
+                        clientSecret = params.clientSecret,
+                        options = requestOptions,
+                        expandFields = listOf("payment_method")
+                    ).map {
                         ElementsSession(
                             linkSettings = null,
                             paymentMethodSpecs = null,
@@ -100,15 +95,11 @@ internal sealed class ElementsSessionRepository {
                     }
                 }
                 is ElementsSessionParams.SetupIntentType -> {
-                    runCatching {
-                        requireNotNull(
-                            stripeRepository.retrieveSetupIntent(
-                                clientSecret = params.clientSecret,
-                                options = requestOptions,
-                                expandFields = listOf("payment_method")
-                            )
-                        )
-                    }.map {
+                    stripeRepository.retrieveSetupIntent(
+                        clientSecret = params.clientSecret,
+                        options = requestOptions,
+                        expandFields = listOf("payment_method")
+                    ).map {
                         ElementsSession(
                             linkSettings = null,
                             paymentMethodSpecs = null,
@@ -126,7 +117,6 @@ internal sealed class ElementsSessionRepository {
     }
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal fun PaymentSheet.InitializationMode.toElementsSessionParams(): ElementsSessionParams {
     return when (this) {
         is PaymentSheet.InitializationMode.PaymentIntent -> {
@@ -147,7 +137,6 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(): Elements
     }
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 private fun PaymentSheet.IntentConfiguration.Mode.toElementsSessionParam(): Mode {
     return when (this) {
         is PaymentSheet.IntentConfiguration.Mode.Payment -> {
@@ -167,7 +156,6 @@ private fun PaymentSheet.IntentConfiguration.Mode.toElementsSessionParam(): Mode
     }
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toElementsSessionParam(): Usage {
     return when (this) {
         PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession -> Usage.OnSession
@@ -175,7 +163,6 @@ private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toElementsSessionPar
     }
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 private fun PaymentSheet.IntentConfiguration.CaptureMethod.toElementsSessionParam(): CaptureMethod {
     return when (this) {
         PaymentSheet.IntentConfiguration.CaptureMethod.Automatic -> CaptureMethod.Automatic

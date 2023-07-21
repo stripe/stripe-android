@@ -11,11 +11,6 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
@@ -33,7 +28,6 @@ import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.uicore.address.AddressRepository
@@ -564,36 +558,18 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     internal class Factory(
         private val argsSupplier: () -> Args,
-    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
-
-        internal data class FallbackInitializeParam(val application: Application)
-
-        @Inject
-        lateinit var subComponentBuilderProvider:
-            Provider<USBankAccountFormViewModelSubcomponent.Builder>
+    ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val args = argsSupplier()
-
-            val application = extras.requireApplication()
-            val savedStateHandle = extras.createSavedStateHandle()
-
-            injectWithFallback(args.injectorKey, FallbackInitializeParam(application))
-
-            return subComponentBuilderProvider.get()
-                .configuration(args)
-                .savedStateHandle(savedStateHandle)
-                .build().viewModel as T
-        }
-
-        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector? {
-            DaggerUSBankAccountFormComponent
+            return DaggerUSBankAccountFormComponent
                 .builder()
-                .application(arg.application)
-                .injectorKey(DUMMY_INJECTOR_KEY)
-                .build().inject(this)
-            return null
+                .application(extras.requireApplication())
+                .build()
+                .subComponentBuilderProvider.get()
+                .configuration(argsSupplier())
+                .savedStateHandle(extras.createSavedStateHandle())
+                .build().viewModel as T
         }
     }
 
@@ -606,7 +582,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val onBehalfOf: String?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
-        @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     )
 
     private companion object {

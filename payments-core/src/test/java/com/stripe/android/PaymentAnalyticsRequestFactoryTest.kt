@@ -121,7 +121,7 @@ class PaymentAnalyticsRequestFactoryTest {
                 "product_usage" to ATTRIBUTION.toList(),
                 "source_type" to "card",
                 "is_development" to true,
-                "session_id" to analyticsRequestFactory.sessionId
+                "session_id" to AnalyticsRequestFactory.sessionId
             )
         )
     }
@@ -300,7 +300,7 @@ class PaymentAnalyticsRequestFactoryTest {
                 )
             )
         assertThat(analyticsRequest.url)
-            .isEqualTo("https://q.stripe.com?publishable_key=pk_abc123&app_version=0&bindings_version=$sdkVersion&os_version=30&session_id=${analyticsRequestFactory.sessionId}&os_release=11&device_type=robolectric_robolectric_robolectric&source_type=card&app_name=com.stripe.android.test&analytics_ua=analytics.stripe_android-1.0&os_name=REL&event=stripe_android.payment_method_creation&is_development=true")
+            .isEqualTo("https://q.stripe.com?publishable_key=pk_abc123&app_version=0&bindings_version=$sdkVersion&os_version=30&session_id=${AnalyticsRequestFactory.sessionId}&os_release=11&device_type=robolectric_robolectric_robolectric&source_type=card&app_name=com.stripe.android.test&analytics_ua=analytics.stripe_android-1.0&os_name=REL&event=stripe_android.payment_method_creation&is_development=true")
     }
 
     @Test

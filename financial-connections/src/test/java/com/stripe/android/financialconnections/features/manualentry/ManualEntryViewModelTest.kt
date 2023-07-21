@@ -9,13 +9,13 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate.EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
 import com.stripe.android.financialconnections.model.ManualEntryMode
+import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -29,14 +29,14 @@ class ManualEntryViewModelTest {
     val mavericksTestRule = MavericksTestRule()
 
     private val getManifest = mock<GetManifest>()
-    private val goNext = mock<GoNext>()
+    private val navigationManager = TestNavigationManager()
     private val pollAttachPaymentAccount = mock<PollAttachPaymentAccount>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
 
     private fun buildViewModel() = ManualEntryViewModel(
         getManifest = getManifest,
-        goNext = goNext,
+        navigationManager = navigationManager,
         logger = Logger.noop(),
         eventTracker = eventTracker,
         initialState = ManualEntryState(),

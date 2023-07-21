@@ -53,7 +53,7 @@ class ConsentScreenTest {
 
     private val mockNavController = mock<NavController>()
 
-    private val verificationPageWithTimeAndPolicy = mock<VerificationPage>().also {
+    private val verificationPageWithTitleTimeAndPolicy = mock<VerificationPage>().also {
         whenever(it.biometricConsent).thenReturn(
             VerificationPageStaticContentConsentPage(
                 acceptButtonText = CONSENT_ACCEPT_TEXT,
@@ -72,11 +72,11 @@ class ConsentScreenTest {
         )
     }
 
-    private val verificationPageWithOutTimeAndPolicy = mock<VerificationPage>().also {
+    private val verificationPageWithOutTitleTimeAndPolicy = mock<VerificationPage>().also {
         whenever(it.biometricConsent).thenReturn(
             VerificationPageStaticContentConsentPage(
                 acceptButtonText = CONSENT_ACCEPT_TEXT,
-                title = CONSENT_TITLE,
+                title = null,
                 privacyPolicy = null,
                 timeEstimate = null,
                 body = CONSENT_BODY,
@@ -92,8 +92,8 @@ class ConsentScreenTest {
     }
 
     @Test
-    fun `when VerificationPage with time and policy UI is bound correctly`() {
-        setComposeTestRuleWith(Resource.success(verificationPageWithTimeAndPolicy)) {
+    fun `when VerificationPage with title time and policy UI is bound correctly`() {
+        setComposeTestRuleWith(Resource.success(verificationPageWithTitleTimeAndPolicy)) {
             onNodeWithTag(LOADING_SCREEN_TAG).assertDoesNotExist()
 
             onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
@@ -113,14 +113,15 @@ class ConsentScreenTest {
     }
 
     @Test
-    fun `when VerificationPage without time and policy UI is bound correctly`() {
-        setComposeTestRuleWith(Resource.success(verificationPageWithOutTimeAndPolicy)) {
+    fun `when VerificationPage without title time and policy UI is bound correctly`() {
+        setComposeTestRuleWith(Resource.success(verificationPageWithOutTitleTimeAndPolicy)) {
             onNodeWithTag(LOADING_SCREEN_TAG).assertDoesNotExist()
 
-            onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
+            onNodeWithTag(CONSENT_HEADER_TAG).assertDoesNotExist()
             onNodeWithTag(TIME_ESTIMATE_TAG).assertDoesNotExist()
             onNodeWithTag(PRIVACY_POLICY_TAG).assertDoesNotExist()
             onNodeWithTag(DIVIDER_TAG).assertDoesNotExist()
+
             onNodeWithTag(BODY_TAG).assertTextEquals(CONSENT_BODY)
 
             onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0)
@@ -135,7 +136,7 @@ class ConsentScreenTest {
 
     @Test
     fun `when agreed button is clicked correctly navigates`() {
-        setComposeTestRuleWith(Resource.success(verificationPageWithTimeAndPolicy)) {
+        setComposeTestRuleWith(Resource.success(verificationPageWithTitleTimeAndPolicy)) {
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0).performClick()
             runBlocking {
                 verify(mockIdentityViewModel).postVerificationPageDataAndMaybeNavigate(
