@@ -21,8 +21,8 @@ internal class CustomerSessionViewModel(
         customerAdapter: CustomerAdapter,
         callback: CustomerSheetResultCallback,
     ): CustomerSessionComponent {
-        val shouldCreateNewComponent = configuration != backingComponent?.configuration &&
-            customerAdapter != backingComponent?.customerAdapter &&
+        val shouldCreateNewComponent = configuration != backingComponent?.configuration ||
+            customerAdapter != backingComponent?.customerAdapter ||
             callback != backingComponent?.callback
         if (shouldCreateNewComponent) {
             backingComponent = DaggerCustomerSessionComponent

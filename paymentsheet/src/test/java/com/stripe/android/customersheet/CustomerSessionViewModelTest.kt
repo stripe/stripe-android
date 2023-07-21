@@ -40,6 +40,25 @@ class CustomerSessionViewModelTest {
     }
 
     @Test
+    fun `createCustomerSessionComponent creates a new session if single component is different`() {
+        val customerAdapter = mock<CustomerAdapter>()
+        val callback = mock<CustomerSheetResultCallback>()
+        val component1 = viewModel.createCustomerSessionComponent(
+            configuration = mock(),
+            customerAdapter = customerAdapter,
+            callback = callback,
+        )
+
+        val component2 = viewModel.createCustomerSessionComponent(
+            configuration = mock(),
+            customerAdapter = customerAdapter,
+            callback = callback,
+        )
+
+        assertThat(component1).isNotEqualTo(component2)
+    }
+
+    @Test
     fun `createCustomerSessionComponent returns the same session`() {
         val configuration = mock<CustomerSheet.Configuration>()
         val customerAdapter = mock<CustomerAdapter>()
