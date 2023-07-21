@@ -31,6 +31,9 @@
 * [ADDED][6912](https://github.com/stripe/stripe-android/pull/6912) `GooglePayPaymentMethodLauncher` can now be presented with an amount of type `Long`. The method to present with an `Int` has been deprecated.
 * [DEPRECATED][6912](https://github.com/stripe/stripe-android/pull/6912) `GooglePayLauncherContract` and `GooglePayPaymentMethodLauncherContract` have been deprecated and will be removed in a future release. Use `GooglePayLauncher` and `GooglePayPaymentMethodLauncher` directly instead.
 
+### StripeCardScan
+* [CHANGED][7057](https://github.com/stripe/stripe-android/pull/7057) Updated CIV to use CameraX by default instead of Camera1.
+
 ## 20.25.8 - 2023-06-26
 
 ### Financial Connections
