@@ -8,7 +8,7 @@ appId: com.stripe.android.financialconnections.example
 # CREATE NEW LINK ACCOUNT
 ###########################################
 - tapOn:
-    id: "Native_checkboxq"
+    id: "Native_checkbox"
 - tapOn: "Mode_Dropdown_Icon"
 - tapOn:
     id: "NetworkingTestMode_checkbox"

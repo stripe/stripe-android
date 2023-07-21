@@ -5,7 +5,7 @@ appId: com.stripe.android.financialconnections.example
 # Android specific: Navigate to example
 - tapOn: "Playground"
 - tapOn:
-    id: "Native_checkboxq"
+    id: "Native_checkbox"
 - tapOn: "Mode_Dropdown_Icon"
 - tapOn:
     id: "Test_checkbox"
