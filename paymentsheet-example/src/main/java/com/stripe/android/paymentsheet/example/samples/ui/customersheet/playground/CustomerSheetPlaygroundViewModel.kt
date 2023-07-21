@@ -57,16 +57,8 @@ class CustomerSheetPlaygroundViewModel(
         .googlePayEnabled(viewState.value.isGooglePayEnabled)
         .build()
     val configuration: StateFlow<CustomerSheet.Configuration> = viewState.map {
-        CustomerSheet.Configuration.Builder()
-            .defaultBillingDetails(
-                PaymentSheet.BillingDetails(
-                    name = "CustomerSheet Testing"
-                )
-            ).billingDetailsCollectionConfiguration(
-                PaymentSheet.BillingDetailsCollectionConfiguration(
-                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
-                )
-            )
+        initialConfiguration
+            .newBuilder()
             .googlePayEnabled(it.isGooglePayEnabled)
             .build()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialConfiguration)

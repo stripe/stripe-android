@@ -153,6 +153,17 @@ class CustomerSheet @Inject internal constructor(
          */
         val merchantDisplayName: String? = null,
     ) {
+
+        fun newBuilder(): Builder {
+            return Builder()
+                .appearance(appearance)
+                .googlePayEnabled(googlePayEnabled)
+                .headerTextForSelectionScreen(headerTextForSelectionScreen)
+                .defaultBillingDetails(defaultBillingDetails)
+                .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+                .merchantDisplayName(merchantDisplayName)
+        }
+
         @ExperimentalCustomerSheetApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Builder {
