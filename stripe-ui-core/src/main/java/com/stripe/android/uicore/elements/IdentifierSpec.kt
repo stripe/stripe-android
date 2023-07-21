@@ -65,6 +65,9 @@ data class IdentifierSpec(
         val Upi = IdentifierSpec("upi")
         val Vpa = IdentifierSpec("upi[vpa]")
 
+        val Blik = IdentifierSpec("payment_method_options[blik]")
+        val Code = IdentifierSpec("payment_method_options[blik][code]")
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {
             CardBrand.v1 -> CardBrand
