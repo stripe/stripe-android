@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
+import java.lang.RuntimeException
 
 /**
  * Factory class for creating [ConfirmPaymentIntentParams] or [ConfirmSetupIntentParams].
@@ -20,6 +21,12 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
     abstract fun create(paymentMethod: PaymentMethod): T
 
     abstract fun create(
+        createParams: PaymentMethodCreateParams,
+        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
+    ): T
+
+    abstract fun create(
+        confirmPaymentMethodOptions: PaymentMethodOptionsParams,
         createParams: PaymentMethodCreateParams,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
     ): T
@@ -107,6 +114,50 @@ internal class ConfirmPaymentIntentParamsFactory(
             shipping = shipping,
         )
     }
+
+    override fun create(
+        confirmPaymentMethodOptions: PaymentMethodOptionsParams,
+        createParams: PaymentMethodCreateParams,
+        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+    ): ConfirmPaymentIntentParams {
+        return ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+            paymentMethodCreateParams = createParams,
+            clientSecret = clientSecret,
+
+            /**
+            Sets `payment_method_options[card][setup_future_usage]`
+            - Note: PaymentSheet uses this `setup_future_usage` (SFU) value very differently from the top-level one:
+            We read the top-level SFU to know the merchant’s desired save behavior
+            We write payment method options SFU to set the customer’s desired save behavior
+             */
+            // At this time, paymentMethodOptions card and us_bank_account is the only PM that
+            // supports setup future usage
+            paymentMethodOptions = when (createParams.typeCode) {
+                PaymentMethod.Type.Card.code -> {
+                    PaymentMethodOptionsParams.Card(setupFutureUsage = setupFutureUsage)
+                }
+                PaymentMethod.Type.USBankAccount.code -> {
+                    PaymentMethodOptionsParams.USBankAccount(setupFutureUsage = setupFutureUsage)
+                }
+                PaymentMethod.Type.Link.code -> {
+                    null
+                }
+                PaymentMethod.Type.Blik.code -> {
+                    val code = (createParams.toParamMap()?.get("blik") as LinkedHashMap<String, String>?)?.get("code") as String?
+//
+                    if (code != null) {
+                        PaymentMethodOptionsParams.Blik(code)
+                    } else {
+                        null
+                    }
+                }
+                else -> {
+                    PaymentMethodOptionsParams.Card(setupFutureUsage = null)
+                }
+            },
+            shipping = shipping,
+        )
+    }
 }
 
 internal class ConfirmSetupIntentParamsFactory(
@@ -124,6 +175,17 @@ internal class ConfirmSetupIntentParamsFactory(
     }
 
     override fun create(
+        createParams: PaymentMethodCreateParams,
+        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+    ): ConfirmSetupIntentParams {
+        return ConfirmSetupIntentParams.create(
+            paymentMethodCreateParams = createParams,
+            clientSecret = clientSecret,
+        )
+    }
+
+    override fun create(
+        confirmPaymentMethodOptions: PaymentMethodOptionsParams,
         createParams: PaymentMethodCreateParams,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): ConfirmSetupIntentParams {

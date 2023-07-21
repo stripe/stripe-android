@@ -9,6 +9,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import kotlinx.parcelize.IgnoredOnParcel
@@ -114,6 +115,22 @@ internal sealed class PaymentSelection : Parcelable {
                 ["number"] as String
                 )
                 .takeLast(4)
+
+        }
+
+        @Parcelize
+        data class Blik(
+            val labelResource: String,
+            @DrawableRes val iconResource: Int,
+            val lightThemeIconUrl: String?,
+            val darkThemeIconUrl: String?,
+            override val paymentMethodCreateParams: PaymentMethodCreateParams,
+            override val customerRequestedSave: CustomerRequestedSave
+        ) : New() {
+            @IgnoredOnParcel
+            val blikCode: String = (paymentMethodCreateParams.toParamMap()["blik"] as? String)!!
+                .takeLast(6)
+
         }
 
         @Parcelize

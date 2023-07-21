@@ -157,15 +157,28 @@ internal fun FormFieldValues.transformToPaymentSelection(
     resources: Resources,
     paymentMethod: LpmRepository.SupportedPaymentMethod
 ): PaymentSelection.New {
-    val params = transformToPaymentMethodCreateParams(paymentMethod)
+
 
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
+        val params = transformToPaymentMethodCreateParams(paymentMethod)
         PaymentSelection.New.Card(
             paymentMethodCreateParams = params,
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,
         )
+    } else if (paymentMethod.code == PaymentMethod.Type.Blik.code){
+        val params = transformToPaymentMethodCreateParams(paymentMethod)
+
+        PaymentSelection.New.Blik(
+            labelResource = resources.getString(paymentMethod.displayNameResource),
+            iconResource = paymentMethod.iconResource,
+            lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
+            darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
+            paymentMethodCreateParams = params,
+            customerRequestedSave = userRequestedReuse,
+        )
     } else {
+        val params = transformToPaymentMethodCreateParams(paymentMethod)
         PaymentSelection.New.GenericPaymentMethod(
             labelResource = resources.getString(paymentMethod.displayNameResource),
             iconResource = paymentMethod.iconResource,

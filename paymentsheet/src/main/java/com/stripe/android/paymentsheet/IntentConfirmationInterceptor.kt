@@ -12,6 +12,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffS
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor.NextStep
@@ -63,6 +64,14 @@ internal interface IntentConfirmationInterceptor {
     suspend fun intercept(
         initializationMode: PaymentSheet.InitializationMode,
         paymentMethodCreateParams: PaymentMethodCreateParams,
+        confirmPaymentMethodOptions: PaymentMethodOptionsParams,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+    ): NextStep
+
+    suspend fun intercept(
+        initializationMode: PaymentSheet.InitializationMode,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): NextStep
@@ -107,6 +116,42 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     override suspend fun intercept(
         initializationMode: PaymentSheet.InitializationMode,
         paymentMethodCreateParams: PaymentMethodCreateParams,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+    ): NextStep {
+        return when (initializationMode) {
+            is PaymentSheet.InitializationMode.DeferredIntent -> {
+                handleDeferredIntent(
+                    intentConfiguration = initializationMode.intentConfiguration,
+                    shippingValues = shippingValues,
+                    paymentMethodCreateParams = paymentMethodCreateParams,
+                    setupForFutureUsage = setupForFutureUsage,
+                )
+            }
+            is PaymentSheet.InitializationMode.PaymentIntent -> {
+                createConfirmStep(
+                    clientSecret = initializationMode.clientSecret,
+                    shippingValues = shippingValues,
+                    paymentMethodCreateParams = paymentMethodCreateParams,
+                    setupForFutureUsage = setupForFutureUsage,
+                )
+            }
+
+            is PaymentSheet.InitializationMode.SetupIntent -> {
+                createConfirmStep(
+                    clientSecret = initializationMode.clientSecret,
+                    shippingValues = shippingValues,
+                    paymentMethodCreateParams = paymentMethodCreateParams,
+                    setupForFutureUsage = setupForFutureUsage,
+                )
+            }
+        }
+    }
+
+    override suspend fun intercept(
+        initializationMode: PaymentSheet.InitializationMode,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        confirmPaymentMethodOptions: PaymentMethodOptionsParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): NextStep {
@@ -332,6 +377,26 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             shipping = shippingValues,
         )
         val confirmParams = paramsFactory.create(paymentMethodCreateParams, setupForFutureUsage)
+
+        return NextStep.Confirm(
+            confirmParams = confirmParams,
+            isDeferred = false,
+        )
+    }
+
+    private fun createConfirmStep(
+        clientSecret: String,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        confirmPaymentMethodOptions: PaymentMethodOptionsParams,
+        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+    ): NextStep.Confirm {
+        val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(
+            clientSecret = clientSecret,
+            shipping = shippingValues,
+        )
+        val confirmParams = paramsFactory.create(confirmPaymentMethodOptions ,paymentMethodCreateParams, setupForFutureUsage)
+
         return NextStep.Confirm(
             confirmParams = confirmParams,
             isDeferred = false,

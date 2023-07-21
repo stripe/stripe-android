@@ -205,6 +205,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
      * Analytics event: [PaymentAnalyticsEvent.PaymentIntentConfirm]
      *
      * @param confirmPaymentIntentParams contains the confirmation params
+     * TODO: Add confirmPaymentIntentOptions
      * @return a [PaymentIntent] reflecting the updated state after applying the parameter
      * provided
      */
