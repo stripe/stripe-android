@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.extensions.jsonBody
@@ -22,6 +23,7 @@ import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateS
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerSheetRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerSheetResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
+import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -74,7 +76,7 @@ class CustomerSheetPlaygroundViewModel(
         adapter = CustomerAdapter.create(
             context = getApplication(),
             customerEphemeralKeyProvider = {
-                val isExistingCustomer = viewState.stateIn(viewModelScope).value.isExistingCustomer
+                val isExistingCustomer = viewState.value.isExistingCustomer
                 fetchCustomerEphemeralKey(isExistingCustomer).fold(
                     success = {
                         CustomerAdapter.Result.success(
@@ -87,7 +89,7 @@ class CustomerSheetPlaygroundViewModel(
                     failure = {
                         CustomerAdapter.Result.failure(
                             it.exception,
-                            "We could\'nt retrieve your information, please try again."
+                            "We couldn't retrieve your information, please try again."
                         )
                     }
                 )
@@ -102,7 +104,7 @@ class CustomerSheetPlaygroundViewModel(
                     failure = {
                         CustomerAdapter.Result.failure(
                             it.exception,
-                            "We could\'nt retrieve your information, please try again."
+                            "We couldn't retrieve your information, please try again."
                         )
                     }
                 )
@@ -128,7 +130,7 @@ class CustomerSheetPlaygroundViewModel(
                         failure = {
                             CustomerAdapter.Result.failure(
                                 it.exception,
-                                "We could\'nt retrieve your information, please try again."
+                                "We couldn't retrieve your information, please try again."
                             )
                         }
                     )
@@ -143,7 +145,7 @@ class CustomerSheetPlaygroundViewModel(
                         failure = {
                             CustomerAdapter.Result.failure(
                                 it.exception,
-                                "We could\'nt retrieve your information, please try again."
+                                "We couldn't retrieve your information, please try again."
                             )
                         }
                     )
@@ -182,8 +184,7 @@ class CustomerSheetPlaygroundViewModel(
 
     private suspend fun fetchCustomerEphemeralKey(
         isExistingCustomer: Boolean
-    ):
-        Result<ExampleCustomerSheetResponse, FuelError> {
+    ): Result<ExampleCustomerSheetResponse, FuelError> {
         return withContext(Dispatchers.IO) {
             val request = ExampleCustomerSheetRequest(
                 customerType = if (isExistingCustomer) {
@@ -278,15 +279,14 @@ class CustomerSheetPlaygroundViewModel(
     }
 
     private fun toggleExistingCustomer() {
-        val isExistingCustomer = !viewState.value.isExistingCustomer
         updateViewState<CustomerSheetPlaygroundViewState.Data> {
             it.copy(
-                isExistingCustomer = isExistingCustomer,
+                isExistingCustomer = !it.isExistingCustomer,
             )
         }
 
         viewModelScope.launch {
-            when (val result = fetchCustomerEphemeralKey(isExistingCustomer)) {
+            when (val result = fetchCustomerEphemeralKey(viewState.value.isExistingCustomer)) {
                 is Result.Success -> {
                     PaymentConfiguration.init(
                         context = getApplication(),
@@ -312,13 +312,11 @@ class CustomerSheetPlaygroundViewModel(
         }
     }
 
-    class Factory(
-        private val application: Application,
-    ) : ViewModelProvider.Factory {
+    object Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return CustomerSheetPlaygroundViewModel(
-                application = application,
+                application = extras.requireApplication(),
             ) as T
         }
     }

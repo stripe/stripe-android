@@ -87,15 +87,6 @@ class MainActivity : AppCompatActivity() {
                 )
             ),
             MenuItem(
-                titleResId = R.string.customersheet_playground_title,
-                subtitleResId = R.string.customer_subtitle,
-                klass = CustomerSheetPlaygroundActivity::class.java,
-                section = MenuItem.Section.CustomerSheet,
-                badge = MenuItem.Badge(
-                    labelResId = R.string.under_construction_badge_label,
-                )
-            ),
-            MenuItem(
                 titleResId = R.string.address_element_title,
                 subtitleResId = R.string.address_element_subtitle,
                 klass = AddressElementExampleActivity::class.java,
@@ -105,6 +96,12 @@ class MainActivity : AppCompatActivity() {
                 titleResId = R.string.playground_title,
                 subtitleResId = R.string.playground_subtitle,
                 klass = PaymentSheetPlaygroundActivity::class.java,
+                section = MenuItem.Section.Internal,
+            ),
+            MenuItem(
+                titleResId = R.string.customersheet_playground_title,
+                subtitleResId = R.string.playground_subtitle,
+                klass = CustomerSheetPlaygroundActivity::class.java,
                 section = MenuItem.Section.Internal,
             ),
         )

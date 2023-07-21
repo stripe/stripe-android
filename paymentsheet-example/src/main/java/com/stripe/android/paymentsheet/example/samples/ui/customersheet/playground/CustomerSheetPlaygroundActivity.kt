@@ -36,9 +36,7 @@ import com.stripe.android.paymentsheet.example.utils.rememberDrawablePainter
 class CustomerSheetPlaygroundActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<CustomerSheetPlaygroundViewModel> {
-        CustomerSheetPlaygroundViewModel.Factory(
-            application = this.application,
-        )
+        CustomerSheetPlaygroundViewModel.Factory
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
