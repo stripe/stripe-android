@@ -18,7 +18,7 @@ now=$(date +%F_%H-%M-%S)
 echo $now
 
 # Install Maestro
-export MAESTRO_VERSION=1.30.0; curl -Ls "https://get.maestro.mobile.dev" | bash
+export MAESTRO_VERSION=1.30.4; curl -Ls "https://get.maestro.mobile.dev" | bash
 export PATH="$PATH":"$HOME/.maestro/bin"
 maestro -v
 
