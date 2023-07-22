@@ -41,6 +41,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val application: Application,
     // TODO (jameswoo) should the current view state be derived from backstack?
     private val backstack: Stack<CustomerSheetViewState>,
+    private var originalPaymentSelection: PaymentSelection?,
     private val paymentConfiguration: PaymentConfiguration,
     private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
@@ -63,8 +64,6 @@ internal class CustomerSheetViewModel @Inject constructor(
             .filterIsInstance<CustomerSheetViewState.SelectPaymentMethod>()
             .firstOrNull()
             ?.paymentSelection
-
-    private var originalPaymentSelection: PaymentSelection? = null
 
     init {
         lpmRepository.initializeWithCardSpec(
@@ -252,7 +251,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                             }
 
                             removedPaymentSelection
-                        },
+                        } ?: originalPaymentSelection,
                     )
                 }
             }.onFailure { cause, displayMessage ->
