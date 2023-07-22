@@ -220,7 +220,7 @@ internal class CustomerSheetViewModel @Inject constructor(
             val isEditing = !it.isEditing
             it.copy(
                 isEditing = isEditing,
-                primaryButtonVisible = !isEditing,
+                primaryButtonVisible = !isEditing && originalPaymentSelection != it.paymentSelection,
             )
         }
     }

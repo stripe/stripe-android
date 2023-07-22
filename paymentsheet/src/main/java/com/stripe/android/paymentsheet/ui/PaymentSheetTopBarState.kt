@@ -21,7 +21,7 @@ internal object PaymentSheetTopBarStateFactory {
 
     fun create(
         screen: PaymentSheetScreen,
-        paymentMethods: List<PaymentMethod>?,
+        paymentMethods: List<PaymentMethod>,
         isLiveMode: Boolean,
         isProcessing: Boolean,
         isEditing: Boolean,
@@ -50,7 +50,7 @@ internal object PaymentSheetTopBarStateFactory {
             icon = icon,
             contentDescription = contentDescription,
             showTestModeLabel = !isLiveMode,
-            showEditMenu = showOptionsMenu && !paymentMethods.isNullOrEmpty(),
+            showEditMenu = showOptionsMenu && paymentMethods.isNotEmpty(),
             editMenuLabel = editMenuLabel,
             isEnabled = !isProcessing,
         )
