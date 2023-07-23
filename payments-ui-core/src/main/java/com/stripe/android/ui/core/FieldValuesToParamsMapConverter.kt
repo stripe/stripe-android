@@ -80,7 +80,22 @@ class FieldValuesToParamsMapConverter {
             val destMap = mutableMapOf<String, Any?>()
 
             val formKeyValueMap = fieldValuePairs
-                .filterNot { it.key.ignoreField }
+                .filterNot { it.key.ignoreField  || it.key.isOptions }
+                .mapValues { entry -> entry.value.value }
+                .mapKeys { it.key.v1 }
+
+            createMap(code, destMap, formKeyValueMap)
+            return destMap
+        }
+
+        private fun transformToOptionsMap(
+            fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
+            code: PaymentMethodCode
+        ): MutableMap<String, Any?> {
+            val destMap = mutableMapOf<String, Any?>()
+
+            val formKeyValueMap = fieldValuePairs
+                .filter { it.key.isOptions }
                 .mapValues { entry -> entry.value.value }
                 .mapKeys { it.key.v1 }
 
