@@ -128,6 +128,7 @@ internal class ConfirmSetupIntentParamsFactory(
             }
         )
     }
+    
     override fun create(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         createParams: PaymentMethodCreateParams,
