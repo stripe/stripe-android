@@ -16,7 +16,8 @@ import kotlinx.serialization.Serializable
 @Parcelize
 data class IdentifierSpec(
     val v1: String,
-    val ignoreField: Boolean = false
+    val ignoreField: Boolean = false,
+    val isOptions: Boolean = false
 ) : Parcelable {
     constructor() : this("")
 
@@ -65,8 +66,8 @@ data class IdentifierSpec(
         val Upi = IdentifierSpec("upi")
         val Vpa = IdentifierSpec("upi[vpa]")
 
-        val Blik = IdentifierSpec("payment_method_options[blik]")
-        val Code = IdentifierSpec("payment_method_options[blik][code]")
+        val Blik = IdentifierSpec("blik", isOptions = true)
+        val Code = IdentifierSpec("blik[code]", isOptions = true)
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {
