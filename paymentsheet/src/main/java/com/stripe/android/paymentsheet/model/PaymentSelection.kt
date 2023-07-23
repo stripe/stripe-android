@@ -90,6 +90,7 @@ internal sealed class PaymentSelection : Parcelable {
     sealed class New : PaymentSelection() {
 
         abstract val paymentMethodCreateParams: PaymentMethodCreateParams
+        abstract val paymentMethodOptionsParams: PaymentMethodOptionsParams?
         abstract val customerRequestedSave: CustomerRequestedSave
 
         override val requiresConfirmation: Boolean
@@ -106,6 +107,7 @@ internal sealed class PaymentSelection : Parcelable {
         @Parcelize
         data class Card(
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
+            override val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
             val brand: CardBrand,
             override val customerRequestedSave: CustomerRequestedSave
         ) : New() {
@@ -125,11 +127,9 @@ internal sealed class PaymentSelection : Parcelable {
             val lightThemeIconUrl: String?,
             val darkThemeIconUrl: String?,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
+            override val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
             override val customerRequestedSave: CustomerRequestedSave
         ) : New() {
-            @IgnoredOnParcel
-            val blikCode: String = (paymentMethodCreateParams.toParamMap()["blik"] as? String)!!
-                .takeLast(6)
 
         }
 
@@ -142,6 +142,7 @@ internal sealed class PaymentSelection : Parcelable {
             val financialConnectionsSessionId: String,
             val intentId: String?,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
+            override val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
             override val customerRequestedSave: CustomerRequestedSave
         ) : New()
 
@@ -155,6 +156,9 @@ internal sealed class PaymentSelection : Parcelable {
 
             @IgnoredOnParcel
             override val paymentMethodCreateParams = linkPaymentDetails.paymentMethodCreateParams
+
+            @IgnoredOnParcel
+            override val paymentMethodOptionsParams = null
 
             @IgnoredOnParcel
             @DrawableRes
@@ -176,6 +180,7 @@ internal sealed class PaymentSelection : Parcelable {
             val lightThemeIconUrl: String?,
             val darkThemeIconUrl: String?,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
+            override val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
             override val customerRequestedSave: CustomerRequestedSave
         ) : New()
     }

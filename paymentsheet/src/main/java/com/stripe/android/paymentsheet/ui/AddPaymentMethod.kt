@@ -20,6 +20,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -174,12 +175,14 @@ internal fun FormFieldValues.transformToPaymentSelection(
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
         val params = transformToPaymentMethodCreateParams(paymentMethod)
         PaymentSelection.New.Card(
+            paymentMethodOptionsParams = options,
             paymentMethodCreateParams = params,
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,
         )
     } else if (paymentMethod.code == PaymentMethod.Type.Blik.code){
         val params = transformToPaymentMethodCreateParams(paymentMethod)
+        val options = transformToPaymentMethodOptionsParams(paymentMethod)
 
         PaymentSelection.New.Blik(
             labelResource = resources.getString(paymentMethod.displayNameResource),
@@ -187,6 +190,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
             paymentMethodCreateParams = params,
+            paymentMethodOptionsParams = options,
             customerRequestedSave = userRequestedReuse,
         )
     } else {
@@ -197,6 +201,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
             paymentMethodCreateParams = params,
+            paymentMethodOptionsParams = options,
             customerRequestedSave = userRequestedReuse,
         )
     }

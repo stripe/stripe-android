@@ -64,14 +64,7 @@ internal interface IntentConfirmationInterceptor {
     suspend fun intercept(
         initializationMode: PaymentSheet.InitializationMode,
         paymentMethodCreateParams: PaymentMethodCreateParams,
-        confirmPaymentMethodOptions: PaymentMethodOptionsParams,
-        shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-    ): NextStep
-
-    suspend fun intercept(
-        initializationMode: PaymentSheet.InitializationMode,
-        paymentMethodCreateParams: PaymentMethodCreateParams,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): NextStep
@@ -113,7 +106,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             stripeAccount = stripeAccountIdProvider(),
         )
 
-    override suspend fun intercept(
+    suspend fun intercept(
         initializationMode: PaymentSheet.InitializationMode,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -151,7 +144,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     override suspend fun intercept(
         initializationMode: PaymentSheet.InitializationMode,
         paymentMethodCreateParams: PaymentMethodCreateParams,
-        confirmPaymentMethodOptions: PaymentMethodOptionsParams,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): NextStep {
@@ -168,6 +161,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
                     shippingValues = shippingValues,
+                    paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodCreateParams = paymentMethodCreateParams,
                     setupForFutureUsage = setupForFutureUsage,
                 )
@@ -376,7 +370,26 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             clientSecret = clientSecret,
             shipping = shippingValues,
         )
-        val confirmParams = paramsFactory.create(paymentMethodCreateParams, setupForFutureUsage)
+        val confirmParams = paramsFactory.create(null, paymentMethodCreateParams, setupForFutureUsage)
+
+        return NextStep.Confirm(
+            confirmParams = confirmParams,
+            isDeferred = false,
+        )
+    }
+
+    private fun createConfirmStep(
+        clientSecret: String,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+    ): NextStep.Confirm {
+        val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(
+            clientSecret = clientSecret,
+            shipping = shippingValues,
+        )
+        val confirmParams = paramsFactory.create(paymentMethodOptionsParams, paymentMethodCreateParams, setupForFutureUsage)
 
         return NextStep.Confirm(
             confirmParams = confirmParams,
