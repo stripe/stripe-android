@@ -2,6 +2,17 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### Payments
+*[CHANGED] The return type for several methods in `Stripe` has changed from `T?` (nullable) to `T` to better reflect possible behavior. These methods continue to be throwing and should be wrapped in a `try/catch` block.
+*[FIXED][6977](https://github.com/stripe/stripe-android/pull/6977) Fixed an issue where `Stripe.retrievePossibleBrands()` returned incorrect results. 
+
+## 20.27.2 - 2023-07-18
+
+### PaymentSheet
+* [FIXED] Fixed various bugs in Link private beta.
+
+## 20.27.1 - 2023-07-17
+
 ### PaymentSheet
 * [FIXED][6992](https://github.com/stripe/stripe-android/pull/6992) Fixed an issue where incorrect padding was set on the Google Pay button.
 
@@ -19,6 +30,9 @@
 ### Payments
 * [ADDED][6912](https://github.com/stripe/stripe-android/pull/6912) `GooglePayPaymentMethodLauncher` can now be presented with an amount of type `Long`. The method to present with an `Int` has been deprecated.
 * [DEPRECATED][6912](https://github.com/stripe/stripe-android/pull/6912) `GooglePayLauncherContract` and `GooglePayPaymentMethodLauncherContract` have been deprecated and will be removed in a future release. Use `GooglePayLauncher` and `GooglePayPaymentMethodLauncher` directly instead.
+
+### StripeCardScan
+* [CHANGED][7057](https://github.com/stripe/stripe-android/pull/7057) Updated CIV to use CameraX by default instead of Camera1.
 
 ## 20.25.8 - 2023-06-26
 

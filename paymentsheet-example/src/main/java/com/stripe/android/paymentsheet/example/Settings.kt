@@ -35,7 +35,7 @@ class Settings(context: Context) {
          *
          * Note: only necessary if not configured via `gradle.properties`.
          */
-        private const val BASE_URL = "http://10.0.2.2:8081/"
+        private const val BASE_URL = "https://stp-mobile-playground-backend-v7.stripedemos.com/"
 
         private const val METADATA_KEY_BACKEND_URL_KEY =
             "com.stripe.android.paymentsheet.example.metadata.backend_url"

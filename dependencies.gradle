@@ -30,7 +30,7 @@ ext.versions = [
         dagger                      : '2.45',
         detekt                      : "1.22.0",
         diskLruCache                : '2.0.2',
-        dokka                       : '1.8.0-dev-194',
+        dokka                       : '1.9.0-dev-218',
         espresso                    : '3.5.1',
         firebaseAppDistribution     : '4.0.0',
         fuel                        : '2.3.1',

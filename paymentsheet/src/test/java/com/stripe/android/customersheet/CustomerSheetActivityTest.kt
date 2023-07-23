@@ -8,6 +8,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.customersheet.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
@@ -16,18 +17,15 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import org.robolectric.annotation.Config
+import java.util.Stack
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
+@OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSheetActivityTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
@@ -52,61 +50,31 @@ internal class CustomerSheetActivityTest {
             assertThat(
                 InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
             ).isEqualTo(
-                InternalCustomerSheetResult.Canceled
+                InternalCustomerSheetResult.Canceled(null)
             )
         }
     }
 
     @Test
-    fun `Finish with cancel on canceled result`() = runTest {
+    fun `Finish with cancel and payment selection on back press`() {
         runActivityScenario(
-            viewState = createSelectPaymentMethodViewState(),
-            result = InternalCustomerSheetResult.Canceled,
+            viewState = createSelectPaymentMethodViewState(
+                paymentSelection = PaymentSelection.Saved(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                )
+            )
         ) {
             composeTestRule.waitForIdle()
-            activity.finish()
+            pressBack()
+            composeTestRule.waitForIdle()
             assertThat(
                 InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
             ).isEqualTo(
-                InternalCustomerSheetResult.Canceled
-            )
-        }
-    }
-
-    @Test
-    fun `Finish with selected on selected result`() = runTest {
-        runActivityScenario(
-            viewState = createSelectPaymentMethodViewState(),
-            result = InternalCustomerSheetResult.Selected(
-                paymentMethodId = "pm_123",
-                drawableResourceId = 123,
-                label = "test",
-            ),
-        ) {
-            composeTestRule.waitForIdle()
-            activity.finish()
-            assertThat(
-                InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
-            ).isInstanceOf(
-                InternalCustomerSheetResult.Selected::class.java
-            )
-        }
-    }
-
-    @Test
-    fun `Finish with error on error result`() = runTest {
-        runActivityScenario(
-            viewState = createSelectPaymentMethodViewState(),
-            result = InternalCustomerSheetResult.Error(
-                exception = Exception("test")
-            ),
-        ) {
-            composeTestRule.waitForIdle()
-            activity.finish()
-            assertThat(
-                InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
-            ).isInstanceOf(
-                InternalCustomerSheetResult.Error::class.java
+                InternalCustomerSheetResult.Canceled(
+                    paymentSelection = PaymentSelection.Saved(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                )
             )
         }
     }
@@ -118,7 +86,7 @@ internal class CustomerSheetActivityTest {
                 title = null
             ),
         ) {
-            page.waitForText("Select your payment method")
+            page.waitForText("Manage your payment method")
         }
     }
 
@@ -147,14 +115,19 @@ internal class CustomerSheetActivityTest {
     }
 
     @Test
-    fun `When primaryButtonLabel is not null, primary button is visible`() {
+    fun `When payment selection is different from original, primary button is visible`() {
         runActivityScenario(
             viewState = createSelectPaymentMethodViewState(
-                primaryButtonLabel = "Testing Primary Button",
-                primaryButtonEnabled = true,
+                isGooglePayEnabled = true,
+                paymentSelection = null,
+                primaryButtonVisible = false,
+                savedPaymentMethods = listOf(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                ),
             ),
         ) {
-            page.waitForText("Testing Primary Button")
+            page.clickPaymentOptionItem("Google Pay")
+            page.waitForText("Confirm")
         }
     }
 
@@ -163,8 +136,8 @@ internal class CustomerSheetActivityTest {
         runActivityScenario(
             viewState = createAddPaymentMethodViewState(),
         ) {
-            page.waitForText("Add your payment information")
-            page.waitForTextExactly("Add")
+            page.waitForText("Save a new payment method")
+            page.waitForTextExactly("Save")
         }
     }
 
@@ -200,21 +173,12 @@ internal class CustomerSheetActivityTest {
 
     private fun activityScenario(
         viewState: CustomerSheetViewState,
-        result: InternalCustomerSheetResult?,
-        providePaymentMethodName: (PaymentMethodCode) -> String,
     ): InjectableActivityScenario<CustomerSheetActivity> {
-        val viewModel = mock<CustomerSheetViewModel>()
-
-        whenever(viewModel.viewState).thenReturn(
-            MutableStateFlow(viewState)
+        val viewModel = createViewModel(
+            backstack = Stack<CustomerSheetViewState>().apply {
+                push(viewState)
+            }
         )
-        whenever(viewModel.result).thenReturn(
-            MutableStateFlow(result)
-        )
-        whenever(viewModel.providePaymentMethodName(any())).then {
-            val code = it.arguments.first() as PaymentMethodCode
-            providePaymentMethodName(code)
-        }
 
         return injectableActivityScenario {
             injectActivity {
@@ -227,14 +191,10 @@ internal class CustomerSheetActivityTest {
         viewState: CustomerSheetViewState = CustomerSheetViewState.Loading(
             isLiveMode = false,
         ),
-        result: InternalCustomerSheetResult? = null,
-        providePaymentMethodName: (PaymentMethodCode) -> String = { it },
         testBlock: CustomerSheetTestData.() -> Unit,
     ) {
         activityScenario(
             viewState = viewState,
-            result = result,
-            providePaymentMethodName = providePaymentMethodName,
         )
             .launchForResult(intent)
             .use { injectableActivityScenario ->
@@ -259,8 +219,8 @@ internal class CustomerSheetActivityTest {
         isProcessing: Boolean = false,
         isEditing: Boolean = false,
         isGooglePayEnabled: Boolean = false,
+        primaryButtonVisible: Boolean = true,
         primaryButtonLabel: String? = null,
-        primaryButtonEnabled: Boolean = false,
     ): CustomerSheetViewState.SelectPaymentMethod {
         return CustomerSheetViewState.SelectPaymentMethod(
             title = title,
@@ -270,8 +230,8 @@ internal class CustomerSheetActivityTest {
             isProcessing = isProcessing,
             isEditing = isEditing,
             isGooglePayEnabled = isGooglePayEnabled,
+            primaryButtonVisible = primaryButtonVisible,
             primaryButtonLabel = primaryButtonLabel,
-            primaryButtonEnabled = primaryButtonEnabled,
         )
     }
 
@@ -287,7 +247,7 @@ internal class CustomerSheetActivityTest {
             formViewData = formViewData,
             enabled = enabled,
             isLiveMode = isLiveMode,
-            isProcessing = isProcessing
+            isProcessing = isProcessing,
         )
     }
 

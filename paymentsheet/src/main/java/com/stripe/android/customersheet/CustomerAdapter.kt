@@ -158,13 +158,20 @@ interface CustomerAdapter {
                 }
             }
 
-            internal fun SavedSelection.toPaymentOption():
-                PaymentOption? {
+            internal fun SavedSelection.toPaymentOption(): PaymentOption? {
                 return when (this) {
                     is SavedSelection.GooglePay -> GooglePay
                     is SavedSelection.Link -> Link
                     is SavedSelection.None -> null
                     is SavedSelection.PaymentMethod -> StripeId(id)
+                }
+            }
+
+            internal fun PaymentSelection.toPaymentOption(): PaymentOption? {
+                return when (this) {
+                    is PaymentSelection.GooglePay -> GooglePay
+                    is PaymentSelection.Saved -> StripeId(paymentMethod.id!!)
+                    else -> null
                 }
             }
         }

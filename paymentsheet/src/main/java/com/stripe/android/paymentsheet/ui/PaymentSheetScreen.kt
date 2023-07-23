@@ -163,13 +163,13 @@ internal fun Wallet(
             )
         }
 
-        state.link?.let { link ->
+        state.link?.let {
             if (state.googlePay != null) {
                 Spacer(modifier = Modifier.requiredHeight(8.dp))
             }
 
             LinkButton(
-                email = link.email,
+                email = null,
                 enabled = state.buttonsEnabled,
                 onClick = onLinkPressed,
             )

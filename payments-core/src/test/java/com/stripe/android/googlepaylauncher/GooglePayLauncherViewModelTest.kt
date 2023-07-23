@@ -36,7 +36,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class GooglePayLauncherViewModelTest {
@@ -70,25 +69,22 @@ class GooglePayLauncherViewModelTest {
         runTest {
             googlePayRepository.value = false
 
-            val error = assertFailsWith<IllegalStateException> {
-                viewModel.createLoadPaymentDataTask()
-            }
-            assertThat(error.message)
-                .isEqualTo("Google Pay is unavailable.")
+            val error = viewModel.createLoadPaymentDataTask().exceptionOrNull()
+            assertThat(error).isInstanceOf(IllegalStateException::class.java)
+            assertThat(error?.message).isEqualTo("Google Pay is unavailable.")
         }
 
     @Test
     fun `createLoadPaymentDataTask() should return task when Google Pay is available`() =
         runTest {
-            assertThat(viewModel.createLoadPaymentDataTask())
-                .isNotNull()
+            assertThat(viewModel.createLoadPaymentDataTask().isSuccess).isTrue()
         }
 
     @Test
     fun `createTransactionInfo() with PaymentIntent should return expected TransactionInfo`() {
         val transactionInfo = viewModel.createTransactionInfo(
-            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.currency.orEmpty()
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            currencyCode = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.currency.orEmpty(),
         )
         assertThat(transactionInfo)
             .isEqualTo(
@@ -107,8 +103,8 @@ class GooglePayLauncherViewModelTest {
     @Test
     fun `createTransactionInfo() with SetupIntent should return expected TransactionInfo`() {
         val transactionInfo = viewModel.createTransactionInfo(
-            SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-            "usd"
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            currencyCode = "usd",
         )
         assertThat(transactionInfo)
             .isEqualTo(
@@ -272,20 +268,21 @@ class GooglePayLauncherViewModelTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
+
         override suspend fun retrievePaymentIntent(
             clientSecret: String,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ): PaymentIntent {
-            return PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        ): Result<PaymentIntent> {
+            return Result.success(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         }
 
         override suspend fun retrieveSetupIntent(
             clientSecret: String,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ): SetupIntent {
-            return SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+        ): Result<SetupIntent> {
+            return Result.success(SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD)
         }
     }
 

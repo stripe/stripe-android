@@ -143,21 +143,15 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         listener: IssuingCardPinRetrievalListener
     ) {
         CoroutineScope(workContext).launch {
-            runCatching {
-                requireNotNull(
-                    stripeRepository.retrieveIssuingCardPin(
-                        operation.cardId,
-                        operation.verificationId,
-                        operation.userOneTimeCode,
-                        ApiRequest.Options(
-                            ephemeralKey.secret,
-                            stripeAccount = stripeAccountId
-                        )
-                    )
-                ) {
-                    "Could not retrieve issuing card PIN."
-                }
-            }.fold(
+            stripeRepository.retrieveIssuingCardPin(
+                cardId = operation.cardId,
+                verificationId = operation.verificationId,
+                userOneTimeCode = operation.userOneTimeCode,
+                requestOptions = ApiRequest.Options(
+                    apiKey = ephemeralKey.secret,
+                    stripeAccount = stripeAccountId,
+                ),
+            ).fold(
                 onSuccess = { pin ->
                     withContext(Dispatchers.Main) {
                         listener.onIssuingCardPinRetrieved(pin)
@@ -230,27 +224,24 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         listener: IssuingCardPinUpdateListener
     ) {
         CoroutineScope(workContext).launch {
-            runCatching {
-                stripeRepository.updateIssuingCardPin(
-                    operation.cardId,
-                    operation.newPin,
-                    operation.verificationId,
-                    operation.userOneTimeCode,
-                    ApiRequest.Options(
-                        ephemeralKey.secret,
-                        stripeAccount = stripeAccountId
-                    )
-                )
-            }.fold(
-                onSuccess = {
-                    withContext(Dispatchers.Main) {
-                        listener.onIssuingCardPinUpdated()
-                    }
-                },
-                onFailure = {
-                    onUpdatePinError(it, listener)
-                }
+            val error = stripeRepository.updateIssuingCardPin(
+                cardId = operation.cardId,
+                newPin = operation.newPin,
+                verificationId = operation.verificationId,
+                userOneTimeCode = operation.userOneTimeCode,
+                requestOptions = ApiRequest.Options(
+                    apiKey = ephemeralKey.secret,
+                    stripeAccount = stripeAccountId,
+                ),
             )
+
+            withContext(Dispatchers.Main) {
+                if (error != null) {
+                    onUpdatePinError(error, listener)
+                } else {
+                    listener.onIssuingCardPinUpdated()
+                }
+            }
         }
     }
 

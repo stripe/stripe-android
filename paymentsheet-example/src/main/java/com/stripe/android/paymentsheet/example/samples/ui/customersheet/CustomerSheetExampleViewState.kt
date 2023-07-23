@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.example.samples.ui.customersheet
 
 import com.stripe.android.customersheet.CustomerEphemeralKey
-import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.PaymentOptionSelection
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 sealed class CustomerSheetExampleViewState {
@@ -13,6 +13,7 @@ sealed class CustomerSheetExampleViewState {
     @Suppress("unused")
     data class Data(
         val customerEphemeralKey: CustomerEphemeralKey,
-        val result: CustomerSheetResult? = null,
+        val selection: PaymentOptionSelection? = null,
+        val errorMessage: String? = null
     ) : CustomerSheetExampleViewState()
 }

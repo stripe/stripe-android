@@ -175,36 +175,40 @@ internal fun LinkInlineSignup(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(MaterialTheme.linkShapes.small)
-                        .clickable {
-                            toggleExpanded()
-                        }
                 ) {
-                    Row(
+                    Column(
                         modifier = Modifier
-                            .padding(16.dp)
+                            .clickable {
+                                toggleExpanded()
+                            }
                     ) {
-                        Checkbox(
-                            checked = expanded,
-                            onCheckedChange = null, // needs to be null for accessibility on row click to work
-                            modifier = Modifier.padding(end = 8.dp),
-                            enabled = enabled
-                        )
-                        Column {
-                            Text(
-                                text = stringResource(id = R.string.stripe_inline_sign_up_header),
-                                style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colors.onSurface
-                                    .copy(alpha = LocalContentAlpha.current)
+                        Row(
+                            modifier = Modifier
+                                .padding(16.dp)
+                        ) {
+                            Checkbox(
+                                checked = expanded,
+                                onCheckedChange = null, // needs to be null for accessibility on row click to work
+                                modifier = Modifier.padding(end = 8.dp),
+                                enabled = enabled
                             )
-                            Text(
-                                text = stringResource(R.string.stripe_sign_up_message, merchantName),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 4.dp),
-                                style = MaterialTheme.typography.body1,
-                                color = MaterialTheme.colors.onSurface
-                                    .copy(alpha = LocalContentAlpha.current)
-                            )
+                            Column {
+                                Text(
+                                    text = stringResource(id = R.string.stripe_inline_sign_up_header),
+                                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colors.onSurface
+                                        .copy(alpha = LocalContentAlpha.current)
+                                )
+                                Text(
+                                    text = stringResource(R.string.stripe_sign_up_message, merchantName),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 4.dp),
+                                    style = MaterialTheme.typography.body1,
+                                    color = MaterialTheme.colors.onSurface
+                                        .copy(alpha = LocalContentAlpha.current)
+                                )
+                            }
                         }
                     }
 

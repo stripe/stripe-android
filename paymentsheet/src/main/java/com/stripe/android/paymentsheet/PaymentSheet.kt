@@ -522,6 +522,7 @@ class PaymentSheet internal constructor(
          */
         val primaryButton: PrimaryButton = PrimaryButton()
     ) : Parcelable {
+
         fun getColors(isDark: Boolean): Colors {
             return if (isDark) colorsDark else colorsLight
         }
@@ -533,12 +534,29 @@ class PaymentSheet internal constructor(
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
 
-            fun colorsLight(colors: Colors) = apply { this.colorsLight = colors }
-            fun colorsDark(colors: Colors) = apply { this.colorsDark = colors }
-            fun shapes(shapes: Shapes) = apply { this.shapes = shapes }
-            fun typography(typography: Typography) = apply { this.typography = typography }
-            fun primaryButton(primaryButton: PrimaryButton) =
-                apply { this.primaryButton = primaryButton }
+            fun colorsLight(colors: Colors) = apply {
+                this.colorsLight = colors
+            }
+
+            fun colorsDark(colors: Colors) = apply {
+                this.colorsDark = colors
+            }
+
+            fun shapes(shapes: Shapes) = apply {
+                this.shapes = shapes
+            }
+
+            fun typography(typography: Typography) = apply {
+                this.typography = typography
+            }
+
+            fun primaryButton(primaryButton: PrimaryButton) = apply {
+                this.primaryButton = primaryButton
+            }
+
+            fun build(): Appearance {
+                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton)
+            }
         }
     }
 

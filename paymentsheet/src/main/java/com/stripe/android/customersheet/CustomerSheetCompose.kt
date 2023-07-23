@@ -35,7 +35,7 @@ fun rememberCustomerSheet(
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    return remember {
+    return remember(configuration) {
         CustomerSheet.getInstance(
             lifecycleOwner = lifecycleOwner,
             viewModelStoreOwner = viewModelStoreOwner,

@@ -20,6 +20,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
+import java.io.IOException
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -54,10 +55,6 @@ internal class RemoteCardAccountRangeSourceTest {
                 country = "GB"
             )
         )
-        verify(cardAccountRangeStore).save(
-            BinFixtures.VISA,
-            AccountRangeFixtures.DEFAULT
-        )
     }
 
     @Test
@@ -79,11 +76,60 @@ internal class RemoteCardAccountRangeSourceTest {
                     CardNumberFixtures.VISA
                 )
             ).isNull()
-            verify(cardAccountRangeStore).save(
-                BinFixtures.VISA,
-                emptyList()
-            )
         }
+
+    @Test
+    fun `getAccountRange() stores server response if not empty`() = runTest {
+        val expectedRanges = AccountRangeFixtures.DEFAULT
+
+        val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
+            stripeRepository = FakeStripeRepository(VISA_METADATA),
+            requestOptions = REQUEST_OPTIONS,
+            cardAccountRangeStore = cardAccountRangeStore,
+            analyticsRequestExecutor = {},
+            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                ApplicationProvider.getApplicationContext(),
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            )
+        )
+
+        remoteCardAccountRangeSource.getAccountRange(CardNumberFixtures.VISA)
+        verify(cardAccountRangeStore).save(BinFixtures.VISA, expectedRanges)
+    }
+
+    @Test
+    fun `getAccountRange() does store server response even if empty`() = runTest {
+        val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
+            stripeRepository = FakeStripeRepository(EMPTY_METADATA),
+            requestOptions = REQUEST_OPTIONS,
+            cardAccountRangeStore = cardAccountRangeStore,
+            analyticsRequestExecutor = {},
+            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                ApplicationProvider.getApplicationContext(),
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            )
+        )
+
+        remoteCardAccountRangeSource.getAccountRange(CardNumberFixtures.VISA)
+        verify(cardAccountRangeStore).save(BinFixtures.VISA, emptyList())
+    }
+
+    @Test
+    fun `getAccountRange() does not store server response if the request failed`() = runTest {
+        val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
+            stripeRepository = FakeStripeRepository(FAILED_REQUEST),
+            requestOptions = REQUEST_OPTIONS,
+            cardAccountRangeStore = cardAccountRangeStore,
+            analyticsRequestExecutor = {},
+            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                ApplicationProvider.getApplicationContext(),
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            )
+        )
+
+        remoteCardAccountRangeSource.getAccountRange(CardNumberFixtures.VISA)
+        verify(cardAccountRangeStore, never()).save(any(), any())
+    }
 
     @Test
     fun `getAccountRange() when card number is less than required BIN length should return null`() =
@@ -118,17 +164,19 @@ internal class RemoteCardAccountRangeSourceTest {
 
             val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
                 FakeStripeRepository(
-                    CardMetadata(
-                        bin = BinFixtures.VISA,
-                        accountRanges = listOf(
-                            AccountRange(
-                                binRange = BinRange(
-                                    low = "4242420000000000",
-                                    high = "4242424200000000"
-                                ),
-                                panLength = 16,
-                                brandInfo = AccountRange.BrandInfo.Visa,
-                                country = "GB"
+                    Result.success(
+                        CardMetadata(
+                            bin = BinFixtures.VISA,
+                            accountRanges = listOf(
+                                AccountRange(
+                                    binRange = BinRange(
+                                        low = "4242420000000000",
+                                        high = "4242424200000000"
+                                    ),
+                                    panLength = 16,
+                                    brandInfo = AccountRange.BrandInfo.Visa,
+                                    country = "GB"
+                                )
                             )
                         )
                     )
@@ -155,12 +203,12 @@ internal class RemoteCardAccountRangeSourceTest {
         }
 
     private class FakeStripeRepository(
-        private val cardMetadata: CardMetadata
+        private val result: Result<CardMetadata>
     ) : AbsFakeStripeRepository() {
         override suspend fun getCardMetadata(
             bin: Bin,
             options: ApiRequest.Options
-        ) = cardMetadata
+        ): Result<CardMetadata> = result
     }
 
     private companion object {
@@ -168,14 +216,20 @@ internal class RemoteCardAccountRangeSourceTest {
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
 
-        private val EMPTY_METADATA = CardMetadata(
-            bin = BinFixtures.FAKE,
-            accountRanges = emptyList()
+        private val FAILED_REQUEST = Result.failure<CardMetadata>(IOException())
+
+        private val EMPTY_METADATA = Result.success(
+            CardMetadata(
+                bin = BinFixtures.FAKE,
+                accountRanges = emptyList()
+            )
         )
 
-        private val VISA_METADATA = CardMetadata(
-            bin = BinFixtures.VISA,
-            accountRanges = AccountRangeFixtures.DEFAULT
+        private val VISA_METADATA = Result.success(
+            CardMetadata(
+                bin = BinFixtures.VISA,
+                accountRanges = AccountRangeFixtures.DEFAULT
+            )
         )
     }
 }
