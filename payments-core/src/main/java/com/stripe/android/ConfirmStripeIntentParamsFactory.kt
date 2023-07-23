@@ -86,41 +86,6 @@ internal class ConfirmPaymentIntentParamsFactory(
             clientSecret = clientSecret,
 
             /**
-             Sets `payment_method_options[card][setup_future_usage]`
-             - Note: PaymentSheet uses this `setup_future_usage` (SFU) value very differently from the top-level one:
-             We read the top-level SFU to know the merchant’s desired save behavior
-             We write payment method options SFU to set the customer’s desired save behavior
-             */
-            // At this time, paymentMethodOptions card and us_bank_account is the only PM that
-            // supports setup future usage
-            paymentMethodOptions = when (createParams.typeCode) {
-                PaymentMethod.Type.Card.code -> {
-                    PaymentMethodOptionsParams.Card(setupFutureUsage = setupFutureUsage)
-                }
-                PaymentMethod.Type.USBankAccount.code -> {
-                    PaymentMethodOptionsParams.USBankAccount(setupFutureUsage = setupFutureUsage)
-                }
-                PaymentMethod.Type.Link.code -> {
-                    null
-                }
-                else -> {
-                    PaymentMethodOptionsParams.Card(setupFutureUsage = null)
-                }
-            },
-            shipping = shipping,
-        )
-    }
-
-    override fun create(
-        confirmPaymentMethodOptions: PaymentMethodOptionsParams,
-        createParams: PaymentMethodCreateParams,
-        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-    ): ConfirmPaymentIntentParams {
-        return ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-            paymentMethodCreateParams = createParams,
-            clientSecret = clientSecret,
-
-            /**
             Sets `payment_method_options[card][setup_future_usage]`
             - Note: PaymentSheet uses this `setup_future_usage` (SFU) value very differently from the top-level one:
             We read the top-level SFU to know the merchant’s desired save behavior
@@ -135,17 +100,11 @@ internal class ConfirmPaymentIntentParamsFactory(
                 PaymentMethod.Type.USBankAccount.code -> {
                     PaymentMethodOptionsParams.USBankAccount(setupFutureUsage = setupFutureUsage)
                 }
+                PaymentMethod.Type.Blik.code -> {
+                    paymentMethodOptionsParams
+                }
                 PaymentMethod.Type.Link.code -> {
                     null
-                }
-                PaymentMethod.Type.Blik.code -> {
-                    val code = (createParams.toParamMap()?.get("blik") as LinkedHashMap<String, String>?)?.get("code") as String?
-//
-                    if (code != null) {
-                        PaymentMethodOptionsParams.Blik(code)
-                    } else {
-                        null
-                    }
                 }
                 else -> {
                     PaymentMethodOptionsParams.Card(setupFutureUsage = null)
@@ -169,7 +128,6 @@ internal class ConfirmSetupIntentParamsFactory(
             }
         )
     }
-
     override fun create(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         createParams: PaymentMethodCreateParams,
