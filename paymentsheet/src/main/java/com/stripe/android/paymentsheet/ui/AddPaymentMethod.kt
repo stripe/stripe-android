@@ -153,6 +153,18 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
     )
 }
 
+internal fun FormFieldValues.transformToPaymentMethodOptionsParams(
+    paymentMethod: LpmRepository.SupportedPaymentMethod
+): PaymentMethodOptionsParams? {
+    return FieldValuesToParamsMapConverter.transformToPaymentMethodOptionsParams(
+        // only provide pairs of type
+        fieldValuePairs = fieldValuePairs.filter { entry ->
+            entry.key.isOptions
+        },
+        code = paymentMethod.code,
+    )
+}
+
 internal fun FormFieldValues.transformToPaymentSelection(
     resources: Resources,
     paymentMethod: LpmRepository.SupportedPaymentMethod
