@@ -38,7 +38,7 @@ workflows:
     envs:
       - opts:
           is_expand: false
-          NEEDS_ROBOLECTRIC: true
+        NEEDS_ROBOLECTRIC: true
     before_run:
       - prepare_all
     after_run:
