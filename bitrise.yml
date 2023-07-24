@@ -19,7 +19,7 @@ pipelines:
 stages:
   stage-trigger-run-all:
     workflows:
-#      - check: { }
+ #      - check: { }
       - test: { }
 #      - run-instrumentation-tests: { }
 #      - run-paymentsheet-end-to-end-tests: { }
