@@ -615,6 +615,38 @@ class CustomerAdapterTest {
             .isEqualTo(null)
     }
 
+    @Test
+    fun `CustomerAdapter result can get value or null`() {
+        val result = CustomerAdapter.Result.success("Hello")
+
+        assertThat(result.getOrNull())
+            .isEqualTo("Hello")
+
+        val nullResult = CustomerAdapter.Result.failure<String>(
+            cause = IllegalStateException("some exception"),
+            displayMessage = "testing"
+        )
+
+        assertThat(nullResult.getOrNull())
+            .isNull()
+    }
+
+    @Test
+    fun `CustomerAdapter result can get failure or null`() {
+        val nullFailure = CustomerAdapter.Result.success("Hello")
+
+        assertThat(nullFailure.failureOrNull())
+            .isNull()
+
+        val failure = CustomerAdapter.Result.failure<String>(
+            cause = IllegalStateException("some exception"),
+            displayMessage = "testing"
+        )
+
+        assertThat(failure.failureOrNull()?.displayMessage)
+            .isEqualTo("testing")
+    }
+
     private fun createAdapter(
         customerEphemeralKeyProvider: CustomerEphemeralKeyProvider =
             CustomerEphemeralKeyProvider {

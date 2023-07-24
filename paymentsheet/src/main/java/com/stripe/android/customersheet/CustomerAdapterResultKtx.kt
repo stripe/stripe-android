@@ -1,14 +1,32 @@
 @file:Suppress("UNCHECKED_CAST")
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 
 package com.stripe.android.customersheet
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.StripeException
 
-@OptIn(ExperimentalCustomerSheetApi::class)
-internal fun <T> CustomerAdapter.Result<T>.getOrNull(): T? =
+/**
+ * Returns the encapsulated value if this instance represents success or null if it is failure.
+ */
+@ExperimentalCustomerSheetApi
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun <T> CustomerAdapter.Result<T>.getOrNull(): T? =
     when {
         isFailure -> null
         else -> value as T
+    }
+
+/**
+ * Returns the encapsulated [CustomerAdapter.Result.Failure] if this instance represents failure or
+ * null if it is success.
+ */
+@ExperimentalCustomerSheetApi
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun <T> CustomerAdapter.Result<T>.failureOrNull(): CustomerAdapter.Result.Failure? =
+    when {
+        isFailure -> value as CustomerAdapter.Result.Failure
+        else -> null
     }
 
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -81,10 +99,3 @@ internal inline fun <R, T> CustomerAdapter.Result<T>.onFailure(
     }
     return this
 }
-
-@OptIn(ExperimentalCustomerSheetApi::class)
-internal fun<T> CustomerAdapter.Result<T>.failureOrNull(): CustomerAdapter.Result.Failure? =
-    when {
-        isFailure -> value as CustomerAdapter.Result.Failure
-        else -> null
-    }

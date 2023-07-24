@@ -187,7 +187,9 @@ interface CustomerAdapter {
         val isSuccess: Boolean get() = value !is Failure
         val isFailure: Boolean get() = value is Failure
 
-        internal data class Failure(
+        @ExperimentalCustomerSheetApi
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class Failure internal constructor(
             val cause: Throwable,
             val displayMessage: String? = null
         )
