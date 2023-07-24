@@ -44,7 +44,7 @@ internal class OTPViewModel(
             controller = OTPController()
         )
 
-    init {
+    internal fun initialize() {
         // transition to submittingOTP when otp is fully input
         viewModelScope.launch {
             otpElement.otpCompleteFlow.collectLatest {
@@ -121,6 +121,10 @@ internal class OTPViewModel(
                 }
             )
         }
+    }
+
+    internal fun resetViewState() {
+        _viewState.update { null }
     }
 
     private fun onRequestingCannotVerifySuccess(verificationPageData: VerificationPageData) {
