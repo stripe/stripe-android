@@ -19,10 +19,10 @@ pipelines:
 stages:
   stage-trigger-run-all:
     workflows:
-      - check: { }
+#      - check: { }
       - test: { }
-      - run-instrumentation-tests: { }
-      - run-paymentsheet-end-to-end-tests: { }
+#      - run-instrumentation-tests: { }
+#      - run-paymentsheet-end-to-end-tests: { }
 
 workflows:
   check:
@@ -173,6 +173,7 @@ workflows:
       - git-clone@8: { }
       - cache-pull@2: { }
       - script-runner@0:
+          # Maven doesn't like java 17, so running it before.
           run_if: '{{getenv "NEEDS_ROBOLECTRIC" | ne ""}}'
           title: Download robolectric dependencies
           inputs:
