@@ -177,6 +177,10 @@ workflows:
       - script@1:
           inputs:
             - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
+      - script-runner@0:
+          title: Download robolectric dependencies
+          inputs:
+            - file_path: ./scripts/download_robolectric.sh
   conclude_all:
     steps:
       - script-runner@0:
