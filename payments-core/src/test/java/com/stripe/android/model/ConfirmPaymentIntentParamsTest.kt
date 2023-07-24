@@ -348,7 +348,6 @@ class ConfirmPaymentIntentParamsTest {
     }
 
     @Test
-    //TODO
     fun toParamMap_withBlikPaymentMethodOptions_shouldCreateExpectedMap() {
         val blikCode = "123456"
         assertThat(
