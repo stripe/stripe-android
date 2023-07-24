@@ -204,9 +204,16 @@ internal abstract class BaseSheetViewModel(
         paymentMethods,
         stripeIntent.map { it?.isLiveMode ?: true },
         processing,
-        editing,
-        PaymentSheetTopBarStateFactory::create,
-    ).stateIn(
+        editing
+    ) { currentScreen, paymentMethods, isLiveMode, isProcessing, isEditing ->
+        PaymentSheetTopBarStateFactory.create(
+            screen = currentScreen,
+            paymentMethods = paymentMethods ?: emptyList(),
+            isLiveMode = isLiveMode,
+            isProcessing = isProcessing,
+            isEditing = isEditing,
+        )
+    }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
         initialValue = PaymentSheetTopBarStateFactory.createDefault(),

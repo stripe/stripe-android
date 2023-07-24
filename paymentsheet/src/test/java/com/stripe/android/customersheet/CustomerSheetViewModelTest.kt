@@ -1070,7 +1070,15 @@ class CustomerSheetViewModelTest {
             )
 
             viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat((viewState).primaryButtonVisible)
+            assertThat(viewState.primaryButtonVisible)
+                .isFalse()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnEditPressed
+            )
+
+            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.primaryButtonVisible)
                 .isFalse()
 
             viewModel.handleViewAction(
@@ -1082,7 +1090,7 @@ class CustomerSheetViewModelTest {
             )
 
             viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat((viewState).primaryButtonVisible)
+            assertThat(viewState.primaryButtonVisible)
                 .isTrue()
         }
     }
