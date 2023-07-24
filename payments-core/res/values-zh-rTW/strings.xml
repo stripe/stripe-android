@@ -140,7 +140,7 @@
   <!-- Error when customer's name is invalid -->
   <string name="stripe_invalid_owner_name">您的名稱無效。</string>
   <!-- Shipping form error message -->
-  <string name="stripe_invalid_shipping_information">送貨地址無效</string>
+  <string name="stripe_invalid_shipping_information">收貨地址無效</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">您的郵遞區號不完整。</string>
   <string name="stripe_payment_method_add_new_card">添加新卡...</string>
