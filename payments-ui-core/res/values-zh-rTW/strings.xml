@@ -28,7 +28,7 @@
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">用 Klarna 延後支付。</string>
   <!-- Label for name on card field -->
-  <string name="stripe_name_on_card">卡上的姓名</string>
+  <string name="stripe_name_on_card">持卡人姓名</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 銀行</string>
   <!-- Label of a button that initiates payment when tapped -->
