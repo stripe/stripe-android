@@ -175,6 +175,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
 
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
         val params = transformToPaymentMethodCreateParams(paymentMethod)
+        val options = transformToPaymentMethodOptionsParams(paymentMethod)
         PaymentSelection.New.Card(
             paymentMethodOptionsParams = options,
             paymentMethodCreateParams = params,
@@ -196,6 +197,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
         )
     } else {
         val params = transformToPaymentMethodCreateParams(paymentMethod)
+        val options = transformToPaymentMethodOptionsParams(paymentMethod)
         PaymentSelection.New.GenericPaymentMethod(
             labelResource = resources.getString(paymentMethod.displayNameResource),
             iconResource = paymentMethod.iconResource,
