@@ -168,6 +168,10 @@ workflows:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
       - git-clone@8: { }
       - cache-pull@2: { }
+      - script-runner@0:
+          title: Download robolectric dependencies
+          inputs:
+            - file_path: ./scripts/download_robolectric.sh
       - set-java-version@1:
           inputs:
             - set_java_version: 17
@@ -177,10 +181,6 @@ workflows:
       - script@1:
           inputs:
             - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
-      - script-runner@0:
-          title: Download robolectric dependencies
-          inputs:
-            - file_path: ./scripts/download_robolectric.sh
   conclude_all:
     steps:
       - script-runner@0:
