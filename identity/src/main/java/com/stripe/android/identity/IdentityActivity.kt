@@ -10,7 +10,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.app.AlertDialog
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +37,8 @@ import com.stripe.android.identity.navigation.IndividualWelcomeDestination
 import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
 import com.stripe.android.identity.ui.IdentityTheme
 import com.stripe.android.identity.ui.IdentityTopBarState
+import com.stripe.android.identity.utils.AlertButton
+import com.stripe.android.identity.utils.showAlertDialog
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
 import javax.inject.Provider
@@ -231,12 +232,13 @@ internal class IdentityActivity :
      * [CameraPermissionCheckingActivity.requestCameraPermission].
      */
     override fun showPermissionRationaleDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder.setMessage(R.string.stripe_camera_permission_rationale)
-            .setPositiveButton(R.string.stripe_ok) { _, _ ->
+        showAlertDialog(
+            this,
+            R.string.stripe_camera_permission_rationale,
+            positiveButton = AlertButton(R.string.stripe_ok) { _, _ ->
                 requestCameraPermission()
             }
-        builder.show()
+        )
     }
 
     // This should have neve been invoked as PERMISSION_RATIONALE_SHOWN is never written.

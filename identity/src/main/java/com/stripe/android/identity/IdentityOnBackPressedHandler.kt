@@ -3,7 +3,6 @@ package com.stripe.android.identity
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
@@ -15,6 +14,8 @@ import com.stripe.android.identity.navigation.InitialLoadingDestination
 import com.stripe.android.identity.navigation.clearDataAndNavigateUp
 import com.stripe.android.identity.navigation.routeToScreenName
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
+import com.stripe.android.identity.utils.AlertButton
+import com.stripe.android.identity.utils.showAlertDialog
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 /**
@@ -49,7 +50,21 @@ internal class IdentityOnBackPressedHandler(
                     ?: IdentityAnalyticsRequestFactory.SCREEN_NAME_UNKNOWN
             )
         } else if (destination?.route == ConsentDestination.ROUTE.route) {
-            showAboutToCancelAlert()
+            showAlertDialog(
+                context,
+                R.string.stripe_identity_confirm_cancel,
+                positiveButton = AlertButton(
+                    R.string.stripe_identity_yes
+                ) { _, _ ->
+                    finishWithCancelResult(
+                        identityViewModel,
+                        verificationFlowFinishable,
+                        destination?.route?.routeToScreenName()
+                            ?: IdentityAnalyticsRequestFactory.SCREEN_NAME_UNKNOWN
+                    )
+                },
+                negativeButton = AlertButton(R.string.stripe_identity_no)
+            )
         } else {
             when (destination?.route) {
                 ConfirmationDestination.ROUTE.route -> {
@@ -86,21 +101,6 @@ internal class IdentityOnBackPressedHandler(
                 }
             }
         }
-    }
-
-    private fun showAboutToCancelAlert() {
-        val builder = AlertDialog.Builder(context)
-        builder.setMessage(R.string.stripe_identity_confirm_cancel)
-            .setPositiveButton(R.string.stripe_identity_yes) { _, _ ->
-                finishWithCancelResult(
-                    identityViewModel,
-                    verificationFlowFinishable,
-                    destination?.route?.routeToScreenName()
-                        ?: IdentityAnalyticsRequestFactory.SCREEN_NAME_UNKNOWN
-                )
-            }.setNegativeButton(R.string.stripe_identity_no) { _, _ ->
-            }
-        builder.show()
     }
 
     private fun finishWithCancelResult(
