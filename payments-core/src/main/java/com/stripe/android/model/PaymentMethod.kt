@@ -245,13 +245,6 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false
         ),
-        Blik(
-            "blik",
-            isReusable = false,
-            isVoucher = false,
-            requiresMandate = false,
-            hasDelayedSettlement = false
-        ),
         Bancontact(
             "bancontact",
             isReusable = false,
@@ -310,6 +303,13 @@ constructor(
         ),
         Netbanking(
             "netbanking",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Blik(
+            "blik",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
