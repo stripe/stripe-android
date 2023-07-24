@@ -10,4 +10,8 @@
 
     <string name="stripe_upload_a_photo">Upload a photo</string>
     <string name="stripe_upload_your_photo_id">Upload your photo ID</string>
+
+    <string name="stripe_identity_confirm_cancel">Are you sure you want to cancel?</string>
+    <string name="stripe_identity_yes">Yes</string>
+    <string name="stripe_identity_no">No</string>
 </resources>

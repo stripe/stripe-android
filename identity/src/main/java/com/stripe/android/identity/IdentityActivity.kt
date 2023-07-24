@@ -196,6 +196,7 @@ internal class IdentityActivity :
                     onBackPressedCallback =
                         IdentityOnBackPressedHandler(
                             this,
+                            this,
                             navController,
                             identityViewModel
                         )
