@@ -34,16 +34,25 @@ internal class BottomSheetState(
     val modalBottomSheetState: ModalBottomSheetState,
 ) {
 
+    private var dismissalType: DismissalType? = null
+
     suspend fun show() {
         modalBottomSheetState.show()
     }
 
-    suspend fun awaitDismissal() {
+    suspend fun awaitDismissal(): DismissalType {
         snapshotFlow { modalBottomSheetState.isVisible }.first { isVisible -> !isVisible }
+        return dismissalType ?: DismissalType.Programmatically
     }
 
     suspend fun hide() {
+        dismissalType = DismissalType.Programmatically
         modalBottomSheetState.hide()
+    }
+
+    internal enum class DismissalType {
+        Programmatically,
+        SwipedDownByUser,
     }
 }
 
@@ -102,8 +111,10 @@ internal fun BottomSheet(
             onShow()
         }
 
-        state.awaitDismissal()
-        onDismissed()
+        val dismissalType = state.awaitDismissal()
+        if (dismissalType == BottomSheetState.DismissalType.SwipedDownByUser) {
+            onDismissed()
+        }
     }
 
     LaunchedEffect(systemUiController, statusBarColorAlpha) {

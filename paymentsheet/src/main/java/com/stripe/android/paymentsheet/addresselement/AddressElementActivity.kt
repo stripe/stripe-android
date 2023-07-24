@@ -69,10 +69,10 @@ internal class AddressElementActivity : ComponentActivity() {
 
             val coroutineScope = rememberCoroutineScope()
 
-            viewModel.navigator.onDismiss = {
-                setResult(it)
+            viewModel.navigator.onDismiss = { result ->
                 coroutineScope.launch {
                     bottomSheetState.hide()
+                    setResult(result)
                     finish()
                 }
             }
