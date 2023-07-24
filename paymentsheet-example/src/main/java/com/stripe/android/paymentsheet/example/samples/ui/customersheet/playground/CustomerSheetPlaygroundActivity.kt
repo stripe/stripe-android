@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -73,6 +74,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
 
                     Text(
                         text = "Payment Methods",
+                        color = MaterialTheme.colors.onBackground,
                         fontSize = 18.sp,
                     )
 
@@ -87,7 +89,8 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                         }
                         is CustomerSheetPlaygroundViewState.FailedToLoad -> {
                             Text(
-                                text = state.message
+                                text = state.message,
+                                color = MaterialTheme.colors.onBackground,
                             )
                         }
                         is CustomerSheetPlaygroundViewState.Loading -> {
@@ -117,6 +120,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             ) {
                 Text(
                     "Payment default",
+                    color = MaterialTheme.colors.onBackground,
                     fontWeight = FontWeight.Bold,
                 )
                 TextButton(
@@ -134,6 +138,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                         }
                         Text(
                             text = state.selection?.paymentOption?.label ?: "Select",
+                            color = MaterialTheme.colors.onBackground,
                         )
                     }
                 }
@@ -159,6 +164,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
         ) {
             Text(
                 text = "Developer Configurations",
+                color = MaterialTheme.colors.onBackground,
                 fontSize = 18.sp
             )
 
@@ -188,11 +194,12 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                if (viewState.isSetupIntentEnabled) {
+                text = if (viewState.isSetupIntentEnabled) {
                     "SetupIntent"
                 } else {
                     "CreateAndAttach"
-                }
+                },
+                color = MaterialTheme.colors.onBackground,
             )
             Switch(
                 checked = viewState.isSetupIntentEnabled,
@@ -214,7 +221,8 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                "Google Pay"
+                text = "Google Pay",
+                color = MaterialTheme.colors.onBackground,
             )
             Switch(
                 checked = viewState.isGooglePayEnabled,
@@ -236,11 +244,12 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                if (viewState.isExistingCustomer) {
+                text = if (viewState.isExistingCustomer) {
                     "Returning customer"
                 } else {
                     "New customer"
-                }
+                },
+                color = MaterialTheme.colors.onBackground,
             )
             Switch(
                 checked = viewState.isExistingCustomer,
