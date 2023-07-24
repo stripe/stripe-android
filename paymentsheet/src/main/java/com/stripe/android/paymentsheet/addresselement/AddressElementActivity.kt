@@ -53,6 +53,7 @@ internal class AddressElementActivity : ComponentActivity() {
         starterArgs.config?.appearance?.parseAppearance()
 
         setContent {
+            val coroutineScope = rememberCoroutineScope()
             val navController = rememberAnimatedNavController()
             viewModel.navigator.navigationController = navController
 
@@ -66,8 +67,6 @@ internal class AddressElementActivity : ComponentActivity() {
             BackHandler {
                 viewModel.navigator.onBack()
             }
-
-            val coroutineScope = rememberCoroutineScope()
 
             viewModel.navigator.onDismiss = { result ->
                 coroutineScope.launch {

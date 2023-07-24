@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.first
 @OptIn(ExperimentalMaterialApi::class)
 internal class BottomSheetState(
     val modalBottomSheetState: ModalBottomSheetState,
+    val keyboardHandler: BottomSheetKeyboardHandler,
 ) {
 
     private var dismissalType: DismissalType? = null
@@ -42,11 +43,12 @@ internal class BottomSheetState(
 
     suspend fun awaitDismissal(): DismissalType {
         snapshotFlow { modalBottomSheetState.isVisible }.first { isVisible -> !isVisible }
-        return dismissalType ?: DismissalType.Programmatically
+        return dismissalType ?: DismissalType.SwipedDownByUser
     }
 
     suspend fun hide() {
         dismissalType = DismissalType.Programmatically
+        keyboardHandler.dismissAndWait()
         modalBottomSheetState.hide()
     }
 
@@ -68,8 +70,13 @@ internal fun rememberBottomSheetState(
         animationSpec = tween(),
     )
 
+    val keyboardHandler = rememberBottomSheetKeyboardHandler()
+
     return remember {
-        BottomSheetState(modalBottomSheetState)
+        BottomSheetState(
+            modalBottomSheetState = modalBottomSheetState,
+            keyboardHandler = keyboardHandler,
+        )
     }
 }
 
