@@ -70,10 +70,14 @@ import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.Requirement.Companion.INDIVIDUAL_REQUIREMENT_SET
+import com.stripe.android.identity.networking.models.Requirement.Companion.nextDestination
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.hasError
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.needsFallback
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.submittedAndClosed
+import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.states.FaceDetectorTransitioner
@@ -872,7 +876,7 @@ internal class IdentityViewModel constructor(
                 ephemeralKey = verificationArgs.ephemeralKeySecret,
                 simulateDelay = simulateDelay
             )
-        }.navigateToConfirmIfSubmitted(fromRoute, navController)
+        }.checkSubmitStatusAndNavigate(fromRoute, navController)
     }
 
     /**
@@ -889,21 +893,23 @@ internal class IdentityViewModel constructor(
                 ephemeralKey = verificationArgs.ephemeralKeySecret,
                 simulateDelay = simulateDelay
             )
-        }.navigateToConfirmIfSubmitted(fromRoute, navController)
+        }.checkSubmitStatusAndNavigate(fromRoute, navController)
     }
 
     /**
-     * Check the [Result] of [VerificationPageData] and try to navigate to [ConfirmationDestination].
+     * Check the submt [Result] of [VerificationPageData] and try to navigate to [ConfirmationDestination].
      *
      * If Result is success, check the value of VerificationPageData
      *   If VerificationPageData has error, navigate to [ErrorDestination] with the error.
-     *   If VerificationPageData is submitted, navigate to [ConfirmationDestination].
-     *   If VerificationPageData is not submitted, navigate to [ErrorDestination].
+     *   If VerificationPageData is submitted closed, navigate to [ConfirmationDestination].
+     *   If VerificationPageData is not closed and it still has missings,
+     *     document fallback happens during submit, update initial missings and navigate accordingly.
+     *   Otherwise navigate to [ErrorDestination].
      *
      * If Result is failed, navigate to [ErrorDestination] with the failure information.
      *
      */
-    private fun Result<VerificationPageData>.navigateToConfirmIfSubmitted(
+    private fun Result<VerificationPageData>.checkSubmitStatusAndNavigate(
         fromRoute: String,
         navController: NavController
     ) {
@@ -923,11 +929,39 @@ internal class IdentityViewModel constructor(
                         )
                     }
                 }
-
-                submittedVerificationPageData.submitted -> {
+                // After submit, missings got repopulated - fallback from phoneV to doc
+                // Need to reset all non-doc related data and start from doc.
+                submittedVerificationPageData.needsFallback() -> {
+                    // update initialMissings
+                    val newMissings =
+                        requireNotNull(submittedVerificationPageData.requirements.missings)
+                    _verificationPage.postValue(
+                        Resource.success(
+                            _verificationPage.value?.data?.copy(
+                                requirements = VerificationPageRequirements(
+                                    missing = newMissings
+                                )
+                            )
+                        )
+                    )
+                    // clear collectedData
+                    _collectedData.updateStateAndSave {
+                        CollectedDataParam()
+                    }
+                    // reset missingRequirement
+                    _missingRequirements.updateStateAndSave {
+                        newMissings.toSet()
+                    }
+                    navController.navigateTo(
+                        newMissings.nextDestination(getApplication())
+                    )
+                }
+                /**
+                 * Only navigates to success when both submitted and closed are true.
+                 */
+                submittedVerificationPageData.submittedAndClosed() -> {
                     navController.navigateTo(ConfirmationDestination)
                 }
-
                 else -> {
                     errorCause.postValue(IllegalStateException("VerificationPage submit failed"))
                     navController.navigateToErrorScreenWithDefaultValues(getApplication())
@@ -972,7 +1006,8 @@ internal class IdentityViewModel constructor(
 
     private val initialMissings: List<Requirement>
         get() {
-            return _verificationPage.value?.data?.requirements?.missing ?: Requirement.values().toList()
+            return _verificationPage.value?.data?.requirements?.missing ?: Requirement.values()
+                .toList()
                 .also {
                     Log.e(
                         TAG,
@@ -1139,7 +1174,7 @@ internal class IdentityViewModel constructor(
     /**
      * Submit the verification and navigate based on result.
      */
-    private suspend fun submitAndNavigate(
+    internal suspend fun submitAndNavigate(
         navController: NavController,
         fromRoute: String
     ) {
@@ -1151,7 +1186,7 @@ internal class IdentityViewModel constructor(
                 verificationArgs.verificationSessionId,
                 verificationArgs.ephemeralKeySecret
             )
-        }.navigateToConfirmIfSubmitted(fromRoute, navController)
+        }.checkSubmitStatusAndNavigate(fromRoute, navController)
     }
 
     /**

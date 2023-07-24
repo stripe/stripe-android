@@ -15,7 +15,8 @@ internal val VERIFICATION_PAGE_DATA_JSON_STRING = """
         ]
       },
       "status": "requires_input",
-      "submitted": false
+      "submitted": false,
+      "closed": false
     }
 """.trimIndent()
 
@@ -132,6 +133,7 @@ internal val VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
       },
       "status": "requires_input",
       "submitted": false,
+      "closed": false,
       "success": {
         "body": "\u003Cp\u003E\u003Cb\u003EThank you for providing your information\u003C/b\u003E\u003C/p\u003E\u003Cp\u003Emlgb.band will reach out if additional details are required.\u003C/p\u003E\u003Cp\u003E\u003Cb\u003ENext steps\u003C/b\u003E\u003C/p\u003E\u003Cp\u003Emlgb.band will contact you regarding the outcome of your identification process.\u003C/p\u003E\u003Cp\u003E\u003Cb\u003EMore about Stripe Identity\u003C/b\u003E\u003C/p\u003E\u003Cp\u003E\u003Ca href='https://support.stripe.com/questions/common-questions-about-stripe-identity'\u003ECommon questions about Stripe Identity\u003C/a\u003E\u003C/p\u003E\u003Cp\u003E\u003Ca href='https://stripe.com/privacy-center/legal#stripe-identity'\u003ELearn how Stripe uses data\u003C/a\u003E\u003C/p\u003E\u003Cp\u003E\u003Ca href='https://stripe.com/privacy'\u003EStripe Privacy Policy\u003C/a\u003E\u003C/p\u003E\u003Cp\u003E\u003Ca href='mailto:privacy@stripe.com'\u003EContact Stripe\u003C/a\u003E\u003C/p\u003E",
         "button_text": "Complete",
@@ -254,6 +256,7 @@ internal val VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
       },
       "status": "requires_input",
       "submitted": false,
+      "closed": false,
       "success": {
         "body": "\u003Cp\u003E\u003Cb\u003EThank you for providing your information\u003C/b\u003E\u003C/p\u003E\u003Cp\u003Emlgb.band will reach out if additional details are required.\u003C/p\u003E\u003Cp\u003E\u003Cb\u003ENext steps\u003C/b\u003E\u003C/p\u003E\u003Cp\u003Emlgb.band will contact you regarding the outcome of your identification process.\u003C/p\u003E\u003Cp\u003E\u003Cb\u003EMore about Stripe Identity\u003C/b\u003E\u003C/p\u003E\u003Cp\u003E\u003Ca href='https://support.stripe.com/questions/common-questions-about-stripe-identity'\u003ECommon questions about Stripe Identity\u003C/a\u003E\u003C/p\u003E\u003Cp\u003E\u003Ca href='https://stripe.com/privacy-center/legal#stripe-identity'\u003ELearn how Stripe uses data\u003C/a\u003E\u003C/p\u003E\u003Cp\u003E\u003Ca href='https://stripe.com/privacy'\u003EStripe Privacy Policy\u003C/a\u003E\u003C/p\u003E\u003Cp\u003E\u003Ca href='mailto:privacy@stripe.com'\u003EContact Stripe\u003C/a\u003E\u003C/p\u003E",
         "button_text": "Complete",
@@ -404,6 +407,7 @@ internal val VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING = """
       },
       "status": "requires_input",
       "submitted": false,
+      "closed": false,
       "success": {
         "body": "<p>Thank you for providing your information. Andrew's Audio will reach out if additional details are required.</p><p><b>Next steps</b></p><p>Andrew's Audio will contact you regarding the outcome of your identification process.</p><p><b>More about Stripe Identity</b></p><p><a href='https://support.stripe.com/questions/common-questions-about-stripe-identity'>Common questions about Stripe Identity</a></p><p><a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn how Stripe uses data</a></p><p><a href='https://stripe.com/privacy'>Stripe Privacy Policy</a></p><p><a href='mailto:privacy@stripe.com'>Contact Stripe</a></p>",
         "button_text": "Complete",
@@ -561,6 +565,7 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING = """
       "selfie": null,
       "status": "requires_input",
       "submitted": false,
+      "closed": false,
       "success": {
         "body": "<p>Thank you for providing your information. Tora's catfood will reach out if additional details are required.</p><p><b>Next steps</b></p><p>Tora's catfood will contact you regarding the outcome of your identification process.</p><p><b>More about Stripe Identity</b></p><p><a href='https://support.stripe.com/questions/common-questions-about-stripe-identity'>Common questions about Stripe Identity</a></p><p><a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn how Stripe uses data</a></p><p><a href='https://stripe.com/privacy'>Stripe Privacy Policy</a></p><p><a href='mailto:privacy@stripe.com'>Contact Stripe</a></p>",
         "button_text": "Complete",
@@ -691,6 +696,7 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING = """
       "selfie": null,
       "status": "requires_input",
       "submitted": false,
+      "closed": false,
       "success": {
         "body": "<p>Thank you for providing your information. Tora's catfood will reach out if additional details are required.</p><p><b>Next steps</b></p><p>Tora's catfood will contact you regarding the outcome of your identification process.</p><p><b>More about Stripe Identity</b></p><p><a href='https://support.stripe.com/questions/common-questions-about-stripe-identity'>Common questions about Stripe Identity</a></p><p><a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn how Stripe uses data</a></p><p><a href='https://stripe.com/privacy'>Stripe Privacy Policy</a></p><p><a href='mailto:privacy@stripe.com'>Contact Stripe</a></p>",
         "button_text": "Complete",
@@ -821,6 +827,7 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_AND_ID_NUMBER_JSON_
       "selfie": null,
       "status": "requires_input",
       "submitted": false,
+      "closed": false,
       "success": {
         "body": "<p>Thank you for providing your information. Tora's catfood will reach out if additional details are required.</p><p><b>Next steps</b></p><p>Tora's catfood will contact you regarding the outcome of your identification process.</p><p><b>More about Stripe Identity</b></p><p><a href='https://support.stripe.com/questions/common-questions-about-stripe-identity'>Common questions about Stripe Identity</a></p><p><a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn how Stripe uses data</a></p><p><a href='https://stripe.com/privacy'>Stripe Privacy Policy</a></p><p><a href='mailto:privacy@stripe.com'>Contact Stripe</a></p>",
         "button_text": "Complete",
@@ -948,6 +955,7 @@ internal val VERIFICATION_PAGE_TYPE_ID_NUMBER_JSON_STRING = """
       "selfie": null,
       "status": "requires_input",
       "submitted": false,
+      "closed": false,
       "success": {
         "body": "<p>Thank you for providing your information. Tora's catfood will reach out if additional details are required.</p><p><b>Next steps</b></p><p>Tora's catfood will contact you regarding the outcome of your identification process.</p><p><b>More about Stripe Identity</b></p><p><a href='https://support.stripe.com/questions/common-questions-about-stripe-identity'>Common questions about Stripe Identity</a></p><p><a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn how Stripe uses data</a></p><p><a href='https://stripe.com/privacy'>Stripe Privacy Policy</a></p><p><a href='mailto:privacy@stripe.com'>Contact Stripe</a></p>",
         "button_text": "Complete",
@@ -1075,6 +1083,7 @@ internal val VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING = """
       "selfie": null,
       "status": "requires_input",
       "submitted": false,
+      "closed": false,
       "success": {
         "body": "<p>Thank you for providing your information. Tora's catfood will reach out if additional details are required.</p><p><b>Next steps</b></p><p>Tora's catfood will contact you regarding the outcome of your identification process.</p><p><b>More about Stripe Identity</b></p><p><a href='https://support.stripe.com/questions/common-questions-about-stripe-identity'>Common questions about Stripe Identity</a></p><p><a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn how Stripe uses data</a></p><p><a href='https://stripe.com/privacy'>Stripe Privacy Policy</a></p><p><a href='mailto:privacy@stripe.com'>Contact Stripe</a></p>",
         "button_text": "Complete",

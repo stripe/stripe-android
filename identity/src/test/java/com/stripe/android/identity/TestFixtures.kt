@@ -14,14 +14,43 @@ internal const val ERROR_BODY = "errorBody"
 internal const val ERROR_BUTTON_TEXT = "error button text"
 internal const val ERROR_TITLE = "errorTitle"
 
-internal val CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA = VerificationPageData(
+internal val SUBMITTED_AND_CLOSED_VERIFICATION_PAGE_DATA = VerificationPageData(
     id = "id",
     objectType = "type",
     requirements = VerificationPageDataRequirements(
         errors = emptyList()
     ),
     status = VerificationPageData.Status.VERIFIED,
-    submitted = false
+    submitted = true,
+    closed = true
+)
+
+internal val SUBMITTED_AND_NOT_CLOSED_VERIFICATION_PAGE_DATA = VerificationPageData(
+    id = "id",
+    objectType = "type",
+    requirements = VerificationPageDataRequirements(
+        errors = emptyList(),
+        missings = listOf(
+            Requirement.BIOMETRICCONSENT,
+            Requirement.IDDOCUMENTFRONT,
+            Requirement.IDDOCUMENTBACK
+        )
+    ),
+    status = VerificationPageData.Status.VERIFIED,
+    submitted = true,
+    closed = false
+)
+
+internal val SUBMITTED_AND_NOT_CLOSED_NO_MISSING_VERIFICATION_PAGE_DATA = VerificationPageData(
+    id = "id",
+    objectType = "type",
+    requirements = VerificationPageDataRequirements(
+        errors = emptyList(),
+        missings = emptyList()
+    ),
+    status = VerificationPageData.Status.VERIFIED,
+    submitted = true,
+    closed = false
 )
 
 internal val CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA = VerificationPageData(
@@ -32,7 +61,8 @@ internal val CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA = Verificatio
         missings = emptyList()
     ),
     status = VerificationPageData.Status.VERIFIED,
-    submitted = true
+    submitted = true,
+    closed = true
 )
 
 internal val VERIFICATION_PAGE_DATA_MISSING_FRONT = VerificationPageData(
@@ -43,7 +73,8 @@ internal val VERIFICATION_PAGE_DATA_MISSING_FRONT = VerificationPageData(
         missings = listOf(Requirement.IDDOCUMENTFRONT)
     ),
     status = VerificationPageData.Status.REQUIRESINPUT,
-    submitted = false
+    submitted = false,
+    closed = false
 )
 
 internal val VERIFICATION_PAGE_DATA_MISSING_BACK = VerificationPageData(
@@ -54,7 +85,8 @@ internal val VERIFICATION_PAGE_DATA_MISSING_BACK = VerificationPageData(
         missings = listOf(Requirement.IDDOCUMENTBACK)
     ),
     status = VerificationPageData.Status.REQUIRESINPUT,
-    submitted = false
+    submitted = false,
+    closed = false
 )
 
 internal val VERIFICATION_PAGE_DATA_MISSING_PHONE_OTP = VerificationPageData(
@@ -65,7 +97,8 @@ internal val VERIFICATION_PAGE_DATA_MISSING_PHONE_OTP = VerificationPageData(
         missings = listOf(Requirement.PHONE_OTP)
     ),
     status = VerificationPageData.Status.REQUIRESINPUT,
-    submitted = false
+    submitted = false,
+    closed = false
 )
 
 internal val VERIFICATION_PAGE_DATA_MISSING_CONSENT = VerificationPageData(
@@ -76,7 +109,8 @@ internal val VERIFICATION_PAGE_DATA_MISSING_CONSENT = VerificationPageData(
         missings = listOf(Requirement.BIOMETRICCONSENT)
     ),
     status = VerificationPageData.Status.REQUIRESINPUT,
-    submitted = false
+    submitted = false,
+    closed = false
 )
 
 internal val VERIFICATION_PAGE_DATA_MISSING_DOCTYPE = VerificationPageData(
@@ -87,7 +121,8 @@ internal val VERIFICATION_PAGE_DATA_MISSING_DOCTYPE = VerificationPageData(
         missings = listOf(Requirement.IDDOCUMENTTYPE)
     ),
     status = VerificationPageData.Status.REQUIRESINPUT,
-    submitted = false
+    submitted = false,
+    closed = false
 )
 
 internal val VERIFICATION_PAGE_DATA_NOT_MISSING_BACK = VerificationPageData(
@@ -98,7 +133,8 @@ internal val VERIFICATION_PAGE_DATA_NOT_MISSING_BACK = VerificationPageData(
         missings = emptyList()
     ),
     status = VerificationPageData.Status.REQUIRESINPUT,
-    submitted = false
+    submitted = false,
+    closed = false
 )
 
 internal val VERIFICATION_PAGE_DATA_MISSING_SELFIE = VerificationPageData(
@@ -109,7 +145,8 @@ internal val VERIFICATION_PAGE_DATA_MISSING_SELFIE = VerificationPageData(
         missings = listOf(Requirement.FACE)
     ),
     status = VerificationPageData.Status.REQUIRESINPUT,
-    submitted = false
+    submitted = false,
+    closed = false
 )
 
 internal val VERIFICATION_PAGE_DATA_HAS_ERROR = VerificationPageData(
@@ -127,7 +164,8 @@ internal val VERIFICATION_PAGE_DATA_HAS_ERROR = VerificationPageData(
         missings = listOf(Requirement.BIOMETRICCONSENT)
     ),
     status = VerificationPageData.Status.REQUIRESINPUT,
-    submitted = false
+    submitted = false,
+    closed = false
 )
 
 internal val json: Json = Json {

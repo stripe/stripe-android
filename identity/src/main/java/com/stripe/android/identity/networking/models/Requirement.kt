@@ -11,6 +11,7 @@ import com.stripe.android.identity.navigation.IDUploadDestination
 import com.stripe.android.identity.navigation.IdentityTopLevelDestination
 import com.stripe.android.identity.navigation.IndividualDestination
 import com.stripe.android.identity.navigation.IndividualWelcomeDestination
+import com.stripe.android.identity.navigation.OTPDestination
 import com.stripe.android.identity.navigation.PassportScanDestination
 import com.stripe.android.identity.navigation.PassportUploadDestination
 import com.stripe.android.identity.navigation.SelfieDestination
@@ -94,8 +95,11 @@ internal enum class Requirement {
                 FACE -> {
                     fromRoute == SelfieDestination.ROUTE.route
                 }
-                DOB, NAME, IDNUMBER, ADDRESS, PHONE_NUMBER, PHONE_OTP -> {
+                DOB, NAME, IDNUMBER, ADDRESS, PHONE_NUMBER -> {
                     fromRoute == IndividualDestination.ROUTE.route
+                }
+                PHONE_OTP -> {
+                    fromRoute == OTPDestination.ROUTE.route
                 }
             }
 
