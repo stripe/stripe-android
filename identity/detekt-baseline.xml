@@ -25,6 +25,7 @@
     <ID>LongMethod:IDNumberSection.kt$@Composable internal fun IDNumberSection( enabled: Boolean, idNumberCountries: List&lt;Country>, countryNotListedText: String, navController: NavController, onIdNumberCollected: (Resource&lt;IdNumberParam>) -> Unit )</ID>
     <ID>LongMethod:IdentityActivity.kt$IdentityActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:IdentityNavGraph.kt$@Composable internal fun IdentityNavGraph( navController: NavHostController = rememberNavController(), identityViewModel: IdentityViewModel, fallbackUrlLauncher: FallbackUrlLauncher, appSettingsOpenable: AppSettingsOpenable, cameraPermissionEnsureable: CameraPermissionEnsureable, verificationFlowFinishable: VerificationFlowFinishable, identityScanViewModelFactory: IdentityScanViewModel.IdentityScanViewModelFactory, onTopBarNavigationClick: () -> Unit, topBarState: IdentityTopBarState, onNavControllerCreated: (NavController) -> Unit )</ID>
+    <ID>LongMethod:IdentityOnBackPressedHandler.kt$IdentityOnBackPressedHandler$override fun handleOnBackPressed()</ID>
     <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$internal fun uploadScanResult( result: IdentityAggregator.FinalResult, verificationPage: VerificationPage, targetScanType: IdentityScanState.ScanType? )</ID>
     <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$private fun uploadDocumentImagesAndNotify( imageFile: File, filePurpose: StripeFilePurpose, uploadMethod: UploadMethod, scores: List&lt;Float>? = null, isHighRes: Boolean, isFront: Boolean, scanType: IdentityScanState.ScanType, compressionQuality: Float )</ID>
     <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$suspend fun postVerificationPageDataForDocSelection( type: CollectedDataParam.Type, navController: NavController, viewLifecycleOwner: LifecycleOwner, cameraPermissionEnsureable: CameraPermissionEnsureable )</ID>
@@ -56,6 +57,7 @@
     <ID>MagicNumber:IDNumberSection.kt$USIDConfig.&lt;no name provided>$4</ID>
     <ID>MagicNumber:OTPScreen.kt$4</ID>
     <ID>MagicNumber:RoundToMaxDecimals.kt$10</ID>
+    <ID>MatchingDeclarationName:AlertUtils.kt$AlertButton</ID>
     <ID>MatchingDeclarationName:ComposeLoadingButton.kt$LoadingButtonState</ID>
     <ID>MaxLineLength:DefaultIdentityRepositoryTest.kt$DefaultIdentityRepositoryTest$fun</ID>
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$fun</ID>
