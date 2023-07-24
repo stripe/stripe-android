@@ -1,23 +1,24 @@
-@file:Suppress("UNCHECKED_CAST")
-
 package com.stripe.android.customersheet
 
 import com.stripe.android.core.exception.StripeException
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal fun <T> CustomerAdapter.Result<T>.getOrNull(): T? =
-    when {
-        isFailure -> null
-        else -> value as T
+    when (this) {
+        is CustomerAdapter.Result.Failure -> null
+        is CustomerAdapter.Result.Success -> this.value
     }
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal inline infix fun <R, T> CustomerAdapter.Result<T>.flatMap(
     transform: (T) -> CustomerAdapter.Result<R>
 ): CustomerAdapter.Result<R> {
-    return when {
-        isSuccess -> transform(value as T)
-        else -> CustomerAdapter.Result(value)
+    return when (this) {
+        is CustomerAdapter.Result.Success -> transform(this.value)
+        is CustomerAdapter.Result.Failure -> CustomerAdapter.Result.failure(
+            cause = this.cause,
+            displayMessage = this.displayMessage
+        )
     }
 }
 
@@ -25,9 +26,12 @@ internal inline infix fun <R, T> CustomerAdapter.Result<T>.flatMap(
 internal inline fun <R, T> CustomerAdapter.Result<T>.map(
     transform: (value: T) -> R
 ): CustomerAdapter.Result<R> {
-    return when {
-        isSuccess -> CustomerAdapter.Result.success(transform(value as T))
-        else -> CustomerAdapter.Result(value)
+    return when (this) {
+        is CustomerAdapter.Result.Success -> CustomerAdapter.Result.success(transform(this.value))
+        is CustomerAdapter.Result.Failure -> CustomerAdapter.Result.failure(
+            cause = this.cause,
+            displayMessage = this.displayMessage
+        )
     }
 }
 
@@ -35,9 +39,12 @@ internal inline fun <R, T> CustomerAdapter.Result<T>.map(
 internal inline fun <R, T> CustomerAdapter.Result<T>.mapCatching(
     transform: (value: T) -> R
 ): CustomerAdapter.Result<R> {
-    return when {
-        isSuccess -> runCatching { transform(value as T) }
-        else -> CustomerAdapter.Result(value)
+    return when (this) {
+        is CustomerAdapter.Result.Success -> runCatching { transform(this.value) }
+        is CustomerAdapter.Result.Failure -> CustomerAdapter.Result.failure(
+            cause = this.cause,
+            displayMessage = this.displayMessage
+        )
     }
 }
 
@@ -56,9 +63,13 @@ internal inline fun <R, T> CustomerAdapter.Result<T>.fold(
     onSuccess: (value: T) -> R,
     onFailure: (cause: Throwable, displayMessage: String?) -> R
 ): R {
-    return when (val failure = value as? CustomerAdapter.Result.Failure) {
-        is CustomerAdapter.Result.Failure -> onFailure(failure.cause, failure.displayMessage)
-        else -> onSuccess(value as T)
+    return when (this) {
+        is CustomerAdapter.Result.Failure -> {
+            onFailure(this.cause, this.displayMessage)
+        }
+        is CustomerAdapter.Result.Success -> {
+            onSuccess(this.value)
+        }
     }
 }
 
@@ -66,7 +77,9 @@ internal inline fun <R, T> CustomerAdapter.Result<T>.fold(
 internal inline fun <R, T> CustomerAdapter.Result<T>.onSuccess(
     action: (value: T) -> R
 ): CustomerAdapter.Result<T> {
-    if (isSuccess) action(value as T)
+    if (this is CustomerAdapter.Result.Success) {
+        action(this.value)
+    }
     return this
 }
 
@@ -83,8 +96,8 @@ internal inline fun <R, T> CustomerAdapter.Result<T>.onFailure(
 }
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-internal fun<T> CustomerAdapter.Result<T>.failureOrNull(): CustomerAdapter.Result.Failure? =
-    when {
-        isFailure -> value as CustomerAdapter.Result.Failure
+internal fun<T> CustomerAdapter.Result<T>.failureOrNull(): CustomerAdapter.Result.Failure<T>? =
+    when (this) {
+        is CustomerAdapter.Result.Failure -> this
         else -> null
     }

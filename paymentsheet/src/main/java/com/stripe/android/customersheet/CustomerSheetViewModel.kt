@@ -133,12 +133,8 @@ internal class CustomerSheetViewModel @Inject constructor(
                 }
             }
 
-            val failure = result.failureOrNull()
-            val errorMessage = if (result.isFailure) {
-                failure?.displayMessage ?: failure?.cause?.stripeErrorMessage(application)
-            } else {
-                null
-            }
+            val errorMessage = result.failureOrNull()?.displayMessage
+                ?: result.failureOrNull()?.cause?.stripeErrorMessage(application)
 
             originalPaymentSelection = paymentSelection
 
