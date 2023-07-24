@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -64,7 +65,8 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
                 ) {
                     Text(
                         text = "Payment Methods",
-                        fontSize = 18.sp
+                        color = MaterialTheme.colors.onBackground,
+                        fontSize = 18.sp,
                     )
 
                     when (val state = viewState) {
@@ -78,7 +80,8 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
                         }
                         is CustomerSheetExampleViewState.FailedToLoad -> {
                             Text(
-                                text = state.message
+                                text = state.message,
+                                color = MaterialTheme.colors.onBackground,
                             )
                         }
                         is CustomerSheetExampleViewState.Loading -> {
@@ -125,6 +128,7 @@ private fun CustomerPaymentMethods(
             Text(
                 "Payment default",
                 fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colors.onBackground,
             )
             TextButton(
                 onClick = onUpdateDefaultPaymentMethod,
@@ -141,6 +145,7 @@ private fun CustomerPaymentMethods(
                     }
                     Text(
                         text = state.selection?.paymentOption?.label ?: "Select",
+                        color = MaterialTheme.colors.onBackground,
                     )
                 }
             }
