@@ -147,7 +147,7 @@ class CustomerAdapterTest {
             customerEphemeralKeyProvider = { error }
         )
         val result = adapter.retrievePaymentMethods()
-        assertThat((result.failureOrNull() as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Merchant says cannot get customer")
     }
 
@@ -178,7 +178,7 @@ class CustomerAdapterTest {
             )
         )
         val result = adapter.attachPaymentMethod("pm_1234")
-        assertThat((result.failureOrNull() as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Something went wrong")
     }
 
@@ -197,7 +197,7 @@ class CustomerAdapterTest {
             )
         )
         val result = adapter.attachPaymentMethod("pm_1234")
-        assertThat((result.failureOrNull() as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Unable to attach payment method")
     }
 
@@ -230,7 +230,7 @@ class CustomerAdapterTest {
             )
         )
         val result = adapter.detachPaymentMethod("pm_1234")
-        assertThat((result.failureOrNull() as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Something went wrong")
     }
 
@@ -249,7 +249,7 @@ class CustomerAdapterTest {
             )
         )
         val result = adapter.detachPaymentMethod("pm_1234")
-        assertThat((result.failureOrNull() as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Unable to detach payment method")
     }
 
@@ -364,9 +364,9 @@ class CustomerAdapterTest {
         val result = adapter.setSelectedPaymentOption(
             paymentOption = CustomerAdapter.PaymentOption.StripeId("pm_1234")
         )
-        assertThat((result.failureOrNull() as CustomerAdapter.Result.Failure).cause.message)
+        assertThat(result.failureOrNull()?.cause?.message)
             .isEqualTo("Unable to persist payment option StripeId(id=pm_1234)")
-        assertThat(result.failureOrNull()!!.displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Something went wrong")
     }
 
@@ -438,7 +438,7 @@ class CustomerAdapterTest {
             },
         )
         val result = adapter.setupIntentClientSecretForCustomerAttach()
-        assertThat((result.failureOrNull() as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Couldn't get client secret")
     }
 
@@ -535,13 +535,13 @@ class CustomerAdapterTest {
             cause = IllegalStateException("Illegal state"),
             displayMessage = "This is display message",
         )
-        assertThat((result.failureOrNull() as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("This is display message")
         assertThat(result.getOrNull())
             .isNull()
 
         var newResult = result.map { "world" }
-        assertThat((newResult.failureOrNull() as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(newResult.failureOrNull()?.displayMessage)
             .isEqualTo("This is display message")
 
         newResult = newResult.fold(
@@ -555,7 +555,7 @@ class CustomerAdapterTest {
                 )
             }
         )
-        assertThat((newResult.failureOrNull() as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(newResult.failureOrNull()?.displayMessage)
             .isEqualTo("This is a new display message")
     }
 
@@ -567,29 +567,29 @@ class CustomerAdapterTest {
             ),
             displayMessage = "There was a problem with Stripe",
         )
-        assertThat((result.failureOrNull() as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("There was a problem with Stripe")
 
         var newResult = result.map {
             "New result"
         }
-        assertThat((newResult.failureOrNull() as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(newResult.failureOrNull()?.displayMessage)
             .isEqualTo("There was a problem with Stripe")
 
         newResult = result.mapCatching {
             "New result"
         }
-        assertThat((newResult.failureOrNull() as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(newResult.failureOrNull()?.displayMessage)
             .isEqualTo("There was a problem with Stripe")
 
-        var stripeResult: CustomerAdapter.Result<String> = CustomerAdapter.Result.failure(
+        var stripeResult = CustomerAdapter.Result.failure<String>(
             cause = APIException(
                 message = "Unlocalized message",
                 stripeError = null,
             ),
             displayMessage = "There was a problem with Stripe",
         )
-        assertThat((stripeResult.failureOrNull() as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(stripeResult.failureOrNull()?.displayMessage)
             .isEqualTo("There was a problem with Stripe")
 
         stripeResult = CustomerAdapter.Result.failure(
@@ -598,7 +598,7 @@ class CustomerAdapterTest {
             ),
             displayMessage = null,
         )
-        assertThat((stripeResult.failureOrNull() as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(stripeResult.failureOrNull()?.displayMessage)
             .isEqualTo(null)
     }
 

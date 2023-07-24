@@ -182,18 +182,14 @@ interface CustomerAdapter {
     sealed class Result<T> {
 
         @ExperimentalCustomerSheetApi
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val isFailure: Boolean get() = this is Failure
-
-        @ExperimentalCustomerSheetApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class Success<T>(
+        class Success<T> internal constructor(
             val value: T
         ) : Result<T>()
 
         @ExperimentalCustomerSheetApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class Failure<T>(
+        class Failure<T> internal constructor(
             val cause: Throwable,
             val displayMessage: String? = null
         ) : Result<T>()
