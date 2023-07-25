@@ -1,6 +1,6 @@
 package com.stripe.android.customersheet
 
-import android.content.Context
+import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
@@ -31,13 +31,13 @@ import kotlin.test.assertFailsWith
 @OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerAdapterTest {
 
-    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val application = ApplicationProvider.getApplicationContext<Application>()
     private val testDispatcher = UnconfinedTestDispatcher()
 
     @Before
     fun setup() {
         PaymentConfiguration.init(
-            context = context,
+            context = application,
             publishableKey = "pk_123",
         )
     }
@@ -58,7 +58,7 @@ class CustomerAdapterTest {
         }
 
         val adapter = CustomerAdapter.create(
-            context = context,
+            context = application,
             customerEphemeralKeyProvider = customerEphemeralKeyProvider,
             setupIntentClientSecretProvider = setupIntentClientSecretProvider
         )
@@ -266,7 +266,7 @@ class CustomerAdapterTest {
             },
             prefsRepositoryFactory = {
                 DefaultPrefsRepository(
-                    context = context,
+                    context = application,
                     customerId = it.customerId,
                     workContext = testScheduler
                 )
@@ -294,7 +294,7 @@ class CustomerAdapterTest {
             },
             prefsRepositoryFactory = {
                 DefaultPrefsRepository(
-                    context = context,
+                    context = application,
                     customerId = it.customerId,
                     workContext = testScheduler
                 )
@@ -383,7 +383,7 @@ class CustomerAdapterTest {
             },
             prefsRepositoryFactory = {
                 DefaultPrefsRepository(
-                    context = context,
+                    context = application,
                     customerId = it.customerId,
                     workContext = testScheduler
                 )
@@ -602,6 +602,66 @@ class CustomerAdapterTest {
             .isEqualTo(null)
     }
 
+    @Test
+    fun `Google Pay is retrievable when it is available and selected`() = runTest {
+        val adapter = createAdapter(
+            prefsRepositoryFactory = {
+                DefaultPrefsRepository(
+                    context = application,
+                    customerId = it.customerId,
+                    workContext = testScheduler
+                ).apply {
+                    setSavedSelection(SavedSelection.GooglePay)
+                }
+            }
+        )
+
+        CustomerSessionViewModel(
+            application = application
+        ).createCustomerSessionComponent(
+            configuration = CustomerSheet.Configuration(
+                googlePayEnabled = true
+            ),
+            customerAdapter = adapter,
+            callback = {}
+        )
+
+        val result = adapter.retrieveSelectedPaymentOption()
+
+        assertThat(result.getOrNull())
+            .isEqualTo(CustomerAdapter.PaymentOption.GooglePay)
+    }
+
+    @Test
+    fun `Google Pay is not retrievable when it is not available and selected`() = runTest {
+        val adapter = createAdapter(
+            prefsRepositoryFactory = {
+                DefaultPrefsRepository(
+                    context = application,
+                    customerId = it.customerId,
+                    workContext = testScheduler
+                ).apply {
+                    setSavedSelection(SavedSelection.GooglePay)
+                }
+            }
+        )
+
+        CustomerSessionViewModel(
+            application = application
+        ).createCustomerSessionComponent(
+            configuration = CustomerSheet.Configuration(
+                googlePayEnabled = false
+            ),
+            customerAdapter = adapter,
+            callback = {}
+        )
+
+        val result = adapter.retrieveSelectedPaymentOption()
+
+        assertThat(result.getOrNull())
+            .isNull()
+    }
+
     private fun createAdapter(
         customerEphemeralKeyProvider: CustomerEphemeralKeyProvider =
             CustomerEphemeralKeyProvider {
@@ -623,7 +683,7 @@ class CustomerAdapterTest {
         }
     ): StripeCustomerAdapter {
         return StripeCustomerAdapter(
-            context = context,
+            context = application,
             customerEphemeralKeyProvider = customerEphemeralKeyProvider,
             setupIntentClientSecretProvider = setupIntentClientSecretProvider,
             timeProvider = timeProvider,
