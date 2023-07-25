@@ -8,6 +8,8 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerSheetTestHelper.createViewModel
+import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
+import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -28,7 +30,7 @@ import kotlin.test.assertFailsWith
 @OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetViewModelTest {
 
-    private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(
+    private val selectPaymentMethodViewState = SelectPaymentMethod(
         title = null,
         savedPaymentMethods = listOf(),
         paymentSelection = null,
@@ -40,7 +42,7 @@ class CustomerSheetViewModelTest {
         primaryButtonLabel = null,
     )
 
-    private val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
+    private val addPaymentMethodViewState = AddPaymentMethod(
         paymentMethodCode = PaymentMethod.Type.Card.code,
         formViewData = FormViewModel.ViewData(
             completeFormValues = FormFieldValues(
@@ -86,7 +88,7 @@ class CustomerSheetViewModelTest {
         val viewModel = createViewModel()
         viewModel.viewState.test {
             assertThat(awaitItem()).isInstanceOf(
-                CustomerSheetViewState.SelectPaymentMethod::class.java
+                SelectPaymentMethod::class.java
             )
         }
     }
@@ -144,9 +146,8 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            assertThat(
-                (awaitItem() as CustomerSheetViewState.SelectPaymentMethod).errorMessage
-            ).isEqualTo("We could\'nt get your payment methods. Please try again.")
+            assertThat(awaitViewState<SelectPaymentMethod>().errorMessage)
+                .isEqualTo("We could\'nt get your payment methods. Please try again.")
         }
     }
 
@@ -161,7 +162,7 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            val viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.paymentSelection)
                 .isEqualTo(null)
             assertThat(viewState.errorMessage)
@@ -177,7 +178,7 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            val viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.paymentSelection)
                 .isEqualTo(PaymentSelection.GooglePay)
             assertThat(viewState.errorMessage)
@@ -193,7 +194,7 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            val viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.paymentSelection)
                 .isEqualTo(PaymentSelection.Link)
             assertThat(viewState.errorMessage)
@@ -218,7 +219,7 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            val viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.paymentSelection)
                 .isInstanceOf(PaymentSelection.Saved::class.java)
             assertThat(viewState.errorMessage)
@@ -251,7 +252,7 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            val viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.primaryButtonLabel)
                 .isNotNull()
             assertThat(viewState.primaryButtonEnabled)
@@ -272,8 +273,7 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat(viewState.primaryButtonVisible)
+            assertThat(awaitViewState<SelectPaymentMethod>().primaryButtonVisible)
                 .isFalse()
         }
     }
@@ -291,7 +291,7 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.primaryButtonVisible)
                 .isFalse()
 
@@ -303,8 +303,7 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-
+            viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
                 .isEqualTo("Confirm")
             assertThat(viewState.primaryButtonEnabled)
@@ -327,7 +326,7 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.primaryButtonLabel)
                 .isEqualTo("Confirm")
             assertThat(viewState.primaryButtonVisible)
@@ -339,8 +338,7 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-
+            viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
                 .isEqualTo("Confirm")
             assertThat(viewState.primaryButtonEnabled)
@@ -363,7 +361,7 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(CustomerSheetViewState.SelectPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
             val error = assertFailsWith<IllegalStateException> {
                 viewModel.handleViewAction(
                     CustomerSheetViewAction.OnItemSelected(
@@ -388,7 +386,7 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(CustomerSheetViewState.SelectPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
             val error = assertFailsWith<IllegalStateException> {
                 viewModel.handleViewAction(
                     CustomerSheetViewAction.OnItemSelected(
@@ -421,10 +419,10 @@ class CustomerSheetViewModelTest {
 
         viewModel.viewState.test {
             assertThat(awaitItem())
-                .isInstanceOf(CustomerSheetViewState.SelectPaymentMethod::class.java)
+                .isInstanceOf(SelectPaymentMethod::class.java)
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
             assertThat(awaitItem())
-                .isInstanceOf(CustomerSheetViewState.AddPaymentMethod::class.java)
+                .isInstanceOf(AddPaymentMethod::class.java)
         }
     }
 
@@ -432,13 +430,13 @@ class CustomerSheetViewModelTest {
     fun `When CustomerViewAction#OnEditPressed, view state isEditing should be updated`() = runTest {
         val viewModel = createViewModel()
         viewModel.viewState.test {
-            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.isEditing)
                 .isFalse()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
 
-            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            viewState = awaitViewState()
             assertThat(viewState.isEditing)
                 .isTrue()
         }
@@ -461,7 +459,7 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.savedPaymentMethods).hasSize(1)
             assertThat(viewState.paymentSelection).isNotNull()
 
@@ -471,7 +469,7 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            viewState = awaitViewState()
             assertThat(viewState.savedPaymentMethods).hasSize(0)
             assertThat(viewState.paymentSelection).isNull()
         }
@@ -499,7 +497,7 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.savedPaymentMethods).hasSize(1)
             assertThat(viewState.errorMessage).isNull()
 
@@ -509,7 +507,7 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            viewState = awaitViewState()
             assertThat(viewState.savedPaymentMethods).hasSize(1)
             assertThat(viewState.errorMessage)
                 .isEqualTo("We were unable to remove this payment method, try again.")
@@ -535,7 +533,7 @@ class CustomerSheetViewModelTest {
         val viewStateTurbine = viewModel.viewState.testIn(backgroundScope)
         val resultTurbine = viewModel.result.testIn(backgroundScope)
 
-        assertThat(viewStateTurbine.awaitItem()).isInstanceOf(CustomerSheetViewState.SelectPaymentMethod::class.java)
+        assertThat(viewStateTurbine.awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
         assertThat(resultTurbine.awaitItem()).isNull()
 
         viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
@@ -566,14 +564,14 @@ class CustomerSheetViewModelTest {
             )
         )
         viewModel.viewState.test {
-            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            val viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.errorMessage).isNull()
             assertThat(viewState.primaryButtonEnabled).isTrue()
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat(viewState.primaryButtonEnabled).isFalse()
-            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat(viewState.errorMessage).isEqualTo("Something went wrong")
+            assertThat(awaitViewState<SelectPaymentMethod>().primaryButtonEnabled)
+                .isFalse()
+            assertThat(awaitViewState<SelectPaymentMethod>().errorMessage)
+                .isEqualTo("Something went wrong")
         }
     }
 
@@ -607,7 +605,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(CustomerSheetViewState.AddPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
             assertThat(awaitItem().isProcessing).isTrue()
 
@@ -630,12 +628,12 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            var viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            var viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.errorMessage).isNull()
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.isProcessing).isTrue()
-            viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.errorMessage).isEqualTo("Could not create payment method.")
             assertThat(viewState.isProcessing).isFalse()
         }
@@ -661,15 +659,13 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            var viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(viewState.errorMessage).isNull()
+            assertThat(awaitViewState<AddPaymentMethod>().errorMessage).isNull()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
-            viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(viewState.isProcessing).isTrue()
+            assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
 
-            val newViewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            val newViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(newViewState.errorMessage).isNull()
             assertThat(newViewState.isProcessing).isFalse()
             assertThat(newViewState.savedPaymentMethods.contains(CARD_PAYMENT_METHOD))
@@ -696,15 +692,13 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            var viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(viewState.errorMessage).isNull()
+            assertThat(awaitViewState<AddPaymentMethod>().errorMessage).isNull()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
-            viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(viewState.isProcessing).isTrue()
+            assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
 
-            val newViewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            val newViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(newViewState.errorMessage).isNull()
             assertThat(newViewState.isProcessing).isFalse()
             assertThat(newViewState.savedPaymentMethods.contains(CARD_PAYMENT_METHOD))
@@ -732,14 +726,14 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            var viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            var viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.errorMessage).isNull()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
-            viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(viewState.isProcessing).isTrue()
-            viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+
+            viewState = awaitViewState()
             assertThat(viewState.errorMessage).isEqualTo("Could not attach payment method.")
             assertThat(viewState.isProcessing).isFalse()
         }
@@ -761,14 +755,14 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            var viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            var viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.errorMessage).isNull()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
-            viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(viewState.isProcessing).isTrue()
-            viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+
+            viewState = awaitViewState()
             assertThat(viewState.errorMessage).isEqualTo("Merchant provided error message")
             assertThat(viewState.isProcessing).isFalse()
         }
@@ -800,14 +794,13 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            var viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            var viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.errorMessage).isNull()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
-            viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(viewState.isProcessing).isTrue()
-            viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+            viewState = awaitViewState()
             assertThat(viewState.errorMessage).isEqualTo("We could not save this payment method. Please try again.")
             assertThat(viewState.isProcessing).isFalse()
         }
@@ -824,8 +817,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            var viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(viewState.primaryButtonEnabled).isFalse()
+            assertThat(awaitViewState<AddPaymentMethod>().primaryButtonEnabled).isFalse()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnFormDataUpdated(
@@ -841,8 +833,7 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(viewState.primaryButtonEnabled).isTrue()
+            assertThat(awaitViewState<AddPaymentMethod>().primaryButtonEnabled).isTrue()
         }
     }
 
@@ -857,8 +848,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            val viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(viewState.primaryButtonEnabled).isFalse()
+            assertThat(awaitViewState<AddPaymentMethod>().primaryButtonEnabled).isFalse()
         }
     }
 
@@ -873,13 +863,11 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat(viewState.primaryButtonVisible).isTrue()
+            assertThat(awaitViewState<SelectPaymentMethod>().primaryButtonVisible).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
 
-            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat(viewState.primaryButtonVisible).isFalse()
+            assertThat(awaitViewState<SelectPaymentMethod>().primaryButtonVisible).isFalse()
         }
     }
 
@@ -902,16 +890,14 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(CustomerSheetViewState.AddPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
-            val addPaymentMethodViewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(addPaymentMethodViewState.isProcessing)
+            assertThat(awaitViewState<AddPaymentMethod>().isProcessing)
                 .isTrue()
 
-            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat(viewState.primaryButtonVisible)
+            assertThat(awaitViewState<SelectPaymentMethod>().primaryButtonVisible)
                 .isTrue()
         }
     }
@@ -940,8 +926,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat(viewState.primaryButtonVisible)
+            assertThat(awaitViewState<SelectPaymentMethod>().primaryButtonVisible)
                 .isFalse()
 
             viewModel.handleViewAction(
@@ -950,16 +935,14 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat(viewState.primaryButtonVisible)
+            assertThat(awaitViewState<SelectPaymentMethod>().primaryButtonVisible)
                 .isFalse()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnEditPressed
             )
 
-            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat(viewState.primaryButtonVisible)
+            assertThat(awaitViewState<SelectPaymentMethod>().primaryButtonVisible)
                 .isFalse()
 
             viewModel.handleViewAction(
@@ -970,8 +953,7 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat(viewState.primaryButtonVisible)
+            assertThat(awaitViewState<SelectPaymentMethod>().primaryButtonVisible)
                 .isTrue()
         }
     }
@@ -1008,33 +990,31 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(CustomerSheetViewState.AddPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
-            val addPaymentMethodViewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(addPaymentMethodViewState.isProcessing).isTrue()
+            assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
 
-            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.primaryButtonVisible).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
 
-            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            viewState = awaitViewState()
             assertThat(viewState.primaryButtonVisible).isFalse()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnItemRemoved(CARD_PAYMENT_METHOD.copy(id = "pm_2"))
             )
 
-            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            viewState = awaitViewState()
             assertThat(viewState.primaryButtonVisible).isFalse()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
 
-            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            viewState = awaitViewState()
             assertThat(viewState.primaryButtonVisible).isFalse()
-
             assertThat(viewState.paymentSelection)
                 .isEqualTo(
                     PaymentSelection.Saved(CARD_PAYMENT_METHOD.copy(id = "pm_1"))
@@ -1068,7 +1048,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            val viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.savedPaymentMethods.indexOfFirst { it.id == "pm_3" }).isEqualTo(0)
         }
     }
@@ -1089,7 +1069,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            val viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.savedPaymentMethods.indexOfFirst { it.id == "pm_1" }).isEqualTo(0)
             assertThat(viewState.savedPaymentMethods.indexOfFirst { it.id == "pm_2" }).isEqualTo(1)
             assertThat(viewState.savedPaymentMethods.indexOfFirst { it.id == "pm_3" }).isEqualTo(2)
@@ -1116,7 +1096,7 @@ class CustomerSheetViewModelTest {
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
 
             assertThat(awaitItem())
-                .isInstanceOf(CustomerSheetViewState.AddPaymentMethod::class.java)
+                .isInstanceOf(AddPaymentMethod::class.java)
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
 
@@ -1149,7 +1129,7 @@ class CustomerSheetViewModelTest {
 
         assertThat(resultTurbine.awaitItem()).isNull()
 
-        assertThat(viewStateTurbine.awaitViewState<CustomerSheetViewState.SelectPaymentMethod>().paymentSelection)
+        assertThat(viewStateTurbine.awaitViewState<SelectPaymentMethod>().paymentSelection)
             .isEqualTo(
                 PaymentSelection.Saved(
                     CARD_PAYMENT_METHOD.copy(id = "pm_2"),
@@ -1163,7 +1143,7 @@ class CustomerSheetViewModelTest {
                 )
             )
         )
-        assertThat(viewStateTurbine.awaitViewState<CustomerSheetViewState.SelectPaymentMethod>().paymentSelection)
+        assertThat(viewStateTurbine.awaitViewState<SelectPaymentMethod>().paymentSelection)
             .isEqualTo(
                 PaymentSelection.Saved(
                     CARD_PAYMENT_METHOD.copy(id = "pm_1"),
