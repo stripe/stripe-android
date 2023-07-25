@@ -1,10 +1,8 @@
 package com.stripe.android.core.networking
 
-import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.exception.APIException
@@ -18,8 +16,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class AnalyticsRequestFactoryTest : TestCase() {
 
-    private val context = ApplicationProvider.getApplicationContext<Context>()
-
     private val packageManager = mock<PackageManager>()
     private val packageName = "com.stripe.android.test"
     private val apiKey = "pk_abc123"
@@ -28,15 +24,6 @@ class AnalyticsRequestFactoryTest : TestCase() {
         override val eventName: String = "randomEvent"
     }
 
-    val factory = AnalyticsRequestFactory(
-        context.applicationContext.packageManager,
-        runCatching {
-            context.applicationContext.packageManager.getPackageInfo(packageName, 0)
-        }.getOrNull(),
-        context.applicationContext.packageName.orEmpty(),
-        { apiKey }
-    )
-
     @Test
     fun `when publishable key is unavailable, create params with undefined key`() {
         val exception = APIException(RuntimeException())
@@ -44,7 +31,8 @@ class AnalyticsRequestFactoryTest : TestCase() {
             mock(),
             null,
             packageName,
-            { throw exception }
+            { throw exception },
+            { "5G" },
         )
 
         val params = factory.createRequest(mockEvent, emptyMap()).params
@@ -68,7 +56,8 @@ class AnalyticsRequestFactoryTest : TestCase() {
             packageManager,
             packageInfo,
             packageName,
-            { apiKey }
+            { apiKey },
+            { "5G" },
         )
         val params = factory.createRequest(mockEvent, emptyMap()).params
 
@@ -92,7 +81,8 @@ class AnalyticsRequestFactoryTest : TestCase() {
             mock(),
             null,
             packageName,
-            { apiKey }
+            { apiKey },
+            { "5G" },
         )
         assertThat(factory.appDataParams()).isEmpty()
     }
@@ -103,7 +93,8 @@ class AnalyticsRequestFactoryTest : TestCase() {
             null,
             null,
             "",
-            { apiKey }
+            { apiKey },
+            { "5G" },
         )
         assertThat(factory.appDataParams()).isEmpty()
     }
