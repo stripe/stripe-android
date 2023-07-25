@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -40,7 +39,9 @@ internal class BottomSheetState(
     private var dismissalType: DismissalType? = null
 
     suspend fun show() {
-        repeatUntilSucceeded {
+        repeatUntilSucceededOrLimit(10) {
+            // Showing the bottom sheet can be interrupted.
+            // We keep trying until it's fully displayed.
             modalBottomSheetState.show()
         }
     }
@@ -155,19 +156,17 @@ internal fun BottomSheet(
     )
 }
 
-private suspend fun repeatUntilSucceeded(
+private suspend fun repeatUntilSucceededOrLimit(
+    limit: Int,
     block: suspend () -> Unit
 ) {
-    val completable = CompletableDeferred<Unit>()
-
-    while (!completable.isCompleted) {
+    var counter = 0
+    while (counter < limit) {
         try {
             block()
-            completable.complete(Unit)
+            break
         } catch (ignored: CancellationException) {
-            continue
+            counter += 1
         }
     }
-
-    completable.await()
 }

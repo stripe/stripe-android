@@ -19,9 +19,8 @@ internal class BottomSheetKeyboardHandler(
 ) {
 
     suspend fun dismissAndWait() {
-        keyboardController?.hide()
-
         if (isKeyboardVisible.value) {
+            keyboardController?.hide()
             awaitKeyboardDismissed()
         }
     }
