@@ -37,9 +37,7 @@ internal class StripeCustomerAdapter @Inject constructor(
     private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey? = null
 
     private val isGooglePayAvailable: Boolean
-        get() = runCatching {
-            CustomerSessionViewModel.component.configuration.googlePayEnabled
-        }.getOrNull() ?: false
+        get() = CustomerSessionViewModel.component.configuration.googlePayEnabled
 
     override val canCreateSetupIntents: Boolean
         get() = setupIntentClientSecretProvider != null
