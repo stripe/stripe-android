@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -40,6 +41,7 @@ object CustomerSheetTestHelper {
         backstack: Stack<CustomerSheetViewState> = Stack<CustomerSheetViewState>().apply {
             push(CustomerSheetViewState.Loading(isLiveMode))
         },
+        originalPaymentSelection: PaymentSelection? = null,
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         stripeRepository: StripeRepository = FakeStripeRepository(),
         paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
@@ -80,6 +82,7 @@ object CustomerSheetTestHelper {
         return CustomerSheetViewModel(
             application = application,
             backstack = backstack,
+            originalPaymentSelection = originalPaymentSelection,
             paymentConfiguration = paymentConfiguration,
             formViewModelSubcomponentBuilderProvider = mockFormSubComponentBuilderProvider,
             resources = application.resources,

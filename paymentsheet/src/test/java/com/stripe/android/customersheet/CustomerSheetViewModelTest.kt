@@ -27,6 +27,31 @@ import kotlin.test.assertFailsWith
 @OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetViewModelTest {
 
+    private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(
+        title = null,
+        savedPaymentMethods = listOf(),
+        paymentSelection = null,
+        isLiveMode = false,
+        isProcessing = false,
+        isEditing = false,
+        isGooglePayEnabled = false,
+        primaryButtonVisible = false,
+        primaryButtonLabel = null,
+    )
+
+    private val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
+        paymentMethodCode = PaymentMethod.Type.Card.code,
+        formViewData = FormViewModel.ViewData(
+            completeFormValues = FormFieldValues(
+                showsMandate = false,
+                userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+            ),
+        ),
+        enabled = true,
+        isLiveMode = false,
+        isProcessing = false,
+    )
+
     @Test
     fun `isLiveMode is true when publishable key is live`() {
         val viewModelModule = CustomerSheetViewModelModule()
@@ -1092,6 +1117,80 @@ class CustomerSheetViewModelTest {
             viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
             assertThat(viewState.primaryButtonVisible)
                 .isTrue()
+        }
+    }
+
+    @Test
+    fun `When removing the newly added payment, original payment selection is selected and primary button is not visible`() = runTest {
+        val viewModel = createViewModel(
+            backstack = buildBackstack(
+                selectPaymentMethodViewState.copy(
+                    savedPaymentMethods = listOf(
+                        CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                    ),
+                    paymentSelection = PaymentSelection.Saved(
+                        CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                    ),
+                ),
+                addPaymentMethodViewState,
+            ),
+            originalPaymentSelection = PaymentSelection.Saved(
+                CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onDetachPaymentMethod = {
+                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD.copy(id = "pm_2"))
+                },
+                onSetupIntentClientSecretForCustomerAttach = {
+                    CustomerAdapter.Result.success("seti_123")
+                }
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD.copy(id = "pm_2"),),
+                confirmSetupIntentResult = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(CustomerSheetViewState.AddPaymentMethod::class.java)
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+            val addPaymentMethodViewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            assertThat(addPaymentMethodViewState.isProcessing).isTrue()
+
+            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.primaryButtonVisible).isTrue()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+
+            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.primaryButtonVisible).isFalse()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemRemoved(CARD_PAYMENT_METHOD.copy(id = "pm_2"))
+            )
+
+            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.primaryButtonVisible).isFalse()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+
+            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.primaryButtonVisible).isFalse()
+
+            assertThat(viewState.paymentSelection)
+                .isEqualTo(
+                    PaymentSelection.Saved(CARD_PAYMENT_METHOD.copy(id = "pm_1"))
+                )
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    PaymentSelection.Saved(CARD_PAYMENT_METHOD.copy(id = "pm_1"))
+                )
+            )
+
+            expectNoEvents()
         }
     }
 

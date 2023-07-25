@@ -14,6 +14,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import dagger.Module
 import dagger.Provides
@@ -94,5 +95,12 @@ internal class CustomerSheetViewModelModule {
                 isLiveMode = isLiveMode
             )
         )
+    }
+
+    @Provides
+    fun originalPaymentSelection(): PaymentSelection? = originalPaymentSelection
+
+    private companion object {
+        private val originalPaymentSelection: PaymentSelection? = null
     }
 }
