@@ -8,22 +8,22 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultEventReporterTest {
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val eventTimeProvider = mock<EventTimeProvider>().apply {
-        whenever(currentTimeMillis()).thenReturn(1000L)
-    }
+    private val durationProvider = FakeDurationProvider()
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         ApplicationProvider.getApplicationContext(),
@@ -35,7 +35,7 @@ class DefaultEventReporterTest {
             mode,
             analyticsRequestExecutor,
             analyticsRequestFactory,
-            eventTimeProvider,
+            durationProvider,
             testDispatcher
         )
     }
@@ -95,20 +95,23 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onPaymentSuccess() should fire analytics request with expected event value`() {
+        durationProvider.enqueueDuration(1.seconds)
+
         // Log initial event so that duration is tracked
         completeEventReporter.onShowExistingPaymentOptions(
             linkEnabled = false,
             currency = "usd",
             isDecoupling = false,
         )
+
         reset(analyticsRequestExecutor)
-        whenever(eventTimeProvider.currentTimeMillis()).thenReturn(2000L)
 
         completeEventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             currency = "usd",
             deferredIntentConfirmationType = null,
         )
+
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_payment_savedpm_success" &&
@@ -121,6 +124,8 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onPaymentSuccess() for Google Pay payment should fire analytics request with expected event value`() {
+        durationProvider.enqueueDuration(2.seconds)
+
         // Log initial event so that duration is tracked
         completeEventReporter.onShowExistingPaymentOptions(
             linkEnabled = false,
@@ -129,7 +134,6 @@ class DefaultEventReporterTest {
         )
 
         reset(analyticsRequestExecutor)
-        whenever(eventTimeProvider.currentTimeMillis()).thenReturn(2000L)
 
         completeEventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.Saved(
@@ -143,13 +147,15 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_payment_googlepay_success" &&
-                    req.params["duration"] == 1f
+                    req.params["duration"] == 2f
             }
         )
     }
 
     @Test
     fun `onPaymentSuccess() for Link payment should fire analytics request with expected event value`() {
+        durationProvider.enqueueDuration(123.milliseconds)
+
         // Log initial event so that duration is tracked
         completeEventReporter.onShowExistingPaymentOptions(
             linkEnabled = true,
@@ -158,7 +164,6 @@ class DefaultEventReporterTest {
         )
 
         reset(analyticsRequestExecutor)
-        whenever(eventTimeProvider.currentTimeMillis()).thenReturn(2000L)
 
         completeEventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.Saved(
@@ -172,21 +177,23 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_payment_link_success" &&
-                    req.params["duration"] == 1f
+                    req.params["duration"] == 0.123f
             }
         )
     }
 
     @Test
     fun `onPaymentFailure() should fire analytics request with expected event value`() {
+        durationProvider.enqueueDuration(456.milliseconds)
+
         // Log initial event so that duration is tracked
         completeEventReporter.onShowExistingPaymentOptions(
             linkEnabled = false,
             currency = "usd",
             isDecoupling = false,
         )
+
         reset(analyticsRequestExecutor)
-        whenever(eventTimeProvider.currentTimeMillis()).thenReturn(2000L)
 
         completeEventReporter.onPaymentFailure(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
@@ -196,7 +203,7 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_payment_savedpm_failure" &&
-                    req.params["duration"] == 1f &&
+                    req.params["duration"] == 0.456f &&
                     req.params["currency"] == "usd" &&
                     req.params["locale"] == "en_US"
             }
@@ -227,7 +234,7 @@ class DefaultEventReporterTest {
             EventReporter.Mode.Complete,
             analyticsRequestExecutor,
             analyticsRequestFactory,
-            eventTimeProvider,
+            durationProvider,
             testDispatcher
         )
     }
