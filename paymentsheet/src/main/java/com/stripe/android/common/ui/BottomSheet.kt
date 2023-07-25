@@ -27,6 +27,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -38,7 +40,9 @@ internal class BottomSheetState(
     private var dismissalType: DismissalType? = null
 
     suspend fun show() {
-        modalBottomSheetState.show()
+        repeatUntilSucceeded {
+            modalBottomSheetState.show()
+        }
     }
 
     suspend fun awaitDismissal(): DismissalType {
@@ -149,4 +153,21 @@ internal fun BottomSheet(
         },
         content = {},
     )
+}
+
+private suspend fun repeatUntilSucceeded(
+    block: suspend () -> Unit
+) {
+    val completable = CompletableDeferred<Unit>()
+
+    while (!completable.isCompleted) {
+        try {
+            block()
+            completable.complete(Unit)
+        } catch (ignored: CancellationException) {
+            continue
+        }
+    }
+
+    completable.await()
 }
