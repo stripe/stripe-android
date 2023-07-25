@@ -41,7 +41,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val application: Application,
     // TODO (jameswoo) should the current view state be derived from backstack?
     private val backstack: Stack<CustomerSheetViewState>,
-    private var originalPaymentSelection: PaymentSelection?,
+    private var savedPaymentSelection: PaymentSelection?,
     private val paymentConfiguration: PaymentConfiguration,
     private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
@@ -58,12 +58,6 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
     val result: StateFlow<InternalCustomerSheetResult?> = _result
-
-    private val currentSelection: PaymentSelection?
-        get() = backstack
-            .filterIsInstance<CustomerSheetViewState.SelectPaymentMethod>()
-            .firstOrNull()
-            ?.paymentSelection
 
     init {
         lpmRepository.initializeWithCardSpec(
@@ -135,7 +129,7 @@ internal class CustomerSheetViewModel @Inject constructor(
             val errorMessage = result.failureOrNull()?.displayMessage
                 ?: result.failureOrNull()?.cause?.stripeErrorMessage(application)
 
-            originalPaymentSelection = paymentSelection
+            savedPaymentSelection = paymentSelection
 
             transition(
                 to = CustomerSheetViewState.SelectPaymentMethod(
@@ -192,7 +186,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private fun onDismissed() {
         _result.update {
-            InternalCustomerSheetResult.Canceled(currentSelection)
+            InternalCustomerSheetResult.Canceled(savedPaymentSelection)
         }
     }
 
@@ -200,7 +194,7 @@ internal class CustomerSheetViewModel @Inject constructor(
         val shouldExit = backstack.peek() is CustomerSheetViewState.SelectPaymentMethod
         if (backstack.empty() || shouldExit) {
             _result.tryEmit(
-                InternalCustomerSheetResult.Canceled(currentSelection)
+                InternalCustomerSheetResult.Canceled(savedPaymentSelection)
             )
         } else {
             backstack.pop()
@@ -215,7 +209,7 @@ internal class CustomerSheetViewModel @Inject constructor(
             val isEditing = !it.isEditing
             it.copy(
                 isEditing = isEditing,
-                primaryButtonVisible = !isEditing && originalPaymentSelection != it.paymentSelection,
+                primaryButtonVisible = !isEditing && savedPaymentSelection != it.paymentSelection,
             )
         }
     }
@@ -242,12 +236,12 @@ internal class CustomerSheetViewModel @Inject constructor(
                             val removedPaymentSelection = selection is PaymentSelection.Saved &&
                                 selection.paymentMethod == paymentMethod
 
-                            if (removedPaymentSelection && originalPaymentSelection == selection) {
-                                originalPaymentSelection = null
+                            if (removedPaymentSelection && savedPaymentSelection == selection) {
+                                savedPaymentSelection = null
                             }
 
                             removedPaymentSelection
-                        } ?: originalPaymentSelection,
+                        } ?: savedPaymentSelection,
                     )
                 }
             }.onFailure { cause, displayMessage ->
@@ -273,7 +267,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
                     it.copy(
                         paymentSelection = paymentSelection,
-                        primaryButtonVisible = originalPaymentSelection != paymentSelection,
+                        primaryButtonVisible = savedPaymentSelection != paymentSelection,
                         // TODO (jameswoo) translate
                         primaryButtonLabel = "Confirm",
                     )

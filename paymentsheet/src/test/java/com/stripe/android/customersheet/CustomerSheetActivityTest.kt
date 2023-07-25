@@ -62,6 +62,9 @@ internal class CustomerSheetActivityTest {
                 paymentSelection = PaymentSelection.Saved(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
+            ),
+            savedPaymentSelection = PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
         ) {
             composeTestRule.waitForIdle()
@@ -173,11 +176,13 @@ internal class CustomerSheetActivityTest {
 
     private fun activityScenario(
         viewState: CustomerSheetViewState,
+        savedPaymentSelection: PaymentSelection?,
     ): InjectableActivityScenario<CustomerSheetActivity> {
         val viewModel = createViewModel(
             backstack = Stack<CustomerSheetViewState>().apply {
                 push(viewState)
-            }
+            },
+            savedPaymentSelection = savedPaymentSelection,
         )
 
         return injectableActivityScenario {
@@ -191,10 +196,12 @@ internal class CustomerSheetActivityTest {
         viewState: CustomerSheetViewState = CustomerSheetViewState.Loading(
             isLiveMode = false,
         ),
+        savedPaymentSelection: PaymentSelection? = null,
         testBlock: CustomerSheetTestData.() -> Unit,
     ) {
         activityScenario(
             viewState = viewState,
+            savedPaymentSelection = savedPaymentSelection,
         )
             .launchForResult(intent)
             .use { injectableActivityScenario ->

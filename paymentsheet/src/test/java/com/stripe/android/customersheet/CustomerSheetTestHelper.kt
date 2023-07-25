@@ -41,7 +41,7 @@ object CustomerSheetTestHelper {
         backstack: Stack<CustomerSheetViewState> = Stack<CustomerSheetViewState>().apply {
             push(CustomerSheetViewState.Loading(isLiveMode))
         },
-        originalPaymentSelection: PaymentSelection? = null,
+        savedPaymentSelection: PaymentSelection? = null,
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         stripeRepository: StripeRepository = FakeStripeRepository(),
         paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
@@ -82,7 +82,7 @@ object CustomerSheetTestHelper {
         return CustomerSheetViewModel(
             application = application,
             backstack = backstack,
-            originalPaymentSelection = originalPaymentSelection,
+            savedPaymentSelection = savedPaymentSelection,
             paymentConfiguration = paymentConfiguration,
             formViewModelSubcomponentBuilderProvider = mockFormSubComponentBuilderProvider,
             resources = application.resources,
