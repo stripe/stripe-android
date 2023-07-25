@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet
 
+import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
@@ -1134,7 +1135,7 @@ class CustomerSheetViewModelTest {
                 ),
                 addPaymentMethodViewState,
             ),
-            originalPaymentSelection = PaymentSelection.Saved(
+            savedPaymentSelection = PaymentSelection.Saved(
                 CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             ),
             customerAdapter = FakeCustomerAdapter(
@@ -1280,11 +1281,78 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When there is an initially selected PM, selecting another PM and cancelling should keep the original`() = runTest {
+        val viewModel = createViewModel(
+            backstack = buildBackstack(
+                selectPaymentMethodViewState.copy(
+                    savedPaymentMethods = listOf(
+                        CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                        CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                    ),
+                    paymentSelection = PaymentSelection.Saved(
+                        CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                    ),
+                )
+            ),
+            savedPaymentSelection = PaymentSelection.Saved(
+                CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+            )
+        )
+
+        val resultTurbine = viewModel.result.testIn(this)
+        val viewStateTurbine = viewModel.viewState.testIn(this)
+
+        assertThat(resultTurbine.awaitItem()).isNull()
+
+        assertThat(viewStateTurbine.awaitViewState<CustomerSheetViewState.SelectPaymentMethod>().paymentSelection)
+            .isEqualTo(
+                PaymentSelection.Saved(
+                    CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                )
+            )
+
+        viewModel.handleViewAction(
+            CustomerSheetViewAction.OnItemSelected(
+                PaymentSelection.Saved(
+                    CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                )
+            )
+        )
+        assertThat(viewStateTurbine.awaitViewState<CustomerSheetViewState.SelectPaymentMethod>().paymentSelection)
+            .isEqualTo(
+                PaymentSelection.Saved(
+                    CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                )
+            )
+
+        viewModel.handleViewAction(
+            CustomerSheetViewAction.OnDismissed
+        )
+
+        assertThat(resultTurbine.awaitItem())
+            .isEqualTo(
+                InternalCustomerSheetResult.Canceled(
+                    PaymentSelection.Saved(
+                        CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                    )
+                )
+            )
+
+        resultTurbine.cancel()
+        viewStateTurbine.cancel()
+    }
+
     private fun buildBackstack(vararg states: CustomerSheetViewState): Stack<CustomerSheetViewState> {
         return Stack<CustomerSheetViewState>().apply {
             states.forEach {
                 push(it)
             }
         }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private suspend inline fun <R> ReceiveTurbine<*>.awaitViewState(): R {
+        return awaitItem() as R
     }
 }

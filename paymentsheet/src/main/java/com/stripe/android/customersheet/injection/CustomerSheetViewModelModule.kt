@@ -98,9 +98,9 @@ internal class CustomerSheetViewModelModule {
     }
 
     @Provides
-    fun originalPaymentSelection(): PaymentSelection? = originalPaymentSelection
+    fun savedPaymentSelection(): PaymentSelection? = savedPaymentSelection
 
     private companion object {
-        private val originalPaymentSelection: PaymentSelection? = null
+        private val savedPaymentSelection: PaymentSelection? = null
     }
 }
