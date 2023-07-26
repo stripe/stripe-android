@@ -618,13 +618,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun onError(error: String?) = resetViewState(error)
 
-    override fun transitionToFirstScreen() {
-        val target = if (paymentMethods.value.isNullOrEmpty()) {
-            PaymentSheetScreen.AddFirstPaymentMethod
-        } else {
+    override fun determineInitialBackStack(): List<PaymentSheetScreen> {
+        val hasPaymentMethods = !paymentMethods.value.isNullOrEmpty()
+        val target = if (hasPaymentMethods) {
             PaymentSheetScreen.SelectSavedPaymentMethods
+        } else {
+            PaymentSheetScreen.AddFirstPaymentMethod
         }
-        transitionTo(target)
+        return listOf(target)
     }
 
     internal class Factory(

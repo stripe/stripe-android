@@ -127,7 +127,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            viewModel.transitionToFirstScreen()
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
         }
     }
@@ -144,7 +143,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            viewModel.transitionToFirstScreen()
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddAnotherPaymentMethod)
 
             viewModel.handleBackPressed()
@@ -270,7 +268,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            viewModel.transitionToFirstScreen()
             assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
         }
     }
@@ -287,7 +284,6 @@ internal class PaymentOptionsViewModelTest {
             )
 
             viewModel.currentScreen.test {
-                viewModel.transitionToFirstScreen()
                 assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
             }
         }
