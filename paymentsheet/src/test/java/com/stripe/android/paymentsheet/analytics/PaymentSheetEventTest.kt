@@ -11,6 +11,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.milliseconds
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentSheetEventTest {
@@ -58,7 +59,7 @@ class PaymentSheetEventTest {
                 mock(),
                 mock()
             ),
-            durationMillis = 1L,
+            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDecoupled = false,
@@ -86,7 +87,7 @@ class PaymentSheetEventTest {
         val savedPMEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            durationMillis = 1L,
+            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDecoupled = false,
@@ -114,7 +115,7 @@ class PaymentSheetEventTest {
         val googlePayEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
             paymentSelection = PaymentSelection.GooglePay,
-            durationMillis = 1L,
+            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDecoupled = false,
@@ -142,7 +143,7 @@ class PaymentSheetEventTest {
         val linkEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
             paymentSelection = PaymentSelection.Link,
-            durationMillis = 1L,
+            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDecoupled = false,
@@ -176,7 +177,7 @@ class PaymentSheetEventTest {
                     mock()
                 )
             ),
-            durationMillis = 1L,
+            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDecoupled = false,
@@ -208,7 +209,7 @@ class PaymentSheetEventTest {
                 mock(),
                 mock()
             ),
-            durationMillis = 1L,
+            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Failure,
             currency = "usd",
             isDecoupled = false,
@@ -236,7 +237,7 @@ class PaymentSheetEventTest {
         val savedPMEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            durationMillis = 1L,
+            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Failure,
             currency = "usd",
             isDecoupled = false,
@@ -264,7 +265,7 @@ class PaymentSheetEventTest {
         val googlePayEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
             paymentSelection = PaymentSelection.GooglePay,
-            durationMillis = 1L,
+            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Failure,
             currency = "usd",
             isDecoupled = false,
@@ -292,7 +293,7 @@ class PaymentSheetEventTest {
         val linkEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
             paymentSelection = PaymentSelection.Link,
-            durationMillis = 1L,
+            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Failure,
             currency = "usd",
             isDecoupled = false,
@@ -326,7 +327,7 @@ class PaymentSheetEventTest {
                     mock()
                 )
             ),
-            durationMillis = 1L,
+            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Failure,
             currency = "usd",
             isDecoupled = false,
