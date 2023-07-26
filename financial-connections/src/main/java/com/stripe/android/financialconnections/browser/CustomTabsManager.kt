@@ -57,7 +57,7 @@ internal class CustomTabsManager(
         connection?.let {
             log("OnStop: unbinding service")
             runCatching { context.unbindService(it) }.onFailure {
-                log("OnStop: couldn't unbind, ${it.stackTrace}")
+                log("OnStop: couldn't unbind, ${it.stackTraceToString()}")
             }
         }
         client = null
