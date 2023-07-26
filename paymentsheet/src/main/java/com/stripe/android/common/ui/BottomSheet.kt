@@ -27,23 +27,41 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalMaterialApi::class)
 internal class BottomSheetState(
     val modalBottomSheetState: ModalBottomSheetState,
+    val keyboardHandler: BottomSheetKeyboardHandler,
 ) {
 
+    private var dismissalType: DismissalType? = null
+
     suspend fun show() {
-        modalBottomSheetState.show()
+        repeatUntilSucceededOrLimit(10) {
+            // Showing the bottom sheet can be interrupted.
+            // We keep trying until it's fully displayed.
+            modalBottomSheetState.show()
+        }
     }
 
-    suspend fun awaitDismissal() {
+    suspend fun awaitDismissal(): DismissalType {
         snapshotFlow { modalBottomSheetState.isVisible }.first { isVisible -> !isVisible }
+        return dismissalType ?: DismissalType.SwipedDownByUser
     }
 
     suspend fun hide() {
+        dismissalType = DismissalType.Programmatically
+        // We dismiss the keyboard before we dismiss the sheet. This looks cleaner and prevents
+        // a CancellationException.
+        keyboardHandler.dismiss()
         modalBottomSheetState.hide()
+    }
+
+    internal enum class DismissalType {
+        Programmatically,
+        SwipedDownByUser,
     }
 }
 
@@ -59,8 +77,13 @@ internal fun rememberBottomSheetState(
         animationSpec = tween(),
     )
 
+    val keyboardHandler = rememberBottomSheetKeyboardHandler()
+
     return remember {
-        BottomSheetState(modalBottomSheetState)
+        BottomSheetState(
+            modalBottomSheetState = modalBottomSheetState,
+            keyboardHandler = keyboardHandler,
+        )
     }
 }
 
@@ -102,8 +125,10 @@ internal fun BottomSheet(
             onShow()
         }
 
-        state.awaitDismissal()
-        onDismissed()
+        val dismissalType = state.awaitDismissal()
+        if (dismissalType == BottomSheetState.DismissalType.SwipedDownByUser) {
+            onDismissed()
+        }
     }
 
     LaunchedEffect(systemUiController, statusBarColorAlpha) {
@@ -131,4 +156,19 @@ internal fun BottomSheet(
         },
         content = {},
     )
+}
+
+private suspend fun repeatUntilSucceededOrLimit(
+    limit: Int,
+    block: suspend () -> Unit
+) {
+    var counter = 0
+    while (counter < limit) {
+        try {
+            block()
+            break
+        } catch (ignored: CancellationException) {
+            counter += 1
+        }
+    }
 }
