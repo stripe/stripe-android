@@ -3,18 +3,18 @@ package com.stripe.android.paymentsheet.addresselement.analytics
 import com.stripe.android.core.networking.AnalyticsEvent
 
 internal sealed class AddressLauncherEvent : AnalyticsEvent {
-    abstract val additionalParams: Map<String, Any>
+    abstract val additionalParams: Map<String, String>
 
     class Show(
         val country: String
     ) : AddressLauncherEvent() {
         override val eventName: String = "mc_address_show"
-        override val additionalParams: Map<String, Any>
+        override val additionalParams: Map<String, String>
             get() {
                 return mapOf(
                     FIELD_ADDRESS_DATA_BLOB to mapOf(
                         FIELD_ADDRESS_COUNTRY_CODE to country
-                    )
+                    ).toString()
                 )
             }
     }
@@ -25,7 +25,7 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
         private val editDistance: Int?
     ) : AddressLauncherEvent() {
         override val eventName: String = "mc_address_completed"
-        override val additionalParams: Map<String, Any>
+        override val additionalParams: Map<String, String>
             get() {
                 val data = mutableMapOf<String, Any>(
                     FIELD_ADDRESS_COUNTRY_CODE to country,
@@ -35,7 +35,7 @@ internal sealed class AddressLauncherEvent : AnalyticsEvent {
                     data[FIELD_EDIT_DISTANCE] = it
                 }
                 return mapOf(
-                    FIELD_ADDRESS_DATA_BLOB to data
+                    FIELD_ADDRESS_DATA_BLOB to data.toString()
                 )
             }
     }

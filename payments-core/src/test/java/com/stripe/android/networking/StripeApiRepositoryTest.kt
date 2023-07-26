@@ -2318,7 +2318,7 @@ internal class StripeApiRepositoryTest {
         )
 
         assertEquals(
-            productUsage,
+            productUsage?.toString(),
             analyticsParams["product_usage"]
         )
     }

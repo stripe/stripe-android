@@ -76,8 +76,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F,
-                "is_decoupled" to false,
+                "duration" to "0.001",
+                "is_decoupled" to "false",
             )
         )
     }
@@ -104,8 +104,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F,
-                "is_decoupled" to false,
+                "duration" to "0.001",
+                "is_decoupled" to "false",
             )
         )
     }
@@ -132,8 +132,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F,
-                "is_decoupled" to false,
+                "duration" to "0.001",
+                "is_decoupled" to "false",
             )
         )
     }
@@ -160,8 +160,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F,
-                "is_decoupled" to false,
+                "duration" to "0.001",
+                "is_decoupled" to "false",
             )
         )
     }
@@ -194,8 +194,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F,
-                "is_decoupled" to false,
+                "duration" to "0.001",
+                "is_decoupled" to "false",
             )
         )
     }
@@ -226,8 +226,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F,
-                "is_decoupled" to false,
+                "duration" to "0.001",
+                "is_decoupled" to "false",
             )
         )
     }
@@ -254,8 +254,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F,
-                "is_decoupled" to false,
+                "duration" to "0.001",
+                "is_decoupled" to "false",
             )
         )
     }
@@ -282,8 +282,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F,
-                "is_decoupled" to false,
+                "duration" to "0.001",
+                "is_decoupled" to "false",
             )
         )
     }
@@ -310,8 +310,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F,
-                "is_decoupled" to false,
+                "duration" to "0.001",
+                "is_decoupled" to "false",
             )
         )
     }
@@ -344,8 +344,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F,
-                "is_decoupled" to false,
+                "duration" to "0.001",
+                "is_decoupled" to "false",
             )
         )
     }
@@ -369,7 +369,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "is_decoupled" to false,
+                "is_decoupled" to "false",
             )
         )
     }
@@ -388,8 +388,8 @@ class PaymentSheetEventTest {
             "colorsDark" to false,
             "corner_radius" to false,
             "border_width" to false,
-            "size_scale_factor" to false,
             "font" to false,
+            "size_scale_factor" to false,
             "primary_button" to expectedPrimaryButton,
             "usage" to false
         )
@@ -417,9 +417,9 @@ class PaymentSheetEventTest {
             ).additionalParams
         ).isEqualTo(
             mapOf(
-                "mpe_config" to expectedConfigMap,
+                "mpe_config" to expectedConfigMap.toString(),
                 "locale" to "en_US",
-                "is_decoupled" to false,
+                "is_decoupled" to "false",
             )
         )
     }
@@ -438,8 +438,8 @@ class PaymentSheetEventTest {
             "colorsDark" to true,
             "corner_radius" to true,
             "border_width" to true,
-            "size_scale_factor" to true,
             "font" to true,
+            "size_scale_factor" to true,
             "primary_button" to expectedPrimaryButton,
             "usage" to true
         )
@@ -467,9 +467,9 @@ class PaymentSheetEventTest {
             ).additionalParams
         ).isEqualTo(
             mapOf(
-                "mpe_config" to expectedConfigMap,
+                "mpe_config" to expectedConfigMap.toString(),
                 "locale" to "en_US",
-                "is_decoupled" to false,
+                "is_decoupled" to "false",
             )
         )
     }

@@ -28,7 +28,7 @@ open class AnalyticsRequestFactory(
      */
     fun createRequest(
         event: AnalyticsEvent,
-        additionalParams: Map<String, Any?>
+        additionalParams: Map<String, String?>
     ): AnalyticsRequest {
         return AnalyticsRequest(
             params = createParams(event) + additionalParams,
@@ -38,7 +38,7 @@ open class AnalyticsRequestFactory(
 
     private fun createParams(
         event: AnalyticsEvent
-    ): Map<String, Any> {
+    ): Map<String, String> {
         return standardParams() + appDataParams() + event.params()
     }
 
@@ -46,18 +46,18 @@ open class AnalyticsRequestFactory(
         return mapOf(AnalyticsFields.EVENT to this.eventName)
     }
 
-    private fun standardParams(): Map<String, Any> = mapOf(
+    private fun standardParams(): Map<String, String> = mapOf(
         AnalyticsFields.ANALYTICS_UA to ANALYTICS_UA,
         AnalyticsFields.PUBLISHABLE_KEY to runCatching {
             publishableKeyProvider.get()
         }.getOrDefault(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY),
         AnalyticsFields.OS_NAME to Build.VERSION.CODENAME,
         AnalyticsFields.OS_RELEASE to Build.VERSION.RELEASE,
-        AnalyticsFields.OS_VERSION to Build.VERSION.SDK_INT,
+        AnalyticsFields.OS_VERSION to Build.VERSION.SDK_INT.toString(),
         AnalyticsFields.DEVICE_TYPE to DEVICE_TYPE,
         AnalyticsFields.BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
-        AnalyticsFields.IS_DEVELOPMENT to BuildConfig.DEBUG,
-        AnalyticsFields.SESSION_ID to sessionId,
+        AnalyticsFields.IS_DEVELOPMENT to BuildConfig.DEBUG.toString(),
+        AnalyticsFields.SESSION_ID to sessionId.toString(),
     ) + networkType()
 
     private fun networkType(): Map<String, String> {
@@ -65,12 +65,12 @@ open class AnalyticsRequestFactory(
         return mapOf(AnalyticsFields.NETWORK_TYPE to networkType)
     }
 
-    internal fun appDataParams(): Map<String, Any> {
+    internal fun appDataParams(): Map<String, String> {
         return when {
             packageManager != null && packageInfo != null -> {
                 mapOf(
-                    AnalyticsFields.APP_NAME to getAppName(packageInfo, packageManager),
-                    AnalyticsFields.APP_VERSION to packageInfo.versionCode
+                    AnalyticsFields.APP_NAME to getAppName(packageInfo, packageManager).toString(),
+                    AnalyticsFields.APP_VERSION to packageInfo.versionCode.toString()
                 )
             }
             else -> emptyMap()

@@ -64,22 +64,24 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.PopupSkipped)
     }
 
-    private fun durationInSecondsFromStart(start: Long?) = start?.let {
-        System.currentTimeMillis() - it
-    }?.takeIf { it > 0 }?.let {
-        mapOf("duration" to it / 1000f)
+    private fun durationInSecondsFromStart(start: Long?): Map<String, String>? {
+        return start?.let {
+            System.currentTimeMillis() - it
+        }?.takeIf { it > 0 }?.let {
+            mapOf("duration" to (it / 1000f).toString())
+        }
     }
 
     private fun fireEvent(
         event: LinkEvent,
-        additionalParams: Map<String, Any>? = null
+        additionalParams: Map<String, String>? = null
     ) {
         logger.debug("Link event: ${event.eventName} $additionalParams")
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
-                    event,
-                    additionalParams ?: emptyMap()
+                    event = event,
+                    additionalParams = additionalParams.orEmpty(),
                 )
             )
         }

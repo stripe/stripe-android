@@ -11,7 +11,7 @@ import androidx.annotation.RestrictTo
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class AnalyticsRequest(
-    val params: Map<String, *>,
+    val params: Map<String, String?>,
     override val headers: Map<String, String>
 ) : StripeRequest() {
     private val query: String = QueryStringFactory.createFromParamsWithEmptyValues(params)

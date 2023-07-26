@@ -206,14 +206,23 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         @Source.SourceType sourceType: String? = null,
         tokenType: Token.Type? = null,
         threeDS2UiType: ThreeDS2UiType? = null
-    ): Map<String, Any> {
-        return defaultProductUsageTokens
-            .plus(productUsageTokens)
-            .takeUnless { it.isEmpty() }?.let { mapOf(FIELD_PRODUCT_USAGE to it.toList()) }
-            .orEmpty()
-            .plus(sourceType?.let { mapOf(FIELD_SOURCE_TYPE to it) }.orEmpty())
-            .plus(createTokenTypeParam(sourceType, tokenType))
-            .plus(threeDS2UiType?.let { mapOf(FIELD_3DS2_UI_TYPE to it.toString()) }.orEmpty())
+    ): Map<String, String> {
+        return buildMap {
+            val tokens = (defaultProductUsageTokens + productUsageTokens).toList()
+            if (tokens.isNotEmpty()) {
+                put(FIELD_PRODUCT_USAGE, tokens.toString())
+            }
+
+            if (sourceType != null) {
+                put(FIELD_SOURCE_TYPE, sourceType)
+            }
+
+            putAll(createTokenTypeParam(sourceType, tokenType))
+
+            if (threeDS2UiType != null) {
+                put(FIELD_3DS2_UI_TYPE, threeDS2UiType.toString())
+            }
+        }
     }
 
     private fun createTokenTypeParam(

@@ -59,16 +59,18 @@ class AnalyticsRequestFactoryTest : TestCase() {
             { apiKey },
             { "5G" },
         )
+
         val params = factory.createRequest(mockEvent, emptyMap()).params
 
-        assertThat(apiKey).isEqualTo(params[AnalyticsFields.PUBLISHABLE_KEY])
-        assertThat(Build.VERSION.SDK_INT).isEqualTo(params[AnalyticsFields.OS_VERSION])
-        assertThat(versionCode).isEqualTo(params[AnalyticsFields.APP_VERSION])
+        assertThat(params[AnalyticsFields.PUBLISHABLE_KEY]).isEqualTo(apiKey)
+        assertThat(params[AnalyticsFields.OS_VERSION]).isEqualTo(Build.VERSION.SDK_INT.toString())
+        assertThat(params[AnalyticsFields.APP_VERSION]).isEqualTo(versionCode.toString())
         assertThat(params[AnalyticsFields.APP_NAME]).isEqualTo(BuildConfig.LIBRARY_PACKAGE_NAME)
-        assertThat(StripeSdkVersion.VERSION_NAME).isEqualTo(params[AnalyticsFields.BINDINGS_VERSION])
-        assertThat(mockEvent.eventName).isEqualTo(params[AnalyticsFields.EVENT])
-        assertThat(expectedUaName).isEqualTo(params[AnalyticsFields.ANALYTICS_UA])
-        assertThat("unknown_generic_x86_robolectric").isEqualTo(params[AnalyticsFields.DEVICE_TYPE])
+        assertThat(params[AnalyticsFields.BINDINGS_VERSION]).isEqualTo(StripeSdkVersion.VERSION_NAME)
+        assertThat(params[AnalyticsFields.EVENT]).isEqualTo(mockEvent.eventName)
+        assertThat(params[AnalyticsFields.ANALYTICS_UA]).isEqualTo(expectedUaName)
+        assertThat(params[AnalyticsFields.DEVICE_TYPE]).isEqualTo("unknown_generic_x86_robolectric")
+
         assertNotNull(params[AnalyticsFields.OS_RELEASE])
         assertNotNull(params[AnalyticsFields.OS_NAME])
         assertNotNull(params[AnalyticsFields.SESSION_ID])
