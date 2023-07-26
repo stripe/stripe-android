@@ -18,7 +18,7 @@ internal class BottomSheetKeyboardHandler(
     private val isKeyboardVisible: State<Boolean>,
 ) {
 
-    suspend fun dismissAndWait() {
+    suspend fun dismiss() {
         if (isKeyboardVisible.value) {
             keyboardController?.hide()
             awaitKeyboardDismissed()

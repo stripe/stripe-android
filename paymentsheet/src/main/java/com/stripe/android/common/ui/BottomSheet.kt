@@ -53,7 +53,9 @@ internal class BottomSheetState(
 
     suspend fun hide() {
         dismissalType = DismissalType.Programmatically
-        keyboardHandler.dismissAndWait()
+        // We dismiss the keyboard before we dismiss the sheet. This looks cleaner and prevents
+        // a CancellationException.
+        keyboardHandler.dismiss()
         modalBottomSheetState.hide()
     }
 
