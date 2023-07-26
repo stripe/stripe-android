@@ -6,6 +6,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.financialconnections.browser.CustomTabsManager
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
@@ -68,6 +69,14 @@ internal interface FinancialConnectionsSheetNativeModule {
             sdkVersion = StripeSdkVersion.VERSION,
             apiVersion = apiVersion.code,
             stripeNetworkClient = stripeNetworkClient
+        )
+
+        @Provides
+        @Singleton
+        fun providesCustomTabsManager(
+            logger: Logger,
+        ): CustomTabsManager = CustomTabsManager(
+            logger = logger,
         )
 
         @Singleton
@@ -141,9 +150,10 @@ internal interface FinancialConnectionsSheetNativeModule {
 
         @Singleton
         @Provides
-        fun providesSaveToLinkWithStripeSucceededRepository() = SaveToLinkWithStripeSucceededRepository(
-            CoroutineScope(SupervisorJob() + Dispatchers.Default)
-        )
+        fun providesSaveToLinkWithStripeSucceededRepository() =
+            SaveToLinkWithStripeSucceededRepository(
+                CoroutineScope(SupervisorJob() + Dispatchers.Default)
+            )
 
         @Provides
         internal fun provideFinancialConnectionsConsumersApiService(

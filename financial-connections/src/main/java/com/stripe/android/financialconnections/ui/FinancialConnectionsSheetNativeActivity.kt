@@ -28,6 +28,7 @@ import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.browser.CustomTabsManager
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.common.CloseDialog
@@ -50,7 +51,6 @@ import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationState
 import com.stripe.android.financialconnections.navigation.toNavigationCommand
-import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
@@ -74,6 +74,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
     @Inject
     lateinit var imageLoader: StripeImageLoader
+
+    @Inject
+    lateinit var customTabsManager: CustomTabsManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,6 +113,16 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        customTabsManager.onStart(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        customTabsManager.onStop(this)
+    }
+
     /**
      * handle state changes here.
      */
@@ -117,11 +130,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         withState(viewModel) { state ->
             state.viewEffect?.let { viewEffect ->
                 when (viewEffect) {
-                    is OpenUrl -> startActivity(
-                        CreateBrowserIntentForUrl(
-                            context = this,
-                            uri = Uri.parse(viewEffect.url)
-                        )
+                    is OpenUrl -> customTabsManager.openCustomTab(
+                        activity = this,
+                        uri = Uri.parse(viewEffect.url),
                     )
 
                     is Finish -> {
@@ -144,9 +155,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         initialPane: Pane,
         reducedBranding: Boolean
     ) {
-        val context = LocalContext.current
+        val context = LocalContext.current as AppCompatActivity
         val navController = rememberNavController()
-        val uriHandler = remember { CustomTabUriHandler(context) }
+        val uriHandler = remember { CustomTabUriHandler(context, customTabsManager) }
         val initialDestination =
             remember(initialPane) {
                 initialPane.toNavigationCommand(
