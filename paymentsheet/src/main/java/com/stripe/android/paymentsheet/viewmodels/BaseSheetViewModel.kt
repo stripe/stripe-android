@@ -286,6 +286,10 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
+    protected fun reportDismiss(isDecoupling: Boolean) {
+        eventReporter.onDismiss(isDecoupling = isDecoupling)
+    }
+
     abstract fun clearErrorMessages()
 
     fun updatePrimaryButtonForLinkSignup(viewState: InlineSignupViewState) {

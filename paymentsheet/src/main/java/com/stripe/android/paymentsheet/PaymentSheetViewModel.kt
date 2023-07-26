@@ -606,6 +606,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override fun onUserCancel() {
+        reportDismiss(isDecoupling)
         _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
     }
 

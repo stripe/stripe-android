@@ -7,9 +7,42 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.StripeThemeDefaults
 import java.util.Locale
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
 
 internal sealed class PaymentSheetEvent : AnalyticsEvent {
     abstract val additionalParams: Map<String, Any?>
+
+    class LoadStarted(
+        isDecoupled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_load_started"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_IS_DECOUPLED to isDecoupled,
+        )
+    }
+
+    class LoadSucceeded(
+        duration: Duration?,
+        isDecoupled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_load_succeeded"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_DURATION to duration?.asSeconds,
+            FIELD_IS_DECOUPLED to isDecoupled,
+        )
+    }
+
+    class LoadFailed(
+        duration: Duration?,
+        isDecoupled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_load_failed"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_DURATION to duration?.asSeconds,
+            FIELD_IS_DECOUPLED to isDecoupled,
+        )
+    }
 
     class Init(
         private val mode: EventReporter.Mode,
@@ -116,10 +149,9 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     }
 
     class Dismiss(
-        mode: EventReporter.Mode,
         isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
-        override val eventName: String = formatEventName(mode, "dismiss")
+        override val eventName: String = "mc_dismiss"
         override val additionalParams: Map<String, Any> = mapOf(
             FIELD_IS_DECOUPLED to isDecoupled,
         )
@@ -173,7 +205,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class Payment(
         mode: EventReporter.Mode,
         result: Result,
-        durationMillis: Long?,
+        duration: Duration?,
         paymentSelection: PaymentSelection?,
         currency: String?,
         isDecoupled: Boolean,
@@ -185,7 +217,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
         override val additionalParams: Map<String, Any?> =
             mapOf(
-                "duration" to durationMillis?.div(1000f),
+                FIELD_DURATION to duration?.asSeconds,
                 "locale" to Locale.getDefault().toString(),
                 "currency" to currency,
                 FIELD_IS_DECOUPLED to isDecoupled,
@@ -268,5 +300,9 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_COLLECT_EMAIL = "email"
         const val FIELD_COLLECT_PHONE = "phone"
         const val FIELD_COLLECT_ADDRESS = "address"
+        const val FIELD_DURATION = "duration"
     }
 }
+
+private val Duration.asSeconds: Float
+    get() = toDouble(DurationUnit.SECONDS).toFloat()

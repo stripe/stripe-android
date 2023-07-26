@@ -34,12 +34,36 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onLoadStarted(isDecoupling: Boolean) {
+        durationProvider.start(DurationProvider.Key.Loading)
+        fireEvent(PaymentSheetEvent.LoadStarted(isDecoupling))
+    }
+
+    override fun onLoadSucceeded(isDecoupling: Boolean) {
+        val duration = durationProvider.end(DurationProvider.Key.Loading)
+        fireEvent(
+            PaymentSheetEvent.LoadSucceeded(
+                duration = duration,
+                isDecoupled = isDecoupling,
+            )
+        )
+    }
+
+    override fun onLoadFailed(isDecoupling: Boolean) {
+        val duration = durationProvider.end(DurationProvider.Key.Loading)
+        fireEvent(
+            PaymentSheetEvent.LoadFailed(
+                duration = duration,
+                isDecoupled = isDecoupling,
+            )
+        )
+    }
+
     override fun onDismiss(
         isDecoupling: Boolean,
     ) {
         fireEvent(
             PaymentSheetEvent.Dismiss(
-                mode = mode,
                 isDecoupled = isDecoupling,
             )
         )
@@ -110,7 +134,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.Payment(
                 mode = mode,
                 paymentSelection = realSelection,
-                durationMillis = duration?.inWholeMilliseconds,
+                duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Success,
                 currency = currency,
                 isDecoupled = deferredIntentConfirmationType != null,
@@ -130,7 +154,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.Payment(
                 mode = mode,
                 paymentSelection = paymentSelection,
-                durationMillis = duration?.inWholeMilliseconds,
+                duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Failure,
                 currency = currency,
                 isDecoupled = isDecoupling,
