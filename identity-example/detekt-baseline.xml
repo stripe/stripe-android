@@ -11,5 +11,10 @@
     <ID>LongMethod:IdentityExampleViewModel.kt$IdentityExampleViewModel$fun postForResult( submissionState: IdentitySubmissionState )</ID>
     <ID>LongMethod:RequirePhoneVerificationUI.kt$@Composable internal fun RequirePhoneVerificationUI( scrollState: ScrollState, submissionState: IdentitySubmissionState, onSubmissionStateChanged: (IdentitySubmissionState) -> Unit )</ID>
     <ID>TooGenericExceptionCaught:IdentityExampleViewModel.kt$IdentityExampleViewModel$t: Throwable</ID>
+    <ID>UnusedPrivateMember:DocumentUI.kt$scrollState: ScrollState</ID>
+    <ID>UnusedPrivateMember:DocumentUI.kt$shouldShowPhoneNumber: Boolean</ID>
+    <ID>UnusedPrivateMember:IdNumberUI.kt$onSubmissionStateChanged: (IdentitySubmissionState) -> Unit</ID>
+    <ID>UnusedPrivateMember:IdNumberUI.kt$scrollState: ScrollState</ID>
+    <ID>UnusedPrivateMember:IdNumberUI.kt$submissionState: IdentitySubmissionState</ID>
   </CurrentIssues>
 </SmellBaseline>
