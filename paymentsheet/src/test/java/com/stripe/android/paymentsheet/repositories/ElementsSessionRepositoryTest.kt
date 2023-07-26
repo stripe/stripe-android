@@ -122,7 +122,7 @@ internal class ElementsSessionRepositoryTest {
             )
         )
 
-        val session = ElementsSessionRepository.Api(
+        val session = RealElementsSessionRepository(
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
@@ -151,7 +151,7 @@ internal class ElementsSessionRepositoryTest {
             Result.failure(endpointException)
         )
 
-        val session = ElementsSessionRepository.Api(
+        val session = RealElementsSessionRepository(
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
@@ -170,7 +170,7 @@ internal class ElementsSessionRepositoryTest {
         assertThat(session.exceptionOrNull()).isEqualTo(endpointException)
     }
 
-    private fun createRepository() = ElementsSessionRepository.Api(
+    private fun createRepository() = RealElementsSessionRepository(
         stripeRepository,
         { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
         testDispatcher,
