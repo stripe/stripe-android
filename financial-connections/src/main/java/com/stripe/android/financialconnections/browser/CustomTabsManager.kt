@@ -34,14 +34,14 @@ internal class CustomTabsManager(
                 name: ComponentName,
                 client: CustomTabsClient
             ) {
-                log("SERVICE CONNECTED")
+                log("Service connected")
                 this@CustomTabsManager.client = client
                 this@CustomTabsManager.client?.warmup(0)
                 session = this@CustomTabsManager.client?.newSession(CustomTabsCallback())
             }
 
             override fun onServiceDisconnected(name: ComponentName) {
-                log("SERVICE DISCONNECTED")
+                log("Service disconnected")
                 client = null
                 session = null
             }
@@ -109,7 +109,6 @@ internal class CustomTabsManager(
     /**
      * Warms up the browser for a given URL, so that it loads faster when launched.
      */
-
     fun mayLaunchUrl(url: String): Boolean {
         return client
             ?.let { getSession() }
