@@ -21,10 +21,10 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -551,7 +551,7 @@ internal class DefaultPaymentSheetLoaderTest {
             googlePayRepositoryFactory = {
                 if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
             },
-            elementsSessionRepository = ElementsSessionRepository.Static(stripeIntent),
+            elementsSessionRepository = FakeElementsSessionRepository(stripeIntent),
             stripeIntentValidator = StripeIntentValidator(),
             customerRepository = customerRepo,
             lpmRepository = lpmRepository,
