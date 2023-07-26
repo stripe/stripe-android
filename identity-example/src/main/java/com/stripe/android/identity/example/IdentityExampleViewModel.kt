@@ -173,6 +173,6 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
 
     private companion object {
         const val EXAMPLE_BACKEND_URL =
-            "https://reflective-fossil-rib.glitch.me/create-verification-session"
+            "https://stripe-mobile-identity-verification-playground.glitch.me/create-verification-session"
     }
 }

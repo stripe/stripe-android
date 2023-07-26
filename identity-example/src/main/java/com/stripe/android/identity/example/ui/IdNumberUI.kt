@@ -9,5 +9,6 @@ internal fun IdNumberUI(
     submissionState: IdentitySubmissionState,
     onSubmissionStateChanged: (IdentitySubmissionState) -> Unit
 ) {
-    RequirePhoneVerificationUI(scrollState, submissionState, onSubmissionStateChanged)
+    // TODO(ccen) re-enable when backend supports PII
+    // RequirePhoneVerificationUI(scrollState, submissionState, onSubmissionStateChanged)
 }

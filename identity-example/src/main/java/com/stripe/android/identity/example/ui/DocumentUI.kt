@@ -25,10 +25,11 @@ internal fun DocumentUI(
 ) {
     AllowedDocumentTypes(submissionState, onSubmissionStateChanged)
     RequireDocTypes(submissionState, onSubmissionStateChanged)
-    if (shouldShowPhoneNumber) {
-        Divider()
-        RequirePhoneVerificationUI(scrollState, submissionState, onSubmissionStateChanged)
-    }
+    // TODO(ccen) re-enable when backend supports PII
+    //    if (shouldShowPhoneNumber) {
+    //        Divider()
+    //        RequirePhoneVerificationUI(scrollState, submissionState, onSubmissionStateChanged)
+    //    }
 }
 
 @Composable
