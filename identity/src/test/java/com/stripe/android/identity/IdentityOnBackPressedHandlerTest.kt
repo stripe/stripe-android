@@ -7,12 +7,12 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.navigation.ConfirmationDestination
+import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.ConsentDestination.CONSENT
 import com.stripe.android.identity.navigation.DocSelectionDestination
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
 import com.stripe.android.identity.navigation.InitialLoadingDestination
-import com.stripe.android.identity.navigation.clearDataAndNavigateUp
 import com.stripe.android.identity.navigation.routeToScreenName
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import org.junit.Test
@@ -106,6 +106,30 @@ class IdentityOnBackPressedHandlerTest {
     }
 
     @Test
+    fun testBackPressOnConsentPage() {
+        val mockDestination = mock<NavDestination> {
+            on { route } doReturn ConsentDestination.ROUTE.route
+        }
+
+        handler.updateState(
+            destination = mockDestination,
+            args = null
+        )
+
+        handler.handleOnBackPressed()
+
+        verify(mockAnalyticsRequestFactory).verificationCanceled(
+            eq(false),
+            eq(CONSENT.routeToScreenName()),
+            anyOrNull(),
+            anyOrNull()
+        )
+        verify(mockFlowFinishable).finishWithResult(
+            eq(IdentityVerificationSheet.VerificationFlowResult.Canceled)
+        )
+    }
+
+    @Test
     fun testBackPressOnErrorPageWithArgShouldFail() {
         val mockDestination = mock<NavDestination> {
             on { route } doReturn ErrorDestination.ROUTE.route
@@ -151,9 +175,7 @@ class IdentityOnBackPressedHandlerTest {
             )
         )
         handler.handleOnBackPressed()
-        verify(mockNavController).clearDataAndNavigateUp(
-            mockIdentityViewModel
-        )
+        verify(mockNavController).navigateUp()
     }
 
     @Test
@@ -167,8 +189,6 @@ class IdentityOnBackPressedHandlerTest {
             args = null
         )
         handler.handleOnBackPressed()
-        verify(mockNavController).clearDataAndNavigateUp(
-            mockIdentityViewModel
-        )
+        verify(mockNavController).navigateUp()
     }
 }

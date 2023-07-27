@@ -5,6 +5,14 @@ import androidx.navigation.NavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_ROUTE
 import com.stripe.android.identity.networking.models.Requirement.Companion.matchesFromRoute
+import com.stripe.android.identity.networking.models.VerificationPageData
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingBack
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingConsent
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingDocType
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingFront
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingIndividualRequirements
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingOtp
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingSelfie
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
@@ -21,7 +29,8 @@ internal fun NavController.navigateToErrorScreenWithRequirementError(
             errorTitle = requirementError.title ?: context.getString(R.string.stripe_error),
             errorContent = requirementError.body
                 ?: context.getString(R.string.stripe_unexpected_error_try_again),
-            backButtonText = requirementError.backButtonText ?: context.getString(R.string.stripe_go_back),
+            backButtonText = requirementError.backButtonText
+                ?: context.getString(R.string.stripe_go_back),
             backButtonDestination =
             if (requirementError.requirement.matchesFromRoute(route)) {
                 route
@@ -94,4 +103,33 @@ internal fun NavController.clearDataAndNavigateUp(identityViewModel: IdentityVie
     }
 
     return navigateUp()
+}
+
+/**
+ * Check the [VerificationPageData.requirements.missings] and navigate or invoke callbacks accordingly.
+ */
+internal suspend fun NavController.navigateOnVerificationPageData(
+    verificationPageData: VerificationPageData,
+    onMissingFront: () -> Unit,
+    onMissingOtp: () -> Unit,
+    onMissingBack: () -> Unit,
+    onReadyToSubmit: suspend () -> Unit
+) {
+    if (verificationPageData.isMissingOtp()) {
+        onMissingOtp()
+    } else if (verificationPageData.isMissingConsent()) {
+        navigateTo(ConsentDestination)
+    } else if (verificationPageData.isMissingDocType()) {
+        navigateTo(DocSelectionDestination)
+    } else if (verificationPageData.isMissingFront()) {
+        onMissingFront()
+    } else if (verificationPageData.isMissingBack()) {
+        onMissingBack()
+    } else if (verificationPageData.isMissingSelfie()) {
+        navigateTo(SelfieDestination)
+    } else if (verificationPageData.isMissingIndividualRequirements()) {
+        navigateTo(IndividualDestination)
+    } else {
+        onReadyToSubmit()
+    }
 }

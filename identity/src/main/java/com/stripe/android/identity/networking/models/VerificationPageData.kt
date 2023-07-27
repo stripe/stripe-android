@@ -22,7 +22,10 @@ internal data class VerificationPageData(
     val status: Status,
     /* If true, the associated VerificationSession has been submitted for processing. */
     @SerialName("submitted")
-    val submitted: Boolean
+    val submitted: Boolean,
+    /* If true, the associated VerificationSession has been is finished and can no longer be changed. */
+    @SerialName("closed")
+    val closed: Boolean,
 ) {
     /**
      * Status of the associated VerificationSession.
@@ -60,8 +63,27 @@ internal data class VerificationPageData(
         fun VerificationPageData.isMissingSelfie() =
             requirements.missings?.contains(Requirement.FACE) == true
 
-        fun VerificationPageData.isMissingIndividualRequirements() = requirements.missings?.intersect(
-            listOf(Requirement.IDNUMBER, Requirement.DOB, Requirement.NAME, Requirement.ADDRESS)
-        )?.isNotEmpty() == true
+        fun VerificationPageData.isMissingOtp() =
+            requirements.missings?.contains(Requirement.PHONE_OTP) == true
+
+        fun VerificationPageData.isMissingIndividualRequirements() =
+            requirements.missings?.intersect(
+                listOf(
+                    Requirement.IDNUMBER,
+                    Requirement.DOB,
+                    Requirement.NAME,
+                    Requirement.ADDRESS,
+                    Requirement.PHONE_NUMBER
+                )
+            )?.isNotEmpty() == true
+
+        /**
+         * When submitted but is not closed and there is still missing requirements, need to
+         * fallback.
+         */
+        fun VerificationPageData.needsFallback() =
+            submitted && !closed && requirements.missings?.isEmpty() == false
+
+        fun VerificationPageData.submittedAndClosed() = submitted && closed
     }
 }

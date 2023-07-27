@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 2023-XX-XX
+### Identity
+* [ADDED][6438](https://github.com/stripe/stripe-android/pull/6438) Supports [phone verification](https://stripe.com/docs/identity/phone) in Identity mobile SDK.
 
 ## 20.27.3 - 2023-07-24
 
