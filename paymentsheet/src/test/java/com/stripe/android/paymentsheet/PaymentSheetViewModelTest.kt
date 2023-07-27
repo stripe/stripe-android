@@ -51,6 +51,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.DummyActivityResultCaller
@@ -1419,6 +1420,44 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onDismiss(isDecoupling = true)
     }
 
+    @Test
+    fun `Sends confirm button event when the user confirms with non-deferred intent`() = runTest {
+        val paymentMethod = PaymentMethodFactory.usBankAccount()
+        val viewModel = createViewModel(customerPaymentMethods = listOf(paymentMethod))
+
+        viewModel.handlePaymentMethodSelected(
+            selection = PaymentSelection.Saved(
+                paymentMethod = paymentMethod,
+            ),
+        )
+        viewModel.checkout()
+
+        verify(eventReporter).onPressConfirmButton(
+            currency = PAYMENT_INTENT.currency,
+            isDecoupling = false,
+        )
+    }
+
+    @Test
+    fun `Sends confirm button event when the user confirms with deferred intent`() = runTest {
+        val paymentMethod = PaymentMethodFactory.usBankAccount()
+        val viewModel = createViewModelForDeferredIntent(
+            customerPaymentMethods = listOf(paymentMethod),
+        )
+
+        viewModel.handlePaymentMethodSelected(
+            selection = PaymentSelection.Saved(
+                paymentMethod = paymentMethod,
+            ),
+        )
+        viewModel.checkout()
+
+        verify(eventReporter).onPressConfirmButton(
+            currency = PAYMENT_INTENT.currency,
+            isDecoupling = true,
+        )
+    }
+
     private fun createViewModel(
         args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
@@ -1467,6 +1506,7 @@ internal class PaymentSheetViewModelTest {
     private fun createViewModelForDeferredIntent(
         args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
+        customerPaymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
     ): PaymentSheetViewModel {
         val deferredIntent = paymentIntent.copy(id = null, clientSecret = null)
 
@@ -1477,6 +1517,7 @@ internal class PaymentSheetViewModelTest {
         return createViewModel(
             args = args.copy(initializationMode = InitializationMode.DeferredIntent(intentConfig)),
             stripeIntent = deferredIntent,
+            customerPaymentMethods = customerPaymentMethods,
         )
     }
 

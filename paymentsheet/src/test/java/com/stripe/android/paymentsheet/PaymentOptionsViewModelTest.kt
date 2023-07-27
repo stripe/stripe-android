@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
@@ -25,6 +26,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -508,6 +510,63 @@ internal class PaymentOptionsViewModelTest {
         val viewModel = createViewModel(args = deferredIntentArgs)
         viewModel.onUserCancel()
         verify(eventReporter).onDismiss(isDecoupling = true)
+    }
+
+    @Test
+    fun `Sends confirm button event when the user confirms with non-deferred intent`() = runTest {
+        val paymentMethod = PaymentMethodFactory.usBankAccount()
+
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
+                customerPaymentMethods = listOf(paymentMethod),
+            ),
+        )
+
+        val viewModel = createViewModel(args = args)
+
+        viewModel.handlePaymentMethodSelected(
+            selection = PaymentSelection.Saved(
+                paymentMethod = paymentMethod,
+            ),
+        )
+
+        viewModel.primaryButtonUiState.value?.onClick?.invoke()
+
+        verify(eventReporter).onPressConfirmButton(
+            currency = args.state.stripeIntent.currency,
+            isDecoupling = false,
+        )
+    }
+
+    @Test
+    fun `Sends confirm button event when the user confirms with deferred intent`() = runTest {
+        val paymentMethod = PaymentMethodFactory.usBankAccount()
+
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
+                stripeIntent = DEFERRED_PAYMENT_INTENT,
+                customerPaymentMethods = listOf(paymentMethod),
+            ),
+        )
+
+        val viewModel = createViewModel(args = args)
+
+        viewModel.primaryButtonUiState.test {
+            viewModel.handlePaymentMethodSelected(
+                selection = PaymentSelection.Saved(
+                    paymentMethod = paymentMethod,
+                ),
+            )
+
+            val uiState = expectMostRecentItem()
+            uiState?.onClick?.invoke()
+//            viewModel.primaryButtonUiState.value?.onClick?.invoke()
+        }
+
+        verify(eventReporter).onPressConfirmButton(
+            currency = args.state.stripeIntent.currency,
+            isDecoupling = true,
+        )
     }
 
     private fun createViewModel(
