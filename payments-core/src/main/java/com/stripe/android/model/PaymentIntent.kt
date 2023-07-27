@@ -38,7 +38,7 @@ constructor(
      * equivalent in charge currency. The amount value supports up to eight digits (e.g., a value
      * of 99999999 for a USD charge of $999,999.99).
      */
-    val amount: Long?,
+    val amount: Long,
 
     /**
      * Populated when `status` is `canceled`, this is the time at which the [PaymentIntent]
@@ -97,7 +97,7 @@ constructor(
     /**
      * Three-letter ISO currency code, in lowercase. Must be a supported currency.
      */
-    val currency: String?,
+    val currency: String,
 
     /**
      * An arbitrary string attached to the object. Often useful for displaying to users.

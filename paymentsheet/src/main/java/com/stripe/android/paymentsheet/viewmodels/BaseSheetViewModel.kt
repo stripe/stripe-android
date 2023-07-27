@@ -109,8 +109,17 @@ internal abstract class BaseSheetViewModel(
     internal val paymentMethods: StateFlow<List<PaymentMethod>?> = savedStateHandle
         .getStateFlow(SAVE_PAYMENT_METHODS, null)
 
-    private val _amount = MutableStateFlow<Amount?>(null)
-    internal val amount: StateFlow<Amount?> = _amount
+    internal val amount: StateFlow<Amount?> = stripeIntent.map {
+        if (it is PaymentIntent) {
+            Amount(it.amount, it.currency)
+        } else {
+            null
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = null,
+    )
 
     protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
         value = listOf(PaymentSheetScreen.Loading),
@@ -277,13 +286,6 @@ internal abstract class BaseSheetViewModel(
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
         _stripeIntent.value = stripeIntent
         supportedPaymentMethods = getPMsToAdd(stripeIntent, config, lpmRepository)
-
-        if (stripeIntent is PaymentIntent) {
-            _amount.value = Amount(
-                requireNotNull(stripeIntent.amount),
-                requireNotNull(stripeIntent.currency)
-            )
-        }
     }
 
     abstract fun clearErrorMessages()

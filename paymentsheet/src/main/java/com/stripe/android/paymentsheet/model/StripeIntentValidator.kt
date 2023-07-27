@@ -37,9 +37,6 @@ internal class StripeIntentValidator @Inject constructor() {
                     """.trimIndent()
                 )
             }
-            stripeIntent is PaymentIntent && (stripeIntent.amount == null || stripeIntent.currency == null) -> {
-                error("PaymentIntent must contain amount and currency.")
-            }
             stripeIntent is SetupIntent &&
                 (
                     (stripeIntent.status == StripeIntent.Status.Canceled) ||
