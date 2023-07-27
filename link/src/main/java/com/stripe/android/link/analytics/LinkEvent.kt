@@ -25,26 +25,26 @@ internal sealed class LinkEvent : AnalyticsEvent {
     }
 
     object PopupShow : LinkEvent() {
-        override val eventName = "link_popup_show"
+        override val eventName = "link.popup.show"
     }
 
     object PopupSuccess : LinkEvent() {
-        override val eventName = "link_popup_success"
+        override val eventName = "link.popup.success"
     }
 
     object PopupCancel : LinkEvent() {
-        override val eventName = "link_popup_cancel"
+        override val eventName = "link.popup.cancel"
     }
 
     object PopupError : LinkEvent() {
-        override val eventName = "link_popup_error"
+        override val eventName = "link.popup.error"
     }
 
     object PopupLogout : LinkEvent() {
-        override val eventName = "link_popup_logout"
+        override val eventName = "link.popup.logout"
     }
 
     object PopupSkipped : LinkEvent() {
-        override val eventName = "link_popup_skipped"
+        override val eventName = "link.popup.skipped"
     }
 }
