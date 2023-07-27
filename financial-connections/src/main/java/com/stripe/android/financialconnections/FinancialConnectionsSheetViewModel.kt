@@ -20,7 +20,7 @@ import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
-import com.stripe.android.financialconnections.domain.IsBrowserAvailable
+import com.stripe.android.financialconnections.domain.GetDefaultAppToOpenUrl
 import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.exception.AppInitializationError
@@ -42,8 +42,6 @@ import com.stripe.android.financialconnections.utils.parcelable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -56,7 +54,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val logger: Logger,
     private val eventReporter: FinancialConnectionsEventReporter,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
-    private val isBrowserAvailable: IsBrowserAvailable,
+    private val getDefaultAppToOpenUrl: GetDefaultAppToOpenUrl,
     private val nativeRouter: NativeAuthFlowRouter,
     initialState: FinancialConnectionsSheetState
 ) : MavericksViewModel<FinancialConnectionsSheetState>(initialState) {
@@ -101,7 +99,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      *
      */
     private fun openAuthFlow(sync: SynchronizeSessionResponse) {
-        if (isBrowserAvailable().not()) {
+        if (getDefaultAppToOpenUrl() == null) {
             logNoBrowserAvailableAndFinish()
             return
         }

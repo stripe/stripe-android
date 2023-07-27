@@ -288,6 +288,21 @@ internal sealed class FinancialConnectionsEvent(
         mapOf("pane" to Pane.CONSENT.value)
     )
 
+    class AuthSessionCreated(
+        pane: Pane,
+        flow: String?,
+        defaultBrowser: String?,
+        id: String
+    ) : FinancialConnectionsEvent(
+        "auth_session.created",
+        mapOf(
+            "auth_session_id" to id,
+            "pane" to pane.value,
+            "flow" to (flow ?: "unknown"),
+            "default_browser" to (defaultBrowser ?: "unknown")
+        ).filterNotNullValues()
+    )
+
     override fun toString(): String {
         return "FinancialConnectionsEvent(name='$name', params=$params)"
     }
