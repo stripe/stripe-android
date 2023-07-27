@@ -2,8 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>CommentWrapping:DefaultIdentityIO.kt$DefaultIdentityIO$/* prefix */</ID>
-    <ID>CommentWrapping:DefaultIdentityIO.kt$DefaultIdentityIO$/* suffix */</ID>
     <ID>CyclomaticComplexMethod:CameraScreenLaunchedEffect.kt$@Composable internal fun CameraScreenLaunchedEffect( identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, verificationPage: VerificationPage, navController: NavController, cameraManager: IdentityCameraManager, onCameraReady: () -> Unit )</ID>
     <ID>CyclomaticComplexMethod:DocumenetScanScreen.kt$@Composable internal fun DocumentScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, frontScanType: IdentityScanState.ScanType, backScanType: IdentityScanState.ScanType?, shouldStartFromBack: Boolean, messageRes: DocumentScanMessageRes, collectedDataParamType: CollectedDataParam.Type, route: String )</ID>
     <ID>CyclomaticComplexMethod:IdentityTopLevelDestination.kt$internal fun String.routeToScreenName(): String</ID>
