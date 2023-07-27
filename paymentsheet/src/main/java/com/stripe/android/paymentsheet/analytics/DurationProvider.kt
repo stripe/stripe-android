@@ -10,6 +10,7 @@ internal interface DurationProvider {
     fun end(key: Key): Duration?
 
     enum class Key {
+        Loading,
         Checkout,
     }
 }

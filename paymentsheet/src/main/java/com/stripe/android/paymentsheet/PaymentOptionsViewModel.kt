@@ -188,6 +188,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onUserCancel() {
+        reportDismiss(isDecoupling)
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Canceled(
                 mostRecentError = mostRecentError,

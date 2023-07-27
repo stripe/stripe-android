@@ -539,11 +539,74 @@ internal class DefaultPaymentSheetLoaderTest {
         assertThat(result?.throwable?.message).isEqualTo(expectedMessage)
     }
 
+    @Test
+    fun `Emits correct events when loading succeeds for non-deferred intent`() = runTest {
+        val loader = createPaymentSheetLoader()
+
+        loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+        )
+
+        verify(eventReporter).onLoadStarted(isDecoupling = false)
+        verify(eventReporter).onLoadSucceeded(isDecoupling = false)
+    }
+
+    @Test
+    fun `Emits correct events when loading succeeds for deferred intent`() = runTest {
+        val loader = createPaymentSheetLoader()
+
+        loader.load(
+            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1234,
+                        currency = "cad",
+                    ),
+                ),
+            ),
+        )
+
+        verify(eventReporter).onLoadStarted(isDecoupling = true)
+        verify(eventReporter).onLoadSucceeded(isDecoupling = true)
+    }
+
+    @Test
+    fun `Emits correct events when loading fails for non-deferred intent`() = runTest {
+        val loader = createPaymentSheetLoader(shouldFail = true)
+
+        loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+        )
+
+        verify(eventReporter).onLoadStarted(isDecoupling = false)
+        verify(eventReporter).onLoadFailed(isDecoupling = false)
+    }
+
+    @Test
+    fun `Emits correct events when loading fails for deferred intent`() = runTest {
+        val loader = createPaymentSheetLoader(shouldFail = true)
+
+        loader.load(
+            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1234,
+                        currency = "cad",
+                    ),
+                ),
+            ),
+        )
+
+        verify(eventReporter).onLoadStarted(isDecoupling = true)
+        verify(eventReporter).onLoadFailed(isDecoupling = true)
+    }
+
     private fun createPaymentSheetLoader(
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         customerRepo: CustomerRepository = customerRepository,
         linkAccountState: AccountStatus = AccountStatus.Verified,
+        shouldFail: Boolean = false,
     ): PaymentSheetLoader {
         return DefaultPaymentSheetLoader(
             appName = "App Name",
@@ -551,7 +614,9 @@ internal class DefaultPaymentSheetLoaderTest {
             googlePayRepositoryFactory = {
                 if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
             },
-            elementsSessionRepository = FakeElementsSessionRepository(stripeIntent),
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = stripeIntent.takeUnless { shouldFail },
+            ),
             stripeIntentValidator = StripeIntentValidator(),
             customerRepository = customerRepo,
             lpmRepository = lpmRepository,

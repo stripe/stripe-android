@@ -1405,6 +1405,20 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
+    @Test
+    fun `Sends dismiss event when the user cancels the flow with non-deferred intent`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.onUserCancel()
+        verify(eventReporter).onDismiss(isDecoupling = false)
+    }
+
+    @Test
+    fun `Sends dismiss event when the user cancels the flow with deferred intent`() = runTest {
+        val viewModel = createViewModelForDeferredIntent()
+        viewModel.onUserCancel()
+        verify(eventReporter).onDismiss(isDecoupling = true)
+    }
+
     private fun createViewModel(
         args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
