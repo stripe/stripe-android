@@ -21,6 +21,7 @@ internal class FinancialConnectionsSheetNativeStateTest {
                 args = args(
                     VisualUpdate(
                         reducedBranding = true,
+                        reducedManualEntryProminenceForErrors = false,
                         merchantLogos = emptyList()
                     )
                 )
@@ -35,6 +36,7 @@ internal class FinancialConnectionsSheetNativeStateTest {
                 args = args(
                     VisualUpdate(
                         reducedBranding = false,
+                        reducedManualEntryProminenceForErrors = false,
                         merchantLogos = emptyList()
                     )
                 )

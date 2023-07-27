@@ -6,8 +6,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
+import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
@@ -30,7 +31,7 @@ internal class AccountPickerViewModelTest {
     val mavericksTestRule = MavericksTestRule()
 
     private val pollAuthorizationSessionAccounts = mock<PollAuthorizationSessionAccounts>()
-    private val getManifest = mock<GetManifest>()
+    private val getSync = mock<GetOrFetchSync>()
     private val goNext = mock<GoNext>()
     private val navigationManager = mock<NavigationManager>()
     private val selectAccounts = mock<SelectAccounts>()
@@ -42,7 +43,7 @@ internal class AccountPickerViewModelTest {
         initialState = state,
         eventTracker = eventTracker,
         selectAccounts = selectAccounts,
-        getManifest = getManifest,
+        getOrFetchSync = getSync,
         goNext = goNext,
         navigationManager = navigationManager,
         logger = Logger.noop(),
@@ -124,7 +125,7 @@ internal class AccountPickerViewModelTest {
         }
 
     private suspend fun givenManifestReturns(manifest: FinancialConnectionsSessionManifest) {
-        whenever(getManifest()).thenReturn(manifest)
+        whenever(getSync()).thenReturn(syncResponse(manifest))
     }
 
     private suspend fun givenPollAccountsReturns(
@@ -133,7 +134,7 @@ internal class AccountPickerViewModelTest {
         whenever(
             pollAuthorizationSessionAccounts(
                 canRetry = any(),
-                manifest = any()
+                sync = any()
             )
         ).thenReturn(response)
     }
