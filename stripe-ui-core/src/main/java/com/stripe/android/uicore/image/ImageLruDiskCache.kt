@@ -37,14 +37,10 @@ class ImageLruDiskCache(
     private val diskLruCache: DiskLruCache? by lazy {
         try {
             DiskLruCache.open(
-                /* directory = */
-                getDiskCacheDir(context, cacheFolder),
-                /* appVersion = */
-                APP_VERSION,
-                /* valueCount = */
-                VALUE_COUNT,
-                /* maxSize = */
-                maxSizeBytes
+                /* directory = */ getDiskCacheDir(context, cacheFolder),
+                /* appVersion = */ APP_VERSION,
+                /* valueCount = */ VALUE_COUNT,
+                /* maxSize = */ maxSizeBytes
             )
         } catch (e: IOException) {
             Log.e(TAG, "error opening cache", e)
