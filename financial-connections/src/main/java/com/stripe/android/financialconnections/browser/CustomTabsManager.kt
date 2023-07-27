@@ -15,7 +15,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.Logger
 import javax.inject.Inject
 
-interface CustomTabsManager : DefaultLifecycleObserver {
+internal interface CustomTabsManager : DefaultLifecycleObserver {
 
     /**
      * Opens the URL on a Custom Tab if possible. Otherwise fallsback to opening it on a WebView.
