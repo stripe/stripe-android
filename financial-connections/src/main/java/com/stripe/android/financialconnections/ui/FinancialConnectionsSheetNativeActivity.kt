@@ -85,6 +85,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         } else {
             viewModel.activityRetainedComponent.inject(this)
             viewModel.onEach { postInvalidate() }
+            lifecycle.addObserver(customTabsManager)
             onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
             setContent {
                 FinancialConnectionsTheme {
@@ -111,16 +112,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 }
             }
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        customTabsManager.onStart(this)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        customTabsManager.onStop(this)
     }
 
     /**

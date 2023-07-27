@@ -10,6 +10,8 @@ import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsServiceConnection
 import androidx.browser.customtabs.CustomTabsSession
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.Logger
 
 /**
@@ -18,7 +20,7 @@ import com.stripe.android.core.Logger
  */
 internal class CustomTabsManager(
     private val logger: Logger
-) {
+) : DefaultLifecycleObserver {
 
     private var client: CustomTabsClient? = null
     private var connection: CustomTabsServiceConnection? = null
@@ -27,7 +29,9 @@ internal class CustomTabsManager(
     /**
      * Binds the Activity to the CustomTabsService.
      */
-    fun onStart(context: Context) {
+    override fun onStart(owner: LifecycleOwner) {
+        super.onStart(owner)
+        val context = owner as? Context ?: return
         if (client != null) return
         connection = object : CustomTabsServiceConnection() {
             override fun onCustomTabsServiceConnected(
@@ -52,13 +56,14 @@ internal class CustomTabsManager(
     /**
      * Unbinds the Activity from the CustomTabsService.
      */
-    fun onStop(context: Context) {
+    override fun onStop(owner: LifecycleOwner) {
+        super.onStop(owner)
+        val context = owner as? Context ?: return
         if (connection == null) return
         connection?.let {
-            log("OnStop: unbinding service")
-            runCatching { context.unbindService(it) }.onFailure {
-                log("OnStop: couldn't unbind, ${it.stackTraceToString()}")
-            }
+            runCatching { context.unbindService(it) }
+                .onFailure { log("OnStop: couldn't unbind, ${it.stackTraceToString()}") }
+                .onSuccess { log("OnStop: service unbound") }
         }
         client = null
         connection = null
