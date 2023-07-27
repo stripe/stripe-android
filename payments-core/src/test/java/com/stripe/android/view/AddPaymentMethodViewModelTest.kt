@@ -27,7 +27,8 @@ class AddPaymentMethodViewModelTest {
     private val stripe = Stripe(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
     private val customerSession: CustomerSession = mock()
-    private val paymentMethodRetrievalCaptor: KArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener> = argumentCaptor()
+    private val paymentMethodRetrievalCaptor: KArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener> =
+        argumentCaptor()
 
     @Test
     fun `updatedPaymentMethodCreateParams should include expected attribution`() {

@@ -104,8 +104,7 @@ class CustomerSheetExampleViewModel(
         }
     }
 
-    private suspend fun fetchCustomerEphemeralKey():
-        FuelResult<ExampleCustomerSheetResponse, FuelError> {
+    private suspend fun fetchCustomerEphemeralKey(): FuelResult<ExampleCustomerSheetResponse, FuelError> {
         return withContext(Dispatchers.IO) {
             val request = ExampleCustomerSheetRequest(
                 customerType = "returning"
@@ -123,8 +122,7 @@ class CustomerSheetExampleViewModel(
         }
     }
 
-    private suspend fun createSetupIntent(customerId: String):
-        FuelResult<ExampleCreateSetupIntentResponse, FuelError> {
+    private suspend fun createSetupIntent(customerId: String): FuelResult<ExampleCreateSetupIntentResponse, FuelError> {
         return withContext(Dispatchers.IO) {
             val request = ExampleCreateSetupIntentRequest(
                 customerId = customerId

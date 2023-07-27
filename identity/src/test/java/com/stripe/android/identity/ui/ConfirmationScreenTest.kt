@@ -42,7 +42,7 @@ class ConfirmationScreenTest {
         )
     }
 
-    private val mockIdentityViewModel = mock<IdentityViewModel>() {
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationPage } doReturn MutableLiveData(Resource.success(verificationPage))
     }
     private val mockNavController = mock<NavController>()

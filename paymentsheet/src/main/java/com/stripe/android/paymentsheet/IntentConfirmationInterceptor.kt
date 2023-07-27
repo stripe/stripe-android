@@ -83,7 +83,7 @@ internal interface IntentConfirmationInterceptor {
 internal enum class DeferredIntentConfirmationType(val value: String) {
     Client("client"),
     Server("server"),
-    None("none");
+    None("none")
 }
 
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(

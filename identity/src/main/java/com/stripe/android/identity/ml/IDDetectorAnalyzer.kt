@@ -115,11 +115,11 @@ internal class IDDetectorAnalyzer(
         private val idDetectorMinScore: Float,
         private val modelPerformanceTracker: ModelPerformanceTracker
     ) : AnalyzerFactory<
-            AnalyzerInput,
-            IdentityScanState,
-            AnalyzerOutput,
-            Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
-            > {
+        AnalyzerInput,
+        IdentityScanState,
+        AnalyzerOutput,
+        Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
+        > {
         override suspend fun newInstance(): Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
             return IDDetectorAnalyzer(
                 modelFile,

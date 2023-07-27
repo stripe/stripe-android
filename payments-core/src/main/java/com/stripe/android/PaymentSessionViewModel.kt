@@ -159,8 +159,7 @@ internal class PaymentSessionViewModel(
     }
 
     @JvmSynthetic
-    fun getSelectedPaymentMethod(userSelectedPaymentMethodId: String? = null):
-        PaymentSessionPrefs.SelectedPaymentMethod? {
+    fun getSelectedPaymentMethod(userSelectedPaymentMethodId: String? = null): PaymentSessionPrefs.SelectedPaymentMethod? {
         return if (paymentSessionData.useGooglePay) {
             null
         } else {

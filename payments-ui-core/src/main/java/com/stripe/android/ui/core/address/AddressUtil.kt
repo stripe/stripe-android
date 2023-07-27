@@ -8,8 +8,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun Map<IdentifierSpec, String?>.toConfirmPaymentIntentShipping():
-    ConfirmPaymentIntentParams.Shipping {
+fun Map<IdentifierSpec, String?>.toConfirmPaymentIntentShipping(): ConfirmPaymentIntentParams.Shipping {
     return ConfirmPaymentIntentParams.Shipping(
         name = this[IdentifierSpec.Name] ?: "",
         address = Address.Builder()

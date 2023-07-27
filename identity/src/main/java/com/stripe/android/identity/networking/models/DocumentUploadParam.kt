@@ -32,6 +32,6 @@ internal data class DocumentUploadParam(
         FILEUPLOAD,
 
         @SerialName("manual_capture")
-        MANUALCAPTURE;
+        MANUALCAPTURE
     }
 }

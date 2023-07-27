@@ -10,7 +10,7 @@ internal class FakeCustomerAdapter(
     private val paymentMethods: CustomerAdapter.Result<List<PaymentMethod>> =
         CustomerAdapter.Result.success(listOf()),
     private val onSetSelectedPaymentOption:
-        ((paymentOption: CustomerAdapter.PaymentOption?) -> CustomerAdapter.Result<Unit>)? = null,
+    ((paymentOption: CustomerAdapter.PaymentOption?) -> CustomerAdapter.Result<Unit>)? = null,
     private val onAttachPaymentMethod: ((paymentMethodId: String) -> CustomerAdapter.Result<PaymentMethod>)? = null,
     private val onDetachPaymentMethod: ((paymentMethodId: String) -> CustomerAdapter.Result<PaymentMethod>)? = null,
     private val onSetupIntentClientSecretForCustomerAttach: (() -> CustomerAdapter.Result<String>)? = null

@@ -170,8 +170,7 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
         overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
     }
 
-    private fun googlePayStatusCodeToErrorCode(googlePayStatusCode: Int):
-        @GooglePayPaymentMethodLauncher.ErrorCode Int {
+    private fun googlePayStatusCodeToErrorCode(googlePayStatusCode: Int): @GooglePayPaymentMethodLauncher.ErrorCode Int {
         return when (googlePayStatusCode) {
             CommonStatusCodes.NETWORK_ERROR -> GooglePayPaymentMethodLauncher.NETWORK_ERROR
             CommonStatusCodes.DEVELOPER_ERROR -> GooglePayPaymentMethodLauncher.DEVELOPER_ERROR

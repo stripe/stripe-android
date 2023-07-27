@@ -110,7 +110,7 @@ class SimpleConfirmationActivity : StripeIntentActivity() {
         val country: String,
         @DrawableRes val icon: Int,
         val createParams:
-            (PaymentMethod.BillingDetails, Map<String, String>?) -> PaymentMethodCreateParams,
+        (PaymentMethod.BillingDetails, Map<String, String>?) -> PaymentMethodCreateParams,
         val requiresName: Boolean = true,
         val requiresEmail: Boolean = false
     ) {

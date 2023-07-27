@@ -64,7 +64,7 @@ data class FinancialConnectionsAccount(
     /* If `category` is `cash`, one of:   - `checking`  - `savings`  - `other`
        If `category` is `credit`, one of:   - `mortgage`  - `line_of_credit`  - `credit_card`  - `other`
        If `category` is `investment` or `other`, this will be `other`.
-    */
+     */
     @SerialName("subcategory")
     val subcategory: Subcategory = Subcategory.UNKNOWN,
 

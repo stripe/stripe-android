@@ -38,6 +38,6 @@ data class AccountHolder(
         @SerialName("customer")
         CUSTOMER("customer"),
 
-        UNKNOWN("unknown");
+        UNKNOWN("unknown")
     }
 }

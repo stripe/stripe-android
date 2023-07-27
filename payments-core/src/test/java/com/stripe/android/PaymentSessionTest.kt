@@ -55,7 +55,8 @@ class PaymentSessionTest {
         ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args> = mock()
 
     private val paymentSessionDataArgumentCaptor: KArgumentCaptor<PaymentSessionData> = argumentCaptor()
-    private val paymentMethodsActivityStarterArgsCaptor: KArgumentCaptor<PaymentMethodsActivityStarter.Args> = argumentCaptor()
+    private val paymentMethodsActivityStarterArgsCaptor: KArgumentCaptor<PaymentMethodsActivityStarter.Args> =
+        argumentCaptor()
     private val productUsageArgumentCaptor: KArgumentCaptor<Set<String>> = argumentCaptor()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
