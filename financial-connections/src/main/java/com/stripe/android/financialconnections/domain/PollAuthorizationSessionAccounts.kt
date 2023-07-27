@@ -9,8 +9,8 @@ import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.features.common.showManualEntryInErrors
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.utils.PollTimingOptions
 import com.stripe.android.financialconnections.utils.retryOnException
@@ -30,8 +30,9 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
 
     suspend operator fun invoke(
         canRetry: Boolean,
-        manifest: FinancialConnectionsSessionManifest
+        sync: SynchronizeSessionResponse
     ): PartnerAccountsList = try {
+        val manifest = requireNotNull(sync.manifest)
         val activeAuthSession = requireNotNull(manifest.activeAuthSession)
         retryOnException(
             PollTimingOptions(
@@ -56,10 +57,10 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
         }
     } catch (@Suppress("SwallowedException") e: StripeException) {
         throw e.toDomainException(
-            institution = manifest.activeInstitution,
-            businessName = manifest.getBusinessName(),
+            institution = sync.manifest.activeInstitution,
+            businessName = sync.manifest.getBusinessName(),
             canRetry = canRetry,
-            showManualEntry = manifest.showManualEntryInErrors()
+            showManualEntry = sync.manifest.showManualEntryInErrors()
         )
     }
 }

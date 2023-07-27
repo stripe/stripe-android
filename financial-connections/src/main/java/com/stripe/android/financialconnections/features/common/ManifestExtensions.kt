@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.common
 
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 
 /**
  * Get the business name from the manifest.
@@ -24,9 +25,8 @@ internal fun FinancialConnectionsSessionManifest.getRedactedEmail(): String? =
         }
     }
 
-internal fun FinancialConnectionsSessionManifest.showManualEntryInErrors(): Boolean {
-    //TODO check experiment.
-    return allowManualEntry && false
+internal fun SynchronizeSessionResponse.showManualEntryInErrors(): Boolean {
+    return manifest.allowManualEntry && visual.reducedManualEntryProminenceForErrors.not()
 }
 
 private const val EMAIL_LENGTH = 15

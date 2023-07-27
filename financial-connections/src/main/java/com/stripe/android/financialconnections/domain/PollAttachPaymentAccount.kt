@@ -5,9 +5,9 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
 import com.stripe.android.financialconnections.features.common.showManualEntryInErrors
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.utils.PollTimingOptions
 import com.stripe.android.financialconnections.utils.retryOnException
@@ -21,7 +21,7 @@ internal class PollAttachPaymentAccount @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        manifest: FinancialConnectionsSessionManifest,
+        sync: SynchronizeSessionResponse,
         // null, when attaching via manual entry.
         activeInstitution: FinancialConnectionsInstitution?,
         // null, if account should not be saved to Link user.
@@ -45,7 +45,7 @@ internal class PollAttachPaymentAccount @Inject constructor(
             ) {
                 throw e.toDomainException(
                     activeInstitution,
-                    manifest.showManualEntryInErrors()
+                    sync.showManualEntryInErrors()
                 )
             }
         }
