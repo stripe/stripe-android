@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.presentation
 import android.content.Intent
 import android.os.Parcelable
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.compose.NavHost
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
@@ -304,6 +305,26 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             eventTracker.track(
                 FinancialConnectionsEvent.PaneLaunched(pane)
             )
+        }
+    }
+
+    fun onLifecycleEvent(
+        currentPane: Pane,
+        event: Lifecycle.Event
+    ) {
+        viewModelScope.launch {
+            when (event) {
+                Lifecycle.Event.ON_RESUME,
+                Lifecycle.Event.ON_PAUSE -> eventTracker.track(
+                    FinancialConnectionsEvent.PaneLifecycleChanged(
+                        pane = currentPane,
+                        state = event.name,
+                    )
+                )
+
+                else -> Unit
+            }
+
         }
     }
 

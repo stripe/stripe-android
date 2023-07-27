@@ -12,12 +12,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
@@ -143,6 +149,17 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         reducedBranding: Boolean
     ) {
         val context = LocalContext.current
+        val lifecycleOwner = LocalLifecycleOwner.current
+        var currentPane by remember { mutableStateOf(initialPane) }
+        DisposableEffect(lifecycleOwner) {
+            val lifecycle = lifecycleOwner.lifecycle
+            val observer = LifecycleEventObserver { _, event ->
+                viewModel.onLifecycleEvent(currentPane, event)
+            }
+            lifecycle.addObserver(observer)
+            onDispose { lifecycle.removeObserver(observer) }
+        }
+
         val navController = rememberNavController()
         val uriHandler = remember { CustomTabUriHandler(context) }
         val initialDestination =
@@ -160,11 +177,13 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         ) {
             NavHost(navController, startDestination = initialDestination) {
                 composable(NavigationDirections.consent.destination) {
+                    currentPane = Pane.CONSENT
                     LaunchedPane(Pane.CONSENT)
                     BackHandler(navController, Pane.CONSENT)
                     ConsentScreen()
                 }
                 composable(NavigationDirections.manualEntry.destination) {
+                    currentPane = Pane.MANUAL_ENTRY
                     LaunchedPane(Pane.MANUAL_ENTRY)
                     BackHandler(navController, Pane.MANUAL_ENTRY)
                     ManualEntryScreen()
@@ -173,66 +192,79 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     route = NavigationDirections.ManualEntrySuccess.route,
                     arguments = NavigationDirections.ManualEntrySuccess.arguments
                 ) {
+                    currentPane = Pane.MANUAL_ENTRY_SUCCESS
                     LaunchedPane(Pane.MANUAL_ENTRY_SUCCESS)
                     BackHandler(navController, Pane.MANUAL_ENTRY_SUCCESS)
                     ManualEntrySuccessScreen(it)
                 }
                 composable(NavigationDirections.institutionPicker.destination) {
+                    currentPane = Pane.INSTITUTION_PICKER
                     LaunchedPane(Pane.INSTITUTION_PICKER)
                     BackHandler(navController, Pane.INSTITUTION_PICKER)
                     InstitutionPickerScreen()
                 }
                 composable(NavigationDirections.partnerAuth.destination) {
+                    currentPane = Pane.PARTNER_AUTH
                     LaunchedPane(Pane.PARTNER_AUTH)
                     BackHandler(navController, Pane.PARTNER_AUTH)
                     PartnerAuthScreen()
                 }
                 composable(NavigationDirections.accountPicker.destination) {
+                    currentPane = Pane.ACCOUNT_PICKER
                     LaunchedPane(Pane.ACCOUNT_PICKER)
                     BackHandler(navController, Pane.ACCOUNT_PICKER)
                     AccountPickerScreen()
                 }
                 composable(NavigationDirections.success.destination) {
+                    currentPane = Pane.SUCCESS
                     LaunchedPane(Pane.SUCCESS)
                     BackHandler(navController, Pane.SUCCESS)
                     SuccessScreen()
                 }
                 composable(NavigationDirections.reset.destination) {
+                    currentPane = Pane.RESET
                     LaunchedPane(Pane.RESET)
                     BackHandler(navController, Pane.RESET)
                     ResetScreen()
                 }
                 composable(NavigationDirections.attachLinkedPaymentAccount.destination) {
+                    currentPane = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT
                     LaunchedPane(Pane.ATTACH_LINKED_PAYMENT_ACCOUNT)
                     BackHandler(navController, Pane.ATTACH_LINKED_PAYMENT_ACCOUNT)
                     AttachPaymentScreen()
                 }
                 composable(NavigationDirections.networkingLinkSignup.destination) {
+                    currentPane = Pane.NETWORKING_LINK_SIGNUP_PANE
                     LaunchedPane(Pane.NETWORKING_LINK_SIGNUP_PANE)
                     BackHandler(navController, Pane.NETWORKING_LINK_SIGNUP_PANE)
                     NetworkingLinkSignupScreen()
                 }
                 composable(NavigationDirections.networkingLinkLoginWarmup.destination) {
+                    currentPane = Pane.NETWORKING_LINK_LOGIN_WARMUP
                     LaunchedPane(Pane.NETWORKING_LINK_LOGIN_WARMUP)
                     BackHandler(navController, Pane.NETWORKING_LINK_LOGIN_WARMUP)
                     NetworkingLinkLoginWarmupScreen()
                 }
                 composable(NavigationDirections.networkingLinkVerification.destination) {
+                    currentPane = Pane.NETWORKING_LINK_VERIFICATION
                     LaunchedPane(Pane.NETWORKING_LINK_VERIFICATION)
                     BackHandler(navController, Pane.NETWORKING_LINK_VERIFICATION)
                     NetworkingLinkVerificationScreen()
                 }
                 composable(NavigationDirections.networkingSaveToLinkVerification.destination) {
+                    currentPane = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION
                     LaunchedPane(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION)
                     BackHandler(navController, Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION)
                     NetworkingSaveToLinkVerificationScreen()
                 }
                 composable(NavigationDirections.linkAccountPicker.destination) {
+                    currentPane = Pane.LINK_ACCOUNT_PICKER
                     LaunchedPane(Pane.LINK_ACCOUNT_PICKER)
                     BackHandler(navController, Pane.LINK_ACCOUNT_PICKER)
                     LinkAccountPickerScreen()
                 }
                 composable(NavigationDirections.linkStepUpVerification.destination) {
+                    currentPane = Pane.LINK_STEP_UP_VERIFICATION
                     LaunchedPane(Pane.LINK_STEP_UP_VERIFICATION)
                     BackHandler(navController, Pane.LINK_STEP_UP_VERIFICATION)
                     LinkStepUpVerificationScreen()
