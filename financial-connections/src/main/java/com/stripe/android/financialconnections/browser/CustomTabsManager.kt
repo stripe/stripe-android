@@ -13,14 +13,38 @@ import androidx.browser.customtabs.CustomTabsSession
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.Logger
+import javax.inject.Inject
+
+interface CustomTabsManager : DefaultLifecycleObserver {
+
+    /**
+     * Opens the URL on a Custom Tab if possible. Otherwise fallsback to opening it on a WebView.
+     *
+     * @param activity The host activity.
+     * @param uri the Uri to be opened.
+     * @param fallback a CustomTabFallback to be used if Custom Tabs is not available.
+     */
+    fun openCustomTab(
+        activity: Activity,
+        uri: Uri,
+        fallback: (Uri) -> Unit = {
+            activity.startActivity(Intent(Intent.ACTION_VIEW, uri))
+        }
+    )
+
+    /**
+     * Warms up the browser for a given URL, so that it loads faster when launched.
+     */
+    fun mayLaunchUrl(url: String): Boolean
+}
 
 /**
  * Manages the connection to the CustomTabsService.
  *
  */
-internal class CustomTabsManager(
+internal class CustomTabsManagerImpl @Inject constructor(
     private val logger: Logger
-) : DefaultLifecycleObserver {
+) : CustomTabsManager {
 
     private var client: CustomTabsClient? = null
     private var connection: CustomTabsServiceConnection? = null
@@ -39,9 +63,9 @@ internal class CustomTabsManager(
                 client: CustomTabsClient
             ) {
                 log("Service connected")
-                this@CustomTabsManager.client = client
-                this@CustomTabsManager.client?.warmup(0)
-                session = this@CustomTabsManager.client?.newSession(CustomTabsCallback())
+                this@CustomTabsManagerImpl.client = client
+                this@CustomTabsManagerImpl.client?.warmup(0)
+                session = this@CustomTabsManagerImpl.client?.newSession(CustomTabsCallback())
             }
 
             override fun onServiceDisconnected(name: ComponentName) {
@@ -83,17 +107,10 @@ internal class CustomTabsManager(
         return session
     }
 
-    /**
-     * Opens the URL on a Custom Tab if possible. Otherwise fallsback to opening it on a WebView.
-     *
-     * @param activity The host activity.
-     * @param uri the Uri to be opened.
-     * @param fallback a CustomTabFallback to be used if Custom Tabs is not available.
-     */
-    fun openCustomTab(
+    override fun openCustomTab(
         activity: Activity,
         uri: Uri,
-        fallback: (Uri) -> Unit = { activity.startActivity(Intent(Intent.ACTION_VIEW, uri)) }
+        fallback: (Uri) -> Unit
     ) {
         val packageName: String? = getCustomTabPackage(activity)
         val customTabsIntent = buildCustomTabsIntent()
@@ -111,10 +128,7 @@ internal class CustomTabsManager(
         .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
         .build()
 
-    /**
-     * Warms up the browser for a given URL, so that it loads faster when launched.
-     */
-    fun mayLaunchUrl(url: String): Boolean {
+    override fun mayLaunchUrl(url: String): Boolean {
         return client
             ?.let { getSession() }
             ?.mayLaunchUrl(Uri.parse(url), null, null)?.also {
@@ -162,7 +176,7 @@ internal class CustomTabsManager(
         return browserPackage
     }
 
-    fun log(message: String) {
+    private fun log(message: String) {
         logger.debug("CustomTabsManager: $message")
     }
 }
