@@ -6,8 +6,8 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.common.getBusinessName
-import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.features.common.showManualEntryInErrors
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
@@ -60,7 +60,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
             institution = sync.manifest.activeInstitution,
             businessName = sync.manifest.getBusinessName(),
             canRetry = canRetry,
-            showManualEntry = sync.manifest.showManualEntryInErrors()
+            showManualEntry = sync.showManualEntryInErrors()
         )
     }
 }
