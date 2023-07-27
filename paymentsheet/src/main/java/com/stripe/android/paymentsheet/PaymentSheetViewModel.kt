@@ -364,6 +364,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         identifier: CheckoutIdentifier,
     ) {
+        reportConfirmButtonPressed()
         startProcessing(identifier)
 
         if (paymentSelection is PaymentSelection.GooglePay) {
@@ -608,10 +609,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onUserCancel() {
         reportDismiss(isDecoupling)
         _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
-    }
-
-    override fun onFinish() {
-        _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
     }
 
     override fun onError(@IntegerRes error: Int?) =

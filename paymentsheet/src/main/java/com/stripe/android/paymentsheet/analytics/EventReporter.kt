@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import androidx.annotation.Keep
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -64,10 +65,27 @@ internal interface EventReporter {
     )
 
     /**
+     * The customer has selected one of the available payment methods in the payment method form.
+     */
+    fun onSelectPaymentMethod(
+        code: PaymentMethodCode,
+        currency: String?,
+        isDecoupling: Boolean,
+    )
+
+    /**
      * The customer has selected one of their existing payment methods.
      */
     fun onSelectPaymentOption(
         paymentSelection: PaymentSelection,
+        currency: String?,
+        isDecoupling: Boolean,
+    )
+
+    /**
+     * The customer has pressed the confirm button.
+     */
+    fun onPressConfirmButton(
         currency: String?,
         isDecoupling: Boolean,
     )

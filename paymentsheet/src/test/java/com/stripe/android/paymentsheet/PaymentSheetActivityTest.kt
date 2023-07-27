@@ -627,26 +627,6 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `Verify ProcessResult state closes the sheet`() {
-        Dispatchers.setMain(testDispatcher)
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-            viewModel.onFinish()
-
-            idleLooper()
-
-            // wait animate time...
-            testDispatcher.scheduler.apply {
-                advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
-                runCurrent()
-            }
-
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-        }
-    }
-
-    @Test
     fun `successful payment should dismiss bottom sheet`() {
         Dispatchers.setMain(testDispatcher)
         val scenario = activityScenario(viewModel)

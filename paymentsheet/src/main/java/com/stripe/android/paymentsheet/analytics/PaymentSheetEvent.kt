@@ -187,6 +187,20 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class SelectPaymentMethod(
+        code: String,
+        currency: String?,
+        isDecoupled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_carousel_payment_method_tapped"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "locale" to Locale.getDefault().toString(),
+            "currency" to currency,
+            FIELD_IS_DECOUPLED to isDecoupled,
+            FIELD_SELECTED_LPM to code,
+        )
+    }
+
     class SelectPaymentOption(
         mode: EventReporter.Mode,
         paymentSelection: PaymentSelection?,
@@ -195,6 +209,18 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
         override val eventName: String =
             formatEventName(mode, "paymentoption_${analyticsValue(paymentSelection)}_select")
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "locale" to Locale.getDefault().toString(),
+            "currency" to currency,
+            FIELD_IS_DECOUPLED to isDecoupled,
+        )
+    }
+
+    class PressConfirmButton(
+        currency: String?,
+        isDecoupled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_confirm_button_tapped"
         override val additionalParams: Map<String, Any?> = mapOf(
             "locale" to Locale.getDefault().toString(),
             "currency" to currency,
@@ -301,6 +327,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_COLLECT_PHONE = "phone"
         const val FIELD_COLLECT_ADDRESS = "address"
         const val FIELD_DURATION = "duration"
+        const val FIELD_SELECTED_LPM = "selected_lpm"
     }
 }
 

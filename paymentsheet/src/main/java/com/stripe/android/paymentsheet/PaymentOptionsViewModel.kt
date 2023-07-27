@@ -79,7 +79,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         amountFlow = amount,
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
-        onClick = this::onUserSelection,
+        onClick = this::handlePrimaryButtonPressed,
     )
 
     private val _paymentOptionResult = MutableSharedFlow<PaymentOptionResult>(replay = 1)
@@ -214,15 +214,16 @@ internal class PaymentOptionsViewModel @Inject constructor(
         return this.takeIf { isStillAround }
     }
 
-    override fun onFinish() {
-        onUserSelection()
-    }
-
     override fun onError(@StringRes error: Int?) =
         onError(error?.let { getApplication<Application>().getString(it) })
 
     override fun onError(error: String?) {
         _error.value = error
+    }
+
+    private fun handlePrimaryButtonPressed() {
+        reportConfirmButtonPressed()
+        onUserSelection()
     }
 
     fun onUserSelection() {
