@@ -502,9 +502,6 @@ data class PersonTokenParams(
     }
 
     private companion object {
-        // top level param
-        private const val PARAM_PERSON = "person"
-
         private const val PARAM_ADDRESS = "address"
         private const val PARAM_ADDRESS_KANA = "address_kana"
         private const val PARAM_ADDRESS_KANJI = "address_kanji"

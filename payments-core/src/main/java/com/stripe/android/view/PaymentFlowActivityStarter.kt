@@ -10,12 +10,14 @@ import kotlinx.parcelize.Parcelize
 class PaymentFlowActivityStarter :
     ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args> {
 
+    @Suppress("UNUSED_PARAMETER")
     constructor(activity: Activity, config: PaymentSessionConfig) : super(
         activity,
         PaymentFlowActivity::class.java,
         REQUEST_CODE
     )
 
+    @Suppress("UNUSED_PARAMETER")
     constructor(fragment: Fragment, config: PaymentSessionConfig) : super(
         fragment,
         PaymentFlowActivity::class.java,

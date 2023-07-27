@@ -498,7 +498,7 @@ class Camera1Adapter(
             try {
                 mCamera?.setPreviewDisplay(this.holder)
                 val bufSize = w * h * ImageFormat.getBitsPerPixel(format) / 8
-                for (i in 0..2) {
+                repeat(3) {
                     mCamera?.addCallbackBuffer(ByteArray(bufSize))
                 }
                 mCamera?.setPreviewCallbackWithBuffer(mPreviewCallback)

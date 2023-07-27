@@ -48,12 +48,14 @@ internal abstract class CardImageVerificationFlow(
     private var mainLoopAnalyzerPool: AnalyzerPool<
         MainLoopAnalyzer.Input,
         MainLoopState,
-        MainLoopAnalyzer.Prediction>? = null
+        MainLoopAnalyzer.Prediction
+        >? = null
     private var mainLoopAggregator: MainLoopAggregator? = null
     private var mainLoop: ProcessBoundAnalyzerLoop<
         MainLoopAnalyzer.Input,
         MainLoopState,
-        MainLoopAnalyzer.Prediction>? = null
+        MainLoopAnalyzer.Prediction
+        >? = null
 
     private var mainLoopJob: Job? = null
 

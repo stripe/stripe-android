@@ -179,7 +179,6 @@ internal open class CardImageVerificationActivity :
                         stripePublishableKey = params.stripePublishableKey,
                         civId = params.cardImageVerificationIntentId,
                         civSecret = params.cardImageVerificationIntentSecret,
-                        savedFrames = frames,
                         verificationFramesData = verificationFramesAndPayload.first
                     )
 

@@ -143,7 +143,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         get() = viewBinding.automaticPmGroup.checkedRadioButtonId == R.id.automatic_pm_on_button
 
     private val setDelayedPaymentMethods: Boolean
-        get() = viewBinding.allowsDelayedPaymentMethodsRadioGroup.checkedRadioButtonId == R.id.allowsDelayedPaymentMethods_on_button
+        get() {
+            val checkButtonId = viewBinding.allowsDelayedPaymentMethodsRadioGroup.checkedRadioButtonId
+            return checkButtonId == R.id.allowsDelayedPaymentMethods_on_button
+        }
 
     private val attachDefaultBillingAddress: Boolean
         get() = viewBinding.attachDefaultsRadioGroup.checkedRadioButtonId == R.id.attach_defaults_on_button

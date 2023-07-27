@@ -67,12 +67,14 @@ internal class MainLoopAnalyzer(
             SSDOcr.Input,
             Any,
             SSDOcr.Prediction,
-            out Analyzer<SSDOcr.Input, Any, SSDOcr.Prediction>>,
+            out Analyzer<SSDOcr.Input, Any, SSDOcr.Prediction>
+            >,
         private val cardDetectFactory: AnalyzerFactory<
             CardDetect.Input,
             Any,
             CardDetect.Prediction,
-            out Analyzer<CardDetect.Input, Any, CardDetect.Prediction>>
+            out Analyzer<CardDetect.Input, Any, CardDetect.Prediction>
+            >
     ) : AnalyzerFactory<Input, MainLoopState, Prediction, MainLoopAnalyzer> {
         override suspend fun newInstance() = MainLoopAnalyzer(
             ssdOcr = ssdOcrFactory.newInstance(),

@@ -20,7 +20,9 @@ internal fun LinkTerms(
     Html(
         html = stringResource(R.string.stripe_sign_up_terms).replaceHyperlinks(),
         color = MaterialTheme.stripeColors.placeholderText,
-        style = MaterialTheme.typography.subtitle1,
+        style = MaterialTheme.typography.subtitle1.copy(
+            textAlign = textAlign,
+        ),
         modifier = modifier,
         urlSpanStyle = SpanStyle(
             color = MaterialTheme.colors.primary

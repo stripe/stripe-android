@@ -1,7 +1,6 @@
 package com.stripe.android.payments
 
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -58,16 +57,10 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onResult(activityResult: ActivityResult) {
         // always dismiss the activity when a result is available
 
         finish()
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-
-        // This is invoked by the intent filter. We might not need to implement this method but
-        // leaving it here for posterity.
     }
 }
