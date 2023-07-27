@@ -47,7 +47,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
             if (accounts.data.isEmpty()) {
                 throw AccountLoadError(
                     institution = requireNotNull(manifest.activeInstitution),
-                    allowManualEntry = manifest.allowManualEntry,
+                    showManualEntry = sync.showManualEntryInErrors(),
                     canRetry = canRetry,
                     stripeException = APIException()
                 )
@@ -83,7 +83,7 @@ private fun StripeException.toDomainException(
             )
 
         else -> AccountLoadError(
-            allowManualEntry = showManualEntry,
+            showManualEntry = showManualEntry,
             institution = institution,
             canRetry = canRetry,
             stripeException = this

@@ -42,7 +42,10 @@ internal class PostAuthorizationSession @Inject constructor(
         } catch (
             @Suppress("SwallowedException") e: StripeException
         ) {
-            throw e.toDomainException(sync.showManualEntryInErrors(), institution)
+            throw e.toDomainException(
+                showManualEntry = sync.showManualEntryInErrors(),
+                institution = institution
+            )
         }
     }
 
@@ -56,13 +59,13 @@ internal class PostAuthorizationSession @Inject constructor(
             "true" -> when {
                 availableAt.isNullOrEmpty() -> InstitutionUnplannedDowntimeError(
                     institution = institution,
-                    allowManualEntry = showManualEntry,
+                    showManualEntry = showManualEntry,
                     stripeException = this
                 )
 
                 else -> InstitutionPlannedDowntimeError(
                     institution = institution,
-                    allowManualEntry = showManualEntry,
+                    showManualEntry = showManualEntry,
                     isToday = true,
                     backUpAt = availableAt.toLong().seconds.inWholeMilliseconds,
                     stripeException = this
