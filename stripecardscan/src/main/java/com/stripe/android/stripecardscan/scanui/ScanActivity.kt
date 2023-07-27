@@ -19,7 +19,6 @@ import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.mlcore.impl.InterpreterInitializerImpl
-import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.camera.getCameraAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -64,7 +63,6 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     internal val scanStat = Stats.trackTask("scan_activity")
-    private val permissionStat = Stats.trackTask("camera_permission")
 
     protected var isFlashlightOn: Boolean = false
         private set

@@ -710,8 +710,7 @@ internal class StripeKtxTest {
         assertSame(expectedApiObj, actualObj)
     }
 
-    private fun
-    `Given repository throws exception when calling retrieveAPI with String param then returns a failure`(
+    private fun `Given repository throws exception when calling retrieveAPI with String param then returns a failure`(
         repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> Result<StripeModel>,
         retrieveApiInvocationBlock: suspend (String, String?) -> StripeModel
     ): Unit = runTest {

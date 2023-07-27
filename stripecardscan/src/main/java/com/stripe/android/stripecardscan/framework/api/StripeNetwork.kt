@@ -135,8 +135,9 @@ internal class StripeNetwork internal constructor(
         )
     )
 
-    private suspend fun executeAndConvertToNetworkResult(request: StripeRequest):
-        NetworkResult<out String, out String> {
+    private suspend fun executeAndConvertToNetworkResult(
+        request: StripeRequest,
+    ): NetworkResult<out String, out String> {
         var responseCode = RESPONSE_CODE_UNSET
         return try {
             stripeNetworkClient.executeRequest(request).let { stripeResponse ->

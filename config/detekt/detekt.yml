@@ -297,6 +297,8 @@ formatting:
   CommentSpacing:
     active: true
     autoCorrect: true
+  CommentWrapping:
+    active: false
   EnumEntryNameCase:
     active: false
     autoCorrect: true

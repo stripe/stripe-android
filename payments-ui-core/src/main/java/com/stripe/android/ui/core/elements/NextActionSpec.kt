@@ -60,7 +60,9 @@ object PostConfirmHandlingPiStatusSpecsSerializer :
     JsonContentPolymorphicSerializer<PostConfirmHandlingPiStatusSpecs>(
         PostConfirmHandlingPiStatusSpecs::class
     ) {
-    override fun selectDeserializer(element: JsonElement): DeserializationStrategy<out PostConfirmHandlingPiStatusSpecs> {
+    override fun selectDeserializer(
+        element: JsonElement,
+    ): DeserializationStrategy<PostConfirmHandlingPiStatusSpecs> {
         return when (element.jsonObject["type"]?.jsonPrimitive?.content) {
             "finished" -> PostConfirmHandlingPiStatusSpecs.FinishedSpec.serializer()
             "canceled" -> PostConfirmHandlingPiStatusSpecs.CanceledSpec.serializer()

@@ -7,7 +7,6 @@ import android.util.Log
 import androidx.annotation.CheckResult
 import com.stripe.android.core.utils.encodeToJson
 import com.stripe.android.core.utils.urlEncode
-import com.stripe.android.stripecardscan.cardimageverification.SavedFrame
 import com.stripe.android.stripecardscan.framework.api.dto.AppInfo
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsRequest
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsResult
@@ -166,7 +165,6 @@ internal suspend fun uploadSavedFrames(
     stripePublishableKey: String,
     civId: String,
     civSecret: String,
-    savedFrames: Collection<SavedFrame>,
     verificationFramesData: List<VerificationFrameData>
 ) = withContext(Dispatchers.IO) {
     network.postForResult(

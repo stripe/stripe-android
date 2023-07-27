@@ -37,9 +37,9 @@ class PaymentSession @VisibleForTesting internal constructor(
     private val config: PaymentSessionConfig,
     customerSession: CustomerSession,
     private val paymentMethodsActivityStarter:
-        ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args>,
+    ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args>,
     private val paymentFlowActivityStarter:
-        ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args>,
+    ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args>,
     paymentSessionData: PaymentSessionData = PaymentSessionData(config)
 ) {
     internal val viewModel: PaymentSessionViewModel =

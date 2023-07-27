@@ -41,7 +41,7 @@ object PayWithGoogleUtils {
         val builder = StringBuilder()
 
         if (fractionDigits == 0) {
-            for (i in 0 until totalLength) {
+            repeat(totalLength) {
                 builder.append('#')
             }
             val noDecimalCurrencyFormat =
@@ -52,7 +52,7 @@ object PayWithGoogleUtils {
         }
 
         val beforeDecimal = totalLength - fractionDigits
-        for (i in 0 until beforeDecimal) {
+        repeat(beforeDecimal) {
             builder.append('#')
         }
 
@@ -61,7 +61,7 @@ object PayWithGoogleUtils {
             builder.append('0')
         }
         builder.append('.')
-        for (i in 0 until fractionDigits) {
+        repeat(fractionDigits) {
             builder.append('0')
         }
         val modBreak = 10.0.pow(fractionDigits.toDouble())

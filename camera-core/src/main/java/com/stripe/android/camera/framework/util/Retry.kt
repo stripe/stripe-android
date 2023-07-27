@@ -21,7 +21,8 @@ internal fun <T> retrySync(
 ): T {
 //    contract { callsInPlace(task, InvocationKind.AT_LEAST_ONCE) }
     var exception: Throwable? = null
-    for (attempt in 1..times) {
+
+    repeat(times) {
         try {
             return task()
         } catch (t: Throwable) {
@@ -32,12 +33,7 @@ internal fun <T> retrySync(
         }
     }
 
-    if (exception != null) {
-        throw exception
-    } else {
-        // This code should never be reached
-        throw UnexpectedRetryException()
-    }
+    throw (exception ?: UnexpectedRetryException())
 }
 
 /**

@@ -25,6 +25,6 @@ data class BalanceRefresh(
         @SerialName("succeeded")
         SUCCEEDED("succeeded"),
 
-        UNKNOWN("unknown");
+        UNKNOWN("unknown")
     }
 }

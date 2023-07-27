@@ -28,7 +28,7 @@ ext.versions = [
         buildTools                  : "30.0.3",
         cameraX                     : '1.2.3',
         dagger                      : '2.45',
-        detekt                      : "1.22.0",
+        detekt                      : "1.23.0",
         diskLruCache                : '2.0.2',
         dokka                       : '1.9.0-dev-218',
         espresso                    : '3.5.1',

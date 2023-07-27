@@ -173,7 +173,7 @@ class CustomerSheet @Inject internal constructor(
             private var defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails()
             private var billingDetailsCollectionConfiguration:
                 PaymentSheet.BillingDetailsCollectionConfiguration =
-                    PaymentSheet.BillingDetailsCollectionConfiguration()
+                PaymentSheet.BillingDetailsCollectionConfiguration()
             private var merchantDisplayName: String? = null
 
             fun appearance(appearance: PaymentSheet.Appearance) = apply {

@@ -170,8 +170,7 @@ class PaymentLauncherConfirmationActivityTest {
         }
     }
 
-    private fun mockViewModelActivityScenario():
-        InjectableActivityScenario<PaymentLauncherConfirmationActivity> {
+    private fun mockViewModelActivityScenario(): InjectableActivityScenario<PaymentLauncherConfirmationActivity> {
         return injectableActivityScenario {
             injectActivity {
                 viewModelFactory = testFactory

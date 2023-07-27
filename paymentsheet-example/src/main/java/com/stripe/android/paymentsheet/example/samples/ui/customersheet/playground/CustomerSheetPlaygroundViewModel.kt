@@ -198,8 +198,7 @@ class CustomerSheetPlaygroundViewModel(
         }
     }
 
-    private suspend fun createSetupIntent(customerId: String):
-        Result<ExampleCreateSetupIntentResponse, FuelError> {
+    private suspend fun createSetupIntent(customerId: String): Result<ExampleCreateSetupIntentResponse, FuelError> {
         return withContext(Dispatchers.IO) {
             val request = ExampleCreateSetupIntentRequest(
                 customerId = customerId

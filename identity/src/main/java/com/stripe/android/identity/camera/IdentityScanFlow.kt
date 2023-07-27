@@ -31,7 +31,8 @@ import java.io.File
  */
 internal class IdentityScanFlow(
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
-    private val aggregateResultListener: AggregateResultListener<IdentityAggregator.InterimResult, IdentityAggregator.FinalResult>,
+    private val aggregateResultListener:
+    AggregateResultListener<IdentityAggregator.InterimResult, IdentityAggregator.FinalResult>,
     private val idDetectorModelFile: File,
     private val faceDetectorModelFile: File?,
     private val verificationPage: VerificationPage,

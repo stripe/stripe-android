@@ -37,12 +37,14 @@ internal abstract class CardScanFlow(
     private var mainLoopAnalyzerPool: AnalyzerPool<
         SSDOcr.Input,
         Any,
-        SSDOcr.Prediction>? = null
+        SSDOcr.Prediction
+        >? = null
     private var mainLoopAggregator: MainLoopAggregator? = null
     private var mainLoop: ProcessBoundAnalyzerLoop<
         SSDOcr.Input,
         MainLoopState,
-        SSDOcr.Prediction>? = null
+        SSDOcr.Prediction
+        >? = null
 
     private var mainLoopJob: Job? = null
 

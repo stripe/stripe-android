@@ -629,7 +629,8 @@ private fun LoadingButton(
                     is Result.Failure -> {
                         onLoadingStateChanged(
                             LoadingState.Result(
-                                resultString = "Error generating verificationSessionId and ephemeralKeySecret: ${it.getException().message}"
+                                resultString = "Error generating verificationSessionId " +
+                                    "and ephemeralKeySecret: ${it.getException().message}"
                             )
                         )
                     }

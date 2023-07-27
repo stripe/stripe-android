@@ -173,7 +173,7 @@ internal class IDDetectorTransitionerTest {
             ).isSameInstanceAs(mockFoundState)
 
             // follow up frames - high IOU frames with unmatch within allowedUnmatchedFrames, stays in Found
-            for (i in 1..allowedUnmatchedFrames) {
+            repeat(allowedUnmatchedFrames) {
                 result = createAnalyzerOutputWithHighIOU(result, Category.ID_BACK)
                 assertThat(
                     transitioner.transitionFromFound(
@@ -229,7 +229,7 @@ internal class IDDetectorTransitionerTest {
             ).isSameInstanceAs(mockFoundState)
 
             // follow up frames - high IOU frames with unmatch within allowedUnmatchedFrames, stays in Found
-            for (i in 1..allowedUnmatchedFrames) {
+            repeat(allowedUnmatchedFrames) {
                 result = createAnalyzerOutputWithHighIOU(result, Category.ID_BACK)
                 assertThat(
                     transitioner.transitionFromFound(

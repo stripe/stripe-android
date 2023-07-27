@@ -21,7 +21,8 @@ import kotlin.test.Test
 class PaymentMethodsViewModelTest {
 
     private val customerSession: CustomerSession = mock()
-    private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()
+    private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> =
+        argumentCaptor()
     private val viewModel = PaymentMethodsViewModel(
         application = ApplicationProvider.getApplicationContext(),
         customerSession = Result.success(customerSession),

@@ -19,6 +19,7 @@
     <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter$1000</ID>
     <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter$150</ID>
     <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter$360</ID>
+    <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter.CameraPreview$3</ID>
     <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter.CameraPreview$8</ID>
     <ID>MagicNumber:CameraAdapter.kt$CameraAdapter.Companion$90</ID>
     <ID>MagicNumber:CameraXAdapter.kt$4</ID>
@@ -49,12 +50,9 @@
     <ID>MaxLineLength:CameraView.kt$CameraView$*</ID>
     <ID>MaxLineLength:CameraView.kt$CameraView$* a [View] to highlight a sub area from previewFrame, the [Rect] of this view is used to crop the highlighted area from the preview.</ID>
     <ID>MaxLineLength:CameraView.kt$CameraView$* an optional [ViewFinderBackground] to draw background and reveals a center viewFinder on previewFrame, has the same size of the [CameraView].</ID>
-    <ID>MaxLineLength:CameraView.kt$CameraView.ViewFinderType$* The type of viewfinder, decides if [viewFinderBackgroundView] should be drawn and the aspect ratio of [viewFinderWindowView]</ID>
-    <ID>MaxLineLength:CameraView.kt$CameraView.ViewFinderType.CreditCard$* [CreditCard] draws [viewFinderBackgroundView] and draws [viewFinderWindowView] in center with aspect ratio [CREDIT_CARD_ASPECT_RATIO]</ID>
-    <ID>MaxLineLength:CameraView.kt$CameraView.ViewFinderType.Passport$* [Passport] draws [viewFinderBackgroundView] and draws [viewFinderWindowView] in center with aspect ratio [Passport]</ID>
     <ID>MaxLineLength:Memoize.kt$fun</ID>
     <ID>MaxLineLength:NV21Image.kt$NV21Image$// Log.d(Config.logTag, "Bitmap to RGB Byte buffer conversion took: ${System.currentTimeMillis() - startTime} ms")</ID>
-    <ID>MaximumLineLength:com.stripe.android.camera.framework.util.Memoize.kt:612</ID>
+    <ID>MaximumLineLength:Memoize.kt$fun</ID>
     <ID>NestedBlockDepth:NV21Image.kt$@CheckResult private fun yuvPlanesToNV21Compat( width: Int, height: Int, planeBuffers: Array&lt;ByteBuffer>, rowStrides: IntArray, pixelStrides: IntArray, format: Int, crop: Rect = Rect(0, 0, width, height) ): ByteArray</ID>
     <ID>ReturnCount:Loop.kt$AnalyzerLoop$protected fun subscribeToFlow( flow: Flow&lt;DataFrame>, processingCoroutineScope: CoroutineScope ): Job?</ID>
     <ID>ReturnCount:NV21Image.kt$NV21Image$fun crop(left: Int, top: Int, right: Int, bottom: Int): NV21Image</ID>
@@ -64,7 +62,6 @@
     <ID>SwallowedException:CameraAdapter.kt$CameraAdapter$e: ClosedSendChannelException</ID>
     <ID>SwallowedException:CameraXAdapter.kt$ex: ReadOnlyBufferException</ID>
     <ID>SwallowedException:NV21Image.kt$ex: ReadOnlyBufferException</ID>
-    <ID>ThrowsCount:Retry.kt$internal fun &lt;T> retrySync( times: Int = DEFAULT_RETRIES, excluding: List&lt;Class&lt;out Throwable>> = emptyList(), task: () -> T ): T</ID>
     <ID>TooGenericExceptionCaught:Camera1Adapter.kt$Camera1Adapter$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:Camera1Adapter.kt$Camera1Adapter.CameraPreview$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:CameraAdapter.kt$CameraAdapter$t: Throwable</ID>
@@ -77,11 +74,8 @@
     <ID>TooManyFunctions:Duration.kt$Duration : Comparable</ID>
     <ID>TooManyFunctions:Layout.kt$com.stripe.android.camera.framework.util.Layout.kt</ID>
     <ID>TooManyFunctions:Memoize.kt$com.stripe.android.camera.framework.util.Memoize.kt</ID>
-    <ID>UnnecessaryAbstractClass:SimpleScanStateful.kt$ScanState$ScanState</ID>
-    <ID>UnusedPrivateMember:Camera1Adapter.kt$Camera1Adapter.CameraPreview$i</ID>
     <ID>UnusedPrivateMember:NV21Image.kt$@CheckResult private fun yuvPlanesToNV21Compat( width: Int, height: Int, planeBuffers: Array&lt;ByteBuffer>, rowStrides: IntArray, pixelStrides: IntArray, format: Int, crop: Rect = Rect(0, 0, width, height) ): ByteArray</ID>
     <ID>UnusedPrivateMember:NV21Image.kt$@CheckResult private fun yuvPlanesToNV21Slow(planeBuffers: Array&lt;ByteBuffer>): ByteArray</ID>
     <ID>UnusedPrivateMember:NV21Image.kt$private fun yuvPlanesToBitmap( width: Int, height: Int, planeBuffers: Array&lt;ByteBuffer> ): Bitmap</ID>
-    <ID>UnusedPrivateMember:Retry.kt$attempt</ID>
   </CurrentIssues>
 </SmellBaseline>
