@@ -24,4 +24,9 @@ internal fun FinancialConnectionsSessionManifest.getRedactedEmail(): String? =
         }
     }
 
+internal fun FinancialConnectionsSessionManifest.showManualEntryInErrors(): Boolean {
+    //TODO check experiment.
+    return allowManualEntry && false
+}
+
 private const val EMAIL_LENGTH = 15

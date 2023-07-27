@@ -7,6 +7,7 @@ import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
+import com.stripe.android.financialconnections.features.common.showManualEntryInErrors
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -58,7 +59,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
             institution = manifest.activeInstitution,
             businessName = manifest.getBusinessName(),
             canRetry = canRetry,
-            allowManualEntry = manifest.allowManualEntry
+            showManualEntry = manifest.showManualEntryInErrors()
         )
     }
 }
@@ -67,7 +68,7 @@ private fun StripeException.toDomainException(
     institution: FinancialConnectionsInstitution?,
     businessName: String?,
     canRetry: Boolean,
-    allowManualEntry: Boolean
+    showManualEntry: Boolean
 ): StripeException =
     when {
         institution == null -> this
@@ -81,7 +82,7 @@ private fun StripeException.toDomainException(
             )
 
         else -> AccountLoadError(
-            allowManualEntry = allowManualEntry,
+            allowManualEntry = showManualEntry,
             institution = institution,
             canRetry = canRetry,
             stripeException = this

@@ -125,7 +125,7 @@ internal class ManualEntryViewModel @Inject constructor(
             val state = awaitState()
             val manifest = getManifest()
             pollAttachPaymentAccount(
-                allowManualEntry = manifest.allowManualEntry,
+                manifest = manifest,
                 activeInstitution = null,
                 consumerSessionClientSecret = null,
                 params = PaymentAccountParams.BankAccount(

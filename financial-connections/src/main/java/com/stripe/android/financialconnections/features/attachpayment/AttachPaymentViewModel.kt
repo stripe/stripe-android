@@ -59,7 +59,7 @@ internal class AttachPaymentViewModel @Inject constructor(
             val id = accounts.first().linkedAccountId
             val (result, millis) = measureTimeMillis {
                 pollAttachPaymentAccount(
-                    allowManualEntry = manifest.allowManualEntry,
+                    manifest = manifest,
                     activeInstitution = activeInstitution,
                     consumerSessionClientSecret = consumerSession?.clientSecret,
                     params = PaymentAccountParams.LinkedAccount(requireNotNull(id))

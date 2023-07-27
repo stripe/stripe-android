@@ -3,7 +3,9 @@ package com.stripe.android.financialconnections.domain
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
+import com.stripe.android.financialconnections.features.common.showManualEntryInErrors
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
@@ -19,7 +21,7 @@ internal class PollAttachPaymentAccount @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        allowManualEntry: Boolean,
+        manifest: FinancialConnectionsSessionManifest,
         // null, when attaching via manual entry.
         activeInstitution: FinancialConnectionsInstitution?,
         // null, if account should not be saved to Link user.
@@ -43,7 +45,7 @@ internal class PollAttachPaymentAccount @Inject constructor(
             ) {
                 throw e.toDomainException(
                     activeInstitution,
-                    allowManualEntry
+                    manifest.showManualEntryInErrors()
                 )
             }
         }
@@ -51,13 +53,13 @@ internal class PollAttachPaymentAccount @Inject constructor(
 
     private fun StripeException.toDomainException(
         institution: FinancialConnectionsInstitution?,
-        allowManualEntry: Boolean
+        showManualEntry: Boolean
     ): StripeException =
         when {
             institution == null -> this
             stripeError?.extraFields?.get("reason") == "account_number_retrieval_failed" ->
                 AccountNumberRetrievalError(
-                    allowManualEntry = allowManualEntry,
+                    allowManualEntry = showManualEntry,
                     institution = institution,
                     stripeException = this
                 )
