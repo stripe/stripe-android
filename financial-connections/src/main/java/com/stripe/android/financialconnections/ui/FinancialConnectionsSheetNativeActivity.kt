@@ -18,7 +18,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -57,6 +56,7 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.argsOrNull
 import com.stripe.android.financialconnections.utils.viewModelLazy
+import com.stripe.android.uicore.compose.rememberActivity
 import com.stripe.android.uicore.image.StripeImageLoader
 import javax.inject.Inject
 
@@ -146,7 +146,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         initialPane: Pane,
         reducedBranding: Boolean
     ) {
-        val context = LocalContext.current as AppCompatActivity
+        val context = rememberActivity { "NavHost must be created in the context of an Activity" }
         val navController = rememberNavController()
         val uriHandler = remember { CustomTabUriHandler(context, customTabsManager) }
         val initialDestination =

@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.ui
 
+import android.app.Activity
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.UriHandler
 import com.stripe.android.financialconnections.browser.CustomTabsManager
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
@@ -11,7 +11,7 @@ import com.stripe.android.financialconnections.presentation.CreateBrowserIntentF
  * using [CreateBrowserIntentForUrl].
  */
 internal class CustomTabUriHandler(
-    private val activity: AppCompatActivity,
+    private val activity: Activity,
     private val customTabsManager: CustomTabsManager
 ) : UriHandler {
     override fun openUri(uri: String) {

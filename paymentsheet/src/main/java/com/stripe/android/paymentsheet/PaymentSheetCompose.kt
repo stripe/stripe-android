@@ -9,7 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import com.stripe.android.utils.rememberActivity
+import com.stripe.android.uicore.compose.rememberActivity
 
 /**
  * Creates a [PaymentSheet] that is remembered across compositions.
