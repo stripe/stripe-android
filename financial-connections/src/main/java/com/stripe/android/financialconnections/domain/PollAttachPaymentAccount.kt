@@ -59,7 +59,7 @@ internal class PollAttachPaymentAccount @Inject constructor(
             institution == null -> this
             stripeError?.extraFields?.get("reason") == "account_number_retrieval_failed" ->
                 AccountNumberRetrievalError(
-                    allowManualEntry = showManualEntry,
+                    showManualEntry = showManualEntry,
                     institution = institution,
                     stripeException = this
                 )

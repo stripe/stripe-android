@@ -228,7 +228,7 @@ internal fun AccountNumberRetrievalErrorContent(
             R.string.stripe_attachlinkedpaymentaccount_error_title
         ),
         content = stringResource(
-            when (exception.allowManualEntry) {
+            when (exception.showManualEntry) {
                 true -> R.string.stripe_attachlinkedpaymentaccount_error_desc_manual_entry
                 false -> R.string.stripe_attachlinkedpaymentaccount_error_desc
             }
@@ -237,7 +237,7 @@ internal fun AccountNumberRetrievalErrorContent(
             stringResource(R.string.stripe_error_cta_select_another_bank),
             onSelectAnotherBank
         ),
-        secondaryCta = if (exception.allowManualEntry) {
+        secondaryCta = if (exception.showManualEntry) {
             Pair(
                 stringResource(R.string.stripe_error_cta_manual_entry),
                 onEnterDetailsManually
