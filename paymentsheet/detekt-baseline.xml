@@ -36,10 +36,6 @@
     <ID>MagicNumber:PaymentMethodsUI.kt$.3f</ID>
     <ID>MagicNumber:PaymentMethodsUI.kt$.4f</ID>
     <ID>MagicNumber:PaymentMethodsUI.kt$.5f</ID>
-    <ID>MagicNumber:PaymentMethodsUI.kt$0.6F</ID>
-    <ID>MagicNumber:PaymentOptionUi.kt$0.6F</ID>
-    <ID>MagicNumber:PaymentOptionUi.kt$14</ID>
-    <ID>MagicNumber:PaymentOptionUi.kt$18</ID>
     <ID>MagicNumber:PrimaryButton.kt$PrimaryButton$0.5f</ID>
     <ID>MagicNumber:StateFlows.kt$3</ID>
     <ID>MagicNumber:StateFlows.kt$4</ID>
@@ -77,8 +73,6 @@
     <ID>TooManyFunctions:PaymentOption.kt$DelegateDrawable : Drawable</ID>
     <ID>TooManyFunctions:PaymentOptionsViewModel.kt$PaymentOptionsViewModel : BaseSheetViewModel</ID>
     <ID>TooManyFunctions:PaymentSheetViewModel.kt$PaymentSheetViewModel : BaseSheetViewModel</ID>
-    <ID>UnnecessaryAbstractClass:PaymentSheetCommonModule.kt$PaymentSheetCommonModule$PaymentSheetCommonModule</ID>
-    <ID>UnnecessaryAbstractClass:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule$PaymentSheetLauncherModule</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
   </CurrentIssues>
 </SmellBaseline>

@@ -22,19 +22,14 @@
     <ID>MagicNumber:DrawablePainter.kt$DrawablePainter$255</ID>
     <ID>MagicNumber:DropdownFieldUI.kt$.8f</ID>
     <ID>MagicNumber:DropdownFieldUI.kt$.9f</ID>
-    <ID>MagicNumber:DropdownFieldUI.kt$8.9f</ID>
     <ID>MagicNumber:ExpiryDateVisualTransformation.kt$ExpiryDateVisualTransformation$12</ID>
-    <ID>MagicNumber:Html.kt$0.1f</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$3</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$5</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$6</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$7</ID>
-    <ID>MagicNumber:StripeTheme.kt$0.15</ID>
-    <ID>MagicNumber:StripeTheme.kt$0.32</ID>
     <ID>MagicNumber:StripeTheme.kt$3</ID>
     <ID>MagicNumber:TextFieldUI.kt$1000</ID>
     <ID>MaxLineLength:DrawablePainter.kt$*</ID>
-    <ID>MaxLineLength:Html.kt$*</ID>
     <ID>MaxLineLength:UiUtils.kt$*</ID>
     <ID>ReturnCount:OTPController.kt$OTPController$fun onValueChanged(index: Int, text: String): Int</ID>
     <ID>ReturnCount:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$override fun originalToTransformed(offset: Int): Int</ID>

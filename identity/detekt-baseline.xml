@@ -2,6 +2,8 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>CommentWrapping:DefaultIdentityIO.kt$DefaultIdentityIO$/* prefix */</ID>
+    <ID>CommentWrapping:DefaultIdentityIO.kt$DefaultIdentityIO$/* suffix */</ID>
     <ID>CyclomaticComplexMethod:CameraScreenLaunchedEffect.kt$@Composable internal fun CameraScreenLaunchedEffect( identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, verificationPage: VerificationPage, navController: NavController, cameraManager: IdentityCameraManager, onCameraReady: () -> Unit )</ID>
     <ID>CyclomaticComplexMethod:DocumenetScanScreen.kt$@Composable internal fun DocumentScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, frontScanType: IdentityScanState.ScanType, backScanType: IdentityScanState.ScanType?, shouldStartFromBack: Boolean, messageRes: DocumentScanMessageRes, collectedDataParamType: CollectedDataParam.Type, route: String )</ID>
     <ID>CyclomaticComplexMethod:IdentityTopLevelDestination.kt$internal fun String.routeToScreenName(): String</ID>
@@ -33,10 +35,8 @@
     <ID>LongMethod:SelfieScreen.kt$@Composable internal fun SelfieScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, )</ID>
     <ID>LongMethod:SelfieScreen.kt$@Composable private fun ResultView( displayState: IdentityScanState, allowImageCollectionHtml: String, allowImageCollectionCheckboxEnabled: Boolean, allowImageCollection: Boolean, navController: NavController, onAllowImageCollectionChanged: (Boolean) -> Unit )</ID>
     <ID>LongMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, collectedDataParamType: CollectedDataParam.Type, route: String, @StringRes titleRes: Int, @StringRes contextRes: Int, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, shouldShowTakePhoto: Boolean, shouldShowChoosePhoto: Boolean )</ID>
-    <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$100</ID>
     <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$5</ID>
     <ID>MagicNumber:DobParam.kt$DobParam.Companion$4</ID>
-    <ID>MagicNumber:FaceDetectorAnalyzer.kt$FaceDetectorAnalyzer$3</ID>
     <ID>MagicNumber:IDDetectorAnalyzer.kt$IDDetectorAnalyzer$3</ID>
     <ID>MagicNumber:IDNumberSection.kt$11</ID>
     <ID>MagicNumber:IDNumberSection.kt$4</ID>
@@ -58,11 +58,9 @@
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION - 1).milliseconds)</ID>
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION + 1).milliseconds)</ID>
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION - 1).milliseconds)</ID>
-    <ID>MaxLineLength:IdentityScanFlow.kt$IdentityScanFlow$private val aggregateResultListener: AggregateResultListener&lt;IdentityAggregator.InterimResult, IdentityAggregator.FinalResult></ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$?:</ID>
     <ID>MaxLineLength:VerificationPage.kt$VerificationPage$* A VerificationPage contains the static content and initial state that is required for Stripe Identity's native mobile SDKs to render the verification flow.</ID>
     <ID>MaxLineLength:VerificationPageData.kt$VerificationPageData$* VerificationPageData contains the state of a verification, including what information needs to be collected to complete the verification flow.</ID>
-    <ID>MaximumLineLength:com.stripe.android.identity.camera.IdentityScanFlow.kt:34</ID>
     <ID>ReturnCount:AddressSection.kt$private fun isValidAddress(addressMap: Map&lt;IdentifierSpec, FormFieldEntry>): Boolean</ID>
     <ID>ReturnCount:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$override fun originalToTransformed(offset: Int): Int</ID>
     <ID>ReturnCount:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
@@ -75,8 +73,6 @@
     <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationTitleTag = "ConfirmationTitle"</ID>
     <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val docSelectionTitleTag = "Title"</ID>
     <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val singleSelectionTag = "SingleSelection"</ID>
-    <ID>UnnecessaryAbstractClass:IdentityCommonModule.kt$IdentityCommonModule$IdentityCommonModule</ID>
-    <ID>UnusedPrivateMember:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$i</ID>
     <ID>VariableNaming:IdentityViewModel.kt$IdentityViewModel$/** * Response for initial VerificationPage, used for building UI. */ @VisibleForTesting internal val _verificationPage: MutableLiveData&lt;Resource&lt;VerificationPage>> = // No need to write to savedStateHandle for livedata savedStateHandle.getLiveData( key = VERIFICATION_PAGE, initialValue = Resource.idle() )</ID>
   </CurrentIssues>
 </SmellBaseline>

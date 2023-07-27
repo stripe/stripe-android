@@ -56,8 +56,6 @@
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Visa, "4242424242424242", CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242"))</ID>
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Visa, "4242424242424243", CardBrand.Visa.getMaxLengthForCardNumber("4242424242424243"))</ID>
     <ID>MaxLineLength:LpmRepository.kt$LpmRepository.SupportedPaymentMethod$/** This describes the image in the LPM selector. These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */</ID>
-    <ID>MaxLineLength:NextActionSpec.kt$PostConfirmHandlingPiStatusSpecsSerializer$override</ID>
-    <ID>MaximumLineLength:com.stripe.android.ui.core.elements.NextActionSpec.kt:63</ID>
     <ID>ReturnCount:AuBankAccountNumberConfig.kt$AuBankAccountNumberConfig$override fun determineState(input: String): TextFieldState</ID>
     <ID>ReturnCount:BsbConfig.kt$BsbConfig$override fun determineState(input: String): TextFieldState</ID>
     <ID>ReturnCount:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$override fun originalToTransformed(offset: Int): Int</ID>

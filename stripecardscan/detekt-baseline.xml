@@ -32,7 +32,6 @@
     <ID>MagicNumber:CardExpiry.kt$12</ID>
     <ID>MagicNumber:CardExpiry.kt$31</ID>
     <ID>MagicNumber:CardExpiry.kt$4</ID>
-    <ID>MagicNumber:CombinePriors.kt$0.5F</ID>
     <ID>MagicNumber:CombinePriors.kt$12</ID>
     <ID>MagicNumber:CombinePriors.kt$16</ID>
     <ID>MagicNumber:CombinePriors.kt$19</ID>
@@ -51,7 +50,6 @@
     <ID>MagicNumber:PanValidator.kt$LuhnPanValidator$9</ID>
     <ID>MagicNumber:RectForm.kt$1000F</ID>
     <ID>MagicNumber:RectForm.kt$3</ID>
-    <ID>MagicNumber:SSDOcr.kt$SSDOcr$10</ID>
     <ID>MagicNumber:ScanActivity.kt$ScanActivity$1500</ID>
     <ID>MagicNumber:ScanFragment.kt$ScanFragment$1500</ID>
     <ID>MagicNumber:SimpleScanActivity.kt$SimpleScanActivity$128</ID>
@@ -96,10 +94,7 @@
     <ID>TooManyFunctions:ScanFragment.kt$ScanFragment : FragmentCoroutineScope</ID>
     <ID>TooManyFunctions:SimpleScanActivity.kt$SimpleScanActivity&lt;ScanFlowParameters> : ScanActivity</ID>
     <ID>TooManyFunctions:SizeAndCenter.kt$com.stripe.android.stripecardscan.framework.ml.ssd.SizeAndCenter.kt</ID>
-    <ID>UnnecessaryAbstractClass:MachineState.kt$MachineState$MachineState</ID>
     <ID>UnusedPrivateMember:PaymentCardUtils.kt$@CheckResult private fun jaccardIndex(string1: String, string2: String): Double</ID>
     <ID>UnusedPrivateMember:PaymentCardUtils.kt$private fun String.isDigitsOnly()</ID>
-    <ID>UnusedPrivateMember:ScanActivity.kt$ScanActivity$private val permissionStat = Stats.trackTask("camera_permission")</ID>
-    <ID>UnusedPrivateMember:StripeApi.kt$savedFrames: Collection&lt;SavedFrame></ID>
   </CurrentIssues>
 </SmellBaseline>
