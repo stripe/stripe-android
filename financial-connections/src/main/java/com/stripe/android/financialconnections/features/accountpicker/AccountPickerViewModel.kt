@@ -120,6 +120,15 @@ internal class AccountPickerViewModel @Inject constructor(
                     selectedIds = setOf(payload.accounts.first().id),
                     updateLocalCache = true
                 )
+
+                // Auto-select the first selectable account.
+                payload.selectionMode == SelectionMode.RADIO -> setState {
+                    copy(
+                        selectedIds = setOfNotNull(
+                            payload.selectableAccounts.firstOrNull()?.id
+                        )
+                    )
+                }
             }
         })
     }
