@@ -32,8 +32,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -53,7 +51,6 @@ import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAc
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
-import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
@@ -285,21 +282,3 @@ private fun Title(
     )
 }
 
-@Composable
-@Preview(group = "LinkAccountPicker Pane")
-internal fun LinkAccountPickerScreenPreview(
-    @PreviewParameter(LinkAccountPickerPreviewParameterProvider::class)
-    state: LinkAccountPickerState
-) {
-    FinancialConnectionsPreview {
-        LinkAccountPickerContent(
-            state = state,
-            onCloseClick = {},
-            onCloseFromErrorClick = {},
-            onLearnMoreAboutDataAccessClick = {},
-            onNewBankAccountClick = {},
-            onSelectAccountClick = {},
-            onAccountClick = {}
-        )
-    }
-}
