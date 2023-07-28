@@ -4,7 +4,6 @@ import com.airbnb.mvrx.test.MavericksTestRule
 import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
@@ -57,7 +56,7 @@ internal class AccountPickerViewModelTest {
         runTest {
             givenManifestReturns(
                 sessionManifest().copy(
-                    activeAuthSession = ApiKeyFixtures.authorizationSession().copy(
+                    activeAuthSession = authorizationSession().copy(
                         skipAccountSelection = null
                     )
                 )
@@ -79,7 +78,7 @@ internal class AccountPickerViewModelTest {
     fun `init - if AuthSession returns skipAccountSelection, state includes it`() = runTest {
         givenManifestReturns(
             sessionManifest().copy(
-                activeAuthSession = ApiKeyFixtures.authorizationSession().copy(
+                activeAuthSession = authorizationSession().copy(
                     skipAccountSelection = true
                 )
             )
@@ -106,7 +105,7 @@ internal class AccountPickerViewModelTest {
             givenManifestReturns(
                 sessionManifest().copy(
                     singleAccount = true,
-                    activeAuthSession = ApiKeyFixtures.authorizationSession().copy(
+                    activeAuthSession = authorizationSession().copy(
                         institutionSkipAccountSelection = true,
                     )
                 )
@@ -125,7 +124,6 @@ internal class AccountPickerViewModelTest {
                 assertEquals(state.payload()!!.shouldSkipPane, true)
             }
         }
-
 
     @Test
     fun `init - if singleAccount, pre-select first available account`() = runTest {
