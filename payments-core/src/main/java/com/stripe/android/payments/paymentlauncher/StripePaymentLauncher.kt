@@ -15,7 +15,6 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.injection.DaggerPaymentLauncherComponent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -40,7 +39,6 @@ class StripePaymentLauncher @AssistedInject internal constructor(
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @IOContext ioContext: CoroutineContext,
     @UIContext uiContext: CoroutineContext,
-    stripeRepository: StripeRepository,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : PaymentLauncher, Injector {
@@ -50,7 +48,6 @@ class StripePaymentLauncher @AssistedInject internal constructor(
             .enableLogging(enableLogging)
             .ioContext(ioContext)
             .uiContext(uiContext)
-            .stripeRepository(stripeRepository)
             .analyticsRequestFactory(paymentAnalyticsRequestFactory)
             .publishableKeyProvider(publishableKeyProvider)
             .stripeAccountIdProvider(stripeAccountIdProvider)
