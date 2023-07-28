@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.features.accountpicker
 
 import com.airbnb.mvrx.test.MavericksTestRule
 import com.airbnb.mvrx.withState
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
@@ -120,6 +121,35 @@ internal class AccountPickerViewModelTest {
             withState(viewModel) { state ->
                 assertEquals(state.payload()!!.userSelectedSingleAccountInInstitution, true)
                 assertEquals(state.payload()!!.shouldSkipPane, true)
+            }
+        }
+
+
+    @Test
+    fun `init - if AuthSession returns and singleAccount, pre-select first available account`() =
+        runTest {
+            givenManifestReturns(
+                ApiKeyFixtures.sessionManifest().copy(
+                    singleAccount = true,
+                    activeAuthSession = ApiKeyFixtures.authorizationSession().copy(
+                        institutionSkipAccountSelection = true,
+                    )
+                )
+            )
+
+            givenPollAccountsReturns(
+                partnerAccountList().copy(
+                    data = listOf(
+                        partnerAccount().copy(id = "unselectable", _allowSelection = false),
+                        partnerAccount().copy(id = "selectable")
+                    )
+                )
+            )
+
+            val viewModel = buildViewModel(AccountPickerState())
+
+            withState(viewModel) { state ->
+                assertThat(state.selectedIds).isEqualTo(setOf("selectable"))
             }
         }
 
