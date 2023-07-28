@@ -1,14 +1,13 @@
 package com.stripe.android.view
 
-import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.Stripe
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -17,6 +16,7 @@ import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
+import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.Dispatchers
 
 internal class PaymentAuthWebViewActivityViewModel(
@@ -113,15 +113,15 @@ internal class PaymentAuthWebViewActivityViewModel(
     )
 
     internal class Factory(
-        private val application: Application,
-        private val logger: Logger,
         private val args: PaymentBrowserAuthContract.Args
     ) : ViewModelProvider.Factory {
+
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            val application = extras.requireApplication()
             return PaymentAuthWebViewActivityViewModel(
                 args,
-                DefaultAnalyticsRequestExecutor(logger, Dispatchers.IO),
+                DefaultAnalyticsRequestExecutor(application, Dispatchers.IO),
                 PaymentAnalyticsRequestFactory(
                     application,
                     args.publishableKey,

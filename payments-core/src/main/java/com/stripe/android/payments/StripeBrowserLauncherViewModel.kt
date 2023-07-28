@@ -109,7 +109,7 @@ internal class StripeBrowserLauncherViewModel(
             val browserCapabilitiesSupplier = BrowserCapabilitiesSupplier(application)
 
             return StripeBrowserLauncherViewModel(
-                DefaultAnalyticsRequestExecutor(),
+                DefaultAnalyticsRequestExecutor(application),
                 PaymentAnalyticsRequestFactory(
                     application,
                     config.publishableKey

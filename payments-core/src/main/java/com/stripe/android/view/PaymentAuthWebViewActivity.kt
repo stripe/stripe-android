@@ -37,8 +37,6 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     }
     private val viewModel: PaymentAuthWebViewActivityViewModel by viewModels {
         PaymentAuthWebViewActivityViewModel.Factory(
-            application,
-            logger,
             requireNotNull(_args)
         )
     }

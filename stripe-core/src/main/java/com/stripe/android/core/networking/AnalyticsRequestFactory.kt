@@ -31,7 +31,7 @@ open class AnalyticsRequestFactory(
         event: AnalyticsEvent,
         additionalParams: Map<String, Any?>
     ): AnalyticsRequest {
-        return AnalyticsRequest(
+        return AnalyticsRequest.create(
             params = createParams(event) + additionalParams,
             headers = RequestHeadersFactory.Analytics.create()
         )

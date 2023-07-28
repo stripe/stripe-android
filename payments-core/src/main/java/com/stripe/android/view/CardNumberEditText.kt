@@ -74,7 +74,7 @@ class CardNumberEditText internal constructor(
         workContext,
         DefaultCardAccountRangeRepositoryFactory(context).create(),
         DefaultStaticCardAccountRanges(),
-        DefaultAnalyticsRequestExecutor(),
+        DefaultAnalyticsRequestExecutor(context),
         PaymentAnalyticsRequestFactory(
             context,
             publishableKeyProvider = publishableKeySupplier

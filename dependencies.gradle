@@ -69,6 +69,7 @@ ext.versions = [
         truth                       : '1.1.3',
         turbine                     : '0.12.3',
         uiAutomator                 : '2.2.0',
+        workManager                 : '2.8.1',
 ]
 
 ext.buildLibs = [
@@ -117,6 +118,7 @@ ext.libs = [
                 preference        : "androidx.preference:preference-ktx:${versions.androidxPreference}",
                 recyclerView      : "androidx.recyclerview:recyclerview:${versions.androidxRecyclerview}",
                 security          : "androidx.security:security-crypto:${versions.androidxSecurity}",
+                workManager       : "androidx.work:work-runtime-ktx:${versions.workManager}",
         ],
         camera                              : [
                 core     : "androidx.camera:camera-core:${versions.cameraX}",
@@ -191,6 +193,7 @@ ext.testLibs = [
                 coreKtx    : "androidx.test:core-ktx:${versions.androidTest}",
                 truth      : "androidx.test.ext:truth:${versions.androidTest}",
                 uiAutomator: "androidx.test.uiautomator:uiautomator:${versions.uiAutomator}",
+                workManager: "androidx.work:work-testing:${versions.workManager}",
         ],
         espresso             : [
                 accessibility : "androidx.test.espresso:espresso-accessibility:${versions.espresso}",

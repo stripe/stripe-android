@@ -84,7 +84,7 @@ class GooglePayLauncher internal constructor(
             PaymentConfiguration.getInstance(activity).publishableKey,
             setOf(PRODUCT_USAGE)
         ),
-        DefaultAnalyticsRequestExecutor()
+        DefaultAnalyticsRequestExecutor(context = activity)
     )
 
     /**
@@ -125,7 +125,7 @@ class GooglePayLauncher internal constructor(
             publishableKey = PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey,
             defaultProductUsageTokens = setOf(PRODUCT_USAGE),
         ),
-        analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
+        analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(fragment.requireContext()),
     )
 
     init {
@@ -359,7 +359,7 @@ fun rememberGooglePayLauncher(
                 PaymentConfiguration.getInstance(context).publishableKey,
                 setOf(GooglePayLauncher.PRODUCT_USAGE)
             ),
-            DefaultAnalyticsRequestExecutor()
+            DefaultAnalyticsRequestExecutor(context)
         )
     }
 }

@@ -44,15 +44,14 @@ import kotlin.coroutines.CoroutineContext
  * any required customer action). The payment authentication mechanism (e.g. 3DS) will be determined
  * by the [PaymentIntent] or [SetupIntent] object.
  */
-internal class StripePaymentController
-constructor(
+internal class StripePaymentController(
     context: Context,
     private val publishableKeyProvider: () -> String,
     private val stripeRepository: StripeRepository,
-    private val enableLogging: Boolean = false,
+    enableLogging: Boolean = false,
     workContext: CoroutineContext = Dispatchers.IO,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
-        DefaultAnalyticsRequestExecutor(Logger.getInstance(enableLogging), workContext),
+        DefaultAnalyticsRequestExecutor(context, workContext),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),

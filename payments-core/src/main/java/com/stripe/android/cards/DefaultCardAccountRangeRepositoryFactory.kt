@@ -28,7 +28,7 @@ class DefaultCardAccountRangeRepositoryFactory(
 
     constructor(context: Context) : this(
         context,
-        DefaultAnalyticsRequestExecutor()
+        DefaultAnalyticsRequestExecutor(context)
     )
 
     @Throws(IllegalStateException::class)
@@ -55,7 +55,7 @@ class DefaultCardAccountRangeRepositoryFactory(
                     publishableKey
                 ),
                 DefaultCardAccountRangeStore(appContext),
-                DefaultAnalyticsRequestExecutor(),
+                DefaultAnalyticsRequestExecutor(appContext),
                 PaymentAnalyticsRequestFactory(appContext, publishableKey)
             ),
             staticSource = StaticCardAccountRangeSource(),
@@ -89,7 +89,7 @@ class DefaultCardAccountRangeRepositoryFactory(
                         publishableKey
                     ),
                     DefaultCardAccountRangeStore(appContext),
-                    DefaultAnalyticsRequestExecutor(),
+                    DefaultAnalyticsRequestExecutor(appContext),
                     PaymentAnalyticsRequestFactory(appContext, publishableKey)
                 )
             },
