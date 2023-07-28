@@ -10,7 +10,7 @@ import org.junit.Test
 class ManifestExtensionsKtTest {
 
     @Test
-    fun `showManualEntryInErrors true when allowManualEntry is true and reducedManualEntryProminenceForErrors is false`() {
+    fun `showManualEntryInErrors true when allowManualEntry true and reducedManualEntry false`() {
         val syncObj = syncResponse(
             sessionManifest().copy(allowManualEntry = true),
             visual().copy(reducedManualEntryProminenceForErrors = false)
@@ -19,7 +19,7 @@ class ManifestExtensionsKtTest {
     }
 
     @Test
-    fun `showManualEntryInErrors false when allowManualEntry is true and reducedManualEntryProminenceForErrors is true`() {
+    fun `showManualEntryInErrors false when allowManualEntry true and reducedManualEntry true`() {
         val syncObj = syncResponse(
             sessionManifest().copy(allowManualEntry = true),
             visual().copy(reducedManualEntryProminenceForErrors = true)
@@ -28,7 +28,7 @@ class ManifestExtensionsKtTest {
     }
 
     @Test
-    fun `showManualEntryInErrors false when allowManualEntry is false and reducedManualEntryProminenceForErrors is false`() {
+    fun `showManualEntryInErrors false when allowManualEntry false and reducedManualEntry false`() {
         val syncObj = syncResponse(
             sessionManifest().copy(allowManualEntry = false),
             visual().copy(reducedManualEntryProminenceForErrors = false)
@@ -37,7 +37,7 @@ class ManifestExtensionsKtTest {
     }
 
     @Test
-    fun `showManualEntryInErrors false when allowManualEntry is false and reducedManualEntryProminenceForErrors is true`() {
+    fun `showManualEntryInErrors false when allowManualEntry false and reducedManualEntry true`() {
         val syncObj = syncResponse(
             sessionManifest().copy(allowManualEntry = false),
             visual().copy(reducedManualEntryProminenceForErrors = true)
