@@ -38,7 +38,7 @@ class DefaultAnalyticsRequestExecutor(
     constructor(
         context: Context,
     ) : this(
-        context = context,
+        context = context.applicationContext,
         stripeNetworkClient = DefaultStripeNetworkClient(
             workContext = Dispatchers.IO,
             logger = Logger.getInstance(BuildConfig.DEBUG),
@@ -50,7 +50,7 @@ class DefaultAnalyticsRequestExecutor(
         context: Context,
         workContext: CoroutineContext,
     ) : this(
-        context = context,
+        context = context.applicationContext,
         stripeNetworkClient = DefaultStripeNetworkClient(
             workContext = workContext,
             logger = Logger.getInstance(BuildConfig.DEBUG),
@@ -58,9 +58,6 @@ class DefaultAnalyticsRequestExecutor(
         workContext = workContext,
     )
 
-    /**
-     * Make the request and ignore the response.
-     */
     override fun executeAsync(request: AnalyticsRequest) {
         if (canUseWorkManager) {
             val workManager = WorkManager.getInstance(context)
@@ -86,16 +83,11 @@ class DefaultAnalyticsRequestExecutor(
         }
     }
 
-    /**
-     * Make the request and ignore the response.
-     */
     private fun enqueue(
         workManager: WorkManager,
         request: AnalyticsRequest
     ) {
-        val inputData = Data.Builder()
-            .putSerializable(FIELD_DATA, request)
-            .build()
+        val inputData = SendAnalyticsEventWorker.createInputData(request)
 
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -103,7 +95,7 @@ class DefaultAnalyticsRequestExecutor(
             .build()
 
         val workRequest = OneTimeWorkRequestBuilder<SendAnalyticsEventWorker>()
-            .addTag("AnalyticsRequest")
+            .addTag(workerTag)
             .setInputData(inputData)
             .setConstraints(constraints)
             .build()
@@ -142,14 +134,22 @@ class DefaultAnalyticsRequestExecutor(
             )
         }
 
-        internal companion object {
-            const val TAG = "SendAnalyticsEventWorker"
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+
+            fun createInputData(request: AnalyticsRequest): Data {
+                return Data.Builder()
+                    .putSerializable(FIELD_DATA, request)
+                    .build()
+            }
         }
     }
 
     internal companion object {
         const val FIELD_DATA = "data"
         const val FIELD_EVENT = "event"
+
+        val workerTag: String = DefaultAnalyticsRequestExecutor::class.java.name
     }
 }
 

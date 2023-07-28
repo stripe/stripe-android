@@ -135,7 +135,7 @@ class CardAccountRangeServiceTest {
             StripeApiRepository(applicationContext, { publishableKey }),
             ApiRequest.Options(publishableKey),
             DefaultCardAccountRangeStore(applicationContext),
-            DefaultAnalyticsRequestExecutor(),
+            DefaultAnalyticsRequestExecutor(applicationContext),
             PaymentAnalyticsRequestFactory(applicationContext, publishableKey)
         )
     }

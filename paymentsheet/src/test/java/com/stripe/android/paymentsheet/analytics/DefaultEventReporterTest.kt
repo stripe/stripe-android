@@ -68,7 +68,7 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_sheet_savedpm_show" &&
-                    req.params["link_enabled"] == true &&
+                    req.params["link_enabled"] == "true" &&
                     req.params["currency"] == "usd" &&
                     req.params["locale"] == "en_US"
             }
@@ -86,7 +86,7 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_sheet_newpm_show" &&
-                    req.params["link_enabled"] == false &&
+                    req.params["link_enabled"] == "false" &&
                     req.params["currency"] == "usd" &&
                     req.params["locale"] == "en_US"
             }
@@ -115,7 +115,7 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_payment_savedpm_success" &&
-                    req.params["duration"] == 1f &&
+                    req.params["duration"] == "1.0" &&
                     req.params["currency"] == "usd" &&
                     req.params["locale"] == "en_US"
             }
@@ -147,7 +147,7 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_payment_googlepay_success" &&
-                    req.params["duration"] == 2f
+                    req.params["duration"] == "2.0"
             }
         )
     }
@@ -177,7 +177,7 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_payment_link_success" &&
-                    req.params["duration"] == 0.123f
+                    req.params["duration"] == "0.123"
             }
         )
     }
@@ -203,7 +203,7 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_payment_savedpm_failure" &&
-                    req.params["duration"] == 0.456f &&
+                    req.params["duration"] == "0.456" &&
                     req.params["currency"] == "usd" &&
                     req.params["locale"] == "en_US"
             }
