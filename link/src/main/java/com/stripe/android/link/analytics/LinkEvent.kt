@@ -8,10 +8,6 @@ internal sealed class LinkEvent : AnalyticsEvent {
         override val eventName = "link.signup.checkbox_checked"
     }
 
-    object SignUpFlowPresented : LinkEvent() {
-        override val eventName = "link.signup.flow_presented"
-    }
-
     object SignUpStart : LinkEvent() {
         override val eventName = "link.signup.start"
     }
@@ -28,47 +24,27 @@ internal sealed class LinkEvent : AnalyticsEvent {
         override val eventName = "link.account_lookup.failure"
     }
 
-    object TwoFAStart : LinkEvent() {
-        override val eventName = "link.2fa.start"
-    }
-
-    object TwoFAStartFailure : LinkEvent() {
-        override val eventName = "link.2fa.start_failure"
-    }
-
-    object TwoFAComplete : LinkEvent() {
-        override val eventName = "link.2fa.complete"
-    }
-
-    object TwoFAFailure : LinkEvent() {
-        override val eventName = "link.2fa.failure"
-    }
-
-    object TwoFACancel : LinkEvent() {
-        override val eventName = "link.2fa.cancel"
-    }
-
     object PopupShow : LinkEvent() {
-        override val eventName = "link_popup_show"
+        override val eventName = "link.popup.show"
     }
 
     object PopupSuccess : LinkEvent() {
-        override val eventName = "link_popup_success"
+        override val eventName = "link.popup.success"
     }
 
     object PopupCancel : LinkEvent() {
-        override val eventName = "link_popup_cancel"
+        override val eventName = "link.popup.cancel"
     }
 
     object PopupError : LinkEvent() {
-        override val eventName = "link_popup_error"
+        override val eventName = "link.popup.error"
     }
 
     object PopupLogout : LinkEvent() {
-        override val eventName = "link_popup_logout"
+        override val eventName = "link.popup.logout"
     }
 
     object PopupSkipped : LinkEvent() {
-        override val eventName = "link_popup_skipped"
+        override val eventName = "link.popup.skipped"
     }
 }

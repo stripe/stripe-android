@@ -21,10 +21,6 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.SignUpCheckboxChecked)
     }
 
-    override fun onSignupFlowPresented() {
-        fireEvent(LinkEvent.SignUpFlowPresented)
-    }
-
     override fun onSignupStarted(isInline: Boolean) {
         signupStartMillis = System.currentTimeMillis()
         fireEvent(LinkEvent.SignUpStart)
@@ -43,26 +39,6 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.AccountLookupFailure)
     }
 
-    override fun on2FAStart() {
-        fireEvent(LinkEvent.TwoFAStart)
-    }
-
-    override fun on2FAStartFailure() {
-        fireEvent(LinkEvent.TwoFAStartFailure)
-    }
-
-    override fun on2FAComplete() {
-        fireEvent(LinkEvent.TwoFAComplete)
-    }
-
-    override fun on2FAFailure() {
-        fireEvent(LinkEvent.TwoFAFailure)
-    }
-
-    override fun on2FACancel() {
-        fireEvent(LinkEvent.TwoFACancel)
-    }
-
     override fun onPopupShow() {
         fireEvent(LinkEvent.PopupShow)
     }
@@ -75,8 +51,8 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.PopupCancel)
     }
 
-    override fun onPopupError(exception: Throwable) {
-        val params = mapOf("error" to (exception.message ?: exception.toString()))
+    override fun onPopupError(error: Throwable) {
+        val params = mapOf("error" to (error.message ?: error.toString()))
         fireEvent(LinkEvent.PopupError, params)
     }
 

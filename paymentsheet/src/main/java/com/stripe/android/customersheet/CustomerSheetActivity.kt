@@ -11,7 +11,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.ui.BottomSheet
@@ -19,7 +18,6 @@ import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.AnimationConstants
-import kotlinx.coroutines.launch
 
 internal class CustomerSheetActivity : AppCompatActivity() {
 
@@ -48,7 +46,6 @@ internal class CustomerSheetActivity : AppCompatActivity() {
         setContent {
             StripeTheme {
                 val bottomSheetState = rememberBottomSheetState()
-                val coroutineScope = rememberCoroutineScope()
 
                 val viewState by viewModel.viewState.collectAsState()
                 val result by viewModel.result.collectAsState()
@@ -61,9 +58,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                 }
 
                 BackHandler {
-                    coroutineScope.launch {
-                        viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
-                    }
+                    viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
                 }
 
                 BottomSheet(

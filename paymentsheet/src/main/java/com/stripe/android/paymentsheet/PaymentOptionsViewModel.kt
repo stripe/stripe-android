@@ -147,14 +147,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 TODO("This can't happen. Will follow up to remodel the states better.")
             }
             is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
-                setContentVisible(true)
                 onPaymentResult(processingState.result)
             }
             is LinkHandler.ProcessingState.Error -> {
                 onError(processingState.message)
             }
             LinkHandler.ProcessingState.Launched -> {
-                setContentVisible(false)
             }
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
                 processingState.details?.let {
@@ -190,6 +188,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onUserCancel() {
+        reportDismiss(isDecoupling)
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Canceled(
                 mostRecentError = mostRecentError,
@@ -289,14 +288,14 @@ internal class PaymentOptionsViewModel @Inject constructor(
         )
     }
 
-    override fun transitionToFirstScreen() {
+    override fun determineInitialBackStack(): List<PaymentSheetScreen> {
         val target = if (args.state.hasPaymentOptions) {
             SelectSavedPaymentMethods
         } else {
             AddFirstPaymentMethod
         }
 
-        val initialBackStack = buildList {
+        return buildList {
             add(target)
 
             if (target is SelectSavedPaymentMethods && newPaymentSelection != null) {
@@ -306,9 +305,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 add(PaymentSheetScreen.AddAnotherPaymentMethod)
             }
         }
-
-        backStack.value = initialBackStack
-        reportNavigationEvent(initialBackStack.last())
     }
 
     internal class Factory(

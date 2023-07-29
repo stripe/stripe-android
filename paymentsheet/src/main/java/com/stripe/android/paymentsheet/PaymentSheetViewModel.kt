@@ -237,11 +237,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
             LinkHandler.ProcessingState.Cancelled -> {
-                setContentVisible(true)
                 resetViewState()
             }
             is LinkHandler.ProcessingState.PaymentMethodCollected -> {
-                setContentVisible(true)
                 updateSelection(
                     PaymentSelection.Saved(
                         paymentMethod = processingState.paymentMethod,
@@ -251,14 +249,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 checkout()
             }
             is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
-                setContentVisible(true)
                 onPaymentResult(processingState.result)
             }
             is LinkHandler.ProcessingState.Error -> {
                 onError(processingState.message)
             }
             LinkHandler.ProcessingState.Launched -> {
-                setContentVisible(false)
                 startProcessing(CheckoutIdentifier.SheetBottomBuy)
             }
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
@@ -610,6 +606,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override fun onUserCancel() {
+        reportDismiss(isDecoupling)
         _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
     }
 
@@ -622,13 +619,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun onError(error: String?) = resetViewState(error)
 
-    override fun transitionToFirstScreen() {
-        val target = if (paymentMethods.value.isNullOrEmpty()) {
-            PaymentSheetScreen.AddFirstPaymentMethod
-        } else {
+    override fun determineInitialBackStack(): List<PaymentSheetScreen> {
+        val hasPaymentMethods = !paymentMethods.value.isNullOrEmpty()
+        val target = if (hasPaymentMethods) {
             PaymentSheetScreen.SelectSavedPaymentMethods
+        } else {
+            PaymentSheetScreen.AddFirstPaymentMethod
         }
-        transitionTo(target)
+        return listOf(target)
     }
 
     internal class Factory(

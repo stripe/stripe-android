@@ -40,6 +40,8 @@ class DefaultIntentStatusPollerTest {
 
         advanceTimeBy(nextDelay())
         assertThat(poller.state.value).isEqualTo(Succeeded)
+
+        poller.stopPolling()
     }
 
     @Test
@@ -131,5 +133,7 @@ class DefaultIntentStatusPollerTest {
 
         poller.startPolling(scope = this@runTest)
         assertThat(poller.state.value).isEqualTo(Succeeded)
+
+        poller.stopPolling()
     }
 }

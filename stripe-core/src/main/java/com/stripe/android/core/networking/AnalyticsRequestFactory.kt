@@ -15,7 +15,8 @@ open class AnalyticsRequestFactory(
     private val packageManager: PackageManager?,
     private val packageInfo: PackageInfo?,
     private val packageName: String,
-    private val publishableKeyProvider: Provider<String>
+    private val publishableKeyProvider: Provider<String>,
+    private val networkTypeProvider: Provider<String?>,
 ) {
     /**
      * Builds an Analytics request for the given [AnalyticsEvent],
@@ -56,8 +57,13 @@ open class AnalyticsRequestFactory(
         AnalyticsFields.DEVICE_TYPE to DEVICE_TYPE,
         AnalyticsFields.BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
         AnalyticsFields.IS_DEVELOPMENT to BuildConfig.DEBUG,
-        AnalyticsFields.SESSION_ID to sessionId
-    )
+        AnalyticsFields.SESSION_ID to sessionId,
+    ) + networkType()
+
+    private fun networkType(): Map<String, String> {
+        val networkType = networkTypeProvider.get() ?: return emptyMap()
+        return mapOf(AnalyticsFields.NETWORK_TYPE to networkType)
+    }
 
     internal fun appDataParams(): Map<String, Any> {
         return when {

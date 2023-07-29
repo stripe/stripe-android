@@ -1,6 +1,6 @@
 package com.stripe.android.customersheet
 
-import android.content.Context
+import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
@@ -31,13 +31,13 @@ import kotlin.test.assertFailsWith
 @OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerAdapterTest {
 
-    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val application = ApplicationProvider.getApplicationContext<Application>()
     private val testDispatcher = UnconfinedTestDispatcher()
 
     @Before
     fun setup() {
         PaymentConfiguration.init(
-            context = context,
+            context = application,
             publishableKey = "pk_123",
         )
     }
@@ -58,7 +58,7 @@ class CustomerAdapterTest {
         }
 
         val adapter = CustomerAdapter.create(
-            context = context,
+            context = application,
             customerEphemeralKeyProvider = customerEphemeralKeyProvider,
             setupIntentClientSecretProvider = setupIntentClientSecretProvider
         )
@@ -147,7 +147,7 @@ class CustomerAdapterTest {
             customerEphemeralKeyProvider = { error }
         )
         val result = adapter.retrievePaymentMethods()
-        assertThat((result.value as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Merchant says cannot get customer")
     }
 
@@ -178,7 +178,7 @@ class CustomerAdapterTest {
             )
         )
         val result = adapter.attachPaymentMethod("pm_1234")
-        assertThat((result.value as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Something went wrong")
     }
 
@@ -197,7 +197,7 @@ class CustomerAdapterTest {
             )
         )
         val result = adapter.attachPaymentMethod("pm_1234")
-        assertThat((result.value as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Unable to attach payment method")
     }
 
@@ -230,7 +230,7 @@ class CustomerAdapterTest {
             )
         )
         val result = adapter.detachPaymentMethod("pm_1234")
-        assertThat((result.value as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Something went wrong")
     }
 
@@ -249,7 +249,7 @@ class CustomerAdapterTest {
             )
         )
         val result = adapter.detachPaymentMethod("pm_1234")
-        assertThat((result.value as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Unable to detach payment method")
     }
 
@@ -266,7 +266,7 @@ class CustomerAdapterTest {
             },
             prefsRepositoryFactory = {
                 DefaultPrefsRepository(
-                    context = context,
+                    context = application,
                     customerId = it.customerId,
                     workContext = testScheduler
                 )
@@ -294,7 +294,7 @@ class CustomerAdapterTest {
             },
             prefsRepositoryFactory = {
                 DefaultPrefsRepository(
-                    context = context,
+                    context = application,
                     customerId = it.customerId,
                     workContext = testScheduler
                 )
@@ -364,9 +364,9 @@ class CustomerAdapterTest {
         val result = adapter.setSelectedPaymentOption(
             paymentOption = CustomerAdapter.PaymentOption.StripeId("pm_1234")
         )
-        assertThat((result.value as CustomerAdapter.Result.Failure).cause.message)
+        assertThat(result.failureOrNull()?.cause?.message)
             .isEqualTo("Unable to persist payment option StripeId(id=pm_1234)")
-        assertThat(result.value.displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Something went wrong")
     }
 
@@ -383,7 +383,7 @@ class CustomerAdapterTest {
             },
             prefsRepositoryFactory = {
                 DefaultPrefsRepository(
-                    context = context,
+                    context = application,
                     customerId = it.customerId,
                     workContext = testScheduler
                 )
@@ -438,7 +438,7 @@ class CustomerAdapterTest {
             },
         )
         val result = adapter.setupIntentClientSecretForCustomerAttach()
-        assertThat((result.value as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Couldn't get client secret")
     }
 
@@ -507,18 +507,12 @@ class CustomerAdapterTest {
     @Test
     fun `CustomerAdapter Result can be created using success`() {
         val result: CustomerAdapter.Result<String> = CustomerAdapter.Result.success("Hello")
-        assertThat(result.value)
-            .isEqualTo("Hello")
         assertThat(result.getOrNull())
             .isEqualTo("Hello")
 
         var newResult = result.map { "world" }
-        assertThat(newResult.value)
+        assertThat(newResult.getOrNull())
             .isEqualTo("world")
-
-        newResult = newResult.mapCatching { "Hello world" }
-        assertThat(newResult.value)
-            .isEqualTo("Hello world")
 
         newResult = newResult.fold(
             onSuccess = {
@@ -531,7 +525,7 @@ class CustomerAdapterTest {
                 )
             }
         )
-        assertThat(newResult.value)
+        assertThat(newResult.getOrNull())
             .isEqualTo("Success")
     }
 
@@ -541,19 +535,13 @@ class CustomerAdapterTest {
             cause = IllegalStateException("Illegal state"),
             displayMessage = "This is display message",
         )
-        assertThat((result.value as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("This is display message")
         assertThat(result.getOrNull())
             .isNull()
 
         var newResult = result.map { "world" }
-        assertThat(newResult.isFailure).isTrue()
-        assertThat((newResult.value as CustomerAdapter.Result.Failure).displayMessage)
-            .isEqualTo("This is display message")
-
-        newResult = newResult.mapCatching { "Hello world" }
-        assertThat(newResult.isFailure).isTrue()
-        assertThat((newResult.value as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(newResult.failureOrNull()?.displayMessage)
             .isEqualTo("This is display message")
 
         newResult = newResult.fold(
@@ -567,8 +555,7 @@ class CustomerAdapterTest {
                 )
             }
         )
-        assertThat(newResult.isFailure).isTrue()
-        assertThat((newResult.value as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(newResult.failureOrNull()?.displayMessage)
             .isEqualTo("This is a new display message")
     }
 
@@ -580,29 +567,29 @@ class CustomerAdapterTest {
             ),
             displayMessage = "There was a problem with Stripe",
         )
-        assertThat((result.value as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("There was a problem with Stripe")
 
         var newResult = result.map {
             "New result"
         }
-        assertThat((newResult.value as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(newResult.failureOrNull()?.displayMessage)
             .isEqualTo("There was a problem with Stripe")
 
         newResult = result.mapCatching {
             "New result"
         }
-        assertThat((newResult.value as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(newResult.failureOrNull()?.displayMessage)
             .isEqualTo("There was a problem with Stripe")
 
-        var stripeResult: CustomerAdapter.Result<String> = CustomerAdapter.Result.failure(
+        var stripeResult = CustomerAdapter.Result.failure<String>(
             cause = APIException(
                 message = "Unlocalized message",
                 stripeError = null,
             ),
             displayMessage = "There was a problem with Stripe",
         )
-        assertThat((stripeResult.value as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(stripeResult.failureOrNull()?.displayMessage)
             .isEqualTo("There was a problem with Stripe")
 
         stripeResult = CustomerAdapter.Result.failure(
@@ -611,8 +598,68 @@ class CustomerAdapterTest {
             ),
             displayMessage = null,
         )
-        assertThat((stripeResult.value as CustomerAdapter.Result.Failure).displayMessage)
+        assertThat(stripeResult.failureOrNull()?.displayMessage)
             .isEqualTo(null)
+    }
+
+    @Test
+    fun `Google Pay is retrievable when it is available and selected`() = runTest {
+        val adapter = createAdapter(
+            prefsRepositoryFactory = {
+                DefaultPrefsRepository(
+                    context = application,
+                    customerId = it.customerId,
+                    workContext = testScheduler
+                ).apply {
+                    setSavedSelection(SavedSelection.GooglePay)
+                }
+            }
+        )
+
+        CustomerSessionViewModel(
+            application = application
+        ).createCustomerSessionComponent(
+            configuration = CustomerSheet.Configuration(
+                googlePayEnabled = true
+            ),
+            customerAdapter = adapter,
+            callback = {}
+        )
+
+        val result = adapter.retrieveSelectedPaymentOption()
+
+        assertThat(result.getOrNull())
+            .isEqualTo(CustomerAdapter.PaymentOption.GooglePay)
+    }
+
+    @Test
+    fun `Google Pay is not retrievable when it is not available and selected`() = runTest {
+        val adapter = createAdapter(
+            prefsRepositoryFactory = {
+                DefaultPrefsRepository(
+                    context = application,
+                    customerId = it.customerId,
+                    workContext = testScheduler
+                ).apply {
+                    setSavedSelection(SavedSelection.GooglePay)
+                }
+            }
+        )
+
+        CustomerSessionViewModel(
+            application = application
+        ).createCustomerSessionComponent(
+            configuration = CustomerSheet.Configuration(
+                googlePayEnabled = false
+            ),
+            customerAdapter = adapter,
+            callback = {}
+        )
+
+        val result = adapter.retrieveSelectedPaymentOption()
+
+        assertThat(result.getOrNull())
+            .isNull()
     }
 
     private fun createAdapter(
@@ -636,7 +683,7 @@ class CustomerAdapterTest {
         }
     ): StripeCustomerAdapter {
         return StripeCustomerAdapter(
-            context = context,
+            context = application,
             customerEphemeralKeyProvider = customerEphemeralKeyProvider,
             setupIntentClientSecretProvider = setupIntentClientSecretProvider,
             timeProvider = timeProvider,

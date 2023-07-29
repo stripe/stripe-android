@@ -386,11 +386,10 @@ public final class com/stripe/android/PaymentAuthConfig {
 	public static final fun init (Lcom/stripe/android/PaymentAuthConfig;)V
 }
 
-public final class com/stripe/android/PaymentAuthConfig$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/PaymentAuthConfig$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/PaymentAuthConfig;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/PaymentAuthConfig;
 	public final fun set3ds2Config (Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2Config;)Lcom/stripe/android/PaymentAuthConfig$Builder;
 }
 
@@ -408,11 +407,10 @@ public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2ButtonCustomiz
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2ButtonCustomization$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2ButtonCustomization$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2ButtonCustomization;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2ButtonCustomization;
 	public final fun setBackgroundColor (Ljava/lang/String;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2ButtonCustomization$Builder;
 	public final fun setCornerRadius (I)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2ButtonCustomization$Builder;
 	public final fun setTextColor (Ljava/lang/String;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2ButtonCustomization$Builder;
@@ -432,11 +430,10 @@ public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2Config : andro
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2Config$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2Config$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2Config;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2Config;
 	public final fun setTimeout (I)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2Config$Builder;
 	public final fun setUiCustomization (Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2Config$Builder;
 }
@@ -458,11 +455,10 @@ public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2LabelCustomiza
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2LabelCustomization$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2LabelCustomization$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2LabelCustomization;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2LabelCustomization;
 	public final fun setHeadingTextColor (Ljava/lang/String;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2LabelCustomization$Builder;
 	public final fun setHeadingTextFontName (Ljava/lang/String;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2LabelCustomization$Builder;
 	public final fun setHeadingTextFontSize (I)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2LabelCustomization$Builder;
@@ -480,11 +476,10 @@ public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2TextBoxCustomi
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2TextBoxCustomization$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2TextBoxCustomization$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2TextBoxCustomization;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2TextBoxCustomization;
 	public final fun setBorderColor (Ljava/lang/String;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2TextBoxCustomization$Builder;
 	public final fun setBorderWidth (I)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2TextBoxCustomization$Builder;
 	public final fun setCornerRadius (I)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2TextBoxCustomization$Builder;
@@ -502,11 +497,10 @@ public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2ToolbarCustomi
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2ToolbarCustomization$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2ToolbarCustomization$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2ToolbarCustomization;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2ToolbarCustomization;
 	public final fun setBackgroundColor (Ljava/lang/String;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2ToolbarCustomization$Builder;
 	public final fun setButtonText (Ljava/lang/String;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2ToolbarCustomization$Builder;
 	public final fun setHeaderText (Ljava/lang/String;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2ToolbarCustomization$Builder;
@@ -530,13 +524,12 @@ public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomizatio
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization$Builder {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization$Builder$Companion;
 	public fun <init> ()V
 	public synthetic fun <init> (Landroid/app/Activity;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun build ()Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization;
 	public static final fun createWithAppTheme (Landroid/app/Activity;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization$Builder;
 	public final fun setAccentColor (Ljava/lang/String;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization$Builder;
 	public final fun setButtonCustomization (Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2ButtonCustomization;Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization$ButtonType;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization$Builder;
@@ -717,11 +710,10 @@ public final class com/stripe/android/PaymentSessionConfig : android/os/Parcelab
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/PaymentSessionConfig$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/PaymentSessionConfig$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/PaymentSessionConfig;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/PaymentSessionConfig;
 	public final fun setAddPaymentMethodFooter (I)Lcom/stripe/android/PaymentSessionConfig$Builder;
 	public final fun setAllowedShippingCountryCodes (Ljava/util/Set;)Lcom/stripe/android/PaymentSessionConfig$Builder;
 	public final fun setBillingAddressFields (Lcom/stripe/android/view/BillingAddressFields;)Lcom/stripe/android/PaymentSessionConfig$Builder;
@@ -1692,11 +1684,10 @@ public final class com/stripe/android/model/AccountParams$BusinessTypeParams$Com
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/AccountParams$BusinessTypeParams$Company$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/model/AccountParams$BusinessTypeParams$Company$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/model/AccountParams$BusinessTypeParams$Company;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/model/AccountParams$BusinessTypeParams$Company;
 	public final fun setAddress (Lcom/stripe/android/model/Address;)Lcom/stripe/android/model/AccountParams$BusinessTypeParams$Company$Builder;
 	public final fun setAddressKana (Lcom/stripe/android/model/AddressJapanParams;)Lcom/stripe/android/model/AccountParams$BusinessTypeParams$Company$Builder;
 	public final fun setAddressKanji (Lcom/stripe/android/model/AddressJapanParams;)Lcom/stripe/android/model/AccountParams$BusinessTypeParams$Company$Builder;
@@ -1843,11 +1834,10 @@ public final class com/stripe/android/model/AccountParams$BusinessTypeParams$Ind
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/AccountParams$BusinessTypeParams$Individual$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/model/AccountParams$BusinessTypeParams$Individual$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/model/AccountParams$BusinessTypeParams$Individual;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/model/AccountParams$BusinessTypeParams$Individual;
 	public final fun setAddress (Lcom/stripe/android/model/Address;)Lcom/stripe/android/model/AccountParams$BusinessTypeParams$Individual$Builder;
 	public final fun setAddressKana (Lcom/stripe/android/model/AddressJapanParams;)Lcom/stripe/android/model/AccountParams$BusinessTypeParams$Individual$Builder;
 	public final fun setAddressKanji (Lcom/stripe/android/model/AddressJapanParams;)Lcom/stripe/android/model/AccountParams$BusinessTypeParams$Individual$Builder;
@@ -1985,11 +1975,10 @@ public final class com/stripe/android/model/Address : com/stripe/android/core/mo
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/Address$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/model/Address$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/model/Address;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/model/Address;
 	public final fun setCity (Ljava/lang/String;)Lcom/stripe/android/model/Address$Builder;
 	public final fun setCountry (Ljava/lang/String;)Lcom/stripe/android/model/Address$Builder;
 	public final fun setLine1 (Ljava/lang/String;)Lcom/stripe/android/model/Address$Builder;
@@ -2040,11 +2029,10 @@ public final class com/stripe/android/model/AddressJapanParams : android/os/Parc
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/AddressJapanParams$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/model/AddressJapanParams$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/model/AddressJapanParams;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/model/AddressJapanParams;
 	public final fun setCity (Ljava/lang/String;)Lcom/stripe/android/model/AddressJapanParams$Builder;
 	public final fun setCountry (Ljava/lang/String;)Lcom/stripe/android/model/AddressJapanParams$Builder;
 	public final fun setLine1 (Ljava/lang/String;)Lcom/stripe/android/model/AddressJapanParams$Builder;
@@ -3444,11 +3432,10 @@ public final class com/stripe/android/model/PaymentMethod$BillingDetails : com/s
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/PaymentMethod$BillingDetails$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/model/PaymentMethod$BillingDetails$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/model/PaymentMethod$BillingDetails;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/model/PaymentMethod$BillingDetails;
 	public final fun setAddress (Lcom/stripe/android/model/Address;)Lcom/stripe/android/model/PaymentMethod$BillingDetails$Builder;
 	public final fun setEmail (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$BillingDetails$Builder;
 	public final fun setName (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$BillingDetails$Builder;
@@ -3463,11 +3450,10 @@ public final class com/stripe/android/model/PaymentMethod$BillingDetails$Creator
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/model/PaymentMethod$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/model/PaymentMethod;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/model/PaymentMethod;
 	public final fun setAuBecsDebit (Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;)Lcom/stripe/android/model/PaymentMethod$Builder;
 	public final fun setBacsDebit (Lcom/stripe/android/model/PaymentMethod$BacsDebit;)Lcom/stripe/android/model/PaymentMethod$Builder;
 	public final fun setBillingDetails (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethod$Builder;
@@ -4122,11 +4108,10 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Card : and
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/PaymentMethodCreateParams$Card$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/model/PaymentMethodCreateParams$Card$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/model/PaymentMethodCreateParams$Card;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/model/PaymentMethodCreateParams$Card;
 	public final fun setCvc (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Builder;
 	public final fun setExpiryMonth (Ljava/lang/Integer;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Builder;
 	public final fun setExpiryYear (Ljava/lang/Integer;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Builder;
@@ -4666,11 +4651,10 @@ public final class com/stripe/android/model/PersonTokenParams : com/stripe/andro
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/PersonTokenParams$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/model/PersonTokenParams$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/model/PersonTokenParams;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/model/PersonTokenParams;
 	public final fun setAddress (Lcom/stripe/android/model/Address;)Lcom/stripe/android/model/PersonTokenParams$Builder;
 	public final fun setAddressKana (Lcom/stripe/android/model/AddressJapanParams;)Lcom/stripe/android/model/PersonTokenParams$Builder;
 	public final fun setAddressKanji (Lcom/stripe/android/model/AddressJapanParams;)Lcom/stripe/android/model/PersonTokenParams$Builder;
@@ -4757,11 +4741,10 @@ public final class com/stripe/android/model/PersonTokenParams$Relationship : and
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/PersonTokenParams$Relationship$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/model/PersonTokenParams$Relationship$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/model/PersonTokenParams$Relationship;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/model/PersonTokenParams$Relationship;
 	public final fun setDirector (Ljava/lang/Boolean;)Lcom/stripe/android/model/PersonTokenParams$Relationship$Builder;
 	public final fun setExecutive (Ljava/lang/Boolean;)Lcom/stripe/android/model/PersonTokenParams$Relationship$Builder;
 	public final fun setOwner (Ljava/lang/Boolean;)Lcom/stripe/android/model/PersonTokenParams$Relationship$Builder;
@@ -6510,11 +6493,11 @@ public final class com/stripe/android/networking/FraudDetectionData$Creator : an
 
 public final class com/stripe/android/networking/StripeRepository$DefaultImpls {
 	public static synthetic fun buildPaymentUserAgent$default (Lcom/stripe/android/networking/StripeRepository;Ljava/util/Set;ILjava/lang/Object;)Ljava/lang/String;
-	public static synthetic fun confirmPaymentIntent$default (Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun confirmSetupIntent$default (Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/model/ConfirmSetupIntentParams;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun retrievePaymentIntent$default (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun retrieveSetupIntent$default (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun retrieveStripeIntent$default (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun confirmPaymentIntent-BWLJW6A$default (Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun confirmSetupIntent-BWLJW6A$default (Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/model/ConfirmSetupIntentParams;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun retrievePaymentIntent-BWLJW6A$default (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun retrieveSetupIntent-BWLJW6A$default (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun retrieveStripeIntent-BWLJW6A$default (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class com/stripe/android/payments/PaymentFlowResult$Unvalidated : android/os/Parcelable {
@@ -7041,11 +7024,10 @@ public final class com/stripe/android/view/AddPaymentMethodActivityStarter$Args 
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/view/AddPaymentMethodActivityStarter$Args$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/view/AddPaymentMethodActivityStarter$Args$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/view/AddPaymentMethodActivityStarter$Args;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/view/AddPaymentMethodActivityStarter$Args;
 	public final fun setAddPaymentMethodFooter (I)Lcom/stripe/android/view/AddPaymentMethodActivityStarter$Args$Builder;
 	public final fun setBillingAddressFields (Lcom/stripe/android/view/BillingAddressFields;)Lcom/stripe/android/view/AddPaymentMethodActivityStarter$Args$Builder;
 	public final fun setPaymentMethodType (Lcom/stripe/android/model/PaymentMethod$Type;)Lcom/stripe/android/view/AddPaymentMethodActivityStarter$Args$Builder;
@@ -7387,11 +7369,10 @@ public final class com/stripe/android/view/PaymentFlowActivityStarter$Args : com
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/view/PaymentFlowActivityStarter$Args$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/view/PaymentFlowActivityStarter$Args$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/view/PaymentFlowActivityStarter$Args;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/view/PaymentFlowActivityStarter$Args;
 	public final fun setIsPaymentSessionActive (Z)Lcom/stripe/android/view/PaymentFlowActivityStarter$Args$Builder;
 	public final fun setPaymentSessionConfig (Lcom/stripe/android/PaymentSessionConfig;)Lcom/stripe/android/view/PaymentFlowActivityStarter$Args$Builder;
 	public final fun setPaymentSessionData (Lcom/stripe/android/PaymentSessionData;)Lcom/stripe/android/view/PaymentFlowActivityStarter$Args$Builder;
@@ -7453,11 +7434,10 @@ public final class com/stripe/android/view/PaymentMethodsActivityStarter$Args : 
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/view/PaymentMethodsActivityStarter$Args$Builder : com/stripe/android/ObjectBuilder {
+public final class com/stripe/android/view/PaymentMethodsActivityStarter$Args$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/view/PaymentMethodsActivityStarter$Args;
-	public synthetic fun build ()Ljava/lang/Object;
+	public final fun build ()Lcom/stripe/android/view/PaymentMethodsActivityStarter$Args;
 	public final fun setAddPaymentMethodFooter (I)Lcom/stripe/android/view/PaymentMethodsActivityStarter$Args$Builder;
 	public final fun setBillingAddressFields (Lcom/stripe/android/view/BillingAddressFields;)Lcom/stripe/android/view/PaymentMethodsActivityStarter$Args$Builder;
 	public final fun setCanDeletePaymentMethods (Z)Lcom/stripe/android/view/PaymentMethodsActivityStarter$Args$Builder;

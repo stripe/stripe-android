@@ -74,6 +74,7 @@ import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -904,7 +905,6 @@ internal class PaymentSheetViewModelTest {
 
         val observedArgs = viewModel.createFormArguments(
             selectedItem = LpmRepository.HardcodedCard,
-            showLinkInlineSignup = false,
         )
 
         assertThat(observedArgs).isEqualTo(
@@ -986,13 +986,13 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Sends correct event when navigating to AddAnotherPaymentMethod screen`() = runTest {
+    fun `Sends no event when navigating to AddAnotherPaymentMethod screen`() = runTest {
         val viewModel = createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             customerPaymentMethods = PaymentMethodFixtures.createCards(1),
         )
 
-        val receiver = viewModel.currentScreen.testIn(this)
+        verify(eventReporter).onInit(configuration = anyOrNull(), isDecoupling = any())
 
         verify(eventReporter).onShowExistingPaymentOptions(
             linkEnabled = eq(false),
@@ -1002,13 +1002,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.transitionToAddPaymentScreen()
 
-        verify(eventReporter).onShowNewPaymentOptionForm(
-            linkEnabled = eq(false),
-            currency = eq("usd"),
-            isDecoupling = eq(false),
-        )
-
-        receiver.cancelAndIgnoreRemainingEvents()
+        verifyNoMoreInteractions(eventReporter)
     }
 
     @Test
@@ -1409,6 +1403,20 @@ internal class PaymentSheetViewModelTest {
             currency = anyOrNull(),
             deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Server),
         )
+    }
+
+    @Test
+    fun `Sends dismiss event when the user cancels the flow with non-deferred intent`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.onUserCancel()
+        verify(eventReporter).onDismiss(isDecoupling = false)
+    }
+
+    @Test
+    fun `Sends dismiss event when the user cancels the flow with deferred intent`() = runTest {
+        val viewModel = createViewModelForDeferredIntent()
+        viewModel.onUserCancel()
+        verify(eventReporter).onDismiss(isDecoupling = true)
     }
 
     private fun createViewModel(

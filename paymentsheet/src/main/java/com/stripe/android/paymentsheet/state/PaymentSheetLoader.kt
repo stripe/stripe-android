@@ -75,6 +75,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         paymentSheetConfiguration: PaymentSheet.Configuration?
     ): PaymentSheetLoader.Result = withContext(workContext) {
         val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
+        val isDecoupling = initializationMode is DeferredIntent
+
+        eventReporter.onLoadStarted(isDecoupling = isDecoupling)
 
         retrieveElementsSession(
             initializationMode = initializationMode,
@@ -82,18 +85,17 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         ).fold(
             onSuccess = { elementsSession ->
                 create(
-                    stripeIntent = elementsSession.stripeIntent,
-                    customerConfig = paymentSheetConfiguration?.customer,
+                    elementsSession = elementsSession,
                     config = paymentSheetConfiguration,
                     isGooglePayReady = isGooglePayReady,
-                    merchantCountry = elementsSession.merchantCountry,
                 )
             },
             onFailure = {
-                logger.error("Failure initializing FlowController", it)
                 PaymentSheetLoader.Result.Failure(it)
             }
-        )
+        ).also {
+            reportLoadResult(loaderResult = it, isDecoupling = isDecoupling)
+        }
     }
 
     private suspend fun isGooglePayReady(
@@ -112,13 +114,15 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 
     private suspend fun create(
-        stripeIntent: StripeIntent,
-        customerConfig: PaymentSheet.CustomerConfiguration?,
+        elementsSession: ElementsSession,
         config: PaymentSheet.Configuration?,
         isGooglePayReady: Boolean,
-        merchantCountry: String?,
     ): PaymentSheetLoader.Result = coroutineScope {
+        val customerConfig = config?.customer
         val prefsRepository = prefsRepositoryFactory(customerConfig)
+
+        val stripeIntent = elementsSession.stripeIntent
+        val merchantCountry = elementsSession.merchantCountry
 
         val isLinkAvailable = stripeIntent.paymentMethodTypes.contains(Link.code) &&
             stripeIntent.linkFundingSources.intersect(supportedFundingSources).isNotEmpty()
@@ -337,6 +341,21 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val requestedTypes = stripeIntent.paymentMethodTypes.toSet()
         val availableTypes = availablePaymentMethods.map { it.code }.toSet()
         return availableTypes.intersect(requestedTypes).isNotEmpty()
+    }
+
+    private fun reportLoadResult(
+        loaderResult: PaymentSheetLoader.Result,
+        isDecoupling: Boolean,
+    ) {
+        when (loaderResult) {
+            is PaymentSheetLoader.Result.Success -> {
+                eventReporter.onLoadSucceeded(isDecoupling = isDecoupling)
+            }
+            is PaymentSheetLoader.Result.Failure -> {
+                logger.error("Failure loading PaymentSheetState", loaderResult.throwable)
+                eventReporter.onLoadFailed(isDecoupling = isDecoupling)
+            }
+        }
     }
 }
 

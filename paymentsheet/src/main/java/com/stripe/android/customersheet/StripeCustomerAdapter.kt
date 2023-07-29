@@ -36,6 +36,9 @@ internal class StripeCustomerAdapter @Inject constructor(
     @Volatile
     private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey? = null
 
+    private val isGooglePayAvailable: Boolean
+        get() = CustomerSessionViewModel.component.configuration.googlePayEnabled
+
     override val canCreateSetupIntents: Boolean
         get() = setupIntentClientSecretProvider != null
 
@@ -114,7 +117,7 @@ internal class StripeCustomerAdapter @Inject constructor(
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
             val savedSelection = prefsRepository.getSavedSelection(
-                isGooglePayAvailable = false,
+                isGooglePayAvailable = isGooglePayAvailable,
                 isLinkAvailable = false,
             )
             savedSelection.toPaymentOption()

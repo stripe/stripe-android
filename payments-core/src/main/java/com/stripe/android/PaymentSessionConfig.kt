@@ -94,7 +94,7 @@ data class PaymentSessionConfig internal constructor(
         ): List<ShippingMethod>
     }
 
-    class Builder : ObjectBuilder<PaymentSessionConfig> {
+    class Builder {
         private var billingAddressFields: BillingAddressFields = DEFAULT_BILLING_ADDRESS_FIELDS
         private var shippingInfoRequired = true
         private var shippingMethodsRequired = true
@@ -278,7 +278,7 @@ data class PaymentSessionConfig internal constructor(
             this.shouldPrefetchCustomer = shouldPrefetchCustomer
         }
 
-        override fun build(): PaymentSessionConfig {
+        fun build(): PaymentSessionConfig {
             return PaymentSessionConfig(
                 hiddenShippingInfoFields = hiddenShippingInfoFields.orEmpty(),
                 optionalShippingInfoFields = optionalShippingInfoFields.orEmpty(),

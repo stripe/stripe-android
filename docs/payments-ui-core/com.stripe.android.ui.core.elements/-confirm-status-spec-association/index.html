@@ -1,9 +1,11 @@
 <!doctype html>
-<html>
+<html class="no-js">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>ConfirmStatusSpecAssociation</title>
-<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
     if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
@@ -18,10 +20,10 @@
     </script>
 <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
 <link href="../../../styles/style.css" rel="Stylesheet">
-<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
 <link href="../../../styles/main.css" rel="Stylesheet">
 <link href="../../../styles/prism.css" rel="Stylesheet">
 <link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
 <script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
 <script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
@@ -29,156 +31,168 @@
 <script type="text/javascript" src="../../../scripts/prism.js" async></script>
 <script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
 <body>
-<div class="navigation-wrapper" id="navigation-wrapper">
-    <div id="leftToggler"><span class="icon-toggler"></span></div>
-    <div class="library-name">
-<a href="../../../index.html">
-<span>stripe-android</span>            </a>    </div>
-    <div>
-    </div>
-    <div class="pull-right d-flex">
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+<a class="library-name--link" href="../../../index.html">
+                            stripe-android
+                    </a>            </div>
+            <div class="library-version">
+            </div>
+        </div>
         <div class="filter-section" id="filter-section">
                 <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":payments-ui-core:dokkaHtmlPartial/release">androidJvm</button>
         </div>
-        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
-        <div id="searchBar"></div>
     </div>
-</div>
-<div id="container">
-    <div id="leftColumn">
-        <div id="sideMenu"></div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
     </div>
-    <div id="main">
-<div class="main-content" id="content" pageids="payments-ui-core::com.stripe.android.ui.core.elements/ConfirmStatusSpecAssociation///PointingToDeclaration//1608493371">
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="payments-ui-core::com.stripe.android.ui.core.elements/ConfirmStatusSpecAssociation///PointingToDeclaration//1608493371">
   <div class="breadcrumbs"><a href="../../index.html">payments-ui-core</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.ui.core.elements</a><span class="delimiter">/</span><span class="current">ConfirmStatusSpecAssociation</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Confirm</span><wbr><span>Status</span><wbr><span>Spec</span><wbr><span><span>Association</span></span></h1>
     <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">ConfirmStatusSpecAssociation</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>requiresPaymentMethod<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>requiresConfirmation<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>requiresAction<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>processing<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>succeeded<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>ConfirmResponseStatusSpecs.FinishedSpec<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>canceled<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
   </div>
   <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
-      <h2 class="tabbedcontent">Constructors</h2>
-      <div class="table" data-togglable="Constructors"><a data-name="1261325425%2FConstructors%2F1608493371" anchor-label="ConfirmStatusSpecAssociation" id="1261325425%2FConstructors%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue TabbedContent">
-            <div class=""><span class="inline-flex">
-                <div><a href="-confirm-status-spec-association.html"><span>Confirm</span><wbr><span>Status</span><wbr><span>Spec</span><wbr><span><span>Association</span></span></a></div>
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="1261325425%2FConstructors%2F1608493371" anchor-label="ConfirmStatusSpecAssociation" id="1261325425%2FConstructors%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-confirm-status-spec-association.html"><span>Confirm</span><wbr><span>Status</span><wbr><span>Spec</span><wbr><span><span>Association</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1261325425%2FConstructors%2F1608493371"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requiresPaymentMethod<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">requiresConfirmation<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">requiresAction<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">processing<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">succeeded<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>ConfirmResponseStatusSpecs.FinishedSpec<span class="token punctuation">, </span></span><span class="parameter ">canceled<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requiresPaymentMethod<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">requiresConfirmation<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">requiresAction<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">processing<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">succeeded<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>ConfirmResponseStatusSpecs.FinishedSpec<span class="token punctuation">, </span></span><span class="parameter ">canceled<span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <h2 class="">Functions</h2>
-      <div class="table" data-togglable="Functions"><a data-name="596684492%2FFunctions%2F1608493371" anchor-label="getMap" id="596684492%2FFunctions%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="get-map.html"><span>get</span><wbr><span><span>Map</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="596684492%2FFunctions%2F1608493371"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-map.html"><span class="token function">getMap</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../../payments-core/com.stripe.android.model/-stripe-intent/-status/index.html">StripeIntent.Status</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">&gt;</span></div></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <h2 class="">Properties</h2>
-      <div class="table" data-togglable="Properties"><a data-name="1251462777%2FProperties%2F1608493371" anchor-label="canceled" id="1251462777%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="canceled.html"><span><span>canceled</span></span></a></div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="1251462777%2FProperties%2F1608493371" anchor-label="canceled" id="1251462777%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="canceled.html"><span><span>canceled</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1251462777%2FProperties%2F1608493371"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="1251462777%2FProperties%2F1608493371" anchor-label="canceled" id="1251462777%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="canceled.html">canceled</a><span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="canceled.html">canceled</a><span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="1000310783%2FProperties%2F1608493371" anchor-label="processing" id="1000310783%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="processing.html"><span><span>processing</span></span></a></div>
+          <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="processing.html"><span><span>processing</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1000310783%2FProperties%2F1608493371"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="1000310783%2FProperties%2F1608493371" anchor-label="processing" id="1000310783%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="processing.html">processing</a><span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="processing.html">processing</a><span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="-948680146%2FProperties%2F1608493371" anchor-label="requiresAction" id="-948680146%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="requires-action.html"><span>requires</span><wbr><span><span>Action</span></span></a></div>
+          <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="requires-action.html"><span>requires</span><wbr><span><span>Action</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-948680146%2FProperties%2F1608493371"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-948680146%2FProperties%2F1608493371" anchor-label="requiresAction" id="-948680146%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="requires-action.html">requiresAction</a><span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="requires-action.html">requiresAction</a><span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="-1173954609%2FProperties%2F1608493371" anchor-label="requiresConfirmation" id="-1173954609%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="requires-confirmation.html"><span>requires</span><wbr><span><span>Confirmation</span></span></a></div>
+          <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="requires-confirmation.html"><span>requires</span><wbr><span><span>Confirmation</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1173954609%2FProperties%2F1608493371"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-1173954609%2FProperties%2F1608493371" anchor-label="requiresConfirmation" id="-1173954609%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="requires-confirmation.html">requiresConfirmation</a><span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="requires-confirmation.html">requiresConfirmation</a><span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="4991311%2FProperties%2F1608493371" anchor-label="requiresPaymentMethod" id="4991311%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="requires-payment-method.html"><span>requires</span><wbr><span>Payment</span><wbr><span><span>Method</span></span></a></div>
+          <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="requires-payment-method.html"><span>requires</span><wbr><span>Payment</span><wbr><span><span>Method</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="4991311%2FProperties%2F1608493371"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="4991311%2FProperties%2F1608493371" anchor-label="requiresPaymentMethod" id="4991311%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="requires-payment-method.html">requiresPaymentMethod</a><span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="requires-payment-method.html">requiresPaymentMethod</a><span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1041647079%2FProperties%2F1608493371" anchor-label="succeeded" id="1041647079%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="succeeded.html"><span><span>succeeded</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1041647079%2FProperties%2F1608493371"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="succeeded.html">succeeded</a><span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span></div></div></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-<a data-name="1041647079%2FProperties%2F1608493371" anchor-label="succeeded" id="1041647079%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="succeeded.html"><span><span>succeeded</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1041647079%2FProperties%2F1608493371"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="1041647079%2FProperties%2F1608493371" anchor-label="succeeded" id="1041647079%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="succeeded.html">succeeded</a><span class="token operator">: </span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">?</span></div></div></div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="596684492%2FFunctions%2F1608493371" anchor-label="getMap" id="596684492%2FFunctions%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-map.html"><span>get</span><wbr><span><span>Map</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="596684492%2FFunctions%2F1608493371"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-map.html"><span class="token function">getMap</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../../payments-core/com.stripe.android.model/-stripe-intent/-status/index.html">StripeIntent.Status</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../-confirm-response-status-specs/index.html">ConfirmResponseStatusSpecs</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
               </div>
             </div>
           </div>
@@ -190,8 +204,9 @@
       <div class="footer">
         <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
       </div>
+            </div>
+        </div>
     </div>
-</div>
 </body>
 </html>
 

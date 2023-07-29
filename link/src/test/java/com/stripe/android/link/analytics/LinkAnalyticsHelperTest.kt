@@ -86,10 +86,6 @@ private open class FakeLinkEventsReporter : LinkEventsReporter {
         throw NotImplementedError()
     }
 
-    override fun onSignupFlowPresented() {
-        throw NotImplementedError()
-    }
-
     override fun onSignupStarted(isInline: Boolean) {
         throw NotImplementedError()
     }
@@ -103,26 +99,6 @@ private open class FakeLinkEventsReporter : LinkEventsReporter {
     }
 
     override fun onAccountLookupFailure() {
-        throw NotImplementedError()
-    }
-
-    override fun on2FAStart() {
-        throw NotImplementedError()
-    }
-
-    override fun on2FAStartFailure() {
-        throw NotImplementedError()
-    }
-
-    override fun on2FAComplete() {
-        throw NotImplementedError()
-    }
-
-    override fun on2FAFailure() {
-        throw NotImplementedError()
-    }
-
-    override fun on2FACancel() {
         throw NotImplementedError()
     }
 

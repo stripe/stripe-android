@@ -21,4 +21,5 @@ object AnalyticsFields {
     const val OS_VERSION = "os_version"
     const val PUBLISHABLE_KEY = "publishable_key"
     const val SESSION_ID = "session_id"
+    const val NETWORK_TYPE = "network_type"
 }

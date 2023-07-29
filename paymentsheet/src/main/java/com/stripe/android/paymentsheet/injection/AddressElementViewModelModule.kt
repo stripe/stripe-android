@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -44,7 +45,8 @@ internal class AddressElementViewModelModule {
         packageManager = context.packageManager,
         packageName = context.packageName.orEmpty(),
         packageInfo = context.packageInfo,
-        publishableKeyProvider = { publishableKey }
+        publishableKeyProvider = { publishableKey },
+        networkTypeProvider = NetworkTypeDetector(context)::invoke,
     )
 
     @Provides

@@ -35,6 +35,10 @@ workflows:
           inputs:
             - content: ./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources
   test:
+    envs:
+      - opts:
+          is_expand: false
+        NEEDS_ROBOLECTRIC: true
     before_run:
       - prepare_all
     after_run:
@@ -70,7 +74,7 @@ workflows:
             - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
           is_always_run: true
           run_if: .IsBuildFailed
-      - custom-test-results-export@0:
+      - custom-test-results-export@1:
           inputs:
             - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests
@@ -96,7 +100,7 @@ workflows:
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
             - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-      - custom-test-results-export@0:
+      - custom-test-results-export@1:
           inputs:
             - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests
@@ -121,7 +125,7 @@ workflows:
           inputs:
             - webhook_url: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
             - webhook_url_on_error: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
-      - custom-test-results-export@0:
+      - custom-test-results-export@1:
           inputs:
             - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests
@@ -168,6 +172,12 @@ workflows:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
       - git-clone@8: { }
       - cache-pull@2: { }
+      - script-runner@0:
+          # Maven doesn't like java 17, so running it before.
+          run_if: '{{getenv "NEEDS_ROBOLECTRIC" | ne ""}}'
+          title: Download robolectric dependencies
+          inputs:
+            - file_path: ./scripts/download_robolectric.sh
       - set-java-version@1:
           inputs:
             - set_java_version: 17

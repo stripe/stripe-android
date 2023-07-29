@@ -127,7 +127,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            viewModel.transitionToFirstScreen()
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
         }
     }
@@ -144,7 +143,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            viewModel.transitionToFirstScreen()
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddAnotherPaymentMethod)
 
             viewModel.handleBackPressed()
@@ -270,7 +268,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            viewModel.transitionToFirstScreen()
             assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
         }
     }
@@ -287,7 +284,6 @@ internal class PaymentOptionsViewModelTest {
             )
 
             viewModel.currentScreen.test {
-                viewModel.transitionToFirstScreen()
                 assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
             }
         }
@@ -496,6 +492,24 @@ internal class PaymentOptionsViewModelTest {
         }
     }
 
+    @Test
+    fun `Sends dismiss event when the user cancels the flow with non-deferred intent`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.onUserCancel()
+        verify(eventReporter).onDismiss(isDecoupling = false)
+    }
+
+    @Test
+    fun `Sends dismiss event when the user cancels the flow with deferred intent`() = runTest {
+        val deferredIntentArgs = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(stripeIntent = DEFERRED_PAYMENT_INTENT),
+        )
+
+        val viewModel = createViewModel(args = deferredIntentArgs)
+        viewModel.onUserCancel()
+        verify(eventReporter).onDismiss(isDecoupling = true)
+    }
+
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,
@@ -529,6 +543,7 @@ internal class PaymentOptionsViewModelTest {
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFactory.create()
+        private val DEFERRED_PAYMENT_INTENT = PAYMENT_INTENT.copy(clientSecret = null)
         private val SELECTION_SAVED_PAYMENT_METHOD = PaymentSelection.Saved(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )

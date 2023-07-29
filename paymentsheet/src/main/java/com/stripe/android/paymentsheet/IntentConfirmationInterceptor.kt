@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.R
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
@@ -229,12 +228,10 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private suspend fun createPaymentMethod(
         params: PaymentMethodCreateParams,
     ): Result<PaymentMethod> {
-        return runCatching {
-            stripeRepository.createPaymentMethod(
-                paymentMethodCreateParams = params,
-                options = requestOptions,
-            ) ?: throw APIException(message = "Couldn't parse response when creating payment method")
-        }
+        return stripeRepository.createPaymentMethod(
+            paymentMethodCreateParams = params,
+            options = requestOptions,
+        )
     }
 
     private suspend fun handleDeferredIntentCreationFromPaymentMethod(
@@ -295,12 +292,10 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private suspend fun retrieveStripeIntent(clientSecret: String): Result<StripeIntent> {
-        return runCatching {
-            stripeRepository.retrieveStripeIntent(
-                clientSecret = clientSecret,
-                options = requestOptions,
-            )
-        }
+        return stripeRepository.retrieveStripeIntent(
+            clientSecret = clientSecret,
+            options = requestOptions,
+        )
     }
 
     private fun createConfirmStep(

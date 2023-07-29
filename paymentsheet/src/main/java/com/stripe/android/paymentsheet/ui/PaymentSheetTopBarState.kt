@@ -50,7 +50,7 @@ internal object PaymentSheetTopBarStateFactory {
             icon = icon,
             contentDescription = contentDescription,
             showTestModeLabel = !isLiveMode,
-            showEditMenu = showOptionsMenu && !paymentMethods.isNullOrEmpty(),
+            showEditMenu = isEditing || showOptionsMenu && !paymentMethods.isNullOrEmpty(),
             editMenuLabel = editMenuLabel,
             isEnabled = !isProcessing,
         )
