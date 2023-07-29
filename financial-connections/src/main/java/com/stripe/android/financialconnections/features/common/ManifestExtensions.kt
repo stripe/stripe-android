@@ -26,7 +26,7 @@ internal fun FinancialConnectionsSessionManifest.getRedactedEmail(): String? =
     }
 
 internal fun SynchronizeSessionResponse.showManualEntryInErrors(): Boolean {
-    return manifest.allowManualEntry && visual.reducedManualEntryProminenceForErrors.not()
+    return manifest.allowManualEntry && visual.reducedManualEntryProminenceInErrors.not()
 }
 
 private const val EMAIL_LENGTH = 15

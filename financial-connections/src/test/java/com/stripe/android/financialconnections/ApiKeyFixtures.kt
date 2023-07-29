@@ -32,7 +32,7 @@ internal object ApiKeyFixtures {
 
     fun visual() = VisualUpdate(
         reducedBranding = false,
-        reducedManualEntryProminenceForErrors = false,
+        reducedManualEntryProminenceInErrors = false,
         merchantLogos = emptyList()
     )
 

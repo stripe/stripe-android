@@ -13,7 +13,7 @@ class ManifestExtensionsKtTest {
     fun `showManualEntryInErrors true when allowManualEntry true and reducedManualEntry false`() {
         val syncObj = syncResponse(
             sessionManifest().copy(allowManualEntry = true),
-            visual().copy(reducedManualEntryProminenceForErrors = false)
+            visual().copy(reducedManualEntryProminenceInErrors = false)
         )
         assertTrue(syncObj.showManualEntryInErrors())
     }
@@ -22,7 +22,7 @@ class ManifestExtensionsKtTest {
     fun `showManualEntryInErrors false when allowManualEntry true and reducedManualEntry true`() {
         val syncObj = syncResponse(
             sessionManifest().copy(allowManualEntry = true),
-            visual().copy(reducedManualEntryProminenceForErrors = true)
+            visual().copy(reducedManualEntryProminenceInErrors = true)
         )
         assertFalse(syncObj.showManualEntryInErrors())
     }
@@ -31,7 +31,7 @@ class ManifestExtensionsKtTest {
     fun `showManualEntryInErrors false when allowManualEntry false and reducedManualEntry false`() {
         val syncObj = syncResponse(
             sessionManifest().copy(allowManualEntry = false),
-            visual().copy(reducedManualEntryProminenceForErrors = false)
+            visual().copy(reducedManualEntryProminenceInErrors = false)
         )
         assertFalse(syncObj.showManualEntryInErrors())
     }
@@ -40,7 +40,7 @@ class ManifestExtensionsKtTest {
     fun `showManualEntryInErrors false when allowManualEntry false and reducedManualEntry true`() {
         val syncObj = syncResponse(
             sessionManifest().copy(allowManualEntry = false),
-            visual().copy(reducedManualEntryProminenceForErrors = true)
+            visual().copy(reducedManualEntryProminenceInErrors = true)
         )
         assertFalse(syncObj.showManualEntryInErrors())
     }
