@@ -327,4 +327,3 @@ internal fun EmailSection(
         }
     }
 }
-

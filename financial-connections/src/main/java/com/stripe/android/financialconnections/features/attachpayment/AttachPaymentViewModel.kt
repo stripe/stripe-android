@@ -13,7 +13,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAttachPaymentsSucceeded
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -34,7 +34,7 @@ internal class AttachPaymentViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedAccounts: GetCachedAccounts,
     private val navigationManager: NavigationManager,
-    private val getManifest: GetManifest,
+    private val getOrFetchSync: GetOrFetchSync,
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val goNext: GoNext,
     private val logger: Logger
@@ -43,14 +43,16 @@ internal class AttachPaymentViewModel @Inject constructor(
     init {
         logErrors()
         suspend {
-            val manifest = getManifest()
+            val sync = getOrFetchSync()
+            val manifest = requireNotNull(sync.manifest)
             AttachPaymentState.Payload(
                 businessName = manifest.businessName,
                 accountsCount = getCachedAccounts().size
             )
         }.execute { copy(payload = it) }
         suspend {
-            val manifest = getManifest()
+            val sync = getOrFetchSync()
+            val manifest = requireNotNull(sync.manifest)
             val consumerSession = getCachedConsumerSession()
             val authSession = requireNotNull(manifest.activeAuthSession)
             val activeInstitution = requireNotNull(manifest.activeInstitution)
@@ -59,7 +61,7 @@ internal class AttachPaymentViewModel @Inject constructor(
             val id = accounts.first().linkedAccountId
             val (result, millis) = measureTimeMillis {
                 pollAttachPaymentAccount(
-                    allowManualEntry = manifest.allowManualEntry,
+                    sync = sync,
                     activeInstitution = activeInstitution,
                     consumerSessionClientSecret = consumerSession?.clientSecret,
                     params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
