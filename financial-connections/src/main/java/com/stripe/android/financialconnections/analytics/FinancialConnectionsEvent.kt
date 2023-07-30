@@ -277,6 +277,16 @@ internal sealed class FinancialConnectionsEvent(
         includePrefix = false,
     )
 
+    class AuthSessionUrlReceived(url: String, status: String, authSessionId: String?) :
+        FinancialConnectionsEvent(
+            name = "auth_session.url_received",
+            params = mapOf(
+                "status" to status,
+                "url" to url,
+                "auth_session_id" to (authSessionId ?: "")
+            ).filterNotNullValues(),
+        )
+
     object ConsentAgree : FinancialConnectionsEvent(
         name = "click.agree",
         mapOf("pane" to Pane.CONSENT.value)
