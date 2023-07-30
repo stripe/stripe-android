@@ -6,10 +6,11 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
@@ -36,7 +37,7 @@ internal class PartnerAuthViewModelTest {
     val mvrxRule = MavericksTestRule(testDispatcher = UnconfinedTestDispatcher())
 
     private val applicationId = "com.sample.applicationid"
-    private val getManifest = mock<GetManifest>()
+    private val getSync = mock<GetOrFetchSync>()
     private val postAuthSessionEvent = mock<PostAuthSessionEvent>()
     private val pollAuthorizationSessionOAuthResults = mock<PollAuthorizationSessionOAuthResults>()
     private val completeAuthorizationSession = mock<CompleteAuthorizationSession>()
@@ -57,8 +58,11 @@ internal class PartnerAuthViewModelTest {
                 publicToken = "123456"
             )
 
-            whenever(getManifest())
-                .thenReturn(sessionManifest().copy(activeAuthSession = activeAuthSession))
+            whenever(getSync()).thenReturn(
+                syncResponse(
+                    sessionManifest().copy(activeAuthSession = activeAuthSession)
+                )
+            )
             whenever(pollAuthorizationSessionOAuthResults(activeAuthSession))
                 .thenReturn(mixedOAuthParams)
             whenever(completeAuthorizationSession(any(), any()))
@@ -79,8 +83,11 @@ internal class PartnerAuthViewModelTest {
         val activeAuthSession = authorizationSession()
         val viewModel = createViewModel()
 
-        whenever(getManifest())
-            .thenReturn(sessionManifest().copy(activeAuthSession = activeAuthSession))
+        whenever(getSync()).thenReturn(
+            syncResponse(
+                manifest = sessionManifest().copy(activeAuthSession = activeAuthSession)
+            )
+        )
 
         viewModel.onWebAuthFlowFinished(WebAuthFlowState.Success("stripe://success"))
 
@@ -99,8 +106,8 @@ internal class PartnerAuthViewModelTest {
                 activeAuthSession = activeAuthSession.copy(_isOAuth = true),
                 activeInstitution = activeInstitution
             )
-
-            whenever(getManifest()).thenReturn(manifest)
+            val syncResponse = syncResponse(manifest)
+            whenever(getSync()).thenReturn(syncResponse)
             whenever(createAuthorizationSession.invoke(any(), any())).thenReturn(activeAuthSession)
 
             val viewModel = createViewModel()
@@ -114,7 +121,7 @@ internal class PartnerAuthViewModelTest {
             // creates two sessions (initial and retry)
             verify(createAuthorizationSession, times(2)).invoke(
                 eq(activeInstitution),
-                eq(manifest.allowManualEntry)
+                eq(syncResponse)
             )
 
             // sends retry event
@@ -130,10 +137,12 @@ internal class PartnerAuthViewModelTest {
             val activeAuthSession = authorizationSession()
             val viewModel = createViewModel()
 
-            whenever(getManifest())
+            whenever(getSync())
                 .thenReturn(
-                    sessionManifest().copy(
-                        activeAuthSession = activeAuthSession.copy(_isOAuth = false)
+                    syncResponse(
+                        sessionManifest().copy(
+                            activeAuthSession = activeAuthSession.copy(_isOAuth = false)
+                        )
                     )
                 )
 
@@ -158,7 +167,7 @@ internal class PartnerAuthViewModelTest {
             cancelAuthorizationSession = cancelAuthorizationSession,
             eventTracker = mock(),
             postAuthSessionEvent = postAuthSessionEvent,
-            getManifest = getManifest,
+            getOrFetchSync = getSync,
             pollAuthorizationSessionOAuthResults = pollAuthorizationSessionOAuthResults,
             logger = mock(),
             initialState = initialState,
