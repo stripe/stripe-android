@@ -17,7 +17,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class PaymentSheetEventTest {
 
     @Test
-    fun `Init event with full config should return expected toString()`() {
+    fun `Init event with full config should return expected params`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -30,11 +30,45 @@ class PaymentSheetEventTest {
             "mc_complete_init_customer_googlepay"
         )
 
-        assertThat(event.params).containsEntry("is_decoupled", false)
+        val expectedConfig = mapOf(
+            "customer" to true,
+            "googlepay" to true,
+            "primary_button_color" to false,
+            "default_billing_details" to false,
+            "allows_delayed_payment_methods" to false,
+            "appearance" to mapOf(
+                "colorsLight" to false,
+                "colorsDark" to false,
+                "corner_radius" to false,
+                "border_width" to false,
+                "font" to false,
+                "size_scale_factor" to false,
+                "primary_button" to mapOf(
+                    "colorsLight" to false,
+                    "colorsDark" to false,
+                    "corner_radius" to false,
+                    "border_width" to false,
+                    "font" to false,
+                ),
+                "usage" to false,
+            ),
+            "billing_details_collection_configuration" to mapOf(
+                "attach_defaults" to false,
+                "name" to "Automatic",
+                "email" to "Automatic",
+                "phone" to "Automatic",
+                "address" to "Automatic",
+            ),
+        )
+
+        assertThat(event.params).run {
+            containsEntry("is_decoupled", false)
+            containsEntry("mpe_config", expectedConfig)
+        }
     }
 
     @Test
-    fun `Init event with minimum config should return expected toString()`() {
+    fun `Init event with minimum config should return expected params`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
@@ -47,7 +81,41 @@ class PaymentSheetEventTest {
             "mc_complete_init_default"
         )
 
-        assertThat(event.params).containsEntry("is_decoupled", false)
+        val expectedConfig = mapOf(
+            "customer" to false,
+            "googlepay" to false,
+            "primary_button_color" to false,
+            "default_billing_details" to false,
+            "allows_delayed_payment_methods" to false,
+            "appearance" to mapOf(
+                "colorsLight" to false,
+                "colorsDark" to false,
+                "corner_radius" to false,
+                "border_width" to false,
+                "font" to false,
+                "size_scale_factor" to false,
+                "primary_button" to mapOf(
+                    "colorsLight" to false,
+                    "colorsDark" to false,
+                    "corner_radius" to false,
+                    "border_width" to false,
+                    "font" to false,
+                ),
+                "usage" to false,
+            ),
+            "billing_details_collection_configuration" to mapOf(
+                "attach_defaults" to false,
+                "name" to "Automatic",
+                "email" to "Automatic",
+                "phone" to "Automatic",
+                "address" to "Automatic",
+            ),
+        )
+
+        assertThat(event.params).run {
+            containsEntry("is_decoupled", false)
+            containsEntry("mpe_config", expectedConfig)
+        }
     }
 
     @Test
