@@ -23,14 +23,14 @@ class PaymentSheetEventTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupled = false,
         )
+
         assertThat(
             event.eventName
         ).isEqualTo(
             "mc_complete_init_customer_googlepay"
         )
-        assertThat(
-            event.additionalParams
-        ).containsEntry("locale", "en_US")
+
+        assertThat(event.params).containsEntry("is_decoupled", false)
     }
 
     @Test
@@ -40,14 +40,14 @@ class PaymentSheetEventTest {
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
             isDecoupled = false,
         )
+
         assertThat(
             event.eventName
         ).isEqualTo(
             "mc_complete_init_default"
         )
-        assertThat(
-            event.additionalParams
-        ).containsEntry("locale", "en_US")
+
+        assertThat(event.params).containsEntry("is_decoupled", false)
     }
 
     @Test
@@ -71,10 +71,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_newpm_success"
         )
         assertThat(
-            newPMEvent.additionalParams
+            newPMEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -99,10 +98,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_savedpm_success"
         )
         assertThat(
-            savedPMEvent.additionalParams
+            savedPMEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -127,10 +125,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_googlepay_success"
         )
         assertThat(
-            googlePayEvent.additionalParams
+            googlePayEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -155,10 +152,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_link_success"
         )
         assertThat(
-            linkEvent.additionalParams
+            linkEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -189,10 +185,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_link_success"
         )
         assertThat(
-            inlineLinkEvent.additionalParams
+            inlineLinkEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -221,10 +216,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_newpm_failure"
         )
         assertThat(
-            newPMEvent.additionalParams
+            newPMEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -249,10 +243,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_savedpm_failure"
         )
         assertThat(
-            savedPMEvent.additionalParams
+            savedPMEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -277,10 +270,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_googlepay_failure"
         )
         assertThat(
-            googlePayEvent.additionalParams
+            googlePayEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -305,10 +297,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_link_failure"
         )
         assertThat(
-            linkEvent.additionalParams
+            linkEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -339,10 +330,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_link_failure"
         )
         assertThat(
-            inlineLinkEvent.additionalParams
+            inlineLinkEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -364,10 +354,9 @@ class PaymentSheetEventTest {
             "mc_custom_paymentoption_googlepay_select"
         )
         assertThat(
-            event.additionalParams
+            event.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "is_decoupled" to false,
             )
@@ -414,11 +403,10 @@ class PaymentSheetEventTest {
                 mode = EventReporter.Mode.Complete,
                 configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
                 isDecoupled = false,
-            ).additionalParams
+            ).params
         ).isEqualTo(
             mapOf(
                 "mpe_config" to expectedConfigMap,
-                "locale" to "en_US",
                 "is_decoupled" to false,
             )
         )
@@ -464,11 +452,10 @@ class PaymentSheetEventTest {
                 mode = EventReporter.Mode.Complete,
                 configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING,
                 isDecoupled = false,
-            ).additionalParams
+            ).params
         ).isEqualTo(
             mapOf(
                 "mpe_config" to expectedConfigMap,
-                "locale" to "en_US",
                 "is_decoupled" to false,
             )
         )

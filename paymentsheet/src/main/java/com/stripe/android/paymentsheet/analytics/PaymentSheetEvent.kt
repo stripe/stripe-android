@@ -6,7 +6,6 @@ import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.StripeThemeDefaults
-import java.util.Locale
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
@@ -249,7 +248,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         isDecoupled: Boolean,
     ): Map<String, Any?> = mapOf(
         FIELD_IS_DECOUPLED to isDecoupled,
-        FIELD_LOCALE to Locale.getDefault().toString(),
     )
 
     internal companion object {
@@ -293,7 +291,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_COLLECT_PHONE = "phone"
         const val FIELD_COLLECT_ADDRESS = "address"
         const val FIELD_DURATION = "duration"
-        const val FIELD_LOCALE = "locale"
         const val FIELD_LINK_ENABLED = "link_enabled"
         const val FIELD_CURRENCY = "currency"
     }
