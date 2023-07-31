@@ -61,6 +61,10 @@ internal fun AddPaymentMethod(
         arguments.showCheckbox,
     )
 
+    LaunchedEffect(selectedPaymentMethodCode) {
+        sheetViewModel.reportLpmSelected(selectedPaymentMethodCode)
+    }
+
     LaunchedEffect(arguments) {
         showCheckboxFlow.emit(arguments.showCheckbox)
     }

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.analytics
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -100,6 +101,20 @@ internal class DefaultEventReporter @Inject internal constructor(
                 linkEnabled = linkEnabled,
                 currency = currency,
                 isDecoupled = isDecoupling,
+            )
+        )
+    }
+
+    override fun onSelectPaymentMethod(
+        code: PaymentMethodCode,
+        currency: String?,
+        isDecoupling: Boolean
+    ) {
+        fireEvent(
+            PaymentSheetEvent.SelectPaymentMethod(
+                code = code,
+                isDecoupled = isDecoupling,
+                currency = currency,
             )
         )
     }

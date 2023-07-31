@@ -179,6 +179,18 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class SelectPaymentMethod(
+        code: String,
+        currency: String?,
+        override val isDecoupled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_carousel_payment_method_tapped"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_CURRENCY to currency,
+            FIELD_SELECTED_LPM to code,
+        )
+    }
+
     class SelectPaymentOption(
         mode: EventReporter.Mode,
         paymentSelection: PaymentSelection?,
@@ -293,6 +305,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_DURATION = "duration"
         const val FIELD_LINK_ENABLED = "link_enabled"
         const val FIELD_CURRENCY = "currency"
+        const val FIELD_SELECTED_LPM = "selected_lpm"
     }
 }
 
