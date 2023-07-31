@@ -149,7 +149,7 @@ class DefaultAnalyticsRequestExecutor(
         const val FIELD_DATA = "data"
         const val FIELD_EVENT = "event"
 
-        val workerTag: String = DefaultAnalyticsRequestExecutor::class.java.name
+        val workerTag: String = SendAnalyticsEventWorker::class.java.name
     }
 }
 

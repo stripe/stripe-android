@@ -70,7 +70,7 @@ internal class SendAnalyticsEventWorkerTest {
         val data = if (request != null) {
             SendAnalyticsEventWorker.createInputData(request)
         } else {
-            Data.Builder().build()
+            Data.EMPTY
         }
 
         return TestListenableWorkerBuilder<SendAnalyticsEventWorker>(
