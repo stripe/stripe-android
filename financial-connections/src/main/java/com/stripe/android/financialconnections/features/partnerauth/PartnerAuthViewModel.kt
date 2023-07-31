@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Loaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
@@ -132,8 +133,12 @@ internal class PartnerAuthViewModel @Inject constructor(
         onAsync(
             PartnerAuthState::payload,
             onFail = {
-                logger.error("Error fetching payload / posting AuthSession", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(Pane.PARTNER_AUTH, it))
+                eventTracker.logError(
+                    extraMessage = "Error fetching payload / posting AuthSession",
+                    error = it,
+                    logger = logger,
+                    pane = Pane.PARTNER_AUTH
+                )
             },
             onSuccess = { eventTracker.track(PaneLoaded(Pane.PARTNER_AUTH)) }
         )
@@ -156,8 +161,12 @@ internal class PartnerAuthViewModel @Inject constructor(
                     ?.let { setState { copy(viewEffect = OpenPartnerAuth(it)) } }
             }
             .onFailure {
-                eventTracker.track(FinancialConnectionsEvent.Error(Pane.PARTNER_AUTH, it))
-                logger.error("failed retrieving active session from cache", it)
+                eventTracker.logError(
+                    extraMessage = "failed retrieving active session from cache",
+                    error = it,
+                    logger = logger,
+                    pane = Pane.PARTNER_AUTH
+                )
                 setState { copy(authenticationStatus = Fail(it)) }
             }
     }
@@ -172,24 +181,48 @@ internal class PartnerAuthViewModel @Inject constructor(
         logger.debug("Web AuthFlow status received $webStatus")
         viewModelScope.launch {
             when (webStatus) {
-                WebAuthFlowState.Canceled -> onAuthCancelled()
-                is WebAuthFlowState.Failed -> onAuthFailed(webStatus.message, webStatus.reason)
-                WebAuthFlowState.InProgress -> setState { copy(authenticationStatus = Loading()) }
-                is WebAuthFlowState.Success -> completeAuthorizationSession()
+                is WebAuthFlowState.Canceled -> {
+                    onAuthCancelled(webStatus.url)
+                }
+
+                is WebAuthFlowState.Failed -> {
+                    onAuthFailed(webStatus.url, webStatus.message, webStatus.reason)
+                }
+
+                WebAuthFlowState.InProgress -> {
+                    setState { copy(authenticationStatus = Loading()) }
+                }
+
+                is WebAuthFlowState.Success -> {
+                    completeAuthorizationSession(webStatus.url)
+                }
+
                 WebAuthFlowState.Uninitialized -> {}
             }
         }
     }
 
     private suspend fun onAuthFailed(
+        url: String,
         message: String,
         reason: String?
     ) {
         val error = WebAuthFlowFailedException(message, reason)
         kotlin.runCatching {
-            logger.debug("Auth failed, cancelling AuthSession")
             val authSession = getOrFetchSync().manifest.activeAuthSession
-            logger.error("Auth failed, cancelling AuthSession", error)
+            eventTracker.track(
+                FinancialConnectionsEvent.AuthSessionUrlReceived(
+                    url = url,
+                    authSessionId = authSession?.id,
+                    status = "failed"
+                )
+            )
+            eventTracker.logError(
+                extraMessage = "Auth failed, cancelling AuthSession",
+                error = error,
+                logger = logger,
+                pane = Pane.PARTNER_AUTH
+            )
             when {
                 authSession != null -> {
                     postAuthSessionEvent(authSession.id, AuthSessionEvent.Failure(Date(), error))
@@ -200,15 +233,28 @@ internal class PartnerAuthViewModel @Inject constructor(
             }
             setState { copy(authenticationStatus = Fail(error)) }
         }.onFailure {
-            logger.error("failed cancelling session after failed web flow", it)
+            eventTracker.logError(
+                extraMessage = "failed cancelling session after failed web flow",
+                error = it,
+                logger = logger,
+                pane = Pane.PARTNER_AUTH
+            )
         }
     }
 
-    private suspend fun onAuthCancelled() {
+    private suspend fun onAuthCancelled(url: String?) {
         kotlin.runCatching {
             logger.debug("Auth cancelled, cancelling AuthSession")
             setState { copy(authenticationStatus = Loading()) }
-            val authSession = requireNotNull(getOrFetchSync().manifest.activeAuthSession)
+            val authSession = getOrFetchSync().manifest.activeAuthSession
+            eventTracker.track(
+                FinancialConnectionsEvent.AuthSessionUrlReceived(
+                    url = url ?: "none",
+                    authSessionId = authSession?.id,
+                    status = "cancelled"
+                )
+            )
+            requireNotNull(authSession)
             val result = cancelAuthorizationSession(authSession.id)
             if (authSession.isOAuth) {
                 // For OAuth institutions, create a new session and navigate to its nextPane (prepane).
@@ -225,15 +271,28 @@ internal class PartnerAuthViewModel @Inject constructor(
                 goNext(result.nextPane)
             }
         }.onFailure {
-            logger.error("failed cancelling session after cancelled web flow", it)
+            eventTracker.logError(
+                "failed cancelling session after cancelled web flow. url: $url",
+                it,
+                logger,
+                Pane.PARTNER_AUTH
+            )
             setState { copy(authenticationStatus = Fail(it)) }
         }
     }
 
-    private suspend fun completeAuthorizationSession() {
+    private suspend fun completeAuthorizationSession(url: String) {
         kotlin.runCatching {
             setState { copy(authenticationStatus = Loading()) }
-            val authSession = requireNotNull(getOrFetchSync().manifest.activeAuthSession)
+            val authSession = getOrFetchSync().manifest.activeAuthSession
+            eventTracker.track(
+                FinancialConnectionsEvent.AuthSessionUrlReceived(
+                    url = url,
+                    authSessionId = authSession?.id,
+                    status = "success"
+                )
+            )
+            requireNotNull(authSession)
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
             if (authSession.isOAuth) {
                 logger.debug("Web AuthFlow completed! waiting for oauth results")
@@ -249,7 +308,12 @@ internal class PartnerAuthViewModel @Inject constructor(
                 goNext(Pane.ACCOUNT_PICKER)
             }
         }.onFailure {
-            logger.error("failed authorizing session", it)
+            eventTracker.logError(
+                extraMessage = "failed authorizing session",
+                error = it,
+                logger = logger,
+                pane = Pane.PARTNER_AUTH
+            )
             setState { copy(authenticationStatus = Fail(it)) }
         }
     }

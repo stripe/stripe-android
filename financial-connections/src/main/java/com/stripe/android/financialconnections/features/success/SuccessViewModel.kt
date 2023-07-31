@@ -106,6 +106,7 @@ internal class SuccessViewModel @Inject constructor(
                 eventTracker.track(
                     Complete(
                         connectedAccounts = it.accounts.data.count(),
+                        exceptionExtraMessage = null,
                         exception = null
                     )
                 )
@@ -123,6 +124,7 @@ internal class SuccessViewModel @Inject constructor(
                 eventTracker.track(
                     Complete(
                         connectedAccounts = null,
+                        exceptionExtraMessage = "Error completing session",
                         exception = error
                     )
                 )

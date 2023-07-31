@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.analytics
 
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.exception.FinancialConnectionsError
+import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 
@@ -54,6 +55,7 @@ internal sealed class FinancialConnectionsEvent(
 
     class Complete(
         exception: Throwable?,
+        exceptionExtraMessage: String?,
         connectedAccounts: Int?
     ) : FinancialConnectionsEvent(
         name = "complete",
@@ -61,7 +63,7 @@ internal sealed class FinancialConnectionsEvent(
             "num_linked_accounts" to connectedAccounts?.toString(),
             "type" to if (exception == null) "object" else "error"
         )
-            .plus(exception?.toEventParams() ?: emptyMap())
+            .plus(exception?.toEventParams(exceptionExtraMessage) ?: emptyMap())
             .filterNotNullValues()
     )
 
@@ -244,16 +246,19 @@ internal sealed class FinancialConnectionsEvent(
 
     class Error(
         pane: Pane,
-        exception: Throwable
+        exception: Throwable,
+        extraMessage: String? = null,
     ) : FinancialConnectionsEvent(
         name = when (exception) {
             is FinancialConnectionsError,
+            is WebAuthFlowFailedException,
             is OTPError -> "error.expected"
+
             else -> "error.unexpected"
         },
         params = (
             mapOf("pane" to pane.value)
-                .plus(exception.toEventParams())
+                .plus(exception.toEventParams(extraMessage))
                 .filterNotNullValues()
             )
     )
@@ -271,6 +276,16 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues(),
         includePrefix = false,
     )
+
+    class AuthSessionUrlReceived(url: String, status: String, authSessionId: String?) :
+        FinancialConnectionsEvent(
+            name = "auth_session.url_received",
+            params = mapOf(
+                "status" to status,
+                "url" to url,
+                "auth_session_id" to (authSessionId ?: "")
+            ).filterNotNullValues(),
+        )
 
     object ConsentAgree : FinancialConnectionsEvent(
         name = "click.agree",

@@ -34,7 +34,7 @@ import org.mockito.kotlin.whenever
 internal class PartnerAuthViewModelTest {
 
     @get:Rule
-    val mvrxRule = MavericksTestRule(testDispatcher = UnconfinedTestDispatcher())
+    val mavericksTestRule = MavericksTestRule(testDispatcher = UnconfinedTestDispatcher())
 
     private val applicationId = "com.sample.applicationid"
     private val getSync = mock<GetOrFetchSync>()
@@ -111,7 +111,7 @@ internal class PartnerAuthViewModelTest {
             whenever(createAuthorizationSession.invoke(any(), any())).thenReturn(activeAuthSession)
 
             val viewModel = createViewModel()
-            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled)
+            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled(activeAuthSession.url))
 
             verify(cancelAuthorizationSession).invoke(eq(activeAuthSession.id))
 
@@ -146,7 +146,7 @@ internal class PartnerAuthViewModelTest {
                     )
                 )
 
-            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled)
+            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled(activeAuthSession.url))
 
             verify(cancelAuthorizationSession).invoke(
                 eq(activeAuthSession.id),

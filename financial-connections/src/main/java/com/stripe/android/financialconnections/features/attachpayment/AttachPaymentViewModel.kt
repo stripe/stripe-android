@@ -8,9 +8,9 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAttachPaymentsSucceeded
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
@@ -76,8 +76,12 @@ internal class AttachPaymentViewModel @Inject constructor(
         onAsync(
             AttachPaymentState::payload,
             onFail = {
-                logger.error("Error retrieving accounts to attach payment", it)
-                eventTracker.track(Error(Pane.ATTACH_LINKED_PAYMENT_ACCOUNT, it))
+                eventTracker.logError(
+                    logger = logger,
+                    pane = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT,
+                    extraMessage = "Error retrieving accounts to attach payment",
+                    error = it
+                )
             },
             onSuccess = {
                 eventTracker.track(PaneLoaded(Pane.ATTACH_LINKED_PAYMENT_ACCOUNT))
@@ -86,12 +90,16 @@ internal class AttachPaymentViewModel @Inject constructor(
         onAsync(
             AttachPaymentState::linkPaymentAccount,
             onSuccess = {
-                saveToLinkWithStripeSucceeded.set(true)
+                runCatching { saveToLinkWithStripeSucceeded.set(true) }
             },
             onFail = {
-                saveToLinkWithStripeSucceeded.set(false)
-                eventTracker.track(Error(Pane.ATTACH_LINKED_PAYMENT_ACCOUNT, it))
-                logger.error("Error Attaching payment account", it)
+                runCatching { saveToLinkWithStripeSucceeded.set(false) }
+                eventTracker.logError(
+                    logger = logger,
+                    pane = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT,
+                    extraMessage = "Error Attaching payment account",
+                    error = it
+                )
             }
         )
     }
