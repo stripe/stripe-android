@@ -17,7 +17,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -28,8 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
-import com.stripe.android.customersheet.rememberCustomerSheet
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.utils.rememberDrawablePainter
@@ -45,18 +42,11 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
 
         setContent {
             PaymentSheetExampleTheme {
-                val customerSheet = rememberCustomerSheet(
-                    customerAdapter = viewModel.customerAdapter,
-                    configuration = buildConfig(),
-                    callback = viewModel::onCustomerSheetResult,
-                )
+                val customerSheet: CustomerSheet = TODO()
 
                 val viewState by viewModel.state.collectAsState()
 
-                LaunchedEffect(Unit) {
-                    val result = customerSheet.retrievePaymentOptionSelection()
-                    viewModel.onCustomerSheetResult(result)
-                }
+                // TODO retrieve the saved payment selection from CustomerSheet
 
                 Column(
                     modifier = Modifier
@@ -74,7 +64,7 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
                             CustomerPaymentMethods(
                                 state = state,
                                 onUpdateDefaultPaymentMethod = {
-                                    customerSheet.present()
+                                    // TODO present customer sheet
                                 }
                             )
                         }
@@ -95,21 +85,6 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    private fun buildConfig(): CustomerSheet.Configuration {
-        return CustomerSheet.Configuration.Builder()
-            .defaultBillingDetails(
-                PaymentSheet.BillingDetails(
-                    name = "CustomerSheet Testing"
-                )
-            ).billingDetailsCollectionConfiguration(
-                PaymentSheet.BillingDetailsCollectionConfiguration(
-                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
-                )
-            )
-            .googlePayEnabled(true)
-            .build()
     }
 }
 

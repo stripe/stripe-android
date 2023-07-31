@@ -35,42 +35,7 @@ class CustomerSheetExampleViewModel(
     )
     val state: StateFlow<CustomerSheetExampleViewState> = _state
 
-    internal val customerAdapter: CustomerAdapter = CustomerAdapter.create(
-        context = getApplication(),
-        customerEphemeralKeyProvider = {
-            fetchCustomerEphemeralKey().fold(
-                success = {
-                    CustomerAdapter.Result.success(
-                        CustomerEphemeralKey.create(
-                            customerId = it.customerId,
-                            ephemeralKey = it.customerEphemeralKeySecret
-                        )
-                    )
-                },
-                failure = {
-                    CustomerAdapter.Result.failure(
-                        it.exception,
-                        "We could\'nt retrieve your information, please try again."
-                    )
-                }
-            )
-        },
-        setupIntentClientSecretProvider = { customerId ->
-            createSetupIntent(customerId).fold(
-                success = {
-                    CustomerAdapter.Result.success(
-                        it.clientSecret
-                    )
-                },
-                failure = {
-                    CustomerAdapter.Result.failure(
-                        it.exception,
-                        "We could\'nt retrieve your information, please try again."
-                    )
-                }
-            )
-        },
-    )
+    internal val customerAdapter: CustomerAdapter = TODO()
 
     init {
         viewModelScope.launch {
@@ -143,32 +108,15 @@ class CustomerSheetExampleViewModel(
     }
 
     fun onCustomerSheetResult(result: CustomerSheetResult) {
-        when (result) {
-            is CustomerSheetResult.Canceled -> {
-                updateDataViewState {
-                    it.copy(
-                        selection = result.selection,
-                        errorMessage = null,
-                    )
-                }
+        // TODO handle the result
+        /* use this helper method to update the view state:
+            updateDataViewState {
+                it.copy(
+                    selection = TODO,
+                    errorMessage = TODO,
+                )
             }
-            is CustomerSheetResult.Selected -> {
-                updateDataViewState {
-                    it.copy(
-                        selection = result.selection,
-                        errorMessage = null,
-                    )
-                }
-            }
-            is CustomerSheetResult.Error -> {
-                updateDataViewState {
-                    it.copy(
-                        selection = null,
-                        errorMessage = result.exception.message,
-                    )
-                }
-            }
-        }
+         */
     }
 
     private fun updateDataViewState(
