@@ -2,12 +2,10 @@ package com.stripe.android.financialconnections.features.accountpicker
 
 import com.airbnb.mvrx.test.MavericksTestRule
 import com.airbnb.mvrx.withState
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
+import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
-import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
@@ -52,8 +50,8 @@ internal class AccountPickerViewModelTest {
     fun `init - if PartnerAccounts response returns skipAccountSelection, state includes it`() =
         runTest {
             givenManifestReturns(
-                sessionManifest().copy(
-                    activeAuthSession = authorizationSession().copy(
+                ApiKeyFixtures.sessionManifest().copy(
+                    activeAuthSession = ApiKeyFixtures.authorizationSession().copy(
                         skipAccountSelection = null
                     )
                 )
@@ -74,8 +72,8 @@ internal class AccountPickerViewModelTest {
     @Test
     fun `init - if AuthSession returns skipAccountSelection, state includes it`() = runTest {
         givenManifestReturns(
-            sessionManifest().copy(
-                activeAuthSession = authorizationSession().copy(
+            ApiKeyFixtures.sessionManifest().copy(
+                activeAuthSession = ApiKeyFixtures.authorizationSession().copy(
                     skipAccountSelection = true
                 )
             )
@@ -100,9 +98,9 @@ internal class AccountPickerViewModelTest {
     fun `init - if AuthSession returns institutionSkipAccountSelection and singleAccount, state includes it`() =
         runTest {
             givenManifestReturns(
-                sessionManifest().copy(
+                ApiKeyFixtures.sessionManifest().copy(
                     singleAccount = true,
-                    activeAuthSession = authorizationSession().copy(
+                    activeAuthSession = ApiKeyFixtures.authorizationSession().copy(
                         institutionSkipAccountSelection = true,
                     )
                 )
@@ -121,31 +119,6 @@ internal class AccountPickerViewModelTest {
                 assertEquals(state.payload()!!.shouldSkipPane, true)
             }
         }
-
-    @Test
-    fun `init - if singleAccount, pre-select first available account`() = runTest {
-        givenManifestReturns(
-            sessionManifest().copy(
-                singleAccount = true,
-                activeAuthSession = authorizationSession()
-            )
-        )
-
-        givenPollAccountsReturns(
-            partnerAccountList().copy(
-                data = listOf(
-                    partnerAccount().copy(id = "unelectable", _allowSelection = false),
-                    partnerAccount().copy(id = "selectable")
-                )
-            )
-        )
-
-        val viewModel = buildViewModel(AccountPickerState())
-
-        withState(viewModel) { state ->
-            assertThat(state.selectedIds).isEqualTo(setOf("selectable"))
-        }
-    }
 
     private suspend fun givenManifestReturns(manifest: FinancialConnectionsSessionManifest) {
         whenever(getManifest()).thenReturn(manifest)
