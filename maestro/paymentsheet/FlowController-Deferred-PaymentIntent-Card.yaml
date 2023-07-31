@@ -1,6 +1,7 @@
 appId: com.stripe.android.paymentsheet.example
 ---
 - launchApp
+- startRecording: /tmp/test_results/flowcontroller-deferred-paymentintent-card
 # Android specific: Navigate to example
 - tapOn: "FlowController with server-side confirmation"
 - waitForAnimationToEnd:
@@ -18,7 +19,9 @@ appId: com.stripe.android.paymentsheet.example
     env:
         CARD_NUMBER: 4242424242424242
 - scroll
-- tapOn: "Continue"
+- tapOn:
+    id: "com.stripe.android.paymentsheet.example:id/primary_button"
 - tapOn: "Buy"
 - assertVisible: ".*Success.*"
 - tapOn: "Finish"
+- stopRecording

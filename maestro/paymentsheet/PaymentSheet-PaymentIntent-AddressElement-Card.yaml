@@ -1,6 +1,7 @@
 appId: com.stripe.android.paymentsheet.example
 ---
 - launchApp
+- startRecording: /tmp/test_results/paymentsheet-paymentintent-addresselement-card
 - scroll
 # Android specific: Navigate to example
 - waitForAnimationToEnd:
@@ -31,5 +32,7 @@ appId: com.stripe.android.paymentsheet.example
     env:
         CARD_NUMBER: 4242424242424242
 - scroll
-- tapOn: "Pay.*"
+- tapOn:
+    id: "com.stripe.android.paymentsheet.example:id/primary_button"
 - assertVisible: ".*Success.*"
+- stopRecording
