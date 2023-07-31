@@ -59,7 +59,7 @@ class DefaultAnalyticsRequestExecutorTest {
 
     private suspend fun findWork(): WorkInfo? {
         val workManager = WorkManager.getInstance(context)
-        val tag = DefaultAnalyticsRequestExecutor.workerTag
+        val tag = DefaultAnalyticsRequestExecutor.makeWorkerTag()
 
         return withContext(Dispatchers.IO) {
             workManager.getWorkInfosByTag(tag).get().singleOrNull()

@@ -95,7 +95,7 @@ class DefaultAnalyticsRequestExecutor(
             .build()
 
         val workRequest = OneTimeWorkRequestBuilder<SendAnalyticsEventWorker>()
-            .addTag(workerTag)
+            .addTag(makeWorkerTag())
             .setInputData(inputData)
             .setConstraints(constraints)
             .build()
@@ -149,7 +149,9 @@ class DefaultAnalyticsRequestExecutor(
         const val FIELD_DATA = "data"
         const val FIELD_EVENT = "event"
 
-        val workerTag: String = SendAnalyticsEventWorker::class.java.name
+        fun makeWorkerTag(): String {
+            return SendAnalyticsEventWorker::class.java.name
+        }
     }
 }
 
