@@ -3,32 +3,35 @@ package com.stripe.android.link.analytics
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
 
 internal class DefaultLinkEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @IOContext private val workContext: CoroutineContext,
-    private val logger: Logger
+    private val logger: Logger,
+    private val durationProvider: DurationProvider,
 ) : LinkEventsReporter {
-    private var signupStartMillis: Long? = null
 
     override fun onInlineSignupCheckboxChecked() {
         fireEvent(LinkEvent.SignUpCheckboxChecked)
     }
 
     override fun onSignupStarted(isInline: Boolean) {
-        signupStartMillis = System.currentTimeMillis()
+        durationProvider.start(DurationProvider.Key.LinkSignup)
         fireEvent(LinkEvent.SignUpStart)
     }
 
     override fun onSignupCompleted(isInline: Boolean) {
-        fireEvent(LinkEvent.SignUpComplete, durationInSecondsFromStart(signupStartMillis))
-        signupStartMillis = null
+        val duration = durationProvider.end(DurationProvider.Key.LinkSignup)
+        fireEvent(LinkEvent.SignUpComplete, durationInSecondsFromStart(duration))
     }
 
     override fun onSignupFailure(isInline: Boolean) {
@@ -64,10 +67,10 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.PopupSkipped)
     }
 
-    private fun durationInSecondsFromStart(start: Long?) = start?.let {
-        System.currentTimeMillis() - it
-    }?.takeIf { it > 0 }?.let {
-        mapOf("duration" to it / 1000f)
+    private fun durationInSecondsFromStart(duration: Duration?): Map<String, Float>? {
+        return duration?.let {
+            mapOf("duration" to it.toDouble(DurationUnit.SECONDS).toFloat())
+        }
     }
 
     private fun fireEvent(

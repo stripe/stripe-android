@@ -1,6 +1,6 @@
 package com.stripe.android.utils
 
-import com.stripe.android.paymentsheet.analytics.DurationProvider
+import com.stripe.android.core.utils.DurationProvider
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
