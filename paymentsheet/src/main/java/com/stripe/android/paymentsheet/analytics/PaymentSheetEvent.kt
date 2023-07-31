@@ -11,43 +11,44 @@ import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
 internal sealed class PaymentSheetEvent : AnalyticsEvent {
-    abstract val additionalParams: Map<String, Any?>
+
+    val params: Map<String, Any?>
+        get() = standardParams(isDecoupled) + additionalParams
+
+    protected abstract val isDecoupled: Boolean
+    protected abstract val additionalParams: Map<String, Any?>
 
     class LoadStarted(
-        isDecoupled: Boolean,
+        override val isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_started"
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_IS_DECOUPLED to isDecoupled,
-        )
+        override val additionalParams: Map<String, Any?> = emptyMap()
     }
 
     class LoadSucceeded(
         duration: Duration?,
-        isDecoupled: Boolean,
+        override val isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_DURATION to duration?.asSeconds,
-            FIELD_IS_DECOUPLED to isDecoupled,
         )
     }
 
     class LoadFailed(
         duration: Duration?,
-        isDecoupled: Boolean,
+        override val isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_failed"
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_DURATION to duration?.asSeconds,
-            FIELD_IS_DECOUPLED to isDecoupled,
         )
     }
 
     class Init(
         private val mode: EventReporter.Mode,
         private val configuration: PaymentSheet.Configuration?,
-        private val isDecoupled: Boolean,
+        override val isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
 
         override val eventName: String
@@ -142,33 +143,27 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
-                    FIELD_IS_DECOUPLED to isDecoupled,
-                    "locale" to Locale.getDefault().toString()
                 )
             }
     }
 
     class Dismiss(
-        isDecoupled: Boolean,
+        override val isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_dismiss"
-        override val additionalParams: Map<String, Any> = mapOf(
-            FIELD_IS_DECOUPLED to isDecoupled,
-        )
+        override val additionalParams: Map<String, Any> = emptyMap()
     }
 
     class ShowNewPaymentOptionForm(
         mode: EventReporter.Mode,
         linkEnabled: Boolean,
         currency: String?,
-        isDecoupled: Boolean,
+        override val isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "sheet_newpm_show")
         override val additionalParams: Map<String, Any?> = mapOf(
-            "link_enabled" to linkEnabled,
-            "locale" to Locale.getDefault().toString(),
-            "currency" to currency,
-            FIELD_IS_DECOUPLED to isDecoupled,
+            FIELD_LINK_ENABLED to linkEnabled,
+            FIELD_CURRENCY to currency,
         )
     }
 
@@ -176,14 +171,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         mode: EventReporter.Mode,
         linkEnabled: Boolean,
         currency: String?,
-        isDecoupled: Boolean,
+        override val isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "sheet_savedpm_show")
         override val additionalParams: Map<String, Any?> = mapOf(
-            "link_enabled" to linkEnabled,
-            "locale" to Locale.getDefault().toString(),
-            "currency" to currency,
-            FIELD_IS_DECOUPLED to isDecoupled,
+            FIELD_LINK_ENABLED to linkEnabled,
+            FIELD_CURRENCY to currency,
         )
     }
 
@@ -191,14 +184,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         mode: EventReporter.Mode,
         paymentSelection: PaymentSelection?,
         currency: String?,
-        isDecoupled: Boolean,
+        override val isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String =
             formatEventName(mode, "paymentoption_${analyticsValue(paymentSelection)}_select")
         override val additionalParams: Map<String, Any?> = mapOf(
-            "locale" to Locale.getDefault().toString(),
-            "currency" to currency,
-            FIELD_IS_DECOUPLED to isDecoupled,
+            FIELD_CURRENCY to currency,
         )
     }
 
@@ -208,7 +199,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         duration: Duration?,
         paymentSelection: PaymentSelection?,
         currency: String?,
-        isDecoupled: Boolean,
+        override val isDecoupled: Boolean,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) : PaymentSheetEvent() {
 
@@ -218,9 +209,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> =
             mapOf(
                 FIELD_DURATION to duration?.asSeconds,
-                "locale" to Locale.getDefault().toString(),
-                "currency" to currency,
-                FIELD_IS_DECOUPLED to isDecoupled,
+                FIELD_CURRENCY to currency,
             ).plus(
                 deferredIntentConfirmationType?.let {
                     mapOf(FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE to it.value)
@@ -237,17 +226,15 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     }
 
     class LpmSerializeFailureEvent(
-        isDecoupled: Boolean,
+        override val isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "luxe_serialize_failure"
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_IS_DECOUPLED to isDecoupled,
-        )
+        override val additionalParams: Map<String, Any?> = emptyMap()
     }
 
     class AutofillEvent(
         type: String,
-        isDecoupled: Boolean,
+        override val isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         private fun String.toSnakeCase() = replace(
             "(?<=.)(?=\\p{Upper})".toRegex(),
@@ -255,10 +242,15 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         ).lowercase()
 
         override val eventName: String = "autofill_${type.toSnakeCase()}"
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_IS_DECOUPLED to isDecoupled,
-        )
+        override val additionalParams: Map<String, Any?> = emptyMap()
     }
+
+    private fun standardParams(
+        isDecoupled: Boolean,
+    ): Map<String, Any?> = mapOf(
+        FIELD_IS_DECOUPLED to isDecoupled,
+        FIELD_LOCALE to Locale.getDefault().toString(),
+    )
 
     internal companion object {
         private fun analyticsValue(
@@ -301,6 +293,9 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_COLLECT_PHONE = "phone"
         const val FIELD_COLLECT_ADDRESS = "address"
         const val FIELD_DURATION = "duration"
+        const val FIELD_LOCALE = "locale"
+        const val FIELD_LINK_ENABLED = "link_enabled"
+        const val FIELD_CURRENCY = "currency"
     }
 }
 

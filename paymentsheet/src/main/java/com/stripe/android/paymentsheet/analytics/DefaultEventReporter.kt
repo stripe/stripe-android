@@ -187,8 +187,8 @@ internal class DefaultEventReporter @Inject internal constructor(
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
-                    event,
-                    event.additionalParams
+                    event = event,
+                    additionalParams = event.params,
                 )
             )
         }
