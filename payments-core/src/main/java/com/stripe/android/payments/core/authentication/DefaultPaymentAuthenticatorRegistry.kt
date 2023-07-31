@@ -14,11 +14,9 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionViewModelFactory
 import com.stripe.android.payments.core.injection.AuthenticationComponent
@@ -144,8 +142,6 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     companion object {
         fun createInstance(
             context: Context,
-            stripeRepository: StripeRepository,
-            analyticsRequestExecutor: AnalyticsRequestExecutor,
             paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
             enableLogging: Boolean,
             workContext: CoroutineContext,
@@ -159,8 +155,6 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
                 WeakMapInjectorRegistry.nextKey(requireNotNull(PaymentAuthenticatorRegistry::class.simpleName))
             val component = DaggerAuthenticationComponent.builder()
                 .context(context)
-                .stripeRepository(stripeRepository)
-                .analyticsRequestExecutor(analyticsRequestExecutor)
                 .analyticsRequestFactory(paymentAnalyticsRequestFactory)
                 .enableLogging(enableLogging)
                 .workContext(workContext)

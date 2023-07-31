@@ -16,7 +16,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
@@ -32,8 +31,6 @@ import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMeth
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.StripeApiRepository
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -76,14 +73,6 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         setOf(PRODUCT_USAGE_TOKEN)
     ),
     analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
-    stripeRepository: StripeRepository = StripeApiRepository(
-        context,
-        publishableKeyProvider,
-        logger = Logger.getInstance(enableLogging),
-        workContext = ioContext,
-        productUsageTokens = setOf(PRODUCT_USAGE_TOKEN),
-        paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory
-    )
 ) {
     private var isReady = false
 
@@ -91,11 +80,11 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         .context(context)
         .ioContext(ioContext)
         .analyticsRequestFactory(paymentAnalyticsRequestFactory)
-        .stripeRepository(stripeRepository)
         .googlePayConfig(config)
         .enableLogging(enableLogging)
         .publishableKeyProvider(publishableKeyProvider)
         .stripeAccountIdProvider(stripeAccountIdProvider)
+        .productUsage(productUsage)
         .build()
 
     @InjectorKey

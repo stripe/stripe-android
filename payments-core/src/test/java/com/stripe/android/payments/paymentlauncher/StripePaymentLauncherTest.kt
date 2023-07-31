@@ -23,7 +23,6 @@ class StripePaymentLauncherTest {
         enableLogging = false,
         ioContext = mock(),
         uiContext = mock(),
-        stripeRepository = mock(),
         paymentAnalyticsRequestFactory = mock(),
         productUsage = mock(),
         statusBarColor = Color.RED,
