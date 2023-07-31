@@ -17,37 +17,105 @@ import kotlin.time.Duration.Companion.milliseconds
 class PaymentSheetEventTest {
 
     @Test
-    fun `Init event with full config should return expected toString()`() {
+    fun `Init event with full config should return expected params`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupled = false,
         )
+
         assertThat(
             event.eventName
         ).isEqualTo(
             "mc_complete_init_customer_googlepay"
         )
-        assertThat(
-            event.additionalParams
-        ).containsEntry("locale", "en_US")
+
+        val expectedConfig = mapOf(
+            "customer" to true,
+            "googlepay" to true,
+            "primary_button_color" to false,
+            "default_billing_details" to false,
+            "allows_delayed_payment_methods" to false,
+            "appearance" to mapOf(
+                "colorsLight" to false,
+                "colorsDark" to false,
+                "corner_radius" to false,
+                "border_width" to false,
+                "font" to false,
+                "size_scale_factor" to false,
+                "primary_button" to mapOf(
+                    "colorsLight" to false,
+                    "colorsDark" to false,
+                    "corner_radius" to false,
+                    "border_width" to false,
+                    "font" to false,
+                ),
+                "usage" to false,
+            ),
+            "billing_details_collection_configuration" to mapOf(
+                "attach_defaults" to false,
+                "name" to "Automatic",
+                "email" to "Automatic",
+                "phone" to "Automatic",
+                "address" to "Automatic",
+            ),
+        )
+
+        assertThat(event.params).run {
+            containsEntry("is_decoupled", false)
+            containsEntry("mpe_config", expectedConfig)
+        }
     }
 
     @Test
-    fun `Init event with minimum config should return expected toString()`() {
+    fun `Init event with minimum config should return expected params`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
             isDecoupled = false,
         )
+
         assertThat(
             event.eventName
         ).isEqualTo(
             "mc_complete_init_default"
         )
-        assertThat(
-            event.additionalParams
-        ).containsEntry("locale", "en_US")
+
+        val expectedConfig = mapOf(
+            "customer" to false,
+            "googlepay" to false,
+            "primary_button_color" to false,
+            "default_billing_details" to false,
+            "allows_delayed_payment_methods" to false,
+            "appearance" to mapOf(
+                "colorsLight" to false,
+                "colorsDark" to false,
+                "corner_radius" to false,
+                "border_width" to false,
+                "font" to false,
+                "size_scale_factor" to false,
+                "primary_button" to mapOf(
+                    "colorsLight" to false,
+                    "colorsDark" to false,
+                    "corner_radius" to false,
+                    "border_width" to false,
+                    "font" to false,
+                ),
+                "usage" to false,
+            ),
+            "billing_details_collection_configuration" to mapOf(
+                "attach_defaults" to false,
+                "name" to "Automatic",
+                "email" to "Automatic",
+                "phone" to "Automatic",
+                "address" to "Automatic",
+            ),
+        )
+
+        assertThat(event.params).run {
+            containsEntry("is_decoupled", false)
+            containsEntry("mpe_config", expectedConfig)
+        }
     }
 
     @Test
@@ -71,10 +139,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_newpm_success"
         )
         assertThat(
-            newPMEvent.additionalParams
+            newPMEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -99,10 +166,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_savedpm_success"
         )
         assertThat(
-            savedPMEvent.additionalParams
+            savedPMEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -127,10 +193,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_googlepay_success"
         )
         assertThat(
-            googlePayEvent.additionalParams
+            googlePayEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -155,10 +220,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_link_success"
         )
         assertThat(
-            linkEvent.additionalParams
+            linkEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -189,10 +253,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_link_success"
         )
         assertThat(
-            inlineLinkEvent.additionalParams
+            inlineLinkEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -221,10 +284,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_newpm_failure"
         )
         assertThat(
-            newPMEvent.additionalParams
+            newPMEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -249,10 +311,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_savedpm_failure"
         )
         assertThat(
-            savedPMEvent.additionalParams
+            savedPMEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -277,10 +338,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_googlepay_failure"
         )
         assertThat(
-            googlePayEvent.additionalParams
+            googlePayEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -305,10 +365,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_link_failure"
         )
         assertThat(
-            linkEvent.additionalParams
+            linkEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -339,10 +398,9 @@ class PaymentSheetEventTest {
             "mc_complete_payment_link_failure"
         )
         assertThat(
-            inlineLinkEvent.additionalParams
+            inlineLinkEvent.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
@@ -364,10 +422,9 @@ class PaymentSheetEventTest {
             "mc_custom_paymentoption_googlepay_select"
         )
         assertThat(
-            event.additionalParams
+            event.params
         ).isEqualTo(
             mapOf(
-                "locale" to "en_US",
                 "currency" to "usd",
                 "is_decoupled" to false,
             )
@@ -414,11 +471,10 @@ class PaymentSheetEventTest {
                 mode = EventReporter.Mode.Complete,
                 configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
                 isDecoupled = false,
-            ).additionalParams
+            ).params
         ).isEqualTo(
             mapOf(
                 "mpe_config" to expectedConfigMap,
-                "locale" to "en_US",
                 "is_decoupled" to false,
             )
         )
@@ -464,11 +520,10 @@ class PaymentSheetEventTest {
                 mode = EventReporter.Mode.Complete,
                 configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING,
                 isDecoupled = false,
-            ).additionalParams
+            ).params
         ).isEqualTo(
             mapOf(
                 "mpe_config" to expectedConfigMap,
-                "locale" to "en_US",
                 "is_decoupled" to false,
             )
         )
