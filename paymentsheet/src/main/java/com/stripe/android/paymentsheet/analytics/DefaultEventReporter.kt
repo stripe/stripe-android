@@ -108,7 +108,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onSelectPaymentMethod(
         code: PaymentMethodCode,
         currency: String?,
-        isDecoupling: Boolean
+        isDecoupling: Boolean,
     ) {
         fireEvent(
             PaymentSheetEvent.SelectPaymentMethod(

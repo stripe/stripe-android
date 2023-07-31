@@ -28,6 +28,7 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
@@ -42,6 +43,7 @@ import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
+import com.stripe.android.utils.formViewModelSubcomponentBuilder
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.Dispatchers
@@ -52,8 +54,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.stub
+import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -309,6 +315,39 @@ internal class PaymentOptionsActivityTest {
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
     }
 
+    @Test
+    fun `Reports payment method selection in payment method form screen`() {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp", "ideal"),
+            ),
+            paymentMethods = emptyList(),
+        )
+
+        runActivityScenario(args) {
+            it.onActivity {
+                composeTestRule
+                    .onNodeWithTag(TEST_TAG_LIST + "Cash App Pay")
+                    .performClick()
+
+                composeTestRule.waitForIdle()
+            }
+        }
+
+        // We don't want the initial selection to be reported, as it's not a user selection
+        verify(eventReporter, never()).onSelectPaymentMethod(
+            code = eq(PaymentMethod.Type.Card.code),
+            currency = anyOrNull(),
+            isDecoupling = any(),
+        )
+
+        verify(eventReporter).onSelectPaymentMethod(
+            code = eq(PaymentMethod.Type.CashAppPay.code),
+            currency = anyOrNull(),
+            isDecoupling = any(),
+        )
+    }
+
     private fun runActivityScenario(
         args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS,
         block: (InjectableActivityScenario<PaymentOptionsActivity>) -> Unit,
@@ -349,7 +388,10 @@ internal class PaymentOptionsActivityTest {
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
-                formViewModelSubComponentBuilderProvider = mock(),
+                formViewModelSubComponentBuilderProvider = formViewModelSubcomponentBuilder(
+                    context = ApplicationProvider.getApplicationContext(),
+                    lpmRepository = lpmRepository,
+                ),
             )
         }
 

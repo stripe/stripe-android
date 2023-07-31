@@ -290,16 +290,9 @@ internal abstract class BaseSheetViewModel(
         eventReporter.onDismiss(isDecoupling = isDecoupling)
     }
 
-    fun reportLpmSelected(code: PaymentMethodCode) {
+    fun reportPaymentMethodTypeSelected(code: PaymentMethodCode) {
         eventReporter.onSelectPaymentMethod(
             code = code,
-            isDecoupling = stripeIntent.value?.clientSecret == null,
-            currency = stripeIntent.value?.currency,
-        )
-    }
-
-    protected fun reportConfirmButtonPressed() {
-        eventReporter.onPressConfirmButton(
             isDecoupling = stripeIntent.value?.clientSecret == null,
             currency = stripeIntent.value?.currency,
         )
