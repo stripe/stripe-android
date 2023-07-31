@@ -22,8 +22,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -233,6 +237,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
         }
     }
 
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     private fun ExistingCustomerSwitch(
         viewState: CustomerSheetPlaygroundViewState,
@@ -255,7 +260,10 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                 checked = viewState.isExistingCustomer,
                 onCheckedChange = {
                     viewActionHandler(CustomerSheetPlaygroundViewAction.ToggleExistingCustomer)
-                }
+                },
+                modifier = Modifier
+                    .semantics { testTagsAsResourceId = true }
+                    .testTag("CUSTOMER_SHEET_PLAYGROUND_EXISTING_CUSTOMER")
             )
         }
     }
