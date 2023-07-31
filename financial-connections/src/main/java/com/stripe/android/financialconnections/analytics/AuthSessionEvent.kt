@@ -45,7 +45,7 @@ internal sealed class AuthSessionEvent(
         name = "failure",
         timestamp = timestamp,
         rawEventDetails = error
-            .toEventParams()
+            .toEventParams(extraMessage = null)
             .filterNotNullValues()
     )
 
