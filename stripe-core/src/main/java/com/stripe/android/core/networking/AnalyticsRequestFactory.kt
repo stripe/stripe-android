@@ -7,6 +7,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.version.StripeSdkVersion
+import java.util.Locale
 import java.util.UUID
 import javax.inject.Provider
 
@@ -58,6 +59,7 @@ open class AnalyticsRequestFactory(
         AnalyticsFields.BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
         AnalyticsFields.IS_DEVELOPMENT to BuildConfig.DEBUG,
         AnalyticsFields.SESSION_ID to sessionId,
+        AnalyticsFields.LOCALE to Locale.getDefault().toString(),
     ) + networkType()
 
     private fun networkType(): Map<String, String> {

@@ -18,7 +18,7 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
@@ -29,6 +29,7 @@ import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthS
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationDirections.accountPicker
 import com.stripe.android.financialconnections.navigation.NavigationDirections.manualEntry
@@ -52,7 +53,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
     private val uriUtils: UriUtils,
     private val postAuthSessionEvent: PostAuthSessionEvent,
-    private val getManifest: GetManifest,
+    private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
@@ -76,10 +77,11 @@ internal class PartnerAuthViewModel @Inject constructor(
         suspend {
             // if coming from a process kill, there should be a session
             // re-fetch the manifest and use its active auth session instead of creating a new one
-            val manifest: FinancialConnectionsSessionManifest = getManifest()
+            val sync: SynchronizeSessionResponse = getOrFetchSync()
+            val manifest: FinancialConnectionsSessionManifest = sync.manifest
             val authSession = manifest.activeAuthSession ?: createAuthorizationSession(
                 institution = requireNotNull(manifest.activeInstitution),
-                allowManualEntry = manifest.allowManualEntry
+                sync = sync
             )
             Payload(
                 authSession = authSession,
@@ -92,10 +94,11 @@ internal class PartnerAuthViewModel @Inject constructor(
     private fun createAuthSession() {
         suspend {
             val launchedEvent = Launched(Date())
-            val manifest: FinancialConnectionsSessionManifest = getManifest()
+            val sync: SynchronizeSessionResponse = getOrFetchSync()
+            val manifest: FinancialConnectionsSessionManifest = sync.manifest
             val authSession = createAuthorizationSession(
                 institution = requireNotNull(manifest.activeInstitution),
-                allowManualEntry = manifest.allowManualEntry
+                sync = sync
             )
             logger.debug("Created auth session ${authSession.id}")
             Payload(
@@ -153,7 +156,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     }
 
     private suspend fun launchAuthInBrowser() {
-        kotlin.runCatching { requireNotNull(getManifest().activeAuthSession) }
+        kotlin.runCatching { requireNotNull(getOrFetchSync().manifest.activeAuthSession) }
             .onSuccess {
                 it.url
                     ?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
@@ -213,7 +216,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     ) {
         val error = WebAuthFlowFailedException(message, reason)
         kotlin.runCatching {
-            val authSession = getManifest().activeAuthSession
+            val authSession = getOrFetchSync().manifest.activeAuthSession
             eventTracker.track(
                 FinancialConnectionsEvent.AuthSessionUrlReceived(
                     url = url,
@@ -250,7 +253,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         kotlin.runCatching {
             logger.debug("Auth cancelled, cancelling AuthSession")
             setState { copy(authenticationStatus = Loading()) }
-            val authSession = getManifest().activeAuthSession
+            val authSession = getOrFetchSync().manifest.activeAuthSession
             eventTracker.track(
                 FinancialConnectionsEvent.AuthSessionUrlReceived(
                     url = url ?: "none",
@@ -293,7 +296,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private suspend fun completeAuthorizationSession(url: String) {
         kotlin.runCatching {
             setState { copy(authenticationStatus = Loading()) }
-            val authSession = getManifest().activeAuthSession
+            val authSession = getOrFetchSync().manifest.activeAuthSession
             eventTracker.track(
                 FinancialConnectionsEvent.AuthSessionUrlReceived(
                     url = url,

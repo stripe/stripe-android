@@ -6,10 +6,11 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.common.getBusinessName
+import com.stripe.android.financialconnections.features.common.showManualEntryInErrors
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.utils.PollTimingOptions
 import com.stripe.android.financialconnections.utils.retryOnException
@@ -29,8 +30,9 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
 
     suspend operator fun invoke(
         canRetry: Boolean,
-        manifest: FinancialConnectionsSessionManifest
+        sync: SynchronizeSessionResponse
     ): PartnerAccountsList = try {
+        val manifest = requireNotNull(sync.manifest)
         val activeAuthSession = requireNotNull(manifest.activeAuthSession)
         retryOnException(
             PollTimingOptions(
@@ -45,7 +47,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
             if (accounts.data.isEmpty()) {
                 throw AccountLoadError(
                     institution = requireNotNull(manifest.activeInstitution),
-                    allowManualEntry = manifest.allowManualEntry,
+                    showManualEntry = sync.showManualEntryInErrors(),
                     canRetry = canRetry,
                     stripeException = APIException()
                 )
@@ -55,10 +57,10 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
         }
     } catch (@Suppress("SwallowedException") e: StripeException) {
         throw e.toDomainException(
-            institution = manifest.activeInstitution,
-            businessName = manifest.getBusinessName(),
+            institution = sync.manifest.activeInstitution,
+            businessName = sync.manifest.getBusinessName(),
             canRetry = canRetry,
-            allowManualEntry = manifest.allowManualEntry
+            showManualEntry = sync.showManualEntryInErrors()
         )
     }
 }
@@ -67,7 +69,7 @@ private fun StripeException.toDomainException(
     institution: FinancialConnectionsInstitution?,
     businessName: String?,
     canRetry: Boolean,
-    allowManualEntry: Boolean
+    showManualEntry: Boolean
 ): StripeException =
     when {
         institution == null -> this
@@ -81,7 +83,7 @@ private fun StripeException.toDomainException(
             )
 
         else -> AccountLoadError(
-            allowManualEntry = allowManualEntry,
+            showManualEntry = showManualEntry,
             institution = institution,
             canRetry = canRetry,
             stripeException = this
