@@ -424,6 +424,15 @@ public final class com/stripe/android/financialconnections/features/networkingli
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/financialconnections/features/networkinglinkverification/ComposableSingletons$NetworkingLinkVerificationScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/networkinglinkverification/ComposableSingletons$NetworkingLinkVerificationScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/financialconnections/features/networkingsavetolinkverification/ComposableSingletons$NetworkingSaveToLinkVerificationScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/networkingsavetolinkverification/ComposableSingletons$NetworkingSaveToLinkVerificationScreenKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;

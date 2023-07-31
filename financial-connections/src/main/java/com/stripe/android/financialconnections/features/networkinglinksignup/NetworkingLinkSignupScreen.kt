@@ -21,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -38,6 +40,7 @@ import com.stripe.android.financialconnections.features.networkinglinksignup.Net
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupViewModel.Companion.PANE
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -325,5 +328,23 @@ internal fun EmailSection(
                 )
             }
         }
+    }
+}
+
+@Composable
+@Preview(group = "NetworkingLinkSignup Pane")
+internal fun NetworkingLinkSignupScreenPreview(
+    @PreviewParameter(NetworkingLinkSignupPreviewParameterProvider::class)
+    state: NetworkingLinkSignupState
+) {
+    FinancialConnectionsPreview {
+        NetworkingLinkSignupContent(
+            state = state,
+            onCloseClick = {},
+            onSaveToLink = {},
+            onClickableTextClick = {},
+            onCloseFromErrorClick = {},
+            onSkipClick = {}
+        )
     }
 }
