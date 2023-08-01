@@ -2,12 +2,16 @@ package com.stripe.android.financialconnections.utils
 
 import android.net.Uri
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import javax.inject.Inject
 
 internal class UriUtils @Inject constructor(
-    private val logger: Logger
+    private val logger: Logger,
+    private val tracker: FinancialConnectionsAnalyticsTracker,
 ) {
-    fun compareSchemeAuthorityAndPath(
+    suspend fun compareSchemeAuthorityAndPath(
         uriString1: String,
         uriString2: String
     ): Boolean {
@@ -19,36 +23,47 @@ internal class UriUtils @Inject constructor(
             uri1.path.equals(uri2.path)
     }
 
-    fun getQueryParameter(uriString: String, key: String): String? {
-        return kotlin.runCatching {
-            uriString.toUriOrNull()?.getQueryParameter(key)
-        }.onFailure {
-            logger.error("Could not extract query param $key from URI $uriString", it)
-        }.getOrNull()
-    }
+    suspend fun getQueryParameter(uri: String, key: String): String? = kotlin.runCatching {
+        uri.toUriOrNull()?.getQueryParameter(key)
+    }.onFailure { error ->
+        tracker.logError(
+            "Could not extract query param $key from URI $uri",
+            error,
+            logger,
+            Pane.UNEXPECTED_ERROR
+        )
+    }.getOrNull()
 
-    fun getQueryParameterFromFragment(uriString: String, key: String): String? {
-        return kotlin.runCatching {
-            val fragment = uriString.toUriOrNull()?.fragment ?: return null
-            val params = fragment.split("&")
-            params.forEach { param ->
+    suspend fun getQueryParameterFromFragment(
+        uri: String,
+        key: String
+    ): String? = runCatching {
+        uri
+            .toUriOrNull()
+            ?.fragment
+            ?.split("&")
+            ?.forEach { param ->
                 val keyValue = param.split("=")
-                if (keyValue[0] == key && keyValue.size > 1) {
-                    return keyValue[1]
-                }
+                if (keyValue[0] == key && keyValue.size > 1) return keyValue[1]
             }
-            return null
-        }.onFailure {
-            logger.error("Could not extract query param $key from URI $uriString", it)
-        }.getOrNull()
-    }
+        return null
+    }.onFailure { error ->
+        tracker.logError(
+            "Could not extract query param $key from URI $uri",
+            error,
+            logger,
+            Pane.UNEXPECTED_ERROR
+        )
+    }.getOrNull()
 
-    private fun String.toUriOrNull(): Uri? {
-        Uri.parse(this).buildUpon().clearQuery()
-        return kotlin.runCatching {
-            return Uri.parse(this)
-        }.onFailure {
-            logger.error("Could not parse given URI $this", it)
-        }.getOrNull()
-    }
+    private suspend fun String.toUriOrNull(): Uri? = kotlin.runCatching {
+        return Uri.parse(this)
+    }.onFailure { error ->
+        tracker.logError(
+            "Could not parse given URI $this",
+            error,
+            logger,
+            Pane.UNEXPECTED_ERROR
+        )
+    }.getOrNull()
 }

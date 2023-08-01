@@ -24,9 +24,7 @@ import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
@@ -347,22 +345,20 @@ internal class PartnerAuthViewModel @Inject constructor(
         )
     )
 
-    fun onClickableTextClick(uri: String) {
-        // if clicked uri contains an eventName query param, track click event.
-        viewModelScope.launch {
-            uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
-                eventTracker.track(
-                    FinancialConnectionsEvent.Click(
-                        eventName,
-                        pane = Pane.PARTNER_AUTH
-                    )
+    // if clicked uri contains an eventName query param, track click event.
+    fun onClickableTextClick(uri: String) = viewModelScope.launch {
+        uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
+            eventTracker.track(
+                FinancialConnectionsEvent.Click(
+                    eventName,
+                    pane = Pane.PARTNER_AUTH
                 )
-            }
+            )
         }
         if (URLUtil.isNetworkUrl(uri)) {
             setState {
                 copy(
-                    viewEffect = OpenUrl(
+                    viewEffect = PartnerAuthState.ViewEffect.OpenUrl(
                         uri,
                         Date().time
                     )
@@ -375,7 +371,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 PartnerAuthState.ClickableText.DATA -> {
                     setState {
                         copy(
-                            viewEffect = OpenBottomSheet(Date().time)
+                            viewEffect = PartnerAuthState.ViewEffect.OpenBottomSheet(Date().time)
                         )
                     }
                 }
