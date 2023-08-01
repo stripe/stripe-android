@@ -23,6 +23,11 @@ internal class UriUtils @Inject constructor(
             uri1.path.equals(uri2.path)
     }
 
+    /**
+     * Extracts a query parameter from an URI.
+     *
+     * stripe-auth://link-accounts/authentication_return?code=failure
+     */
     suspend fun getQueryParameter(uri: String, key: String): String? = kotlin.runCatching {
         uri.toUriOrNull()?.getQueryParameter(key)
     }.onFailure { error ->
@@ -34,6 +39,11 @@ internal class UriUtils @Inject constructor(
         )
     }.getOrNull()
 
+    /**
+     * Extracts a query parameter from the fragment of an URI.
+     *
+     * stripe-auth://link-accounts/authentication_return#code=failure
+     */
     suspend fun getQueryParameterFromFragment(
         uri: String,
         key: String
