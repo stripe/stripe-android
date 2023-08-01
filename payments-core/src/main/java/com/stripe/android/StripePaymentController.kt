@@ -99,8 +99,6 @@ constructor(
     private val authenticatorRegistry: PaymentAuthenticatorRegistry =
         DefaultPaymentAuthenticatorRegistry.createInstance(
             context,
-            stripeRepository,
-            analyticsRequestExecutor,
             paymentAnalyticsRequestFactory,
             enableLogging,
             workContext,

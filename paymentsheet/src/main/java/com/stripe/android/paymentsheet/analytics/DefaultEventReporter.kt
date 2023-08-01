@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.analytics
 
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -187,8 +188,8 @@ internal class DefaultEventReporter @Inject internal constructor(
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
-                    event,
-                    event.additionalParams
+                    event = event,
+                    additionalParams = event.params,
                 )
             )
         }

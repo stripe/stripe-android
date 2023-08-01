@@ -12,10 +12,10 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLinkAccounts
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAccountsSucceeded
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
@@ -39,7 +39,7 @@ internal class AccountPickerViewModel @Inject constructor(
     initialState: AccountPickerState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val selectAccounts: SelectAccounts,
-    private val getManifest: GetManifest,
+    private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
@@ -54,11 +54,12 @@ internal class AccountPickerViewModel @Inject constructor(
     private fun loadAccounts() {
         suspend {
             val state = awaitState()
-            val manifest = getManifest()
+            val sync = getOrFetchSync()
+            val manifest = sync.manifest
             val activeAuthSession = requireNotNull(manifest.activeAuthSession)
             val (partnerAccountList, millis) = measureTimeMillis {
                 pollAuthorizationSessionAccounts(
-                    manifest = manifest,
+                    sync = sync,
                     canRetry = state.canRetry
                 )
             }
@@ -119,6 +120,15 @@ internal class AccountPickerViewModel @Inject constructor(
                     selectedIds = setOf(payload.accounts.first().id),
                     updateLocalCache = true
                 )
+
+                // Auto-select the first selectable account.
+                payload.selectionMode == SelectionMode.RADIO -> setState {
+                    copy(
+                        selectedIds = setOfNotNull(
+                            payload.selectableAccounts.firstOrNull()?.id
+                        )
+                    )
+                }
             }
         })
     }
@@ -127,15 +137,23 @@ internal class AccountPickerViewModel @Inject constructor(
         onAsync(
             AccountPickerState::payload,
             onFail = {
-                eventTracker.track(Error(Pane.ACCOUNT_PICKER, it))
-                logger.error("Error retrieving accounts", it)
+                eventTracker.logError(
+                    logger = logger,
+                    pane = Pane.ACCOUNT_PICKER,
+                    extraMessage = "Error retrieving accounts",
+                    error = it
+                )
             },
         )
         onAsync(
             AccountPickerState::selectAccounts,
             onFail = {
-                eventTracker.track(Error(Pane.ACCOUNT_PICKER, it))
-                logger.error("Error selecting accounts", it)
+                eventTracker.logError(
+                    logger = logger,
+                    pane = Pane.ACCOUNT_PICKER,
+                    extraMessage = "Error selecting accounts",
+                    error = it
+                )
             }
         )
     }
@@ -182,7 +200,7 @@ internal class AccountPickerViewModel @Inject constructor(
         updateLocalCache: Boolean
     ) {
         suspend {
-            val manifest = getManifest()
+            val manifest = getOrFetchSync().manifest
             val accountsList: PartnerAccountsList = selectAccounts(
                 selectedAccountIds = selectedIds,
                 sessionId = requireNotNull(manifest.activeAuthSession).id,

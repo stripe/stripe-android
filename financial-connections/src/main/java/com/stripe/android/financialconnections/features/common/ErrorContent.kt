@@ -95,7 +95,7 @@ internal fun InstitutionUnplannedDowntimeErrorContent(
             stringResource(R.string.stripe_error_cta_select_another_bank),
             onSelectAnotherBank
         ),
-        secondaryCta = if (exception.allowManualEntry) {
+        secondaryCta = if (exception.showManualEntry) {
             Pair(
                 stringResource(R.string.stripe_error_cta_manual_entry),
                 onEnterDetailsManually
@@ -130,7 +130,7 @@ internal fun InstitutionPlannedDowntimeErrorContent(
             stringResource(R.string.stripe_error_cta_select_another_bank),
             onSelectAnotherBank
         ),
-        secondaryCta = if (exception.allowManualEntry) {
+        secondaryCta = if (exception.showManualEntry) {
             Pair(
                 stringResource(R.string.stripe_error_cta_manual_entry),
                 onEnterDetailsManually
@@ -175,7 +175,7 @@ internal fun NoAccountsAvailableErrorContent(
 ) {
     // primary and (optional) secondary button to show.
     val (primaryCta: Pair<Int, () -> Unit>, secondaryCta: Pair<Int, () -> Unit>?) = remember(
-        exception.allowManualEntry,
+        exception.showManualEntry,
         exception.canRetry
     ) {
         when {
@@ -184,7 +184,7 @@ internal fun NoAccountsAvailableErrorContent(
                 second = R.string.stripe_error_cta_select_another_bank to onSelectAnotherBank,
             )
 
-            exception.allowManualEntry -> Pair(
+            exception.showManualEntry -> Pair(
                 first = R.string.stripe_error_cta_manual_entry to onEnterDetailsManually,
                 second = R.string.stripe_error_cta_select_another_bank to onSelectAnotherBank,
             )
@@ -196,10 +196,10 @@ internal fun NoAccountsAvailableErrorContent(
         }
     }
     // description to show.
-    val description = remember(exception.allowManualEntry, exception.canRetry) {
+    val description = remember(exception.showManualEntry, exception.canRetry) {
         when {
             exception.canRetry -> R.string.stripe_accounts_error_desc_retry
-            exception.allowManualEntry -> R.string.stripe_accounts_error_desc_manualentry
+            exception.showManualEntry -> R.string.stripe_accounts_error_desc_manualentry
             else -> R.string.stripe_accounts_error_desc_no_retry
         }
     }
@@ -228,7 +228,7 @@ internal fun AccountNumberRetrievalErrorContent(
             R.string.stripe_attachlinkedpaymentaccount_error_title
         ),
         content = stringResource(
-            when (exception.allowManualEntry) {
+            when (exception.showManualEntry) {
                 true -> R.string.stripe_attachlinkedpaymentaccount_error_desc_manual_entry
                 false -> R.string.stripe_attachlinkedpaymentaccount_error_desc
             }
@@ -237,7 +237,7 @@ internal fun AccountNumberRetrievalErrorContent(
             stringResource(R.string.stripe_error_cta_select_another_bank),
             onSelectAnotherBank
         ),
-        secondaryCta = if (exception.allowManualEntry) {
+        secondaryCta = if (exception.showManualEntry) {
             Pair(
                 stringResource(R.string.stripe_error_cta_manual_entry),
                 onEnterDetailsManually
@@ -381,7 +381,7 @@ internal fun InstitutionPlannedDowntimeErrorContentPreview() {
                         logo = null,
                         mobileHandoffCapable = false
                     ),
-                    allowManualEntry = true,
+                    showManualEntry = true,
                     isToday = true,
                     backUpAt = 10000L,
                     stripeException = APIException()
@@ -412,7 +412,7 @@ internal fun NoAccountsAvailableErrorContentPreview() {
                         logo = null,
                         mobileHandoffCapable = false
                     ),
-                    allowManualEntry = true,
+                    showManualEntry = true,
                     stripeException = APIException(),
                     canRetry = true
                 ),

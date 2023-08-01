@@ -22,4 +22,5 @@ object AnalyticsFields {
     const val PUBLISHABLE_KEY = "publishable_key"
     const val SESSION_ID = "session_id"
     const val NETWORK_TYPE = "network_type"
+    const val LOCALE = "locale"
 }

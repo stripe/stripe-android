@@ -12,6 +12,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import java.util.Locale
 
 @RunWith(RobolectricTestRunner::class)
 class AnalyticsRequestFactoryTest : TestCase() {
@@ -104,4 +105,38 @@ class AnalyticsRequestFactoryTest : TestCase() {
         assertThat(AnalyticsRequestFactory.ANALYTICS_UA)
             .isEqualTo("analytics.stripe_android-1.0")
     }
+
+    @Test
+    fun `Adds correct locale to request`() {
+        val locales = listOf(Locale.US, Locale.CANADA, Locale.GERMANY)
+
+        val factory = AnalyticsRequestFactory(
+            packageManager = null,
+            packageInfo = null,
+            packageName = "",
+            publishableKeyProvider = { apiKey },
+            networkTypeProvider = { "5G" },
+        )
+
+        val event = object : AnalyticsEvent {
+            override val eventName: String = "test_event"
+        }
+
+        for (locale in locales) {
+            withLocale(locale) {
+                val request = factory.createRequest(
+                    event = event,
+                    additionalParams = emptyMap(),
+                )
+                assertThat(request.params).containsEntry("locale", locale.toString())
+            }
+        }
+    }
+}
+
+private fun withLocale(locale: Locale, block: () -> Unit) {
+    val original = Locale.getDefault()
+    Locale.setDefault(locale)
+    block()
+    Locale.setDefault(original)
 }
