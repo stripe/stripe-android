@@ -39,6 +39,7 @@ class GetQueryParamsTest {
 }
 
 @RunWith(ParameterizedRobolectricTestRunner::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class CompareSchemeAuthorityAndPathTest(
     private val uri1: String,
     private val uri2: String,
