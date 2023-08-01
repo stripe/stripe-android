@@ -97,7 +97,7 @@ interface CustomerAdapter {
             setupIntentClientSecretProvider: SetupIntentClientSecretProvider?,
         ): CustomerAdapter {
             val component = DaggerStripeCustomerAdapterComponent.builder()
-                .context(context)
+                .context(context.applicationContext)
                 .customerEphemeralKeyProvider(customerEphemeralKeyProvider)
                 .setupIntentClientSecretProvider(setupIntentClientSecretProvider)
                 .build()
@@ -128,9 +128,11 @@ interface CustomerAdapter {
                 is GooglePay -> {
                     PaymentSelection.GooglePay
                 }
+
                 is Link -> {
                     PaymentSelection.Link
                 }
+
                 is StripeId -> {
                     paymentMethodProvider(id)?.let {
                         PaymentSelection.Saved(it)
