@@ -186,6 +186,12 @@ internal fun SelfieScanScreen(
             identityViewModel.resetSelfieUploadedState()
         }
 
+        LaunchedEffect(newDisplayState) {
+            if (newDisplayState is IdentityScanState.Finished) {
+                identityScanViewModel.stopScan(lifecycleOwner)
+            }
+        }
+
         CameraScreenLaunchedEffect(
             identityViewModel = identityViewModel,
             identityScanViewModel = identityScanViewModel,
