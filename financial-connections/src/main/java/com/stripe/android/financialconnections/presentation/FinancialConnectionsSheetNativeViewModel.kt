@@ -127,29 +127,28 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    private fun onUrlReceived(receivedUrl: String, status: String?) {
+    private suspend fun onUrlReceived(receivedUrl: String, status: String?) {
         when (status) {
             STATUS_SUCCESS -> setState {
                 copy(webAuthFlow = WebAuthFlowState.Success(receivedUrl))
             }
-
 
             STATUS_CLOSE,
             STATUS_CANCEL -> setState {
                 copy(webAuthFlow = WebAuthFlowState.Canceled(receivedUrl))
             }
 
-            STATUS_FAILURE -> setState {
-                copy(
-                    webAuthFlow = WebAuthFlowState.Failed(
-                        url = receivedUrl,
-                        message = "Received return_url with failed status: $receivedUrl",
-                        reason = uriUtils.getQueryParameter(
-                            receivedUrl,
-                            PARAM_ERROR_REASON
+            STATUS_FAILURE -> {
+                val reason = uriUtils.getQueryParameter(receivedUrl, PARAM_ERROR_REASON)
+                setState {
+                    copy(
+                        webAuthFlow = WebAuthFlowState.Failed(
+                            url = receivedUrl,
+                            message = "Received return_url with failed status: $receivedUrl",
+                            reason = reason
                         )
                     )
-                )
+                }
             }
             // received unknown / non-handleable [PARAM_STATUS]
             else -> setState {
