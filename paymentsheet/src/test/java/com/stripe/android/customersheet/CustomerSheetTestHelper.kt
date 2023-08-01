@@ -83,14 +83,14 @@ object CustomerSheetTestHelper {
             application = application,
             backstack = backstack,
             savedPaymentSelection = savedPaymentSelection,
-            paymentConfiguration = paymentConfiguration,
+            paymentConfigurationProvider = { paymentConfiguration },
             formViewModelSubcomponentBuilderProvider = mockFormSubComponentBuilderProvider,
             resources = application.resources,
             stripeRepository = stripeRepository,
             customerAdapter = customerAdapter,
             lpmRepository = lpmRepository,
             configuration = configuration,
-            isLiveMode = isLiveMode,
+            isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
         )
     }
