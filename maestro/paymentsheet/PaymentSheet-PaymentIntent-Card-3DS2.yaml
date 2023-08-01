@@ -1,6 +1,7 @@
 appId: com.stripe.android.paymentsheet.example
 ---
 - launchApp
+- startRecording: /tmp/test_results/paymentsheet-paymentintent-card-3ds2
 # Android specific: Navigate to example
 - tapOn: "PaymentSheet"
 - waitForAnimationToEnd:
@@ -15,7 +16,8 @@ appId: com.stripe.android.paymentsheet.example
     env:
         CARD_NUMBER: 4000000000003220
 - scroll
-- tapOn: "Pay.*"
+- tapOn:
+    id: "com.stripe.android.paymentsheet.example:id/primary_button"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
       file: ../common/subflow-skip-chrome-welcome.yaml
@@ -32,3 +34,4 @@ appId: com.stripe.android.paymentsheet.example
     visible: ".*Success.*"
     timeout: 60000
 - tapOn: "Finish"
+- stopRecording
