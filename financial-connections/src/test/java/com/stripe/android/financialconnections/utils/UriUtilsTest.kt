@@ -1,19 +1,24 @@
+
 package com.stripe.android.financialconnections.utils
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.ParameterizedRobolectricTestRunner
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class GetQueryParamsTest {
 
-    private val underTest = UriUtils(Logger.noop())
+    private val underTest = UriUtils(Logger.noop(), mock())
 
     @Test
-    fun `getQueryParameter - url with eventName`() {
+    fun `getQueryParameter - url with eventName`() = runTest {
         val queryParam = underTest
             .getQueryParameter(
                 "https://www.stripe.com/terms?eventName=click.terms",
@@ -23,7 +28,7 @@ class GetQueryParamsTest {
     }
 
     @Test
-    fun `getQueryParameter - stripe uri with eventName`() {
+    fun `getQueryParameter - stripe uri with eventName`() = runTest {
         val queryParam = underTest
             .getQueryParameter(
                 "stripe://data-access-notice?eventName=click.terms",
@@ -39,7 +44,7 @@ class CompareSchemeAuthorityAndPathTest(
     private val uri2: String,
     private val result: Boolean
 ) {
-    private val underTest = UriUtils(Logger.noop())
+    private val underTest = UriUtils(Logger.noop(), mock())
 
     companion object {
         @JvmStatic
@@ -97,7 +102,7 @@ class CompareSchemeAuthorityAndPathTest(
     }
 
     @Test
-    fun compareUrlsReturn() {
+    fun compareUrlsReturn() = runTest {
         assertThat(underTest.compareSchemeAuthorityAndPath(uri1, uri2)).isEqualTo(result)
     }
 }

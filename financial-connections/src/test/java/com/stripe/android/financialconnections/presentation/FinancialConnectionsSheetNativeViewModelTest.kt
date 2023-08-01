@@ -184,7 +184,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         eventTracker = mock(),
         activityRetainedComponent = mock(),
         applicationId = applicationId,
-        uriUtils = UriUtils(Logger.noop()),
+        uriUtils = UriUtils(Logger.noop(), mock()),
         completeFinancialConnectionsSession = completeFinancialConnectionsSession,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         logger = mock(),

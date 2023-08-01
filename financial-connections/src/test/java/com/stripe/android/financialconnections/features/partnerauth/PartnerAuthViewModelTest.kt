@@ -171,7 +171,7 @@ internal class PartnerAuthViewModelTest {
             pollAuthorizationSessionOAuthResults = pollAuthorizationSessionOAuthResults,
             logger = mock(),
             initialState = initialState,
-            uriUtils = UriUtils(Logger.noop()),
+            uriUtils = UriUtils(Logger.noop(), mock()),
             applicationId = applicationId
         )
     }
