@@ -42,14 +42,14 @@ internal class CustomerSheetViewModel @Inject constructor(
     // TODO (jameswoo) should the current view state be derived from backstack?
     private val backstack: Stack<CustomerSheetViewState>,
     private var savedPaymentSelection: PaymentSelection?,
-    private val paymentConfiguration: PaymentConfiguration,
+    private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
     private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
     private val logger: Logger,
     private val stripeRepository: StripeRepository,
     private val customerAdapter: CustomerAdapter,
     private val lpmRepository: LpmRepository,
-    @Named(IS_LIVE_MODE) private val isLiveMode: Boolean,
+    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
 ) : ViewModel() {
 
@@ -136,7 +136,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     title = configuration.headerTextForSelectionScreen,
                     savedPaymentMethods = paymentMethods ?: emptyList(),
                     paymentSelection = paymentSelection,
-                    isLiveMode = isLiveMode,
+                    isLiveMode = isLiveModeProvider(),
                     isProcessing = false,
                     isEditing = false,
                     isGooglePayEnabled = configuration.googlePayEnabled,
@@ -172,7 +172,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 paymentMethodCode = paymentMethodCode,
                 formViewData = FormViewModel.ViewData(),
                 enabled = true,
-                isLiveMode = isLiveMode,
+                isLiveMode = isLiveModeProvider(),
                 isProcessing = false,
             )
         )
@@ -337,8 +337,8 @@ internal class CustomerSheetViewModel @Inject constructor(
         return stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = createParams,
             options = ApiRequest.Options(
-                apiKey = paymentConfiguration.publishableKey,
-                stripeAccount = paymentConfiguration.stripeAccountId,
+                apiKey = paymentConfigurationProvider.get().publishableKey,
+                stripeAccount = paymentConfigurationProvider.get().stripeAccountId,
             )
         )
     }
@@ -362,8 +362,8 @@ internal class CustomerSheetViewModel @Inject constructor(
                         clientSecret = clientSecret,
                     ),
                     options = ApiRequest.Options(
-                        apiKey = paymentConfiguration.publishableKey,
-                        stripeAccount = paymentConfiguration.stripeAccountId,
+                        apiKey = paymentConfigurationProvider.get().publishableKey,
+                        stripeAccount = paymentConfigurationProvider.get().stripeAccountId,
                     ),
                 ).getOrThrow()
             }.onSuccess {

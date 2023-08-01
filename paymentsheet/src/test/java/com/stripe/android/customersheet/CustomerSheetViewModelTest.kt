@@ -58,29 +58,29 @@ class CustomerSheetViewModelTest {
     @Test
     fun `isLiveMode is true when publishable key is live`() {
         val viewModelModule = CustomerSheetViewModelModule()
-        var isLiveMode = viewModelModule.isLiveMode(
+        var isLiveMode = viewModelModule.isLiveMode {
             PaymentConfiguration(
                 publishableKey = "pk_test_123"
             )
-        )
+        }
 
-        assertThat(isLiveMode).isFalse()
+        assertThat(isLiveMode()).isFalse()
 
-        isLiveMode = viewModelModule.isLiveMode(
+        isLiveMode = viewModelModule.isLiveMode {
             PaymentConfiguration(
                 publishableKey = "pk_live_123"
             )
-        )
+        }
 
-        assertThat(isLiveMode).isTrue()
+        assertThat(isLiveMode()).isTrue()
 
-        isLiveMode = viewModelModule.isLiveMode(
+        isLiveMode = viewModelModule.isLiveMode {
             PaymentConfiguration(
                 publishableKey = "pk_test_51HvTI7Lu5o3livep6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"
             )
-        )
+        }
 
-        assertThat(isLiveMode).isFalse()
+        assertThat(isLiveMode()).isFalse()
     }
 
     @Test
