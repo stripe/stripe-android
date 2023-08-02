@@ -89,7 +89,7 @@ internal class CustomerSheetActivityTest {
                 title = null
             ),
         ) {
-            page.waitForText("Manage your payment method")
+            page.waitForText("Manage your payment methods")
         }
     }
 

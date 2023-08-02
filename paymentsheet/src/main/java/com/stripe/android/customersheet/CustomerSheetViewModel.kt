@@ -281,7 +281,10 @@ internal class CustomerSheetViewModel @Inject constructor(
         when (val currentViewState = viewState.value) {
             is CustomerSheetViewState.AddPaymentMethod -> {
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
-                    it.copy(isProcessing = true)
+                    it.copy(
+                        isProcessing = true,
+                        enabled = false,
+                    )
                 }
                 lpmRepository.fromCode(currentViewState.paymentMethodCode)?.let { paymentMethodSpec ->
                     addPaymentMethod(

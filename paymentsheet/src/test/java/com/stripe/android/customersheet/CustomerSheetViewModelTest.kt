@@ -607,7 +607,9 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            assertThat(awaitItem().isProcessing).isTrue()
+            val viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.isProcessing).isTrue()
+            assertThat(viewState.enabled).isFalse()
 
             // Payment method was created and attached to the customer
             assertThat(awaitItem().isProcessing).isFalse()
