@@ -83,6 +83,14 @@ internal interface EventReporter {
     )
 
     /**
+     * The customer has pressed the confirm button.
+     */
+    fun onPressConfirmButton(
+        currency: String?,
+        isDecoupling: Boolean,
+    )
+
+    /**
      * Payment or setup have succeeded.
      */
     fun onPaymentSuccess(

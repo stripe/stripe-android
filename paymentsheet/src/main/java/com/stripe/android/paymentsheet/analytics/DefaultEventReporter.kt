@@ -134,6 +134,15 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onPressConfirmButton(currency: String?, isDecoupling: Boolean) {
+        fireEvent(
+            PaymentSheetEvent.PressConfirmButton(
+                currency = currency,
+                isDecoupled = isDecoupling,
+            )
+        )
+    }
+
     override fun onPaymentSuccess(
         paymentSelection: PaymentSelection?,
         currency: String?,

@@ -204,6 +204,16 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class PressConfirmButton(
+        currency: String?,
+        override val isDecoupled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_confirm_button_tapped"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_CURRENCY to currency,
+        )
+    }
+
     class Payment(
         mode: EventReporter.Mode,
         result: Result,
