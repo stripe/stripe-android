@@ -62,5 +62,5 @@
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Payment failed</string>
   <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_go_to_banking_app">Confirm the payment in your bank\'s app within %s to complete the purchase.</string>
+  <string name="stripe_blik_confirm_payment">Confirm the payment in your bank\'s app within %s to complete the purchase.</string>
 </resources>
