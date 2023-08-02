@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,15 +14,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -34,8 +43,10 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.samples.ui.shared.MultiToggleButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.utils.rememberDrawablePainter
+import java.util.Locale
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetPlaygroundActivity : AppCompatActivity() {
@@ -44,6 +55,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
         CustomerSheetPlaygroundViewModel.Factory
     }
 
+    @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -52,16 +64,19 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
         setContent {
             PaymentSheetExampleTheme {
                 val viewState by viewModel.viewState.collectAsState()
+                val configurationState by viewModel.configurationState.collectAsState()
                 val config by viewModel.configuration.collectAsState()
                 val customerAdapter by viewModel.customerAdapter.collectAsState()
 
+                val currentCustomerAdapter = customerAdapter ?: return@PaymentSheetExampleTheme
+
                 val customerSheet = rememberCustomerSheet(
-                    customerAdapter = customerAdapter,
+                    customerAdapter = currentCustomerAdapter,
                     configuration = config,
                     callback = viewModel::onCustomerSheetResult,
                 )
 
-                LaunchedEffect(viewState.isExistingCustomer) {
+                LaunchedEffect(configurationState.isExistingCustomer) {
                     val result = customerSheet.retrievePaymentOptionSelection()
                     viewModel.onCustomerSheetResult(result)
                 }
@@ -72,7 +87,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                         .padding(16.dp)
                 ) {
                     DeveloperConfigurations(
-                        viewState = viewState,
+                        configurationState = configurationState,
                         viewActionHandler = viewModel::handleViewAction,
                     )
 
@@ -158,38 +173,67 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
 
     @Composable
     private fun DeveloperConfigurations(
-        viewState: CustomerSheetPlaygroundViewState,
+        configurationState: CustomerSheetPlaygroundConfigurationState,
         viewActionHandler: (CustomerSheetPlaygroundViewAction) -> Unit
     ) {
+        var collapsed by rememberSaveable { mutableStateOf(false) }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
-            Text(
-                text = "Developer Configurations",
-                color = MaterialTheme.colors.onBackground,
-                fontSize = 18.sp
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Developer Configurations",
+                    color = MaterialTheme.colors.onBackground,
+                    fontSize = 18.sp
+                )
 
-            SetupIntentSwitch(
-                viewState = viewState,
-                viewActionHandler = viewActionHandler,
-            )
-            GooglePaySwitch(
-                viewState = viewState,
-                viewActionHandler = viewActionHandler,
-            )
-            ExistingCustomerSwitch(
-                viewState = viewState,
-                viewActionHandler = viewActionHandler,
-            )
+                Icon(
+                    imageVector = if (collapsed) {
+                        Icons.Rounded.KeyboardArrowRight
+                    } else {
+                        Icons.Rounded.KeyboardArrowDown
+                    },
+                    contentDescription = "Developer settings",
+                    modifier = Modifier
+                        .height(32.dp)
+                        .clickable {
+                            collapsed = !collapsed
+                        }
+                )
+            }
+
+            AnimatedVisibility(visible = !collapsed) {
+                Column {
+                    SetupIntentSwitch(
+                        configurationState = configurationState,
+                        viewActionHandler = viewActionHandler,
+                    )
+                    GooglePaySwitch(
+                        configurationState = configurationState,
+                        viewActionHandler = viewActionHandler,
+                    )
+                    ExistingCustomerSwitch(
+                        configurationState = configurationState,
+                        viewActionHandler = viewActionHandler,
+                    )
+                    BillingDetailsConfiguration(
+                        configurationState = configurationState,
+                        viewActionHandler = viewActionHandler,
+                    )
+                }
+            }
         }
     }
 
     @Composable
     private fun SetupIntentSwitch(
-        viewState: CustomerSheetPlaygroundViewState,
+        configurationState: CustomerSheetPlaygroundConfigurationState,
         viewActionHandler: (CustomerSheetPlaygroundViewAction) -> Unit,
     ) {
         Row(
@@ -198,7 +242,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = if (viewState.isSetupIntentEnabled) {
+                text = if (configurationState.isSetupIntentEnabled) {
                     "SetupIntent"
                 } else {
                     "CreateAndAttach"
@@ -206,7 +250,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                 color = MaterialTheme.colors.onBackground,
             )
             Switch(
-                checked = viewState.isSetupIntentEnabled,
+                checked = configurationState.isSetupIntentEnabled,
                 onCheckedChange = {
                     viewActionHandler(CustomerSheetPlaygroundViewAction.ToggleSetupIntentEnabled)
                 }
@@ -216,7 +260,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
 
     @Composable
     private fun GooglePaySwitch(
-        viewState: CustomerSheetPlaygroundViewState,
+        configurationState: CustomerSheetPlaygroundConfigurationState,
         viewActionHandler: (CustomerSheetPlaygroundViewAction) -> Unit,
     ) {
         Row(
@@ -229,7 +273,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                 color = MaterialTheme.colors.onBackground,
             )
             Switch(
-                checked = viewState.isGooglePayEnabled,
+                checked = configurationState.isGooglePayEnabled,
                 onCheckedChange = {
                     viewActionHandler(CustomerSheetPlaygroundViewAction.ToggleGooglePayEnabled)
                 }
@@ -240,7 +284,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     private fun ExistingCustomerSwitch(
-        viewState: CustomerSheetPlaygroundViewState,
+        configurationState: CustomerSheetPlaygroundConfigurationState,
         viewActionHandler: (CustomerSheetPlaygroundViewAction) -> Unit,
     ) {
         Row(
@@ -249,7 +293,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = if (viewState.isExistingCustomer) {
+                text = if (configurationState.isExistingCustomer) {
                     "Returning customer"
                 } else {
                     "New customer"
@@ -257,7 +301,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                 color = MaterialTheme.colors.onBackground,
             )
             Switch(
-                checked = viewState.isExistingCustomer,
+                checked = configurationState.isExistingCustomer,
                 onCheckedChange = {
                     viewActionHandler(CustomerSheetPlaygroundViewAction.ToggleExistingCustomer)
                 },
@@ -265,6 +309,140 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                     .semantics { testTagsAsResourceId = true }
                     .testTag("CUSTOMER_SHEET_PLAYGROUND_EXISTING_CUSTOMER")
             )
+        }
+    }
+
+    @Suppress("LongMethod")
+    @Composable
+    private fun BillingDetailsConfiguration(
+        configurationState: CustomerSheetPlaygroundConfigurationState,
+        viewActionHandler: (CustomerSheetPlaygroundViewAction) -> Unit,
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Use Default Billing Address",
+                    color = MaterialTheme.colors.onBackground,
+                )
+                Switch(
+                    checked = configurationState.useDefaultBillingAddress,
+                    onCheckedChange = {
+                        viewActionHandler(
+                            CustomerSheetPlaygroundViewAction.ToggleUseDefaultBillingAddress
+                        )
+                    },
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Attach Default Billing Address",
+                    color = MaterialTheme.colors.onBackground,
+                )
+                Switch(
+                    checked = configurationState.useDefaultBillingAddress,
+                    onCheckedChange = {
+                        viewActionHandler(
+                            CustomerSheetPlaygroundViewAction.ToggleUseDefaultBillingAddress
+                        )
+                    },
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Name",
+                    color = MaterialTheme.colors.onBackground,
+                )
+                MultiToggleButton(
+                    currentSelection =
+                    configurationState.billingCollectionConfiguration.name.name.lowercase(
+                        Locale.getDefault()
+                    ),
+                    toggleStates = listOf("automatic", "never", "always"),
+                    onToggleChange = {
+                        viewActionHandler(
+                            CustomerSheetPlaygroundViewAction.UpdateBillingNameCollection(it)
+                        )
+                    }
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Email",
+                    color = MaterialTheme.colors.onBackground,
+                )
+                MultiToggleButton(
+                    currentSelection =
+                    configurationState.billingCollectionConfiguration.email.name.lowercase(
+                        Locale.getDefault()
+                    ),
+                    toggleStates = listOf("automatic", "never", "always"),
+                    onToggleChange = {
+                        viewActionHandler(
+                            CustomerSheetPlaygroundViewAction.UpdateBillingEmailCollection(it)
+                        )
+                    }
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Phone",
+                    color = MaterialTheme.colors.onBackground,
+                )
+                MultiToggleButton(
+                    currentSelection =
+                    configurationState.billingCollectionConfiguration.phone.name.lowercase(
+                        Locale.getDefault()
+                    ),
+                    toggleStates = listOf("automatic", "never", "always"),
+                    onToggleChange = {
+                        viewActionHandler(
+                            CustomerSheetPlaygroundViewAction.UpdateBillingPhoneCollection(it)
+                        )
+                    }
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Address",
+                    color = MaterialTheme.colors.onBackground,
+                )
+                MultiToggleButton(
+                    currentSelection =
+                    configurationState.billingCollectionConfiguration.address.name.lowercase(
+                        Locale.getDefault()
+                    ),
+                    toggleStates = listOf("automatic", "never", "full"),
+                    onToggleChange = {
+                        viewActionHandler(
+                            CustomerSheetPlaygroundViewAction.UpdateBillingAddressCollection(it)
+                        )
+                    }
+                )
+            }
         }
     }
 }
