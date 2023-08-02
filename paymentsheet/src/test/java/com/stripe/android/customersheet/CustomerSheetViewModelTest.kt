@@ -14,6 +14,7 @@ import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -56,8 +57,7 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `isLiveMode is true when publishable key is live`() {
-        val viewModelModule = CustomerSheetViewModelModule()
-        var isLiveMode = viewModelModule.isLiveMode {
+        var isLiveMode = CustomerSheetViewModelModule.isLiveMode {
             PaymentConfiguration(
                 publishableKey = "pk_test_123"
             )
@@ -65,7 +65,7 @@ class CustomerSheetViewModelTest {
 
         assertThat(isLiveMode()).isFalse()
 
-        isLiveMode = viewModelModule.isLiveMode {
+        isLiveMode = CustomerSheetViewModelModule.isLiveMode {
             PaymentConfiguration(
                 publishableKey = "pk_live_123"
             )
@@ -73,7 +73,7 @@ class CustomerSheetViewModelTest {
 
         assertThat(isLiveMode()).isTrue()
 
-        isLiveMode = viewModelModule.isLiveMode {
+        isLiveMode = CustomerSheetViewModelModule.isLiveMode {
             PaymentConfiguration(
                 publishableKey = "pk_test_51HvTI7Lu5o3livep6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"
             )
@@ -619,9 +619,6 @@ class CustomerSheetViewModelTest {
             val viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.isProcessing).isTrue()
             assertThat(viewState.enabled).isFalse()
-
-            // Payment method was created and attached to the customer
-            assertThat(awaitItem().isProcessing).isFalse()
         }
     }
 
@@ -665,7 +662,7 @@ class CustomerSheetViewModelTest {
             ),
             stripeRepository = FakeStripeRepository(
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                confirmSetupIntentResult = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
         )
 
@@ -675,6 +672,8 @@ class CustomerSheetViewModelTest {
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+
+            viewModel.onPaymentLauncherResult(PaymentResult.Completed)
 
             val newViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(newViewState.errorMessage).isNull()
@@ -720,7 +719,8 @@ class CustomerSheetViewModelTest {
     fun `When payment method cannot be attached with setup intent, error message is visible`() = runTest {
         val viewModel = createViewModel(
             initialBackStack = listOf(
-                addPaymentMethodViewState
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
             ),
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,
@@ -730,7 +730,7 @@ class CustomerSheetViewModelTest {
             ),
             stripeRepository = FakeStripeRepository(
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                confirmSetupIntentResult = Result.failure(
+                retrieveSetupIntent = Result.failure(
                     APIException(stripeError = StripeError(message = "Could not attach payment method."))
                 ),
             ),
@@ -754,7 +754,8 @@ class CustomerSheetViewModelTest {
     fun `When setup intent provider is not provided, error message is visible`() = runTest {
         val viewModel = createViewModel(
             initialBackStack = listOf(
-                addPaymentMethodViewState
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
             ),
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,
@@ -783,7 +784,8 @@ class CustomerSheetViewModelTest {
     fun `When payment method cannot be attached, error message is visible`() = runTest {
         val viewModel = createViewModel(
             initialBackStack = listOf(
-                addPaymentMethodViewState
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
             ),
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = false,
@@ -795,7 +797,7 @@ class CustomerSheetViewModelTest {
                                 message = "Cannot attach payment method."
                             )
                         ),
-                        displayMessage = "We could not save this payment method. Please try again."
+                        displayMessage = "We couldn't save this payment method. Please try again."
                     )
                 },
             ),
@@ -812,7 +814,7 @@ class CustomerSheetViewModelTest {
 
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
             viewState = awaitViewState()
-            assertThat(viewState.errorMessage).isEqualTo("We could not save this payment method. Please try again.")
+            assertThat(viewState.errorMessage).isEqualTo("We couldn't save this payment method. Please try again.")
             assertThat(viewState.isProcessing).isFalse()
         }
     }
@@ -891,7 +893,7 @@ class CustomerSheetViewModelTest {
             ),
             stripeRepository = FakeStripeRepository(
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                confirmSetupIntentResult = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
             customerAdapter = FakeCustomerAdapter(
                 onSetupIntentClientSecretForCustomerAttach = {
@@ -907,6 +909,8 @@ class CustomerSheetViewModelTest {
 
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing)
                 .isTrue()
+
+            viewModel.onPaymentLauncherResult(PaymentResult.Completed)
 
             assertThat(awaitViewState<SelectPaymentMethod>().primaryButtonVisible)
                 .isTrue()
@@ -996,7 +1000,7 @@ class CustomerSheetViewModelTest {
             ),
             stripeRepository = FakeStripeRepository(
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD.copy(id = "pm_2"),),
-                confirmSetupIntentResult = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
         )
 
@@ -1006,6 +1010,8 @@ class CustomerSheetViewModelTest {
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+
+            viewModel.onPaymentLauncherResult(PaymentResult.Completed)
 
             var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.primaryButtonVisible).isTrue()

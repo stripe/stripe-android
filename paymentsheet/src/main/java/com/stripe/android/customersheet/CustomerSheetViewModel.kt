@@ -2,6 +2,9 @@ package com.stripe.android.customersheet
 
 import android.app.Application
 import android.content.res.Resources
+import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -14,11 +17,21 @@ import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.paymentlauncher.PaymentLauncher
+import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
+import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -53,6 +66,8 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val lpmRepository: LpmRepository,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
+    private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
+    private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
 ) : ViewModel() {
 
@@ -61,6 +76,8 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
     val result: StateFlow<InternalCustomerSheetResult?> = _result
+
+    private var paymentLauncher: PaymentLauncher? = null
 
     init {
         lpmRepository.initializeWithCardSpec(
@@ -92,6 +109,53 @@ internal class CustomerSheetViewModel @Inject constructor(
         return paymentMethod?.displayNameResource?.let {
             resources.getString(it)
         }.orEmpty()
+    }
+
+    fun registerFromActivity(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner
+    ) {
+        paymentLauncher = paymentLauncherFactory.create(
+            publishableKey = { paymentConfigurationProvider.get().publishableKey },
+            stripeAccountId = { paymentConfigurationProvider.get().stripeAccountId },
+            statusBarColor = null,
+            hostActivityLauncher = activityResultCaller.registerForActivityResult(
+                PaymentLauncherContract(),
+                ::onPaymentLauncherResult
+            )
+        )
+
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    paymentLauncher = null
+                    super.onDestroy(owner)
+                }
+            }
+        )
+    }
+
+    internal fun onPaymentLauncherResult(result: PaymentResult) {
+        when (result) {
+            is PaymentResult.Canceled -> {
+                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                    it.copy(
+                        isProcessing = false,
+                    )
+                }
+            }
+            is PaymentResult.Completed -> {
+                onBackPressed()
+            }
+            is PaymentResult.Failed -> {
+                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                    it.copy(
+                        isProcessing = false,
+                        errorMessage = result.throwable.stripeErrorMessage(application),
+                    )
+                }
+            }
+        }
     }
 
     private fun loadPaymentMethods() {
@@ -328,7 +392,19 @@ internal class CustomerSheetViewModel @Inject constructor(
                 .transformToPaymentMethodCreateParams(paymentMethodSpec)
             createPaymentMethod(params)
                 .onSuccess { paymentMethod ->
-                    attachPaymentMethodToCustomer(paymentMethod)
+                    updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                        val newState = it.copy(
+                            savedPaymentMethods = listOf(paymentMethod) + it.savedPaymentMethods,
+                            paymentSelection = PaymentSelection.Saved(
+                                paymentMethod = paymentMethod
+                            ),
+                            primaryButtonVisible = true,
+                            // TODO (jameswoo) translate
+                            primaryButtonLabel = "Confirm",
+                        )
+                        attachPaymentMethodToCustomer(paymentMethod)
+                        newState
+                    }
                 }.onFailure { throwable ->
                     logger.error(
                         msg = "Failed to create payment method for $paymentMethodSpec",
@@ -369,18 +445,14 @@ internal class CustomerSheetViewModel @Inject constructor(
     private suspend fun attachWithSetupIntent(paymentMethod: PaymentMethod) {
         customerAdapter.setupIntentClientSecretForCustomerAttach()
             .mapCatching { clientSecret ->
-                stripeRepository.confirmSetupIntent(
-                    confirmSetupIntentParams = ConfirmSetupIntentParams.create(
-                        paymentMethodId = paymentMethod.id!!,
-                        clientSecret = clientSecret,
-                    ),
+                val intent = stripeRepository.retrieveSetupIntent(
+                    clientSecret = clientSecret,
                     options = ApiRequest.Options(
                         apiKey = paymentConfigurationProvider.get().publishableKey,
                         stripeAccount = paymentConfigurationProvider.get().stripeAccountId,
                     ),
                 ).getOrThrow()
-            }.onSuccess {
-                handlePaymentMethodAttachSuccess(paymentMethod)
+                handleStripeIntent(intent, clientSecret, paymentMethod)
             }.onFailure { cause, displayMessage ->
                 logger.error(
                     msg = "Failed to attach payment method to SetupIntent: $paymentMethod",
@@ -395,10 +467,97 @@ internal class CustomerSheetViewModel @Inject constructor(
             }
     }
 
+    private suspend fun handleStripeIntent(
+        stripeIntent: StripeIntent,
+        clientSecret: String,
+        paymentMethod: PaymentMethod
+    ) {
+        val nextStep = intentConfirmationInterceptor.intercept(
+            initializationMode = PaymentSheet.InitializationMode.SetupIntent(
+                clientSecret = clientSecret,
+            ),
+            paymentMethod = paymentMethod,
+            shippingValues = null,
+            setupForFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+        )
+
+        when (nextStep) {
+            is IntentConfirmationInterceptor.NextStep.Complete -> {
+                onBackPressed()
+            }
+            is IntentConfirmationInterceptor.NextStep.Confirm -> {
+                confirmStripeIntent(nextStep.confirmParams)
+            }
+            is IntentConfirmationInterceptor.NextStep.Fail -> {
+                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                    it.copy(
+                        isProcessing = false,
+                        errorMessage = nextStep.message,
+                    )
+                }
+            }
+            is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
+                handleNextAction(
+                    clientSecret = nextStep.clientSecret,
+                    stripeIntent = stripeIntent
+                )
+            }
+        }
+    }
+
+    private fun confirmStripeIntent(confirmStripeIntentParams: ConfirmStripeIntentParams) {
+        runCatching {
+            requireNotNull(paymentLauncher)
+        }.fold(
+            onSuccess = {
+                when (confirmStripeIntentParams) {
+                    is ConfirmSetupIntentParams -> {
+                        it.confirm(confirmStripeIntentParams)
+                    }
+                    else -> error("Only SetupIntents are supported at this time")
+                }
+            },
+            onFailure = { throwable ->
+                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                    it.copy(
+                        isProcessing = false,
+                        errorMessage = throwable.stripeErrorMessage(application),
+                    )
+                }
+            }
+        )
+    }
+
+    private fun handleNextAction(
+        clientSecret: String,
+        stripeIntent: StripeIntent,
+    ) {
+        runCatching {
+            requireNotNull(paymentLauncher)
+        }.fold(
+            onSuccess = {
+                when (stripeIntent) {
+                    is SetupIntent -> {
+                        it.handleNextActionForSetupIntent(clientSecret)
+                    }
+                    else -> error("Only SetupIntents are supported at this time")
+                }
+            },
+            onFailure = { throwable ->
+                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                    it.copy(
+                        isProcessing = false,
+                        errorMessage = throwable.stripeErrorMessage(application),
+                    )
+                }
+            }
+        )
+    }
+
     private suspend fun attachPaymentMethod(paymentMethod: PaymentMethod) {
         customerAdapter.attachPaymentMethod(paymentMethod.id!!)
             .onSuccess {
-                handlePaymentMethodAttachSuccess(paymentMethod)
+                onBackPressed()
             }.onFailure { cause, displayMessage ->
                 logger.error(
                     msg = "Failed to attach payment method to Customer: $paymentMethod",
@@ -411,21 +570,6 @@ internal class CustomerSheetViewModel @Inject constructor(
                     )
                 }
             }
-    }
-
-    private fun handlePaymentMethodAttachSuccess(paymentMethod: PaymentMethod) {
-        onBackPressed()
-        updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-            it.copy(
-                savedPaymentMethods = listOf(paymentMethod) + it.savedPaymentMethods,
-                paymentSelection = PaymentSelection.Saved(
-                    paymentMethod = paymentMethod
-                ),
-                primaryButtonVisible = true,
-                // TODO (jameswoo) translate
-                primaryButtonLabel = "Confirm",
-            )
-        }
     }
 
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved?) {

@@ -1,12 +1,17 @@
 package com.stripe.android.customersheet
 
 import android.app.Application
+import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -14,6 +19,8 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
 import org.mockito.kotlin.any
@@ -92,11 +99,26 @@ object CustomerSheetTestHelper {
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
+            intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+                enqueueCompleteStep(true)
+            },
+            paymentLauncherFactory = object : StripePaymentLauncherAssistedFactory {
+                override fun create(
+                    publishableKey: () -> String,
+                    stripeAccountId: () -> String?,
+                    statusBarColor: Int?,
+                    hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
+                ): StripePaymentLauncher {
+                    return mock()
+                }
+            },
             googlePayRepositoryFactory = {
                 GooglePayRepository {
                     flowOf(isGooglePayAvailable)
                 }
             }
-        )
+        ).apply {
+            registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
+        }
     }
 }
