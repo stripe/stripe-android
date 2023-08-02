@@ -125,8 +125,6 @@ internal class PaymentSheetActivityTest {
 
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 
-    private lateinit var viewModel: PaymentSheetViewModel
-
     private val contract = PaymentSheetContractV2()
 
     private val intent = contract.createIntent(
@@ -142,7 +140,6 @@ internal class PaymentSheetActivityTest {
 
     @BeforeTest
     fun before() {
-        viewModel = createViewModel()
         PaymentConfiguration.init(
             context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
@@ -238,7 +235,8 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Errors are cleared when checking out with a generic payment method`() {
-        val scenario = activityScenario()
+        val viewModel = createViewModel()
+        val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
             val error = "some error"
@@ -504,7 +502,9 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `handles buy button clicks`() {
-        val scenario = activityScenario()
+        val viewModel = createViewModel()
+        val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity { activity ->
             viewModel.updateSelection(
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -521,7 +521,9 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Verify Ready state updates the buy button label`() {
-        val scenario = activityScenario()
+        val viewModel = createViewModel()
+        val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity { activity ->
             viewModel.viewState.value = PaymentSheetViewState.Reset(null)
 
@@ -536,7 +538,9 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Verify StartProcessing state updates the buy button label`() {
-        val scenario = activityScenario()
+        val viewModel = createViewModel()
+        val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity { activity ->
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
             viewModel.viewState.value = PaymentSheetViewState.StartProcessing
@@ -549,7 +553,9 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `Verify FinishProcessing state calls the callback`() {
         Dispatchers.setMain(testDispatcher)
-        val scenario = activityScenario()
+        val viewModel = createViewModel()
+        val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity {
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
 
@@ -619,7 +625,10 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `Verify ProcessResult state closes the sheet`() {
         Dispatchers.setMain(testDispatcher)
-        val scenario = activityScenario()
+
+        val viewModel = createViewModel()
+        val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity { activity ->
             viewModel.onFinish()
 
@@ -639,7 +648,10 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `successful payment should dismiss bottom sheet`() {
         Dispatchers.setMain(testDispatcher)
+
+        val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity { activity ->
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
             viewModel.onPaymentResult(PaymentResult.Completed)
@@ -735,7 +747,9 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `notes visibility is visible`() {
+        val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity {
             val text = context.getString(StripeUiCoreR.string.stripe_paymentsheet_payment_method_us_bank_account)
             viewModel.updateBelowButtonText(text)
@@ -748,7 +762,9 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `notes visibility is gone`() {
+        val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity {
             val text = "some text"
 
@@ -845,7 +861,9 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `processing should enable after checkout`() {
+        val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity {
             runTest {
                 viewModel.processing.test {
@@ -896,7 +914,9 @@ internal class PaymentSheetActivityTest {
     @Test
     @Config(qualifiers = "sw800dp-w1250dp-h800dp")
     fun `tablet launches payment sheet centered horizontally`() = runTest(testDispatcher) {
+        val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity { activity ->
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(STATE_EXPANDED)
@@ -911,7 +931,7 @@ internal class PaymentSheetActivityTest {
     }
 
     private fun activityScenario(
-        viewModel: PaymentSheetViewModel = this.viewModel
+        viewModel: PaymentSheetViewModel = createViewModel(),
     ): InjectableActivityScenario<PaymentSheetActivity> {
         return injectableActivityScenario {
             injectActivity {
@@ -929,7 +949,7 @@ internal class PaymentSheetActivityTest {
         initialPaymentSelection: PaymentSelection? = null,
     ): PaymentSheetViewModel = runBlocking {
         val lpmRepository = LpmRepository(
-            arguments = LpmRepository.LpmRepositoryArguments(resources = context.resources,),
+            arguments = LpmRepository.LpmRepositoryArguments(resources = context.resources),
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
         ).apply {
             update(
