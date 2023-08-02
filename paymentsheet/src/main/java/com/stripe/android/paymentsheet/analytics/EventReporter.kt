@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import androidx.annotation.Keep
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -59,6 +60,15 @@ internal interface EventReporter {
      */
     fun onShowNewPaymentOptionForm(
         linkEnabled: Boolean,
+        currency: String?,
+        isDecoupling: Boolean,
+    )
+
+    /**
+     * The customer has selected one of the available payment methods in the payment method form.
+     */
+    fun onSelectPaymentMethod(
+        code: PaymentMethodCode,
         currency: String?,
         isDecoupling: Boolean,
     )
