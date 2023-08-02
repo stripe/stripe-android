@@ -111,14 +111,12 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
         )
 
         val timeout = args.config.timeout
-        return runCatching {
-            perform3ds2AuthenticationRequest(
-                transaction,
-                stripe3ds2Fingerprint,
-                threeDS2RequestOptions,
-                timeout
-            )
-        }.fold(
+        return perform3ds2AuthenticationRequest(
+            transaction,
+            stripe3ds2Fingerprint,
+            threeDS2RequestOptions,
+            timeout
+        ).fold(
             onSuccess = { authResult ->
                 on3ds2AuthSuccess(
                     authResult,
@@ -145,7 +143,7 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
         stripe3ds2Fingerprint: Stripe3ds2Fingerprint,
         requestOptions: ApiRequest.Options,
         timeout: Int
-    ) = withContext(workContext) {
+    ): Result<Stripe3ds2AuthResult> = withContext(workContext) {
         val areqParams = transaction.createAuthenticationRequestParameters()
 
         val authParams = Stripe3ds2AuthParams(
@@ -162,11 +160,9 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
             returnUrl = null
         )
 
-        requireNotNull(
-            stripeRepository.start3ds2Auth(
-                authParams,
-                requestOptions
-            )
+        stripeRepository.start3ds2Auth(
+            authParams,
+            requestOptions
         )
     }
 

@@ -9,27 +9,14 @@ import com.stripe.android.R as StripeR
 class HeaderTextFactoryTest {
 
     @Test
-    fun `Shows the correct header in complete flow if in payment mode and showing wallets`() {
+    fun `Shows the correct header in complete flow and showing wallets`() {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
             screen = PaymentSheetScreen.SelectSavedPaymentMethods,
             isWalletEnabled = true,
-            isPaymentIntent = true,
             types = emptyList(),
         )
 
-        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_pay_using)
-    }
-
-    @Test
-    fun `Shows the correct header in complete flow if not in payment mode`() {
-        val resource = HeaderTextFactory(isCompleteFlow = true).create(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods,
-            isWalletEnabled = true,
-            isPaymentIntent = false,
-            types = emptyList(),
-        )
-
-        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_select_payment_method)
+        assertThat(resource).isNull()
     }
 
     @Test
@@ -37,7 +24,6 @@ class HeaderTextFactoryTest {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
             isWalletEnabled = true,
-            isPaymentIntent = false,
             types = emptyList(),
         )
 
@@ -49,7 +35,6 @@ class HeaderTextFactoryTest {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
             screen = PaymentSheetScreen.AddFirstPaymentMethod,
             isWalletEnabled = false,
-            isPaymentIntent = false,
             types = emptyList(),
         )
 
@@ -61,7 +46,6 @@ class HeaderTextFactoryTest {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
             screen = PaymentSheetScreen.AddFirstPaymentMethod,
             isWalletEnabled = true,
-            isPaymentIntent = false,
             types = emptyList(),
         )
 
@@ -73,7 +57,6 @@ class HeaderTextFactoryTest {
         val resource = HeaderTextFactory(isCompleteFlow = false).create(
             screen = PaymentSheetScreen.SelectSavedPaymentMethods,
             isWalletEnabled = true,
-            isPaymentIntent = false,
             types = emptyList(),
         )
 
@@ -85,7 +68,6 @@ class HeaderTextFactoryTest {
         val resource = HeaderTextFactory(isCompleteFlow = false).create(
             screen = PaymentSheetScreen.AddFirstPaymentMethod,
             isWalletEnabled = false,
-            isPaymentIntent = false,
             types = listOf("card"),
         )
 
@@ -97,7 +79,6 @@ class HeaderTextFactoryTest {
         val resource = HeaderTextFactory(isCompleteFlow = false).create(
             screen = PaymentSheetScreen.AddFirstPaymentMethod,
             isWalletEnabled = false,
-            isPaymentIntent = false,
             types = listOf("card", "not_card"),
         )
 

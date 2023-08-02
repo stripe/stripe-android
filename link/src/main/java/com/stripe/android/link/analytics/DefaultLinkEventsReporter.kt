@@ -3,36 +3,35 @@ package com.stripe.android.link.analytics
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
 
 internal class DefaultLinkEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @IOContext private val workContext: CoroutineContext,
-    private val logger: Logger
+    private val logger: Logger,
+    private val durationProvider: DurationProvider,
 ) : LinkEventsReporter {
-    private var signupStartMillis: Long? = null
 
     override fun onInlineSignupCheckboxChecked() {
         fireEvent(LinkEvent.SignUpCheckboxChecked)
     }
 
-    override fun onSignupFlowPresented() {
-        fireEvent(LinkEvent.SignUpFlowPresented)
-    }
-
     override fun onSignupStarted(isInline: Boolean) {
-        signupStartMillis = System.currentTimeMillis()
+        durationProvider.start(DurationProvider.Key.LinkSignup)
         fireEvent(LinkEvent.SignUpStart)
     }
 
     override fun onSignupCompleted(isInline: Boolean) {
-        fireEvent(LinkEvent.SignUpComplete, durationInSecondsFromStart(signupStartMillis))
-        signupStartMillis = null
+        val duration = durationProvider.end(DurationProvider.Key.LinkSignup)
+        fireEvent(LinkEvent.SignUpComplete, durationInSecondsFromStart(duration))
     }
 
     override fun onSignupFailure(isInline: Boolean) {
@@ -41,26 +40,6 @@ internal class DefaultLinkEventsReporter @Inject constructor(
 
     override fun onAccountLookupFailure() {
         fireEvent(LinkEvent.AccountLookupFailure)
-    }
-
-    override fun on2FAStart() {
-        fireEvent(LinkEvent.TwoFAStart)
-    }
-
-    override fun on2FAStartFailure() {
-        fireEvent(LinkEvent.TwoFAStartFailure)
-    }
-
-    override fun on2FAComplete() {
-        fireEvent(LinkEvent.TwoFAComplete)
-    }
-
-    override fun on2FAFailure() {
-        fireEvent(LinkEvent.TwoFAFailure)
-    }
-
-    override fun on2FACancel() {
-        fireEvent(LinkEvent.TwoFACancel)
     }
 
     override fun onPopupShow() {
@@ -75,8 +54,8 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.PopupCancel)
     }
 
-    override fun onPopupError(exception: Throwable) {
-        val params = mapOf("error" to (exception.message ?: exception.toString()))
+    override fun onPopupError(error: Throwable) {
+        val params = mapOf("error" to (error.message ?: error.toString()))
         fireEvent(LinkEvent.PopupError, params)
     }
 
@@ -84,10 +63,14 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.PopupLogout)
     }
 
-    private fun durationInSecondsFromStart(start: Long?) = start?.let {
-        System.currentTimeMillis() - it
-    }?.takeIf { it > 0 }?.let {
-        mapOf("duration" to it / 1000f)
+    override fun onPopupSkipped() {
+        fireEvent(LinkEvent.PopupSkipped)
+    }
+
+    private fun durationInSecondsFromStart(duration: Duration?): Map<String, Float>? {
+        return duration?.let {
+            mapOf("duration" to it.toDouble(DurationUnit.SECONDS).toFloat())
+        }
     }
 
     private fun fireEvent(

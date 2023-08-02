@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.ObjectBuilder
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.AddressJsonParser
@@ -39,7 +38,7 @@ data class Address @VisibleForTesting constructor(
         ).filterValues { it.isNotEmpty() }
     }
 
-    class Builder : ObjectBuilder<Address> {
+    class Builder {
         private var city: String? = null
         private var country: String? = null
         private var line1: String? = null
@@ -76,7 +75,7 @@ data class Address @VisibleForTesting constructor(
             this.state = state
         }
 
-        override fun build(): Address {
+        fun build(): Address {
             return Address(
                 city = city,
                 country = country,

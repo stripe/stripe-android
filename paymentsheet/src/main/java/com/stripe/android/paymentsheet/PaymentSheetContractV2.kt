@@ -7,8 +7,6 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -38,7 +36,6 @@ internal class PaymentSheetContractV2 :
         internal val initializationMode: PaymentSheet.InitializationMode,
         internal val config: PaymentSheet.Configuration?,
         @ColorInt internal val statusBarColor: Int?,
-        @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     ) : ActivityStarter.Args {
 
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay

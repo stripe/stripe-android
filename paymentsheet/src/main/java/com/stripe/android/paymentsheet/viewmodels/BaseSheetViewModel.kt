@@ -235,36 +235,38 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    abstract fun transitionToFirstScreen()
-
-    protected fun transitionTo(target: PaymentSheetScreen) {
-        clearErrorMessages()
-        backStack.update { (it - PaymentSheetScreen.Loading) + target }
-        reportNavigationEvent(target)
+    protected fun transitionToFirstScreen() {
+        val initialBackStack = determineInitialBackStack()
+        backStack.value = initialBackStack
+        reportPaymentSheetShown(initialBackStack.first())
     }
+
+    abstract fun determineInitialBackStack(): List<PaymentSheetScreen>
 
     fun transitionToAddPaymentScreen() {
         transitionTo(AddAnotherPaymentMethod)
     }
 
-    protected fun reportNavigationEvent(currentScreen: PaymentSheetScreen) {
+    private fun transitionTo(target: PaymentSheetScreen) {
+        clearErrorMessages()
+        backStack.update { (it - PaymentSheetScreen.Loading) + target }
+    }
+
+    private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
-            PaymentSheetScreen.Loading -> {
+            PaymentSheetScreen.Loading, AddAnotherPaymentMethod -> {
                 // Nothing to do here
             }
             PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
-                    activeLinkSession = linkHandler.activeLinkSession.value,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = stripeIntent.value?.clientSecret == null,
                 )
             }
-            AddFirstPaymentMethod,
-            AddAnotherPaymentMethod -> {
+            AddFirstPaymentMethod -> {
                 eventReporter.onShowNewPaymentOptionForm(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
-                    activeLinkSession = linkHandler.activeLinkSession.value,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = stripeIntent.value?.clientSecret == null,
                 )
@@ -282,6 +284,18 @@ internal abstract class BaseSheetViewModel(
                 requireNotNull(stripeIntent.currency)
             )
         }
+    }
+
+    protected fun reportDismiss(isDecoupling: Boolean) {
+        eventReporter.onDismiss(isDecoupling = isDecoupling)
+    }
+
+    fun reportPaymentMethodTypeSelected(code: PaymentMethodCode) {
+        eventReporter.onSelectPaymentMethod(
+            code = code,
+            isDecoupling = stripeIntent.value?.clientSecret == null,
+            currency = stripeIntent.value?.currency,
+        )
     }
 
     abstract fun clearErrorMessages()
@@ -425,7 +439,6 @@ internal abstract class BaseSheetViewModel(
             headerTextFactory.create(
                 screen = screen,
                 isWalletEnabled = isLinkAvailable || googlePayState is GooglePayState.Available,
-                isPaymentIntent = stripeIntent is PaymentIntent,
                 types = stripeIntent.paymentMethodTypes,
             )
         } else {
@@ -435,7 +448,7 @@ internal abstract class BaseSheetViewModel(
 
     abstract val shouldCompleteLinkFlowInline: Boolean
 
-    fun payWithLinkInline(userInput: UserInput?) {
+    private fun payWithLinkInline(userInput: UserInput?) {
         viewModelScope.launch {
             linkHandler.payWithLinkInline(
                 userInput = userInput,
@@ -447,7 +460,6 @@ internal abstract class BaseSheetViewModel(
 
     fun createFormArguments(
         selectedItem: LpmRepository.SupportedPaymentMethod,
-        showLinkInlineSignup: Boolean
     ): FormArguments = FormArgumentsFactory.create(
         paymentMethod = selectedItem,
         stripeIntent = requireNotNull(stripeIntent.value),
@@ -455,7 +467,6 @@ internal abstract class BaseSheetViewModel(
         merchantName = merchantName,
         amount = amount.value,
         newLpm = newPaymentSelection,
-        isShowingLinkInlineSignup = showLinkInlineSignup
     )
 
     fun handleBackPressed() {

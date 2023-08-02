@@ -33,15 +33,6 @@ internal interface LinkRepository {
     ): Result<ConsumerSession>
 
     /**
-     * Logs out the current consumer.
-     */
-    suspend fun logout(
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
-        authSessionCookie: String?
-    ): Result<ConsumerSession>
-
-    /**
      * Create a new card payment method in the consumer account.
      */
     suspend fun createCardPaymentDetails(

@@ -1,17 +1,16 @@
 package com.stripe.android.customersheet
 
 import android.content.Context
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
-import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toSavedSelection
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -23,7 +22,6 @@ import kotlin.coroutines.CoroutineContext
  * to load the customer's default saved payment method.
  */
 @OptIn(ExperimentalCustomerSheetApi::class)
-@Suppress("unused")
 @JvmSuppressWildcards
 internal class StripeCustomerAdapter @Inject constructor(
     private val context: Context,
@@ -38,10 +36,13 @@ internal class StripeCustomerAdapter @Inject constructor(
     @Volatile
     private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey? = null
 
+    private val isGooglePayAvailable: Boolean
+        get() = CustomerSessionViewModel.component.configuration.googlePayEnabled
+
     override val canCreateSetupIntents: Boolean
         get() = setupIntentClientSecretProvider != null
 
-    override suspend fun retrievePaymentMethods(): Result<List<PaymentMethod>> {
+    override suspend fun retrievePaymentMethods(): CustomerAdapter.Result<List<PaymentMethod>> {
         return getCustomerEphemeralKey().map { customerEphemeralKey ->
             val paymentMethods = customerRepository.getPaymentMethods(
                 customerConfig = PaymentSheet.CustomerConfiguration(
@@ -54,7 +55,9 @@ internal class StripeCustomerAdapter @Inject constructor(
         }
     }
 
-    override suspend fun attachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
+    override suspend fun attachPaymentMethod(
+        paymentMethodId: String
+    ): CustomerAdapter.Result<PaymentMethod> {
         return getCustomerEphemeralKey().map { customerEphemeralKey ->
             customerRepository.attachPaymentMethod(
                 customerConfig = PaymentSheet.CustomerConfiguration(
@@ -63,12 +66,17 @@ internal class StripeCustomerAdapter @Inject constructor(
                 ),
                 paymentMethodId = paymentMethodId
             ).getOrElse {
-                return Result.failure(it)
+                return CustomerAdapter.Result.failure(
+                    cause = it,
+                    displayMessage = it.stripeErrorMessage(context),
+                )
             }
         }
     }
 
-    override suspend fun detachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
+    override suspend fun detachPaymentMethod(
+        paymentMethodId: String
+    ): CustomerAdapter.Result<PaymentMethod> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             customerRepository.detachPaymentMethod(
                 customerConfig = PaymentSheet.CustomerConfiguration(
@@ -77,51 +85,55 @@ internal class StripeCustomerAdapter @Inject constructor(
                 ),
                 paymentMethodId = paymentMethodId
             ).getOrElse {
-                return Result.failure(it)
+                return CustomerAdapter.Result.failure(
+                    cause = it,
+                    displayMessage = it.stripeErrorMessage(context),
+                )
             }
         }
     }
 
     override suspend fun setSelectedPaymentOption(
         paymentOption: CustomerAdapter.PaymentOption?
-    ): Result<Unit> {
+    ): CustomerAdapter.Result<Unit> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
-            withContext(workContext) {
+            return withContext(workContext) {
                 val result = prefsRepository.setSavedSelection(paymentOption?.toSavedSelection())
                 if (result) {
-                    Result.success(Unit)
+                    CustomerAdapter.Result.success(Unit)
                 } else {
-                    Result.failure(
-                        IOException("Unable to set the payment option: $paymentOption")
+                    CustomerAdapter.Result.failure(
+                        cause = IOException("Unable to persist payment option $paymentOption"),
+                        displayMessage = context.getString(R.string.stripe_something_went_wrong)
                     )
                 }
             }
-        }.getOrElse {
-            Result.failure(it)
         }
     }
 
-    override suspend fun retrieveSelectedPaymentOption(): Result<CustomerAdapter.PaymentOption?> {
+    override suspend fun retrieveSelectedPaymentOption():
+        CustomerAdapter.Result<CustomerAdapter.PaymentOption?> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
             val savedSelection = prefsRepository.getSavedSelection(
-                isGooglePayAvailable = false,
+                isGooglePayAvailable = isGooglePayAvailable,
                 isLinkAvailable = false,
             )
             savedSelection.toPaymentOption()
         }
     }
 
-    override suspend fun setupIntentClientSecretForCustomerAttach(): Result<String> {
-        return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
-            setupIntentClientSecretProvider?.provide(customerEphemeralKey.customerId)
-        }.getOrElse {
-            Result.failure(it)
-        } ?: throw IllegalArgumentException("setupIntentClientSecretProvider cannot be null")
+    override suspend fun setupIntentClientSecretForCustomerAttach(): CustomerAdapter.Result<String> {
+        if (setupIntentClientSecretProvider == null) {
+            throw IllegalArgumentException("setupIntentClientSecretProvider cannot be null")
+        }
+        return getCustomerEphemeralKey().flatMap { customerEphemeralKey ->
+            setupIntentClientSecretProvider.provideSetupIntentClientSecret(customerEphemeralKey.customerId)
+        }
     }
 
-    internal suspend fun getCustomerEphemeralKey(): Result<CustomerEphemeralKey> {
+    internal suspend fun getCustomerEphemeralKey(): CustomerAdapter.Result<CustomerEphemeralKey> {
         return withContext(workContext) {
             cachedCustomerEphemeralKey.takeUnless { cachedCustomerEphemeralKey ->
                 cachedCustomerEphemeralKey == null || shouldRefreshCustomer(
@@ -129,7 +141,7 @@ internal class StripeCustomerAdapter @Inject constructor(
                 )
             }?.result ?: run {
                 val newCachedCustomerEphemeralKey = CachedCustomerEphemeralKey(
-                    result = customerEphemeralKeyProvider.provide(),
+                    result = customerEphemeralKeyProvider.provideCustomerEphemeralKey(),
                     date = timeProvider(),
                 )
                 cachedCustomerEphemeralKey = newCachedCustomerEphemeralKey
@@ -151,6 +163,6 @@ internal class StripeCustomerAdapter @Inject constructor(
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 private data class CachedCustomerEphemeralKey(
-    val result: Result<CustomerEphemeralKey>,
+    val result: CustomerAdapter.Result<CustomerEphemeralKey>,
     val date: Long,
 )

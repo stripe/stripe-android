@@ -304,7 +304,7 @@ private fun Title(
         text = TextResource.Text(title),
         defaultStyle = FinancialConnectionsTheme.typography.subtitle,
         annotationStyles = emptyMap(),
-        onClickableTextClick = {},
+        onClickableTextClick = {}
     )
 }
 

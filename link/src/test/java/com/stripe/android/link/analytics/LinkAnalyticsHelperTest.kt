@@ -65,16 +65,24 @@ internal class LinkAnalyticsHelperTest {
         analyticsHelper.onLinkResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.LoggedOut))
         assertThat(eventReporter.calledCount).isEqualTo(1)
     }
+
+    @Test
+    fun testOnLinkSkippedCalls_onPopupSkipped() {
+        val eventReporter = object : FakeLinkEventsReporter() {
+            override fun onPopupSkipped() {
+                calledCount++
+            }
+        }
+        val analyticsHelper = LinkAnalyticsHelper(eventReporter)
+        analyticsHelper.onLinkPopupSkipped()
+        assertThat(eventReporter.calledCount).isEqualTo(1)
+    }
 }
 
 private open class FakeLinkEventsReporter : LinkEventsReporter {
     var calledCount = 0
 
     override fun onInlineSignupCheckboxChecked() {
-        throw NotImplementedError()
-    }
-
-    override fun onSignupFlowPresented() {
         throw NotImplementedError()
     }
 
@@ -91,26 +99,6 @@ private open class FakeLinkEventsReporter : LinkEventsReporter {
     }
 
     override fun onAccountLookupFailure() {
-        throw NotImplementedError()
-    }
-
-    override fun on2FAStart() {
-        throw NotImplementedError()
-    }
-
-    override fun on2FAStartFailure() {
-        throw NotImplementedError()
-    }
-
-    override fun on2FAComplete() {
-        throw NotImplementedError()
-    }
-
-    override fun on2FAFailure() {
-        throw NotImplementedError()
-    }
-
-    override fun on2FACancel() {
         throw NotImplementedError()
     }
 
@@ -131,6 +119,10 @@ private open class FakeLinkEventsReporter : LinkEventsReporter {
     }
 
     override fun onPopupLogout() {
+        throw NotImplementedError()
+    }
+
+    override fun onPopupSkipped() {
         throw NotImplementedError()
     }
 }

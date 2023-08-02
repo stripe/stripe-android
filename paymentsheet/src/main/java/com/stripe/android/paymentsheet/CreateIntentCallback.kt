@@ -1,19 +1,14 @@
 package com.stripe.android.paymentsheet
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed interface AbsCreateIntentCallback
 
 /**
  * Callback to be used when you use `PaymentSheet` and intend to create and optionally confirm the
  * [PaymentIntent] or [SetupIntent] on your server.
  */
-@ExperimentalPaymentSheetDecouplingApi
-fun interface CreateIntentCallback : AbsCreateIntentCallback {
+fun interface CreateIntentCallback {
 
     /**
      * Called when the customer confirms the payment or setup.
@@ -38,13 +33,10 @@ fun interface CreateIntentCallback : AbsCreateIntentCallback {
 /**
  * Represents the result of a [CreateIntentCallback].
  */
-@ExperimentalPaymentSheetDecouplingApi
 sealed interface CreateIntentResult {
 
-    @ExperimentalPaymentSheetDecouplingApi
     class Success(internal val clientSecret: String) : CreateIntentResult
 
-    @ExperimentalPaymentSheetDecouplingApi
     class Failure @JvmOverloads constructor(
         internal val cause: Exception,
         internal val displayMessage: String? = null,

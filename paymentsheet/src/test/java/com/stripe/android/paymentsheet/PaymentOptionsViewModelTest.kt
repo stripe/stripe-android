@@ -7,7 +7,6 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -128,7 +127,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            viewModel.transitionToFirstScreen()
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
         }
     }
@@ -145,7 +143,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            viewModel.transitionToFirstScreen()
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddAnotherPaymentMethod)
 
             viewModel.handleBackPressed()
@@ -208,7 +205,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link)
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
@@ -219,7 +215,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link)
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
     }
 
@@ -273,7 +268,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            viewModel.transitionToFirstScreen()
             assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
         }
     }
@@ -290,7 +284,6 @@ internal class PaymentOptionsViewModelTest {
             )
 
             viewModel.currentScreen.test {
-                viewModel.transitionToFirstScreen()
                 assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
             }
         }
@@ -499,6 +492,24 @@ internal class PaymentOptionsViewModelTest {
         }
     }
 
+    @Test
+    fun `Sends dismiss event when the user cancels the flow with non-deferred intent`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.onUserCancel()
+        verify(eventReporter).onDismiss(isDecoupling = false)
+    }
+
+    @Test
+    fun `Sends dismiss event when the user cancels the flow with deferred intent`() = runTest {
+        val deferredIntentArgs = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(stripeIntent = DEFERRED_PAYMENT_INTENT),
+        )
+
+        val viewModel = createViewModel(args = deferredIntentArgs)
+        viewModel.onUserCancel()
+        verify(eventReporter).onDismiss(isDecoupling = true)
+    }
+
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,
@@ -532,6 +543,7 @@ internal class PaymentOptionsViewModelTest {
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFactory.create()
+        private val DEFERRED_PAYMENT_INTENT = PAYMENT_INTENT.copy(clientSecret = null)
         private val SELECTION_SAVED_PAYMENT_METHOD = PaymentSelection.Saved(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
@@ -563,7 +575,6 @@ internal class PaymentOptionsViewModelTest {
                 linkState = null,
             ),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            injectorKey = DUMMY_INJECTOR_KEY,
             enableLogging = false,
             productUsage = mock()
         )

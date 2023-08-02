@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.example
 
-import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
@@ -38,6 +36,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetP
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetExampleActivity
+import com.stripe.android.paymentsheet.example.samples.ui.customersheet.playground.CustomerSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow.CustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
@@ -70,24 +69,16 @@ class MainActivity : AppCompatActivity() {
                 titleResId = R.string.paymentsheet_serverside_confirmation_title,
                 subtitleResId = R.string.paymentsheet_serverside_confirmation_subtitle,
                 klass = ServerSideConfirmationCompleteFlowActivity::class.java,
-                badge = MenuItem.Badge(
-                    labelResId = R.string.beta_badge_label,
-                    onClick = this::openDecouplingBetaLink,
-                ),
                 section = MenuItem.Section.CompleteFlow,
             ),
             MenuItem(
                 titleResId = R.string.paymentsheet_custom_serverside_confirmation_title,
                 subtitleResId = R.string.paymentsheet_serverside_confirmation_subtitle,
                 klass = ServerSideConfirmationCustomFlowActivity::class.java,
-                badge = MenuItem.Badge(
-                    labelResId = R.string.beta_badge_label,
-                    onClick = this::openDecouplingBetaLink,
-                ),
                 section = MenuItem.Section.CustomFlow,
             ),
             MenuItem(
-                titleResId = R.string.customer_title,
+                titleResId = R.string.customersheet_example_title,
                 subtitleResId = R.string.customer_subtitle,
                 klass = CustomerSheetExampleActivity::class.java,
                 section = MenuItem.Section.CustomerSheet,
@@ -105,6 +96,12 @@ class MainActivity : AppCompatActivity() {
                 titleResId = R.string.playground_title,
                 subtitleResId = R.string.playground_subtitle,
                 klass = PaymentSheetPlaygroundActivity::class.java,
+                section = MenuItem.Section.Internal,
+            ),
+            MenuItem(
+                titleResId = R.string.customersheet_playground_title,
+                subtitleResId = R.string.playground_subtitle,
+                klass = CustomerSheetPlaygroundActivity::class.java,
                 section = MenuItem.Section.Internal,
             ),
         )
@@ -258,12 +255,4 @@ private fun MenuItemRow(item: MenuItem) {
             }
         }
     }
-}
-
-private fun Context.openDecouplingBetaLink() {
-    val url = "https://stripe.com/docs/payments/finalize-payments-on-the-server?platform=mobile"
-    val intent = Intent(Intent.ACTION_VIEW).apply {
-        data = Uri.parse(url)
-    }
-    startActivity(intent)
 }

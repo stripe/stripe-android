@@ -21,13 +21,19 @@ internal object ApiKeyFixtures {
     const val SUCCESS_URL = "stripe-auth://link-accounts/success"
     const val CANCEL_URL = "stripe-auth://link-accounts/cancel"
 
-    fun syncResponse() = SynchronizeSessionResponse(
-        manifest = sessionManifest(),
+    fun syncResponse(
+        manifest: FinancialConnectionsSessionManifest = sessionManifest(),
+        visual: VisualUpdate = visual()
+    ) = SynchronizeSessionResponse(
+        manifest = manifest,
         text = null,
-        visual = VisualUpdate(
-            reducedBranding = false,
-            merchantLogos = emptyList()
-        )
+        visual = visual
+    )
+
+    fun visual() = VisualUpdate(
+        reducedBranding = false,
+        reducedManualEntryProminenceInErrors = false,
+        merchantLogos = emptyList()
     )
 
     fun financialConnectionsSessionNoAccounts() = FinancialConnectionsSession(

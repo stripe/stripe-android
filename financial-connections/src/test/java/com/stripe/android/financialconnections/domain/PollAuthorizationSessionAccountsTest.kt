@@ -6,6 +6,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSessi
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -37,9 +38,11 @@ internal class PollAuthorizationSessionAccountsTest {
 
     @Test
     fun `test successful account polling`() = runTest {
-        val manifest: FinancialConnectionsSessionManifest = sessionManifest().copy(
-            activeAuthSession = authorizationSession(),
-            activeInstitution = institution()
+        val sync = syncResponse(
+            sessionManifest().copy(
+                activeAuthSession = authorizationSession(),
+                activeInstitution = institution()
+            )
         )
         val accountsList = PartnerAccountsList(
             data = listOf(
@@ -51,27 +54,29 @@ internal class PollAuthorizationSessionAccountsTest {
         whenever(repository.postAuthorizationSessionAccounts(any(), any()))
             .doReturn(accountsList)
 
-        val result = pollAuthorizationSessionAccounts.invoke(true, manifest)
+        val result = pollAuthorizationSessionAccounts.invoke(true, sync)
 
         assertEquals(accountsList, result)
         verify(repository).postAuthorizationSessionAccounts(
             configuration.financialConnectionsSessionClientSecret,
-            manifest.activeAuthSession!!.id
+            sync.manifest.activeAuthSession!!.id
         )
     }
 
     @Test
     fun `test reached too many failed account polling`() = runTest {
-        val manifest: FinancialConnectionsSessionManifest = sessionManifest().copy(
-            activeAuthSession = authorizationSession(),
-            activeInstitution = institution()
+        val sync = syncResponse(
+            sessionManifest().copy(
+                activeAuthSession = authorizationSession(),
+                activeInstitution = institution()
+            )
         )
 
         whenever(repository.postAuthorizationSessionAccounts(any(), any()))
             .thenAnswer { throw retryException() }
 
         val exception: Throwable? = runCatching {
-            pollAuthorizationSessionAccounts.invoke(true, manifest)
+            pollAuthorizationSessionAccounts.invoke(true, sync)
         }.exceptionOrNull()
 
         assertIs<AccountLoadError>(exception)
@@ -79,15 +84,17 @@ internal class PollAuthorizationSessionAccountsTest {
         // Retries 180 times
         verify(repository, times(180)).postAuthorizationSessionAccounts(
             configuration.financialConnectionsSessionClientSecret,
-            manifest.activeAuthSession!!.id
+            sync.manifest.activeAuthSession!!.id
         )
     }
 
     @Test
     fun `test empty account list retrieved`() = runTest {
-        val manifest: FinancialConnectionsSessionManifest = sessionManifest().copy(
-            activeAuthSession = authorizationSession(),
-            activeInstitution = institution()
+        val sync = syncResponse(
+            sessionManifest().copy(
+                activeAuthSession = authorizationSession(),
+                activeInstitution = institution()
+            )
         )
 
         val emptyList = PartnerAccountsList(
@@ -98,14 +105,14 @@ internal class PollAuthorizationSessionAccountsTest {
         whenever(repository.postAuthorizationSessionAccounts(any(), any())).doReturn(emptyList)
 
         val exception: Throwable? = runCatching {
-            pollAuthorizationSessionAccounts.invoke(true, manifest)
+            pollAuthorizationSessionAccounts.invoke(true, sync)
         }.exceptionOrNull()
 
         assertIs<AccountLoadError>(exception)
 
         verify(repository, times(1)).postAuthorizationSessionAccounts(
             configuration.financialConnectionsSessionClientSecret,
-            manifest.activeAuthSession!!.id
+            sync.manifest.activeAuthSession!!.id
         )
     }
 }

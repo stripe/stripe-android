@@ -53,6 +53,7 @@ internal class AddressElementActivity : ComponentActivity() {
         starterArgs.config?.appearance?.parseAppearance()
 
         setContent {
+            val coroutineScope = rememberCoroutineScope()
             val navController = rememberAnimatedNavController()
             viewModel.navigator.navigationController = navController
 
@@ -67,12 +68,10 @@ internal class AddressElementActivity : ComponentActivity() {
                 viewModel.navigator.onBack()
             }
 
-            val coroutineScope = rememberCoroutineScope()
-
-            viewModel.navigator.onDismiss = {
-                setResult(it)
+            viewModel.navigator.onDismiss = { result ->
                 coroutineScope.launch {
                     bottomSheetState.hide()
+                    setResult(result)
                     finish()
                 }
             }
@@ -92,7 +91,7 @@ internal class AddressElementActivity : ComponentActivity() {
                                 LoadingIndicator(modifier = Modifier.fillMaxSize())
                             }
                             composable(AddressElementScreen.InputAddress.route) {
-                                InputAddressScreen(viewModel.injector)
+                                InputAddressScreen(viewModel.inputAddressViewModelSubcomponentBuilderProvider)
                             }
                             composable(
                                 AddressElementScreen.Autocomplete.route,
@@ -108,7 +107,7 @@ internal class AddressElementActivity : ComponentActivity() {
                                         AddressElementScreen.Autocomplete.countryArg
                                     )
                                 AutocompleteScreen(
-                                    viewModel.injector,
+                                    viewModel.autoCompleteViewModelSubcomponentBuilderProvider,
                                     country
                                 )
                             }

@@ -46,6 +46,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.SourceFixtures
@@ -81,7 +82,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
@@ -474,13 +474,10 @@ internal class StripeApiRepositoryTest {
                 "stripe://payment-auth-return"
             )
 
-            val invalidRequestException =
-                assertFailsWith<InvalidRequestException> {
-                    stripeApiRepository.start3ds2Auth(
-                        authParams,
-                        DEFAULT_OPTIONS
-                    )
-                }
+            val invalidRequestException = stripeApiRepository.start3ds2Auth(
+                authParams,
+                DEFAULT_OPTIONS
+            ).exceptionOrNull() as InvalidRequestException
 
             assertEquals("source", invalidRequestException.stripeError?.param)
             assertEquals("resource_missing", invalidRequestException.stripeError?.code)
@@ -489,13 +486,11 @@ internal class StripeApiRepositoryTest {
     @Test
     fun complete3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException() =
         runTest {
-            val invalidRequestException =
-                assertFailsWith<InvalidRequestException> {
-                    stripeApiRepository.complete3ds2Auth(
-                        "src_123",
-                        DEFAULT_OPTIONS
-                    )
-                }
+            val invalidRequestException = stripeApiRepository.complete3ds2Auth(
+                "src_123",
+                DEFAULT_OPTIONS
+            ).exceptionOrNull() as InvalidRequestException
+
             assertThat(invalidRequestException.statusCode)
                 .isEqualTo(HttpURLConnection.HTTP_NOT_FOUND)
             assertEquals("source", invalidRequestException.stripeError?.param)
@@ -757,7 +752,7 @@ internal class StripeApiRepositoryTest {
                 create(setOf(productUsage)).confirmSetupIntent(
                     confirmSetupIntentParams,
                     ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-                )
+                ).getOrNull()
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -800,7 +795,7 @@ internal class StripeApiRepositoryTest {
                 create(setOf(productUsage)).confirmSetupIntent(
                     confirmSetupIntentParams,
                     ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-                )
+                ).getOrNull()
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -840,12 +835,10 @@ internal class StripeApiRepositoryTest {
             val clientSecret = "temporarily put a private key here simulate the backend"
             val publishableKey = "put a public key that matches the private key here"
 
-            requireNotNull(
-                stripeApiRepository.retrievePaymentIntent(
-                    clientSecret,
-                    ApiRequest.Options(publishableKey)
-                )
-            )
+            stripeApiRepository.retrievePaymentIntent(
+                clientSecret,
+                ApiRequest.Options(publishableKey)
+            ).getOrThrow()
         }
 
     @Test
@@ -1112,7 +1105,7 @@ internal class StripeApiRepositoryTest {
     fun getFpxBankStatus_withFpxKey() = runTest {
         val fpxBankStatuses = stripeApiRepository.getFpxBankStatus(
             ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
-        )
+        ).getOrThrow()
         assertThat(fpxBankStatuses.size())
             .isEqualTo(26)
     }
@@ -1124,7 +1117,7 @@ internal class StripeApiRepositoryTest {
                 apiKey = ApiKeyFixtures.FPX_PUBLISHABLE_KEY,
                 stripeAccount = "acct_1234"
             )
-        )
+        ).getOrThrow()
         assertThat(fpxBankStatuses.size())
             .isEqualTo(26)
     }
@@ -1135,8 +1128,7 @@ internal class StripeApiRepositoryTest {
             stripeApiRepository.getCardMetadata(
                 BinFixtures.VISA,
                 ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
-            )
-        requireNotNull(cardMetadata)
+            ).getOrThrow()
         assertThat(cardMetadata.bin)
             .isEqualTo(BinFixtures.VISA)
         assertThat(cardMetadata.accountRanges)
@@ -1146,21 +1138,19 @@ internal class StripeApiRepositoryTest {
     @Test
     fun cancelPaymentIntentSource_whenAlreadyCanceled_throwsInvalidRequestException() =
         runTest {
-            val exception = assertFailsWith<InvalidRequestException> {
-                stripeApiRepository.cancelPaymentIntentSource(
-                    "pi_1FejpSH8dsfnfKo38L276wr6",
-                    "src_1FejpbH8dsfnfKo3KR7EqCzJ",
-                    ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
-                )
-            }
-            assertEquals(
+            val exception = stripeApiRepository.cancelPaymentIntentSource(
+                paymentIntentId = "pi_1FejpSH8dsfnfKo38L276wr6",
+                sourceId = "src_1FejpbH8dsfnfKo3KR7EqCzJ",
+                options = ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY),
+            ).exceptionOrNull() as InvalidRequestException
+
+            assertThat(exception.message).isEqualTo(
                 "This PaymentIntent could be not be fulfilled via this session because" +
                     " a different payment method was attached to it. " +
                     "Another session could be attempting to fulfill this PaymentIntent." +
                     " Please complete that session or try again.",
-                exception.message
             )
-            assertEquals("payment_intent_unexpected_state", exception.stripeError?.code)
+            assertThat(exception.stripeError?.code).isEqualTo("payment_intent_unexpected_state")
         }
 
     @Test
@@ -1169,12 +1159,12 @@ internal class StripeApiRepositoryTest {
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenAnswer { throw UnknownHostException() }
 
-            assertFailsWith<APIConnectionException> {
-                create().createSource(
-                    SourceParams.createCardParams(CARD_PARAMS),
-                    DEFAULT_OPTIONS
-                )
-            }
+            val exception = create().createSource(
+                sourceParams = SourceParams.createCardParams(CARD_PARAMS),
+                options = DEFAULT_OPTIONS,
+            ).exceptionOrNull()
+
+            assertThat(exception).isInstanceOf(APIConnectionException::class.java)
         }
 
     @Test
@@ -1221,7 +1211,7 @@ internal class StripeApiRepositoryTest {
         val response = create().retrieveObject(
             StripeApiRepository.paymentMethodsUrl,
             DEFAULT_OPTIONS
-        )
+        ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(any())
         assertThat(response.body).isEqualTo(responseBody)
@@ -1240,12 +1230,10 @@ internal class StripeApiRepositoryTest {
                 sdkVersion = "AndroidBindings/13.0.0"
             )
 
-            val ex = assertFailsWith<InvalidRequestException> {
-                stripeRepository.retrieveSetupIntent(
-                    "seti_1CkiBMLENEVhOs7YMtUehLau_secret_invalid",
-                    DEFAULT_OPTIONS
-                )
-            }
+            val ex = stripeRepository.retrieveSetupIntent(
+                "seti_1CkiBMLENEVhOs7YMtUehLau_secret_invalid",
+                DEFAULT_OPTIONS
+            ).exceptionOrNull() as InvalidRequestException
             assertEquals(
                 "No such setupintent: 'seti_1CkiBMLENEVhOs7YMtUehLau'",
                 ex.stripeError?.message
@@ -1529,9 +1517,8 @@ internal class StripeApiRepositoryTest {
                 ),
                 workContext = testDispatcher
             )
-            val radarSession = requireNotNull(
-                stripeRepository.createRadarSession(DEFAULT_OPTIONS)
-            )
+            val radarSession = stripeRepository.createRadarSession(DEFAULT_OPTIONS).getOrThrow()
+
             assertThat(radarSession.id)
                 .startsWith("rse_")
 
@@ -1550,10 +1537,10 @@ internal class StripeApiRepositoryTest {
                 workContext = testDispatcher
             )
 
-            val invalidRequestException = assertFailsWith<InvalidRequestException> {
-                stripeRepository.createRadarSession(DEFAULT_OPTIONS)
-            }
-            assertThat(invalidRequestException.message)
+            val invalidRequestException = stripeRepository.createRadarSession(DEFAULT_OPTIONS).exceptionOrNull()
+
+            assertThat(invalidRequestException).isInstanceOf(InvalidRequestException::class.java)
+            assertThat(invalidRequestException?.message)
                 .isEqualTo("Could not obtain fraud data required to create a Radar Session.")
         }
 
@@ -1561,27 +1548,26 @@ internal class StripeApiRepositoryTest {
     fun `createRadarSession() with advancedFraudSignalsEnabled set to false should throw an exception`() =
         runTest {
             verifyNoInteractions(fraudDetectionDataRepository)
-
             Stripe.advancedFraudSignalsEnabled = false
+
             val stripeRepository = create()
-            val invalidRequestException = assertFailsWith<InvalidRequestException> {
-                stripeRepository.createRadarSession(DEFAULT_OPTIONS)
-            }
-            assertThat(invalidRequestException.message)
+            val invalidRequestException = stripeRepository.createRadarSession(DEFAULT_OPTIONS).exceptionOrNull()
+
+            assertThat(invalidRequestException).isInstanceOf(InvalidRequestException::class.java)
+            assertThat(invalidRequestException?.message)
                 .isEqualTo("Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session.")
         }
 
     @Test
     fun `retrieveStripeIntent() with invalid client secret should throw exception`() =
         runTest {
-            val error = assertFailsWith<IllegalStateException> {
-                stripeApiRepository.retrieveStripeIntent(
-                    "invalid!",
-                    DEFAULT_OPTIONS
-                )
-            }
-            assertThat(error.message)
-                .isEqualTo("Invalid client secret.")
+            val error = stripeApiRepository.retrieveStripeIntent(
+                clientSecret = "invalid!",
+                options = DEFAULT_OPTIONS,
+            ).exceptionOrNull()
+
+            assertThat(error).isInstanceOf(IllegalStateException::class.java)
+            assertThat(error?.message).isEqualTo("Invalid client secret.")
         }
 
     @Test
@@ -1597,12 +1583,10 @@ internal class StripeApiRepositoryTest {
                     )
                 )
 
-            requireNotNull(
-                create().refreshPaymentIntent(
-                    clientSecret,
-                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-                )
-            )
+            create().refreshPaymentIntent(
+                clientSecret,
+                ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            ).getOrThrow()
 
             verify(stripeNetworkClient).executeRequest(
                 argWhere<ApiRequest> {
@@ -1660,39 +1644,6 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun `logoutConsumer() sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                ConsumerFixtures.CONSUMER_LOGGED_OUT_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val clientSecret = "secret"
-            val cookie = "cookie1"
-            create().logoutConsumer(
-                clientSecret,
-                cookie,
-                DEFAULT_OPTIONS
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-
-            with(params) {
-                assertEquals(this["request_surface"], "android_payment_element")
-                withNestedParams("credentials") {
-                    assertEquals(this["consumer_session_client_secret"], clientSecret)
-                }
-                withNestedParams("cookies") {
-                    assertEquals(this["verification_session_client_secrets"], listOf(cookie))
-                }
-            }
-        }
-
-    @Test
     fun `createDeferredFinancialConnectionsSession() sends all parameters`() =
         runTest {
             val stripeResponse = StripeResponse(
@@ -1731,41 +1682,6 @@ internal class StripeApiRepositoryTest {
                 assertEquals(null, this["on_behalf_of"])
                 assertEquals(1000, this["amount"])
                 assertEquals("usd", this["currency"])
-            }
-        }
-
-    @Test
-    fun `createPaymentDetails() for financial connections sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val clientSecret = "secret"
-            val accountId = "account"
-            create().createPaymentDetails(
-                clientSecret,
-                accountId,
-                DEFAULT_OPTIONS
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-
-            with(params) {
-                assertEquals(this["request_surface"], "android_payment_element")
-                withNestedParams("credentials") {
-                    assertEquals(this["consumer_session_client_secret"], clientSecret)
-                }
-                assertEquals(this["is_default"], true)
-                assertEquals(this["type"], "bank_account")
-                withNestedParams("bank_account") {
-                    assertEquals(this["account"], accountId)
-                }
             }
         }
 
@@ -2308,6 +2224,65 @@ internal class StripeApiRepositoryTest {
             assertEquals("automatic", this["deferred_intent[capture_method]"])
             assertEquals("card", this["deferred_intent[payment_method_types][0]"])
             assertEquals("link", this["deferred_intent[payment_method_types][1]"])
+        }
+    }
+
+    @Test
+    fun `Verify that retrieveCardMetadata returns failure for BINs that are too short`() = runTest {
+        val repository = create()
+
+        val exception = repository.retrieveCardMetadata(
+            cardNumber = "4242 4",
+            requestOptions = DEFAULT_OPTIONS,
+        ).exceptionOrNull()
+
+        assertThat(exception).isInstanceOf(InvalidRequestException::class.java)
+    }
+
+    @Test
+    fun `Verify that the payment method options are persisted for dashboard card payments`() = runTest {
+        // Dashboard payments create a payment first
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    PaymentMethodFixtures.CARD_JSON.toString(),
+                    emptyMap()
+                )
+            )
+
+        val confirmPaymentIntentParams =
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                clientSecret = "pi_12345_secret_fake",
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+                    moto = true
+                )
+            )
+
+        // Dashboard uses user key
+        create().confirmPaymentIntent(
+            confirmPaymentIntentParams = confirmPaymentIntentParams,
+            options = DEFAULT_OPTIONS.copy(
+                apiKey = "uk_12345"
+            )
+        )
+
+        // Once to create the payment method and once for confirming the payment intent
+        verify(stripeNetworkClient, times(2))
+            .executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.secondValue
+        val params = requireNotNull(request.params)
+
+        with(params) {
+            withNestedParams("payment_method_options") {
+                withNestedParams("card") {
+                    assertEquals(true, this["moto"])
+                    assertEquals("off_session", this["setup_future_usage"])
+                }
+            }
         }
     }
 

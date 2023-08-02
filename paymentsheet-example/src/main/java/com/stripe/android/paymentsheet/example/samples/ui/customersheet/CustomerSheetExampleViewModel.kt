@@ -40,7 +40,7 @@ class CustomerSheetExampleViewModel(
         customerEphemeralKeyProvider = {
             fetchCustomerEphemeralKey().fold(
                 success = {
-                    Result.success(
+                    CustomerAdapter.Result.success(
                         CustomerEphemeralKey.create(
                             customerId = it.customerId,
                             ephemeralKey = it.customerEphemeralKeySecret
@@ -48,19 +48,25 @@ class CustomerSheetExampleViewModel(
                     )
                 },
                 failure = {
-                    Result.failure(it.exception)
+                    CustomerAdapter.Result.failure(
+                        it.exception,
+                        "We could\'nt retrieve your information, please try again."
+                    )
                 }
             )
         },
         setupIntentClientSecretProvider = { customerId ->
             createSetupIntent(customerId).fold(
                 success = {
-                    Result.success(
+                    CustomerAdapter.Result.success(
                         it.clientSecret
                     )
                 },
                 failure = {
-                    Result.failure(it.exception)
+                    CustomerAdapter.Result.failure(
+                        it.exception,
+                        "We could\'nt retrieve your information, please try again."
+                    )
                 }
             )
         },
@@ -137,11 +143,42 @@ class CustomerSheetExampleViewModel(
     }
 
     fun onCustomerSheetResult(result: CustomerSheetResult) {
-        (state.value as? CustomerSheetExampleViewState.Data)?.let { state ->
-            _state.update {
-                state.copy(
-                    result = result
-                )
+        when (result) {
+            is CustomerSheetResult.Canceled -> {
+                updateDataViewState {
+                    it.copy(
+                        selection = result.selection,
+                        errorMessage = null,
+                    )
+                }
+            }
+            is CustomerSheetResult.Selected -> {
+                updateDataViewState {
+                    it.copy(
+                        selection = result.selection,
+                        errorMessage = null,
+                    )
+                }
+            }
+            is CustomerSheetResult.Error -> {
+                updateDataViewState {
+                    it.copy(
+                        selection = null,
+                        errorMessage = result.exception.message,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun updateDataViewState(
+        transform: (CustomerSheetExampleViewState.Data) -> CustomerSheetExampleViewState.Data,
+    ) {
+        _state.update {
+            if (it is CustomerSheetExampleViewState.Data) {
+                transform(it)
+            } else {
+                it
             }
         }
     }

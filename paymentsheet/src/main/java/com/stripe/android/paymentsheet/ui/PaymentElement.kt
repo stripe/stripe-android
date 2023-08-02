@@ -13,7 +13,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
-import com.stripe.android.link.ui.inline.LinkInlineSignedIn
 import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentMethodsUI
@@ -81,29 +80,15 @@ internal fun PaymentElement(
             )
         }
 
-        val linkInlineSelection = sheetViewModel.linkHandler.linkInlineSelection.collectAsState()
-
         if (showLinkInlineSignup) {
-            if (linkInlineSelection.value != null) {
-                LinkInlineSignedIn(
-                    linkConfigurationCoordinator = linkConfigurationCoordinator,
-                    onLogout = {
-                        sheetViewModel.linkHandler.linkInlineSelection.value = null
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = horizontalPadding, vertical = 6.dp)
-                        .fillMaxWidth()
-                )
-            } else {
-                LinkInlineSignup(
-                    linkConfigurationCoordinator = linkConfigurationCoordinator,
-                    enabled = enabled,
-                    onStateChanged = onLinkSignupStateChanged,
-                    modifier = Modifier
-                        .padding(horizontal = horizontalPadding, vertical = 6.dp)
-                        .fillMaxWidth()
-                )
-            }
+            LinkInlineSignup(
+                linkConfigurationCoordinator = linkConfigurationCoordinator,
+                enabled = enabled,
+                onStateChanged = onLinkSignupStateChanged,
+                modifier = Modifier
+                    .padding(horizontal = horizontalPadding, vertical = 6.dp)
+                    .fillMaxWidth()
+            )
         }
     }
 }

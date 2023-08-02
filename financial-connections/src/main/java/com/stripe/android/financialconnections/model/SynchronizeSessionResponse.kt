@@ -22,6 +22,8 @@ internal data class VisualUpdate(
     // Indicates whether the logo should be removed from most panes
     @SerialName("reduced_branding")
     val reducedBranding: Boolean,
+    @SerialName("reduce_manual_entry_prominence_in_errors")
+    val reducedManualEntryProminenceInErrors: Boolean,
     @SerialName("merchant_logo")
     val merchantLogos: List<String>
 ) : Parcelable

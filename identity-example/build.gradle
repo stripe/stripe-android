@@ -7,7 +7,7 @@ assemble.dependsOn('lint')
 android {
     defaultConfig {
         applicationId "com.stripe.android.identity.example"
-        versionCode 15
+        versionCode 16
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -46,6 +46,7 @@ android {
 
 dependencies {
     implementation project(':identity')
+    implementation project(':stripe-ui-core')
 
     implementation libs.accompanist.themeAdapter
     implementation libs.androidx.appCompat

@@ -38,16 +38,17 @@ import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.navigation.CameraPermissionDeniedDestination
 import com.stripe.android.identity.navigation.ConfirmationDestination
-import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.DocSelectionDestination
 import com.stripe.android.identity.navigation.DriverLicenseScanDestination
 import com.stripe.android.identity.navigation.DriverLicenseUploadDestination
 import com.stripe.android.identity.navigation.IDScanDestination
 import com.stripe.android.identity.navigation.IDUploadDestination
 import com.stripe.android.identity.navigation.IndividualDestination
+import com.stripe.android.identity.navigation.OTPDestination
 import com.stripe.android.identity.navigation.PassportScanDestination
 import com.stripe.android.identity.navigation.PassportUploadDestination
 import com.stripe.android.identity.navigation.SelfieDestination
+import com.stripe.android.identity.navigation.navigateOnVerificationPageData
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithRequirementError
@@ -69,16 +70,14 @@ import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.Requirement.Companion.INDIVIDUAL_REQUIREMENT_SET
+import com.stripe.android.identity.networking.models.Requirement.Companion.nextDestination
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.hasError
-import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingBack
-import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingConsent
-import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingDocType
-import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingFront
-import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingIndividualRequirements
-import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingSelfie
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.needsFallback
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.submittedAndClosed
+import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.states.FaceDetectorTransitioner
@@ -105,7 +104,7 @@ import kotlin.coroutines.CoroutineContext
 internal class IdentityViewModel constructor(
     application: Application,
     internal val verificationArgs: IdentityVerificationSheetContract.Args,
-    private val identityRepository: IdentityRepository,
+    internal val identityRepository: IdentityRepository,
     private val identityModelFetcher: IdentityModelFetcher,
     private val identityIO: IdentityIO,
     internal val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
@@ -301,9 +300,11 @@ internal class IdentityViewModel constructor(
                         page = it.data
                         maybePostSuccess()
                     }
+
                     Status.ERROR -> {
                         postValue(Resource.error("$verificationPage posts error"))
                     }
+
                     Status.LOADING -> {} // no-op
                     Status.IDLE -> {}
                 }
@@ -314,9 +315,11 @@ internal class IdentityViewModel constructor(
                         idDetectorModel = it.data
                         maybePostSuccess()
                     }
+
                     Status.ERROR -> {
                         postValue(Resource.error("$idDetectorModelFile posts error"))
                     }
+
                     Status.LOADING -> {} // no-op
                     Status.IDLE -> {} // no-op
                 }
@@ -328,9 +331,11 @@ internal class IdentityViewModel constructor(
                         faceDetectorModel = it.data
                         maybePostSuccess()
                     }
+
                     Status.ERROR -> {
                         postValue(Resource.error("$faceDetectorModelFile posts error"))
                     }
+
                     Status.LOADING -> {} // no-op
                     Status.IDLE -> {} // no-op
                 }
@@ -463,6 +468,7 @@ internal class IdentityViewModel constructor(
                     targetScanType
                 )
             }
+
             is FaceDetectorOutput -> {
                 val filteredFrames =
                     (result.identityState.transitioner as FaceDetectorTransitioner).filteredFrames
@@ -792,10 +798,12 @@ internal class IdentityViewModel constructor(
                 Status.SUCCESS -> {
                     onSuccess(requireNotNull(resource.data))
                 }
+
                 Status.ERROR -> {
                     Log.e(TAG, "Fail to get VerificationPage")
                     onFailure(requireNotNull(resource.throwable))
                 }
+
                 Status.LOADING -> {} // no-op
                 Status.IDLE -> {} // no-op
             }
@@ -868,7 +876,7 @@ internal class IdentityViewModel constructor(
                 ephemeralKey = verificationArgs.ephemeralKeySecret,
                 simulateDelay = simulateDelay
             )
-        }.navigateToConfirmIfSubmitted(fromRoute, navController)
+        }.checkSubmitStatusAndNavigate(fromRoute, navController)
     }
 
     /**
@@ -885,21 +893,23 @@ internal class IdentityViewModel constructor(
                 ephemeralKey = verificationArgs.ephemeralKeySecret,
                 simulateDelay = simulateDelay
             )
-        }.navigateToConfirmIfSubmitted(fromRoute, navController)
+        }.checkSubmitStatusAndNavigate(fromRoute, navController)
     }
 
     /**
-     * Check the [Result] of [VerificationPageData] and try to navigate to [ConfirmationDestination].
+     * Check the submt [Result] of [VerificationPageData] and try to navigate to [ConfirmationDestination].
      *
      * If Result is success, check the value of VerificationPageData
      *   If VerificationPageData has error, navigate to [ErrorDestination] with the error.
-     *   If VerificationPageData is submitted, navigate to [ConfirmationDestination].
-     *   If VerificationPageData is not submitted, navigate to [ErrorDestination].
+     *   If VerificationPageData is submitted closed, navigate to [ConfirmationDestination].
+     *   If VerificationPageData is not closed and it still has missings,
+     *     document fallback happens during submit, update initial missings and navigate accordingly.
+     *   Otherwise navigate to [ErrorDestination].
      *
      * If Result is failed, navigate to [ErrorDestination] with the failure information.
      *
      */
-    private fun Result<VerificationPageData>.navigateToConfirmIfSubmitted(
+    private fun Result<VerificationPageData>.checkSubmitStatusAndNavigate(
         fromRoute: String,
         navController: NavController
     ) {
@@ -919,7 +929,37 @@ internal class IdentityViewModel constructor(
                         )
                     }
                 }
-                submittedVerificationPageData.submitted -> {
+                // After submit, missings got repopulated - fallback from phoneV to doc
+                // Need to reset all non-doc related data and start from doc.
+                submittedVerificationPageData.needsFallback() -> {
+                    // update initialMissings
+                    val newMissings =
+                        requireNotNull(submittedVerificationPageData.requirements.missings)
+                    _verificationPage.postValue(
+                        Resource.success(
+                            _verificationPage.value?.data?.copy(
+                                requirements = VerificationPageRequirements(
+                                    missing = newMissings
+                                )
+                            )
+                        )
+                    )
+                    // clear collectedData
+                    _collectedData.updateStateAndSave {
+                        CollectedDataParam()
+                    }
+                    // reset missingRequirement
+                    _missingRequirements.updateStateAndSave {
+                        newMissings.toSet()
+                    }
+                    navController.navigateTo(
+                        newMissings.nextDestination(getApplication())
+                    )
+                }
+                /**
+                 * Only navigates to success when both submitted and closed are true.
+                 */
+                submittedVerificationPageData.submittedAndClosed() -> {
                     navController.navigateTo(ConfirmationDestination)
                 }
                 else -> {
@@ -957,21 +997,24 @@ internal class IdentityViewModel constructor(
         }
     }
 
-    private fun calculateClearDataParam(dataToBeCollected: CollectedDataParam): ClearDataParam {
-        val initialMissings =
-            _verificationPage.value?.data?.requirements?.missing ?: Requirement.values().toList()
+    private fun calculateClearDataParam(dataToBeCollected: CollectedDataParam) =
+        ClearDataParam.createFromRequirements(
+            initialMissings.toMutableSet().minus(
+                collectedData.value.collectedRequirements()
+            ).minus(dataToBeCollected.collectedRequirements())
+        )
+
+    private val initialMissings: List<Requirement>
+        get() {
+            return _verificationPage.value?.data?.requirements?.missing ?: Requirement.values()
+                .toList()
                 .also {
                     Log.e(
                         TAG,
                         "_verificationPage is null, using Requirement.values() as initialMissings"
                     )
                 }
-        return ClearDataParam.createFromRequirements(
-            initialMissings.toMutableSet().minus(
-                collectedData.value.collectedRequirements()
-            ).minus(dataToBeCollected.collectedRequirements())
-        )
-    }
+        }
 
     /**
      * Send a POST request to VerificationPageData,
@@ -1004,40 +1047,56 @@ internal class IdentityViewModel constructor(
             _collectedData.updateStateAndSave { oldValue ->
                 oldValue.mergeWith(collectedDataParam)
             }
-
-            _missingRequirements.updateStateAndSave { oldMissings ->
-                val newMissings =
-                    requireNotNull(newVerificationPageData.requirements.missings).toSet()
-
-                newMissings.intersect(INDIVIDUAL_REQUIREMENT_SET).takeIf { it.isNotEmpty() }
-                    ?.let {
-                        // If "NAME", "DOB" and "IDNUMBER" are collected and "DOB" is invalid,
-                        // newMissings will only contain "DOB". However we still need to show the UI to
-                        // collect all three fields, manually updated the oldIndividualMissings.
-                        val oldIndividualMissings =
-                            oldMissings.intersect(INDIVIDUAL_REQUIREMENT_SET)
-                        newMissings.plus(oldIndividualMissings)
-                    } ?: run {
-                    newMissings
-                }
-            }
-
-            if (newVerificationPageData.hasError()) {
-                newVerificationPageData.requirements.errors[0].let { requirementError ->
-                    errorCause.postValue(
-                        IllegalStateException("VerificationPageDataRequirementError: $requirementError")
-                    )
-                    navController.navigateToErrorScreenWithRequirementError(
-                        fromRoute,
-                        requirementError,
-                    )
-                }
-            } else {
-                onCorrectResponse(newVerificationPageData)
-            }
+            updateStatesWithVerificationPageData(
+                fromRoute,
+                newVerificationPageData,
+                navController,
+                onCorrectResponse
+            )
         }.onFailure { cause ->
             errorCause.postValue(cause)
             navController.navigateToErrorScreenWithDefaultValues(getApplication())
+        }
+    }
+
+    /**
+     * Check missings and error in VerificationPageData and update states accordingly.
+     */
+    suspend fun updateStatesWithVerificationPageData(
+        fromRoute: String,
+        newVerificationPageData: VerificationPageData,
+        navController: NavController,
+        onCorrectResponse: suspend ((verificationPageDataWithNoError: VerificationPageData) -> Unit) = {}
+    ) {
+        _missingRequirements.updateStateAndSave { oldMissings ->
+            val newMissings =
+                requireNotNull(newVerificationPageData.requirements.missings).toSet()
+
+            newMissings.intersect(INDIVIDUAL_REQUIREMENT_SET).takeIf { it.isNotEmpty() }
+                ?.let {
+                    // If "NAME", "DOB" and "IDNUMBER" are collected and "DOB" is invalid,
+                    // newMissings will only contain "DOB". However we still need to show the UI to
+                    // collect all three fields, manually updated the oldIndividualMissings.
+                    val oldIndividualMissings =
+                        oldMissings.intersect(INDIVIDUAL_REQUIREMENT_SET)
+                    newMissings.plus(oldIndividualMissings)
+                } ?: run {
+                newMissings
+            }
+        }
+
+        if (newVerificationPageData.hasError()) {
+            newVerificationPageData.requirements.errors[0].let { requirementError ->
+                errorCause.postValue(
+                    IllegalStateException("VerificationPageDataRequirementError: $requirementError")
+                )
+                navController.navigateToErrorScreenWithRequirementError(
+                    fromRoute,
+                    requirementError,
+                )
+            }
+        } else {
+            onCorrectResponse(newVerificationPageData)
         }
     }
 
@@ -1064,6 +1123,14 @@ internal class IdentityViewModel constructor(
             )
             navController.navigateToErrorScreenWithDefaultValues(getApplication())
         },
+        onMissingPhoneOtp: () -> Unit = {
+            errorCause.postValue(
+                IllegalStateException(
+                    "unhandled onMissingOtp from $fromRoute with $collectedDataParam"
+                )
+            )
+            navController.navigateToErrorScreenWithDefaultValues(getApplication())
+        },
         onReadyToSubmit: suspend () -> Unit = {
             errorCause.postValue(
                 IllegalStateException(
@@ -1078,21 +1145,13 @@ internal class IdentityViewModel constructor(
             collectedDataParam = collectedDataParam,
             fromRoute = fromRoute
         ) { verificationPageData ->
-            if (verificationPageData.isMissingConsent()) {
-                navController.navigateTo(ConsentDestination)
-            } else if (verificationPageData.isMissingDocType()) {
-                navController.navigateTo(DocSelectionDestination)
-            } else if (verificationPageData.isMissingFront()) {
-                onMissingFront()
-            } else if (verificationPageData.isMissingBack()) {
-                onMissingBack()
-            } else if (verificationPageData.isMissingSelfie()) {
-                navController.navigateTo(SelfieDestination)
-            } else if (verificationPageData.isMissingIndividualRequirements()) {
-                navController.navigateTo(IndividualDestination)
-            } else {
-                onReadyToSubmit()
-            }
+            navController.navigateOnVerificationPageData(
+                verificationPageData = verificationPageData,
+                onMissingFront = onMissingFront,
+                onMissingOtp = onMissingPhoneOtp,
+                onMissingBack = onMissingBack,
+                onReadyToSubmit = onReadyToSubmit
+            )
         }
     }
 
@@ -1115,7 +1174,7 @@ internal class IdentityViewModel constructor(
     /**
      * Submit the verification and navigate based on result.
      */
-    private suspend fun submitAndNavigate(
+    internal suspend fun submitAndNavigate(
         navController: NavController,
         fromRoute: String
     ) {
@@ -1127,7 +1186,7 @@ internal class IdentityViewModel constructor(
                 verificationArgs.verificationSessionId,
                 verificationArgs.ephemeralKeySecret
             )
-        }.navigateToConfirmIfSubmitted(fromRoute, navController)
+        }.checkSubmitStatusAndNavigate(fromRoute, navController)
     }
 
     /**
@@ -1143,6 +1202,7 @@ internal class IdentityViewModel constructor(
                 Status.SUCCESS -> {
                     onSuccess(requireNotNull(resource.data))
                 }
+
                 Status.ERROR -> {
                     Log.e(TAG, "Fail to get VerificationPage")
                     val cause = requireNotNull(resource.throwable)
@@ -1151,6 +1211,7 @@ internal class IdentityViewModel constructor(
                         getApplication()
                     )
                 }
+
                 Status.LOADING -> {} // no-op
                 Status.IDLE -> {} // no-op
             }
@@ -1207,8 +1268,16 @@ internal class IdentityViewModel constructor(
     }
 
     fun clearCollectedData(field: Requirement) {
+        // Remove the requirement from _collectedData.
         _collectedData.updateStateAndSave {
             it.clearData(field)
+        }
+        // Add the requirement to _missingRequirements.
+        // If the requirement doesn't appear in initialMissings, don't add
+        if (initialMissings.contains(field)) {
+            _missingRequirements.updateStateAndSave {
+                it.plus(field)
+            }
         }
     }
 
@@ -1240,30 +1309,35 @@ internal class IdentityViewModel constructor(
                         oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
+
                 IdentityScanState.ScanType.ID_BACK -> {
                     oldState.copy(
                         docBackRetryTimes =
                         oldState.docBackRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
+
                 IdentityScanState.ScanType.DL_FRONT -> {
                     oldState.copy(
                         docFrontRetryTimes =
                         oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
+
                 IdentityScanState.ScanType.DL_BACK -> {
                     oldState.copy(
                         docBackRetryTimes =
                         oldState.docBackRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
+
                 IdentityScanState.ScanType.PASSPORT -> {
                     oldState.copy(
                         docFrontRetryTimes =
                         oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
+
                 IdentityScanState.ScanType.SELFIE -> {
                     oldState.copy(
                         selfieRetryTimes =
@@ -1324,6 +1398,7 @@ internal class IdentityViewModel constructor(
                                         }
                                     }
                                 }
+
                                 Status.LOADING -> {} // no-op
                                 Status.IDLE -> {} // no-op
                             }
@@ -1363,10 +1438,37 @@ internal class IdentityViewModel constructor(
             navController,
             individualCollectedStates.toCollectedDataParam(),
             fromRoute = IndividualDestination.ROUTE.route,
+            onMissingPhoneOtp = {
+                navController.navigateTo(OTPDestination)
+            }
         ) {
             submitAndNavigate(
                 navController = navController,
                 fromRoute = IndividualDestination.ROUTE.route
+            )
+        }
+    }
+
+    /**
+     * Post verification with OTP, and decide next step based on result with 3 possible cases.
+     *  1. correct OTP - navigate based on missings(could be none or document related)
+     *  2. incorrect OTP - missings still contains otp, show inline error on OTP screen
+     *  3. requirement.error - show error
+     */
+    suspend fun postVerificationPageDataForOTP(
+        otp: String,
+        navController: NavController,
+        onMissingOtp: () -> Unit
+    ) {
+        postVerificationPageDataAndMaybeNavigate(
+            navController,
+            CollectedDataParam(phoneOtp = otp),
+            fromRoute = OTPDestination.ROUTE.route,
+            onMissingPhoneOtp = onMissingOtp
+        ) {
+            submitAndNavigate(
+                navController = navController,
+                fromRoute = OTPDestination.ROUTE.route
             )
         }
     }
@@ -1503,6 +1605,7 @@ internal class IdentityViewModel constructor(
                     errorCause.postValue(it.getError())
                     navController.navigateToErrorScreenWithDefaultValues(getApplication())
                 }
+
                 it.isAllUploaded() -> {
                     runCatching {
                         postVerificationPageDataAndMaybeNavigate(
@@ -1531,6 +1634,7 @@ internal class IdentityViewModel constructor(
                         navController.navigateToErrorScreenWithDefaultValues(getApplication())
                     }
                 }
+
                 else -> {
                     errorCause.postValue(
                         IllegalStateException(
@@ -1620,16 +1724,19 @@ internal class IdentityViewModel constructor(
                     shouldShowTakePhoto,
                     shouldShowChoosePhoto
                 )
+
             CollectedDataParam.Type.PASSPORT ->
                 PassportUploadDestination(
                     shouldShowTakePhoto,
                     shouldShowChoosePhoto
                 )
+
             CollectedDataParam.Type.DRIVINGLICENSE ->
                 DriverLicenseUploadDestination(
                     shouldShowTakePhoto,
                     shouldShowChoosePhoto
                 )
+
             else -> throw IllegalStateException("Invalid CollectedDataParam.Type")
         }
 

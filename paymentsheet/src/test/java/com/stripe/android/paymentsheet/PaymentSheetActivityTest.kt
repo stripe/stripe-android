@@ -49,33 +49,24 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
-import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.forms.MandateRequirement
-import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
-import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
+import com.stripe.android.utils.formViewModelSubcomponentBuilder
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -92,9 +83,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
-import org.mockito.kotlin.whenever
 import org.robolectric.annotation.Config
-import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.time.Duration
@@ -380,6 +369,7 @@ internal class PaymentSheetActivityTest {
                 .assertDoesNotExist()
 
             viewModel.transitionToAddPaymentScreen()
+            composeTestRule.waitForIdle()
 
             viewModel.onError(error)
 
@@ -938,9 +928,15 @@ internal class PaymentSheetActivityTest {
         isLinkAvailable: Boolean = false,
         initialPaymentSelection: PaymentSelection? = null,
     ): PaymentSheetViewModel = runBlocking {
-        val lpmRepository = mock<LpmRepository>()
-        whenever(lpmRepository.fromCode(any())).thenReturn(LpmRepository.HardcodedCard)
-        whenever(lpmRepository.serverSpecLoadingState).thenReturn(LpmRepository.ServerSpecState.Uninitialized)
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(resources = context.resources,),
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+        ).apply {
+            update(
+                stripeIntent = paymentIntent,
+                serverLpmSpecs = null,
+            )
+        }
 
         TestViewModelFactory.create(
             linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>().stub {
@@ -976,7 +972,10 @@ internal class PaymentSheetActivityTest {
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
                 intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
-                formViewModelSubComponentBuilderProvider = formViewModelSubcomponentBuilder()
+                formViewModelSubComponentBuilderProvider = formViewModelSubcomponentBuilder(
+                    context = ApplicationProvider.getApplicationContext(),
+                    lpmRepository = lpmRepository,
+                ),
             )
         }
     }
@@ -995,55 +994,6 @@ internal class PaymentSheetActivityTest {
                 return googlePayPaymentMethodLauncher
             }
         }
-
-    private fun formViewModelSubcomponentBuilder(): Provider<FormViewModelSubcomponent.Builder> {
-        val lpmRepository = mock<LpmRepository>().apply {
-            whenever(fromCode(any())).thenReturn(
-                LpmRepository.SupportedPaymentMethod(
-                    code = PaymentMethod.Type.Card.code,
-                    requiresMandate = false,
-                    mandateRequirement = MandateRequirement.Never,
-                    displayNameResource = StripeUiCoreR.string.stripe_paymentsheet_payment_method_card,
-                    iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_card,
-                    lightThemeIconUrl = null,
-                    darkThemeIconUrl = null,
-                    tintIconOnSelection = true,
-                    requirement = PaymentMethodRequirements(emptySet(), emptySet(), true),
-                    formSpec = LayoutSpec.create(
-                        EmailSpec(),
-                        SaveForFutureUseSpec()
-                    )
-                )
-            )
-        }
-
-        val formViewModel = FormViewModel(
-            context = context,
-            formArguments = FormArguments(
-                PaymentMethod.Type.Card.code,
-                showCheckbox = true,
-                showCheckboxControlledFields = true,
-                merchantName = "Merchant, Inc.",
-                amount = Amount(50, "USD"),
-                initialPaymentMethodCreateParams = null
-            ),
-            lpmRepository = lpmRepository,
-            addressRepository = AddressRepository(context.resources, Dispatchers.Unconfined),
-            showCheckboxFlow = mock()
-        )
-
-        val mockFormBuilder = mock<FormViewModelSubcomponent.Builder>()
-        val mockFormSubcomponent = mock<FormViewModelSubcomponent>()
-        val mockFormSubComponentBuilderProvider =
-            mock<Provider<FormViewModelSubcomponent.Builder>>()
-        whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
-        whenever(mockFormBuilder.formArguments(any())).thenReturn(mockFormBuilder)
-        whenever(mockFormBuilder.showCheckboxFlow(any())).thenReturn(mockFormBuilder)
-        whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
-        whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
-
-        return mockFormSubComponentBuilderProvider
-    }
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD

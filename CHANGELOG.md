@@ -2,6 +2,33 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.28.0 - 2023-07-31
+### Identity
+* [ADDED][6438](https://github.com/stripe/stripe-android/pull/6438) Supports [phone verification](https://stripe.com/docs/identity/phone) in Identity mobile SDK.
+
+## 20.27.3 - 2023-07-24
+
+### Payments
+* [CHANGED] The return type for several methods in `Stripe` has changed from `T?` (nullable) to `T` to better reflect possible behavior. These methods continue to be throwing and should be wrapped in a `try/catch` block.
+* [FIXED][6977](https://github.com/stripe/stripe-android/pull/6977) Fixed an issue where `Stripe.retrievePossibleBrands()` returned incorrect results. 
+
+## 20.27.2 - 2023-07-18
+
+### PaymentSheet
+* [FIXED] Fixed various bugs in Link private beta.
+
+## 20.27.1 - 2023-07-17
+
+### PaymentSheet
+* [FIXED][6992](https://github.com/stripe/stripe-android/pull/6992) Fixed an issue where incorrect padding was set on the Google Pay button.
+
+## 20.27.0 - 2023-07-10
+
+### PaymentSheet
+* [ADDED][6857](https://github.com/stripe/stripe-android/pull/6857) You can now collect payment details before creating a PaymentIntent or SetupIntent. See [our docs](https://stripe.com/docs/payments/accept-a-payment-deferred?platform=android) for more info. This integration also allows you to [confirm the Intent on the server](https://stripe.com/docs/payments/finalize-payments-on-the-server?platform=android).
+
+## 20.26.0 - 2023-07-05
+
 ### PaymentSheet
 * [ADDED][6583](https://github.com/stripe/stripe-android/pull/6583) Added top-level methods `rememberPaymentSheet()` and `rememberPaymentSheetFlowController()` for easier integration in Compose.
 * [DEPRECATED][6583](https://github.com/stripe/stripe-android/pull/6583) `PaymentSheetContract` has been deprecated and will be removed in a future release. Use the `PaymentSheet` constructor or new `rememberPaymentSheet()` method instead.
@@ -9,6 +36,9 @@
 ### Payments
 * [ADDED][6912](https://github.com/stripe/stripe-android/pull/6912) `GooglePayPaymentMethodLauncher` can now be presented with an amount of type `Long`. The method to present with an `Int` has been deprecated.
 * [DEPRECATED][6912](https://github.com/stripe/stripe-android/pull/6912) `GooglePayLauncherContract` and `GooglePayPaymentMethodLauncherContract` have been deprecated and will be removed in a future release. Use `GooglePayLauncher` and `GooglePayPaymentMethodLauncher` directly instead.
+
+### StripeCardScan
+* [CHANGED][7057](https://github.com/stripe/stripe-android/pull/7057) Updated CIV to use CameraX by default instead of Camera1.
 
 ## 20.25.8 - 2023-06-26
 

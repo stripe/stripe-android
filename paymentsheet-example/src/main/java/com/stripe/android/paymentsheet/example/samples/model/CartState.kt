@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.example.samples.model
 
-import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleUpdateResponse
@@ -74,7 +73,6 @@ internal fun CartState.updateWithResponse(
     )
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal fun CartState.toIntentConfiguration(): PaymentSheet.IntentConfiguration {
     return PaymentSheet.IntentConfiguration(
         mode = PaymentSheet.IntentConfiguration.Mode.Payment(

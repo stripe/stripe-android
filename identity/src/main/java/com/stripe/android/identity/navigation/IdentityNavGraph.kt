@@ -44,6 +44,7 @@ import com.stripe.android.identity.ui.IdentityTopBarState
 import com.stripe.android.identity.ui.IndividualScreen
 import com.stripe.android.identity.ui.IndividualWelcomeScreen
 import com.stripe.android.identity.ui.InitialLoadingScreen
+import com.stripe.android.identity.ui.OTPScreen
 import com.stripe.android.identity.ui.SelfieScanScreen
 import com.stripe.android.identity.ui.UploadScreen
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
@@ -231,6 +232,9 @@ internal fun IdentityNavGraph(
                     identityViewModel = identityViewModel,
                     verificationFlowFinishable = verificationFlowFinishable
                 )
+            }
+            screen(OTPDestination.ROUTE) {
+                OTPScreen(navController = navController, identityViewModel = identityViewModel)
             }
             screen(CameraPermissionDeniedDestination.ROUTE) {
                 val collectedDataParamType =

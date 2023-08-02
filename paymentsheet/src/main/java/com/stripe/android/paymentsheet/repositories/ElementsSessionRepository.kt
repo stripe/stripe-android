@@ -11,122 +11,91 @@ import com.stripe.android.model.PaymentIntent.CaptureMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Usage
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
-internal sealed class ElementsSessionRepository {
-
-    abstract suspend fun get(
+internal interface ElementsSessionRepository {
+    suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
     ): Result<ElementsSession>
+}
 
-    /**
-     * Retrieve the [StripeIntent] from a static source.
-     */
-    class Static(
-        private val stripeIntent: StripeIntent
-    ) : ElementsSessionRepository() {
-        override suspend fun get(
-            initializationMode: PaymentSheet.InitializationMode,
-        ): Result<ElementsSession> {
-            return Result.success(
-                ElementsSession(
-                    linkSettings = null,
-                    paymentMethodSpecs = null,
-                    stripeIntent = stripeIntent,
-                    merchantCountry = null,
-                )
-            )
+/**
+ * Retrieve the [StripeIntent] from the [StripeRepository].
+ */
+internal class RealElementsSessionRepository @Inject constructor(
+    private val stripeRepository: StripeRepository,
+    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
+    @IOContext private val workContext: CoroutineContext,
+) : ElementsSessionRepository {
+
+    // The PaymentConfiguration can change after initialization, so this needs to get a new
+    // request options each time requested.
+    private val requestOptions: ApiRequest.Options
+        get() = ApiRequest.Options(
+            apiKey = lazyPaymentConfig.get().publishableKey,
+            stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+        )
+
+    override suspend fun get(
+        initializationMode: PaymentSheet.InitializationMode,
+    ): Result<ElementsSession> {
+        val params = initializationMode.toElementsSessionParams()
+
+        val elementsSession = stripeRepository.retrieveElementsSession(
+            params = params,
+            options = requestOptions,
+        )
+
+        return elementsSession.getResultOrElse { elementsSessionFailure ->
+            fallback(params, elementsSessionFailure)
         }
     }
 
-    /**
-     * Retrieve the [StripeIntent] from the [StripeRepository].
-     */
-    class Api @Inject constructor(
-        private val stripeRepository: StripeRepository,
-        private val lazyPaymentConfig: Provider<PaymentConfiguration>,
-        @IOContext private val workContext: CoroutineContext,
-    ) : ElementsSessionRepository() {
-
-        // The PaymentConfiguration can change after initialization, so this needs to get a new
-        // request options each time requested.
-        private val requestOptions: ApiRequest.Options
-            get() = ApiRequest.Options(
-                apiKey = lazyPaymentConfig.get().publishableKey,
-                stripeAccount = lazyPaymentConfig.get().stripeAccountId,
-            )
-
-        override suspend fun get(
-            initializationMode: PaymentSheet.InitializationMode,
-        ): Result<ElementsSession> {
-            val params = initializationMode.toElementsSessionParams()
-
-            val elementsSession = stripeRepository.retrieveElementsSession(
-                params = params,
-                options = requestOptions,
-            )
-
-            return elementsSession.getResultOrElse { elementsSessionFailure ->
-                fallback(params, elementsSessionFailure)
+    private suspend fun fallback(
+        params: ElementsSessionParams,
+        elementsSessionFailure: Throwable,
+    ): Result<ElementsSession> = withContext(workContext) {
+        when (params) {
+            is ElementsSessionParams.PaymentIntentType -> {
+                stripeRepository.retrievePaymentIntent(
+                    clientSecret = params.clientSecret,
+                    options = requestOptions,
+                    expandFields = listOf("payment_method")
+                ).map {
+                    ElementsSession(
+                        linkSettings = null,
+                        paymentMethodSpecs = null,
+                        stripeIntent = it,
+                        merchantCountry = null,
+                    )
+                }
             }
-        }
-
-        private suspend fun fallback(
-            params: ElementsSessionParams,
-            elementsSessionFailure: Throwable,
-        ): Result<ElementsSession> = withContext(workContext) {
-            when (params) {
-                is ElementsSessionParams.PaymentIntentType -> {
-                    runCatching {
-                        requireNotNull(
-                            stripeRepository.retrievePaymentIntent(
-                                clientSecret = params.clientSecret,
-                                options = requestOptions,
-                                expandFields = listOf("payment_method")
-                            )
-                        )
-                    }.map {
-                        ElementsSession(
-                            linkSettings = null,
-                            paymentMethodSpecs = null,
-                            stripeIntent = it,
-                            merchantCountry = null,
-                        )
-                    }
+            is ElementsSessionParams.SetupIntentType -> {
+                stripeRepository.retrieveSetupIntent(
+                    clientSecret = params.clientSecret,
+                    options = requestOptions,
+                    expandFields = listOf("payment_method")
+                ).map {
+                    ElementsSession(
+                        linkSettings = null,
+                        paymentMethodSpecs = null,
+                        stripeIntent = it,
+                        merchantCountry = null,
+                    )
                 }
-                is ElementsSessionParams.SetupIntentType -> {
-                    runCatching {
-                        requireNotNull(
-                            stripeRepository.retrieveSetupIntent(
-                                clientSecret = params.clientSecret,
-                                options = requestOptions,
-                                expandFields = listOf("payment_method")
-                            )
-                        )
-                    }.map {
-                        ElementsSession(
-                            linkSettings = null,
-                            paymentMethodSpecs = null,
-                            stripeIntent = it,
-                            merchantCountry = null,
-                        )
-                    }
-                }
-                is ElementsSessionParams.DeferredIntentType -> {
-                    // We don't have a fallback endpoint for the deferred intent flow
-                    Result.failure(elementsSessionFailure)
-                }
+            }
+            is ElementsSessionParams.DeferredIntentType -> {
+                // We don't have a fallback endpoint for the deferred intent flow
+                Result.failure(elementsSessionFailure)
             }
         }
     }
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal fun PaymentSheet.InitializationMode.toElementsSessionParams(): ElementsSessionParams {
     return when (this) {
         is PaymentSheet.InitializationMode.PaymentIntent -> {
@@ -147,7 +116,6 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(): Elements
     }
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 private fun PaymentSheet.IntentConfiguration.Mode.toElementsSessionParam(): Mode {
     return when (this) {
         is PaymentSheet.IntentConfiguration.Mode.Payment -> {
@@ -167,7 +135,6 @@ private fun PaymentSheet.IntentConfiguration.Mode.toElementsSessionParam(): Mode
     }
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toElementsSessionParam(): Usage {
     return when (this) {
         PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession -> Usage.OnSession
@@ -175,7 +142,6 @@ private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toElementsSessionPar
     }
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 private fun PaymentSheet.IntentConfiguration.CaptureMethod.toElementsSessionParam(): CaptureMethod {
     return when (this) {
         PaymentSheet.IntentConfiguration.CaptureMethod.Automatic -> CaptureMethod.Automatic

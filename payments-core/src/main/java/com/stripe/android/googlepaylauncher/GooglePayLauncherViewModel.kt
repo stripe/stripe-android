@@ -21,6 +21,7 @@ import com.stripe.android.PaymentController
 import com.stripe.android.StripePaymentController
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.googlepaylauncher.GooglePayLauncher.BillingAddressConfig.Format
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -30,12 +31,12 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.utils.mapResult
 import com.stripe.android.utils.requireApplication
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import kotlin.coroutines.CoroutineContext
 
 @Suppress("LongParameterList")
@@ -73,56 +74,50 @@ internal class GooglePayLauncherViewModel(
     @VisibleForTesting
     suspend fun createPaymentDataRequest(
         args: GooglePayLauncherContract.Args
-    ): JSONObject {
-        val transactionInfo = when (args) {
+    ): Result<String> {
+        val transactionInfoResult = when (args) {
             is GooglePayLauncherContract.PaymentIntentArgs -> {
-                val paymentIntent = requireNotNull(
-                    stripeRepository.retrievePaymentIntent(
-                        args.clientSecret,
-                        requestOptions
+                stripeRepository.retrievePaymentIntent(
+                    args.clientSecret,
+                    requestOptions
+                ).map { intent ->
+                    createTransactionInfo(
+                        stripeIntent = intent,
+                        currencyCode = intent.currency.orEmpty(),
                     )
-                ) {
-                    "Could not retrieve PaymentIntent."
                 }
-                createTransactionInfo(
-                    paymentIntent,
-                    paymentIntent.currency.orEmpty()
-                )
             }
             is GooglePayLauncherContract.SetupIntentArgs -> {
-                val setupIntent = requireNotNull(
-                    stripeRepository.retrieveSetupIntent(
-                        args.clientSecret,
-                        requestOptions
+                stripeRepository.retrieveSetupIntent(
+                    args.clientSecret,
+                    requestOptions
+                ).map { intent ->
+                    createTransactionInfo(
+                        stripeIntent = intent,
+                        currencyCode = args.currencyCode,
                     )
-                ) {
-                    "Could not retrieve SetupIntent."
                 }
-                createTransactionInfo(
-                    setupIntent,
-                    args.currencyCode
-                )
             }
         }
 
-        return googlePayJsonFactory.createPaymentDataRequest(
-            transactionInfo = transactionInfo,
-            merchantInfo = GooglePayJsonFactory.MerchantInfo(
-                merchantName = args.config.merchantName
-            ),
-            billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
-                isRequired = args.config.billingAddressConfig.isRequired,
-                format = when (args.config.billingAddressConfig.format) {
-                    GooglePayLauncher.BillingAddressConfig.Format.Min ->
-                        GooglePayJsonFactory.BillingAddressParameters.Format.Min
-                    GooglePayLauncher.BillingAddressConfig.Format.Full ->
-                        GooglePayJsonFactory.BillingAddressParameters.Format.Full
-                },
-                isPhoneNumberRequired = args.config.billingAddressConfig.isPhoneNumberRequired
-            ),
-            isEmailRequired = args.config.isEmailRequired,
-            allowCreditCards = args.config.allowCreditCards
-        )
+        return transactionInfoResult.map { info ->
+            googlePayJsonFactory.createPaymentDataRequest(
+                transactionInfo = info,
+                merchantInfo = GooglePayJsonFactory.MerchantInfo(
+                    merchantName = args.config.merchantName,
+                ),
+                billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
+                    isRequired = args.config.billingAddressConfig.isRequired,
+                    format = when (args.config.billingAddressConfig.format) {
+                        Format.Min -> GooglePayJsonFactory.BillingAddressParameters.Format.Min
+                        Format.Full -> GooglePayJsonFactory.BillingAddressParameters.Format.Full
+                    },
+                    isPhoneNumberRequired = args.config.billingAddressConfig.isPhoneNumberRequired,
+                ),
+                isEmailRequired = args.config.isEmailRequired,
+                allowCreditCards = args.config.allowCreditCards,
+            ).toString()
+        }
     }
 
     @VisibleForTesting
@@ -156,15 +151,16 @@ internal class GooglePayLauncherViewModel(
         }
     }
 
-    suspend fun createLoadPaymentDataTask(): Task<PaymentData> {
-        check(isReadyToPay()) {
-            "Google Pay is unavailable."
+    suspend fun createLoadPaymentDataTask(): Result<Task<PaymentData>> {
+        return runCatching {
+            check(isReadyToPay()) { "Google Pay is unavailable." }
+        }.mapResult {
+            createPaymentDataRequest(args)
+        }.mapCatching { json ->
+            PaymentDataRequest.fromJson(json)
+        }.map { request ->
+            paymentsClient.loadPaymentData(request)
         }
-        return paymentsClient.loadPaymentData(
-            PaymentDataRequest.fromJson(
-                createPaymentDataRequest(args).toString()
-            )
-        )
     }
 
     suspend fun confirmStripeIntent(

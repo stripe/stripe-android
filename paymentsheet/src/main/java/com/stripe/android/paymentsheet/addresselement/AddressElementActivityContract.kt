@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -26,14 +24,11 @@ internal class AddressElementActivityContract :
      *
      * @param publishableKey the Stripe publishable key
      * @param config the paymentsheet configuration passed from the merchant
-     * @param injectorKey Parameter needed to perform dependency injection.
-     *                        If default, a new graph is created
      */
     @Parcelize
     data class Args internal constructor(
         internal val publishableKey: String,
         internal val config: AddressLauncher.Configuration?,
-        @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY,
     ) : ActivityStarter.Args {
 
         internal companion object {

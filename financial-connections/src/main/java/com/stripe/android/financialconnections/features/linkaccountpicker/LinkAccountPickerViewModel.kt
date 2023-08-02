@@ -15,7 +15,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
@@ -25,6 +24,10 @@ import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.NavigationDirections.institutionPicker
+import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -38,7 +41,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val updateLocalManifest: UpdateLocalManifest,
     private val updateCachedAccounts: UpdateCachedAccounts,
     private val getManifest: GetManifest,
-    private val goNext: GoNext,
+    private val navigationManager: NavigationManager,
     private val logger: Logger
 ) : MavericksViewModel<LinkAccountPickerState>(initialState) {
 
@@ -85,7 +88,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             onFail = { error ->
                 logger.error("Error fetching payload", error)
                 eventTracker.track(Error(PANE, error))
-                goNext(Pane.INSTITUTION_PICKER)
+                navigationManager.navigate(NavigateToRoute(institutionPicker))
             },
         )
         onAsync(
@@ -105,7 +108,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     fun onNewBankAccountClick() = viewModelScope.launch {
         eventTracker.track(Click("click.new_account", PANE))
         val nextPane = awaitState().payload()?.addNewAccount?.nextPane ?: Pane.INSTITUTION_PICKER
-        goNext(nextPane)
+        navigationManager.navigate(NavigateToRoute(nextPane))
     }
 
     fun onSelectAccountClick() = suspend {
@@ -139,7 +142,9 @@ internal class LinkAccountPickerViewModel @Inject constructor(
 
             else -> Unit
         }
-        nextPane?.let { goNext(it) }
+        nextPane?.let {
+            navigationManager.navigate(NavigateToRoute(it))
+        }
         Unit
     }.execute { copy(selectNetworkedAccountAsync = it) }
 

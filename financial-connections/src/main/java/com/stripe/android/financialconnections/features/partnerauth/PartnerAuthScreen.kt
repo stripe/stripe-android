@@ -47,7 +47,6 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
@@ -87,9 +86,8 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun PartnerAuthScreen() {
     // activity view model
-    val activityViewModel: FinancialConnectionsSheetNativeViewModel = mavericksActivityViewModel()
     val parentViewModel = parentViewModel()
-    val webAuthFlow = activityViewModel.collectAsState { it.webAuthFlow }
+    val webAuthFlow = parentViewModel.collectAsState { it.webAuthFlow }
     val uriHandler = LocalUriHandler.current
 
     // step view model
@@ -110,7 +108,7 @@ internal fun PartnerAuthScreen() {
                 is OpenBottomSheet -> bottomSheetState.show()
                 is OpenUrl -> uriHandler.openUri(viewEffect.url)
                 is OpenPartnerAuth -> {
-                    activityViewModel.openPartnerAuthFlowInBrowser(viewEffect.url)
+                    parentViewModel.openPartnerAuthFlowInBrowser(viewEffect.url)
                     viewModel.onViewEffectLaunched()
                 }
             }

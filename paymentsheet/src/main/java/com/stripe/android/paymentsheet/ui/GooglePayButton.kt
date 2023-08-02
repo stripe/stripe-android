@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.core.view.updatePadding
 import com.google.android.gms.wallet.button.ButtonConstants
 import com.google.android.gms.wallet.button.ButtonOptions
 import com.stripe.android.GooglePayJsonFactory
@@ -153,10 +152,6 @@ internal class GooglePayButton @JvmOverloads constructor(
     }
 
     private fun onStartProcessing() {
-        val padding = context.resources.getDimensionPixelSize(
-            R.dimen.stripe_paymentsheet_googlepay_button_bottom_padding
-        )
-        viewBinding.googlePayButtonLayout.updatePadding(bottom = padding)
         viewBinding.googlePayPrimaryButton.isVisible = true
         viewBinding.googlePayPaymentButton.isVisible = false
     }
