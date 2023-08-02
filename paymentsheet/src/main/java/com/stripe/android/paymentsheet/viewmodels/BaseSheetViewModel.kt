@@ -274,6 +274,13 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
+    protected fun reportConfirmButtonPressed() {
+        eventReporter.onPressConfirmButton(
+            currency = stripeIntent.value?.currency,
+            isDecoupling = stripeIntent.value?.clientSecret == null,
+        )
+    }
+
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
         _stripeIntent.value = stripeIntent
         supportedPaymentMethods = getPMsToAdd(stripeIntent, config, lpmRepository)

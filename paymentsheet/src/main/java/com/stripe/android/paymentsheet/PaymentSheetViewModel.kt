@@ -119,7 +119,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         amountFlow = amount,
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
-        onClick = this::checkout,
+        onClick = {
+            reportConfirmButtonPressed()
+            checkout()
+        },
     )
 
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
@@ -427,6 +430,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount) {
         updateSelection(paymentSelection)
+        reportConfirmButtonPressed()
         checkout()
     }
 
