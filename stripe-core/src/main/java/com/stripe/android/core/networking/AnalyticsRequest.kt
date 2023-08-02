@@ -11,8 +11,9 @@ import kotlinx.serialization.Serializable
  * this table through r.stripe.com. See [AnalyticsRequestV2] for details.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Suppress("DataClassPrivateConstructor")
 @Serializable
-data class AnalyticsRequest(
+data class AnalyticsRequest private constructor(
     val params: Map<String, String?>,
     override val headers: Map<String, String>,
 ) : StripeRequest() {
@@ -30,7 +31,8 @@ data class AnalyticsRequest(
         query.takeIf { it.isNotEmpty() }
     ).joinToString("?")
 
-    internal companion object {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
         internal const val HOST = "https://q.stripe.com"
 
         fun create(
@@ -45,6 +47,10 @@ data class AnalyticsRequest(
     }
 }
 
+/**
+ * Maps the receiver to a map with string values. If any value is null, its entry will not be
+ * included in the result.
+ */
 private fun Map<String, *>.toMapWithStringValues(): Map<String, String> {
     val result = mutableMapOf<String, String>()
 

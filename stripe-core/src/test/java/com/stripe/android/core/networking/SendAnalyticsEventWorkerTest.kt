@@ -94,7 +94,7 @@ internal class SendAnalyticsEventWorkerTest {
     }
 
     private fun defaultAnalyticsRequest(): AnalyticsRequest {
-        return AnalyticsRequest(
+        return AnalyticsRequest.create(
             params = mapOf(FIELD_EVENT to "test_event"),
             headers = emptyMap(),
         )

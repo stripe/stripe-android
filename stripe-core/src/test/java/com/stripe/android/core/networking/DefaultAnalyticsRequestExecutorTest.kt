@@ -34,7 +34,7 @@ class DefaultAnalyticsRequestExecutorTest {
         workContext = testDispatcher,
     )
 
-    private val analyticsRequest = AnalyticsRequest(mapOf(FIELD_EVENT to TEST_EVENT), emptyMap())
+    private val analyticsRequest = AnalyticsRequest.create(mapOf(FIELD_EVENT to TEST_EVENT), emptyMap())
 
     @Test
     fun `Should delegate to network client if WorkManager is not available`() = runTest {
