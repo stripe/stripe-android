@@ -141,13 +141,13 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.failure(
                     cause = APIException(message = "Failed to retrieve payment methods."),
-                    displayMessage = "We could\'nt get your payment methods. Please try again."
+                    displayMessage = "We couldn't get your payment methods. Please try again."
                 )
             )
         )
         viewModel.viewState.test {
             assertThat(awaitViewState<SelectPaymentMethod>().errorMessage)
-                .isEqualTo("We could\'nt get your payment methods. Please try again.")
+                .isEqualTo("We couldn't get your payment methods. Please try again.")
         }
     }
 
