@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
+import com.stripe.android.paymentsheet.utils.mapAsStateFlow
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,7 +34,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Stack
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -42,8 +42,7 @@ import javax.inject.Provider
 @CustomerSheetViewModelScope
 internal class CustomerSheetViewModel @Inject constructor(
     private val application: Application,
-    // TODO (jameswoo) should the current view state be derived from backstack?
-    private val backstack: Stack<CustomerSheetViewState>,
+    initialBackStack: @JvmSuppressWildcards List<CustomerSheetViewState>,
     private var savedPaymentSelection: PaymentSelection?,
     private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
     private val resources: Resources,
@@ -57,8 +56,8 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
 ) : ViewModel() {
 
-    private val _viewState = MutableStateFlow(backstack.peek())
-    val viewState: StateFlow<CustomerSheetViewState> = _viewState
+    private val backStack = MutableStateFlow(initialBackStack)
+    val viewState: StateFlow<CustomerSheetViewState> = backStack.mapAsStateFlow { it.last() }
 
     private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
     val result: StateFlow<InternalCustomerSheetResult?> = _result
@@ -203,15 +202,14 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onBackPressed() {
-        val shouldExit = backstack.peek() is CustomerSheetViewState.SelectPaymentMethod
-        if (backstack.empty() || shouldExit) {
+        val shouldExit = viewState.value is CustomerSheetViewState.SelectPaymentMethod
+        if (shouldExit) {
             _result.tryEmit(
                 InternalCustomerSheetResult.Canceled(savedPaymentSelection)
             )
         } else {
-            backstack.pop()
-            _viewState.update {
-                backstack.peek()
+            backStack.update {
+                it.dropLast(1)
             }
         }
     }
@@ -480,24 +478,21 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun transition(to: CustomerSheetViewState) {
-        backstack.push(to)
-        _viewState.update {
-            to
+        backStack.update {
+            it + to
         }
     }
 
-    private inline fun <reified T : CustomerSheetViewState> updateViewState(block: (T) -> T) {
-        // TODO (jameswoo) viewstate should be derived from backstack
-        val index = backstack.indexOf(_viewState.value)
-        backstack.removeAt(index)
-
-        (_viewState.value as? T)?.let {
-            _viewState.update {
-                block(it as T)
+    private inline fun <reified T : CustomerSheetViewState> updateViewState(transform: (T) -> T) {
+        backStack.update { currentBackStack ->
+            currentBackStack.map {
+                if (it is T) {
+                    transform(it)
+                } else {
+                    it
+                }
             }
         }
-
-        backstack.insertElementAt(_viewState.value, index)
     }
 
     object Factory : ViewModelProvider.Factory {
