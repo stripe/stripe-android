@@ -56,6 +56,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherP
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.GooglePayButton
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -83,6 +84,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
+import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -928,6 +930,36 @@ internal class PaymentSheetActivityTest {
             assertThat(layoutParams.gravity).isEqualTo(Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM)
             assertThat(layoutParams.width).isEqualTo(750)
         }
+    }
+
+    @Test
+    fun `Send confirm pressed event when pressing primary button`() = runTest(testDispatcher) {
+        // Use only payment method type that doesn't require form input
+        val paymentIntent = PAYMENT_INTENT.copy(
+            amount = 9999,
+            currency = "CAD",
+            paymentMethodTypes = listOf("cashapp"),
+        )
+
+        val viewModel = createViewModel(
+            paymentIntent = paymentIntent,
+            paymentMethods = emptyList(),
+        )
+
+        val scenario = activityScenario(viewModel)
+
+        scenario.launch(intent).onActivity {
+            composeTestRule
+                .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .performClick()
+
+            composeTestRule.waitForIdle()
+        }
+
+        verify(eventReporter).onPressConfirmButton(
+            currency = "CAD",
+            isDecoupling = false,
+        )
     }
 
     private fun activityScenario(

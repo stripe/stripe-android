@@ -72,6 +72,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
@@ -1417,6 +1418,60 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModelForDeferredIntent()
         viewModel.onUserCancel()
         verify(eventReporter).onDismiss(isDecoupling = true)
+    }
+
+    @Test
+    fun `Sends confirm pressed event when fully confirming US bank account payment`() = runTest {
+        val newPaymentSelection = PaymentSelection.New.USBankAccount(
+            labelResource = "Test",
+            iconResource = 0,
+            bankName = "Test",
+            last4 = "Test",
+            financialConnectionsSessionId = "1234",
+            intentId = "1234",
+            paymentMethodCreateParams = mock(),
+            customerRequestedSave = mock(),
+        )
+
+        val viewModel = createViewModel()
+
+        viewModel.handleConfirmUSBankAccount(newPaymentSelection)
+
+        verify(eventReporter).onPressConfirmButton(
+            currency = "usd",
+            isDecoupling = false,
+        )
+    }
+
+    @Test
+    fun `Sends no confirm pressed event when opening US bank account auth flow`() = runTest {
+        val paymentIntent = PAYMENT_INTENT.copy(
+            amount = 9999,
+            currency = "CAD",
+            paymentMethodTypes = listOf("card", "us_bank_account"),
+        )
+
+        val viewModel = createViewModel(stripeIntent = paymentIntent)
+
+        // Mock the filled out US Bank Account form by updating the selection
+        val usBankAccount = PaymentSelection.New.USBankAccount(
+            labelResource = "Test",
+            iconResource = 0,
+            bankName = "Test",
+            last4 = "Test",
+            financialConnectionsSessionId = "1234",
+            intentId = "1234",
+            paymentMethodCreateParams = mock(),
+            customerRequestedSave = mock(),
+        )
+        viewModel.updateSelection(usBankAccount)
+
+        viewModel.checkout()
+
+        verify(eventReporter, never()).onPressConfirmButton(
+            currency = "usd",
+            isDecoupling = false,
+        )
     }
 
     private fun createViewModel(
