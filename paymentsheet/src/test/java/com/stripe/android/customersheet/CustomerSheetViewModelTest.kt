@@ -1167,6 +1167,42 @@ class CustomerSheetViewModelTest {
         viewStateTurbine.cancel()
     }
 
+    @Test
+    fun `If Google Pay is not available and config enables Google Pay, then Google Pay should not be enabled`() = runTest {
+        val viewModel = createViewModel(
+            backstack = buildBackstack(
+                selectPaymentMethodViewState,
+                CustomerSheetViewState.Loading(false)
+            ),
+            configuration = CustomerSheet.Configuration(
+                googlePayEnabled = true,
+            ),
+            isGooglePayAvailable = false,
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitViewState<SelectPaymentMethod>().isGooglePayEnabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `If Google Pay is available and config enables Google Pay, then Google Pay should be enabled`() = runTest {
+        val viewModel = createViewModel(
+            backstack = buildBackstack(
+                selectPaymentMethodViewState,
+                CustomerSheetViewState.Loading(false)
+            ),
+            configuration = CustomerSheet.Configuration(
+                googlePayEnabled = true,
+            ),
+            isGooglePayAvailable = true,
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitViewState<SelectPaymentMethod>().isGooglePayEnabled).isTrue()
+        }
+    }
+
     private fun buildBackstack(vararg states: CustomerSheetViewState): Stack<CustomerSheetViewState> {
         return Stack<CustomerSheetViewState>().apply {
             states.forEach {

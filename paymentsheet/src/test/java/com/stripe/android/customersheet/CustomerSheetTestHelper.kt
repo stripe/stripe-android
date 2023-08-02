@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -14,6 +15,7 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOf
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -49,6 +51,7 @@ object CustomerSheetTestHelper {
             stripeAccountId = null,
         ),
         configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(),
+        isGooglePayAvailable: Boolean = true,
     ): CustomerSheetViewModel {
         val formViewModel = FormViewModel(
             context = application,
@@ -92,6 +95,11 @@ object CustomerSheetTestHelper {
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
+            googlePayRepositoryFactory = {
+                GooglePayRepository {
+                    flowOf(isGooglePayAvailable)
+                }
+            }
         )
     }
 }

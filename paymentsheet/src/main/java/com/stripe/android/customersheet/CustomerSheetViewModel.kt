@@ -12,6 +12,8 @@ import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -27,6 +29,7 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -51,6 +54,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val lpmRepository: LpmRepository,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
+    private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(backstack.peek())
@@ -131,6 +135,14 @@ internal class CustomerSheetViewModel @Inject constructor(
 
             savedPaymentSelection = paymentSelection
 
+            val isGooglePayReady = googlePayRepositoryFactory(
+                if (isLiveModeProvider()) {
+                    GooglePayEnvironment.Production
+                } else {
+                    GooglePayEnvironment.Test
+                }
+            ).isReady().first()
+
             transition(
                 to = CustomerSheetViewState.SelectPaymentMethod(
                     title = configuration.headerTextForSelectionScreen,
@@ -139,7 +151,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     isLiveMode = isLiveModeProvider(),
                     isProcessing = false,
                     isEditing = false,
-                    isGooglePayEnabled = configuration.googlePayEnabled,
+                    isGooglePayEnabled = configuration.googlePayEnabled && isGooglePayReady,
                     primaryButtonVisible = false,
                     // TODO (jameswoo) translate
                     primaryButtonLabel = "Confirm",
