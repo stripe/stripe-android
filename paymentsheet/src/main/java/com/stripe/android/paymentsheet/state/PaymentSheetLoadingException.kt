@@ -2,11 +2,11 @@ package com.stripe.android.paymentsheet.state
 
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.Unknown
 
 internal sealed class PaymentSheetLoadingException : Throwable() {
 
     abstract val type: String
-    abstract override val cause: Throwable
 
     data class InvalidConfirmationMethod(
         private val confirmationMethod: PaymentIntent.ConfirmationMethod,
@@ -19,9 +19,6 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
             The current PaymentIntent has confirmation_method '$confirmationMethod'.
             See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method.
         """.trimIndent()
-
-        override val cause: Throwable
-            get() = IllegalStateException(message)
     }
 
     data class NoPaymentMethodTypesAvailable(
@@ -34,9 +31,6 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
         override val message: String
             get() = "None of the requested payment methods ($requested) " +
                 "match the supported payment types ($supported)."
-
-        override val cause: Throwable
-            get() = IllegalStateException(message)
     }
 
     data class PaymentIntentInTerminalState(
@@ -50,9 +44,6 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
                 PaymentSheet cannot set up a PaymentIntent in status '$status'.
                 See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status.
             """.trimIndent()
-
-        override val cause: Throwable
-            get() = IllegalStateException(message)
     }
 
     data class SetupIntentInTerminalState(
@@ -66,17 +57,11 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
                 PaymentSheet cannot set up a SetupIntent in status '$status'.
                 See https://stripe.com/docs/api/setup_intents/object#setup_intent_object-status.
             """.trimIndent()
-
-        override val cause: Throwable
-            get() = IllegalStateException(message)
     }
 
     object MissingAmountOrCurrency : PaymentSheetLoadingException() {
         override val type: String = "missingAmountOrCurrency"
         override val message: String = "PaymentIntent must contain amount and currency."
-
-        override val cause: Throwable
-            get() = IllegalStateException(message)
     }
 
     data class Unknown(
@@ -85,13 +70,7 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
         override val type: String = "unknown"
         override val message: String? = cause.message
     }
-
-    fun unwrap(): Throwable = cause
-
-    companion object {
-
-        fun create(throwable: Throwable): PaymentSheetLoadingException {
-            return (throwable as? PaymentSheetLoadingException) ?: Unknown(cause = throwable)
-        }
-    }
 }
+
+internal val Throwable.asPaymentSheetLoadingException: PaymentSheetLoadingException
+    get() = (this as? PaymentSheetLoadingException) ?: Unknown(cause = this)
