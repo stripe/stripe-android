@@ -21,7 +21,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -657,7 +656,6 @@ internal class DefaultPaymentSheetLoaderTest {
                 stripeIntent = stripeIntent,
                 error = error,
             ),
-            stripeIntentValidator = StripeIntentValidator(),
             customerRepository = customerRepo,
             lpmRepository = lpmRepository,
             logger = Logger.noop(),
