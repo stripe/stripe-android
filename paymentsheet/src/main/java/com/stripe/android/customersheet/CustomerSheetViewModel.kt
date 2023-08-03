@@ -64,6 +64,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val customerAdapter: CustomerAdapter,
     private val lpmRepository: LpmRepository,
+    private val statusBarColor: () -> Int?,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
@@ -115,19 +116,22 @@ internal class CustomerSheetViewModel @Inject constructor(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner
     ) {
+        val launcher = activityResultCaller.registerForActivityResult(
+            PaymentLauncherContract(),
+            ::onPaymentLauncherResult
+        )
+
         paymentLauncher = paymentLauncherFactory.create(
             publishableKey = { paymentConfigurationProvider.get().publishableKey },
             stripeAccountId = { paymentConfigurationProvider.get().stripeAccountId },
-            statusBarColor = null,
-            hostActivityLauncher = activityResultCaller.registerForActivityResult(
-                PaymentLauncherContract(),
-                ::onPaymentLauncherResult
-            )
+            statusBarColor = statusBarColor(),
+            hostActivityLauncher = launcher,
         )
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
+                    launcher.unregister()
                     paymentLauncher = null
                     super.onDestroy(owner)
                 }
@@ -135,21 +139,38 @@ internal class CustomerSheetViewModel @Inject constructor(
         )
     }
 
-    internal fun onPaymentLauncherResult(result: PaymentResult) {
+    private fun onPaymentLauncherResult(result: PaymentResult) {
         when (result) {
             is PaymentResult.Canceled -> {
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
+                        enabled = true,
                         isProcessing = false,
                     )
                 }
             }
             is PaymentResult.Completed -> {
+                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                    if (it.unconfirmedPaymentMethod == null) {
+                        it
+                    } else {
+                        it.copy(
+                            savedPaymentMethods = listOf(it.unconfirmedPaymentMethod) + it.savedPaymentMethods,
+                            paymentSelection = PaymentSelection.Saved(
+                                paymentMethod = it.unconfirmedPaymentMethod
+                            ),
+                            primaryButtonVisible = true,
+                            // TODO (jameswoo) translate
+                            primaryButtonLabel = "Confirm",
+                        )
+                    }
+                }
                 onBackPressed()
             }
             is PaymentResult.Failed -> {
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
+                        enabled = true,
                         isProcessing = false,
                         errorMessage = result.throwable.stripeErrorMessage(application),
                     )
@@ -266,7 +287,8 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onBackPressed() {
-        val shouldExit = viewState.value is CustomerSheetViewState.SelectPaymentMethod
+        val shouldExit = backStack.value.singleOrNull() != null ||
+            viewState.value is CustomerSheetViewState.SelectPaymentMethod
         if (shouldExit) {
             _result.tryEmit(
                 InternalCustomerSheetResult.Canceled(savedPaymentSelection)
@@ -392,19 +414,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 .transformToPaymentMethodCreateParams(paymentMethodSpec)
             createPaymentMethod(params)
                 .onSuccess { paymentMethod ->
-                    updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                        val newState = it.copy(
-                            savedPaymentMethods = listOf(paymentMethod) + it.savedPaymentMethods,
-                            paymentSelection = PaymentSelection.Saved(
-                                paymentMethod = paymentMethod
-                            ),
-                            primaryButtonVisible = true,
-                            // TODO (jameswoo) translate
-                            primaryButtonLabel = "Confirm",
-                        )
-                        attachPaymentMethodToCustomer(paymentMethod)
-                        newState
-                    }
+                    attachPaymentMethodToCustomer(paymentMethod)
                 }.onFailure { throwable ->
                     logger.error(
                         msg = "Failed to create payment method for $paymentMethodSpec",
@@ -481,8 +491,29 @@ internal class CustomerSheetViewModel @Inject constructor(
             setupForFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
         )
 
+        updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+            it.copy(
+                unconfirmedPaymentMethod = paymentMethod,
+            )
+        }
+
         when (nextStep) {
             is IntentConfirmationInterceptor.NextStep.Complete -> {
+                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                    if (it.unconfirmedPaymentMethod == null) {
+                        it
+                    } else {
+                        it.copy(
+                            savedPaymentMethods = listOf(it.unconfirmedPaymentMethod) + it.savedPaymentMethods,
+                            paymentSelection = PaymentSelection.Saved(
+                                paymentMethod = it.unconfirmedPaymentMethod
+                            ),
+                            primaryButtonVisible = true,
+                            // TODO (jameswoo) translate
+                            primaryButtonLabel = "Confirm",
+                        )
+                    }
+                }
                 onBackPressed()
             }
             is IntentConfirmationInterceptor.NextStep.Confirm -> {
@@ -557,6 +588,17 @@ internal class CustomerSheetViewModel @Inject constructor(
     private suspend fun attachPaymentMethod(paymentMethod: PaymentMethod) {
         customerAdapter.attachPaymentMethod(paymentMethod.id!!)
             .onSuccess {
+                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                    it.copy(
+                        savedPaymentMethods = listOf(paymentMethod) + it.savedPaymentMethods,
+                        paymentSelection = PaymentSelection.Saved(
+                            paymentMethod = paymentMethod
+                        ),
+                        primaryButtonVisible = true,
+                        // TODO (jameswoo) translate
+                        primaryButtonLabel = "Confirm",
+                    )
+                }
                 onBackPressed()
             }.onFailure { cause, displayMessage ->
                 logger.error(

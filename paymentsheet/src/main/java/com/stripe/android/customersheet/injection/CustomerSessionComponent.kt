@@ -45,6 +45,9 @@ internal interface CustomerSessionComponent {
         @BindsInstance
         fun callback(callback: CustomerSheetResultCallback): Builder
 
+        @BindsInstance
+        fun statusBarColor(statusBarColor: () -> Int?): Builder
+
         fun build(): CustomerSessionComponent
     }
 }

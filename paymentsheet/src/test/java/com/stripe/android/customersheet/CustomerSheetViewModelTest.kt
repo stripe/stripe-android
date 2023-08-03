@@ -14,7 +14,6 @@ import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -606,7 +605,14 @@ class CustomerSheetViewModelTest {
     fun `When primary button is pressed in the add payment flow, view should be loading`() = runTest {
         val viewModel = createViewModel(
             initialBackStack = listOf(
+                selectPaymentMethodViewState,
                 addPaymentMethodViewState,
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                canCreateSetupIntents = false,
+                onAttachPaymentMethod = {
+                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD)
+                }
             ),
             stripeRepository = FakeStripeRepository(
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
@@ -619,6 +625,7 @@ class CustomerSheetViewModelTest {
             val viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.isProcessing).isTrue()
             assertThat(viewState.enabled).isFalse()
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
         }
     }
 
@@ -672,8 +679,6 @@ class CustomerSheetViewModelTest {
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
-
-            viewModel.onPaymentLauncherResult(PaymentResult.Completed)
 
             val newViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(newViewState.errorMessage).isNull()
@@ -910,8 +915,6 @@ class CustomerSheetViewModelTest {
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing)
                 .isTrue()
 
-            viewModel.onPaymentLauncherResult(PaymentResult.Completed)
-
             assertThat(awaitViewState<SelectPaymentMethod>().primaryButtonVisible)
                 .isTrue()
         }
@@ -1010,8 +1013,6 @@ class CustomerSheetViewModelTest {
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
-
-            viewModel.onPaymentLauncherResult(PaymentResult.Completed)
 
             var viewState = awaitViewState<SelectPaymentMethod>()
             assertThat(viewState.primaryButtonVisible).isTrue()

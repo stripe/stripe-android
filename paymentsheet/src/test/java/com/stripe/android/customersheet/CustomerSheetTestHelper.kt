@@ -116,7 +116,8 @@ object CustomerSheetTestHelper {
                 GooglePayRepository {
                     flowOf(isGooglePayAvailable)
                 }
-            }
+            },
+            statusBarColor = { null },
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
         }
