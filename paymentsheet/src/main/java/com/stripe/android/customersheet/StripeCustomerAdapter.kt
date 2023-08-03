@@ -140,12 +140,24 @@ internal class StripeCustomerAdapter @Inject constructor(
                     cachedCustomerEphemeralKey.date
                 )
             }?.result ?: run {
+                val ephemeralKey = customerEphemeralKeyProvider.provideCustomerEphemeralKey()
+
+                ephemeralKey.getOrNull()?.let {
+                    customerRepository.retrieveCustomer(
+                        customerId = it.customerId,
+                        ephemeralKeySecret = it.ephemeralKey,
+                    ) ?: return@run CustomerAdapter.Result.failure(
+                        cause = IllegalStateException("Invalid customer"),
+                        displayMessage = null
+                    )
+                }
+
                 val newCachedCustomerEphemeralKey = CachedCustomerEphemeralKey(
-                    result = customerEphemeralKeyProvider.provideCustomerEphemeralKey(),
+                    result = ephemeralKey,
                     date = timeProvider(),
                 )
                 cachedCustomerEphemeralKey = newCachedCustomerEphemeralKey
-                newCachedCustomerEphemeralKey.result
+                ephemeralKey
             }
         }
     }

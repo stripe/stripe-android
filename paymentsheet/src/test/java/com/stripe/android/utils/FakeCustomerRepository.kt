@@ -1,13 +1,14 @@
 package com.stripe.android.utils
 
 import com.stripe.android.model.Customer
+import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 
 internal class FakeCustomerRepository(
     private val paymentMethods: List<PaymentMethod> = emptyList(),
-    private val customer: Customer? = null,
+    private val customer: Customer? = CustomerFixtures.CUSTOMER,
     private val onDetachPaymentMethod: () -> Result<PaymentMethod> = {
         Result.failure(NotImplementedError())
     },

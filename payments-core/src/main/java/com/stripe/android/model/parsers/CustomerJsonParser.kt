@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
@@ -9,7 +10,8 @@ import com.stripe.android.model.TokenizationMethod
 import org.json.JSONArray
 import org.json.JSONObject
 
-internal class CustomerJsonParser : ModelJsonParser<Customer> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class CustomerJsonParser : ModelJsonParser<Customer> {
     private val customerSourceJsonParser = CustomerPaymentSourceJsonParser()
 
     override fun parse(json: JSONObject): Customer? {

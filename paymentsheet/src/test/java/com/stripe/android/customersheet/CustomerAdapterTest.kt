@@ -8,6 +8,7 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
+import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -122,6 +123,30 @@ class CustomerAdapterTest {
         assertThat(customer.getOrNull()?.customerId)
             .isEqualTo("${CACHED_CUSTOMER_MAX_AGE_MILLIS + 1}")
         assertThat(ephemeralKeyProviderCounter.get()).isEqualTo(2)
+    }
+
+    @Test
+    fun `Invalid customer returns failure when retrieving customer ephemeral key`() = runTest {
+        val adapter = createAdapter(
+            customerEphemeralKeyProvider = {
+                CustomerAdapter.Result.success(
+                    CustomerEphemeralKey(
+                        customerId = "invalid",
+                        ephemeralKey = "ek_123"
+                    )
+                )
+            },
+            customerRepository = FakeCustomerRepository(
+                customer = null,
+            ),
+            timeProvider = { testScheduler.currentTime }
+        )
+
+        val exception = adapter.getCustomerEphemeralKey().failureOrNull()?.cause
+        assertThat(exception)
+            .isInstanceOf(IllegalStateException::class.java)
+        assertThat(exception?.message)
+            .isEqualTo("Invalid customer")
     }
 
     @Test
@@ -669,7 +694,7 @@ class CustomerAdapterTest {
             CustomerEphemeralKeyProvider {
                 CustomerAdapter.Result.success(
                     CustomerEphemeralKey(
-                        customerId = "cus_123",
+                        customerId = CustomerFixtures.CUSTOMER.id!!,
                         ephemeralKey = "ek_123"
                     )
                 )
