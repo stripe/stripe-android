@@ -16,6 +16,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
@@ -40,6 +41,12 @@ fun MultiToggleButton(
             val isSelected = currentSelection.lowercase() == toggleState.lowercase()
             val backgroundTint = if (isSelected) selectedTint else unselectedTint
             val textColor = if (isSelected) Color.White else Color.Unspecified
+            val shape = RoundedCornerShape(
+                topStart = if (index == 0) 4.dp else 0.dp,
+                bottomStart = if (index == 0) 4.dp else 0.dp,
+                topEnd = if (index == toggleStates.size - 1) 4.dp else 0.dp,
+                bottomEnd = if (index == toggleStates.size - 1) 4.dp else 0.dp,
+            )
 
             if (index != 0) {
                 Divider(
@@ -56,14 +63,11 @@ fun MultiToggleButton(
                 modifier = Modifier
                     .background(
                         color = backgroundTint,
-                        shape = RoundedCornerShape(
-                            topStart = if (index == 0) 4.dp else 0.dp,
-                            bottomStart = if (index == 0) 4.dp else 0.dp,
-                            topEnd = if (index == toggleStates.size - 1) 4.dp else 0.dp,
-                            bottomEnd = if (index == toggleStates.size - 1) 4.dp else 0.dp,
-                        )
+                        shape = shape,
                     )
-                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                    .clip(
+                        shape = shape,
+                    )
                     .toggleable(
                         value = isSelected,
                         enabled = true,
@@ -73,6 +77,7 @@ fun MultiToggleButton(
                             }
                         }
                     )
+                    .padding(vertical = 4.dp, horizontal = 8.dp)
             )
         }
     }
