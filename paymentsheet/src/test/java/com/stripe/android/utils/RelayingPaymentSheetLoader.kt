@@ -3,6 +3,7 @@ package com.stripe.android.utils
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.channels.Channel
@@ -30,7 +31,7 @@ internal class RelayingPaymentSheetLoader : PaymentSheetLoader {
 
     fun enqueueFailure() {
         val error = RuntimeException("whoops")
-        enqueue(Result.failure<PaymentSheetState.Full>(error))
+        enqueue(Result.failure(error))
     }
 
     private fun enqueue(result: Result<PaymentSheetState.Full>) {
