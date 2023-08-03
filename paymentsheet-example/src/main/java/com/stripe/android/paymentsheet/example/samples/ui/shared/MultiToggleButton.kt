@@ -44,8 +44,8 @@ fun MultiToggleButton(
             val shape = RoundedCornerShape(
                 topStart = if (index == 0) 4.dp else 0.dp,
                 bottomStart = if (index == 0) 4.dp else 0.dp,
-                topEnd = if (index == toggleStates.size - 1) 4.dp else 0.dp,
-                bottomEnd = if (index == toggleStates.size - 1) 4.dp else 0.dp,
+                topEnd = if (index == toggleStates.lastIndex) 4.dp else 0.dp,
+                bottomEnd = if (index == toggleStates.lastIndex) 4.dp else 0.dp,
             )
 
             if (index != 0) {
