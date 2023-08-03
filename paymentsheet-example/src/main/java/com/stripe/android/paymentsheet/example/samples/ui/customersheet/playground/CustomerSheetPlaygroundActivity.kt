@@ -68,10 +68,8 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                 val config by viewModel.configuration.collectAsState()
                 val customerAdapter by viewModel.customerAdapter.collectAsState()
 
-                val currentCustomerAdapter = customerAdapter ?: return@PaymentSheetExampleTheme
-
                 val customerSheet = rememberCustomerSheet(
-                    customerAdapter = currentCustomerAdapter,
+                    customerAdapter = customerAdapter,
                     configuration = config,
                     callback = viewModel::onCustomerSheetResult,
                 )
@@ -358,7 +356,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
             ) {
                 Text(
                     text = "Name",
@@ -380,7 +378,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
             ) {
                 Text(
                     text = "Email",
@@ -402,7 +400,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
             ) {
                 Text(
                     text = "Phone",
@@ -424,7 +422,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
             ) {
                 Text(
                     text = "Address",

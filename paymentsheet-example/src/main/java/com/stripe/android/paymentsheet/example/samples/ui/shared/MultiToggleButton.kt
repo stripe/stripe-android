@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -30,7 +31,10 @@ fun MultiToggleButton(
     Row(
         modifier = Modifier
             .height(IntrinsicSize.Min)
-            .border(BorderStroke(1.dp, Color.LightGray))
+            .border(
+                border = BorderStroke(1.dp, Color.LightGray),
+                shape = RoundedCornerShape(4.dp),
+            )
     ) {
         toggleStates.forEachIndexed { index, toggleState ->
             val isSelected = currentSelection.lowercase() == toggleState.lowercase()
@@ -46,10 +50,20 @@ fun MultiToggleButton(
                 )
             }
 
-            Row(
+            Text(
+                toggleState,
+                color = textColor,
                 modifier = Modifier
-                    .background(backgroundTint)
-                    .padding(vertical = 6.dp, horizontal = 8.dp)
+                    .background(
+                        color = backgroundTint,
+                        shape = RoundedCornerShape(
+                            topStart = if (index == 0) 4.dp else 0.dp,
+                            bottomStart = if (index == 0) 4.dp else 0.dp,
+                            topEnd = if (index == toggleStates.size - 1) 4.dp else 0.dp,
+                            bottomEnd = if (index == toggleStates.size - 1) 4.dp else 0.dp,
+                        )
+                    )
+                    .padding(vertical = 4.dp, horizontal = 8.dp)
                     .toggleable(
                         value = isSelected,
                         enabled = true,
@@ -59,9 +73,7 @@ fun MultiToggleButton(
                             }
                         }
                     )
-            ) {
-                Text(toggleState, color = textColor, modifier = Modifier.padding(4.dp))
-            }
+            )
         }
     }
 }

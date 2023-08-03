@@ -93,7 +93,7 @@ class CustomerSheetPlaygroundViewModel(
             .build()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialConfiguration)
 
-    internal val customerAdapter: StateFlow<CustomerSheetPlaygroundAdapter?> = configurationState.map {
+    internal val customerAdapter: StateFlow<CustomerSheetPlaygroundAdapter> = configurationState.map {
         CustomerSheetPlaygroundAdapter(
             overrideCanCreateSetupIntents = it.isSetupIntentEnabled,
             adapter = CustomerAdapter.create(
@@ -133,7 +133,22 @@ class CustomerSheetPlaygroundViewModel(
                 },
             )
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = CustomerSheetPlaygroundAdapter(
+            adapter = CustomerAdapter.create(
+                context = getApplication(),
+                customerEphemeralKeyProvider = {
+                    CustomerAdapter.Result.failure(
+                        cause = NotImplementedError(),
+                        displayMessage = null
+                    )
+                },
+                setupIntentClientSecretProvider = null
+            )
+        )
+    )
 
     init {
         viewModelScope.launch {
