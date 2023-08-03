@@ -188,7 +188,7 @@ internal class DefaultPaymentSheetLoaderTest {
     fun `load() with customer should fetch only supported payment method types`() =
         runTest {
             val customerRepository = mock<CustomerRepository> {
-                whenever(it.getPaymentMethods(any(), any())).thenReturn(emptyList())
+                whenever(it.getPaymentMethods(any(), any(), any())).thenReturn(Result.success(emptyList()))
             }
 
             val paymentMethodTypes = listOf(
@@ -213,7 +213,8 @@ internal class DefaultPaymentSheetLoaderTest {
 
             verify(customerRepository).getPaymentMethods(
                 any(),
-                capture(paymentMethodTypeCaptor)
+                capture(paymentMethodTypeCaptor),
+                any(),
             )
             assertThat(paymentMethodTypeCaptor.allValues.flatten())
                 .containsExactly(PaymentMethod.Type.Card)
@@ -223,7 +224,7 @@ internal class DefaultPaymentSheetLoaderTest {
     fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() =
         runTest {
             val customerRepository = mock<CustomerRepository> {
-                whenever(it.getPaymentMethods(any(), any())).thenReturn(emptyList())
+                whenever(it.getPaymentMethods(any(), any(), any())).thenReturn(Result.success(emptyList()))
             }
 
             val loader = createPaymentSheetLoader(
@@ -246,7 +247,8 @@ internal class DefaultPaymentSheetLoaderTest {
 
             verify(customerRepository).getPaymentMethods(
                 any(),
-                capture(paymentMethodTypeCaptor)
+                capture(paymentMethodTypeCaptor),
+                any(),
             )
             assertThat(paymentMethodTypeCaptor.value)
                 .containsExactly(PaymentMethod.Type.Card)

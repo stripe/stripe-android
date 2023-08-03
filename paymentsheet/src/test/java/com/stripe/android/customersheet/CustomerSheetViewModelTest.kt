@@ -138,7 +138,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When payment methods cannot be loaded, errorMessage is emitted`() = runTest {
+    fun `When payment methods cannot be loaded, sheet closes`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.failure(
@@ -147,9 +147,9 @@ class CustomerSheetViewModelTest {
                 )
             )
         )
-        viewModel.viewState.test {
-            assertThat(awaitViewState<SelectPaymentMethod>().errorMessage)
-                .isEqualTo("We couldn't get your payment methods. Please try again.")
+        viewModel.result.test {
+            assertThat((awaitItem() as InternalCustomerSheetResult.Error).exception.message)
+                .isEqualTo("Failed to retrieve payment methods.")
         }
     }
 
@@ -163,12 +163,9 @@ class CustomerSheetViewModelTest {
                 )
             )
         )
-        viewModel.viewState.test {
-            val viewState = awaitViewState<SelectPaymentMethod>()
-            assertThat(viewState.paymentSelection)
-                .isEqualTo(null)
-            assertThat(viewState.errorMessage)
-                .isEqualTo("Something went wrong")
+        viewModel.result.test {
+            assertThat((awaitItem() as InternalCustomerSheetResult.Error).exception.message)
+                .isEqualTo("Failed to retrieve selected payment option.")
         }
     }
 

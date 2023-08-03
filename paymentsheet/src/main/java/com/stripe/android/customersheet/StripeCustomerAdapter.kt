@@ -44,14 +44,19 @@ internal class StripeCustomerAdapter @Inject constructor(
 
     override suspend fun retrievePaymentMethods(): CustomerAdapter.Result<List<PaymentMethod>> {
         return getCustomerEphemeralKey().map { customerEphemeralKey ->
-            val paymentMethods = customerRepository.getPaymentMethods(
+            customerRepository.getPaymentMethods(
                 customerConfig = PaymentSheet.CustomerConfiguration(
                     id = customerEphemeralKey.customerId,
-                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey
+                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 ),
-                types = listOf(PaymentMethod.Type.Card)
-            )
-            paymentMethods
+                types = listOf(PaymentMethod.Type.Card),
+                silentlyFail = false,
+            ).getOrElse {
+                return CustomerAdapter.Result.failure(
+                    cause = it,
+                    displayMessage = it.stripeErrorMessage(context),
+                )
+            }
         }
     }
 
