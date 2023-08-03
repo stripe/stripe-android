@@ -623,7 +623,8 @@ class CustomerAdapterTest {
                 googlePayEnabled = true
             ),
             customerAdapter = adapter,
-            callback = {}
+            callback = {},
+            statusBarColor = { null },
         )
 
         val result = adapter.retrieveSelectedPaymentOption()
@@ -653,7 +654,8 @@ class CustomerAdapterTest {
                 googlePayEnabled = false
             ),
             customerAdapter = adapter,
-            callback = {}
+            callback = {},
+            statusBarColor = { null },
         )
 
         val result = adapter.retrieveSelectedPaymentOption()
