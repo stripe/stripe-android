@@ -8,6 +8,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -51,11 +52,17 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onLoadFailed(isDecoupling: Boolean) {
+    override fun onLoadFailed(
+        isDecoupling: Boolean,
+        error: Throwable,
+    ) {
+        val loadError = PaymentSheetLoadingException.create(error)
         val duration = durationProvider.end(DurationProvider.Key.Loading)
+
         fireEvent(
             PaymentSheetEvent.LoadFailed(
                 duration = duration,
+                error = loadError.type,
                 isDecoupled = isDecoupling,
             )
         )

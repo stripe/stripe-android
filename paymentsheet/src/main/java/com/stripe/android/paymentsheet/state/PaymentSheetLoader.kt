@@ -184,10 +184,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
             val supported = lpmRepository.values().joinToString(separator = ", ") { it.code }
 
-            throw IllegalArgumentException(
-                "None of the requested payment methods ($requested) " +
-                    "match the supported payment types ($supported)."
-            )
+            throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested, supported)
         }
     }
 
@@ -339,7 +336,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             },
             onFailure = { error ->
                 logger.error("Failure loading PaymentSheetState", error)
-                eventReporter.onLoadFailed(isDecoupling = isDecoupling)
+                eventReporter.onLoadFailed(
+                    isDecoupling = isDecoupling,
+                    error = error,
+                )
             }
         )
     }

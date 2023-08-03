@@ -41,7 +41,6 @@ import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -80,7 +79,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     eventReporter: EventReporter,
     // Properties provided through injection
     private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
-    private val stripeIntentValidator: StripeIntentValidator,
     private val paymentSheetLoader: PaymentSheetLoader,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
@@ -553,18 +551,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     )
                 }
 
-                runCatching {
-                    stripeIntentValidator.requireValid(stripeIntent)
-                }.fold(
-                    onSuccess = {
-                        resetViewState(
-                            when (paymentResult) {
-                                is PaymentResult.Failed -> paymentResult.throwable.localizedMessage
-                                else -> null // indicates canceled payment
-                            }
-                        )
-                    },
-                    onFailure = ::onFatal
+                resetViewState(
+                    userErrorMessage = when (paymentResult) {
+                        is PaymentResult.Failed -> paymentResult.throwable.localizedMessage
+                        else -> null // indicates canceled payment
+                    }
                 )
             }
         }
