@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.example.samples.ui.customersheet.playground
 
 import android.app.Application
+import androidx.compose.ui.text.capitalize
+import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -44,6 +46,11 @@ class CustomerSheetPlaygroundViewModel(
         MutableStateFlow<CustomerSheetPlaygroundViewState>(CustomerSheetPlaygroundViewState.Loading)
     val viewState: StateFlow<CustomerSheetPlaygroundViewState> = _viewState
 
+    private val _configurationState = MutableStateFlow(CustomerSheetPlaygroundConfigurationState())
+    val configurationState: StateFlow<CustomerSheetPlaygroundConfigurationState> = _configurationState
+
+    private var newCustomerId: String? = null
+
     private val initialConfiguration = CustomerSheet.Configuration.Builder()
         .defaultBillingDetails(
             PaymentSheet.BillingDetails(
@@ -54,57 +61,39 @@ class CustomerSheetPlaygroundViewModel(
                 name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
             )
         )
-        .googlePayEnabled(viewState.value.isGooglePayEnabled)
+        .googlePayEnabled(configurationState.value.isGooglePayEnabled)
         .build()
-    val configuration: StateFlow<CustomerSheet.Configuration> = viewState.map {
+    val configuration: StateFlow<CustomerSheet.Configuration> = configurationState.map {
         initialConfiguration
             .newBuilder()
+            .defaultBillingDetails(
+                if (it.useDefaultBillingAddress) {
+                    PaymentSheet.BillingDetails(
+                        address = PaymentSheet.Address(
+                            city = "Seattle",
+                            country = "US",
+                            line1 = "123 Main St.",
+                            postalCode = "99999",
+                        )
+                    )
+                } else {
+                    PaymentSheet.BillingDetails()
+                }
+            )
+            .billingDetailsCollectionConfiguration(
+                configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = it.billingCollectionConfiguration.name,
+                    phone = it.billingCollectionConfiguration.phone,
+                    email = it.billingCollectionConfiguration.email,
+                    address = it.billingCollectionConfiguration.address,
+                    attachDefaultsToPaymentMethod = it.attachDefaultBillingAddress,
+                )
+            )
             .googlePayEnabled(it.isGooglePayEnabled)
             .build()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialConfiguration)
 
-    private val initialCustomerAdapter = CustomerSheetPlaygroundAdapter(
-        overrideCanCreateSetupIntents = viewState.value.isSetupIntentEnabled,
-        adapter = CustomerAdapter.create(
-            context = getApplication(),
-            customerEphemeralKeyProvider = {
-                val isExistingCustomer = viewState.value.isExistingCustomer
-                fetchCustomerEphemeralKey(isExistingCustomer).fold(
-                    success = {
-                        CustomerAdapter.Result.success(
-                            CustomerEphemeralKey.create(
-                                customerId = it.customerId,
-                                ephemeralKey = it.customerEphemeralKeySecret
-                            )
-                        )
-                    },
-                    failure = {
-                        CustomerAdapter.Result.failure(
-                            it.exception,
-                            "We couldn't retrieve your information, please try again."
-                        )
-                    }
-                )
-            },
-            setupIntentClientSecretProvider = { customerId ->
-                createSetupIntent(customerId).fold(
-                    success = {
-                        CustomerAdapter.Result.success(
-                            it.clientSecret
-                        )
-                    },
-                    failure = {
-                        CustomerAdapter.Result.failure(
-                            it.exception,
-                            "We couldn't retrieve your information, please try again."
-                        )
-                    }
-                )
-            },
-        )
-    )
-
-    internal val customerAdapter: StateFlow<CustomerSheetPlaygroundAdapter> = viewState.map {
+    internal val customerAdapter: StateFlow<CustomerSheetPlaygroundAdapter> = configurationState.map {
         CustomerSheetPlaygroundAdapter(
             overrideCanCreateSetupIntents = it.isSetupIntentEnabled,
             adapter = CustomerAdapter.create(
@@ -144,7 +133,22 @@ class CustomerSheetPlaygroundViewModel(
                 },
             )
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialCustomerAdapter)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = CustomerSheetPlaygroundAdapter(
+            adapter = CustomerAdapter.create(
+                context = getApplication(),
+                customerEphemeralKeyProvider = {
+                    CustomerAdapter.Result.failure(
+                        cause = NotImplementedError(),
+                        displayMessage = null
+                    )
+                },
+                setupIntentClientSecretProvider = null
+            )
+        )
+    )
 
     init {
         viewModelScope.launch {
@@ -153,7 +157,7 @@ class CustomerSheetPlaygroundViewModel(
     }
 
     private suspend fun initialize() {
-        when (val result = fetchCustomerEphemeralKey(viewState.value.isExistingCustomer)) {
+        when (val result = fetchCustomerEphemeralKey(configurationState.value.isExistingCustomer)) {
             is Result.Success -> {
                 PaymentConfiguration.init(
                     context = getApplication(),
@@ -182,7 +186,7 @@ class CustomerSheetPlaygroundViewModel(
                 customerType = if (isExistingCustomer) {
                     "returning"
                 } else {
-                    "new"
+                    newCustomerId ?: "new"
                 }
             )
             val requestBody = Json.encodeToString(
@@ -219,9 +223,24 @@ class CustomerSheetPlaygroundViewModel(
 
     fun handleViewAction(viewAction: CustomerSheetPlaygroundViewAction) {
         when (viewAction) {
-            CustomerSheetPlaygroundViewAction.ToggleGooglePayEnabled -> toggleGooglePayEnabled()
-            CustomerSheetPlaygroundViewAction.ToggleSetupIntentEnabled -> toggleSetupIntentEnabled()
-            CustomerSheetPlaygroundViewAction.ToggleExistingCustomer -> toggleExistingCustomer()
+            is CustomerSheetPlaygroundViewAction.ToggleGooglePayEnabled ->
+                toggleGooglePayEnabled()
+            is CustomerSheetPlaygroundViewAction.ToggleSetupIntentEnabled ->
+                toggleSetupIntentEnabled()
+            is CustomerSheetPlaygroundViewAction.ToggleExistingCustomer ->
+                toggleExistingCustomer()
+            is CustomerSheetPlaygroundViewAction.ToggleUseDefaultBillingAddress ->
+                toggleUseDefaultBillingAddress()
+            is CustomerSheetPlaygroundViewAction.ToggleAttachDefaultBillingAddress ->
+                toggleAttachDefaultBillingAddress()
+            is CustomerSheetPlaygroundViewAction.UpdateBillingAddressCollection ->
+                updateBillingAddressCollection(viewAction.value)
+            is CustomerSheetPlaygroundViewAction.UpdateBillingEmailCollection ->
+                updateBillingEmailCollection(viewAction.value)
+            is CustomerSheetPlaygroundViewAction.UpdateBillingNameCollection ->
+                updateBillingNameCollection(viewAction.value)
+            is CustomerSheetPlaygroundViewAction.UpdateBillingPhoneCollection ->
+                updateBillingPhoneCollection(viewAction.value)
         }
     }
 
@@ -255,7 +274,7 @@ class CustomerSheetPlaygroundViewModel(
     }
 
     private fun toggleSetupIntentEnabled() {
-        updateViewState<CustomerSheetPlaygroundViewState.Data> {
+        updateConfiguration {
             it.copy(
                 isSetupIntentEnabled = !it.isSetupIntentEnabled
             )
@@ -263,7 +282,7 @@ class CustomerSheetPlaygroundViewModel(
     }
 
     private fun toggleGooglePayEnabled() {
-        updateViewState<CustomerSheetPlaygroundViewState.Data> {
+        updateConfiguration {
             it.copy(
                 isGooglePayEnabled = !it.isGooglePayEnabled
             )
@@ -271,15 +290,16 @@ class CustomerSheetPlaygroundViewModel(
     }
 
     private fun toggleExistingCustomer() {
-        updateViewState<CustomerSheetPlaygroundViewState.Data> {
+        updateConfiguration {
             it.copy(
                 isExistingCustomer = !it.isExistingCustomer,
             )
         }
 
         viewModelScope.launch {
-            when (val result = fetchCustomerEphemeralKey(viewState.value.isExistingCustomer)) {
+            when (val result = fetchCustomerEphemeralKey(configurationState.value.isExistingCustomer)) {
                 is Result.Success -> {
+                    newCustomerId = result.value.customerId
                     PaymentConfiguration.init(
                         context = getApplication(),
                         publishableKey = result.value.publishableKey,
@@ -296,11 +316,87 @@ class CustomerSheetPlaygroundViewModel(
         }
     }
 
-    private inline fun <reified T : CustomerSheetPlaygroundViewState> updateViewState(block: (T) -> T) {
+    private fun toggleUseDefaultBillingAddress() {
+        updateConfiguration {
+            it.copy(
+                useDefaultBillingAddress = !it.useDefaultBillingAddress
+            )
+        }
+    }
+
+    private fun toggleAttachDefaultBillingAddress() {
+        updateConfiguration {
+            it.copy(
+                attachDefaultBillingAddress = !it.attachDefaultBillingAddress
+            )
+        }
+    }
+
+    private fun updateBillingAddressCollection(value: String) {
+        updateConfiguration {
+            it.copy(
+                billingCollectionConfiguration = it.billingCollectionConfiguration.copy(
+                    address =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.valueOf(
+                        value.capitalize(Locale.current)
+                    )
+                )
+            )
+        }
+    }
+
+    private fun updateBillingEmailCollection(value: String) {
+        updateConfiguration {
+            it.copy(
+                billingCollectionConfiguration = it.billingCollectionConfiguration.copy(
+                    email =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.valueOf(
+                        value.capitalize(Locale.current)
+                    )
+                )
+            )
+        }
+    }
+
+    private fun updateBillingNameCollection(value: String) {
+        updateConfiguration {
+            it.copy(
+                billingCollectionConfiguration = it.billingCollectionConfiguration.copy(
+                    name =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.valueOf(
+                        value.capitalize(Locale.current)
+                    )
+                )
+            )
+        }
+    }
+
+    private fun updateBillingPhoneCollection(value: String) {
+        updateConfiguration {
+            it.copy(
+                billingCollectionConfiguration = it.billingCollectionConfiguration.copy(
+                    phone =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.valueOf(
+                        value.capitalize(Locale.current)
+                    )
+                )
+            )
+        }
+    }
+
+    private inline fun <reified T : CustomerSheetPlaygroundViewState> updateViewState(transform: (T) -> T) {
         (_viewState.value as? T)?.let {
             _viewState.update {
-                block(it as T)
+                transform(it as T)
             }
+        }
+    }
+
+    private inline fun updateConfiguration(
+        transform: (CustomerSheetPlaygroundConfigurationState) -> CustomerSheetPlaygroundConfigurationState
+    ) {
+        _configurationState.update {
+            transform(it)
         }
     }
 
