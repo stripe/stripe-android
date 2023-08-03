@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 internal fun <T1, T2, R> ViewModel.combineStateFlows(
@@ -51,5 +52,19 @@ internal fun <T1, T2, T3, T4, T5, T6, R> ViewModel.combineStateFlows(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
         initialValue = initialValue,
+    )
+}
+
+context (ViewModel)
+internal fun <T, R> StateFlow<T>.mapAsStateFlow(
+    started: SharingStarted = SharingStarted.WhileSubscribed(),
+    transform: (T) -> R,
+): StateFlow<R> {
+    return map {
+        transform(it)
+    }.stateIn(
+        scope = viewModelScope,
+        started = started,
+        initialValue = transform(value),
     )
 }

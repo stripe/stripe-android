@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.flowOf
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import java.util.Stack
 import javax.inject.Provider
 
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -40,9 +39,7 @@ object CustomerSheetTestHelper {
     internal fun createViewModel(
         lpmRepository: LpmRepository = this.lpmRepository,
         isLiveMode: Boolean = false,
-        backstack: Stack<CustomerSheetViewState> = Stack<CustomerSheetViewState>().apply {
-            push(CustomerSheetViewState.Loading(isLiveMode))
-        },
+        initialBackStack: List<CustomerSheetViewState> = listOf(CustomerSheetViewState.Loading(isLiveMode)),
         savedPaymentSelection: PaymentSelection? = null,
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         stripeRepository: StripeRepository = FakeStripeRepository(),
@@ -84,7 +81,7 @@ object CustomerSheetTestHelper {
 
         return CustomerSheetViewModel(
             application = application,
-            backstack = backstack,
+            initialBackStack = initialBackStack,
             savedPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
             formViewModelSubcomponentBuilderProvider = mockFormSubComponentBuilderProvider,

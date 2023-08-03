@@ -179,7 +179,7 @@ internal class CustomerSheetActivityTest {
         savedPaymentSelection: PaymentSelection?,
     ): InjectableActivityScenario<CustomerSheetActivity> {
         val viewModel = createViewModel(
-            backstack = Stack<CustomerSheetViewState>().apply {
+            initialBackStack = Stack<CustomerSheetViewState>().apply {
                 push(viewState)
             },
             savedPaymentSelection = savedPaymentSelection,

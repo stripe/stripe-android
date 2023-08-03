@@ -21,7 +21,6 @@ import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
-import java.util.Stack
 import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -106,13 +105,11 @@ internal class CustomerSheetViewModelModule {
     @Provides
     fun backstack(
         @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean
-    ): Stack<CustomerSheetViewState> = Stack<CustomerSheetViewState>().apply {
-        push(
-            CustomerSheetViewState.Loading(
-                isLiveMode = isLiveModeProvider()
-            )
+    ): List<CustomerSheetViewState> = listOf(
+        CustomerSheetViewState.Loading(
+            isLiveMode = isLiveModeProvider()
         )
-    }
+    )
 
     @Provides
     fun savedPaymentSelection(): PaymentSelection? = savedPaymentSelection

@@ -131,7 +131,10 @@ android {
     }
 
     kotlinOptions {
-        freeCompilerArgs += ["-opt-in=kotlinx.coroutines.FlowPreview"]
+        freeCompilerArgs += [
+                "-opt-in=kotlinx.coroutines.FlowPreview",
+                "-Xcontext-receivers",
+        ]
         if (gradle.ext.isCi) {
             kotlinOptions.allWarningsAsErrors = true
         }
