@@ -288,15 +288,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             paymentSheetLoader.load(args.initializationMode, args.config)
         }
 
-        when (result) {
-            is PaymentSheetLoader.Result.Success -> {
-                handlePaymentSheetStateLoaded(result.state)
-            }
-            is PaymentSheetLoader.Result.Failure -> {
+        result.fold(
+            onSuccess = { state ->
+                handlePaymentSheetStateLoaded(state)
+            },
+            onFailure = { error ->
                 setStripeIntent(null)
-                onFatal(result.throwable)
+                onFatal(error)
             }
-        }
+        )
     }
 
     private fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {

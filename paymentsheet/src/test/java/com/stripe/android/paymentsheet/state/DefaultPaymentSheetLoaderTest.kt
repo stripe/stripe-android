@@ -107,19 +107,17 @@ internal class DefaultPaymentSheetLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-            )
+            ).getOrThrow()
         ).isEqualTo(
-            PaymentSheetLoader.Result.Success(
-                PaymentSheetState.Full(
-                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
-                    customerPaymentMethods = PAYMENT_METHODS,
-                    isGooglePayReady = true,
-                    paymentSelection = PaymentSelection.Saved(
-                        paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    ),
-                    linkState = null,
-                )
+            PaymentSheetState.Full(
+                config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                customerPaymentMethods = PAYMENT_METHODS,
+                isGooglePayReady = true,
+                paymentSelection = PaymentSelection.Saved(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                ),
+                linkState = null,
             )
         )
     }
@@ -134,14 +132,14 @@ internal class DefaultPaymentSheetLoaderTest {
             customerRepo = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS),
         )
 
-        val result = loader.load(
+        val state = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ) as PaymentSheetLoader.Result.Success
+        ).getOrThrow()
 
-        assertThat(result.state.paymentSelection).isEqualTo(
+        assertThat(state.paymentSelection).isEqualTo(
             PaymentSelection.Saved(paymentMethod = PAYMENT_METHODS.first())
         )
     }
@@ -161,9 +159,9 @@ internal class DefaultPaymentSheetLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ) as PaymentSheetLoader.Result.Success
+        ).getOrThrow()
 
-        assertThat(result.state.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
     }
 
     @Test
@@ -181,9 +179,9 @@ internal class DefaultPaymentSheetLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ) as PaymentSheetLoader.Result.Success
+        ).getOrThrow()
 
-        assertThat(result.state.paymentSelection).isNull()
+        assertThat(result.paymentSelection).isNull()
     }
 
     @Test
@@ -269,9 +267,9 @@ internal class DefaultPaymentSheetLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-            ) as PaymentSheetLoader.Result.Success
+            ).getOrThrow()
 
-            assertThat(result.state.customerPaymentMethods)
+            assertThat(result.customerPaymentMethods)
                 .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
 
@@ -291,44 +289,42 @@ internal class DefaultPaymentSheetLoaderTest {
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ) as PaymentSheetLoader.Result.Success
+        ).getOrThrow()
 
-        assertThat(result.state.customerPaymentMethods)
+        assertThat(result.customerPaymentMethods)
             .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     }
 
     @Test
-    fun `load() when PaymentIntent has invalid status should return null`() =
-        runTest {
-            val result = createPaymentSheetLoader(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    status = StripeIntent.Status.Succeeded
-                ),
-            ).load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-                ),
-                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-            )
-            assertThat(result)
-                .isInstanceOf(PaymentSheetLoader.Result::class.java)
-        }
+    fun `load() when PaymentIntent has invalid status should return null`() = runTest {
+        val result = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                status = StripeIntent.Status.Succeeded
+            ),
+        ).load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ).exceptionOrNull()
+
+        assertThat(result).isInstanceOf(IllegalStateException::class.java)
+    }
 
     @Test
-    fun `load() when PaymentIntent has invalid confirmationMethod should return null`() =
-        runTest {
-            val result = createPaymentSheetLoader(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    confirmationMethod = PaymentIntent.ConfirmationMethod.Manual
-                ),
-            ).load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-                ),
-            )
-            assertThat(result)
-                .isInstanceOf(PaymentSheetLoader.Result::class.java)
-        }
+    fun `load() when PaymentIntent has invalid confirmationMethod should return null`() = runTest {
+        val result = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                confirmationMethod = PaymentIntent.ConfirmationMethod.Manual
+            ),
+        ).load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+        ).exceptionOrNull()
+
+        assertThat(result).isInstanceOf(IllegalStateException::class.java)
+    }
 
     @Test
     fun `Defaults to first existing payment method for known customer`() = runTest {
@@ -344,10 +340,10 @@ internal class DefaultPaymentSheetLoaderTest {
                     ephemeralKeySecret = "some_key"
                 )
             )
-        ) as PaymentSheetLoader.Result.Success
+        ).getOrThrow()
 
         val expectedPaymentMethod = requireNotNull(PAYMENT_METHODS.first())
-        assertThat(result.state.paymentSelection).isEqualTo(PaymentSelection.Saved(expectedPaymentMethod))
+        assertThat(result.paymentSelection).isEqualTo(PaymentSelection.Saved(expectedPaymentMethod))
     }
 
     @Test
@@ -357,9 +353,9 @@ internal class DefaultPaymentSheetLoaderTest {
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-        ) as PaymentSheetLoader.Result.Success
+        ).getOrThrow()
 
-        assertThat(result.state.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedIn)
+        assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedIn)
     }
 
     @Test
@@ -369,9 +365,9 @@ internal class DefaultPaymentSheetLoaderTest {
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-        ) as PaymentSheetLoader.Result.Success
+        ).getOrThrow()
 
-        assertThat(result.state.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
+        assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
     }
 
     @Test
@@ -381,9 +377,9 @@ internal class DefaultPaymentSheetLoaderTest {
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-        ) as PaymentSheetLoader.Result.Success
+        ).getOrThrow()
 
-        assertThat(result.state.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
+        assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
     }
 
     @Test
@@ -393,9 +389,9 @@ internal class DefaultPaymentSheetLoaderTest {
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-        ) as PaymentSheetLoader.Result.Success
+        ).getOrThrow()
 
-        assertThat(result.state.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedOut)
+        assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedOut)
     }
 
     @Test
@@ -412,7 +408,7 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = mockConfiguration(
                 defaultBillingDetails = billingDetails,
             ),
-        ) as PaymentSheetLoader.Result.Success
+        ).getOrThrow()
 
         val expectedLinkConfig = LinkConfiguration(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -425,7 +421,7 @@ internal class DefaultPaymentSheetLoaderTest {
             shippingValues = null,
         )
 
-        assertThat(result.state.linkState?.configuration).isEqualTo(expectedLinkConfig)
+        assertThat(result.linkState?.configuration).isEqualTo(expectedLinkConfig)
     }
 
     @Test
@@ -443,9 +439,9 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = mockConfiguration(
                 shippingDetails = shippingDetails,
             ),
-        ) as PaymentSheetLoader.Result.Success
+        ).getOrThrow()
 
-        assertThat(result.state.linkState?.configuration?.shippingValues).isNotNull()
+        assertThat(result.linkState?.configuration?.shippingValues).isNotNull()
     }
 
     @Test
@@ -466,9 +462,9 @@ internal class DefaultPaymentSheetLoaderTest {
                 shippingDetails = shippingDetails,
                 defaultBillingDetails = billingDetails,
             ),
-        ) as PaymentSheetLoader.Result.Success
+        ).getOrThrow()
 
-        assertThat(result.state.linkState?.configuration?.customerPhone)
+        assertThat(result.linkState?.configuration?.customerPhone)
             .isEqualTo(shippingDetails.phoneNumber)
     }
 
@@ -490,9 +486,9 @@ internal class DefaultPaymentSheetLoaderTest {
                     ephemeralKeySecret = "key"
                 ),
             ),
-        ) as PaymentSheetLoader.Result.Success
+        ).getOrThrow()
 
-        assertThat(result.state.linkState?.configuration?.customerEmail)
+        assertThat(result.linkState?.configuration?.customerEmail)
             .isEqualTo("email@stripe.com")
     }
 
@@ -514,9 +510,9 @@ internal class DefaultPaymentSheetLoaderTest {
                     ephemeralKeySecret = "key",
                 ),
             ),
-        ) as PaymentSheetLoader.Result.Success
+        ).getOrThrow()
 
-        val observedElements = result.state.customerPaymentMethods
+        val observedElements = result.customerPaymentMethods
         val expectedElements = listOf(lastUsed) + (paymentMethods - lastUsed)
 
         assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
@@ -532,11 +528,11 @@ internal class DefaultPaymentSheetLoaderTest {
 
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
-        ) as? PaymentSheetLoader.Result.Failure
+        ).exceptionOrNull()
 
         val expectedMessage = "None of the requested payment methods (gold, silver, bronze) " +
             "match the supported payment types (card, cashapp)."
-        assertThat(result?.throwable?.message).isEqualTo(expectedMessage)
+        assertThat(result?.message).isEqualTo(expectedMessage)
     }
 
     @Test
