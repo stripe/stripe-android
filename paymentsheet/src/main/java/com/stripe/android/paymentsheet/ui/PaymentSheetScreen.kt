@@ -155,7 +155,7 @@ internal fun Wallet(
     Column(modifier = modifier.padding(horizontal = padding)) {
         state.googlePay?.let { googlePay ->
             GooglePayButton(
-                state = googlePay.buttonState?.convert(),
+                state = googlePay.buttonState.convert(),
                 allowCreditCards = googlePay.allowCreditCards,
                 billingAddressParameters = googlePay.billingAddressParameters,
                 isEnabled = state.buttonsEnabled,

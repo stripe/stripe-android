@@ -20,7 +20,7 @@ internal data class WalletsState(
     )
 
     data class GooglePay(
-        val buttonState: PaymentSheetViewState?,
+        val buttonState: PaymentSheetViewState,
         val allowCreditCards: Boolean,
         val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?,
     )
@@ -39,7 +39,7 @@ internal data class WalletsState(
             val link = Link(email = linkEmail).takeIf { isLinkAvailable == true }
 
             val googlePay = GooglePay(
-                buttonState = googlePayButtonState,
+                buttonState = googlePayButtonState ?: PaymentSheetViewState.Reset(),
                 allowCreditCards = googlePayLauncherConfig?.allowCreditCards ?: false,
                 billingAddressParameters = googlePayLauncherConfig?.let {
                     GooglePayJsonFactory.BillingAddressParameters(

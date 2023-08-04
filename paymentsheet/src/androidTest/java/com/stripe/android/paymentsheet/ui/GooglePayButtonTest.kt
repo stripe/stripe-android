@@ -20,12 +20,12 @@ class GooglePayButtonTest {
     @Ignore("Re-enable once we have refactored the Google Pay button handling")
     @Test
     fun handlesPressWhenEnabled() {
-        val testTag = GooglePayButton.TEST_TAG
+        val testTag = GOOGLE_PAY_BUTTON_TEST_TAG
         var didCallOnPressed = false
 
         composeTestRule.setContent {
             GooglePayButton(
-                state = null,
+                state = PrimaryButton.State.Ready,
                 isEnabled = true,
                 allowCreditCards = true,
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
@@ -46,12 +46,12 @@ class GooglePayButtonTest {
     @Ignore("Re-enable once we have refactored the Google Pay button handling")
     @Test
     fun ignoresPressWhenDisabled() {
-        val testTag = GooglePayButton.TEST_TAG
+        val testTag = GOOGLE_PAY_BUTTON_TEST_TAG
         var didCallOnPressed = false
 
         composeTestRule.setContent {
             GooglePayButton(
-                state = null,
+                state = PrimaryButton.State.Ready,
                 isEnabled = false,
                 allowCreditCards = true,
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
