@@ -24,7 +24,7 @@ import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
-import com.stripe.android.financialconnections.features.common.shouldDisableAuthSessionRetrieval
+import com.stripe.android.financialconnections.features.common.enableRetrieveAuthSession
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
@@ -267,7 +267,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 )
             )
             requireNotNull(authSession)
-            if (url.isNullOrEmpty() && manifest.shouldDisableAuthSessionRetrieval().not()) {
+            if (manifest.enableRetrieveAuthSession()) {
                 // client did not receive any deeplink -> retrieve the auth session and check its status
                 val retrievedAuthSession = retrieveAuthorizationSession(authSession.id)
                 val nextPane = retrievedAuthSession.nextPane
