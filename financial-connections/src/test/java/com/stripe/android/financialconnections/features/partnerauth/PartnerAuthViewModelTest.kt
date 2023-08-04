@@ -102,7 +102,7 @@ internal class PartnerAuthViewModelTest {
     }
 
     @Test
-    fun `onWebAuthFlowFinished - when cancels with deeplink, retries and fires event (OAuth)`() =
+    fun `onWebAuthFlowFinished - when cancels with deeplink, retries (OAuth)`() =
         runTest {
             val activeAuthSession = authorizationSession().copy(url = "stripe://cancel")
             val activeInstitution = institution()
@@ -136,11 +136,44 @@ internal class PartnerAuthViewModelTest {
         }
 
     @Test
+    fun `onWebAuthFlowFinished - when webStatus cancels with deeplink, cancels (Legacy)`() =
+        runTest {
+            val activeAuthSession = authorizationSession().copy(
+                url = "stripe://cancel",
+                _isOAuth = false
+            )
+            val viewModel = createViewModel()
+
+            whenever(getSync())
+                .thenReturn(
+                    syncResponse(
+                        sessionManifest().copy(
+                            activeAuthSession = activeAuthSession.copy(_isOAuth = false)
+                        )
+                    )
+                )
+
+            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled(activeAuthSession.url))
+
+            verify(cancelAuthorizationSession).invoke(
+                eq(activeAuthSession.id),
+            )
+            verify(postAuthSessionEvent).invoke(
+                eq(activeAuthSession.id),
+                any<AuthSessionEvent.Cancel>()
+            )
+        }
+
+    @Test
     fun `onWebAuthFlowFinished - when cancels with no deeplink and retrieve pane is ACCOUNT_PICKER, navigates to next pane (OAuth)`() =
         runTest {
             val activeAuthSession = authorizationSession().copy(url = null)
             val activeInstitution = institution()
             val manifest = sessionManifest().copy(
+                features = mapOf(
+                    // make sure defensive auth session retrieval is enabled (disabled = false)
+                    "bank_connections_disable_defensive_auth_session_retrieval_on_complete" to false
+                ),
                 activeAuthSession = activeAuthSession.copy(_isOAuth = true),
                 activeInstitution = activeInstitution
             )
@@ -158,6 +191,47 @@ internal class PartnerAuthViewModelTest {
 
             // stays in partner auth pane
             assertThat(navigationManager.emittedEvents).isEmpty()
+        }
+
+    @Test
+    fun `onWebAuthFlowFinished - when cancels with no deeplink and flag disables retrieve, cancels (OAuth)`() =
+        runTest {
+            val activeAuthSession = authorizationSession().copy(url = null)
+            val activeInstitution = institution()
+            val manifest = sessionManifest().copy(
+                features = mapOf(
+                    // make sure defensive auth session retrieval is disabled (disabled = true)
+                    "bank_connections_disable_defensive_auth_session_retrieval_on_complete" to true
+                ),
+                activeAuthSession = activeAuthSession.copy(_isOAuth = true),
+                activeInstitution = activeInstitution
+            )
+            val syncResponse = syncResponse(manifest)
+            whenever(getSync()).thenReturn(syncResponse)
+            whenever(createAuthorizationSession.invoke(any(), any())).thenReturn(activeAuthSession)
+            // simulate that auth session succeeded in abstract auth:
+            whenever(retrieveAuthorizationSession.invoke(any()))
+                .thenReturn(activeAuthSession.copy(nextPane = Pane.ACCOUNT_PICKER))
+
+            val viewModel = createViewModel()
+            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled(activeAuthSession.url))
+
+            verify(cancelAuthorizationSession).invoke(eq(activeAuthSession.id))
+
+            // stays in partner auth pane
+            assertThat(navigationManager.emittedEvents).isEmpty()
+
+            // creates two sessions (initial and retry)
+            verify(createAuthorizationSession, times(2)).invoke(
+                eq(activeInstitution),
+                eq(syncResponse)
+            )
+
+            // sends retry event
+            verify(postAuthSessionEvent).invoke(
+                eq(activeAuthSession.id),
+                any<AuthSessionEvent.Retry>()
+            )
         }
 
     @Test
@@ -194,35 +268,6 @@ internal class PartnerAuthViewModelTest {
             verify(postAuthSessionEvent).invoke(
                 eq(activeAuthSession.id),
                 any<AuthSessionEvent.Retry>()
-            )
-        }
-
-    @Test
-    fun `onWebAuthFlowFinished - when webStatus cancels with deeplink, cancels and fires cancel event (Legacy)`() =
-        runTest {
-            val activeAuthSession = authorizationSession().copy(
-                url = "stripe://cancel",
-                _isOAuth = false
-            )
-            val viewModel = createViewModel()
-
-            whenever(getSync())
-                .thenReturn(
-                    syncResponse(
-                        sessionManifest().copy(
-                            activeAuthSession = activeAuthSession.copy(_isOAuth = false)
-                        )
-                    )
-                )
-
-            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled(activeAuthSession.url))
-
-            verify(cancelAuthorizationSession).invoke(
-                eq(activeAuthSession.id),
-            )
-            verify(postAuthSessionEvent).invoke(
-                eq(activeAuthSession.id),
-                any<AuthSessionEvent.Cancel>()
             )
         }
 
