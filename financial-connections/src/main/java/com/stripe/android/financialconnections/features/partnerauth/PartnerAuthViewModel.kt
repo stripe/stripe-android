@@ -22,11 +22,13 @@ import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
+import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
@@ -49,6 +51,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val completeAuthorizationSession: CompleteAuthorizationSession,
     private val createAuthorizationSession: PostAuthorizationSession,
     private val cancelAuthorizationSession: CancelAuthorizationSession,
+    private val retrieveAuthorizationSession: RetrieveAuthorizationSession,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     @Named(APPLICATION_ID) private val applicationId: String,
     private val uriUtils: UriUtils,
@@ -262,25 +265,19 @@ internal class PartnerAuthViewModel @Inject constructor(
                 )
             )
             requireNotNull(authSession)
-            val result = cancelAuthorizationSession(authSession.id)
-            if (authSession.isOAuth) {
-                // For OAuth institutions, create a new session and navigate to its nextPane (prepane).
-                logger.debug("Creating a new session for this OAuth institution")
-                // Send retry event as we're presenting the prepane again.
-                postAuthSessionEvent(authSession.id, AuthSessionEvent.Retry(Date()))
-                // for OAuth institutions, we remain on the pre-pane,
-                // but create a brand new auth session
-                setState { copy(authenticationStatus = Uninitialized) }
-                createAuthSession()
+            if (url.isNullOrEmpty()) {
+                // call retrieve auth session endpoint
+                val retrievedAuthSession = retrieveAuthorizationSession(authSession.id)
+                val nextPane = retrievedAuthSession.nextPane
+                if (nextPane == Pane.PARTNER_AUTH) {
+                    // something failed.
+                    cancelAuthSessionAndContinue(authSession = retrievedAuthSession)
+                } else {
+                    // auth session succeeded although client didn't retrieve any deeplink.
+                    navigationManager.navigate(NavigateToRoute(nextPane.toNavigationCommand()))
+                }
             } else {
-                // For OAuth institutions, navigate to Session cancellation's next pane.
-                postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
-                navigationManager.navigate(
-                    NavigateToRoute(
-                        command = result.nextPane.toNavigationCommand(),
-                        popCurrentFromBackStack = true
-                    )
-                )
+                cancelAuthSessionAndContinue(authSession)
             }
         }.onFailure {
             eventTracker.logError(
@@ -290,6 +287,34 @@ internal class PartnerAuthViewModel @Inject constructor(
                 Pane.PARTNER_AUTH
             )
             setState { copy(authenticationStatus = Fail(it)) }
+        }
+    }
+
+    /**
+     * Cancels the given [authSession] and navigates to the next pane (non-OAuth) / retries (OAuth).
+     */
+    private suspend fun cancelAuthSessionAndContinue(
+        authSession: FinancialConnectionsAuthorizationSession
+    ) {
+        val result = cancelAuthorizationSession(authSession.id)
+        if (authSession.isOAuth) {
+            // For OAuth institutions, create a new session and navigate to its nextPane (prepane).
+            logger.debug("Creating a new session for this OAuth institution")
+            // Send retry event as we're presenting the prepane again.
+            postAuthSessionEvent(authSession.id, AuthSessionEvent.Retry(Date()))
+            // for OAuth institutions, we remain on the pre-pane,
+            // but create a brand new auth session
+            setState { copy(authenticationStatus = Uninitialized) }
+            createAuthSession()
+        } else {
+            // For OAuth institutions, navigate to Session cancellation's next pane.
+            postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
+            navigationManager.navigate(
+                NavigateToRoute(
+                    command = result.nextPane.toNavigationCommand(),
+                    popCurrentFromBackStack = true
+                )
+            )
         }
     }
 
