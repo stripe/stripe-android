@@ -35,6 +35,7 @@ ext.versions = [
         firebaseAppDistribution     : '4.0.0',
         fuel                        : '2.3.1',
         goDaddyColorPicker          : '0.7.0',
+        googlePayCompose            : '0.1.0',
         googleServices              : '4.3.15',
         gson                        : '2.10.1',
         hamcrest                    : '2.2',
@@ -127,6 +128,7 @@ ext.libs = [
         compose                             : [
                 activity             : "androidx.activity:activity-compose:${versions.androidxActivity}",
                 foundation           : "androidx.compose.foundation:foundation:${versions.androidxCompose}",
+                googlePay            : "com.google.pay.button:compose-pay-button:${versions.googlePayCompose}",
                 liveData             : "androidx.compose.runtime:runtime-livedata:${versions.androidxComposeRuntime}",
                 material             : "androidx.compose.material:material:${versions.androidxCompose}",
                 materialIcons        : "androidx.compose.material:material-icons-core:${versions.androidxCompose}",

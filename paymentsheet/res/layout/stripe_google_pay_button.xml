@@ -5,7 +5,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:paddingTop="2sp"
+        android:paddingTop="2dp"
         android:contentDescription="@string/stripe_google_pay">
 
         <com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -14,9 +14,11 @@
             android:layout_height="@dimen/stripe_paymentsheet_googlepay_button_height"
             android:visibility="invisible" />
 
-        <com.google.android.gms.wallet.button.PayButton
+        <androidx.compose.ui.platform.ComposeView
             android:id="@+id/google_pay_payment_button"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="@dimen/stripe_paymentsheet_googlepay_button_height" />
+
     </RelativeLayout>
+
 </merge>

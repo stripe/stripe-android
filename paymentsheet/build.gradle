@@ -35,6 +35,7 @@ dependencies {
     implementation libs.compose.ui
     implementation libs.compose.uiViewBinding
     implementation libs.compose.foundation
+    implementation libs.compose.googlePay
     implementation libs.compose.material
     implementation libs.compose.materialIcons
     implementation libs.compose.activity

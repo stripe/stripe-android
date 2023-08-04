@@ -5,6 +5,8 @@ import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -14,14 +16,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import com.google.android.gms.wallet.button.ButtonConstants
-import com.google.android.gms.wallet.button.ButtonOptions
+import com.google.pay.button.ButtonTheme
+import com.google.pay.button.ButtonType
+import com.google.pay.button.PayButton
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.convertDpToPx
-import com.stripe.android.uicore.isSystemDarkTheme
 import org.json.JSONArray
 
 @Composable
@@ -46,12 +48,12 @@ internal fun GooglePayButton(
                 googlePayButton.initialize(
                     cornerRadius = cornerRadius,
                     allowCreditCards = allowCreditCards,
-                    billingAddressParameters = billingAddressParameters
+                    billingAddressParameters = billingAddressParameters,
+                    onPressed = onPressed,
                 )
             }
             googlePayButton.isEnabled = isEnabled
             googlePayButton.updateState(state)
-            googlePayButton.viewBinding.googlePayPaymentButton.setOnClickListener { onPressed() }
         },
         modifier = modifier.testTag(GooglePayButton.TEST_TAG),
     )
@@ -78,10 +80,11 @@ internal class GooglePayButton @JvmOverloads constructor(
     fun initialize(
         cornerRadius: Int,
         allowCreditCards: Boolean,
-        billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?
+        billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?,
+        onPressed: () -> Unit,
     ) {
         initializePrimaryButton()
-        val isDark = context.isSystemDarkTheme()
+
         val allowedPaymentMethods = JSONArray().put(
             GooglePayJsonFactory(context).createCardPaymentMethod(
                 billingAddressParameters = billingAddressParameters,
@@ -89,28 +92,24 @@ internal class GooglePayButton @JvmOverloads constructor(
             )
         ).toString()
 
-        val options = with(ButtonOptions.newBuilder()) {
-            setButtonTheme(
-                if (isDark) {
-                    ButtonConstants.ButtonTheme.LIGHT
+        viewBinding.googlePayPaymentButton.setContent {
+            PayButton(
+                onClick = onPressed,
+                allowedPaymentMethods = allowedPaymentMethods,
+                theme = if (isSystemInDarkTheme()) {
+                    ButtonTheme.Light
                 } else {
-                    ButtonConstants.ButtonTheme.DARK
-                }
+                    ButtonTheme.Dark
+                },
+                type = ButtonType.Buy,
+                radius = maxOf(1, cornerRadius).dp,
+                modifier = Modifier.fillMaxWidth(),
             )
-            setButtonType(ButtonConstants.ButtonType.PAY)
-            setAllowedPaymentMethods(allowedPaymentMethods)
-            setCornerRadius(
-                // Corner radius of 0 is undefined in Google Pay
-                if (cornerRadius <= 0) {
-                    1
-                } else {
-                    cornerRadius
-                }
-            )
-            build()
         }
+    }
 
-        viewBinding.googlePayPaymentButton.initialize(options)
+    override fun setOnClickListener(l: OnClickListener?) {
+        viewBinding.googlePayButtonLayout.setOnClickListener(l)
     }
 
     private fun initializePrimaryButton() {
