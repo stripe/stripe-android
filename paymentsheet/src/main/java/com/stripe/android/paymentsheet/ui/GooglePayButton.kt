@@ -1,14 +1,17 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.content.res.ColorStateList
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
@@ -52,22 +55,33 @@ internal fun GooglePayButton(
         ).toString()
     }
 
+    val alpha by animateFloatAsState(
+        targetValue = if (isEnabled) 1f else 0.5f,
+        label = "GooglePayButtonAlpha",
+    )
+
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .requiredHeight(height),
+            .requiredHeight(height)
+            .testTag(GOOGLE_PAY_BUTTON_TEST_TAG),
     ) {
         when (state) {
             is PrimaryButton.State.Ready -> {
                 PayButton(
-                    onClick = onPressed,
+                    onClick = {
+                        if (isEnabled) {
+                            onPressed()
+                        }
+                    },
                     allowedPaymentMethods = allowedPaymentMethods,
                     theme = if (isSystemInDarkTheme()) Light else Dark,
                     type = ButtonType.Buy,
                     radius = maxOf(1, cornerRadius).dp,
                     modifier = Modifier
                         .fillMaxSize()
-                        .testTag(GOOGLE_PAY_BUTTON_TEST_TAG),
+                        .alpha(alpha)
+                        .testTag(GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG),
                 )
             }
             is PrimaryButton.State.StartProcessing,
@@ -75,7 +89,9 @@ internal fun GooglePayButton(
                 PrimaryButtonWrapper(
                     state = state,
                     isEnabled = isEnabled,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag(GOOGLE_PAY_BUTTON_PRIMARY_BUTTON_TEST_TAG),
                 )
             }
         }
@@ -130,3 +146,5 @@ private fun PrimaryButtonWrapper(
 }
 
 internal const val GOOGLE_PAY_BUTTON_TEST_TAG = "google-pay-button"
+internal const val GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG = "google-pay-button-pay-button"
+internal const val GOOGLE_PAY_BUTTON_PRIMARY_BUTTON_TEST_TAG = "google-pay-button-primary-button"

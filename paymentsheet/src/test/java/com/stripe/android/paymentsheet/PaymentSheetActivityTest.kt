@@ -55,7 +55,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherP
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator

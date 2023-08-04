@@ -1,7 +1,13 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -68,4 +74,75 @@ class GooglePayButtonTest {
 
         assertThat(didCallOnPressed).isFalse()
     }
+
+    @Test
+    fun showPayButtonInReadyState() {
+        composeTestRule.setContent {
+            GooglePayButton(
+                state = PrimaryButton.State.Ready,
+                isEnabled = true,
+                allowCreditCards = true,
+                billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
+                onPressed = {},
+            )
+        }
+
+        composeTestRule
+            .onNodeWithTag(GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GOOGLE_PAY_BUTTON_PRIMARY_BUTTON_TEST_TAG)
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun usesCorrectAlphaIfEnabled() {
+        composeTestRule.setContent {
+            GooglePayButton(
+                state = PrimaryButton.State.Ready,
+                isEnabled = true,
+                allowCreditCards = true,
+                billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
+                onPressed = {},
+            )
+        }
+
+        composeTestRule
+            .onNodeWithTag(GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG)
+            .fetchSemanticsNode()
+            .layoutInfo
+            .getModifierInfo()
+    }
+
+    @Test
+    fun usesCorrectAlphaIfDisabled() {
+        composeTestRule.setContent {
+            GooglePayButton(
+                state = PrimaryButton.State.Ready,
+                isEnabled = false,
+                allowCreditCards = true,
+                billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
+                onPressed = {},
+            )
+        }
+
+        composeTestRule
+            .onNodeWithTag(GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG)
+            .assertAlpha(0.5f)
+    }
+}
+
+private fun SemanticsNodeInteraction.assertAlpha(
+    alpha: Float,
+): SemanticsNodeInteraction {
+    return assert(hasAlpha(alpha))
+}
+
+private fun hasAlpha(alpha: Float): SemanticsMatcher = SemanticsMatcher(
+    "${SemanticsProperties.Text.name} has alpha '$alpha'"
+) { node ->
+    node.layoutInfo.getModifierInfo().filter { modifierInfo ->
+        modifierInfo.modifier == Modifier.alpha(alpha)
+    }.size == 1
 }
