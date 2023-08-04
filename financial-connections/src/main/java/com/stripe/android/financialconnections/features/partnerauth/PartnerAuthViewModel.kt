@@ -268,7 +268,9 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
             requireNotNull(authSession)
             if (manifest.enableRetrieveAuthSession()) {
-                // client did not receive any deeplink -> retrieve the auth session and check its status
+                // if the client canceled mid-flow (either by closing the browser or
+                // cancelling on the institution page), retrieve the auth session
+                // and try to recover if possible.
                 val retrievedAuthSession = retrieveAuthorizationSession(authSession.id)
                 val nextPane = retrievedAuthSession.nextPane
                 eventTracker.track(
