@@ -49,8 +49,6 @@ class CustomerSheetPlaygroundViewModel(
     private val _configurationState = MutableStateFlow(CustomerSheetPlaygroundConfigurationState())
     val configurationState: StateFlow<CustomerSheetPlaygroundConfigurationState> = _configurationState
 
-    private var newCustomerId: String? = null
-
     private val initialConfiguration = CustomerSheet.Configuration.Builder()
         .defaultBillingDetails(
             PaymentSheet.BillingDetails(
@@ -99,7 +97,7 @@ class CustomerSheetPlaygroundViewModel(
             adapter = CustomerAdapter.create(
                 context = getApplication(),
                 customerEphemeralKeyProvider = {
-                    fetchCustomerEphemeralKey(it.isExistingCustomer).fold(
+                    fetchCustomerEphemeralKey(viewState.value.currentCustomerId).fold(
                         success = {
                             CustomerAdapter.Result.success(
                                 CustomerEphemeralKey.create(
@@ -152,53 +150,51 @@ class CustomerSheetPlaygroundViewModel(
 
     init {
         viewModelScope.launch {
-            initialize()
-        }
-    }
-
-    private suspend fun initialize() {
-        when (val result = fetchCustomerEphemeralKey(configurationState.value.isExistingCustomer)) {
-            is Result.Success -> {
-                PaymentConfiguration.init(
-                    context = getApplication(),
-                    publishableKey = result.value.publishableKey,
-                )
-                _viewState.update {
-                    CustomerSheetPlaygroundViewState.Data()
-                }
-            }
-
-            is Result.Failure -> {
-                _viewState.update {
-                    CustomerSheetPlaygroundViewState.FailedToLoad(
-                        message = result.error.message.toString()
-                    )
-                }
-            }
+            fetchCustomerEphemeralKey()
         }
     }
 
     private suspend fun fetchCustomerEphemeralKey(
-        isExistingCustomer: Boolean
+        customerId: String = "returning"
     ): Result<ExampleCustomerSheetResponse, FuelError> {
         return withContext(Dispatchers.IO) {
             val request = ExampleCustomerSheetRequest(
-                customerType = if (isExistingCustomer) {
-                    "returning"
-                } else {
-                    newCustomerId ?: "new"
-                }
+                customerType = customerId
             )
             val requestBody = Json.encodeToString(
                 ExampleCustomerSheetRequest.serializer(),
                 request
             )
 
-            Fuel
+            val result = Fuel
                 .post("$backendUrl/customer_ephemeral_key")
                 .jsonBody(requestBody)
                 .suspendable()
                 .awaitModel(ExampleCustomerSheetResponse.serializer())
+
+            when (result) {
+                is Result.Success -> {
+                    PaymentConfiguration.init(
+                        context = getApplication(),
+                        publishableKey = result.value.publishableKey,
+                    )
+                    _viewState.update {
+                        CustomerSheetPlaygroundViewState.Data(
+                            currentCustomer = result.value.customerId,
+                        )
+                    }
+                }
+
+                is Result.Failure -> {
+                    _viewState.update {
+                        CustomerSheetPlaygroundViewState.FailedToLoad(
+                            message = result.error.message.toString()
+                        )
+                    }
+                }
+            }
+
+            result
         }
     }
 
@@ -297,22 +293,13 @@ class CustomerSheetPlaygroundViewModel(
         }
 
         viewModelScope.launch {
-            when (val result = fetchCustomerEphemeralKey(configurationState.value.isExistingCustomer)) {
-                is Result.Success -> {
-                    newCustomerId = result.value.customerId
-                    PaymentConfiguration.init(
-                        context = getApplication(),
-                        publishableKey = result.value.publishableKey,
-                    )
+            fetchCustomerEphemeralKey(
+                if (configurationState.value.isExistingCustomer) {
+                    "returning"
+                } else {
+                    "new"
                 }
-                is Result.Failure -> {
-                    _viewState.update {
-                        CustomerSheetPlaygroundViewState.FailedToLoad(
-                            message = result.error.message.toString()
-                        )
-                    }
-                }
-            }
+            )
         }
     }
 

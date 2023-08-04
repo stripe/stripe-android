@@ -10,5 +10,9 @@ sealed class CustomerSheetPlaygroundViewState {
     data class Data(
         val selection: PaymentOptionSelection? = null,
         val errorMessage: String? = null,
+        val currentCustomer: String? = null,
     ) : CustomerSheetPlaygroundViewState()
+
+    val currentCustomerId: String
+        get() = (this as? Data)?.currentCustomer ?: "returning"
 }
