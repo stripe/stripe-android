@@ -24,6 +24,7 @@
     <ID>LongMethod:AutocompleteScreen.kt$@Composable internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel)</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`()</ID>
+    <ID>LongMethod:GooglePayButton.kt$@Composable internal fun GooglePayButton( state: PrimaryButton.State, allowCreditCards: Boolean, billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?, isEnabled: Boolean, onPressed: () -> Unit, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
     <ID>LongMethod:PaymentSheetLoader.kt$DefaultPaymentSheetLoader$private suspend fun create( elementsSession: ElementsSession, config: PaymentSheet.Configuration?, isGooglePayReady: Boolean, ): PaymentSheetState.Full</ID>
@@ -32,7 +33,7 @@
     <ID>MagicNumber:AutocompleteScreen.kt$0.07f</ID>
     <ID>MagicNumber:BaseSheetActivity.kt$BaseSheetActivity$30</ID>
     <ID>MagicNumber:BottomSheet.kt$BottomSheetState$10</ID>
-    <ID>MagicNumber:GooglePayButton.kt$GooglePayButton$0.5f</ID>
+    <ID>MagicNumber:GooglePayButton.kt$0.5f</ID>
     <ID>MagicNumber:PaymentMethodsUI.kt$.3f</ID>
     <ID>MagicNumber:PaymentMethodsUI.kt$.4f</ID>
     <ID>MagicNumber:PaymentMethodsUI.kt$.5f</ID>

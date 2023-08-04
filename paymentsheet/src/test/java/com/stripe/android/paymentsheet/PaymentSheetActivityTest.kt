@@ -54,7 +54,7 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
@@ -281,7 +281,7 @@ internal class PaymentSheetActivityTest {
                 .assertExists()
 
             composeTestRule
-                .onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG)
+                .onNodeWithTag(GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG)
                 .performClick()
 
             composeTestRule
@@ -345,7 +345,7 @@ internal class PaymentSheetActivityTest {
             viewModel.updateSelection(newSelection)
 
             composeTestRule
-                .onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG)
+                .onNodeWithTag(GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG)
                 .performClick()
 
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
@@ -614,7 +614,7 @@ internal class PaymentSheetActivityTest {
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
 
             composeTestRule
-                .onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG)
+                .onNodeWithTag(GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG)
                 .performClick()
 
             composeTestRule.waitForIdle()

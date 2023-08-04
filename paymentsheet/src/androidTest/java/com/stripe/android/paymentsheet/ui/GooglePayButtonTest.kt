@@ -26,7 +26,7 @@ class GooglePayButtonTest {
     @Ignore("Re-enable once we have refactored the Google Pay button handling")
     @Test
     fun handlesPressWhenEnabled() {
-        val testTag = GOOGLE_PAY_BUTTON_TEST_TAG
+        val testTag = GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG
         var didCallOnPressed = false
 
         composeTestRule.setContent {
@@ -52,7 +52,7 @@ class GooglePayButtonTest {
     @Ignore("Re-enable once we have refactored the Google Pay button handling")
     @Test
     fun ignoresPressWhenDisabled() {
-        val testTag = GOOGLE_PAY_BUTTON_TEST_TAG
+        val testTag = GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG
         var didCallOnPressed = false
 
         composeTestRule.setContent {
