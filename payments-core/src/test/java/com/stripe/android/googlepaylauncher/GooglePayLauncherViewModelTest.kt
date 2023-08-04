@@ -106,6 +106,9 @@ class GooglePayLauncherViewModelTest {
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
             currencyCode = "usd",
         )
+
+        val expectedTotalPrice: Long? = null
+
         assertThat(transactionInfo)
             .isEqualTo(
                 GooglePayJsonFactory.TransactionInfo(
@@ -113,7 +116,7 @@ class GooglePayLauncherViewModelTest {
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
                     countryCode = "us",
                     transactionId = "seti_1GSmaFCRMbs",
-                    totalPrice = 0L,
+                    totalPrice = expectedTotalPrice,
                     totalPriceLabel = null,
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
                 )

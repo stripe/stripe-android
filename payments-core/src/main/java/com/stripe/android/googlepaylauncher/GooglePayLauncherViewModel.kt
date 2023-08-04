@@ -138,12 +138,13 @@ internal class GooglePayLauncherViewModel(
                 )
             }
             is SetupIntent -> {
+                val totalPrice: Long? = null
                 GooglePayJsonFactory.TransactionInfo(
                     currencyCode = currencyCode,
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
                     countryCode = args.config.merchantCountryCode,
                     transactionId = stripeIntent.id,
-                    totalPrice = 0L,
+                    totalPrice = totalPrice,
                     totalPriceLabel = null,
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
                 )
