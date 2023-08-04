@@ -53,7 +53,7 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
      */
     @Parcelize
     class Error internal constructor(
-        val exception: Exception
+        val exception: Throwable
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
             paymentOptionFactory: PaymentOptionFactory,

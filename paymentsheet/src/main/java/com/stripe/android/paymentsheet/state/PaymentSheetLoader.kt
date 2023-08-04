@@ -205,7 +205,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return customerRepository.getPaymentMethods(
             customerConfig = customerConfig,
             types = paymentMethodTypes,
-        ).filter { paymentMethod ->
+            silentlyFail = true,
+        ).getOrDefault(emptyList()).filter { paymentMethod ->
             paymentMethod.hasExpectedDetails() &&
                 // PayPal isn't supported yet as a saved payment method (backend limitation).
                 paymentMethod.type != PaymentMethod.Type.PayPal
