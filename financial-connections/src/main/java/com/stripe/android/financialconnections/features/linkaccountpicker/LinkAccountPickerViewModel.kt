@@ -24,10 +24,10 @@ import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
-import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationDirections.institutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
+import com.stripe.android.financialconnections.navigation.toNavigationCommand
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -108,7 +108,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     fun onNewBankAccountClick() = viewModelScope.launch {
         eventTracker.track(Click("click.new_account", PANE))
         val nextPane = awaitState().payload()?.addNewAccount?.nextPane ?: Pane.INSTITUTION_PICKER
-        navigationManager.navigate(NavigateToRoute(nextPane))
+        navigationManager.navigate(NavigateToRoute(nextPane.toNavigationCommand()))
     }
 
     fun onSelectAccountClick() = suspend {
@@ -143,7 +143,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             else -> Unit
         }
         nextPane?.let {
-            navigationManager.navigate(NavigateToRoute(it))
+            navigationManager.navigate(NavigateToRoute(it.toNavigationCommand()))
         }
         Unit
     }.execute { copy(selectNetworkedAccountAsync = it) }
