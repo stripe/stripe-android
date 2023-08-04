@@ -142,7 +142,6 @@ class CameraScreenLaunchedEffectTest {
                     eq(IdentityAnalyticsRequestFactory.TYPE_SELFIE)
                 )
             }
-            verify(mockIdentityScanViewModel).stopScan(any())
 
             verify(mockIdentityViewModel).updateAnalyticsState(
                 argWhere { block ->
@@ -175,7 +174,6 @@ class CameraScreenLaunchedEffectTest {
                     eq(IdentityAnalyticsRequestFactory.TYPE_SELFIE)
                 )
             }
-            verify(mockIdentityScanViewModel).stopScan(any())
 
             verify(mockIdentityAnalyticsRequestFactory).selfieTimeout()
 
@@ -213,7 +211,6 @@ class CameraScreenLaunchedEffectTest {
                     eq(IdentityAnalyticsRequestFactory.TYPE_DOCUMENT)
                 )
             }
-            verify(mockIdentityScanViewModel).stopScan(any())
 
             verify(mockIdentityViewModel).updateAnalyticsState(
                 argWhere { block ->
@@ -248,7 +245,6 @@ class CameraScreenLaunchedEffectTest {
                     eq(IdentityAnalyticsRequestFactory.TYPE_DOCUMENT)
                 )
             }
-            verify(mockIdentityScanViewModel).stopScan(any())
 
             verify(mockIdentityAnalyticsRequestFactory).documentTimeout(
                 eq(IdentityScanState.ScanType.ID_FRONT)
@@ -287,7 +283,6 @@ class CameraScreenLaunchedEffectTest {
                     eq(IdentityAnalyticsRequestFactory.TYPE_DOCUMENT)
                 )
             }
-            verify(mockIdentityScanViewModel).stopScan(any())
 
             verify(mockIdentityViewModel).updateAnalyticsState(
                 argWhere { block ->
@@ -322,7 +317,6 @@ class CameraScreenLaunchedEffectTest {
                     eq(IdentityAnalyticsRequestFactory.TYPE_DOCUMENT)
                 )
             }
-            verify(mockIdentityScanViewModel).stopScan(any())
 
             verify(mockIdentityAnalyticsRequestFactory).documentTimeout(
                 eq(IdentityScanState.ScanType.ID_BACK)
