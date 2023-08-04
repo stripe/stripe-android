@@ -74,7 +74,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                     callback = viewModel::onCustomerSheetResult,
                 )
 
-                LaunchedEffect(configurationState.isExistingCustomer) {
+                LaunchedEffect(viewState) {
                     val result = customerSheet.retrievePaymentOptionSelection()
                     viewModel.onCustomerSheetResult(result)
                 }
