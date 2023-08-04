@@ -158,7 +158,6 @@ internal class PartnerAuthViewModelTest {
 
             // stays in partner auth pane
             assertThat(navigationManager.emittedEvents).isEmpty()
-
         }
 
     @Test

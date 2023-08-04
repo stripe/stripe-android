@@ -25,6 +25,12 @@ internal fun FinancialConnectionsSessionManifest.getRedactedEmail(): String? =
         }
     }
 
+internal fun FinancialConnectionsSessionManifest.shouldDisableAuthSessionRetrieval(): Boolean =
+    features
+        ?.get("bank_connections_disable_defensive_auth_session_retrieval_on_complete")
+        // if feature not present, disable auth session retrieval
+        ?: true
+
 internal fun SynchronizeSessionResponse.showManualEntryInErrors(): Boolean {
     return manifest.allowManualEntry && visual.reducedManualEntryProminenceInErrors.not()
 }

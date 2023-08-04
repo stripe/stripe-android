@@ -24,6 +24,7 @@ import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
+import com.stripe.android.financialconnections.features.common.shouldDisableAuthSessionRetrieval
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
@@ -256,7 +257,8 @@ internal class PartnerAuthViewModel @Inject constructor(
         kotlin.runCatching {
             logger.debug("Auth cancelled, cancelling AuthSession")
             setState { copy(authenticationStatus = Loading()) }
-            val authSession = getOrFetchSync().manifest.activeAuthSession
+            val manifest = getOrFetchSync().manifest
+            val authSession = manifest.activeAuthSession
             eventTracker.track(
                 FinancialConnectionsEvent.AuthSessionUrlReceived(
                     url = url ?: "none",
@@ -265,7 +267,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 )
             )
             requireNotNull(authSession)
-            if (url.isNullOrEmpty()) {
+            if (url.isNullOrEmpty() && manifest.shouldDisableAuthSessionRetrieval().not()) {
                 // client did not receive any deeplink -> retrieve the auth session and check its status
                 val retrievedAuthSession = retrieveAuthorizationSession(authSession.id)
                 val nextPane = retrievedAuthSession.nextPane
