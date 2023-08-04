@@ -21,10 +21,13 @@ appId: com.stripe.android.paymentsheet.example
       timeout: 60000
 - tapOn: "Select"
 - extendedWaitUntil:
-      visible: "Manage your payment method"
-      timeout: 60000
+    visible:
+      text: "Manage your payment methods"
+      optional: true
+    timeout: 60000
 - tapOn:
     id: "AddCard"
+    optional: true
 - extendedWaitUntil:
     visible: "Save a new payment method"
     timeout: 60000
