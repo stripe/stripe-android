@@ -1,8 +1,9 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -26,22 +27,22 @@ class GooglePayButtonTest {
     @Ignore("Re-enable once we have refactored the Google Pay button handling")
     @Test
     fun handlesPressWhenEnabled() {
-        val testTag = GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG
         var didCallOnPressed = false
 
         composeTestRule.setContent {
-            GooglePayButton(
-                state = PrimaryButton.State.Ready,
-                isEnabled = true,
-                allowCreditCards = true,
-                billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
-                onPressed = { didCallOnPressed = true },
-                modifier = Modifier.testTag(testTag),
-            )
+            CompositionLocalProvider(LocalInspectionMode provides true) {
+                GooglePayButton(
+                    state = PrimaryButton.State.Ready,
+                    isEnabled = true,
+                    allowCreditCards = true,
+                    billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
+                    onPressed = { didCallOnPressed = true },
+                )
+            }
         }
 
         composeTestRule
-            .onNodeWithTag(testTag)
+            .onNodeWithTag(GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG)
             .performClick()
 
         composeTestRule.waitForIdle()
@@ -52,22 +53,22 @@ class GooglePayButtonTest {
     @Ignore("Re-enable once we have refactored the Google Pay button handling")
     @Test
     fun ignoresPressWhenDisabled() {
-        val testTag = GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG
         var didCallOnPressed = false
 
         composeTestRule.setContent {
-            GooglePayButton(
-                state = PrimaryButton.State.Ready,
-                isEnabled = false,
-                allowCreditCards = true,
-                billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
-                onPressed = { didCallOnPressed = true },
-                modifier = Modifier.testTag(testTag),
-            )
+            CompositionLocalProvider(LocalInspectionMode provides true) {
+                GooglePayButton(
+                    state = PrimaryButton.State.Ready,
+                    isEnabled = false,
+                    allowCreditCards = true,
+                    billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
+                    onPressed = { didCallOnPressed = true },
+                )
+            }
         }
 
         composeTestRule
-            .onNodeWithTag(testTag)
+            .onNodeWithTag(GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG)
             .performClick()
 
         composeTestRule.waitForIdle()
@@ -97,25 +98,6 @@ class GooglePayButtonTest {
     }
 
     @Test
-    fun usesCorrectAlphaIfEnabled() {
-        composeTestRule.setContent {
-            GooglePayButton(
-                state = PrimaryButton.State.Ready,
-                isEnabled = true,
-                allowCreditCards = true,
-                billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
-                onPressed = {},
-            )
-        }
-
-        composeTestRule
-            .onNodeWithTag(GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG)
-            .fetchSemanticsNode()
-            .layoutInfo
-            .getModifierInfo()
-    }
-
-    @Test
     fun usesCorrectAlphaIfDisabled() {
         composeTestRule.setContent {
             GooglePayButton(
@@ -129,7 +111,7 @@ class GooglePayButtonTest {
 
         composeTestRule
             .onNodeWithTag(GOOGLE_PAY_BUTTON_PAY_BUTTON_TEST_TAG)
-            .assertAlpha(0.5f)
+            .assertAlpha(0.38f)
     }
 }
 
