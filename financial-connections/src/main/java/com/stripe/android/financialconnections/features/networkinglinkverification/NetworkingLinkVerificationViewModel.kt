@@ -27,13 +27,12 @@ import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.PartnerAccountsList
+import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections.institutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationDirections.linkAccountPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
 import com.stripe.android.financialconnections.navigation.toNavigationCommand
-import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
