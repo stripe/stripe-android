@@ -271,6 +271,12 @@ internal class PartnerAuthViewModel @Inject constructor(
                 // client did not receive any deeplink -> retrieve the auth session and check its status
                 val retrievedAuthSession = retrieveAuthorizationSession(authSession.id)
                 val nextPane = retrievedAuthSession.nextPane
+                eventTracker.track(
+                    FinancialConnectionsEvent.AuthSessionRetrieved(
+                        authSessionId = retrievedAuthSession.id,
+                        nextPane = nextPane
+                    )
+                )
                 if (nextPane == Pane.PARTNER_AUTH) {
                     // auth session was not completed, proceed with cancellation
                     cancelAuthSessionAndContinue(authSession = retrievedAuthSession)
