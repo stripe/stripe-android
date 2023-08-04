@@ -21,7 +21,7 @@ appId: com.stripe.android.paymentsheet.example
       timeout: 60000
 - tapOn: "Select"
 - extendedWaitUntil:
-      visible: "Manage your payment method"
+      visible: "Manage your payment methods"
       timeout: 60000
 - tapOn:
     id: "PAYMENT_OPTION_CARD_TEST_TAG_Google Pay"
