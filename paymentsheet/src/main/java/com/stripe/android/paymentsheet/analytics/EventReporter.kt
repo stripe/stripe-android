@@ -36,6 +36,7 @@ internal interface EventReporter {
      */
     fun onLoadFailed(
         isDecoupling: Boolean,
+        error: Throwable,
     )
 
     /**

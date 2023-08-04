@@ -21,9 +21,9 @@ import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
+import com.stripe.android.paymentsheet.model.requireValidOrThrow
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
@@ -56,7 +56,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val elementsSessionRepository: ElementsSessionRepository,
-    private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
     private val lpmRepository: LpmRepository,
     private val logger: Logger,
@@ -184,10 +183,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
             val supported = lpmRepository.values().joinToString(separator = ", ") { it.code }
 
-            throw IllegalArgumentException(
-                "None of the requested payment methods ($requested) " +
-                    "match the supported payment types ($supported)."
-            )
+            throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested, supported)
         }
     }
 
@@ -237,9 +233,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 )
             }
 
-            stripeIntentValidator.requireValid(elementsSession.stripeIntent)
-
-            elementsSession
+            elementsSession.requireValidOrThrow()
         }
     }
 
@@ -339,7 +333,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             },
             onFailure = { error ->
                 logger.error("Failure loading PaymentSheetState", error)
-                eventReporter.onLoadFailed(isDecoupling = isDecoupling)
+                eventReporter.onLoadFailed(
+                    isDecoupling = isDecoupling,
+                    error = error,
+                )
             }
         )
     }

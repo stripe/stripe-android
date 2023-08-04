@@ -30,7 +30,7 @@ internal class RelayingPaymentSheetLoader : PaymentSheetLoader {
 
     fun enqueueFailure() {
         val error = RuntimeException("whoops")
-        enqueue(Result.failure<PaymentSheetState.Full>(error))
+        enqueue(Result.failure(error))
     }
 
     private fun enqueue(result: Result<PaymentSheetState.Full>) {

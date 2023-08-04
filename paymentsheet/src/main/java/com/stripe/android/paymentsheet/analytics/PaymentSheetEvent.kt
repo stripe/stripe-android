@@ -36,11 +36,13 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class LoadFailed(
         duration: Duration?,
+        error: String,
         override val isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_failed"
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_DURATION to duration?.asSeconds,
+            FIELD_ERROR_MESSAGE to error,
         )
     }
 
@@ -332,6 +334,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_LINK_ENABLED = "link_enabled"
         const val FIELD_CURRENCY = "currency"
         const val FIELD_SELECTED_LPM = "selected_lpm"
+        const val FIELD_ERROR_MESSAGE = "error_message"
     }
 }
 

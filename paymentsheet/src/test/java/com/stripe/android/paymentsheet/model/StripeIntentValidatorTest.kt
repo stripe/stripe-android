@@ -13,19 +13,18 @@ import kotlin.test.assertFails
 
 @RunWith(RobolectricTestRunner::class)
 class StripeIntentValidatorTest {
-    private val validator = StripeIntentValidator()
 
     @Test
     fun `requireValid() should return original PaymentIntent when valid`() {
         assertThat(
-            validator.requireValid(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+            StripeIntentValidator.requireValid(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         ).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
     }
 
     @Test
     fun `requireValid() requires confirmationMethod = Automatic`() {
         assertFails {
-            validator.requireValid(
+            StripeIntentValidator.requireValid(
                 PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.copy(
                     confirmationMethod = PaymentIntent.ConfirmationMethod.Manual
                 )
@@ -36,7 +35,7 @@ class StripeIntentValidatorTest {
     @Test
     fun `requireValid() Succeeded is not valid`() {
         assertFails {
-            validator.requireValid(
+            StripeIntentValidator.requireValid(
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     status = StripeIntent.Status.Succeeded
                 )
@@ -46,35 +45,35 @@ class StripeIntentValidatorTest {
 
     @Test
     fun `PaymentIntent requireValid() allows status = RequiresPaymentMethod`() {
-        validator.requireValid(
+        StripeIntentValidator.requireValid(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         )
     }
 
     @Test
     fun `PaymentIntent requireValid() allows status = RequiresAction`() {
-        validator.requireValid(
+        StripeIntentValidator.requireValid(
             PaymentIntentJsonParser().parse(PaymentIntentFixtures.EXPANDED_PAYMENT_METHOD_JSON)!!
         )
     }
 
     @Test
     fun `SetupIntent requireValid() allows status = RequiresPaymentMethod`() {
-        validator.requireValid(
+        StripeIntentValidator.requireValid(
             SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
         )
     }
 
     @Test
     fun `SetupIntent requireValid() allows status = RequiresAction`() {
-        validator.requireValid(
+        StripeIntentValidator.requireValid(
             SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
         )
     }
 
     @Test
     fun `PaymentIntent requireValid() allows status = RequiresConfirmation`() {
-        validator.requireValid(
+        StripeIntentValidator.requireValid(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 status = StripeIntent.Status.RequiresConfirmation
             )
@@ -83,7 +82,7 @@ class StripeIntentValidatorTest {
 
     @Test
     fun `PaymentIntent requireValid() allows status = Processing`() {
-        validator.requireValid(
+        StripeIntentValidator.requireValid(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 status = StripeIntent.Status.Processing
             )
@@ -93,7 +92,7 @@ class StripeIntentValidatorTest {
     @Test
     fun `Considers PaymentIntent without amount invalid`() {
         assertFails {
-            validator.requireValid(
+            StripeIntentValidator.requireValid(
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     amount = null,
                 )
@@ -104,7 +103,7 @@ class StripeIntentValidatorTest {
     @Test
     fun `Considers PaymentIntent without currency invalid`() {
         assertFails {
-            validator.requireValid(
+            StripeIntentValidator.requireValid(
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     currency = null,
                 )

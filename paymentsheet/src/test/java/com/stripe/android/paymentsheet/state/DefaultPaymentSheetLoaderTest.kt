@@ -8,18 +8,19 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.StripeIntent.Status.Canceled
+import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -35,6 +36,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -299,7 +301,7 @@ internal class DefaultPaymentSheetLoaderTest {
     fun `load() when PaymentIntent has invalid status should return null`() = runTest {
         val result = createPaymentSheetLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                status = StripeIntent.Status.Succeeded
+                status = Succeeded,
             ),
         ).load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
@@ -308,14 +310,14 @@ internal class DefaultPaymentSheetLoaderTest {
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ).exceptionOrNull()
 
-        assertThat(result).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result).isEqualTo(PaymentSheetLoadingException.PaymentIntentInTerminalState(Succeeded))
     }
 
     @Test
     fun `load() when PaymentIntent has invalid confirmationMethod should return null`() = runTest {
         val result = createPaymentSheetLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                confirmationMethod = PaymentIntent.ConfirmationMethod.Manual
+                confirmationMethod = Manual,
             ),
         ).load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
@@ -323,7 +325,7 @@ internal class DefaultPaymentSheetLoaderTest {
             ),
         ).exceptionOrNull()
 
-        assertThat(result).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result).isEqualTo(PaymentSheetLoadingException.InvalidConfirmationMethod(Manual))
     }
 
     @Test
@@ -530,9 +532,12 @@ internal class DefaultPaymentSheetLoaderTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
         ).exceptionOrNull()
 
-        val expectedMessage = "None of the requested payment methods (gold, silver, bronze) " +
-            "match the supported payment types (card, cashapp)."
-        assertThat(result?.message).isEqualTo(expectedMessage)
+        assertThat(result).isEqualTo(
+            PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(
+                requested = "gold, silver, bronze",
+                supported = "card, cashapp",
+            )
+        )
     }
 
     @Test
@@ -568,19 +573,25 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @Test
     fun `Emits correct events when loading fails for non-deferred intent`() = runTest {
-        val loader = createPaymentSheetLoader(shouldFail = true)
+        val error = PaymentSheetLoadingException.MissingAmountOrCurrency
+        val loader = createPaymentSheetLoader(error = error)
 
         loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = false)
-        verify(eventReporter).onLoadFailed(isDecoupling = false)
+
+        verify(eventReporter).onLoadFailed(
+            isDecoupling = eq(false),
+            error = eq(error),
+        )
     }
 
     @Test
     fun `Emits correct events when loading fails for deferred intent`() = runTest {
-        val loader = createPaymentSheetLoader(shouldFail = true)
+        val error = PaymentSheetLoadingException.PaymentIntentInTerminalState(status = Canceled)
+        val loader = createPaymentSheetLoader(error = error)
 
         loader.load(
             initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
@@ -594,7 +605,38 @@ internal class DefaultPaymentSheetLoaderTest {
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = true)
-        verify(eventReporter).onLoadFailed(isDecoupling = true)
+
+        verify(eventReporter).onLoadFailed(
+            isDecoupling = eq(true),
+            error = eq(error),
+        )
+    }
+
+    @Test
+    fun `Emits correct events when loading fails with invalid confirmation method`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                confirmationMethod = Manual,
+            )
+        )
+
+        loader.load(
+            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1234,
+                        currency = "cad",
+                    ),
+                ),
+            ),
+        )
+
+        verify(eventReporter).onLoadStarted(isDecoupling = true)
+
+        verify(eventReporter).onLoadFailed(
+            isDecoupling = true,
+            error = PaymentSheetLoadingException.InvalidConfirmationMethod(Manual),
+        )
     }
 
     private fun createPaymentSheetLoader(
@@ -602,7 +644,7 @@ internal class DefaultPaymentSheetLoaderTest {
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         customerRepo: CustomerRepository = customerRepository,
         linkAccountState: AccountStatus = AccountStatus.Verified,
-        shouldFail: Boolean = false,
+        error: Throwable? = null,
     ): PaymentSheetLoader {
         return DefaultPaymentSheetLoader(
             appName = "App Name",
@@ -611,9 +653,9 @@ internal class DefaultPaymentSheetLoaderTest {
                 if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
             },
             elementsSessionRepository = FakeElementsSessionRepository(
-                stripeIntent = stripeIntent.takeUnless { shouldFail },
+                stripeIntent = stripeIntent,
+                error = error,
             ),
-            stripeIntentValidator = StripeIntentValidator(),
             customerRepository = customerRepo,
             lpmRepository = lpmRepository,
             logger = Logger.noop(),
