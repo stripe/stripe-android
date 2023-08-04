@@ -266,11 +266,11 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
             requireNotNull(authSession)
             if (url.isNullOrEmpty()) {
-                // call retrieve auth session endpoint
+                // client did not receive any deeplink -> retrieve the auth session and check its status
                 val retrievedAuthSession = retrieveAuthorizationSession(authSession.id)
                 val nextPane = retrievedAuthSession.nextPane
                 if (nextPane == Pane.PARTNER_AUTH) {
-                    // something failed.
+                    // auth session was not completed, proceed with cancellation
                     cancelAuthSessionAndContinue(authSession = retrievedAuthSession)
                 } else {
                     // auth session succeeded although client didn't retrieve any deeplink.
