@@ -34,6 +34,7 @@ import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@Suppress("MaxLineLength")
 internal class PartnerAuthViewModelTest {
 
     @get:Rule
