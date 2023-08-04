@@ -317,7 +317,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             setState { copy(authenticationStatus = Uninitialized) }
             createAuthSession()
         } else {
-            // For OAuth institutions, navigate to Session cancellation's next pane.
+            // For non-OAuth institutions, navigate to Session cancellation's next pane.
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
             navigationManager.navigate(
                 NavigateToRoute(

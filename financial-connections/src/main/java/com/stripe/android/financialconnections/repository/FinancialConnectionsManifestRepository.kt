@@ -346,21 +346,18 @@ private class FinancialConnectionsManifestRepositoryImpl(
     override suspend fun retrieveAuthorizationSession(
         clientSecret: String,
         sessionId: String
-    ): FinancialConnectionsAuthorizationSession {
-        val request = apiRequestFactory.createPost(
+    ): FinancialConnectionsAuthorizationSession = requestExecutor.execute(
+        request = apiRequestFactory.createPost(
             url = retrieveAuthSessionUrl,
             options = apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
             )
-        )
-        return requestExecutor.execute(
-            request,
-            FinancialConnectionsAuthorizationSession.serializer()
-        ).also {
-            updateCachedActiveAuthSession("retrieveAuthorizationSession", it)
-        }
+        ),
+        FinancialConnectionsAuthorizationSession.serializer()
+    ).also {
+        updateCachedActiveAuthSession("retrieveAuthorizationSession", it)
     }
 
     override suspend fun completeAuthorizationSession(
