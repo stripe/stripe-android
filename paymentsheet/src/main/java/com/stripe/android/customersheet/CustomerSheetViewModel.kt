@@ -474,7 +474,8 @@ internal class CustomerSheetViewModel @Inject constructor(
                 )
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
-                        errorMessage = displayMessage,
+                        errorMessage = displayMessage ?: cause.stripeErrorMessage(application),
+                        enabled = true,
                         isProcessing = false,
                     )
                 }

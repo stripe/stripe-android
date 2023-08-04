@@ -727,13 +727,13 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,
                 onSetupIntentClientSecretForCustomerAttach = {
-                    CustomerAdapter.Result.success("seti_123")
+                    CustomerAdapter.Result.success("invalid setup intent")
                 },
             ),
             stripeRepository = FakeStripeRepository(
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                 retrieveSetupIntent = Result.failure(
-                    APIException(stripeError = StripeError(message = "Could not attach payment method."))
+                    IllegalArgumentException("Invalid setup intent")
                 ),
             ),
         )
@@ -747,7 +747,8 @@ class CustomerSheetViewModelTest {
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
 
             viewState = awaitViewState()
-            assertThat(viewState.errorMessage).isEqualTo("Could not attach payment method.")
+            assertThat(viewState.errorMessage).isEqualTo("Something went wrong")
+            assertThat(viewState.enabled).isTrue()
             assertThat(viewState.isProcessing).isFalse()
         }
     }
