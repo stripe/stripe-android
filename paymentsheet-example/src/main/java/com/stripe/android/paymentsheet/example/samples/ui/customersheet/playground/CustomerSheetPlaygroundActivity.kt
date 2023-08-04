@@ -130,6 +130,11 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
         onUpdateDefaultPaymentMethod: () -> Unit
     ) {
         Column {
+            Text(
+                "Customer ${state.currentCustomer}",
+                color = MaterialTheme.colors.onBackground,
+                fontWeight = FontWeight.Bold,
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
