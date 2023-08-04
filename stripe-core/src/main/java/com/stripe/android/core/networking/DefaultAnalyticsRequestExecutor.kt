@@ -11,8 +11,6 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.exception.InvalidRequestException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -125,11 +123,8 @@ class DefaultAnalyticsRequestExecutor(
             }.fold(
                 onSuccess = { Result.success() },
                 onFailure = {
-                    if (it.canRetry) {
-                        Result.retry()
-                    } else {
-                        Result.failure()
-                    }
+                    // We can't retry due to missing idempotency support on q.stripe.com
+                    Result.failure()
                 },
             )
         }
@@ -154,6 +149,3 @@ class DefaultAnalyticsRequestExecutor(
         }
     }
 }
-
-private val Throwable.canRetry: Boolean
-    get() = this !is APIException && this !is InvalidRequestException

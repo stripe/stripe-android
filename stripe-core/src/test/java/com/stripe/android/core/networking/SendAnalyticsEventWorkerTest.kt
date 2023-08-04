@@ -40,16 +40,7 @@ internal class SendAnalyticsEventWorkerTest {
     }
 
     @Test
-    fun `Returns retry if analytics request fails due to fixable error reason`() = runTest {
-        val worker = createWorker()
-        enqueueRetryResponse()
-
-        val result = worker.doWork()
-        assertThat(result).isEqualTo(ListenableWorker.Result.retry())
-    }
-
-    @Test
-    fun `Returns failure if analytics request fails due to non-fixable error reason`() = runTest {
+    fun `Returns failure if analytics request fails`() = runTest {
         val worker = createWorker()
         enqueueFailureResponse()
 
