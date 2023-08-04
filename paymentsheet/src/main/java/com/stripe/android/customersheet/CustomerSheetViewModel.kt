@@ -184,7 +184,7 @@ internal class CustomerSheetViewModel @Inject constructor(
             val paymentMethodsResult = customerAdapter.retrievePaymentMethods()
             val selectedPaymentOption = customerAdapter.retrieveSelectedPaymentOption()
 
-            val result = paymentMethodsResult.flatMap { paymentMethods ->
+            paymentMethodsResult.flatMap { paymentMethods ->
                 selectedPaymentOption.map { paymentOption ->
                     Pair(paymentMethods, paymentOption)
                 }
@@ -195,53 +195,57 @@ internal class CustomerSheetViewModel @Inject constructor(
                     paymentMethods.find { it.id == id }
                 }
                 Pair(paymentMethods, selection)
-            }
+            }.onFailure { cause, _ ->
+                _result.update {
+                    InternalCustomerSheetResult.Error(
+                        exception = cause
+                    )
+                }
+            }.onSuccess { result ->
+                var paymentMethods = result.first
+                val paymentSelection = result.second
 
-            var paymentMethods = result.getOrNull()?.first
-            val paymentSelection = result.getOrNull()?.second
-
-            paymentSelection?.apply {
-                val selectedPaymentMethod = (this as? PaymentSelection.Saved)?.paymentMethod
-                // The order of the payment methods should be selected PM and then any additional PMs
-                // The carousel always starts with Add and Google Pay (if enabled)
-                paymentMethods = paymentMethods?.sortedWith { left, right ->
-                    // We only care to move the selected payment method, all others stay in the order they were before
-                    when {
-                        left.id == selectedPaymentMethod?.id -> -1
-                        right.id == selectedPaymentMethod?.id -> 1
-                        else -> 0
+                paymentSelection?.apply {
+                    val selectedPaymentMethod = (this as? PaymentSelection.Saved)?.paymentMethod
+                    // The order of the payment methods should be selected PM and then any additional PMs
+                    // The carousel always starts with Add and Google Pay (if enabled)
+                    paymentMethods = paymentMethods.sortedWith { left, right ->
+                        // We only care to move the selected payment method, all others stay in the
+                        // order they were before
+                        when {
+                            left.id == selectedPaymentMethod?.id -> -1
+                            right.id == selectedPaymentMethod?.id -> 1
+                            else -> 0
+                        }
                     }
                 }
-            }
 
-            val errorMessage = result.failureOrNull()?.displayMessage
-                ?: result.failureOrNull()?.cause?.stripeErrorMessage(application)
+                savedPaymentSelection = paymentSelection
 
-            savedPaymentSelection = paymentSelection
+                val isGooglePayReady = googlePayRepositoryFactory(
+                    if (isLiveModeProvider()) {
+                        GooglePayEnvironment.Production
+                    } else {
+                        GooglePayEnvironment.Test
+                    }
+                ).isReady().first()
 
-            val isGooglePayReady = googlePayRepositoryFactory(
-                if (isLiveModeProvider()) {
-                    GooglePayEnvironment.Production
-                } else {
-                    GooglePayEnvironment.Test
-                }
-            ).isReady().first()
-
-            transition(
-                to = CustomerSheetViewState.SelectPaymentMethod(
-                    title = configuration.headerTextForSelectionScreen,
-                    savedPaymentMethods = paymentMethods ?: emptyList(),
-                    paymentSelection = paymentSelection,
-                    isLiveMode = isLiveModeProvider(),
-                    isProcessing = false,
-                    isEditing = false,
-                    isGooglePayEnabled = configuration.googlePayEnabled && isGooglePayReady,
-                    primaryButtonVisible = false,
-                    // TODO (jameswoo) translate
-                    primaryButtonLabel = "Confirm",
-                    errorMessage = errorMessage,
+                transition(
+                    to = CustomerSheetViewState.SelectPaymentMethod(
+                        title = configuration.headerTextForSelectionScreen,
+                        savedPaymentMethods = paymentMethods,
+                        paymentSelection = paymentSelection,
+                        isLiveMode = isLiveModeProvider(),
+                        isProcessing = false,
+                        isEditing = false,
+                        isGooglePayEnabled = configuration.googlePayEnabled && isGooglePayReady,
+                        primaryButtonVisible = false,
+                        // TODO (jameswoo) translate
+                        primaryButtonLabel = "Confirm",
+                        errorMessage = null,
+                    )
                 )
-            )
+            }
         }
     }
 

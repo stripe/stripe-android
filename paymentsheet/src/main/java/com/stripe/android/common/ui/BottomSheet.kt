@@ -56,7 +56,9 @@ internal class BottomSheetState(
         // We dismiss the keyboard before we dismiss the sheet. This looks cleaner and prevents
         // a CancellationException.
         keyboardHandler.dismiss()
-        modalBottomSheetState.hide()
+        if (modalBottomSheetState.isVisible) {
+            modalBottomSheetState.hide()
+        }
     }
 
     internal enum class DismissalType {
