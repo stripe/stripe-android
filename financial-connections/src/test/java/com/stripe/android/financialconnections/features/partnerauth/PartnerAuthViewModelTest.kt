@@ -103,7 +103,7 @@ internal class PartnerAuthViewModelTest {
     }
 
     @Test
-    fun `onWebAuthFlowFinished - when webStatus is cancelled, cancels (Legacy)`() =
+    fun `onWebAuthFlowFinished - when webStatus is cancelled and retrieve pane is PARTNER_AUTH, cancels (Legacy)`() =
         runTest {
             val activeAuthSession = authorizationSession().copy(_isOAuth = false)
             val viewModel = createViewModel()
@@ -116,6 +116,10 @@ internal class PartnerAuthViewModelTest {
                         )
                     )
                 )
+
+            // simulate that auth session succeeded in abstract auth:
+            whenever(retrieveAuthorizationSession.invoke(any()))
+                .thenReturn(activeAuthSession.copy(nextPane = Pane.PARTNER_AUTH))
 
             viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled(activeAuthSession.url))
 
@@ -154,13 +158,16 @@ internal class PartnerAuthViewModelTest {
         }
 
     @Test
-    fun `onWebAuthFlowFinished - when webStatus is cancelled but killswitch is on, cancels (OAuth)`() =
+    fun `onWebAuthFlowFinished - when webStatus is cancelled but kill switch is on, cancels (OAuth)`() =
         runTest {
             val activeAuthSession = authorizationSession().copy(url = null)
             val activeInstitution = institution()
             val manifest = sessionManifest().copy(
                 activeAuthSession = activeAuthSession.copy(_isOAuth = true),
-                activeInstitution = activeInstitution
+                activeInstitution = activeInstitution,
+                features = mapOf(
+                    "bank_connections_disable_defensive_auth_session_retrieval_on_complete" to true
+                )
             )
             val syncResponse = syncResponse(manifest)
             whenever(getSync()).thenReturn(syncResponse)
