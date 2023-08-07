@@ -284,6 +284,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                     cancelAuthSessionAndContinue(authSession = retrievedAuthSession)
                 } else {
                     // auth session succeeded although client didn't retrieve any deeplink.
+                    postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
                     navigationManager.navigate(NavigateToRoute(nextPane.toNavigationCommand()))
                 }
             } else {
