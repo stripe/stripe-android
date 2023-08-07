@@ -301,6 +301,13 @@ internal sealed class FinancialConnectionsEvent(
         mapOf("pane" to Pane.CONSENT.value)
     )
 
+    class PrepaneClickContinue(
+        pane: Pane
+    ) : FinancialConnectionsEvent(
+        name = "click.prepane.continue",
+        mapOf("pane" to pane.value)
+    )
+
     override fun toString(): String {
         return "FinancialConnectionsEvent(name='$name', params=$params)"
     }
