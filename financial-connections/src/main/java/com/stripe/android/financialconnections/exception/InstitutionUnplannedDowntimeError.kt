@@ -5,7 +5,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 
 internal class InstitutionUnplannedDowntimeError(
     val institution: FinancialConnectionsInstitution,
-    val allowManualEntry: Boolean,
+    val showManualEntry: Boolean,
     stripeException: StripeException
 ) : FinancialConnectionsError(
     name = "InstitutionUnplannedDowntimeError",

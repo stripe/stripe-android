@@ -20,7 +20,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -30,24 +29,18 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.domain.ConfirmVerification
-import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError.Type
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
-import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.OTPController
-import com.stripe.android.uicore.elements.OTPElement
 
 @Composable
 internal fun NetworkingLinkVerificationScreen() {
@@ -183,58 +176,4 @@ private fun Title() {
         annotationStyles = emptyMap(),
         onClickableTextClick = {},
     )
-}
-
-@Composable
-@Preview(group = "NetworkingLinkVerification Pane", name = "Entering OTP")
-internal fun NetworkingLinkVerificationScreenPreview() {
-    FinancialConnectionsPreview {
-        NetworkingLinkVerificationContent(
-            state = NetworkingLinkVerificationState(
-                payload = Success(
-                    Payload(
-                        email = "email@gmail.com",
-                        phoneNumber = "12345678",
-                        otpElement = OTPElement(
-                            IdentifierSpec.Generic("otp"),
-                            OTPController()
-                        ),
-                        consumerSessionClientSecret = "12345678"
-                    )
-                )
-            ),
-            onCloseClick = {},
-            onCloseFromErrorClick = {}
-        )
-    }
-}
-
-@Composable
-@Preview(group = "NetworkingLinkVerification Pane", name = "Error")
-internal fun NetworkingLinkVerificationScreenWithErrorPreview() {
-    FinancialConnectionsPreview {
-        NetworkingLinkVerificationContent(
-            state = NetworkingLinkVerificationState(
-                confirmVerification = Fail(
-                    ConfirmVerification.OTPError(
-                        message = "consumer_verification_max_attempts_exceeded",
-                        type = Type.SMS_CODE_EXPIRED
-                    )
-                ),
-                payload = Success(
-                    Payload(
-                        email = "email@gmail.com",
-                        phoneNumber = "12345678",
-                        otpElement = OTPElement(
-                            IdentifierSpec.Generic("otp"),
-                            OTPController()
-                        ),
-                        consumerSessionClientSecret = "12345678"
-                    )
-                )
-            ),
-            onCloseClick = {},
-            onCloseFromErrorClick = {}
-        )
-    }
 }

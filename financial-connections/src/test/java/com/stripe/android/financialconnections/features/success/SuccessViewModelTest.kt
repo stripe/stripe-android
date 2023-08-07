@@ -79,6 +79,7 @@ internal class SuccessViewModelTest {
             assertThat(eventTracker.sentEvents).containsExactly(
                 FinancialConnectionsEvent.Complete(
                     connectedAccounts = session.accounts.count,
+                    exceptionExtraMessage = null,
                     exception = null
                 )
             )

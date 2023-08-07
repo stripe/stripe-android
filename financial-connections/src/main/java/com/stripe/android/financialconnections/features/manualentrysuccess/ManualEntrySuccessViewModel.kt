@@ -44,6 +44,7 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
                 eventTracker.track(
                     Complete(
                         connectedAccounts = it.accounts.data.count(),
+                        exceptionExtraMessage = null,
                         exception = null
                     )
                 )
@@ -52,6 +53,7 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
                 eventTracker.track(
                     Complete(
                         connectedAccounts = null,
+                        exceptionExtraMessage = null,
                         exception = it
                     )
                 )

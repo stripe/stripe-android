@@ -4,7 +4,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 
 internal class AccountLoadError(
-    val allowManualEntry: Boolean,
+    val showManualEntry: Boolean,
     val canRetry: Boolean,
     val institution: FinancialConnectionsInstitution,
     stripeException: StripeException

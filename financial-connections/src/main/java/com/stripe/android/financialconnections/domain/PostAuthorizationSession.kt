@@ -5,8 +5,10 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
+import com.stripe.android.financialconnections.features.common.showManualEntryInErrors
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import javax.inject.Inject
 import javax.inject.Named
@@ -25,11 +27,11 @@ internal class PostAuthorizationSession @Inject constructor(
 
     /**
      * @param institution selected institution to create a [FinancialConnectionsAuthorizationSession]
-     * @param allowManualEntry to build
+     * @param sync [SynchronizeSessionResponse]
      */
     suspend operator fun invoke(
         institution: FinancialConnectionsInstitution,
-        allowManualEntry: Boolean
+        sync: SynchronizeSessionResponse,
     ): FinancialConnectionsAuthorizationSession {
         return try {
             repository.postAuthorizationSession(
@@ -40,12 +42,15 @@ internal class PostAuthorizationSession @Inject constructor(
         } catch (
             @Suppress("SwallowedException") e: StripeException
         ) {
-            throw e.toDomainException(allowManualEntry, institution)
+            throw e.toDomainException(
+                showManualEntry = sync.showManualEntryInErrors(),
+                institution = institution
+            )
         }
     }
 
     private fun StripeException.toDomainException(
-        allowManualEntry: Boolean,
+        showManualEntry: Boolean,
         institution: FinancialConnectionsInstitution
     ): StripeException = this.stripeError?.let {
         val institutionUnavailable: String? = it.extraFields?.get("institution_unavailable")
@@ -54,13 +59,13 @@ internal class PostAuthorizationSession @Inject constructor(
             "true" -> when {
                 availableAt.isNullOrEmpty() -> InstitutionUnplannedDowntimeError(
                     institution = institution,
-                    allowManualEntry = allowManualEntry,
+                    showManualEntry = showManualEntry,
                     stripeException = this
                 )
 
                 else -> InstitutionPlannedDowntimeError(
                     institution = institution,
-                    allowManualEntry = allowManualEntry,
+                    showManualEntry = showManualEntry,
                     isToday = true,
                     backUpAt = availableAt.toLong().seconds.inWholeMilliseconds,
                     stripeException = this
