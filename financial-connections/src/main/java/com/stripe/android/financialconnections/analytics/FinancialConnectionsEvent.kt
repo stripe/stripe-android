@@ -287,9 +287,25 @@ internal sealed class FinancialConnectionsEvent(
             ).filterNotNullValues(),
         )
 
+    class AuthSessionRetrieved(nextPane: Pane, authSessionId: String) :
+        FinancialConnectionsEvent(
+            name = "auth_session.retrieved",
+            params = mapOf(
+                "next_pane" to nextPane.value,
+                "auth_session_id" to authSessionId,
+            ).filterNotNullValues(),
+        )
+
     object ConsentAgree : FinancialConnectionsEvent(
         name = "click.agree",
         mapOf("pane" to Pane.CONSENT.value)
+    )
+
+    class PrepaneClickContinue(
+        pane: Pane
+    ) : FinancialConnectionsEvent(
+        name = "click.prepane.continue",
+        mapOf("pane" to pane.value)
     )
 
     override fun toString(): String {
