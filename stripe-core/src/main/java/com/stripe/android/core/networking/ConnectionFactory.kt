@@ -49,6 +49,13 @@ interface ConnectionFactory {
 
         private fun openConnectionAndApplyFields(request: StripeRequest): HttpURLConnection {
             return (URL(request.url).openConnection() as HttpURLConnection).apply {
+                // Sleep a random amount of time between 1 and 5 seconds
+                Thread.sleep((Math.random() * 4000 + 1000).toLong())
+                // Randomly throw a network failed exception 10% of the time
+                if (Math.random() < 0.1) {
+                    throw IOException("Simulated network failure")
+                }
+
                 testConnectionCustomization?.invoke(this)
 
                 connectTimeout = CONNECT_TIMEOUT
