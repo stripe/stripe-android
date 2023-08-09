@@ -11,7 +11,6 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
-import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.model.PaymentMethodCode
@@ -21,6 +20,7 @@ import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.H4Text
 

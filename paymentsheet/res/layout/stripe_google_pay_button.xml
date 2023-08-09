@@ -11,8 +11,7 @@
         <com.stripe.android.paymentsheet.ui.PrimaryButton
             android:id="@+id/google_pay_primary_button"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/stripe_paymentsheet_googlepay_button_height"
-            android:visibility="invisible" />
+            android:layout_height="@dimen/stripe_paymentsheet_googlepay_button_height" />
 
         <com.google.android.gms.wallet.button.PayButton
             android:id="@+id/google_pay_payment_button"

@@ -32,6 +32,7 @@ dependencies {
     kapt libs.daggerCompiler
 
     // Compose
+    implementation libs.compose.constraintLayout
     implementation libs.compose.ui
     implementation libs.compose.uiViewBinding
     implementation libs.compose.foundation

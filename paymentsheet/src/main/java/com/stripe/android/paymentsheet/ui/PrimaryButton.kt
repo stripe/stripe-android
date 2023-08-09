@@ -9,27 +9,42 @@ import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.core.content.withStyledAttributes
-import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.uicore.PrimaryButtonStyle
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.convertDpToPx
 import com.stripe.android.uicore.getBorderStrokeColor
-import com.stripe.android.uicore.getComposeTextStyle
-import com.stripe.android.uicore.getOnBackgroundColor
+import kotlinx.coroutines.flow.MutableStateFlow
+
+private inline fun <T1, T2, T3> safeLet(
+    value1: T1?,
+    value2: T2?,
+    value3: T3?,
+    block: (T1, T2, T3) -> Unit,
+) {
+    if (value1 != null && value2 != null && value3 != null) {
+        block(value1, value2, value3)
+    }
+}
+
+private inline fun <T1, T2, T3, T4> safeLet(
+    value1: T1?,
+    value2: T2?,
+    value3: T3?,
+    value4: T4?,
+    block: (T1, T2, T3, T4) -> Unit,
+) {
+    if (value1 != null && value2 != null && value3 != null && value4 != null) {
+        block(value1, value2, value3, value4)
+    }
+}
 
 /**
  * The primary call-to-action for a payment sheet screen.
@@ -41,14 +56,14 @@ internal class PrimaryButton @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr) {
     @VisibleForTesting
     internal var defaultTintList: ColorStateList? = null
-    private var state: State? = null
-    private val animator = PrimaryButtonAnimator(context)
+//    private var state: State? = null
+//    private val animator = PrimaryButtonAnimator(context)
 
     // This is the text set by the client.  The internal label text is set to this value
     // in the on ready state and it is temporarily replaced during the processing and finishing states.
-    private var originalLabel: String? = null
+//    private var originalLabel: String? = null
 
-    private var defaultLabelColor: Int? = null
+//    private var defaultLabelColor: Int? = null
 
     @VisibleForTesting
     internal var externalLabel: String? = null
@@ -61,7 +76,7 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     internal var lockVisible = true
 
-    private val confirmedIcon = viewBinding.confirmedIcon
+//    private val confirmedIcon = viewBinding.confirmedIcon
 
     private var cornerRadius = context.convertDpToPx(
         StripeThemeDefaults.primaryButtonStyle.shape.cornerRadius.dp
@@ -78,13 +93,54 @@ internal class PrimaryButton @JvmOverloads constructor(
             R.color.stripe_paymentsheet_primary_button_success_background
         )
 
+    private val uiStateFlow = MutableStateFlow<UIState?>(null)
+    private val stateFlow = MutableStateFlow<State?>(null)
+    private val styleFlow = MutableStateFlow<PrimaryButtonStyle?>(null)
+    private val backgroundFlow = MutableStateFlow<Int?>(null)
+    private val defaultLabelColorFlow = MutableStateFlow<Int?>(null)
+    private val lockIconDrawableFlow = MutableStateFlow<Int?>(null)
+    private val confirmedIconDrawableFlow = MutableStateFlow<Int?>(null)
+    private val indicatorColorFlow = MutableStateFlow<Int?>(null)
+
     init {
         // This is only needed if the button is inside a fragment
-        viewBinding.label.setViewCompositionStrategy(
+        viewBinding.content.setViewCompositionStrategy(
             ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
         )
-        getTextAttributeValue(attrs)?.let {
-            setLabel(it.toString())
+
+        viewBinding.content.setContent {
+            val currentUiState by uiStateFlow.collectAsState()
+            val currentState by stateFlow.collectAsState()
+            val currentStyle by styleFlow.collectAsState()
+            val currentBackground by backgroundFlow.collectAsState()
+            val currentLabelColor by defaultLabelColorFlow.collectAsState()
+
+            val lockIconDrawable by lockIconDrawableFlow.collectAsState()
+            val confirmedIconDrawable by lockIconDrawableFlow.collectAsState()
+            val indicatorColor by indicatorColorFlow.collectAsState()
+
+//            safeLet(
+//                currentUiState,
+//                currentState,
+//                currentStyle,
+//                currentBackground,
+//            ) { uiState, state, style, background ->
+//                PrimaryButton(
+//                    uiState = uiState,
+//                    state = state,
+//                    style = style,
+//                    background = background,
+//                    defaultLabelColor = currentLabelColor,
+//                    lockIconDrawable = lockIconDrawable,
+//                    confirmedIconDrawable = confirmedIconDrawable,
+//                    indicatorColor = indicatorColor,
+//                    modifier = Modifier.padding(
+//                        top = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing),
+//                        start = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
+//                        end = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
+//                    ),
+//                )
+//            }
         }
 
         isClickable = true
@@ -95,30 +151,33 @@ internal class PrimaryButton @JvmOverloads constructor(
         primaryButtonStyle: PrimaryButtonStyle,
         tintList: ColorStateList?
     ) {
-        cornerRadius = context.convertDpToPx(primaryButtonStyle.shape.cornerRadius.dp)
-        borderStrokeWidth = context.convertDpToPx(primaryButtonStyle.shape.borderStrokeWidth.dp)
-        borderStrokeColor = primaryButtonStyle.getBorderStrokeColor(context)
-        viewBinding.lockIcon.imageTintList = ColorStateList.valueOf(
-            primaryButtonStyle.getOnBackgroundColor(context)
-        )
-        defaultTintList = tintList
-        backgroundTintList = tintList
+        styleFlow.value = primaryButtonStyle
+        backgroundFlow.value = tintList?.defaultColor
+
+//        cornerRadius = context.convertDpToPx(primaryButtonStyle.shape.cornerRadius.dp)
+//        borderStrokeWidth = context.convertDpToPx(primaryButtonStyle.shape.borderStrokeWidth.dp)
+//        borderStrokeColor = primaryButtonStyle.getBorderStrokeColor(context)
+//        viewBinding.lockIcon.imageTintList = ColorStateList.valueOf(
+//            primaryButtonStyle.getOnBackgroundColor(context)
+//        )
+//        defaultTintList = tintList
+//        backgroundTintList = tintList
     }
 
     fun setDefaultLabelColor(@ColorInt color: Int) {
-        defaultLabelColor = color
+        defaultLabelColorFlow.value = color
     }
 
     fun setLockIconDrawable(@DrawableRes drawable: Int) {
-        viewBinding.lockIcon.setImageResource(drawable)
+        lockIconDrawableFlow.value = drawable
     }
 
     fun setIndicatorColor(@ColorInt color: Int) {
-        viewBinding.confirmingIcon.setIndicatorColor(color)
+        indicatorColorFlow.value = color
     }
 
     fun setConfirmedIconDrawable(@DrawableRes drawable: Int) {
-        viewBinding.confirmedIcon.setImageResource(drawable)
+        confirmedIconDrawableFlow.value = drawable
     }
 
     override fun setBackgroundTintList(tintList: ColorStateList?) {
@@ -136,115 +195,117 @@ internal class PrimaryButton @JvmOverloads constructor(
         )
     }
 
-    private fun getTextAttributeValue(attrs: AttributeSet?): CharSequence? {
-        var text: CharSequence? = null
-        context.withStyledAttributes(
-            attrs,
-            listOf(android.R.attr.text).toIntArray()
-        ) {
-            text = getText(0)
-        }
-        return text
-    }
+//    private fun getTextAttributeValue(attrs: AttributeSet?): CharSequence? {
+//        var text: CharSequence? = null
+//        context.withStyledAttributes(
+//            attrs,
+//            listOf(android.R.attr.text).toIntArray()
+//        ) {
+//            text = getText(0)
+//        }
+//        return text
+//    }
 
-    private fun setLabel(text: String?) {
-        externalLabel = text
-        text?.let {
-            if (state !is State.StartProcessing) {
-                originalLabel = text
-            }
-            viewBinding.label.setContent {
-                LabelUI(
-                    label = text,
-                    color = defaultLabelColor,
-                )
-            }
-        }
-    }
+//    private fun setLabel(text: String?) {
+//        externalLabel = text
+//        text?.let {
+//            if (state !is State.StartProcessing) {
+//                originalLabel = text
+//            }
+//            viewBinding.label.setContent {
+//                LabelUI(
+//                    label = text,
+//                    color = defaultLabelColor,
+//                )
+//            }
+//        }
+//    }
 
-    private fun onReadyState() {
-        isClickable = true
-        originalLabel?.let {
-            setLabel(it)
-        }
-        defaultTintList?.let {
-            backgroundTintList = it
-        }
-        viewBinding.lockIcon.isVisible = lockVisible
-        viewBinding.confirmingIcon.isVisible = false
-    }
+//    private fun onReadyState() {
+//        isClickable = true
+//        originalLabel?.let {
+//            setLabel(it)
+//        }
+//        defaultTintList?.let {
+//            backgroundTintList = it
+//        }
+//        viewBinding.lockIcon.isVisible = lockVisible
+//        viewBinding.confirmingIcon.isVisible = false
+//    }
 
-    private fun onStartProcessing() {
-        viewBinding.lockIcon.isVisible = false
-        viewBinding.confirmingIcon.isVisible = true
-        isClickable = false
-        setLabel(
-            resources.getString(R.string.stripe_paymentsheet_primary_button_processing)
-        )
-    }
+//    private fun onStartProcessing() {
+//        viewBinding.lockIcon.isVisible = false
+//        viewBinding.confirmingIcon.isVisible = true
+//        isClickable = false
+//        setLabel(
+//            resources.getString(R.string.stripe_paymentsheet_primary_button_processing)
+//        )
+//    }
 
-    private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
-        isClickable = false
-        backgroundTintList = ColorStateList.valueOf(finishedBackgroundColor)
+//    private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
+//        isClickable = false
+//        backgroundTintList = ColorStateList.valueOf(finishedBackgroundColor)
+//
+//        animator.fadeOut(viewBinding.label)
+//        animator.fadeOut(viewBinding.confirmingIcon)
+//
+//        animator.fadeIn(confirmedIcon, width) {
+//            onAnimationEnd()
+//        }
+//    }
 
-        animator.fadeOut(viewBinding.label)
-        animator.fadeOut(viewBinding.confirmingIcon)
-
-        animator.fadeIn(confirmedIcon, width) {
-            onAnimationEnd()
-        }
-    }
-
-    override fun setEnabled(enabled: Boolean) {
-        super.setEnabled(enabled)
-        updateAlpha()
-    }
+//    override fun setEnabled(enabled: Boolean) {
+//        super.setEnabled(enabled)
+//        updateAlpha()
+//    }
 
     fun updateUiState(uiState: UIState?) {
-        isVisible = uiState != null
-
-        if (uiState != null) {
-            if (state !is State.StartProcessing && state !is State.FinishProcessing) {
-                // If we're processing or finishing, we're not overriding the label
-                setLabel(uiState.label)
-            }
-
-            isEnabled = uiState.enabled
-            lockVisible = uiState.lockVisible
-            setOnClickListener { uiState.onClick() }
-        }
+        uiStateFlow.value = uiState
+//        isVisible = uiState != null
+//
+//        if (uiState != null) {
+//            if (state !is State.StartProcessing && state !is State.FinishProcessing) {
+//                // If we're processing or finishing, we're not overriding the label
+//                setLabel(uiState.label)
+//            }
+//
+//            isEnabled = uiState.enabled
+//            lockVisible = uiState.lockVisible
+//            setOnClickListener { uiState.onClick() }
+//        }
     }
 
     fun updateState(state: State?) {
-        this.state = state
-        updateAlpha()
-
-        when (state) {
-            is State.Ready -> {
-                onReadyState()
-            }
-            State.StartProcessing -> {
-                onStartProcessing()
-            }
-            is State.FinishProcessing -> {
-                onFinishProcessing(state.onComplete)
-            }
-            null -> {}
-        }
+        stateFlow.value = state
+//        this.state = state
+//        updateAlpha()
+//
+//        when (state) {
+//            is State.Ready -> {
+//                onReadyState()
+//            }
+//            State.StartProcessing -> {
+//                onStartProcessing()
+//            }
+//            is State.FinishProcessing -> {
+//                onFinishProcessing(state.onComplete)
+//            }
+//            null -> {}
+//        }
     }
 
-    private fun updateAlpha() {
-        listOf(
-            viewBinding.label,
-            viewBinding.lockIcon
-        ).forEach { view ->
-            view.alpha = if ((state == null || state is State.Ready) && !isEnabled) {
-                0.5f
-            } else {
-                1.0f
-            }
-        }
-    }
+//    private fun updateAlpha() {
+//        listOf(
+//            viewBinding.label,
+//            viewBinding.lockIcon
+//        ).forEach { view ->
+//            view.alpha = if ((state == null || state is State.Ready) && !isEnabled) {
+//                0.5f
+//            } else {
+//                1.0f
+//            }
+//        }
+//    }
 
     internal sealed class State(
         val isProcessing: Boolean
@@ -272,18 +333,4 @@ internal class PrimaryButton @JvmOverloads constructor(
         val enabled: Boolean,
         val lockVisible: Boolean,
     )
-}
-
-@Composable
-private fun LabelUI(label: String, color: Int?) {
-    StripeTheme {
-        Text(
-            text = label,
-            textAlign = TextAlign.Center,
-            color = color?.let { Color(it) } ?: Color.Unspecified,
-            style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
-            modifier = Modifier
-                .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
-        )
-    }
 }

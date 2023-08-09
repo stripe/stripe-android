@@ -27,6 +27,7 @@ ext.versions = [
         binaryCompatibilityValidator: '0.13.1',
         buildTools                  : "30.0.3",
         cameraX                     : '1.2.3',
+        composeConstraintlayout     : '1.0.1',
         dagger                      : '2.45',
         detekt                      : "1.22.0",
         diskLruCache                : '2.0.2',
@@ -126,6 +127,7 @@ ext.libs = [
         ],
         compose                             : [
                 activity             : "androidx.activity:activity-compose:${versions.androidxActivity}",
+                constraintLayout     : "androidx.constraintlayout:constraintlayout-compose:${versions.composeConstraintlayout}",
                 foundation           : "androidx.compose.foundation:foundation:${versions.androidxCompose}",
                 liveData             : "androidx.compose.runtime:runtime-livedata:${versions.androidxComposeRuntime}",
                 material             : "androidx.compose.material:material:${versions.androidxCompose}",

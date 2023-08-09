@@ -4,6 +4,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
@@ -17,22 +18,24 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentSheetPrimaryButtonBinding
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
+import com.stripe.android.utils.rememberActivity
 
 @Composable
 internal fun PaymentSheetScreen(
@@ -82,13 +85,25 @@ internal fun PaymentSheetScreenContent(
     viewModel: PaymentSheetViewModel,
     modifier: Modifier = Modifier,
 ) {
+    val activity = rememberActivity {
+        "PaymentSheetScreenContent must be called in the context of an Activity"
+    }
+
     val headerText by viewModel.headerText.collectAsState(null)
     val walletsState by viewModel.walletsState.collectAsState()
-    val buyButtonState by viewModel.buyButtonState.collectAsState(initial = null)
     val currentScreen by viewModel.currentScreen.collectAsState()
     val notes by viewModel.notesText.collectAsState()
 
+    val buyButtonState by viewModel.buyButtonState.collectAsState(initial = null)
+    val uiState by viewModel.primaryButtonUiState.collectAsState()
+
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+
+    val buyButtonPadding = PaddingValues(
+        top = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing),
+        start = horizontalPadding,
+        end = horizontalPadding,
+    )
 
     Column(modifier) {
         headerText?.let { text ->
@@ -120,10 +135,20 @@ internal fun PaymentSheetScreenContent(
             )
         }
 
-        AndroidViewBinding(
-            factory = StripeFragmentPaymentSheetPrimaryButtonBinding::inflate,
-            modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
-        )
+        uiState?.let { uiState ->
+            PrimaryButton(
+                uiState = uiState,
+                state = buyButtonState?.convert() ?: PrimaryButton.State.Ready,
+                style = StripeTheme.primaryButtonStyle,
+                background = Color(
+                    viewModel.config?.primaryButtonColor?.defaultColor
+                        ?: StripeTheme.primaryButtonStyle.getBackgroundColor(activity.baseContext)
+                ),
+                modifier = Modifier
+                    .padding(buyButtonPadding)
+                    .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
+            )
+        }
 
         notes?.let { text ->
             Html(
