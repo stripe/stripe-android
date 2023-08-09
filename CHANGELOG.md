@@ -4,7 +4,7 @@
 
 ## 20.28.1 - 2023-08-09
 
-### Payments
+### PaymentSheet
 * [FIXED][7136](https://github.com/stripe/stripe-android/pull/7136) Fixed an issue where the Google Pay button in PaymentSheet was not clickable in some cases.
 
 ## 20.28.0 - 2023-07-31
