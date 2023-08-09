@@ -52,7 +52,7 @@ class AnalyticsRequestV2(
     // As opposed to
     // key[nestedKey1]="value1"&key[nestedKey2]="value2"
     @VisibleForTesting
-    val postParameters: String = createParams(params + analyticParams())
+    internal val postParameters: String = createParams(params + analyticParams())
 
     private val postBodyBytes: ByteArray
         @Throws(UnsupportedEncodingException::class)
