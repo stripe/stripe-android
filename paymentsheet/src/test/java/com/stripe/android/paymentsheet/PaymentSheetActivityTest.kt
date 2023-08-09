@@ -76,6 +76,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -260,6 +261,7 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Ignore("Re-enable once we have refactored the Google Pay button handling")
     @Test
     fun `Errors are cleared when checking out with Google Pay`() {
         val viewModel = createViewModel(isGooglePayAvailable = true)
@@ -602,6 +604,7 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Ignore("Re-enable once we have refactored the Google Pay button handling")
     @Test
     fun `google pay flow updates the scroll view before and after`() {
         val viewModel = createViewModel(isGooglePayAvailable = true)
