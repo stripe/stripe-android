@@ -115,13 +115,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 )
                 // received unknown / non-handleable return url.
                 else -> setState {
-                    copy(
-                        webAuthFlow = WebAuthFlowState.Failed(
-                            url = receivedUrl,
-                            message = "Received unknown return_url: $receivedUrl",
-                            reason = null
-                        )
-                    )
+                    copy(webAuthFlow = WebAuthFlowState.Canceled(receivedUrl))
                 }
             }
         }
