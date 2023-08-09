@@ -51,7 +51,7 @@ internal fun GooglePayButton(
             }
             googlePayButton.isEnabled = isEnabled
             googlePayButton.updateState(state)
-            googlePayButton.setOnClickListener { onPressed() }
+            googlePayButton.viewBinding.googlePayPaymentButton.setOnClickListener { onPressed() }
         },
         modifier = modifier.testTag(GooglePayButton.TEST_TAG),
     )
@@ -164,6 +164,7 @@ internal class GooglePayButton @JvmOverloads constructor(
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
         viewBinding.googlePayPrimaryButton.isEnabled = enabled
+        viewBinding.googlePayPaymentButton.isEnabled = enabled
         updateAlpha()
     }
 
