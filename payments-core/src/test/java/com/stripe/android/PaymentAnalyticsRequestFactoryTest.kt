@@ -123,6 +123,7 @@ class PaymentAnalyticsRequestFactoryTest {
                 "is_development" to true,
                 "session_id" to AnalyticsRequestFactory.sessionId,
                 "network_type" to "2G",
+                "locale" to "en_US",
             )
         )
     }
@@ -302,7 +303,7 @@ class PaymentAnalyticsRequestFactoryTest {
                 )
             )
         assertThat(analyticsRequest.url)
-            .isEqualTo("https://q.stripe.com?publishable_key=pk_abc123&app_version=0&bindings_version=$sdkVersion&os_version=30&session_id=${AnalyticsRequestFactory.sessionId}&os_release=11&device_type=robolectric_robolectric_robolectric&source_type=card&app_name=com.stripe.android.test&analytics_ua=analytics.stripe_android-1.0&os_name=REL&network_type=2G&event=stripe_android.payment_method_creation&is_development=true")
+            .isEqualTo("https://q.stripe.com?publishable_key=pk_abc123&app_version=0&bindings_version=$sdkVersion&os_version=30&session_id=${AnalyticsRequestFactory.sessionId}&os_release=11&device_type=robolectric_robolectric_robolectric&source_type=card&locale=en_US&app_name=com.stripe.android.test&analytics_ua=analytics.stripe_android-1.0&os_name=REL&network_type=2G&event=stripe_android.payment_method_creation&is_development=true")
     }
 
     @Test
@@ -379,6 +380,7 @@ class PaymentAnalyticsRequestFactoryTest {
             PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE,
             PaymentAnalyticsRequestFactory.FIELD_TOKEN_TYPE,
             AnalyticsFields.NETWORK_TYPE,
+            AnalyticsFields.LOCALE,
         )
     }
 }

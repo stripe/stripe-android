@@ -7,7 +7,6 @@ import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.BuildConfig
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.Dispatchers
 
 /**
@@ -65,11 +64,6 @@ class PaymentLauncherFactory(
             enableLogging = BuildConfig.DEBUG,
             ioContext = Dispatchers.IO,
             uiContext = Dispatchers.Main,
-            stripeRepository = StripeApiRepository(
-                context = context,
-                publishableKeyProvider = { publishableKey },
-                paymentAnalyticsRequestFactory = analyticsRequestFactory,
-            ),
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             productUsage = productUsage,
         )

@@ -281,7 +281,7 @@ private fun Title(
         ),
         defaultStyle = FinancialConnectionsTheme.typography.subtitle,
         annotationStyles = emptyMap(),
-        onClickableTextClick = {},
+        onClickableTextClick = {}
     )
 }
 

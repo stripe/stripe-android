@@ -45,6 +45,7 @@ class CustomerSessionViewModelTest {
                 setupIntentClientSecretProvider = null,
             ),
             callback = { },
+            statusBarColor = { null },
         )
 
         val component2 = viewModel.createCustomerSessionComponent(
@@ -64,6 +65,7 @@ class CustomerSessionViewModelTest {
                 setupIntentClientSecretProvider = null,
             ),
             callback = { },
+            statusBarColor = { null },
         )
 
         assertThat(component1).isNotEqualTo(component2)
@@ -79,6 +81,7 @@ class CustomerSessionViewModelTest {
             ),
             customerAdapter = customerAdapter,
             callback = callback,
+            statusBarColor = { null },
         )
 
         val component2 = viewModel.createCustomerSessionComponent(
@@ -87,6 +90,7 @@ class CustomerSessionViewModelTest {
             ),
             customerAdapter = customerAdapter,
             callback = callback,
+            statusBarColor = { null },
         )
 
         assertThat(component1).isNotEqualTo(component2)
@@ -102,12 +106,14 @@ class CustomerSessionViewModelTest {
             configuration = configuration,
             customerAdapter = customerAdapter,
             callback = callback,
+            statusBarColor = { null },
         )
 
         val component2 = viewModel.createCustomerSessionComponent(
             configuration = configuration,
             customerAdapter = customerAdapter,
             callback = callback,
+            statusBarColor = { null },
         )
 
         assertThat(component1).isEqualTo(component2)
@@ -126,6 +132,7 @@ class CustomerSessionViewModelTest {
             configuration = mock(),
             customerAdapter = mock(),
             callback = mock(),
+            statusBarColor = { null },
         )
 
         assertThat(component).isEqualTo(CustomerSessionViewModel.component)
@@ -137,6 +144,7 @@ class CustomerSessionViewModelTest {
             configuration = mock(),
             customerAdapter = mock(),
             callback = mock(),
+            statusBarColor = { null },
         )
 
         assertThat(component).isEqualTo(CustomerSessionViewModel.component)

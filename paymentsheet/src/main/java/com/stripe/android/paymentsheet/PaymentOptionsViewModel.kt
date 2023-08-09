@@ -79,7 +79,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
         amountFlow = amount,
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
-        onClick = this::onUserSelection,
+        onClick = {
+            reportConfirmButtonPressed()
+            onUserSelection()
+        },
     )
 
     private val _paymentOptionResult = MutableSharedFlow<PaymentOptionResult>(replay = 1)
@@ -188,6 +191,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onUserCancel() {
+        reportDismiss(isDecoupling)
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Canceled(
                 mostRecentError = mostRecentError,
@@ -260,6 +264,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount) {
         updateSelection(paymentSelection)
+        reportConfirmButtonPressed()
         onUserSelection()
     }
 
@@ -287,14 +292,14 @@ internal class PaymentOptionsViewModel @Inject constructor(
         )
     }
 
-    override fun transitionToFirstScreen() {
+    override fun determineInitialBackStack(): List<PaymentSheetScreen> {
         val target = if (args.state.hasPaymentOptions) {
             SelectSavedPaymentMethods
         } else {
             AddFirstPaymentMethod
         }
 
-        val initialBackStack = buildList {
+        return buildList {
             add(target)
 
             if (target is SelectSavedPaymentMethods && newPaymentSelection != null) {
@@ -304,9 +309,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 add(PaymentSheetScreen.AddAnotherPaymentMethod)
             }
         }
-
-        backStack.value = initialBackStack
-        reportNavigationEvent(initialBackStack.last())
     }
 
     internal class Factory(

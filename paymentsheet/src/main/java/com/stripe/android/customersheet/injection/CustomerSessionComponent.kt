@@ -6,6 +6,7 @@ import com.stripe.android.customersheet.CustomerSessionViewModel
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResultCallback
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -16,6 +17,7 @@ import dagger.Component
     modules = [
         CustomerSheetViewModelModule::class,
         StripeRepositoryModule::class,
+        GooglePayLauncherModule::class,
     ]
 )
 internal interface CustomerSessionComponent {
@@ -42,6 +44,9 @@ internal interface CustomerSessionComponent {
 
         @BindsInstance
         fun callback(callback: CustomerSheetResultCallback): Builder
+
+        @BindsInstance
+        fun statusBarColor(statusBarColor: () -> Int?): Builder
 
         fun build(): CustomerSessionComponent
     }

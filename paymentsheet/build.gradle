@@ -79,6 +79,7 @@ dependencies {
     testImplementation testLibs.espresso.core
 
     androidTestImplementation project(':network-testing')
+    androidTestImplementation project(':payments-core-testing')
 
     androidTestImplementation libs.places
     androidTestImplementation testLibs.androidx.composeUi
@@ -93,6 +94,9 @@ dependencies {
     androidTestImplementation (testLibs.espresso.contrib) {
         exclude group: 'org.checkerframework', module: 'checker'
     }
+    androidTestImplementation testLibs.mockito.core
+    androidTestImplementation testLibs.mockito.inline
+    androidTestImplementation testLibs.mockito.kotlin
     androidTestImplementation testLibs.truth
 
     androidTestUtil testLibs.testOrchestrator
@@ -127,7 +131,10 @@ android {
     }
 
     kotlinOptions {
-        freeCompilerArgs += ["-opt-in=kotlinx.coroutines.FlowPreview"]
+        freeCompilerArgs += [
+                "-opt-in=kotlinx.coroutines.FlowPreview",
+                "-Xcontext-receivers",
+        ]
         if (gradle.ext.isCi) {
             kotlinOptions.allWarningsAsErrors = true
         }

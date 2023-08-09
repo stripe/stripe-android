@@ -235,6 +235,7 @@ class CustomerSheet @Inject internal constructor(
                 lifecycleOwner = activity,
                 viewModelStoreOwner = activity,
                 activityResultRegistryOwner = activity,
+                statusBarColor = { activity.window.statusBarColor },
                 configuration = configuration,
                 customerAdapter = customerAdapter,
                 callback = callback,
@@ -260,6 +261,7 @@ class CustomerSheet @Inject internal constructor(
                 viewModelStoreOwner = fragment,
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
+                statusBarColor = { fragment.activity?.window?.statusBarColor },
                 configuration = configuration,
                 customerAdapter = customerAdapter,
                 callback = callback,
@@ -270,6 +272,7 @@ class CustomerSheet @Inject internal constructor(
             lifecycleOwner: LifecycleOwner,
             viewModelStoreOwner: ViewModelStoreOwner,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
+            statusBarColor: () -> Int?,
             configuration: Configuration,
             customerAdapter: CustomerAdapter,
             callback: CustomerSheetResultCallback,
@@ -281,6 +284,7 @@ class CustomerSheet @Inject internal constructor(
                 configuration = configuration,
                 customerAdapter = customerAdapter,
                 callback = callback,
+                statusBarColor = statusBarColor,
             )
 
             val customerSheetComponent: CustomerSheetComponent =
