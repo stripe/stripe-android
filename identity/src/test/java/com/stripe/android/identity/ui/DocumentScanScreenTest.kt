@@ -123,6 +123,7 @@ class DocumentScanScreenTest {
             displayState = mock<IdentityScanState.Finished>(),
             targetScanType = IdentityScanState.ScanType.ID_FRONT
         ) {
+            verify(mockIdentityScanViewModel).stopScan(any())
             onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
             onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_scanned))
             onNodeWithTag(CHECK_MARK_TAG).assertExists()

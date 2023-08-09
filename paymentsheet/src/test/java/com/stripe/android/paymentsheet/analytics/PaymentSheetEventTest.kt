@@ -145,6 +145,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "selected_lpm" to "card",
             )
         )
     }
@@ -172,6 +173,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "selected_lpm" to "card",
             )
         )
     }
@@ -199,6 +201,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "selected_lpm" to "google_pay",
             )
         )
     }
@@ -226,6 +229,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "selected_lpm" to "link",
             )
         )
     }
@@ -290,6 +294,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "selected_lpm" to "card",
             )
         )
     }
@@ -317,6 +322,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "selected_lpm" to "card",
             )
         )
     }
@@ -344,6 +350,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "selected_lpm" to "google_pay",
             )
         )
     }
@@ -371,6 +378,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "selected_lpm" to "link",
             )
         )
     }

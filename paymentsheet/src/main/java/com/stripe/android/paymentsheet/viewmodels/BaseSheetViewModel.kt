@@ -274,6 +274,13 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
+    protected fun reportConfirmButtonPressed() {
+        eventReporter.onPressConfirmButton(
+            currency = stripeIntent.value?.currency,
+            isDecoupling = stripeIntent.value?.clientSecret == null,
+        )
+    }
+
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
         _stripeIntent.value = stripeIntent
         supportedPaymentMethods = getPMsToAdd(stripeIntent, config, lpmRepository)
@@ -288,6 +295,14 @@ internal abstract class BaseSheetViewModel(
 
     protected fun reportDismiss(isDecoupling: Boolean) {
         eventReporter.onDismiss(isDecoupling = isDecoupling)
+    }
+
+    fun reportPaymentMethodTypeSelected(code: PaymentMethodCode) {
+        eventReporter.onSelectPaymentMethod(
+            code = code,
+            isDecoupling = stripeIntent.value?.clientSecret == null,
+            currency = stripeIntent.value?.currency,
+        )
     }
 
     abstract fun clearErrorMessages()

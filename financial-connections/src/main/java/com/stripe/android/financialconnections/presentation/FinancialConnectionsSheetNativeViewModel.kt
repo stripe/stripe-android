@@ -133,11 +133,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 copy(webAuthFlow = WebAuthFlowState.Success(receivedUrl))
             }
 
-            STATUS_CLOSE,
-            STATUS_CANCEL -> setState {
-                copy(webAuthFlow = WebAuthFlowState.Canceled(receivedUrl))
-            }
-
             STATUS_FAILURE -> {
                 val reason = uriUtils.getQueryParameter(receivedUrl, PARAM_ERROR_REASON)
                 setState {
@@ -150,16 +145,10 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     )
                 }
             }
-            // received unknown / non-handleable [PARAM_STATUS]
-            else -> setState {
-                copy(
-                    webAuthFlow = WebAuthFlowState.Failed(
-                        url = receivedUrl,
-                        message = "Received return_url with unknown status: $receivedUrl",
-                        reason = null
-                    )
 
-                )
+            // received cancel / unknown / non-handleable [PARAM_STATUS]
+            else -> setState {
+                copy(webAuthFlow = WebAuthFlowState.Canceled(receivedUrl))
             }
         }
     }
@@ -331,8 +320,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         private const val PARAM_CODE = "code"
         private const val PARAM_ERROR_REASON = "error_reason"
         private const val STATUS_SUCCESS = "success"
-        private const val STATUS_CANCEL = "cancel"
-        private const val STATUS_CLOSE = "close"
         private const val STATUS_FAILURE = "failure"
 
         override fun create(

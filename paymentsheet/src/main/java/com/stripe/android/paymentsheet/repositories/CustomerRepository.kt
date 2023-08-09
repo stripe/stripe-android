@@ -18,12 +18,14 @@ internal interface CustomerRepository {
 
     /**
      * Retrieve a Customer's payment methods of all types requested.
-     * Silently handle failures by returning an empty list for the payment method types that failed.
+     * @param silentlyFail Silently handle failures by returning an empty list for the payment method
+     * types that failed.
      */
     suspend fun getPaymentMethods(
         customerConfig: PaymentSheet.CustomerConfiguration,
-        types: List<PaymentMethod.Type>
-    ): List<PaymentMethod>
+        types: List<PaymentMethod.Type>,
+        silentlyFail: Boolean,
+    ): Result<List<PaymentMethod>>
 
     /**
      * Detach a payment method from the Customer and return the modified [PaymentMethod].
