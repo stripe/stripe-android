@@ -97,7 +97,7 @@ internal class CustomTabsManagerImpl @Inject constructor(
     /**
      * Creates or retrieves an exiting CustomTabsSession.
      *
-     * @return a CustomTabsSession.
+     * @return a CustomTabsSession, or null if a connection to the service could not be established.
      */
     private fun getSession(): CustomTabsSession? {
         when {
