@@ -1,11 +1,17 @@
 package com.stripe.android.customersheet
 
 import android.app.Application
+import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -13,11 +19,13 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOf
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import java.util.Stack
 import javax.inject.Provider
 
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -38,9 +46,7 @@ object CustomerSheetTestHelper {
     internal fun createViewModel(
         lpmRepository: LpmRepository = this.lpmRepository,
         isLiveMode: Boolean = false,
-        backstack: Stack<CustomerSheetViewState> = Stack<CustomerSheetViewState>().apply {
-            push(CustomerSheetViewState.Loading(isLiveMode))
-        },
+        initialBackStack: List<CustomerSheetViewState> = listOf(CustomerSheetViewState.Loading(isLiveMode)),
         savedPaymentSelection: PaymentSelection? = null,
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         stripeRepository: StripeRepository = FakeStripeRepository(),
@@ -49,6 +55,7 @@ object CustomerSheetTestHelper {
             stripeAccountId = null,
         ),
         configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(),
+        isGooglePayAvailable: Boolean = true,
     ): CustomerSheetViewModel {
         val formViewModel = FormViewModel(
             context = application,
@@ -81,7 +88,7 @@ object CustomerSheetTestHelper {
 
         return CustomerSheetViewModel(
             application = application,
-            backstack = backstack,
+            initialBackStack = initialBackStack,
             savedPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
             formViewModelSubcomponentBuilderProvider = mockFormSubComponentBuilderProvider,
@@ -92,6 +99,27 @@ object CustomerSheetTestHelper {
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
-        )
+            intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+                enqueueCompleteStep(true)
+            },
+            paymentLauncherFactory = object : StripePaymentLauncherAssistedFactory {
+                override fun create(
+                    publishableKey: () -> String,
+                    stripeAccountId: () -> String?,
+                    statusBarColor: Int?,
+                    hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
+                ): StripePaymentLauncher {
+                    return mock()
+                }
+            },
+            googlePayRepositoryFactory = {
+                GooglePayRepository {
+                    flowOf(isGooglePayAvailable)
+                }
+            },
+            statusBarColor = { null },
+        ).apply {
+            registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
+        }
     }
 }

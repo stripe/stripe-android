@@ -3,6 +3,8 @@ package com.stripe.android.customersheet.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
@@ -82,7 +84,7 @@ internal fun SelectPaymentMethod(
     ) {
         H4Text(
             // TODO translate string
-            text = viewState.title ?: "Manage your payment method",
+            text = viewState.title ?: "Manage your payment methods",
             modifier = Modifier
                 .padding(bottom = 20.dp)
                 .padding(horizontal = horizontalPadding)
@@ -142,7 +144,9 @@ internal fun AddCard(
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     Column(
-        modifier = modifier.padding(horizontal = horizontalPadding)
+        modifier = modifier
+            .padding(horizontal = horizontalPadding)
+            .verticalScroll(rememberScrollState())
     ) {
         H4Text(
             // TODO (jameswoo) translate
@@ -156,14 +160,13 @@ internal fun AddCard(
             enabled = viewState.enabled,
             elements = viewState.formViewData.elements,
             lastTextFieldIdentifier = viewState.formViewData.lastTextFieldIdentifier,
-            modifier = Modifier.padding(bottom = 20.dp),
         )
 
         AnimatedVisibility(visible = viewState.errorMessage != null) {
             viewState.errorMessage?.let { error ->
                 ErrorMessage(
                     error = error,
-                    modifier = Modifier.padding(vertical = 2.dp),
+                    modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
         }

@@ -6,13 +6,16 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 
 internal class FakeElementsSessionRepository(
-    private val stripeIntent: StripeIntent?,
+    private val stripeIntent: StripeIntent,
+    private val error: Throwable?,
 ) : ElementsSessionRepository {
 
     override suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
     ): Result<ElementsSession> {
-        return if (stripeIntent != null) {
+        return if (error != null) {
+            Result.failure(error)
+        } else {
             Result.success(
                 ElementsSession(
                     linkSettings = null,
@@ -21,8 +24,6 @@ internal class FakeElementsSessionRepository(
                     merchantCountry = null,
                 )
             )
-        } else {
-            Result.failure(RuntimeException())
         }
     }
 }

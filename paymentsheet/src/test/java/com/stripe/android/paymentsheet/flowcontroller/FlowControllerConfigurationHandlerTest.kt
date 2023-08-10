@@ -18,9 +18,9 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
-import com.stripe.android.utils.DelayingPaymentSheetLoader
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
+import com.stripe.android.utils.RelayingPaymentSheetLoader
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -333,7 +333,7 @@ class FlowControllerConfigurationHandlerTest {
 
     @Test
     fun `Cancels current configure job if new call to configure comes in`() = runTest {
-        val loader = DelayingPaymentSheetLoader()
+        val loader = RelayingPaymentSheetLoader()
         val configurationHandler = createConfigurationHandler(paymentSheetLoader = loader)
 
         val amounts = (0 until 10).map { index ->
@@ -370,7 +370,7 @@ class FlowControllerConfigurationHandlerTest {
 
     @Test
     fun `Cancels current configure job if coroutine scope is canceled`() = runTest {
-        val loader = DelayingPaymentSheetLoader()
+        val loader = RelayingPaymentSheetLoader()
         val configurationHandler = createConfigurationHandler(paymentSheetLoader = loader)
 
         val resultTurbine = Turbine<Unit>()

@@ -36,6 +36,7 @@ internal interface EventReporter {
      */
     fun onLoadFailed(
         isDecoupling: Boolean,
+        error: Throwable,
     )
 
     /**
@@ -78,6 +79,14 @@ internal interface EventReporter {
      */
     fun onSelectPaymentOption(
         paymentSelection: PaymentSelection,
+        currency: String?,
+        isDecoupling: Boolean,
+    )
+
+    /**
+     * The customer has pressed the confirm button.
+     */
+    fun onPressConfirmButton(
         currency: String?,
         isDecoupling: Boolean,
     )

@@ -26,7 +26,7 @@
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`()</ID>
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
-    <ID>LongMethod:PaymentSheetLoader.kt$DefaultPaymentSheetLoader$private suspend fun create( elementsSession: ElementsSession, config: PaymentSheet.Configuration?, isGooglePayReady: Boolean, ): PaymentSheetLoader.Result</ID>
+    <ID>LongMethod:PaymentSheetLoader.kt$DefaultPaymentSheetLoader$private suspend fun create( elementsSession: ElementsSession, config: PaymentSheet.Configuration?, isGooglePayReady: Boolean, ): PaymentSheetState.Full</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable internal fun USBankAccountForm( formArgs: FormArguments, sheetViewModel: BaseSheetViewModel, isProcessing: Boolean, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable private fun AccountDetailsForm( formArgs: FormArguments, isProcessing: Boolean, bankName: String?, last4: String?, saveForFutureUseElement: SaveForFutureUseElement, onRemoveAccount: () -> Unit, )</ID>
     <ID>MagicNumber:AutocompleteScreen.kt$0.07f</ID>
@@ -46,6 +46,7 @@
     <ID>MagicNumber:StateFlows.kt$5</ID>
     <ID>MagicNumber:USBankAccountForm.kt$0.5f</ID>
     <ID>MatchingDeclarationName:BottomSheet.kt$BottomSheetState</ID>
+    <ID>MaxLineLength:CustomerRepositoryTest.kt$CustomerRepositoryTest$fun</ID>
     <ID>MaxLineLength:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest$fun</ID>
     <ID>MaxLineLength:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest$publishableKey = "pk_test_51HvTI7Lu5o3livep6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"</ID>
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$fun</ID>
@@ -72,7 +73,6 @@
     <ID>NestedBlockDepth:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$private fun generatePaymentIntentScenarios(): List&lt;PaymentIntentTestInput></ID>
     <ID>ReturnCount:AddressUtils.kt$internal fun CharSequence.levenshtein(other: CharSequence): Int</ID>
     <ID>ThrowsCount:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Configuration.validate()</ID>
-    <ID>TooManyFunctions:CustomerSheetViewModelModule.kt$CustomerSheetViewModelModule</ID>
     <ID>TooManyFunctions:DefaultEventReporter.kt$DefaultEventReporter : EventReporter</ID>
     <ID>TooManyFunctions:DefaultFlowController.kt$DefaultFlowController : FlowController</ID>
     <ID>TooManyFunctions:EventReporter.kt$EventReporter</ID>

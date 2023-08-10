@@ -89,7 +89,7 @@ internal class CustomerSheetActivityTest {
                 title = null
             ),
         ) {
-            page.waitForText("Manage your payment method")
+            page.waitForText("Manage your payment methods")
         }
     }
 
@@ -179,7 +179,7 @@ internal class CustomerSheetActivityTest {
         savedPaymentSelection: PaymentSelection?,
     ): InjectableActivityScenario<CustomerSheetActivity> {
         val viewModel = createViewModel(
-            backstack = Stack<CustomerSheetViewState>().apply {
+            initialBackStack = Stack<CustomerSheetViewState>().apply {
                 push(viewState)
             },
             savedPaymentSelection = savedPaymentSelection,

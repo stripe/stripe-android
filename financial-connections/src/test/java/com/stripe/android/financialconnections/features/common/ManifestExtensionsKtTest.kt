@@ -44,4 +44,36 @@ class ManifestExtensionsKtTest {
         )
         assertFalse(syncObj.showManualEntryInErrors())
     }
+
+    @Test
+    fun `enableRetrieveAuthSession true when disable feature flag not present`() {
+        val syncObj = syncResponse(
+            sessionManifest().copy(features = emptyMap()),
+        )
+        assertTrue(syncObj.manifest.enableRetrieveAuthSession())
+    }
+
+    @Test
+    fun `enableRetrieveAuthSession true when disable feature flag is false`() {
+        val syncObj = syncResponse(
+            sessionManifest().copy(
+                features = mapOf(
+                    "bank_connections_disable_defensive_auth_session_retrieval_on_complete" to false
+                )
+            ),
+        )
+        assertTrue(syncObj.manifest.enableRetrieveAuthSession())
+    }
+
+    @Test
+    fun `enableRetrieveAuthSession false when disable feature flag is true`() {
+        val syncObj = syncResponse(
+            sessionManifest().copy(
+                features = mapOf(
+                    "bank_connections_disable_defensive_auth_session_retrieval_on_complete" to true
+                )
+            ),
+        )
+        assertFalse(syncObj.manifest.enableRetrieveAuthSession())
+    }
 }

@@ -36,11 +36,13 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class LoadFailed(
         duration: Duration?,
+        error: String,
         override val isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_failed"
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_DURATION to duration?.asSeconds,
+            FIELD_ERROR_MESSAGE to error,
         )
     }
 
@@ -204,14 +206,24 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class PressConfirmButton(
+        currency: String?,
+        override val isDecoupled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_confirm_button_tapped"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_CURRENCY to currency,
+        )
+    }
+
     class Payment(
         mode: EventReporter.Mode,
         result: Result,
         duration: Duration?,
-        paymentSelection: PaymentSelection?,
+        private val paymentSelection: PaymentSelection?,
         currency: String?,
         override val isDecoupled: Boolean,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        private val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) : PaymentSheetEvent() {
 
         override val eventName: String =
@@ -221,11 +233,27 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             mapOf(
                 FIELD_DURATION to duration?.asSeconds,
                 FIELD_CURRENCY to currency,
-            ).plus(
-                deferredIntentConfirmationType?.let {
-                    mapOf(FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE to it.value)
-                }.orEmpty()
-            )
+            ) + buildDeferredIntentConfirmationType() + selectedPaymentMethodType()
+
+        private fun buildDeferredIntentConfirmationType(): Map<String, String> {
+            return deferredIntentConfirmationType?.let {
+                mapOf(FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE to it.value)
+            }.orEmpty()
+        }
+
+        private fun selectedPaymentMethodType(): Map<String, String> {
+            val code = when (paymentSelection) {
+                is PaymentSelection.GooglePay -> "google_pay"
+                is PaymentSelection.Link -> "link"
+                is PaymentSelection.New -> paymentSelection.paymentMethodCreateParams.typeCode
+                is PaymentSelection.Saved -> paymentSelection.paymentMethod.type?.code
+                null -> null
+            }
+
+            return code?.let {
+                mapOf(FIELD_SELECTED_LPM to it)
+            }.orEmpty()
+        }
 
         enum class Result(private val code: String) {
             Success("success"),
@@ -306,6 +334,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_LINK_ENABLED = "link_enabled"
         const val FIELD_CURRENCY = "currency"
         const val FIELD_SELECTED_LPM = "selected_lpm"
+        const val FIELD_ERROR_MESSAGE = "error_message"
     }
 }
 
