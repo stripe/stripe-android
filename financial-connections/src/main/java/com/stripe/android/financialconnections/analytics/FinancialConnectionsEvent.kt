@@ -277,6 +277,14 @@ internal sealed class FinancialConnectionsEvent(
         includePrefix = false,
     )
 
+    class AuthSessionCreated(browser: String?, authSessionId: String) : FinancialConnectionsEvent(
+        name = "auth_session.created",
+        params = mapOf(
+            "browser" to browser,
+            "auth_session_id" to authSessionId,
+        ).filterNotNullValues(),
+    )
+
     class AuthSessionUrlReceived(url: String, status: String, authSessionId: String?) :
         FinancialConnectionsEvent(
             name = "auth_session.url_received",
@@ -287,14 +295,13 @@ internal sealed class FinancialConnectionsEvent(
             ).filterNotNullValues(),
         )
 
-    class AuthSessionRetrieved(nextPane: Pane, authSessionId: String) :
-        FinancialConnectionsEvent(
-            name = "auth_session.retrieved",
-            params = mapOf(
-                "next_pane" to nextPane.value,
-                "auth_session_id" to authSessionId,
-            ).filterNotNullValues(),
-        )
+    class AuthSessionRetrieved(nextPane: Pane, authSessionId: String) : FinancialConnectionsEvent(
+        name = "auth_session.retrieved",
+        params = mapOf(
+            "next_pane" to nextPane.value,
+            "auth_session_id" to authSessionId,
+        ).filterNotNullValues(),
+    )
 
     object ConsentAgree : FinancialConnectionsEvent(
         name = "click.agree",
