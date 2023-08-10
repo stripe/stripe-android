@@ -156,7 +156,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     @Throws(APIException::class)
     override suspend fun attachPaymentMethod(
         customerId: String,
-        publishableKey: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
@@ -166,7 +165,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
 
     @Throws(APIException::class)
     override suspend fun detachPaymentMethod(
-        publishableKey: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
@@ -177,7 +175,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     @Throws(APIException::class)
     override suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
-        publishableKey: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
     ): Result<List<PaymentMethod>> {
