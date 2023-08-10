@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import com.stripe.android.utils.rememberActivityOrNull
+import com.stripe.android.uicore.compose.rememberActivityOrNull
 
 /**
  * Creates a [CustomerSheet] that is remembered across compositions.
