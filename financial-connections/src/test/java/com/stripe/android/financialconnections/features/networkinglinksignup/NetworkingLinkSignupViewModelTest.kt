@@ -53,7 +53,7 @@ class NetworkingLinkSignupViewModelTest {
         navigationManager = navigationManager,
         getCachedAccounts = getAuthorizationSessionAccounts,
         lookupAccount = lookupAccount,
-        uriUtils = UriUtils(Logger.noop()),
+        uriUtils = UriUtils(Logger.noop(), eventTracker),
         sync = sync,
         saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
         saveAccountToLink = saveAccountToLink

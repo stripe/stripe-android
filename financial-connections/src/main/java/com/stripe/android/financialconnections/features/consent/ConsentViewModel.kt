@@ -84,39 +84,39 @@ internal class ConsentViewModel @Inject constructor(
             uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
                 eventTracker.track(Click(eventName, pane = Pane.CONSENT))
             }
-        }
-        val date = Date()
-        if (URLUtil.isNetworkUrl(uri)) {
-            setState { copy(viewEffect = OpenUrl(uri, date.time)) }
-        } else {
-            val managedUri = ConsentClickableText.values()
-                .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
-            when (managedUri) {
-                ConsentClickableText.DATA -> {
-                    setState {
-                        copy(
-                            currentBottomSheet = BottomSheetContent.DATA,
-                            viewEffect = ViewEffect.OpenBottomSheet(date.time)
+            val date = Date()
+            if (URLUtil.isNetworkUrl(uri)) {
+                setState { copy(viewEffect = OpenUrl(uri, date.time)) }
+            } else {
+                val managedUri = ConsentClickableText.values()
+                    .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
+                when (managedUri) {
+                    ConsentClickableText.DATA -> {
+                        setState {
+                            copy(
+                                currentBottomSheet = BottomSheetContent.DATA,
+                                viewEffect = ViewEffect.OpenBottomSheet(date.time)
+                            )
+                        }
+                    }
+
+                    ConsentClickableText.MANUAL_ENTRY -> {
+                        navigationManager.navigate(
+                            NavigateToRoute(NavigationDirections.manualEntry)
                         )
                     }
-                }
 
-                ConsentClickableText.MANUAL_ENTRY -> {
-                    navigationManager.navigate(
-                        NavigateToRoute(NavigationDirections.manualEntry)
-                    )
-                }
-
-                ConsentClickableText.LEGAL_DETAILS -> {
-                    setState {
-                        copy(
-                            currentBottomSheet = BottomSheetContent.LEGAL,
-                            viewEffect = ViewEffect.OpenBottomSheet(date.time)
-                        )
+                    ConsentClickableText.LEGAL_DETAILS -> {
+                        setState {
+                            copy(
+                                currentBottomSheet = BottomSheetContent.LEGAL,
+                                viewEffect = ViewEffect.OpenBottomSheet(date.time)
+                            )
+                        }
                     }
-                }
 
-                null -> logger.error("Unrecognized clickable text: $uri")
+                    null -> logger.error("Unrecognized clickable text: $uri")
+                }
             }
         }
     }
