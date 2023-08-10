@@ -112,15 +112,19 @@ internal class CustomTabsManagerImpl @Inject constructor(
         uri: Uri,
         fallback: (Uri) -> Unit
     ) {
-        val packageName: String? = getCustomTabPackage(activity)
-        val customTabsIntent = buildCustomTabsIntent()
+        runCatching {
+            val packageName: String? = getCustomTabPackage(activity)
+            val customTabsIntent = buildCustomTabsIntent()
 
-        // If we cant find a package name no browser that supports Custom Tabs is installed.
-        if (packageName == null) {
+            // If we cant find a package name no browser that supports Custom Tabs is installed.
+            if (packageName == null) {
+                fallback.invoke(uri)
+            } else {
+                customTabsIntent.intent.setPackage(packageName)
+                customTabsIntent.launchUrl(activity, uri)
+            }
+        }.onFailure {
             fallback.invoke(uri)
-        } else {
-            customTabsIntent.intent.setPackage(packageName)
-            customTabsIntent.launchUrl(activity, uri)
         }
     }
 
