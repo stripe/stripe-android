@@ -55,13 +55,13 @@ internal interface FinancialConnectionsSheetNativeModule {
 
     @Singleton
     @Binds
-    fun providesNavigationManager(
+    fun bindsNavigationManager(
         impl: NavigationManagerImpl
     ): NavigationManager
 
     @Singleton
     @Binds
-    fun providesCustomTabsManager(
+    fun bindsCustomTabsManager(
         impl: CustomTabsManagerImpl,
     ): CustomTabsManager
 
