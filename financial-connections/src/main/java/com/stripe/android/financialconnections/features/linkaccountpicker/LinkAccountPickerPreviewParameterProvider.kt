@@ -32,6 +32,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 accessibleData = accessibleCallout(),
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
+                nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
             )
         ),
     )
@@ -46,6 +47,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 accessibleData = accessibleCallout(),
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
+                nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
             )
         ),
     )
@@ -63,6 +65,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             _allowSelection = true,
             allowSelectionMessage = "",
             subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+            nextPaneOnSelection = Pane.BANK_AUTH_REPAIR,
             supportedPaymentMethodTypes = emptyList()
         ) to NetworkedAccount(
             id = "id0",
@@ -71,7 +74,6 @@ internal class LinkAccountPickerPreviewParameterProvider :
             icon = Image(
                 default = "https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--warning-orange-3x.png"
             ),
-            nextPaneOnSelection = Pane.BANK_AUTH_REPAIR,
             selectionCta = "Repair and connect account"
         ),
         PartnerAccount(
@@ -172,7 +174,6 @@ internal class LinkAccountPickerPreviewParameterProvider :
             icon = Image(
                 default = "https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--add-purple-3x.png"
             ),
-            nextPane = Pane.INSTITUTION_PICKER
         )
     )
 }

@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
@@ -16,7 +17,7 @@ internal data class PartnerAccountsList(
 
     @SerialName(value = "data") @Required val data: List<PartnerAccount>,
 
-    @SerialName(value = "next_pane") @Required val nextPane: FinancialConnectionsSessionManifest.Pane,
+    @SerialName(value = "next_pane") @Required val nextPane: Pane,
 
     @SerialName(value = "skip_account_selection") val skipAccountSelection: Boolean? = null,
 )
@@ -74,6 +75,8 @@ internal data class PartnerAccount(
     @SerialName(value = "allow_selection") private val _allowSelection: Boolean? = null,
 
     @SerialName(value = "allow_selection_message") val allowSelectionMessage: String? = null,
+
+    @SerialName(value = "next_pane_on_selection") val nextPaneOnSelection: Pane? = null,
 
     @SerialName(value = "institution_url") val institutionUrl: String? = null,
 

@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.serializer.EntrySerializer
 import com.stripe.android.financialconnections.model.serializer.MarkdownToHtmlSerializer
 import kotlinx.parcelize.Parcelize
@@ -227,7 +226,6 @@ internal data class NetworkedAccount(
     @SerialName("selection_cta") val selectionCta: String? = null,
     @SerialName("icon") val icon: Image? = null,
     @SerialName("selection_cta_icon") val selectionCtaIcon: Image? = null,
-    @SerialName("next_pane_on_selection") val nextPaneOnSelection: Pane? = null
 ) : Parcelable
 
 @Serializable
@@ -235,5 +233,4 @@ internal data class NetworkedAccount(
 internal data class AddNewAccount(
     @SerialName("body") val body: String? = null,
     @SerialName("icon") val icon: Image? = null,
-    @SerialName("next_pane") val nextPane: Pane? = null
 ) : Parcelable

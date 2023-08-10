@@ -72,6 +72,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
                 accounts = accounts,
+                nextPaneOnNewAccount = accountsResponse.nextPaneOnNewAccount,
                 addNewAccount = requireNotNull(display.addNewAccount),
                 title = display.title,
                 defaultCta = display.defaultCta,
@@ -107,16 +108,16 @@ internal class LinkAccountPickerViewModel @Inject constructor(
 
     fun onNewBankAccountClick() = viewModelScope.launch {
         eventTracker.track(Click("click.new_account", PANE))
-        val nextPane = awaitState().payload()?.addNewAccount?.nextPane ?: Pane.INSTITUTION_PICKER
+        val nextPane = awaitState().payload()?.nextPaneOnNewAccount ?: Pane.INSTITUTION_PICKER
         navigationManager.navigate(NavigateToRoute(nextPane.toNavigationCommand()))
     }
 
     fun onSelectAccountClick() = suspend {
         val state = awaitState()
         val payload = requireNotNull(state.payload())
-        val (account, networkedAccount) =
+        val (account, _) =
             requireNotNull(payload.accounts.first { it.first.id == state.selectedAccountId })
-        val nextPane = networkedAccount.nextPaneOnSelection
+        val nextPane = account.nextPaneOnSelection
         // Caches the selected account.
         updateCachedAccounts { listOf(account) }
         when (nextPane) {
@@ -184,7 +185,8 @@ internal data class LinkAccountPickerState(
         val addNewAccount: AddNewAccount,
         val accessibleData: AccessibleDataCalloutModel,
         val consumerSessionClientSecret: String,
-        val defaultCta: String
+        val defaultCta: String,
+        val nextPaneOnNewAccount: Pane?
     )
 
     val cta: String?

@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.model
 
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -8,5 +9,7 @@ import kotlinx.serialization.Serializable
 internal data class NetworkedAccountsList(
     @SerialName(value = "data") @Required val data: List<PartnerAccount>,
 
-    @SerialName(value = "display") val display: Display? = null
+    @SerialName(value = "display") val display: Display? = null,
+
+    @SerialName(value = "next_pane_on_new_account") val nextPaneOnNewAccount: Pane? = null
 )
