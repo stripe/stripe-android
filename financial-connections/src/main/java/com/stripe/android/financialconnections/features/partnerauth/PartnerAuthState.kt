@@ -42,7 +42,8 @@ internal data class PartnerAuthState(
 
     sealed interface ViewEffect {
         data class OpenPartnerAuth(
-            val url: String
+            val url: String,
+            val useCustomTabsService: Boolean
         ) : ViewEffect
 
         data class OpenUrl(

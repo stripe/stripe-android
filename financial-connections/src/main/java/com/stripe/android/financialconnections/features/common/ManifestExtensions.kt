@@ -29,6 +29,10 @@ internal fun FinancialConnectionsSessionManifest.enableRetrieveAuthSession(): Bo
     features
         ?.get("bank_connections_disable_defensive_auth_session_retrieval_on_complete") != true
 
+internal fun FinancialConnectionsSessionManifest.enableCustomTabsService(): Boolean =
+    features
+        ?.get("bank_connections_android_disable_custom_tabs_service") != true
+
 internal fun SynchronizeSessionResponse.showManualEntryInErrors(): Boolean {
     return manifest.allowManualEntry && visual.reducedManualEntryProminenceInErrors.not()
 }

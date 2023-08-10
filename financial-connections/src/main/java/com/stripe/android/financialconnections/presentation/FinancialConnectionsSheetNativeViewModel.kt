@@ -161,11 +161,11 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    fun openPartnerAuthFlowInBrowser(url: String) {
+    fun openPartnerAuthFlowInBrowser(url: String, useCustomTabsService: Boolean) {
         setState {
             copy(
                 webAuthFlow = WebAuthFlowState.InProgress,
-                viewEffect = OpenUrl(url)
+                viewEffect = OpenUrl(url, useCustomTabsService)
             )
         }
     }
@@ -427,7 +427,8 @@ internal sealed interface FinancialConnectionsSheetNativeViewEffect {
      * Open the Web AuthFlow.
      */
     data class OpenUrl(
-        val url: String
+        val url: String,
+        val useCustomTabsService: Boolean
     ) : FinancialConnectionsSheetNativeViewEffect
 
     /**

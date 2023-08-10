@@ -128,15 +128,13 @@ internal class CustomTabsManagerImpl @Inject constructor(
         .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
         .build()
 
-    override fun mayLaunchUrl(url: String): Boolean {
-        return client
-            ?.let { getSession() }
-            ?.mayLaunchUrl(Uri.parse(url), null, null)?.also {
-                log("URL prefetch: $url, Result: $it")
-            } ?: run {
-            log("URL not prefetched, ${if (client == null) "null client" else "null session"}")
-            false
-        }
+    override fun mayLaunchUrl(url: String): Boolean = client
+        ?.let { getSession() }
+        ?.mayLaunchUrl(Uri.parse(url), null, null)?.also {
+            log("URL prefetch: $url, Result: $it")
+        } ?: run {
+        log("URL not prefetched, ${if (client == null) "null client" else "null session"}")
+        false
     }
 
     private fun bindCustomTabService(context: Context) {

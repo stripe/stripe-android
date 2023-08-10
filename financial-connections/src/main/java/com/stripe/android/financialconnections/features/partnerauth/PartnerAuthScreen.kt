@@ -107,7 +107,10 @@ internal fun PartnerAuthScreen() {
                 is OpenBottomSheet -> bottomSheetState.show()
                 is OpenUrl -> uriHandler.openUri(viewEffect.url)
                 is OpenPartnerAuth -> {
-                    parentViewModel.openPartnerAuthFlowInBrowser(viewEffect.url)
+                    parentViewModel.openPartnerAuthFlowInBrowser(
+                        url = viewEffect.url,
+                        useCustomTabsService = viewEffect.useCustomTabsService
+                    )
                     viewModel.onViewEffectLaunched()
                 }
             }
