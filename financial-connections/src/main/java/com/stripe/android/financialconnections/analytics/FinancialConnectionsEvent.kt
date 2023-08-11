@@ -277,7 +277,10 @@ internal sealed class FinancialConnectionsEvent(
         includePrefix = false,
     )
 
-    class AuthSessionCreated(browser: String?, authSessionId: String) : FinancialConnectionsEvent(
+    class AuthSessionCreated(
+        browser: String?,
+        authSessionId: String
+    ) : FinancialConnectionsEvent(
         name = "auth_session.created",
         params = mapOf(
             "browser" to browser,

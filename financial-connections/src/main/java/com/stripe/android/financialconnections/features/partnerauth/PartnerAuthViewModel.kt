@@ -111,11 +111,12 @@ internal class PartnerAuthViewModel @Inject constructor(
             eventTracker.track(
                 AuthSessionCreated(
                     authSessionId = authSession.id,
-                    browser = BrowserUtils
-                        .getBrowserPackage(context, requireNotNull(authSession.browserReadyUrl()).toUri()),
+                    browser = BrowserUtils.getBrowserPackage(
+                        context = context,
+                        uri = requireNotNull(authSession.browserReadyUrl()).toUri()
+                    ),
                 )
             )
-            logger.debug("Created auth session ${authSession.id}")
             Payload(
                 authSession = authSession,
                 institution = requireNotNull(manifest.activeInstitution),
@@ -190,9 +191,12 @@ internal class PartnerAuthViewModel @Inject constructor(
             }
     }
 
-    private fun FinancialConnectionsAuthorizationSession.browserReadyUrl(): String? {
-        return this?.url?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
-    }
+    /**
+     * Auth Session url after clearing the deep link prefix (required for non-native app2app flows).
+     */
+    private fun FinancialConnectionsAuthorizationSession.browserReadyUrl(): String? =
+        url?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
+
     fun onSelectAnotherBank() {
         navigationManager.navigate(
             NavigateToRoute(
