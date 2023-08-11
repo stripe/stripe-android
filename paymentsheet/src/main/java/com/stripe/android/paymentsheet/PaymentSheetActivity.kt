@@ -3,25 +3,24 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.ViewGroup
+import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.common.ui.BottomSheet
+import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
-import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
-import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.uicore.StripeTheme
-import kotlinx.coroutines.flow.filterNotNull
 import java.security.InvalidParameterException
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
-    @VisibleForTesting
-    internal val viewBinding by lazy {
-        StripeActivityPaymentSheetBinding.inflate(layoutInflater)
-    }
 
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory = PaymentSheetViewModel.Factory {
@@ -34,9 +33,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         PaymentSheetContractV2.Args.fromIntent(intent)
     }
 
-    override val rootView: ViewGroup by lazy { viewBinding.root }
-    override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
-
+    @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         val validationResult = initializeArgs()
         super.onCreate(savedInstanceState)
@@ -60,16 +57,30 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             )
         )
 
-        setContentView(viewBinding.root)
-
-        viewBinding.content.setContent {
+        setContent {
             StripeTheme {
-                PaymentSheetScreen(viewModel)
-            }
-        }
+                val isProcessing by viewModel.processing.collectAsState()
+                val result by viewModel.paymentSheetResult.collectAsState(initial = null)
 
-        viewModel.paymentSheetResult.filterNotNull().launchAndCollectIn(this) {
-            closeSheet(it)
+                val bottomSheetState = rememberBottomSheetState(
+                    confirmValueChange = { !isProcessing },
+                )
+
+                result?.let { sheetResult ->
+                    LaunchedEffect(sheetResult) {
+                        setActivityResult(sheetResult)
+                        bottomSheetState.hide()
+                        finish()
+                    }
+                }
+
+                BottomSheet(
+                    state = bottomSheetState,
+                    onDismissed = viewModel::onUserCancel,
+                ) {
+                    PaymentSheetScreen(viewModel)
+                }
+            }
         }
     }
 
@@ -108,9 +119,5 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     private fun defaultInitializationError(): IllegalArgumentException {
         return IllegalArgumentException("PaymentSheet started without arguments.")
-    }
-
-    internal companion object {
-        internal const val EXTRA_STARTER_ARGS = BaseSheetActivity.EXTRA_STARTER_ARGS
     }
 }
