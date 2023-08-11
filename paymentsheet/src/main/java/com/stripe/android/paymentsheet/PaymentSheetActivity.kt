@@ -18,6 +18,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.uicore.StripeTheme
+import kotlinx.coroutines.flow.filterNotNull
 import java.security.InvalidParameterException
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
@@ -60,14 +61,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setContent {
             StripeTheme {
                 val isProcessing by viewModel.processing.collectAsState()
-                val result by viewModel.paymentSheetResult.collectAsState(initial = null)
 
                 val bottomSheetState = rememberBottomSheetState(
                     confirmValueChange = { !isProcessing },
                 )
 
-                result?.let { sheetResult ->
-                    LaunchedEffect(sheetResult) {
+                LaunchedEffect(Unit) {
+                    viewModel.paymentSheetResult.filterNotNull().collect { sheetResult ->
                         setActivityResult(sheetResult)
                         bottomSheetState.hide()
                         finish()

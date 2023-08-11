@@ -15,6 +15,7 @@ import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentOptionsScreen
 import com.stripe.android.uicore.StripeTheme
+import kotlinx.coroutines.flow.filterNotNull
 
 /**
  * An `Activity` for selecting a payment option.
@@ -45,14 +46,13 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         setContent {
             StripeTheme {
                 val isProcessing by viewModel.processing.collectAsState()
-                val result by viewModel.paymentOptionResult.collectAsState(initial = null)
 
                 val bottomSheetState = rememberBottomSheetState(
                     confirmValueChange = { !isProcessing },
                 )
 
-                result?.let { sheetResult ->
-                    LaunchedEffect(sheetResult) {
+                LaunchedEffect(Unit) {
+                    viewModel.paymentOptionResult.filterNotNull().collect { sheetResult ->
                         setActivityResult(sheetResult)
                         bottomSheetState.hide()
                         finish()

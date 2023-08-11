@@ -59,8 +59,7 @@ internal class BottomSheetState(
     }
 
     suspend fun hide() {
-        val skip = runCatching { Build.FINGERPRINT.lowercase() == "robolectric" }.getOrDefault(false)
-        if (skip) {
+        if (isRunningTest) {
             return
         }
 
@@ -189,3 +188,16 @@ private suspend fun repeatUntilSucceededOrLimit(
         }
     }
 }
+
+private val isRunningTest: Boolean
+    get() {
+        val isUnitTest = runCatching {
+            Build.FINGERPRINT.lowercase() == "robolectric"
+        }.getOrDefault(false)
+
+        val isUiTest = runCatching {
+            Class.forName("androidx.test.InstrumentationRegistry")
+        }.isSuccess
+
+        return isUnitTest || isUiTest
+    }
