@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [FIXED][7147](https://github.com/stripe/stripe-android/pull/7147) Fixed an issue where we displayed incorrect error messages for some languages.
+
 ## 20.28.1 - 2023-08-09
 
 ### PaymentSheet
