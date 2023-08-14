@@ -1031,13 +1031,12 @@ internal class StripeApiRepositoryTest {
         val stripeApiRepository = create()
         val paymentMethods = stripeApiRepository
             .getPaymentMethods(
-                ListPaymentMethodsParams(
+                listPaymentMethodsParams = ListPaymentMethodsParams(
                     "cus_123",
                     PaymentMethod.Type.Card
                 ),
-                DEFAULT_OPTIONS.apiKey,
-                emptySet(),
-                ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+                productUsageTokens = emptySet(),
+                requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
             ).getOrThrow()
         assertThat(paymentMethods)
             .hasSize(3)
@@ -1089,13 +1088,12 @@ internal class StripeApiRepositoryTest {
         val stripeApiRepository = create()
         val paymentMethods = stripeApiRepository
             .getPaymentMethods(
-                ListPaymentMethodsParams(
+                listPaymentMethodsParams = ListPaymentMethodsParams(
                     "cus_123",
                     PaymentMethod.Type.Card
                 ),
-                DEFAULT_OPTIONS.apiKey,
-                emptySet(),
-                ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+                productUsageTokens = emptySet(),
+                requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
             ).getOrThrow()
         assertThat(paymentMethods)
             .isEmpty()

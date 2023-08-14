@@ -1,7 +1,6 @@
 package com.stripe.android.testing
 
 import com.stripe.android.cards.Bin
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.ApiRequest
@@ -153,7 +152,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
-    @Throws(APIException::class)
     override suspend fun attachPaymentMethod(
         customerId: String,
         productUsageTokens: Set<String>,
@@ -163,7 +161,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
-    @Throws(APIException::class)
     override suspend fun detachPaymentMethod(
         productUsageTokens: Set<String>,
         paymentMethodId: String,
@@ -172,7 +169,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
-    @Throws(APIException::class)
     override suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         productUsageTokens: Set<String>,
