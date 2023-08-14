@@ -47,7 +47,8 @@ class GooglePayLauncherContract :
     data class SetupIntentArgs(
         override val clientSecret: String,
         override val config: GooglePayLauncher.Config,
-        internal val currencyCode: String
+        internal val currencyCode: String,
+        internal val amount: Long? = null,
     ) : Args()
 
     sealed class Args : Parcelable {

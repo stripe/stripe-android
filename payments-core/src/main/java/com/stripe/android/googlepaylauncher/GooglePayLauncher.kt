@@ -178,7 +178,8 @@ class GooglePayLauncher internal constructor(
      */
     fun presentForSetupIntent(
         clientSecret: String,
-        currencyCode: String
+        currencyCode: String,
+        amount: Long? = null,
     ) {
         check(isReady) {
             "presentForSetupIntent() may only be called when Google Pay is available on this device."
@@ -188,7 +189,8 @@ class GooglePayLauncher internal constructor(
             GooglePayLauncherContract.SetupIntentArgs(
                 clientSecret = clientSecret,
                 config = config,
-                currencyCode = currencyCode
+                currencyCode = currencyCode,
+                amount = amount,
             )
         )
     }

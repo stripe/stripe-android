@@ -251,7 +251,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     @JvmOverloads
     fun present(
         currencyCode: String,
-        amount: Long = 0L,
+        amount: Long? = null,
         transactionId: String? = null
     ) {
         check(skipReadyCheck || isReady) {

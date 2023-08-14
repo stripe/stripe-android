@@ -84,6 +84,7 @@ internal class GooglePayLauncherViewModel(
                     createTransactionInfo(
                         stripeIntent = intent,
                         currencyCode = intent.currency.orEmpty(),
+                        amount = intent.amount,
                     )
                 }
             }
@@ -95,6 +96,7 @@ internal class GooglePayLauncherViewModel(
                     createTransactionInfo(
                         stripeIntent = intent,
                         currencyCode = args.currencyCode,
+                        amount = args.amount,
                     )
                 }
             }
@@ -123,7 +125,8 @@ internal class GooglePayLauncherViewModel(
     @VisibleForTesting
     internal fun createTransactionInfo(
         stripeIntent: StripeIntent,
-        currencyCode: String
+        currencyCode: String,
+        amount: Long?,
     ): GooglePayJsonFactory.TransactionInfo {
         return when (stripeIntent) {
             is PaymentIntent -> {
@@ -132,7 +135,7 @@ internal class GooglePayLauncherViewModel(
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
                     countryCode = args.config.merchantCountryCode,
                     transactionId = stripeIntent.id,
-                    totalPrice = stripeIntent.amount,
+                    totalPrice = amount,
                     totalPriceLabel = null,
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.CompleteImmediatePurchase
                 )
@@ -143,7 +146,7 @@ internal class GooglePayLauncherViewModel(
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
                     countryCode = args.config.merchantCountryCode,
                     transactionId = stripeIntent.id,
-                    totalPrice = 0L,
+                    totalPrice = amount,
                     totalPriceLabel = null,
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
                 )

@@ -46,7 +46,7 @@ class GooglePayPaymentMethodLauncherContract :
     data class Args internal constructor(
         internal val config: GooglePayPaymentMethodLauncher.Config,
         internal val currencyCode: String,
-        internal val amount: Int,
+        internal val amount: Int?,
         internal val transactionId: String? = null,
         internal val injectionParams: InjectionParams? = null
     ) : Parcelable {
@@ -87,7 +87,7 @@ private fun GooglePayPaymentMethodLauncherContract.Args.toV2(): GooglePayPayment
     return GooglePayPaymentMethodLauncherContractV2.Args(
         config = config,
         currencyCode = currencyCode,
-        amount = amount.toLong(),
+        amount = amount?.toLong(),
         transactionId = transactionId,
         injectionParams = injectionParams?.let { params ->
             GooglePayPaymentMethodLauncherContractV2.Args.InjectionParams(
