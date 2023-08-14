@@ -49,6 +49,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Vel betalingsmåte</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Totalt: %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">Noko gjekk gale</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Avbryt og betal på ei anna måte</string>
   <!-- Text on a screen asking the user to approve a payment -->
