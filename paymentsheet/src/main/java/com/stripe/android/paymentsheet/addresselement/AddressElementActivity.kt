@@ -129,6 +129,7 @@ internal class AddressElementActivity : ComponentActivity() {
 
     override fun finish() {
         super.finish()
+        @Suppress("DEPRECATION")
         overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
     }
 }

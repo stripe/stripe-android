@@ -11,7 +11,7 @@ ext.versions = [
         androidxAppcompat           : '1.6.1',
         androidxArchCore            : '2.2.0',
         androidxBrowser             : '1.5.0',
-        androidxCompose             : '1.4.3',
+        androidxCompose             : '1.5.0',
         androidxComposeCompiler     : '1.4.1',
         androidxComposeRuntime      : '1.4.3',
         androidxComposeUi           : '1.4.3',

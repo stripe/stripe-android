@@ -83,10 +83,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
     private fun finishWithResult(result: InternalCustomerSheetResult) {
         setResult(RESULT_OK, Intent().putExtras(result.toBundle()))
         finish()
-    }
-
-    override fun finish() {
-        super.finish()
+        @Suppress("DEPRECATION")
         overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
     }
 }

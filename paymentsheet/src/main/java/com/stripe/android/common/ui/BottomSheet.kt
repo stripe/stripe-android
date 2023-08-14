@@ -172,6 +172,7 @@ internal fun BottomSheet(
             topStart = MaterialTheme.stripeShapes.cornerRadius.dp,
             topEnd = MaterialTheme.stripeShapes.cornerRadius.dp,
         ),
+        sheetGesturesEnabled = false,
         sheetContent = {
             Box(modifier = Modifier.testTag(BottomSheetContentTestTag)) {
                 sheetContent()

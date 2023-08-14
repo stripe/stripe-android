@@ -49,7 +49,7 @@ allprojects {
 
 ext {
     buildToolsVersion = "30.0.3"
-    compileSdkVersion = 33
+    compileSdkVersion = 34
 
     group_name = GROUP
     version_name = VERSION_NAME

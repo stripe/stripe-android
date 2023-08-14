@@ -81,6 +81,7 @@ internal class PollingActivity : AppCompatActivity() {
             Intent().putExtras(result.toBundle())
         )
         finish()
+        @Suppress("DEPRECATION")
         overridePendingTransition(0, AnimationConstants.FADE_OUT)
     }
 }
