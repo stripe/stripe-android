@@ -53,15 +53,14 @@ internal class CustomerRepositoryTest {
             )
 
             verify(stripeRepository).getPaymentMethods(
-                eq(
+                listPaymentMethodsParams = eq(
                     ListPaymentMethodsParams(
                         customerId = "customer_id",
                         paymentMethodType = PaymentMethod.Type.Card
                     )
                 ),
-                anyString(),
-                any(),
-                any()
+                productUsageTokens = any(),
+                requestOptions = any()
             )
         }
 
@@ -235,10 +234,9 @@ internal class CustomerRepositoryTest {
         val repository = mock<StripeRepository>()
         whenever(
             repository.getPaymentMethods(
-                any(),
-                anyString(),
-                any(),
-                any()
+                listPaymentMethodsParams = any(),
+                productUsageTokens = any(),
+                requestOptions = any()
             )
         )
             .doReturn(Result.failure(InvalidParameterException("Request Failed")))
@@ -253,7 +251,6 @@ internal class CustomerRepositoryTest {
             onBlocking {
                 getPaymentMethods(
                     listPaymentMethodsParams = any(),
-                    publishableKey = anyString(),
                     productUsageTokens = any(),
                     requestOptions = any(),
                 )
@@ -267,7 +264,6 @@ internal class CustomerRepositoryTest {
         stripeRepository.stub {
             onBlocking {
                 detachPaymentMethod(
-                    publishableKey = anyString(),
                     productUsageTokens = any(),
                     paymentMethodId = anyString(),
                     requestOptions = any(),
@@ -283,7 +279,6 @@ internal class CustomerRepositoryTest {
             onBlocking {
                 attachPaymentMethod(
                     customerId = anyString(),
-                    publishableKey = anyString(),
                     productUsageTokens = any(),
                     paymentMethodId = anyString(),
                     requestOptions = any(),

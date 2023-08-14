@@ -22,7 +22,6 @@ import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import dagger.Binds
-import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
