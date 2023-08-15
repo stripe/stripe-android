@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetDefaults
@@ -29,13 +28,11 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 
 internal const val BottomSheetContentTestTag = "BottomSheetContentTestTag"
-internal val MaxBottomSheetWidth = 640.dp
 
 @OptIn(ExperimentalMaterialApi::class)
 internal class BottomSheetState(
@@ -160,7 +157,6 @@ internal fun BottomSheet(
 
     ModalBottomSheetLayout(
         modifier = modifier
-            .widthIn(max = MaxBottomSheetWidth)
             .statusBarsPadding()
             .imePadding(),
         sheetState = state.modalBottomSheetState,

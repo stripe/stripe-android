@@ -22,7 +22,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.ui.BottomSheetContentTestTag
-import com.stripe.android.common.ui.MaxBottomSheetWidth
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -872,24 +871,6 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.buyButton.externalLabel).isEqualTo("Pay")
             testDispatcher.scheduler.advanceTimeBy(250)
             assertThat(activity.buyButton.externalLabel).isEqualTo("Pay CA\$99.99")
-        }
-    }
-
-    @Test
-    @Config(qualifiers = "sw800dp-w1250dp-h800dp")
-    fun `PaymentSheet is limited to correct width`() = runTest(testDispatcher) {
-        val viewModel = createViewModel()
-        val scenario = activityScenario(viewModel)
-
-        scenario.launch(intent).onActivity {
-            val sheetWidth = composeTestRule
-                .onNodeWithTag(BottomSheetContentTestTag)
-                .fetchSemanticsNode()
-                .layoutInfo
-                .width
-                .toFloat()
-
-            assertThat(sheetWidth).isEqualTo(MaxBottomSheetWidth.value)
         }
     }
 
