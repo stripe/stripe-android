@@ -145,7 +145,6 @@ interface StripeRepository {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun attachPaymentMethod(
         customerId: String,
-        publishableKey: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
@@ -153,7 +152,6 @@ interface StripeRepository {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun detachPaymentMethod(
-        publishableKey: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
@@ -162,7 +160,6 @@ interface StripeRepository {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
-        publishableKey: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
     ): Result<List<PaymentMethod>>

@@ -4,6 +4,7 @@
   <CurrentIssues>
     <ID>EmptyFunctionBlock:DefaultStripeNetworkClientTest.kt$DefaultStripeNetworkClientTest.FailingConnection${ }</ID>
     <ID>EmptyFunctionBlock:DefaultStripeNetworkClientTest.kt$DefaultStripeNetworkClientTest.ResponseCodeOverrideConnection${ }</ID>
+    <ID>MagicNumber:NetworkTypeDetector.kt$NetworkTypeDetector$19</ID>
     <ID>MagicNumber:StripeJsonUtils.kt$StripeJsonUtils$3</ID>
     <ID>MaxLineLength:QueryStringFactoryTest.kt$QueryStringFactoryTest$"colors[]=blue&amp;colors[]=green&amp;empty_list=&amp;person[age]=45&amp;person[city]=San Francisco&amp;person[wishes]=&amp;person[friends][]=Alice&amp;person[friends][]=Bob"</ID>
     <ID>MaxLineLength:RequestHeadersFactoriesTest.kt$RequestHeadersFactoriesTest$.</ID>

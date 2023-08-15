@@ -45,7 +45,6 @@ internal class CustomerSessionOperationExecutorTest {
             object : AbsFakeStripeRepository() {
                 override suspend fun attachPaymentMethod(
                     customerId: String,
-                    publishableKey: String,
                     productUsageTokens: Set<String>,
                     paymentMethodId: String,
                     requestOptions: ApiRequest.Options
@@ -79,7 +78,6 @@ internal class CustomerSessionOperationExecutorTest {
             object : AbsFakeStripeRepository() {
                 override suspend fun attachPaymentMethod(
                     customerId: String,
-                    publishableKey: String,
                     productUsageTokens: Set<String>,
                     paymentMethodId: String,
                     requestOptions: ApiRequest.Options

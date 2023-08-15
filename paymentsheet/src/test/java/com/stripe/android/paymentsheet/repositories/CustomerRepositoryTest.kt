@@ -48,24 +48,24 @@ internal class CustomerRepositoryTest {
                     "customer_id",
                     "ephemeral_key"
                 ),
-                listOf(PaymentMethod.Type.Card)
+                listOf(PaymentMethod.Type.Card),
+                true,
             )
 
             verify(stripeRepository).getPaymentMethods(
-                eq(
+                listPaymentMethodsParams = eq(
                     ListPaymentMethodsParams(
                         customerId = "customer_id",
                         paymentMethodType = PaymentMethod.Type.Card
                     )
                 ),
-                anyString(),
-                any(),
-                any()
+                productUsageTokens = any(),
+                requestOptions = any()
             )
         }
 
     @Test
-    fun `getPaymentMethods() should return empty list on failure`() =
+    fun `getPaymentMethods() should return empty list on failure when silent failures`() =
         runTest {
             givenGetPaymentMethodsReturns(
                 Result.failure(InvalidParameterException("error"))
@@ -76,14 +76,35 @@ internal class CustomerRepositoryTest {
                     "customer_id",
                     "ephemeral_key"
                 ),
-                listOf(PaymentMethod.Type.Card)
+                listOf(PaymentMethod.Type.Card),
+                true,
             )
 
-            assertThat(result).isEmpty()
+            assertThat(result.getOrNull()).isEmpty()
         }
 
     @Test
-    fun `getPaymentMethods() with partially failing requests should emit list with successful values`() =
+    fun `getPaymentMethods() should return failure`() =
+        runTest {
+            givenGetPaymentMethodsReturns(
+                Result.failure(InvalidParameterException("error"))
+            )
+
+            val result = repository.getPaymentMethods(
+                PaymentSheet.CustomerConfiguration(
+                    "customer_id",
+                    "ephemeral_key"
+                ),
+                listOf(PaymentMethod.Type.Card),
+                false,
+            )
+
+            assertThat(result.exceptionOrNull()?.message)
+                .isEqualTo("error")
+        }
+
+    @Test
+    fun `getPaymentMethods() with partially failing requests should emit list with successful values when silent failures`() =
         runTest {
             val repository = CustomerApiRepository(
                 failsOnceStripeRepository(),
@@ -98,13 +119,38 @@ internal class CustomerRepositoryTest {
                     "customer_id",
                     "ephemeral_key"
                 ),
-                listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Card, PaymentMethod.Type.Card)
+                listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Card, PaymentMethod.Type.Card),
+                true,
             )
 
-            assertThat(result).containsExactly(
+            assertThat(result.getOrNull()).containsExactly(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
+        }
+
+    @Test
+    fun `getPaymentMethods() with partially failing requests should emit failure`() =
+        runTest {
+            val repository = CustomerApiRepository(
+                failsOnceStripeRepository(),
+                { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
+                Logger.getInstance(false),
+                workContext = testDispatcher
+            )
+
+            // Requesting 3 payment method types, the first request will fail
+            val result = repository.getPaymentMethods(
+                PaymentSheet.CustomerConfiguration(
+                    "customer_id",
+                    "ephemeral_key"
+                ),
+                listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Card, PaymentMethod.Type.Card),
+                false,
+            )
+
+            assertThat(result.exceptionOrNull()?.message)
+                .isEqualTo("Request Failed")
         }
 
     @Test
@@ -188,10 +234,9 @@ internal class CustomerRepositoryTest {
         val repository = mock<StripeRepository>()
         whenever(
             repository.getPaymentMethods(
-                any(),
-                anyString(),
-                any(),
-                any()
+                listPaymentMethodsParams = any(),
+                productUsageTokens = any(),
+                requestOptions = any()
             )
         )
             .doReturn(Result.failure(InvalidParameterException("Request Failed")))
@@ -206,7 +251,6 @@ internal class CustomerRepositoryTest {
             onBlocking {
                 getPaymentMethods(
                     listPaymentMethodsParams = any(),
-                    publishableKey = anyString(),
                     productUsageTokens = any(),
                     requestOptions = any(),
                 )
@@ -220,7 +264,6 @@ internal class CustomerRepositoryTest {
         stripeRepository.stub {
             onBlocking {
                 detachPaymentMethod(
-                    publishableKey = anyString(),
                     productUsageTokens = any(),
                     paymentMethodId = anyString(),
                     requestOptions = any(),
@@ -236,7 +279,6 @@ internal class CustomerRepositoryTest {
             onBlocking {
                 attachPaymentMethod(
                     customerId = anyString(),
-                    publishableKey = anyString(),
                     productUsageTokens = any(),
                     paymentMethodId = anyString(),
                     requestOptions = any(),

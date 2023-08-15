@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.stripe.android.utils.rememberActivityOrNull
 
 /**
  * Creates a [CustomerSheet] that is remembered across compositions.
@@ -34,6 +35,7 @@ fun rememberCustomerSheet(
     }
 
     val lifecycleOwner = LocalLifecycleOwner.current
+    val activity = rememberActivityOrNull()
 
     return remember(configuration) {
         CustomerSheet.getInstance(
@@ -43,6 +45,7 @@ fun rememberCustomerSheet(
             configuration = configuration,
             customerAdapter = customerAdapter,
             callback = callback,
+            statusBarColor = { activity?.window?.statusBarColor },
         )
     }
 }

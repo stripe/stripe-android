@@ -18,4 +18,9 @@
     <string name="verification_type">Verification Type</string>
     <string name="require_address">Require address</string>
 
+    <string name="document_fallback">Fallback with document</string>
+    <string name="otp_check">OTP check</string>
+
+    <string name="require_phone_number">Require phone number</string>
+    <string name="provided_phone_number">Provided phone number</string>
 </resources>

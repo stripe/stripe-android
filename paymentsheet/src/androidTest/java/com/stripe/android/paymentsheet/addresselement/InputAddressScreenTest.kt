@@ -1,32 +1,28 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.activity.ComponentActivity
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.DefaultStripeTheme
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@ExperimentalAnimationApi
 @RunWith(AndroidJUnit4::class)
-@Ignore("Flakes on CI, need to investigate.")
 class InputAddressScreenTest {
+
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    val composeTestRule = createComposeRule()
 
     @Test
     fun clicking_primary_button_triggers_callback_when_enabled() {
         var counter = 0
         setContent(primaryButtonEnabled = true, primaryButtonCallback = { counter++ })
         composeTestRule.onNodeWithText("Save Address").performClick()
-        Truth.assertThat(counter).isEqualTo(1)
+        assertThat(counter).isEqualTo(1)
     }
 
     @Test
@@ -34,7 +30,7 @@ class InputAddressScreenTest {
         var counter = 0
         setContent(primaryButtonEnabled = false, primaryButtonCallback = { counter++ })
         composeTestRule.onNodeWithText("Save Address").performClick()
-        Truth.assertThat(counter).isEqualTo(0)
+        assertThat(counter).isEqualTo(0)
     }
 
     @Test
@@ -42,7 +38,7 @@ class InputAddressScreenTest {
         var counter = 0
         setContent(onCloseCallback = { counter++ })
         composeTestRule.onNodeWithContentDescription("Close").performClick()
-        Truth.assertThat(counter).isEqualTo(1)
+        assertThat(counter).isEqualTo(1)
     }
 
     private fun setContent(

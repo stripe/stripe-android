@@ -99,6 +99,7 @@ internal fun AddPaymentMethod(
                 onItemSelectedListener = { selectedLpm ->
                     if (selectedItem != selectedLpm) {
                         selectedPaymentMethodCode = selectedLpm.code
+                        sheetViewModel.reportPaymentMethodTypeSelected(selectedLpm.code)
                     }
                 },
                 onLinkSignupStateChanged = { _, inlineSignupViewState ->

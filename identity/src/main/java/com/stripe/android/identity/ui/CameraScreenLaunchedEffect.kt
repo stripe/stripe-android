@@ -84,7 +84,6 @@ internal fun CameraScreenLaunchedEffect(
                     }
                 )
             }
-            identityScanViewModel.stopScan(lifecycleOwner)
 
             // Upload success result
             if (finalResult.identityState is IdentityScanState.Finished) {

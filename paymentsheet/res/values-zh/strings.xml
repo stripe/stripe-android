@@ -36,7 +36,7 @@
   <!-- US Bank Account copy title for Mobile payment element form -->
   <string name="stripe_paymentsheet_pay_with_bank_title">只需少许几步，即可用您的银行账户付款。</string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-  <string name="stripe_paymentsheet_primary_button_processing">正在处理...</string>
+  <string name="stripe_paymentsheet_primary_button_processing">处理中...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">移除银行账户</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->

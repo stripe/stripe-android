@@ -9,6 +9,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.Source
@@ -27,12 +28,14 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     packageInfo: PackageInfo?,
     packageName: String,
     publishableKeyProvider: Provider<String>,
-    internal val defaultProductUsageTokens: Set<String> = emptySet()
+    networkTypeProvider: Provider<String?>,
+    internal val defaultProductUsageTokens: Set<String> = emptySet(),
 ) : AnalyticsRequestFactory(
     packageManager,
     packageInfo,
     packageName,
-    publishableKeyProvider
+    publishableKeyProvider,
+    networkTypeProvider,
 ) {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
@@ -49,11 +52,11 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         context: Context,
         publishableKeyProvider: Provider<String>
     ) : this(
-        context.applicationContext.packageManager,
-        context.applicationContext.packageInfo,
-        context.applicationContext.packageName.orEmpty(),
-        publishableKeyProvider,
-        emptySet()
+        packageManager = context.applicationContext.packageManager,
+        packageInfo = context.applicationContext.packageInfo,
+        packageName = context.applicationContext.packageName.orEmpty(),
+        publishableKeyProvider = publishableKeyProvider,
+        networkTypeProvider = NetworkTypeDetector(context)::invoke,
     )
 
     @Inject
@@ -62,11 +65,12 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
         @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>
     ) : this(
-        context.applicationContext.packageManager,
-        context.applicationContext.packageInfo,
-        context.applicationContext.packageName.orEmpty(),
-        publishableKeyProvider,
-        defaultProductUsageTokens
+        packageManager = context.applicationContext.packageManager,
+        packageInfo = context.applicationContext.packageInfo,
+        packageName = context.applicationContext.packageName.orEmpty(),
+        publishableKeyProvider = publishableKeyProvider,
+        networkTypeProvider = NetworkTypeDetector(context)::invoke,
+        defaultProductUsageTokens = defaultProductUsageTokens,
     )
 
     @JvmSynthetic

@@ -204,16 +204,9 @@ internal abstract class BaseSheetViewModel(
         paymentMethods,
         stripeIntent.map { it?.isLiveMode ?: true },
         processing,
-        editing
-    ) { currentScreen, paymentMethods, isLiveMode, isProcessing, isEditing ->
-        PaymentSheetTopBarStateFactory.create(
-            screen = currentScreen,
-            paymentMethods = paymentMethods ?: emptyList(),
-            isLiveMode = isLiveMode,
-            isProcessing = isProcessing,
-            isEditing = isEditing,
-        )
-    }.stateIn(
+        editing,
+        PaymentSheetTopBarStateFactory::create,
+    ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
         initialValue = PaymentSheetTopBarStateFactory.createDefault(),
@@ -242,21 +235,26 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    abstract fun transitionToFirstScreen()
-
-    protected fun transitionTo(target: PaymentSheetScreen) {
-        clearErrorMessages()
-        backStack.update { (it - PaymentSheetScreen.Loading) + target }
-        reportNavigationEvent(target)
+    protected fun transitionToFirstScreen() {
+        val initialBackStack = determineInitialBackStack()
+        backStack.value = initialBackStack
+        reportPaymentSheetShown(initialBackStack.first())
     }
+
+    abstract fun determineInitialBackStack(): List<PaymentSheetScreen>
 
     fun transitionToAddPaymentScreen() {
         transitionTo(AddAnotherPaymentMethod)
     }
 
-    protected fun reportNavigationEvent(currentScreen: PaymentSheetScreen) {
+    private fun transitionTo(target: PaymentSheetScreen) {
+        clearErrorMessages()
+        backStack.update { (it - PaymentSheetScreen.Loading) + target }
+    }
+
+    private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
-            PaymentSheetScreen.Loading -> {
+            PaymentSheetScreen.Loading, AddAnotherPaymentMethod -> {
                 // Nothing to do here
             }
             PaymentSheetScreen.SelectSavedPaymentMethods -> {
@@ -266,8 +264,7 @@ internal abstract class BaseSheetViewModel(
                     isDecoupling = stripeIntent.value?.clientSecret == null,
                 )
             }
-            AddFirstPaymentMethod,
-            AddAnotherPaymentMethod -> {
+            AddFirstPaymentMethod -> {
                 eventReporter.onShowNewPaymentOptionForm(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
                     currency = stripeIntent.value?.currency,
@@ -275,6 +272,13 @@ internal abstract class BaseSheetViewModel(
                 )
             }
         }
+    }
+
+    protected fun reportConfirmButtonPressed() {
+        eventReporter.onPressConfirmButton(
+            currency = stripeIntent.value?.currency,
+            isDecoupling = stripeIntent.value?.clientSecret == null,
+        )
     }
 
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
@@ -287,6 +291,18 @@ internal abstract class BaseSheetViewModel(
                 requireNotNull(stripeIntent.currency)
             )
         }
+    }
+
+    protected fun reportDismiss(isDecoupling: Boolean) {
+        eventReporter.onDismiss(isDecoupling = isDecoupling)
+    }
+
+    fun reportPaymentMethodTypeSelected(code: PaymentMethodCode) {
+        eventReporter.onSelectPaymentMethod(
+            code = code,
+            isDecoupling = stripeIntent.value?.clientSecret == null,
+            currency = stripeIntent.value?.currency,
+        )
     }
 
     abstract fun clearErrorMessages()

@@ -21,8 +21,8 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -78,7 +78,7 @@ class PaymentLauncherViewModelTest {
     private val paymentIntentFlowResultProcessor = mock<PaymentIntentFlowResultProcessor>()
     private val setupIntentFlowResultProcessor = mock<SetupIntentFlowResultProcessor>()
 
-    private val analyticsRequestExecutor = mock<DefaultAnalyticsRequestExecutor>()
+    private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val analyticsRequestFactory = mock<PaymentAnalyticsRequestFactory>()
     private val uiContext = UnconfinedTestDispatcher()
     private val activityResultCaller = mock<ActivityResultCaller>()

@@ -85,16 +85,17 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         }
 
         AnalyticsRequestFactory.regenerateSessionId()
-        when (val result = paymentSheetLoader.load(initializationMode, configuration)) {
-            is PaymentSheetLoader.Result.Success -> {
+
+        paymentSheetLoader.load(initializationMode, configuration).fold(
+            onSuccess = { state ->
                 viewModel.previousConfigureRequest = configureRequest
-                onInitSuccess(result.state, configureRequest)
+                onInitSuccess(state, configureRequest)
                 onConfigured()
+            },
+            onFailure = { error ->
+                onConfigured(error = error)
             }
-            is PaymentSheetLoader.Result.Failure -> {
-                onConfigured(error = result.throwable)
-            }
-        }
+        )
     }
 
     private fun onInitSuccess(

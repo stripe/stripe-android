@@ -97,7 +97,7 @@ interface CustomerAdapter {
             setupIntentClientSecretProvider: SetupIntentClientSecretProvider?,
         ): CustomerAdapter {
             val component = DaggerStripeCustomerAdapterComponent.builder()
-                .context(context)
+                .context(context.applicationContext)
                 .customerEphemeralKeyProvider(customerEphemeralKeyProvider)
                 .setupIntentClientSecretProvider(setupIntentClientSecretProvider)
                 .build()
@@ -128,9 +128,11 @@ interface CustomerAdapter {
                 is GooglePay -> {
                     PaymentSelection.GooglePay
                 }
+
                 is Link -> {
                     PaymentSelection.Link
                 }
+
                 is StripeId -> {
                     paymentMethodProvider(id)?.let {
                         PaymentSelection.Saved(it)
@@ -179,35 +181,33 @@ interface CustomerAdapter {
 
     @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @JvmInline
-    value class Result<out T> internal constructor(
-        internal val value: Any?
-    ) {
+    sealed class Result<T> {
 
-        val isSuccess: Boolean get() = value !is Failure
-        val isFailure: Boolean get() = value is Failure
+        @ExperimentalCustomerSheetApi
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Success<T> internal constructor(
+            val value: T
+        ) : Result<T>()
 
-        internal data class Failure(
+        @ExperimentalCustomerSheetApi
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Failure<T> internal constructor(
             val cause: Throwable,
             val displayMessage: String? = null
-        )
+        ) : Result<T>()
 
         @ExperimentalCustomerSheetApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             @ExperimentalCustomerSheetApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun <T> success(value: T): Result<T> {
-                return Result(value)
+            fun <T> success(value: T): Success<T> {
+                return Success(value)
             }
 
             @ExperimentalCustomerSheetApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun <T> failure(cause: Throwable, displayMessage: String?): Result<T> {
-                return Result(createFailure(cause, displayMessage))
-            }
-
-            private fun createFailure(cause: Throwable, displayMessage: String? = null): Any {
+            fun <T> failure(cause: Throwable, displayMessage: String?): Failure<T> {
                 return Failure(cause, displayMessage)
             }
         }

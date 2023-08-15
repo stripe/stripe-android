@@ -25,8 +25,9 @@ internal class FakeCustomerRepository(
 
     override suspend fun getPaymentMethods(
         customerConfig: PaymentSheet.CustomerConfiguration,
-        types: List<PaymentMethod.Type>
-    ): List<PaymentMethod> = paymentMethods
+        types: List<PaymentMethod.Type>,
+        silentlyFail: Boolean,
+    ): Result<List<PaymentMethod>> = Result.success(paymentMethods)
 
     override suspend fun detachPaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,

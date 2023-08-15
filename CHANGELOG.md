@@ -2,9 +2,25 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.28.2 - 2023-08-14
+
+### PaymentSheet
+* [FIXED][7147](https://github.com/stripe/stripe-android/pull/7147) Fixed an issue where we displayed incorrect error messages for some languages.
+
+## 20.28.1 - 2023-08-09
+
+### PaymentSheet
+* [FIXED][7136](https://github.com/stripe/stripe-android/pull/7136) Fixed an issue where the Google Pay button in PaymentSheet was not clickable in some cases.
+
+## 20.28.0 - 2023-07-31
+### Identity
+* [ADDED][6438](https://github.com/stripe/stripe-android/pull/6438) Supports [phone verification](https://stripe.com/docs/identity/phone) in Identity mobile SDK.
+
+## 20.27.3 - 2023-07-24
+
 ### Payments
-*[CHANGED] The return type for several methods in `Stripe` has changed from `T?` (nullable) to `T` to better reflect possible behavior. These methods continue to be throwing and should be wrapped in a `try/catch` block.
-*[FIXED][6977](https://github.com/stripe/stripe-android/pull/6977) Fixed an issue where `Stripe.retrievePossibleBrands()` returned incorrect results. 
+* [CHANGED] The return type for several methods in `Stripe` has changed from `T?` (nullable) to `T` to better reflect possible behavior. These methods continue to be throwing and should be wrapped in a `try/catch` block.
+* [FIXED][6977](https://github.com/stripe/stripe-android/pull/6977) Fixed an issue where `Stripe.retrievePossibleBrands()` returned incorrect results. 
 
 ## 20.27.2 - 2023-07-18
 

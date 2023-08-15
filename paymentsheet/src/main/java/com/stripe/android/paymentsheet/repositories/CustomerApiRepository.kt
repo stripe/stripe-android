@@ -33,7 +33,7 @@ internal class CustomerApiRepository @Inject constructor(
 
     override suspend fun retrieveCustomer(
         customerId: String,
-        ephemeralKeySecret: String
+        ephemeralKeySecret: String,
     ): Customer? {
         return stripeRepository.retrieveCustomer(
             customerId,
@@ -47,8 +47,9 @@ internal class CustomerApiRepository @Inject constructor(
 
     override suspend fun getPaymentMethods(
         customerConfig: PaymentSheet.CustomerConfiguration,
-        types: List<PaymentMethod.Type>
-    ): List<PaymentMethod> = withContext(workContext) {
+        types: List<PaymentMethod.Type>,
+        silentlyFail: Boolean,
+    ): Result<List<PaymentMethod>> = withContext(workContext) {
         val requests = types.map { paymentMethodType ->
             async {
                 stripeRepository.getPaymentMethods(
@@ -56,7 +57,6 @@ internal class CustomerApiRepository @Inject constructor(
                         customerId = customerConfig.id,
                         paymentMethodType = paymentMethodType,
                     ),
-                    publishableKey = lazyPaymentConfig.get().publishableKey,
                     productUsageTokens = productUsageTokens,
                     requestOptions = ApiRequest.Options(
                         apiKey = customerConfig.ephemeralKeySecret,
@@ -68,9 +68,21 @@ internal class CustomerApiRepository @Inject constructor(
             }
         }
 
-        requests.awaitAll().flatMap {
-            it.getOrElse { emptyList() }
+        val paymentMethods = mutableListOf<PaymentMethod>()
+        requests.awaitAll().forEach {
+            it.fold(
+                onFailure = {
+                    if (!silentlyFail) {
+                        return@withContext Result.failure(it)
+                    }
+                },
+                onSuccess = {
+                    paymentMethods.addAll(it)
+                }
+            )
         }
+
+        Result.success(paymentMethods)
     }
 
     override suspend fun detachPaymentMethod(
@@ -78,7 +90,6 @@ internal class CustomerApiRepository @Inject constructor(
         paymentMethodId: String
     ): Result<PaymentMethod> =
         stripeRepository.detachPaymentMethod(
-            publishableKey = lazyPaymentConfig.get().publishableKey,
             productUsageTokens = productUsageTokens,
             paymentMethodId = paymentMethodId,
             requestOptions = ApiRequest.Options(
@@ -95,7 +106,6 @@ internal class CustomerApiRepository @Inject constructor(
     ): Result<PaymentMethod> =
         stripeRepository.attachPaymentMethod(
             customerId = customerConfig.id,
-            publishableKey = lazyPaymentConfig.get().publishableKey,
             productUsageTokens = productUsageTokens,
             paymentMethodId = paymentMethodId,
             requestOptions = ApiRequest.Options(

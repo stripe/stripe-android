@@ -181,7 +181,6 @@
     <ID>MaxLineLength:StripeIntent.kt$StripeIntent.Status$*</ID>
     <ID>MaxLineLength:StripeKtx.kt$*</ID>
     <ID>MaxLineLength:StripeKtxTest.kt$StripeKtxTest$`Given repository returns non-empty value when calling retrieveAPI with String param then return correct result`</ID>
-    <ID>MaxLineLength:StripeKtxTest.kt$StripeKtxTest$`Given repository returns non-empty value when calling retrieveAPI with String param then returns correct result`</ID>
     <ID>MaxLineLength:StripeKtxTest.kt$StripeKtxTest$assertFailsWith</ID>
     <ID>MaxLineLength:StripeKtxTest.kt$StripeKtxTest$private inline</ID>
     <ID>MaxLineLength:StripePaymentControllerTest.kt$StripePaymentControllerTest$"We are unable to authenticate your payment method. Please choose a different payment method and try again."</ID>
@@ -203,8 +202,8 @@
     <ID>ThrowsCount:StripeApiRepository.kt$StripeApiRepository$@Throws( InvalidRequestException::class, AuthenticationException::class, CardException::class, APIException::class ) private fun handleApiError(response: StripeResponse&lt;String>)</ID>
     <ID>TooGenericExceptionThrown:DefaultAlipayRepository.kt$DefaultAlipayRepository$throw RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")</ID>
     <ID>TooGenericExceptionThrown:PaymentFlowViewModelTest.kt$PaymentFlowViewModelTest.ThrowingShippingMethodsFactory$throw RuntimeException("Always throws an exception")</ID>
-    <ID>TooManyFunctions:AccountParams.kt$AccountParams.BusinessTypeParams.Company$Builder : ObjectBuilder</ID>
-    <ID>TooManyFunctions:AccountParams.kt$AccountParams.BusinessTypeParams.Individual$Builder : ObjectBuilder</ID>
+    <ID>TooManyFunctions:AccountParams.kt$AccountParams.BusinessTypeParams.Company$Builder</ID>
+    <ID>TooManyFunctions:AccountParams.kt$AccountParams.BusinessTypeParams.Individual$Builder</ID>
     <ID>TooManyFunctions:AuthenticationComponent.kt$AuthenticationComponent$Builder</ID>
     <ID>TooManyFunctions:CardInputWidget.kt$CardInputWidget : LinearLayoutCardWidget</ID>
     <ID>TooManyFunctions:CardMultilineWidget.kt$CardMultilineWidget : LinearLayoutCardWidget</ID>
@@ -213,12 +212,12 @@
     <ID>TooManyFunctions:CustomerSession.kt$CustomerSession</ID>
     <ID>TooManyFunctions:PaymentAnalyticsRequestFactory.kt$PaymentAnalyticsRequestFactory : AnalyticsRequestFactory</ID>
     <ID>TooManyFunctions:PaymentController.kt$PaymentController</ID>
-    <ID>TooManyFunctions:PaymentMethod.kt$PaymentMethod$Builder : ObjectBuilder</ID>
+    <ID>TooManyFunctions:PaymentMethod.kt$PaymentMethod$Builder</ID>
     <ID>TooManyFunctions:PaymentMethodCreateParams.kt$PaymentMethodCreateParams$Companion</ID>
-    <ID>TooManyFunctions:PaymentMethodsActivityStarter.kt$PaymentMethodsActivityStarter.Args$Builder : ObjectBuilder</ID>
+    <ID>TooManyFunctions:PaymentMethodsActivityStarter.kt$PaymentMethodsActivityStarter.Args$Builder</ID>
     <ID>TooManyFunctions:PaymentMethodsAdapter.kt$PaymentMethodsAdapter : Adapter</ID>
-    <ID>TooManyFunctions:PaymentSessionConfig.kt$PaymentSessionConfig$Builder : ObjectBuilder</ID>
-    <ID>TooManyFunctions:PersonTokenParams.kt$PersonTokenParams$Builder : ObjectBuilder</ID>
+    <ID>TooManyFunctions:PaymentSessionConfig.kt$PaymentSessionConfig$Builder</ID>
+    <ID>TooManyFunctions:PersonTokenParams.kt$PersonTokenParams$Builder</ID>
     <ID>TooManyFunctions:SourceParams.kt$SourceParams$Companion</ID>
     <ID>TooManyFunctions:Stripe.kt$Stripe</ID>
     <ID>TooManyFunctions:StripeApiRepository.kt$StripeApiRepository : StripeRepository</ID>

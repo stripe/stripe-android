@@ -7,9 +7,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
-import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionViewModelFactory
 import dagger.BindsInstance
@@ -31,7 +29,8 @@ import kotlin.coroutines.CoroutineContext
         AuthenticationModule::class,
         Stripe3DSAuthenticatorModule::class,
         WeChatPayAuthenticatorModule::class,
-        CoreCommonModule::class
+        CoreCommonModule::class,
+        StripeRepositoryModule::class,
     ]
 )
 internal interface AuthenticationComponent {
@@ -43,12 +42,6 @@ internal interface AuthenticationComponent {
     interface Builder {
         @BindsInstance
         fun context(context: Context): Builder
-
-        @BindsInstance
-        fun stripeRepository(stripeRepository: StripeRepository): Builder
-
-        @BindsInstance
-        fun analyticsRequestExecutor(analyticsRequestExecutor: AnalyticsRequestExecutor): Builder
 
         @BindsInstance
         fun analyticsRequestFactory(paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory): Builder
