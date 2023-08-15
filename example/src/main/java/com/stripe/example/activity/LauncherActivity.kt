@@ -173,6 +173,10 @@ class LauncherActivity : AppCompatActivity() {
                 "BLIK",
                 BlikPaymentMethodActivity::class.java
             ),
+            Item(
+                "WeChat Example",
+                WeChatPaymentMethodActivity::class.java
+            ),
             // This is for internal use so as not to confuse the user.
             Item(
                 "StripeImage Example",

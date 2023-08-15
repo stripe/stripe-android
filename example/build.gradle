@@ -18,6 +18,9 @@ def getAccountId() {
 dependencies {
     implementation project(':payments')
     implementation project(':financial-connections')
+    implementation project(':wechatpay')
+
+    implementation "com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.7.0"
 
     implementation libs.accompanist.themeAdapter
     implementation libs.alipay

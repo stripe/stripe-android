@@ -78,6 +78,7 @@
         <activity android:name=".activity.StripeImageActivity"/>
         <activity android:name=".activity.CashAppPayActivity"/>
         <activity android:name=".activity.BlikPaymentMethodActivity"/>
+        <activity android:name=".activity.WeChatPaymentMethodActivity"/>
     </application>
 
 </manifest>
