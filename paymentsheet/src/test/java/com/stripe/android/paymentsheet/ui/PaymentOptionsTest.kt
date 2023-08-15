@@ -17,10 +17,7 @@ import org.robolectric.annotation.Config
 import kotlin.math.roundToInt
 
 @RunWith(AndroidJUnit4::class)
-@Config(
-    sdk = [Build.VERSION_CODES.Q],
-    instrumentedPackages = ["androidx.loader.content"],
-)
+@Config(sdk = [Build.VERSION_CODES.Q])
 class PaymentOptionsTest {
 
     @get:Rule

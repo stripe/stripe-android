@@ -24,10 +24,7 @@ import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @RunWith(AndroidJUnit4::class)
-@Config(
-    sdk = [Build.VERSION_CODES.Q],
-    instrumentedPackages = ["androidx.loader.content"],
-)
+@Config(sdk = [Build.VERSION_CODES.Q])
 class PaymentSheetTopBarTest {
 
     @get:Rule
