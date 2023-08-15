@@ -1,6 +1,8 @@
 package com.stripe.android.customersheet.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -47,22 +49,24 @@ internal fun CustomerSheetScreen(
             )
         },
         content = {
-            when (viewState) {
-                is CustomerSheetViewState.Loading -> {
-                    BottomSheetLoadingIndicator()
-                }
-                is CustomerSheetViewState.SelectPaymentMethod -> {
-                    SelectPaymentMethod(
-                        viewState = viewState,
-                        viewActionHandler = viewActionHandler,
-                        paymentMethodNameProvider = paymentMethodNameProvider,
-                    )
-                }
-                is CustomerSheetViewState.AddPaymentMethod -> {
-                    AddCard(
-                        viewState = viewState,
-                        viewActionHandler = viewActionHandler,
-                    )
+            Box(modifier = Modifier.animateContentSize()) {
+                when (viewState) {
+                    is CustomerSheetViewState.Loading -> {
+                        BottomSheetLoadingIndicator()
+                    }
+                    is CustomerSheetViewState.SelectPaymentMethod -> {
+                        SelectPaymentMethod(
+                            viewState = viewState,
+                            viewActionHandler = viewActionHandler,
+                            paymentMethodNameProvider = paymentMethodNameProvider,
+                        )
+                    }
+                    is CustomerSheetViewState.AddPaymentMethod -> {
+                        AddCard(
+                            viewState = viewState,
+                            viewActionHandler = viewActionHandler,
+                        )
+                    }
                 }
             }
         },
