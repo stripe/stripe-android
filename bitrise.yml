@@ -5,8 +5,8 @@ project_type: android
 trigger_map:
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
-  - pull_request_source_branch: '*'
-    pipeline: main-trigger-pipeline
+  - pull_request_source_branch: 'carlosmuvi/android-emulator-timing-out'
+    workflow: maestro-financial-connections
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
@@ -191,6 +191,15 @@ workflows:
             - profile: "pixel_3a"
             - api_level: 30
             - tag: "google_apis_playstore"
+            - start_command_flags: >
+               -camera-back none
+               -camera-front none
+               -netdelay none
+               -netspeed full
+               -memory 2048
+               -no-snapshot
+               -no-audio
+               -no-window
   prepare_all:
     steps:
       - activate-ssh-key@4:
