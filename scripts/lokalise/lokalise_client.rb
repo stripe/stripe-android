@@ -145,11 +145,6 @@ class LokaliseClient
         hash['keys']
     end
 
-    def filter_android_keys(all_keys)
-        android_keys = all_keys.select { |key| key['platforms'].include? 'android' }
-        android_keys.map { |key| key['key_name']['android'] }
-    end
-
     def project_id
         "747824695e51bc2f4aa912.89576472"
     end

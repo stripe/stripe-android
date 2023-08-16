@@ -53,7 +53,7 @@ class Processor
         end
 
         def ios_key_name
-            @existing_key['key_name']['android']
+            @existing_key['key_name']['ios']
         end
     end
 
