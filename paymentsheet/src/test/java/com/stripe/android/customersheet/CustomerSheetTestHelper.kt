@@ -22,7 +22,6 @@ import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOf
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -114,7 +113,7 @@ object CustomerSheetTestHelper {
             },
             googlePayRepositoryFactory = {
                 GooglePayRepository {
-                    flowOf(isGooglePayAvailable)
+                    isGooglePayAvailable
                 }
             },
             statusBarColor = { null },

@@ -21,7 +21,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.util.Locale
@@ -136,7 +135,7 @@ class GooglePayLauncher internal constructor(
         lifecycleScope.launch {
             val repository = googlePayRepositoryFactory(config.environment)
             readyCallback.onReady(
-                repository.isReady().first().also {
+                repository.isReady().also {
                     isReady = it
                 }
             )

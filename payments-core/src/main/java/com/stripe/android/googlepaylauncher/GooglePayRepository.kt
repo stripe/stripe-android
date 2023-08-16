@@ -8,18 +8,13 @@ import com.google.android.gms.wallet.Wallet
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 fun interface GooglePayRepository {
-    fun isReady(): Flow<Boolean>
-
-    object Disabled : GooglePayRepository {
-        override fun isReady(): Flow<Boolean> = flowOf(false)
-    }
+    suspend fun isReady(): Boolean
 }
 
 /**
@@ -66,9 +61,7 @@ internal class DefaultGooglePayRepository(
      * See [Google Pay API docs](https://developers.google.com/android/reference/com/google/android/gms/wallet/PaymentsClient#isReadyToPay(com.google.android.gms.wallet.IsReadyToPayRequest))
      * for more details.
      */
-    override fun isReady(): Flow<Boolean> {
-        val isReadyState = MutableStateFlow<Boolean?>(null)
-
+    override suspend fun isReady() = suspendCoroutine { continuation ->
         val request = IsReadyToPayRequest.fromJson(
             googlePayJsonFactory.createIsReadyToPayRequest(
                 billingAddressParameters = billingAddressParameters,
@@ -84,10 +77,10 @@ internal class DefaultGooglePayRepository(
                 }.onFailure {
                     logger.error("Google Pay check failed.", it)
                 }.getOrDefault(false)
-                logger.info("Google Pay ready? $isReady")
-                isReadyState.value = isReady
-            }
 
-        return isReadyState.filterNotNull()
+                logger.info("Google Pay ready? $isReady")
+
+                continuation.resume(isReady)
+            }
     }
 }

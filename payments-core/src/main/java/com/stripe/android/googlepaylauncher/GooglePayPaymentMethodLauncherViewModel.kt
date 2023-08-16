@@ -26,7 +26,6 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.utils.requireApplication
-import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -57,7 +56,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
 
     @VisibleForTesting
     suspend fun isReadyToPay(): Boolean {
-        return googlePayRepository.isReady().first()
+        return googlePayRepository.isReady()
     }
 
     @VisibleForTesting
