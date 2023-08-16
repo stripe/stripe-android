@@ -51,7 +51,6 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
@@ -67,6 +66,7 @@ import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.elements.menu.Checkbox
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeShapes
 
 @Preview
 @Composable
@@ -164,23 +164,20 @@ internal fun LinkInlineSignup(
                 modifier = modifier
                     .border(
                         border = MaterialTheme.getBorderStroke(isSelected = false),
-                        shape = MaterialTheme.linkShapes.small
+                        shape = MaterialTheme.stripeShapes.roundedCornerShape,
                     )
                     .background(
                         color = MaterialTheme.stripeColors.component,
-                        shape = MaterialTheme.linkShapes.small
+                        shape = MaterialTheme.stripeShapes.roundedCornerShape,
                     )
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(MaterialTheme.linkShapes.small)
+                        .clip(MaterialTheme.stripeShapes.roundedCornerShape)
                 ) {
                     Column(
-                        modifier = Modifier
-                            .clickable {
-                                toggleExpanded()
-                            }
+                        modifier = Modifier.clickable { toggleExpanded() },
                     ) {
                         Row(
                             modifier = Modifier
