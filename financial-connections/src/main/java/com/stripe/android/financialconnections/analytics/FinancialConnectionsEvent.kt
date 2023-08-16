@@ -95,6 +95,24 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
+    class FeaturedInstitutionsLoaded(
+        institutionIds: Set<String>,
+        duration: Long
+    ) : FinancialConnectionsEvent(
+        name = "search.feature_institutions_loaded",
+        params = (
+            institutionIds
+                .mapIndexed { index, id -> "institutions[$index]" to id }
+                .toMap()
+                .plus(
+                    mapOf(
+                        "result_count" to institutionIds.size.toString(),
+                        "duration" to duration.toString(),
+                    )
+                )
+        ).filterNotNullValues()
+    )
+
     class InstitutionSelected(
         pane: Pane,
         fromFeatured: Boolean,
