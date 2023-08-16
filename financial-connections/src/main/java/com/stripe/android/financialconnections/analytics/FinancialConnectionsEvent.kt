@@ -133,6 +133,22 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
+    class AccountSelected(
+        selected: Boolean,
+        isSingleAccount: Boolean,
+        accountId: String,
+    ) : FinancialConnectionsEvent(
+        name = if (selected) {
+            "click.account_picker.account_selected"
+        } else {
+            "click.account_picker.account_unselected"
+        },
+        mapOf(
+            "is_single_account" to isSingleAccount.toString(),
+            "account" to accountId,
+        ).filterNotNullValues()
+    )
+
     class PollAttachPaymentsSucceeded(
         authSessionId: String,
         duration: Long
