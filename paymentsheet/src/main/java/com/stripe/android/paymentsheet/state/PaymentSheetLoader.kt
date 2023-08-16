@@ -31,7 +31,6 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.ServerSpecState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
@@ -99,7 +98,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                         GooglePayEnvironment.Test
                 }
             )
-        }?.isReady()?.first() ?: false
+        }?.isReady() ?: false
     }
 
     private suspend fun create(

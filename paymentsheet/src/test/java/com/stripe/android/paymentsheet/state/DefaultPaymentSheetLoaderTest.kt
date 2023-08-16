@@ -26,7 +26,6 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -38,6 +37,7 @@ import org.mockito.kotlin.capture
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -80,17 +80,10 @@ internal class DefaultPaymentSheetLoaderTest {
     fun setup() {
         MockitoAnnotations.openMocks(this)
 
-        whenever(readyGooglePayRepository.isReady()).thenReturn(
-            flow {
-                emit(true)
-            }
-        )
-
-        whenever(unreadyGooglePayRepository.isReady()).thenReturn(
-            flow {
-                emit(false)
-            }
-        )
+        readyGooglePayRepository.stub {
+            onBlocking { readyGooglePayRepository.isReady() } doReturn true
+            onBlocking { unreadyGooglePayRepository.isReady() } doReturn false
+        }
     }
 
     @Test

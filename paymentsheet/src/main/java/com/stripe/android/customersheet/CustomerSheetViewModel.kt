@@ -43,7 +43,6 @@ import com.stripe.android.paymentsheet.utils.mapAsStateFlow
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -228,7 +227,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     } else {
                         GooglePayEnvironment.Test
                     }
-                ).isReady().first()
+                ).isReady()
 
                 transition(
                     to = CustomerSheetViewState.SelectPaymentMethod(

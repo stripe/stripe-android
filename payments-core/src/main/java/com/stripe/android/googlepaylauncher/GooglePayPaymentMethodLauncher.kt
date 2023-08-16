@@ -36,7 +36,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.util.Locale
@@ -199,7 +198,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
             lifecycleScope.launch {
                 val repository = googlePayRepositoryFactory(config.environment)
                 readyCallback.onReady(
-                    repository.isReady().first().also {
+                    repository.isReady().also {
                         isReady = it
                     }
                 )

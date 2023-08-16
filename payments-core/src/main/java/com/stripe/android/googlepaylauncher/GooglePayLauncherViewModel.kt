@@ -35,7 +35,6 @@ import com.stripe.android.utils.mapResult
 import com.stripe.android.utils.requireApplication
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -68,7 +67,7 @@ internal class GooglePayLauncherViewModel(
 
     @VisibleForTesting
     suspend fun isReadyToPay(): Boolean {
-        return googlePayRepository.isReady().first()
+        return googlePayRepository.isReady()
     }
 
     @VisibleForTesting
