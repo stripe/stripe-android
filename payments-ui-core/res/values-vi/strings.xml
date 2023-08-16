@@ -6,6 +6,8 @@
   <string name="stripe_back">Quay lại</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Địa chỉ thanh toán</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">Mã BLIK</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Thông tin liên lạc</string>
   <!-- Text for continue button -->
@@ -20,6 +22,10 @@
   <string name="stripe_iban_invalid_start">IBAN của quý vị phải bắt đầu bằng mã quốc gia gồm hai chữ cái.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">Ngân hàng iDEAL</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Mã BLIK của quý vị chưa đầy đủ.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Mã BLIK của quý vị không hợp lệ.</string>
   <string name="stripe_invalid_email_address">Địa chỉ email không hợp lệ: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Số ID UPI không hợp lệ</string>
