@@ -164,14 +164,12 @@ internal fun AddCard(
             enabled = viewState.enabled,
             elements = viewState.formViewData.elements,
             lastTextFieldIdentifier = viewState.formViewData.lastTextFieldIdentifier,
+            modifier = Modifier.padding(bottom = 8.dp),
         )
 
         AnimatedVisibility(visible = viewState.errorMessage != null) {
             viewState.errorMessage?.let { error ->
-                ErrorMessage(
-                    error = error,
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
+                ErrorMessage(error = error)
             }
         }
 
@@ -183,6 +181,7 @@ internal fun AddCard(
             onButtonClick = {
                 viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
             },
+            modifier = Modifier.padding(top = 10.dp),
         )
     }
 }
