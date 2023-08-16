@@ -26,7 +26,7 @@ class LokaliseClient
             request["X-Api-Token"] = api_token
         end
 
-        body = {
+        request_body = {
             "keys": [
                 {
                     "key_name": {
@@ -50,12 +50,16 @@ class LokaliseClient
             ]
         }
 
-        request.body = body.to_s
-
+        request.body = request_body.to_json
         response = http.request(request)
-        success = response.kind_of? Net::HTTPSuccess
 
-        success
+        if response.kind_of? Net::HTTPSuccess
+            response_json = JSON.parse(response.body)
+            errors = response_json['errors']
+            errors.empty?
+        else
+            false
+        end
     end
 
     def update_key(existing_key, key_object)
@@ -75,20 +79,31 @@ class LokaliseClient
             request["X-Api-Token"] = api_token
         end
 
-        key['key_name']['android'] = key_object[:key_name]
-        key['filenames']['android'] = key_object[:filename]
-        key['platforms'] << 'android'
+        existing_key['key_name']['android'] = key_object[:key_name]
+        existing_key['filenames']['android'] = key_object[:filename]
+        existing_key['platforms'] << 'android'
 
-        body = {
-            "keys": [key]
+        if existing_key['custom_attributes'].empty?
+            existing_key.delete('custom_attributes')
+        end
+
+        # No need to send all the translations back
+        existing_key.delete('translations')
+
+        request_body = {
+            "keys": [existing_key]
         }
 
-        request.body = body.to_s
-
+        request.body = request_body.to_json
         response = http.request(request)
-        success = response.kind_of? Net::HTTPSuccess
 
-        success
+        if response.kind_of? Net::HTTPSuccess
+            response_json = JSON.parse(response.body)
+            errors = response_json['errors']
+            errors.empty?
+        else
+            false
+        end
     end
 
     private

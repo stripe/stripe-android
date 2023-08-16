@@ -21,13 +21,10 @@ class Processor
         end
 
         def perform(lokalise_client)
-            # TODO: Enable these
             success = if @type == "create"
-                true
-                # lokalise_client.create_key(@key)
+                lokalise_client.create_key(@key)
             else
-                false
-                # lokalise_client.update_key(@existing_key, @key)
+                lokalise_client.update_key(@existing_key, @key)
             end
 
             message = success ? success_message : failure_message
