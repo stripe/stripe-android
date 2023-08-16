@@ -156,9 +156,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     val addressElement = AddressElement(
         _identifier = IdentifierSpec.Generic("billing_details[address]"),
         addressRepository = addressRepository,
-        rawValuesMap = args.savedPaymentMethod?.input?.address?.asFormFieldValues()
-            ?: defaultAddress?.asFormFieldValues()
-            ?: emptyMap(),
+        rawValuesMap = defaultAddress?.asFormFieldValues() ?: emptyMap(),
         sameAsShippingElement = sameAsShippingElement,
         shippingValuesMap = args.formArgs.shippingDetails?.toIdentifierMap(args.formArgs.billingDetails),
     )
