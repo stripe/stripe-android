@@ -159,8 +159,7 @@ internal class AccountPickerViewModel @Inject constructor(
         )
     }
 
-    fun onAccountClicked(account: PartnerAccount) = viewModelScope.launch {
-        val state = awaitState()
+    fun onAccountClicked(account: PartnerAccount) = withState { state ->
         state.payload()?.let { payload ->
             val selectedIds = state.selectedIds
             val newSelectedIds = when (payload.selectionMode) {
@@ -171,41 +170,43 @@ internal class AccountPickerViewModel @Inject constructor(
                     selectedIds + account.id
                 }
             }
+            setState { copy(selectedIds = newSelectedIds) }
             logAccountSelectionChanges(
                 idsBefore = selectedIds,
                 idsAfter = newSelectedIds,
                 isSingleAccount = payload.singleAccount
             )
-            setState { copy(selectedIds = newSelectedIds) }
         } ?: run {
             logger.error("account clicked without available payload.")
         }
     }
 
-    private suspend fun logAccountSelectionChanges(
+    private fun logAccountSelectionChanges(
         idsBefore: Set<String>,
         idsAfter: Set<String>,
         isSingleAccount: Boolean
     ) {
-        val newIds = idsAfter - idsBefore
-        val removedIds = idsBefore - idsAfter
-        if (newIds.size == 1) {
-            eventTracker.track(
-                AccountSelected(
-                    isSingleAccount = isSingleAccount,
-                    selected = true,
-                    accountId = newIds.first()
+        viewModelScope.launch {
+            val newIds = idsAfter - idsBefore
+            val removedIds = idsBefore - idsAfter
+            if (newIds.size == 1) {
+                eventTracker.track(
+                    AccountSelected(
+                        isSingleAccount = isSingleAccount,
+                        selected = true,
+                        accountId = newIds.first()
+                    )
                 )
-            )
-        }
-        if (removedIds.size == 1) {
-            eventTracker.track(
-                AccountSelected(
-                    isSingleAccount = isSingleAccount,
-                    selected = false,
-                    accountId = removedIds.first()
+            }
+            if (removedIds.size == 1) {
+                eventTracker.track(
+                    AccountSelected(
+                        isSingleAccount = isSingleAccount,
+                        selected = false,
+                        accountId = removedIds.first()
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -253,8 +254,7 @@ internal class AccountPickerViewModel @Inject constructor(
         loadAccounts()
     }
 
-    fun onSelectAllAccountsClicked() = viewModelScope.launch {
-        val state = awaitState()
+    fun onSelectAllAccountsClicked() = withState { state ->
         state.payload()?.let { payload ->
             val selectedIds = state.selectedIds
             val newIds = if (state.allAccountsSelected) {
