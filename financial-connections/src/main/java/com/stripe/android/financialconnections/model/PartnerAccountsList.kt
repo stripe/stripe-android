@@ -92,5 +92,4 @@ internal data class PartnerAccount(
         get() = _allowSelection ?: true
 
     internal val redactedAccountNumbers: String? get() = displayableAccountNumbers?.let { "••••$it" }
-
 }
