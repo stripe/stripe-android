@@ -17,11 +17,16 @@ import kotlinx.serialization.Serializable
 data class IdentifierSpec(
     val v1: String,
     val ignoreField: Boolean = false,
-    val isOptions: Boolean = false
+    val requestDestination: RequestDestination = RequestDestination.Params,
 ) : Parcelable {
     constructor() : this("")
 
     companion object {
+        enum class RequestDestination {
+            Params,
+            Options
+        }
+
         fun Generic(_value: String) = IdentifierSpec(_value)
 
         // Needed to pre-populate forms
@@ -66,8 +71,8 @@ data class IdentifierSpec(
         val Upi = IdentifierSpec("upi")
         val Vpa = IdentifierSpec("upi[vpa]")
 
-        val Blik = IdentifierSpec("blik", isOptions = true)
-        val Code = IdentifierSpec("blik[code]", isOptions = true)
+        val Blik = IdentifierSpec("blik", requestDestination = RequestDestination.Options)
+        val Code = IdentifierSpec("blik[code]", requestDestination = RequestDestination.Options)
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {

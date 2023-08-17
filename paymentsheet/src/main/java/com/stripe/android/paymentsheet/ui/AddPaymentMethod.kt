@@ -28,6 +28,7 @@ import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
+import com.stripe.android.uicore.elements.RequestDestination
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -148,7 +149,9 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
     paymentMethod: LpmRepository.SupportedPaymentMethod
 ): PaymentMethodCreateParams {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
-        fieldValuePairs = fieldValuePairs.filterNot { entry ->
+        fieldValuePairs = fieldValuePairs.filter { entry ->
+            entry.key.requestDestination == RequestDestination.Params
+        }.filterNot { entry ->
             entry.key == IdentifierSpec.SaveForFutureUse || entry.key == IdentifierSpec.CardBrand
         },
         code = paymentMethod.code,
@@ -162,7 +165,7 @@ internal fun FormFieldValues.transformToPaymentMethodOptionsParams(
     return FieldValuesToParamsMapConverter.transformToPaymentMethodOptionsParams(
         // only provide pairs of type
         fieldValuePairs = fieldValuePairs.filter { entry ->
-            entry.key.isOptions
+            entry.key.requestDestination == RequestDestination.Options
         },
         code = paymentMethod.code,
     )
