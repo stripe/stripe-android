@@ -46,6 +46,7 @@ import com.stripe.android.identity.ui.IndividualWelcomeScreen
 import com.stripe.android.identity.ui.InitialLoadingScreen
 import com.stripe.android.identity.ui.OTPScreen
 import com.stripe.android.identity.ui.SelfieScanScreen
+import com.stripe.android.identity.ui.SelfieWarmupScreen
 import com.stripe.android.identity.ui.UploadScreen
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -154,6 +155,12 @@ internal fun IdentityNavGraph(
                     identityScanViewModel = identityScanViewModel,
                     backStackEntry = it,
                     route = PassportScanDestination.ROUTE.route
+                )
+            }
+            screen(SelfieWarmupDestination.ROUTE) {
+                SelfieWarmupScreen(
+                    navController = navController,
+                    identityViewModel = identityViewModel
                 )
             }
             screen(SelfieDestination.ROUTE) {

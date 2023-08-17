@@ -41,7 +41,7 @@ import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.DocSelectionDestination
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.IdentityTopLevelDestination
-import com.stripe.android.identity.navigation.SelfieDestination
+import com.stripe.android.identity.navigation.SelfieWarmupDestination
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
@@ -423,7 +423,7 @@ internal class IdentityViewModelTest {
     fun `postVerificationPageDataAndMaybeNavigate - missSelfie`() {
         testPostVerificationPageDataAndMaybeNavigate(
             VERIFICATION_PAGE_DATA_MISSING_SELFIE,
-            SelfieDestination
+            SelfieWarmupDestination
         )
     }
 
@@ -475,7 +475,7 @@ internal class IdentityViewModelTest {
             ConsentDestination.ROUTE.route
         )
         verify(mockController).navigate(
-            eq(SelfieDestination.routeWithArgs),
+            eq(SelfieWarmupDestination.routeWithArgs),
             any<NavOptionsBuilder.() -> Unit>()
         )
     }
