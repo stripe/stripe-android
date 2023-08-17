@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import com.stripe.android.ConfirmStripeIntentParamsFactory
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
@@ -14,8 +15,10 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor.NextStep
 import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.coroutines.CoroutineContext
 
 internal interface IntentConfirmationInterceptor {
 
@@ -88,6 +91,7 @@ internal enum class DeferredIntentConfirmationType(val value: String) {
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val context: Context,
     private val stripeRepository: StripeRepository,
+    @IOContext private val workContext: CoroutineContext,
     @Named(IS_FLOW_CONTROLLER) private val isFlowController: Boolean,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
@@ -107,8 +111,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-    ): NextStep {
-        return when (initializationMode) {
+    ): NextStep = withContext(workContext) {
+        when (initializationMode) {
             is PaymentSheet.InitializationMode.DeferredIntent -> {
                 handleDeferredIntent(
                     intentConfiguration = initializationMode.intentConfiguration,
@@ -142,8 +146,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-    ): NextStep {
-        return when (initializationMode) {
+    ): NextStep = withContext(workContext) {
+        when (initializationMode) {
             is PaymentSheet.InitializationMode.DeferredIntent -> {
                 handleDeferredIntent(
                     intentConfiguration = initializationMode.intentConfiguration,

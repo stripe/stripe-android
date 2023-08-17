@@ -41,6 +41,7 @@ class DefaultIntentConfirmationInterceptorTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
             stripeRepository = object : AbsFakeStripeRepository() {},
+            workContext = coroutineContext,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
             isFlowController = false,
@@ -67,6 +68,7 @@ class DefaultIntentConfirmationInterceptorTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
             stripeRepository = object : AbsFakeStripeRepository() {},
+            workContext = coroutineContext,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
             isFlowController = false,
@@ -93,6 +95,7 @@ class DefaultIntentConfirmationInterceptorTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
             stripeRepository = object : AbsFakeStripeRepository() {},
+            workContext = coroutineContext,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
             isFlowController = false,
@@ -131,6 +134,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                 }
             },
+            workContext = coroutineContext,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
             isFlowController = false,
@@ -168,6 +172,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     return Result.failure(apiException)
                 }
             },
+            workContext = coroutineContext,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
             isFlowController = false,
@@ -209,6 +214,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     return Result.failure(apiException)
                 }
             },
+            workContext = coroutineContext,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
             isFlowController = false,
@@ -236,6 +242,7 @@ class DefaultIntentConfirmationInterceptorTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
             stripeRepository = mock(),
+            workContext = coroutineContext,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
             isFlowController = false,
@@ -265,6 +272,7 @@ class DefaultIntentConfirmationInterceptorTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
             stripeRepository = mock(),
+            workContext = coroutineContext,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
             isFlowController = false,
@@ -306,6 +314,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     )
                 }
             },
+            workContext = coroutineContext,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
             isFlowController = false,
@@ -345,6 +354,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
                 }
             },
+            workContext = coroutineContext,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
             isFlowController = false,
@@ -390,6 +400,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     )
                 }
             },
+            workContext = coroutineContext,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
             isFlowController = false,
@@ -432,6 +443,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
                 }
             },
+            workContext = coroutineContext,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
             isFlowController = false,
@@ -477,6 +489,7 @@ class DefaultIntentConfirmationInterceptorTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
             stripeRepository = stripeRepository,
+            workContext = coroutineContext,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
             isFlowController = false,
