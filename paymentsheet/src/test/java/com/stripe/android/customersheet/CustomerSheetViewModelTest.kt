@@ -31,7 +31,7 @@ class CustomerSheetViewModelTest {
 
     private val selectPaymentMethodViewState = SelectPaymentMethod(
         title = null,
-        savedPaymentMethods = listOf(),
+        savedPaymentMethods = listOf(CARD_PAYMENT_METHOD),
         paymentSelection = null,
         isLiveMode = false,
         isProcessing = false,
@@ -52,6 +52,7 @@ class CustomerSheetViewModelTest {
         enabled = true,
         isLiveMode = false,
         isProcessing = false,
+        isFirstPaymentMethod = false
     )
 
     @Test
@@ -82,7 +83,34 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `init emits CustomerSheetViewState#SelectPaymentMethod`() = runTest {
+    fun `init emits CustomerSheetViewState#AddPaymentMethod when no payment methods available`() = runTest {
+        val viewModel = createViewModel(
+            isGooglePayAvailable = false,
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.success(listOf())
+            )
+        )
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(
+                AddPaymentMethod::class.java
+            )
+        }
+    }
+
+    @Test
+    fun `init emits CustomerSheetViewState#SelectPaymentMethod when only google pay available`() = runTest {
+        val viewModel = createViewModel(
+            isGooglePayAvailable = true
+        )
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(
+                SelectPaymentMethod::class.java
+            )
+        }
+    }
+
+    @Test
+    fun `init emits CustomerSheetViewState#SelectPaymentMethod when payment methods available`() = runTest {
         val viewModel = createViewModel()
         viewModel.viewState.test {
             assertThat(awaitItem()).isInstanceOf(
@@ -108,6 +136,7 @@ class CustomerSheetViewModelTest {
     @Test
     fun `When payment methods loaded, CustomerSheetViewState is populated`() = runTest {
         val viewModel = createViewModel(
+            isGooglePayAvailable = false,
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
@@ -348,6 +377,43 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `When CustomerViewAction#OnItemSelected with editing view state, payment selection should not be updated`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.success(
+                    listOf(
+                        CARD_PAYMENT_METHOD,
+                        CARD_PAYMENT_METHOD.copy(id = "pm_2")
+                    )
+                ),
+                selectedPaymentOption = CustomerAdapter.Result.success(
+                    CustomerAdapter.PaymentOption.fromId(CARD_PAYMENT_METHOD.id!!)
+                )
+            )
+        )
+        viewModel.viewState.test {
+            val initialViewState = awaitViewState<SelectPaymentMethod>()
+            val initialPaymentSelection = initialViewState.paymentSelection as PaymentSelection.Saved
+
+            assertThat(initialPaymentSelection.paymentMethod).isEqualTo(CARD_PAYMENT_METHOD)
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    PaymentSelection.Saved(
+                        paymentMethod = CARD_PAYMENT_METHOD.copy("pm_2")
+                    )
+                )
+            )
+
+            val currentViewState = awaitViewState<SelectPaymentMethod>()
+            val currentPaymentSelection = currentViewState.paymentSelection as PaymentSelection.Saved
+
+            assertThat(currentPaymentSelection.paymentMethod).isEqualTo(CARD_PAYMENT_METHOD)
+        }
+    }
+
+    @Test
     fun `When CustomerViewAction#OnItemSelected with Link, exception should be thrown`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
@@ -447,7 +513,8 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = CustomerAdapter.Result.success(
                     listOf(
-                        CARD_PAYMENT_METHOD
+                        CARD_PAYMENT_METHOD,
+                        CARD_PAYMENT_METHOD.copy(id = "pm_2")
                     )
                 ),
                 selectedPaymentOption = CustomerAdapter.Result.success(
@@ -459,7 +526,7 @@ class CustomerSheetViewModelTest {
         )
         viewModel.viewState.test {
             var viewState = awaitViewState<SelectPaymentMethod>()
-            assertThat(viewState.savedPaymentMethods).hasSize(1)
+            assertThat(viewState.savedPaymentMethods).hasSize(2)
             assertThat(viewState.paymentSelection).isNotNull()
 
             viewModel.handleViewAction(
@@ -469,8 +536,42 @@ class CustomerSheetViewModelTest {
             )
 
             viewState = awaitViewState()
-            assertThat(viewState.savedPaymentMethods).hasSize(0)
+            assertThat(viewState.savedPaymentMethods).hasSize(1)
             assertThat(viewState.paymentSelection).isNull()
+        }
+    }
+
+    @Test
+    fun `When removing last payment method & google pay disabled, should transition to add payment screen`() = runTest {
+        val viewModel = createViewModel(
+            isGooglePayAvailable = false,
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.success(
+                    listOf(
+                        CARD_PAYMENT_METHOD
+                    )
+                ),
+                selectedPaymentOption = CustomerAdapter.Result.success(
+                    CustomerAdapter.PaymentOption.fromId(
+                        CARD_PAYMENT_METHOD.id!!
+                    )
+                )
+            )
+        )
+        viewModel.viewState.test {
+            val viewState = awaitViewState<SelectPaymentMethod>()
+            assertThat(viewState.savedPaymentMethods).hasSize(1)
+            assertThat(viewState.paymentSelection).isNotNull()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemRemoved(
+                    CARD_PAYMENT_METHOD
+                )
+            )
+
+            val addPaymentMethodViewState = awaitViewState<AddPaymentMethod>()
+
+            assertThat(addPaymentMethodViewState.isFirstPaymentMethod).isTrue()
         }
     }
 
@@ -962,12 +1063,18 @@ class CustomerSheetViewModelTest {
                 .isFalse()
 
             viewModel.handleViewAction(
+                CustomerSheetViewAction.OnEditPressed
+            )
+
+            viewModel.handleViewAction(
                 CustomerSheetViewAction.OnItemSelected(
                     PaymentSelection.Saved(
                         CARD_PAYMENT_METHOD.copy(id = "pm_1")
                     )
                 )
             )
+
+            skipItems(1)
 
             assertThat(awaitViewState<SelectPaymentMethod>().primaryButtonVisible)
                 .isTrue()

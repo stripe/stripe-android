@@ -6,6 +6,8 @@
   <string name="stripe_back">Tornar</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Adreça de facturació</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">Codi BLIK</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Informació de contacte</string>
   <!-- Text for continue button -->
@@ -20,6 +22,10 @@
   <string name="stripe_iban_invalid_start">El teu IBAN ha de començar amb un codi de país de dues lletres.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">Bank iDeal</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">El codi BLIK no està complet.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">El codi BLIK no és vàlid.</string>
   <string name="stripe_invalid_email_address">Adreça electrònica no vàlida: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">ID d\'UPI no vàlid</string>
