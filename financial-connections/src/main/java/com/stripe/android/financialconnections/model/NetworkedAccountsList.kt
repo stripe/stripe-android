@@ -11,5 +11,5 @@ internal data class NetworkedAccountsList(
 
     @SerialName(value = "display") val display: Display? = null,
 
-    @SerialName(value = "next_pane_on_new_account") val nextPaneOnNewAccount: Pane? = null
+    @SerialName(value = "next_pane_on_add_account") val nextPaneOnAddAccount: Pane? = null
 )

@@ -107,7 +107,7 @@ class LinkAccountPickerViewModelTest {
     @Test
     fun `onNewBankAccountClick - navigates to AddNewAccount#NextPane`() = runTest {
         val response = twoAccounts().copy(
-            nextPaneOnNewAccount = Pane.INSTITUTION_PICKER
+            nextPaneOnAddAccount = Pane.INSTITUTION_PICKER
         )
         whenever(getManifest()).thenReturn(sessionManifest())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
@@ -116,7 +116,7 @@ class LinkAccountPickerViewModelTest {
         val viewModel = buildViewModel(LinkAccountPickerState())
         viewModel.onNewBankAccountClick()
 
-        val navigation = response.nextPaneOnNewAccount!!.toNavigationCommand()
+        val navigation = response.nextPaneOnAddAccount!!.toNavigationCommand()
         navigationManager.assertNavigatedTo(navigation)
     }
 
@@ -207,7 +207,7 @@ class LinkAccountPickerViewModelTest {
         }
 
     private fun twoAccounts() = NetworkedAccountsList(
-        nextPaneOnNewAccount = null,
+        nextPaneOnAddAccount = null,
         data = listOf(
             partnerAccount().copy(
                 id = "id1",

@@ -72,7 +72,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
                 accounts = accounts,
-                nextPaneOnNewAccount = accountsResponse.nextPaneOnNewAccount,
+                nextPaneOnNewAccount = accountsResponse.nextPaneOnAddAccount,
                 addNewAccount = requireNotNull(display.addNewAccount),
                 title = display.title,
                 defaultCta = display.defaultCta,

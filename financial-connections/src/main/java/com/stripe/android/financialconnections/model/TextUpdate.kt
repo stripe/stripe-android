@@ -231,6 +231,6 @@ internal data class NetworkedAccount(
 @Serializable
 @Parcelize
 internal data class AddNewAccount(
-    @SerialName("body") val body: String? = null,
+    @SerialName("body") val body: String,
     @SerialName("icon") val icon: Image? = null,
 ) : Parcelable
