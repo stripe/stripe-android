@@ -72,7 +72,7 @@ data class IdentifierSpec(
         val Vpa = IdentifierSpec("upi[vpa]")
 
         val Blik = IdentifierSpec("blik", requestDestination = RequestDestination.Options)
-        val Code = IdentifierSpec("blik[code]", requestDestination = RequestDestination.Options)
+        val BlikCode = IdentifierSpec("blik[code]", requestDestination = RequestDestination.Options)
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {

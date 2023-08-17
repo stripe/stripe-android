@@ -45,7 +45,7 @@ class FieldValuesToParamsMapConverter {
             code: PaymentMethodCode,
         ): PaymentMethodOptionsParams? {
             if (code == PaymentMethod.Type.Blik.code) {
-                val blikCode = fieldValuePairs[IdentifierSpec.Code]?.value
+                val blikCode = fieldValuePairs[IdentifierSpec.BlikCode]?.value
                 if (blikCode != null) {
                     return PaymentMethodOptionsParams.Blik(
                         blikCode
