@@ -186,19 +186,6 @@ internal fun FormFieldValues.transformToPaymentSelection(
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,
         )
-    } else if (paymentMethod.code == PaymentMethod.Type.Blik.code){
-        val params = transformToPaymentMethodCreateParams(paymentMethod)
-        val options = transformToPaymentMethodOptionsParams(paymentMethod)
-
-        PaymentSelection.New.Blik(
-            labelResource = resources.getString(paymentMethod.displayNameResource),
-            iconResource = paymentMethod.iconResource,
-            lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
-            darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
-            paymentMethodCreateParams = params,
-            paymentMethodOptionsParams = options,
-            customerRequestedSave = userRequestedReuse,
-        )
     } else {
         val params = transformToPaymentMethodCreateParams(paymentMethod)
         val options = transformToPaymentMethodOptionsParams(paymentMethod)
