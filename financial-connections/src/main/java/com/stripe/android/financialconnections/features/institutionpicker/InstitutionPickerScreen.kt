@@ -42,7 +42,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -83,10 +82,6 @@ import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.theme.Brand100
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.image.StripeImage
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 
 @Composable
 internal fun InstitutionPickerScreen() {
@@ -129,7 +124,7 @@ private fun InstitutionPickerContent(
     onCloseClick: () -> Unit,
     onSearchFocused: () -> Unit,
     onManualEntryClick: () -> Unit,
-    onScrollChanged: (List<String>) -> Unit
+    onScrollChanged: () -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
@@ -166,7 +161,7 @@ private fun LoadedContent(
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     payload: Async<Payload>,
     onManualEntryClick: () -> Unit,
-    onScrollChanged: (List<String>) -> Unit,
+    onScrollChanged: () -> Unit,
 ) {
     var input by remember { mutableStateOf(TextFieldValue(previewText ?: "")) }
     LaunchedEffect(searchMode) { if (!searchMode) input = TextFieldValue() }
@@ -272,23 +267,22 @@ private fun SearchInstitutionsList(
     institutions: Async<InstitutionResponse>,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     onManualEntryClick: () -> Unit,
-    onScrollChanged: (List<String>) -> Unit,
+    onScrollChanged: () -> Unit,
     allowManualEntry: Boolean
 ) {
     val listState = rememberLazyListState()
-    LaunchedEffect(institutions) {
-        // only start collecting scroll changes when institutions are loaded
-        if (institutions()?.data?.isNotEmpty() == true) {
-            snapshotFlow { listState.layoutInfo.visibleItemsInfo to listState.isScrollInProgress }
-                // ignore changes while scrolling
-                .filter {(_, scrolling) ->  scrolling.not() }
-                // map to institution ids (keys)
-                .map { (visibleItems, _) -> visibleItems.mapNotNull { it.key as? String } }
-                // only emit when visible indexes change
-                .distinctUntilChanged()
-                // drop first emission (first render of the list)
-                .drop(1)
-                .collect { visibleItems -> onScrollChanged(visibleItems) }
+    val shouldEmitScrollEvent = remember { mutableStateOf(true) }
+
+    // Scroll event should be emitted just once per search
+    LaunchedEffect(institutions) { shouldEmitScrollEvent.value = true }
+    // Trigger onScrollChanged with the list of institutions when scrolling stops (true -> false)
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (institutions()?.data?.isNotEmpty() == true &&
+            !listState.isScrollInProgress &&
+            shouldEmitScrollEvent.value
+        ) {
+            onScrollChanged()
+            shouldEmitScrollEvent.value = false
         }
     }
 

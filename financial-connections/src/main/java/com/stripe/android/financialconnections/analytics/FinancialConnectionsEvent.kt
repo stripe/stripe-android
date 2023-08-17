@@ -116,7 +116,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class SearchScroll(
-        institutionIds: List<String>,
+        institutionIds: Set<String>,
         pane: Pane
     ) : FinancialConnectionsEvent(
         name = "search.scroll",

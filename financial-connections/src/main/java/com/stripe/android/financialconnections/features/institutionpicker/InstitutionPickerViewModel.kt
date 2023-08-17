@@ -208,12 +208,15 @@ internal class InstitutionPickerViewModel @Inject constructor(
         )
     }
 
-    fun onScrollChanged(visibleIds: List<String>) {
+    fun onScrollChanged() {
         viewModelScope.launch {
             eventTracker.track(
                 SearchScroll(
                     pane = Pane.INSTITUTION_PICKER,
-                    institutionIds = visibleIds
+                    institutionIds = awaitState().searchInstitutions()
+                        ?.data
+                        ?.map { it.id }
+                        ?.toSet() ?: emptySet(),
                 )
             )
         }
