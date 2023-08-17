@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.FeaturedInstitutionsLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.InstitutionSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.SearchScroll
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.SearchSucceeded
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
@@ -33,6 +34,7 @@ import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @Suppress("LongParameterList")
@@ -61,7 +63,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
                             clientSecret = configuration.financialConnectionsSessionClientSecret
                         ).data
                     }
-
                 }.onFailure {
                     logger.error("Error fetching featured institutions", it)
                     eventTracker.track(FinancialConnectionsEvent.Error(Pane.INSTITUTION_PICKER, it))
@@ -84,6 +85,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 eventTracker.track(PaneLoaded(Pane.INSTITUTION_PICKER))
                 eventTracker.track(
                     FeaturedInstitutionsLoaded(
+                        pane = Pane.INSTITUTION_PICKER,
                         duration = payload.featuredInstitutionsDuration,
                         institutionIds = payload.featuredInstitutions.map { it.id }.toSet()
                     )
@@ -204,6 +206,17 @@ internal class InstitutionPickerViewModel @Inject constructor(
         navigationManager.navigate(
             NavigationState.NavigateToRoute(NavigationDirections.manualEntry)
         )
+    }
+
+    fun onScrollChanged(visibleIds: List<String>) {
+        viewModelScope.launch {
+            eventTracker.track(
+                SearchScroll(
+                    pane = Pane.INSTITUTION_PICKER,
+                    institutionIds = visibleIds
+                )
+            )
+        }
     }
 
     companion object :

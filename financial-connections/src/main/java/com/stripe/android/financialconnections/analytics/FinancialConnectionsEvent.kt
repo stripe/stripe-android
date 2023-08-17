@@ -97,7 +97,8 @@ internal sealed class FinancialConnectionsEvent(
 
     class FeaturedInstitutionsLoaded(
         institutionIds: Set<String>,
-        duration: Long
+        duration: Long,
+        pane: Pane
     ) : FinancialConnectionsEvent(
         name = "search.feature_institutions_loaded",
         params = (
@@ -106,11 +107,27 @@ internal sealed class FinancialConnectionsEvent(
                 .toMap()
                 .plus(
                     mapOf(
+                        "pane" to pane.value,
                         "result_count" to institutionIds.size.toString(),
                         "duration" to duration.toString(),
                     )
                 )
-        ).filterNotNullValues()
+            ).filterNotNullValues()
+    )
+
+    class SearchScroll(
+        institutionIds: List<String>,
+        pane: Pane
+    ) : FinancialConnectionsEvent(
+        name = "search.scroll",
+        params = (
+            institutionIds
+                .mapIndexed { index, id -> "institution_ids[$index]" to id }
+                .toMap()
+                .plus(
+                    mapOf("pane" to pane.value)
+                )
+            ).filterNotNullValues()
     )
 
     class InstitutionSelected(
