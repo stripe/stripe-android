@@ -85,6 +85,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.uicore.image.StripeImage
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 
 @Composable
@@ -278,12 +279,14 @@ private fun SearchInstitutionsList(
     LaunchedEffect(institutions) {
         // only start collecting scroll changes when institutions are loaded
         if (institutions()?.data?.isNotEmpty() == true) {
-            snapshotFlow { listState.layoutInfo.visibleItemsInfo }
-                // observe visible institution ids (keys)
-                .map { visibleItems -> visibleItems.mapNotNull { it.key as? String } }
+            snapshotFlow { listState.layoutInfo.visibleItemsInfo to listState.isScrollInProgress }
+                // ignore changes while scrolling
+                .filter {(_, scrolling) ->  scrolling.not() }
+                // map to institution ids (keys)
+                .map { (visibleItems, _) -> visibleItems.mapNotNull { it.key as? String } }
                 // only emit when visible indexes change
                 .distinctUntilChanged()
-                // drop first render
+                // drop first emission (first render of the list)
                 .drop(1)
                 .collect { visibleItems -> onScrollChanged(visibleItems) }
         }
