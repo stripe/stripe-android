@@ -128,14 +128,19 @@ private fun getAccountTexts(
         networkedAccount?.caption != null -> networkedAccount.caption
         allowSelection.not() && account.allowSelectionMessage?.isNotBlank() == true ->
             account.allowSelectionMessage
+
         formattedBalance != null -> formattedBalance
-        account.redactedAccountNumbers.isNotEmpty() -> account.redactedAccountNumbers
+        account.redactedAccountNumbers != null -> account.redactedAccountNumbers
         else -> null
     }
 
     // just show redacted account numbers in the title if they're not in the subtitle.
     val title = when {
-        subtitle != account.redactedAccountNumbers -> "${account.name} ${account.redactedAccountNumbers}"
+        subtitle != account.redactedAccountNumbers -> listOfNotNull(
+            account.name,
+            account.redactedAccountNumbers
+        ).joinToString(" ")
+
         else -> account.name
     }
 

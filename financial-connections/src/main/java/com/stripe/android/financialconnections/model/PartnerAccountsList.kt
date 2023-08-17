@@ -91,7 +91,6 @@ internal data class PartnerAccount(
     internal val allowSelection: Boolean
         get() = _allowSelection ?: true
 
-    internal val redactedAccountNumbers get() = displayableAccountNumbers?.let { "••••$it" } ?: ""
+    internal val redactedAccountNumbers: String? get() = displayableAccountNumbers?.let { "••••$it" }
 
-    internal val fullName get() = "${this.name} $redactedAccountNumbers"
 }

@@ -74,7 +74,10 @@ internal fun AccessibleDataCalloutWithAccounts(
                 accounts.forEach {
                     AccountRow(
                         iconUrl = institution.icon?.default,
-                        text = it.fullName
+                        text = listOfNotNull(
+                            it.name,
+                            it.redactedAccountNumbers
+                        ).joinToString(" ")
                     )
                 }
             }
