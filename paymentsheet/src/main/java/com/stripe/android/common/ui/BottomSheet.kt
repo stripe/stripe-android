@@ -44,6 +44,9 @@ internal class BottomSheetState(
             // We keep trying until it's fully displayed.
             modalBottomSheetState.show()
         }
+
+        // Ensure that isVisible is being updated correctly inside ModalBottomSheetState
+        snapshotFlow { modalBottomSheetState.isVisible }.first { isVisible -> isVisible }
     }
 
     suspend fun awaitDismissal(): DismissalType {

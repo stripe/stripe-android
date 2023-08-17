@@ -47,12 +47,6 @@ class AuBankAccountNumberConfig : TextFieldConfig {
             )
         }
 
-        if (input.length > LENGTH) {
-            return TextFieldStateConstants.Error.Invalid(
-                StripeR.string.stripe_becs_widget_account_number_invalid
-            )
-        }
-
         return TextFieldStateConstants.Valid.Full
     }
 

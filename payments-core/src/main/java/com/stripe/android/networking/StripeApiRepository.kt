@@ -633,7 +633,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun attachPaymentMethod(
         customerId: String,
-        publishableKey: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
@@ -665,7 +664,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         CardException::class
     )
     override suspend fun detachPaymentMethod(
-        publishableKey: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
@@ -690,7 +688,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
-        publishableKey: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
     ): Result<List<PaymentMethod>> {

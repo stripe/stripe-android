@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal class FakeCustomerAdapter(
@@ -8,7 +9,7 @@ internal class FakeCustomerAdapter(
     var selectedPaymentOption: CustomerAdapter.Result<CustomerAdapter.PaymentOption?> =
         CustomerAdapter.Result.success(null),
     private val paymentMethods: CustomerAdapter.Result<List<PaymentMethod>> =
-        CustomerAdapter.Result.success(listOf()),
+        CustomerAdapter.Result.success(listOf(CARD_PAYMENT_METHOD)),
     private val onSetSelectedPaymentOption:
         ((paymentOption: CustomerAdapter.PaymentOption?) -> CustomerAdapter.Result<Unit>)? = null,
     private val onAttachPaymentMethod: ((paymentMethodId: String) -> CustomerAdapter.Result<PaymentMethod>)? = null,

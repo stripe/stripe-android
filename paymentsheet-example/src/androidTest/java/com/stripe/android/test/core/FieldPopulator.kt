@@ -105,14 +105,15 @@ class FieldPopulator(
                         .assertContentDescriptionEquals(values.auBecsBsbNumber)
                 }
                 is CardDetailsSectionSpec -> {
+                    val accessibleCardNumber = values.cardNumber.toCharArray().joinToString(" ")
+                    val accessibleCvc = values.cardCvc.toCharArray().joinToString(" ")
+
                     selectors.getCardNumber()
-                        .assertContentDescriptionEquals(values.cardNumber)
+                        .assertContentDescriptionEquals(accessibleCardNumber)
                     selectors.getCardExpiration()
                         .assertContentDescriptionEquals(values.cardExpiration)
                     selectors.getCardCvc()
-                        .assertContentDescriptionEquals(
-                            values.cardCvc.replace("\\d".toRegex(), "$0 ")
-                        )
+                        .assertContentDescriptionEquals(accessibleCvc)
                 }
                 is EmailSpec -> {
                     if (testParameters.billing == Billing.Off) {

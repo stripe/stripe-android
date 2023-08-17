@@ -183,7 +183,7 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(nextStep).isEqualTo(
             IntentConfirmationInterceptor.NextStep.Fail(
                 cause = apiException,
-                message = "Unable to complete operation",
+                message = "Something went wrong",
             )
         )
     }
@@ -226,7 +226,7 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(nextStep).isEqualTo(
             IntentConfirmationInterceptor.NextStep.Fail(
                 cause = apiException,
-                message = "Unable to complete operation",
+                message = "Something went wrong",
             )
         )
     }
@@ -282,7 +282,7 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(nextStep).isEqualTo(
             IntentConfirmationInterceptor.NextStep.Fail(
                 cause = TestException(),
-                message = "Unable to complete operation",
+                message = "Something went wrong",
             )
         )
     }

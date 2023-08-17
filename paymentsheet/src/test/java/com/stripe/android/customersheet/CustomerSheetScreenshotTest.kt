@@ -162,6 +162,7 @@ class CustomerSheetScreenshotTest {
                     isLiveMode = false,
                     isProcessing = false,
                     errorMessage = "This is an error message.",
+                    isFirstPaymentMethod = false
                 ),
                 paymentMethodNameProvider = { it!! }
             )
@@ -186,6 +187,50 @@ class CustomerSheetScreenshotTest {
                     enabled = true,
                     isLiveMode = false,
                     isProcessing = false,
+                    isFirstPaymentMethod = false
+                ),
+                paymentMethodNameProvider = { it!! }
+            )
+        }
+    }
+
+    @Test
+    fun testAddFirstPaymentMethodDisabled() {
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = CustomerSheetViewState.AddPaymentMethod(
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
+                    formViewData = FormViewModel.ViewData(),
+                    enabled = true,
+                    isLiveMode = false,
+                    isProcessing = false,
+                    errorMessage = "This is an error message.",
+                    isFirstPaymentMethod = true
+                ),
+                paymentMethodNameProvider = { it!! }
+            )
+        }
+    }
+
+    @Test
+    fun testAddFirstPaymentMethodEnabled() {
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = CustomerSheetViewState.AddPaymentMethod(
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
+                    formViewData = FormViewModel.ViewData(
+                        completeFormValues = FormFieldValues(
+                            fieldValuePairs = mapOf(
+                                IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                            ),
+                            showsMandate = true,
+                            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                        )
+                    ),
+                    enabled = true,
+                    isLiveMode = false,
+                    isProcessing = false,
+                    isFirstPaymentMethod = true
                 ),
                 paymentMethodNameProvider = { it!! }
             )

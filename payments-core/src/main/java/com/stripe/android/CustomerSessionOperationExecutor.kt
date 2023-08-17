@@ -73,7 +73,6 @@ internal class CustomerSessionOperationExecutor(
             is EphemeralOperation.Customer.AttachPaymentMethod -> {
                 val result = stripeRepository.attachPaymentMethod(
                     customerId = ephemeralKey.objectId,
-                    publishableKey = publishableKey,
                     productUsageTokens = operation.productUsage,
                     paymentMethodId = operation.paymentMethodId,
                     requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
@@ -93,7 +92,6 @@ internal class CustomerSessionOperationExecutor(
             }
             is EphemeralOperation.Customer.DetachPaymentMethod -> {
                 val result = stripeRepository.detachPaymentMethod(
-                    publishableKey = publishableKey,
                     productUsageTokens = operation.productUsage,
                     paymentMethodId = operation.paymentMethodId,
                     requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
@@ -120,7 +118,6 @@ internal class CustomerSessionOperationExecutor(
                         endingBefore = operation.endingBefore,
                         startingAfter = operation.startingAfter,
                     ),
-                    publishableKey = publishableKey,
                     productUsageTokens = operation.productUsage,
                     requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
                 )

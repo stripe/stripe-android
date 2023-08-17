@@ -57,7 +57,6 @@ internal class CustomerApiRepository @Inject constructor(
                         customerId = customerConfig.id,
                         paymentMethodType = paymentMethodType,
                     ),
-                    publishableKey = lazyPaymentConfig.get().publishableKey,
                     productUsageTokens = productUsageTokens,
                     requestOptions = ApiRequest.Options(
                         apiKey = customerConfig.ephemeralKeySecret,
@@ -91,7 +90,6 @@ internal class CustomerApiRepository @Inject constructor(
         paymentMethodId: String
     ): Result<PaymentMethod> =
         stripeRepository.detachPaymentMethod(
-            publishableKey = lazyPaymentConfig.get().publishableKey,
             productUsageTokens = productUsageTokens,
             paymentMethodId = paymentMethodId,
             requestOptions = ApiRequest.Options(
@@ -108,7 +106,6 @@ internal class CustomerApiRepository @Inject constructor(
     ): Result<PaymentMethod> =
         stripeRepository.attachPaymentMethod(
             customerId = customerConfig.id,
-            publishableKey = lazyPaymentConfig.get().publishableKey,
             productUsageTokens = productUsageTokens,
             paymentMethodId = paymentMethodId,
             requestOptions = ApiRequest.Options(
