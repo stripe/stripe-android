@@ -337,6 +337,10 @@ internal class CustomerSheetViewModel @Inject constructor(
         // error source is when the payment methods cannot be loaded
         when (paymentSelection) {
             is PaymentSelection.GooglePay, is PaymentSelection.Saved -> {
+                if (viewState.value.isEditing) {
+                    return
+                }
+
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
                     it.copy(
                         paymentSelection = paymentSelection,

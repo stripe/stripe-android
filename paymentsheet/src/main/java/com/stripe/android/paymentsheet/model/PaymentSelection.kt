@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
@@ -11,6 +12,7 @@ import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -120,13 +122,21 @@ internal sealed class PaymentSelection : Parcelable {
         data class USBankAccount(
             val labelResource: String,
             @DrawableRes val iconResource: Int,
-            val bankName: String,
-            val last4: String,
-            val financialConnectionsSessionId: String,
-            val intentId: String?,
+            val input: Input,
+            val screenState: USBankAccountFormScreenState,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             override val customerRequestedSave: CustomerRequestedSave
-        ) : New()
+        ) : New() {
+
+            @Parcelize
+            data class Input(
+                val name: String,
+                val email: String?,
+                val phone: String?,
+                val address: Address?,
+                val saveForFutureUse: Boolean,
+            ) : Parcelable
+        }
 
         @Parcelize
         data class LinkInline(val linkPaymentDetails: LinkPaymentDetails.New) : New() {

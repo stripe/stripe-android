@@ -43,6 +43,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
@@ -1424,12 +1425,23 @@ internal class PaymentSheetViewModelTest {
         val newPaymentSelection = PaymentSelection.New.USBankAccount(
             labelResource = "Test",
             iconResource = 0,
-            bankName = "Test",
-            last4 = "Test",
-            financialConnectionsSessionId = "1234",
-            intentId = "1234",
             paymentMethodCreateParams = mock(),
             customerRequestedSave = mock(),
+            input = PaymentSelection.New.USBankAccount.Input(
+                name = "",
+                email = null,
+                phone = null,
+                address = null,
+                saveForFutureUse = false,
+            ),
+            screenState = USBankAccountFormScreenState.SavedAccount(
+                financialConnectionsSessionId = "session_1234",
+                intentId = "intent_1234",
+                bankName = "Stripe Bank",
+                last4 = "6789",
+                primaryButtonText = "Continue",
+                mandateText = null,
+            ),
         )
 
         val viewModel = createViewModel()
@@ -1456,12 +1468,23 @@ internal class PaymentSheetViewModelTest {
         val usBankAccount = PaymentSelection.New.USBankAccount(
             labelResource = "Test",
             iconResource = 0,
-            bankName = "Test",
-            last4 = "Test",
-            financialConnectionsSessionId = "1234",
-            intentId = "1234",
             paymentMethodCreateParams = mock(),
             customerRequestedSave = mock(),
+            input = PaymentSelection.New.USBankAccount.Input(
+                name = "",
+                email = null,
+                phone = null,
+                address = null,
+                saveForFutureUse = false,
+            ),
+            screenState = USBankAccountFormScreenState.SavedAccount(
+                financialConnectionsSessionId = "session_1234",
+                intentId = "intent_1234",
+                bankName = "Stripe Bank",
+                last4 = "6789",
+                primaryButtonText = "Continue",
+                mandateText = null,
+            ),
         )
         viewModel.updateSelection(usBankAccount)
 

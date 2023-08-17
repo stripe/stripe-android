@@ -377,6 +377,43 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `When CustomerViewAction#OnItemSelected with editing view state, payment selection should not be updated`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.success(
+                    listOf(
+                        CARD_PAYMENT_METHOD,
+                        CARD_PAYMENT_METHOD.copy(id = "pm_2")
+                    )
+                ),
+                selectedPaymentOption = CustomerAdapter.Result.success(
+                    CustomerAdapter.PaymentOption.fromId(CARD_PAYMENT_METHOD.id!!)
+                )
+            )
+        )
+        viewModel.viewState.test {
+            val initialViewState = awaitViewState<SelectPaymentMethod>()
+            val initialPaymentSelection = initialViewState.paymentSelection as PaymentSelection.Saved
+
+            assertThat(initialPaymentSelection.paymentMethod).isEqualTo(CARD_PAYMENT_METHOD)
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    PaymentSelection.Saved(
+                        paymentMethod = CARD_PAYMENT_METHOD.copy("pm_2")
+                    )
+                )
+            )
+
+            val currentViewState = awaitViewState<SelectPaymentMethod>()
+            val currentPaymentSelection = currentViewState.paymentSelection as PaymentSelection.Saved
+
+            assertThat(currentPaymentSelection.paymentMethod).isEqualTo(CARD_PAYMENT_METHOD)
+        }
+    }
+
+    @Test
     fun `When CustomerViewAction#OnItemSelected with Link, exception should be thrown`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
@@ -1026,12 +1063,18 @@ class CustomerSheetViewModelTest {
                 .isFalse()
 
             viewModel.handleViewAction(
+                CustomerSheetViewAction.OnEditPressed
+            )
+
+            viewModel.handleViewAction(
                 CustomerSheetViewAction.OnItemSelected(
                     PaymentSelection.Saved(
                         CARD_PAYMENT_METHOD.copy(id = "pm_1")
                     )
                 )
             )
+
+            skipItems(1)
 
             assertThat(awaitViewState<SelectPaymentMethod>().primaryButtonVisible)
                 .isTrue()
