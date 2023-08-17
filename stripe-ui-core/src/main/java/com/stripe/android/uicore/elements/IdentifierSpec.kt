@@ -5,6 +5,11 @@ import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
+enum class RequestDestination {
+    Params,
+    Options
+}
+
 /**
  * This uniquely identifies a element in the form.  The vals here are for identifier
  * specs that need to be found when pre-populating fields, or when extracting data.
@@ -22,11 +27,6 @@ data class IdentifierSpec(
     constructor() : this("")
 
     companion object {
-        enum class RequestDestination {
-            Params,
-            Options
-        }
-
         fun Generic(_value: String) = IdentifierSpec(_value)
 
         // Needed to pre-populate forms
