@@ -63,6 +63,4 @@
   <string name="stripe_upi_polling_payment_failed_message">Please go back and select another payment method</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Payment failed</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_blik_polling_message">Confirm the payment in your bank\'s app within %s to complete the purchase.</string>
 </resources>

@@ -63,8 +63,4 @@
   <string name="stripe_setup_button_label">Set up</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">UPI ID</string>
-  <!-- Label for BLIK code number field on form -->
-  <string name="stripe_blik_code">BLIK code</string>
-  <!-- Error message when BLIK code is invalid -->
-  <string name="stripe_invalid_blik_code">Your BLIK code is incomplete.</string>
 </resources>
