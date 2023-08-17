@@ -43,28 +43,17 @@ class FieldValuesToParamsMapConverter {
         fun transformToPaymentMethodOptionsParams(
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
             code: PaymentMethodCode,
-        ) = transformToOptionsMap(
-            fieldValuePairs,
-            code
-        )
-            .filterOutNullValues()
-            .toMap()
-            .run {
-                if (code == PaymentMethod.Type.Blik.code) {
-                    val code =
-                        (this.get("blik") as? LinkedHashMap<String, String>)?.let { it["code"] }
-                    if (code != null) {
-                        PaymentMethodOptionsParams.Blik(
-                            code
-                        )
-                    } else {
-                        null
-                    }
-                } else {
-                    null
-
+        ): PaymentMethodOptionsParams? {
+            if (code == PaymentMethod.Type.Blik.code) {
+                val blikCode = fieldValuePairs[IdentifierSpec.Code]?.value
+                if (blikCode != null) {
+                    return PaymentMethodOptionsParams.Blik(
+                        blikCode
+                    )
                 }
             }
+            return null
+        }
 
         /**
          * This function will put the field values as defined in the fieldValuePairs into a map
@@ -81,21 +70,6 @@ class FieldValuesToParamsMapConverter {
 
             val formKeyValueMap = fieldValuePairs
                 .filterNot { it.key.ignoreField  || it.key.isOptions }
-                .mapValues { entry -> entry.value.value }
-                .mapKeys { it.key.v1 }
-
-            createMap(code, destMap, formKeyValueMap)
-            return destMap
-        }
-
-        private fun transformToOptionsMap(
-            fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
-            code: PaymentMethodCode
-        ): MutableMap<String, Any?> {
-            val destMap = mutableMapOf<String, Any?>()
-
-            val formKeyValueMap = fieldValuePairs
-                .filter { it.key.isOptions }
                 .mapValues { entry -> entry.value.value }
                 .mapKeys { it.key.v1 }
 
