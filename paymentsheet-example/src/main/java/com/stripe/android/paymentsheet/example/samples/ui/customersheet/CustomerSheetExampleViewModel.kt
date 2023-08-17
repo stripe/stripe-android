@@ -184,6 +184,6 @@ class CustomerSheetExampleViewModel(
     }
 
     private companion object {
-        const val backendUrl = "https://glistening-heavenly-radon.glitch.me"
+        const val backendUrl = "https://stp-mobile-playground-backend-v7.stripedemos.com"
     }
 }

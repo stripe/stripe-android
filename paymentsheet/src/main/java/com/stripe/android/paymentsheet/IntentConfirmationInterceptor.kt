@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import com.stripe.android.ConfirmStripeIntentParamsFactory
-import com.stripe.android.R
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
@@ -95,7 +94,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 ) : IntentConfirmationInterceptor {
 
     private val genericErrorMessage: String
-        get() = context.getString(R.string.stripe_unable_to_complete_operation)
+        get() = context.getString(R.string.stripe_something_went_wrong)
 
     private val requestOptions: ApiRequest.Options
         get() = ApiRequest.Options(
