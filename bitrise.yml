@@ -157,11 +157,11 @@ workflows:
       - deploy-to-bitrise-io@2: { }
   run-instrumentation-tests:
     before_run:
-      - start_emulator
       - prepare_all
     after_run:
       - conclude_all
     steps:
+      - avd-manager@1: { }
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
