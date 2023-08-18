@@ -119,7 +119,6 @@ internal sealed class PaymentSelection : Parcelable {
                 ["number"] as String
                 )
                 .takeLast(4)
-
         }
 
         @Parcelize
@@ -131,9 +130,7 @@ internal sealed class PaymentSelection : Parcelable {
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
             override val customerRequestedSave: CustomerRequestedSave
-        ) : New() {
-
-        }
+        ) : New()
 
         @Parcelize
         data class USBankAccount(

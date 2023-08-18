@@ -16,7 +16,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal

@@ -10,7 +10,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
-import java.lang.RuntimeException
 
 /**
  * Factory class for creating [ConfirmPaymentIntentParams] or [ConfirmSetupIntentParams].
@@ -118,7 +117,6 @@ internal class ConfirmPaymentIntentParamsFactory(
 internal class ConfirmSetupIntentParamsFactory(
     private val clientSecret: String,
 ) : ConfirmStripeIntentParamsFactory<ConfirmSetupIntentParams>() {
-
     override fun create(paymentMethod: PaymentMethod): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
             paymentMethodId = paymentMethod.id.orEmpty(),
@@ -128,7 +126,7 @@ internal class ConfirmSetupIntentParamsFactory(
             }
         )
     }
-    
+
     override fun create(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         createParams: PaymentMethodCreateParams,

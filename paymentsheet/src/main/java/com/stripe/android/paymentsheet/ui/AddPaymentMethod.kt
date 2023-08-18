@@ -175,8 +175,6 @@ internal fun FormFieldValues.transformToPaymentSelection(
     resources: Resources,
     paymentMethod: LpmRepository.SupportedPaymentMethod
 ): PaymentSelection.New {
-
-
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
         val params = transformToPaymentMethodCreateParams(paymentMethod)
         val options = transformToPaymentMethodOptionsParams(paymentMethod)
