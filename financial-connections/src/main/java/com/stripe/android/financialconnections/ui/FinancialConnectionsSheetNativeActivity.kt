@@ -386,7 +386,7 @@ private class ActivityVisibilityObserver(
         super.onStop(owner)
         // If the activity is being rotated, we don't want to notify a backgrounded state
         val changingConfigurations = (owner as? AppCompatActivity)?.isChangingConfigurations ?: false
-        if (!changingConfigurations){
+        if (!changingConfigurations) {
             isInBackground = true
             onBackgrounded()
             Log.d("Test", "Moving to Background")

@@ -92,7 +92,6 @@ private fun StripeException.toDomainException(
     }
 
 private fun Flow?.toPollIntervalMs(): Long {
-
     val defaultInitialPollDelay: Long = 1.75.seconds.inWholeMilliseconds
     return when (this) {
         Flow.TESTMODE,

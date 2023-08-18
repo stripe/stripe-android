@@ -112,7 +112,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                     id = authSession.id,
                     pane = Pane.PARTNER_AUTH,
                     flow = authSession.flow,
-                    defaultBrowser = BrowserUtils.getBrowserPackage(
+                    defaultBrowser = BrowserUtils.getPackageToHandleUri(
                         context = context,
                         uri = requireNotNull(authSession.browserReadyUrl()).toUri()
                     )

@@ -11,9 +11,8 @@ internal object BrowserUtils {
     /**
      * Get the default browser app package that will be used to open the given [Uri].
      */
-    fun getBrowserPackage(context: Context, uri: Uri): String? = runCatching {
-        val (_, resolveInfo: String?) = browserIntent(uri, context)
-        return resolveInfo
+    fun getPackageToHandleUri(context: Context, uri: Uri): String? = runCatching {
+        getPackageToHandleIntent(context, uri.toIntent())
     }.getOrNull()
 
     /**
@@ -21,36 +20,31 @@ internal object BrowserUtils {
      * based on the default browser set for this device.
      */
     fun createBrowserIntentForUrl(context: Context, uri: Uri): Intent {
-        val (browserIntent, resolveInfo: String?) = browserIntent(uri, context)
+        val browserIntent = uri.toIntent()
+        val defaultPackage = getPackageToHandleIntent(context, browserIntent)
         return when {
             /**
              * Firefox browser has a redirect issue when launching as a custom tab.
              * @see [BANKCON-3846]
              */
-            resolveInfo?.contains(FIREFOX_PACKAGE) == true -> browserIntent
+            defaultPackage?.contains(FIREFOX_PACKAGE) == true -> browserIntent
             else -> createCustomTabIntent(uri)
         }
     }
 
-    private fun browserIntent(
-        uri: Uri,
-        context: Context
-    ): Pair<Intent, String?> {
-        val browserIntent = Intent(Intent.ACTION_VIEW, uri)
-        val resolveInfo: String? = context.packageManager
-            .resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
+    private fun Uri.toIntent(): Intent = Intent(Intent.ACTION_VIEW, this)
+
+    private fun getPackageToHandleIntent(context: Context, intent: Intent): String? =
+        context.packageManager
+            .resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
             ?.activityInfo
             ?.packageName
-        return Pair(browserIntent, resolveInfo)
-    }
 
-    private fun createCustomTabIntent(uri: Uri): Intent {
-        return CustomTabsIntent.Builder()
-            .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
-            .build()
-            .also { it.intent.data = uri }
-            .intent
-    }
+    private fun createCustomTabIntent(uri: Uri): Intent = CustomTabsIntent.Builder()
+        .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+        .build()
+        .also { it.intent.data = uri }
+        .intent
 
     private const val FIREFOX_PACKAGE = "org.mozilla"
 }

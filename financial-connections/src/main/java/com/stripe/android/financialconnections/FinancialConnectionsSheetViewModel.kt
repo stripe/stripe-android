@@ -100,7 +100,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      *
      */
     private fun openAuthFlow(sync: SynchronizeSessionResponse) {
-        if (BrowserUtils.getBrowserPackage(context, Uri.parse("https://")) == null) {
+        if (BrowserUtils.getPackageToHandleUri(context, Uri.parse("https://")) == null) {
             logNoBrowserAvailableAndFinish()
             return
         }
