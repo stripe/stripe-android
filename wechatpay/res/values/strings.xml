@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stripe_wechat_failed_unknown_error">WeChatPay failed with an unknown error.</string>
+    <string name="stripe_wechat_failed_with_error">WeChatPay failed with error code %d.</string>
+    <string name="stripe_unable_to_launch_wechat">Unable to launch WeChat: %s.</string>
+    <string name="stripe_unable_to_launch_wechat_failed_to_fetch_info">Couldn\'t load payment info</string>
+    <string name="stripe_unable_to_launch_wechat_failed_to_register">Couldn\'t register app</string>
+    <string name="stripe_unable_to_launch_wechat_not_installed">App not installed</string>
+    <string name="stripe_unable_to_launch_wechat_failed_to_send_request">Couldn\'t send request</string>
+</resources>

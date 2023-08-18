@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.link.account.CookieStore
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
@@ -417,6 +418,12 @@ class PaymentSheet internal constructor(
          */
         val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration(),
+
+        /**
+         * The [PaymentMethodOptionsParams] for each payment method type that should be provided
+         * when confirming a payment.
+         */
+        internal val paymentMethodOptions: Map<String, PaymentMethodOptionsParams> = emptyMap(),
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
@@ -433,17 +440,21 @@ class PaymentSheet internal constructor(
             private var allowsDelayedPaymentMethods: Boolean = false
             private var allowsPaymentMethodsRequiringShippingAddress: Boolean = false
             private var appearance: Appearance = Appearance()
-            private var billingDetailsCollectionConfiguration =
-                BillingDetailsCollectionConfiguration()
+            private var primaryButtonLabel: String? = null
+            private var billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration()
+            private var paymentMethodOptions = emptyMap<String, PaymentMethodOptionsParams>()
 
-            fun merchantDisplayName(merchantDisplayName: String) =
-                apply { this.merchantDisplayName = merchantDisplayName }
+            fun merchantDisplayName(merchantDisplayName: String) = apply {
+                this.merchantDisplayName = merchantDisplayName
+            }
 
-            fun customer(customer: CustomerConfiguration?) =
-                apply { this.customer = customer }
+            fun customer(customer: CustomerConfiguration?) = apply {
+                this.customer = customer
+            }
 
-            fun googlePay(googlePay: GooglePayConfiguration?) =
-                apply { this.googlePay = googlePay }
+            fun googlePay(googlePay: GooglePayConfiguration?) = apply {
+                this.googlePay = googlePay
+            }
 
             @Deprecated(
                 message = "Use Appearance parameter to customize primary button color",
@@ -452,17 +463,21 @@ class PaymentSheet internal constructor(
                         "or PrimaryButton.colorsLight/colorsDark.background"
                 )
             )
-            fun primaryButtonColor(primaryButtonColor: ColorStateList?) =
-                apply { this.primaryButtonColor = primaryButtonColor }
+            fun primaryButtonColor(primaryButtonColor: ColorStateList?) = apply {
+                this.primaryButtonColor = primaryButtonColor
+            }
 
-            fun defaultBillingDetails(defaultBillingDetails: BillingDetails?) =
-                apply { this.defaultBillingDetails = defaultBillingDetails }
+            fun defaultBillingDetails(defaultBillingDetails: BillingDetails?) = apply {
+                this.defaultBillingDetails = defaultBillingDetails
+            }
 
-            fun shippingDetails(shippingDetails: AddressDetails?) =
-                apply { this.shippingDetails = shippingDetails }
+            fun shippingDetails(shippingDetails: AddressDetails?) = apply {
+                this.shippingDetails = shippingDetails
+            }
 
-            fun allowsDelayedPaymentMethods(allowsDelayedPaymentMethods: Boolean) =
-                apply { this.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods }
+            fun allowsDelayedPaymentMethods(allowsDelayedPaymentMethods: Boolean) = apply {
+                this.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods
+            }
 
             fun allowsPaymentMethodsRequiringShippingAddress(
                 allowsPaymentMethodsRequiringShippingAddress: Boolean,
@@ -471,8 +486,13 @@ class PaymentSheet internal constructor(
                     allowsPaymentMethodsRequiringShippingAddress
             }
 
-            fun appearance(appearance: Appearance) =
-                apply { this.appearance = appearance }
+            fun appearance(appearance: Appearance) = apply {
+                this.appearance = appearance
+            }
+
+            fun primaryButtonLabel(primaryButtonLabel: String?) = apply {
+                this.primaryButtonLabel = primaryButtonLabel
+            }
 
             fun billingDetailsCollectionConfiguration(
                 billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
@@ -480,17 +500,25 @@ class PaymentSheet internal constructor(
                 this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
             }
 
+            fun paymentMethodOptions(
+                paymentMethodOptions: Map<String, PaymentMethodOptionsParams>,
+            ) = apply {
+                this.paymentMethodOptions = paymentMethodOptions
+            }
+
             fun build() = Configuration(
-                merchantDisplayName,
-                customer,
-                googlePay,
-                primaryButtonColor,
-                defaultBillingDetails,
-                shippingDetails,
-                allowsDelayedPaymentMethods,
-                allowsPaymentMethodsRequiringShippingAddress,
-                appearance,
+                merchantDisplayName = merchantDisplayName,
+                customer = customer,
+                googlePay = googlePay,
+                primaryButtonColor = primaryButtonColor,
+                defaultBillingDetails = defaultBillingDetails,
+                shippingDetails = shippingDetails,
+                allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+                appearance = appearance,
+                primaryButtonLabel = primaryButtonLabel,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                paymentMethodOptions = paymentMethodOptions,
             )
         }
     }

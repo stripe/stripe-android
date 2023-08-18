@@ -228,7 +228,7 @@ class PaymentSheetPlaygroundViewModel(
             automatic_payment_methods = setAutomaticPaymentMethod,
             use_link = linkEnabled,
             merchant_country_code = merchantCountry.value,
-            supported_payment_methods = supportedPaymentMethods
+            supported_payment_methods = listOf("card", "wechat_pay"),
         )
 
         Fuel.post(backendUrl + "checkout")

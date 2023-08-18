@@ -23,6 +23,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -773,7 +774,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             allowsPaymentMethodsRequiringShippingAddress = viewBinding.shippingOnButton.isChecked,
             appearance = appearance,
             primaryButtonLabel = customPrimaryButtonLabel,
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            paymentMethodOptions = mapOf(
+                "wechat_pay" to PaymentMethodOptionsParams.WeChatPay(appId = "wx65997d6307c3827d"),
+            ),
         )
     }
 
@@ -874,56 +878,32 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         private const val returnUrl = "stripesdk://payment_return_url/" +
             "com.stripe.android.paymentsheet.example"
 
+        private val merchantCountries = listOf("US", "GB", "AU", "FR", "IN", "CN").map { code ->
+            CountryCode.create(code)
+        }
+
         /**
          * This is a pairing of the countries to their default currency
          **/
-        private val countryCurrencyPairs = CountryUtils.getOrderedCountries(Locale.getDefault())
-            .filter { country ->
-                /**
-                 * Modify this list if you want to change the countries displayed in the playground.
-                 */
-                country.code.value in setOf("US", "GB", "AU", "FR", "IN")
-            }.map { country ->
-                /**
-                 * Modify this statement to change the default currency associated with each
-                 * country.  The currency values should match the stripeSupportedCurrencies.
-                 */
-                when (country.code.value) {
-                    "GB" -> {
-                        country to "GBP"
-                    }
-                    "FR" -> {
-                        country to "EUR"
-                    }
-                    "AU" -> {
-                        country to "AUD"
-                    }
-                    "US" -> {
-                        country to "USD"
-                    }
-                    "IN" -> {
-                        country to "INR"
-                    }
-                    else -> {
-                        country to "USD"
-                    }
-                }
+        private val countryCurrencyPairs = merchantCountries.mapNotNull { countryCode ->
+            CountryUtils.getCountryByCode(countryCode, Locale.getDefault())
+        }.map { country ->
+            /**
+             * Modify this statement to change the default currency associated with each
+             * country.  The currency values should match the stripeSupportedCurrencies.
+             */
+            when (country.code.value) {
+                "GB" -> country to "GBP"
+                "FR" -> country to "EUR"
+                "AU" -> country to "AUD"
+                "IN" -> country to "INR"
+                "CN" -> country to "CNY"
+                else -> country to "USD"
             }
+        }
 
         // List was created from: https://stripe.com/docs/currencies
         /** Modify this list if you want to change the currencies displayed in the playground **/
-        private val stripeSupportedCurrencies = listOf("AUD", "EUR", "GBP", "USD", "INR", "PLN")
-//            "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS",  "AWG", "AZN", "BAM",
-//            "BBD", "BDT", "BGN", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BWP", "BYN", "BZD",
-//            "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CVE", "CZK", "DJF", "DKK", "DOP",
-//            "DZD", "EGP", "ETB", "FJD", "FKP", "GEL", "GIP", "GMD", "GNF", "GTQ",
-//            "GYD", "HKD", "HNL", "HRK", "HTG", "HUF", "IDR", "ILS", "ISK", "JMD", "JPY",
-//            "KES", "KGS", "KHR", "KMF", "KRW", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL",
-//            "MAD", "MDL", "MGA", "MKD", "MMK", "MNT", "MOP", "MRO", "MUR", "MVR", "MWK", "MXN",
-//            "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "PAB", "PEN", "PGK", "PHP",
-//            "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SBD", "SCR", "SEK",
-//            "SGD", "SHP", "SLL", "SOS", "SRD", "STD", "SZL", "THB", "TJS", "TOP", "TRY", "TTD",
-//            "TWD", "TZS", "UAH", "UGX", "UYU", "UZS", "VND", "VUV", "WST", "XAF", "XCD", "XOF",
-//            "XPF", "YER", "ZAR", "ZMW"
+        private val stripeSupportedCurrencies = countryCurrencyPairs.map { it.second }
     }
 }

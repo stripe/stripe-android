@@ -14,6 +14,7 @@
     <string name="stripe_paymentsheet_payment_method_us_bank_account">US Bank Account</string>
     <string name="stripe_paymentsheet_payment_method_upi">UPI</string>
     <string name="stripe_paymentsheet_payment_method_cashapp">Cash App Pay</string>
+    <string name="stripe_paymentsheet_payment_method_wechat">WeChat Pay</string>
 
     <string name="stripe_paymentsheet_payment_method_affirm">Affirm</string>
     <string name="stripe_paymentsheet_payment_method_revolut_pay">Revolut Pay</string>

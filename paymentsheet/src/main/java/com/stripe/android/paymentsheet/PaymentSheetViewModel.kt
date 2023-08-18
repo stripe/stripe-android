@@ -480,6 +480,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 initializationMode = args.initializationMode,
                 paymentSelection = paymentSelection,
                 shippingValues = args.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
+                paymentMethodOptions = args.config?.paymentMethodOptions.orEmpty(),
             )
 
             deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType

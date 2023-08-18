@@ -5,8 +5,11 @@ apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
 dependencies {
     implementation project(':payments-core')
+    implementation libs.androidx.activity
     implementation libs.androidx.appCompat
     implementation libs.androidx.coreKtx
+
+    compileOnly "com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.7.0"
 
     testImplementation testLibs.androidx.coreKtx
     testImplementation testLibs.androidx.lifecycle

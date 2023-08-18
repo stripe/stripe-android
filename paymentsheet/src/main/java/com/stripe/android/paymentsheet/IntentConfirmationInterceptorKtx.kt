@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 
@@ -9,6 +10,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
     initializationMode: PaymentSheet.InitializationMode,
     paymentSelection: PaymentSelection?,
     shippingValues: ConfirmPaymentIntentParams.Shipping?,
+    paymentMethodOptions: Map<String, PaymentMethodOptionsParams>,
 ): IntentConfirmationInterceptor.NextStep {
     return when (paymentSelection) {
         is PaymentSelection.New -> {
@@ -23,6 +25,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
                 paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
                 shippingValues = shippingValues,
                 setupForFutureUsage = setupFutureUsage,
+                paymentMethodOptions = paymentMethodOptions,
             )
         }
         is PaymentSelection.Saved -> {

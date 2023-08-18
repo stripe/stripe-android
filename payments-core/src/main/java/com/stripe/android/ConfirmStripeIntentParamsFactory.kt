@@ -21,7 +21,8 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
 
     abstract fun create(
         createParams: PaymentMethodCreateParams,
-        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
+        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        paymentMethodOptions: Map<String, PaymentMethodOptionsParams>,
     ): T
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -77,6 +78,7 @@ internal class ConfirmPaymentIntentParamsFactory(
     override fun create(
         createParams: PaymentMethodCreateParams,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        paymentMethodOptions: Map<String, PaymentMethodOptionsParams>,
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
             paymentMethodCreateParams = createParams,
@@ -99,6 +101,9 @@ internal class ConfirmPaymentIntentParamsFactory(
                 }
                 PaymentMethod.Type.Link.code -> {
                     null
+                }
+                PaymentMethod.Type.WeChatPay.code -> {
+                    paymentMethodOptions[PaymentMethod.Type.WeChatPay.code]
                 }
                 else -> {
                     PaymentMethodOptionsParams.Card(setupFutureUsage = null)
@@ -126,6 +131,7 @@ internal class ConfirmSetupIntentParamsFactory(
     override fun create(
         createParams: PaymentMethodCreateParams,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        paymentMethodOptions: Map<String, PaymentMethodOptionsParams>,
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
             paymentMethodCreateParams = createParams,

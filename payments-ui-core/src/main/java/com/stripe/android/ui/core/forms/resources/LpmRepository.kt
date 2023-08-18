@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.paymentsheet.forms.UpiRequirement
+import com.stripe.android.paymentsheet.forms.WeChatPayRequirement
 import com.stripe.android.paymentsheet.forms.ZipRequirement
 import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
@@ -91,6 +92,7 @@ class LpmRepository constructor(
             PaymentMethod.Type.AuBecsDebit.code,
             PaymentMethod.Type.Upi.code,
             PaymentMethod.Type.CashAppPay.code,
+            PaymentMethod.Type.WeChatPay.code,
         )
     }
 
@@ -499,6 +501,18 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = CashAppPayRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields),
+        )
+        PaymentMethod.Type.WeChatPay.code -> SupportedPaymentMethod(
+            code = "wechat_pay",
+            requiresMandate = false,
+            mandateRequirement = MandateRequirement.Never,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_wechat,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_wechat_pay,
+            lightThemeIconUrl = null, // sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = null, // sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = WeChatPayRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields),
         )
         else -> null
