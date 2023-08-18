@@ -7,8 +7,11 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.analytics.LinkAnalyticsHelper
+import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -27,6 +30,7 @@ internal class LinkHandler @Inject constructor(
     private val linkLauncher: LinkPaymentLauncher,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle,
+    linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
 ) {
     sealed class ProcessingState {
         object Ready : ProcessingState()
@@ -41,9 +45,11 @@ internal class LinkHandler @Inject constructor(
 
         object Cancelled : ProcessingState()
 
-        object Completed : ProcessingState()
+        data class PaymentMethodCollected(val paymentMethod: PaymentMethod) : ProcessingState()
 
         class CompletedWithPaymentResult(val result: PaymentResult) : ProcessingState()
+
+        object CompleteWithoutLink : ProcessingState()
     }
 
     private val _processingState =
@@ -55,14 +61,15 @@ internal class LinkHandler @Inject constructor(
     private val _isLinkEnabled = MutableStateFlow<Boolean?>(null)
     val isLinkEnabled: StateFlow<Boolean?> = _isLinkEnabled
 
-    private val _activeLinkSession = MutableStateFlow(false)
-    val activeLinkSession: StateFlow<Boolean> = _activeLinkSession
-
     private val linkConfiguration = MutableStateFlow<LinkConfiguration?>(null)
 
     val accountStatus: Flow<AccountStatus> = linkConfiguration
         .filterNotNull()
         .flatMapLatest(linkConfigurationCoordinator::getAccountStatusFlow)
+
+    private val linkAnalyticsHelper: LinkAnalyticsHelper by lazy {
+        linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
+    }
 
     fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
         linkLauncher.register(
@@ -77,7 +84,6 @@ internal class LinkHandler @Inject constructor(
 
     fun setupLink(state: LinkState?) {
         _isLinkEnabled.value = state != null
-        _activeLinkSession.value = state?.loginState == LinkState.LoginState.LoggedIn
 
         if (state == null) return
 
@@ -97,7 +103,6 @@ internal class LinkHandler @Inject constructor(
 
             when (linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()) {
                 AccountStatus.Verified -> {
-                    _activeLinkSession.value = true
                     completeLinkInlinePayment(
                         configuration,
                         params,
@@ -106,11 +111,11 @@ internal class LinkHandler @Inject constructor(
                 }
                 AccountStatus.VerificationStarted,
                 AccountStatus.NeedsVerification -> {
-                    TODO()
+                    linkAnalyticsHelper.onLinkPopupSkipped()
+                    _processingState.emit(ProcessingState.CompleteWithoutLink)
                 }
                 AccountStatus.SignedOut,
                 AccountStatus.Error -> {
-                    _activeLinkSession.value = false
                     userInput?.let {
                         linkConfigurationCoordinator.signInWithUserInput(configuration, userInput).fold(
                             onSuccess = {
@@ -142,7 +147,8 @@ internal class LinkHandler @Inject constructor(
         shouldCompleteLinkInlineFlow: Boolean
     ) {
         if (shouldCompleteLinkInlineFlow) {
-            launchLink(configuration, paymentMethodCreateParams)
+            linkAnalyticsHelper.onLinkPopupSkipped()
+            _processingState.emit(ProcessingState.CompleteWithoutLink)
         } else {
             _processingState.emit(
                 ProcessingState.PaymentDetailsCollected(
@@ -157,16 +163,9 @@ internal class LinkHandler @Inject constructor(
 
     fun launchLink() {
         val config = linkConfiguration.value ?: return
-        launchLink(config)
-    }
 
-    fun launchLink(
-        configuration: LinkConfiguration,
-        paymentMethodCreateParams: PaymentMethodCreateParams? = null
-    ) {
         linkLauncher.present(
-            configuration,
-            paymentMethodCreateParams,
+            config,
         )
 
         _processingState.tryEmit(ProcessingState.Launched)
@@ -176,13 +175,13 @@ internal class LinkHandler @Inject constructor(
      * Method called with the result of launching the Link UI to collect a payment.
      */
     fun onLinkActivityResult(result: LinkActivityResult) {
-        val completePaymentFlow = result is LinkActivityResult.Completed
+        val paymentMethod = (result as? LinkActivityResult.Completed)?.paymentMethod
         val cancelPaymentFlow = result is LinkActivityResult.Canceled &&
             result.reason == LinkActivityResult.Canceled.Reason.BackPressed
 
-        if (completePaymentFlow) {
+        if (paymentMethod != null) {
             // If payment was completed inside the Link UI, dismiss immediately.
-            _processingState.tryEmit(ProcessingState.Completed)
+            _processingState.tryEmit(ProcessingState.PaymentMethodCollected(paymentMethod))
         } else if (cancelPaymentFlow) {
             // We launched the user straight into Link, but they decided to exit out of it.
             _processingState.tryEmit(ProcessingState.Cancelled)

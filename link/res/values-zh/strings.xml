@@ -47,7 +47,7 @@
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">用另一方式支付</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
-  <string name="stripe_wallet_recollect_cvc_error">出于安全原因，请重新输入您银行卡的安全码。</string>
+  <string name="stripe_wallet_recollect_cvc_error">出于安全原因，请重新输入您的银行卡的安全码。</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">您确定要移除这个关联的账户吗？</string>
   <!-- Title for a button that when tapped removes a saved card. -->

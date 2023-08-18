@@ -1,5 +1,9 @@
 package com.stripe.android.paymentsheet
 
+@Deprecated(
+    message = "This feature is no longer experimental. You can remove the annotation.",
+    level = DeprecationLevel.HIDDEN,
+)
 @RequiresOptIn(
     level = RequiresOptIn.Level.ERROR,
     message = "This is an experimental API for finalizing payments on the server when using " +

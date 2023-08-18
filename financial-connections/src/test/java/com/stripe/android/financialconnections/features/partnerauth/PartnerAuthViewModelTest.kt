@@ -1,20 +1,24 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
 import com.airbnb.mvrx.test.MavericksTestRule
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
-import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
+import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
+import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -30,18 +34,20 @@ import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@Suppress("MaxLineLength")
 internal class PartnerAuthViewModelTest {
 
     @get:Rule
-    val mvrxRule = MavericksTestRule(testDispatcher = UnconfinedTestDispatcher())
+    val mavericksTestRule = MavericksTestRule(testDispatcher = UnconfinedTestDispatcher())
 
     private val applicationId = "com.sample.applicationid"
-    private val getManifest = mock<GetManifest>()
+    private val getSync = mock<GetOrFetchSync>()
     private val postAuthSessionEvent = mock<PostAuthSessionEvent>()
+    private val retrieveAuthorizationSession = mock<RetrieveAuthorizationSession>()
     private val pollAuthorizationSessionOAuthResults = mock<PollAuthorizationSessionOAuthResults>()
     private val completeAuthorizationSession = mock<CompleteAuthorizationSession>()
     private val cancelAuthorizationSession = mock<CancelAuthorizationSession>()
-    private val goNext = mock<GoNext>()
+    private val navigationManager = TestNavigationManager()
     private val createAuthorizationSession = mock<PostAuthorizationSession>()
 
     @Test
@@ -57,8 +63,11 @@ internal class PartnerAuthViewModelTest {
                 publicToken = "123456"
             )
 
-            whenever(getManifest())
-                .thenReturn(sessionManifest().copy(activeAuthSession = activeAuthSession))
+            whenever(getSync()).thenReturn(
+                syncResponse(
+                    sessionManifest().copy(activeAuthSession = activeAuthSession)
+                )
+            )
             whenever(pollAuthorizationSessionOAuthResults(activeAuthSession))
                 .thenReturn(mixedOAuthParams)
             whenever(completeAuthorizationSession(any(), any()))
@@ -79,8 +88,11 @@ internal class PartnerAuthViewModelTest {
         val activeAuthSession = authorizationSession()
         val viewModel = createViewModel()
 
-        whenever(getManifest())
-            .thenReturn(sessionManifest().copy(activeAuthSession = activeAuthSession))
+        whenever(getSync()).thenReturn(
+            syncResponse(
+                manifest = sessionManifest().copy(activeAuthSession = activeAuthSession)
+            )
+        )
 
         viewModel.onWebAuthFlowFinished(WebAuthFlowState.Success("stripe://success"))
 
@@ -91,53 +103,25 @@ internal class PartnerAuthViewModelTest {
     }
 
     @Test
-    fun `onWebAuthFlowFinished - when webStatus Cancelled, cancels, reloads session and fires retry event (OAuth)`() =
+    fun `onWebAuthFlowFinished - when webStatus is cancelled and retrieve pane is PARTNER_AUTH, cancels (Legacy)`() =
         runTest {
-            val activeAuthSession = authorizationSession()
-            val activeInstitution = institution()
-            val manifest = sessionManifest().copy(
-                activeAuthSession = activeAuthSession.copy(_isOAuth = true),
-                activeInstitution = activeInstitution
-            )
-
-            whenever(getManifest()).thenReturn(manifest)
-            whenever(createAuthorizationSession.invoke(any(), any())).thenReturn(activeAuthSession)
-
-            val viewModel = createViewModel()
-            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled)
-
-            verify(cancelAuthorizationSession).invoke(eq(activeAuthSession.id),)
-
-            // stays in partner auth pane
-            verifyNoInteractions(goNext)
-
-            // creates two sessions (initial and retry)
-            verify(createAuthorizationSession, times(2)).invoke(
-                eq(activeInstitution),
-                eq(manifest.allowManualEntry)
-            )
-
-            // sends retry event
-            verify(postAuthSessionEvent).invoke(
-                eq(activeAuthSession.id),
-                any<AuthSessionEvent.Retry>()
-            )
-        }
-
-    @Test
-    fun `onWebAuthFlowFinished - when webStatus Cancelled, cancels and fires cancel event (Legacy)`() =
-        runTest {
-            val activeAuthSession = authorizationSession()
+            val activeAuthSession = authorizationSession().copy(_isOAuth = false)
             val viewModel = createViewModel()
 
-            whenever(getManifest())
+            whenever(getSync())
                 .thenReturn(
-                    sessionManifest().copy(
-                        activeAuthSession = activeAuthSession.copy(_isOAuth = false)
+                    syncResponse(
+                        sessionManifest().copy(
+                            activeAuthSession = activeAuthSession.copy(_isOAuth = false)
+                        )
                     )
                 )
 
-            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled)
+            // simulate that auth session succeeded in abstract auth:
+            whenever(retrieveAuthorizationSession.invoke(any()))
+                .thenReturn(activeAuthSession.copy(nextPane = Pane.PARTNER_AUTH))
+
+            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled(activeAuthSession.url))
 
             verify(cancelAuthorizationSession).invoke(
                 eq(activeAuthSession.id),
@@ -148,22 +132,124 @@ internal class PartnerAuthViewModelTest {
             )
         }
 
+    @Test
+    fun `onWebAuthFlowFinished - when webStatus is cancelled and retrieve pane is ACCOUNT_PICKER, navigates to next pane (OAuth)`() =
+        runTest {
+            val activeAuthSession = authorizationSession().copy(url = null)
+            val activeInstitution = institution()
+            val manifest = sessionManifest().copy(
+                activeAuthSession = activeAuthSession.copy(_isOAuth = true),
+                activeInstitution = activeInstitution
+            )
+            val syncResponse = syncResponse(manifest)
+            whenever(getSync()).thenReturn(syncResponse)
+            whenever(createAuthorizationSession.invoke(any(), any())).thenReturn(activeAuthSession)
+            // simulate that auth session succeeded in abstract auth:
+            whenever(retrieveAuthorizationSession.invoke(any()))
+                .thenReturn(activeAuthSession.copy(nextPane = Pane.ACCOUNT_PICKER))
+
+            val viewModel = createViewModel()
+            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled(activeAuthSession.url))
+
+            verifyNoInteractions(cancelAuthorizationSession)
+
+            // stays in partner auth pane
+            assertThat(navigationManager.emittedEvents).isEmpty()
+        }
+
+    @Test
+    fun `onWebAuthFlowFinished - when webStatus is cancelled but kill switch is on, cancels (OAuth)`() =
+        runTest {
+            val activeAuthSession = authorizationSession().copy(url = null)
+            val activeInstitution = institution()
+            val manifest = sessionManifest().copy(
+                activeAuthSession = activeAuthSession.copy(_isOAuth = true),
+                activeInstitution = activeInstitution,
+                features = mapOf(
+                    "bank_connections_disable_defensive_auth_session_retrieval_on_complete" to true
+                )
+            )
+            val syncResponse = syncResponse(manifest)
+            whenever(getSync()).thenReturn(syncResponse)
+            whenever(createAuthorizationSession.invoke(any(), any())).thenReturn(activeAuthSession)
+            // simulate that auth session succeeded in abstract auth:
+            whenever(retrieveAuthorizationSession.invoke(any()))
+                .thenReturn(activeAuthSession.copy(nextPane = Pane.ACCOUNT_PICKER))
+
+            val viewModel = createViewModel()
+            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled(activeAuthSession.url))
+
+            verify(cancelAuthorizationSession).invoke(eq(activeAuthSession.id))
+
+            // stays in partner auth pane
+            assertThat(navigationManager.emittedEvents).isEmpty()
+
+            // creates two sessions (initial and retry)
+            verify(createAuthorizationSession, times(2)).invoke(
+                eq(activeInstitution),
+                eq(syncResponse)
+            )
+
+            // sends retry event
+            verify(postAuthSessionEvent).invoke(
+                eq(activeAuthSession.id),
+                any<AuthSessionEvent.Retry>()
+            )
+        }
+
+    @Test
+    fun `onWebAuthFlowFinished - when cancels with no deeplink and retrieve pane is PARTNER_AUTH, retries (OAuth)`() =
+        runTest {
+            val activeAuthSession = authorizationSession().copy(url = null)
+            val activeInstitution = institution()
+            val manifest = sessionManifest().copy(
+                activeAuthSession = activeAuthSession.copy(_isOAuth = true),
+                activeInstitution = activeInstitution
+            )
+            val syncResponse = syncResponse(manifest)
+            whenever(getSync()).thenReturn(syncResponse)
+            whenever(createAuthorizationSession.invoke(any(), any())).thenReturn(activeAuthSession)
+            // simulate that auth session succeeded in abstract auth:
+            whenever(retrieveAuthorizationSession.invoke(any()))
+                .thenReturn(activeAuthSession.copy(nextPane = Pane.PARTNER_AUTH))
+
+            val viewModel = createViewModel()
+            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled(activeAuthSession.url))
+
+            verify(cancelAuthorizationSession).invoke(eq(activeAuthSession.id))
+
+            // stays in partner auth pane
+            assertThat(navigationManager.emittedEvents).isEmpty()
+
+            // creates two sessions (initial and retry)
+            verify(createAuthorizationSession, times(2)).invoke(
+                eq(activeInstitution),
+                eq(syncResponse)
+            )
+
+            // sends retry event
+            verify(postAuthSessionEvent).invoke(
+                eq(activeAuthSession.id),
+                any<AuthSessionEvent.Retry>()
+            )
+        }
+
     private fun createViewModel(
         initialState: PartnerAuthState = PartnerAuthState()
     ): PartnerAuthViewModel {
         return PartnerAuthViewModel(
+            navigationManager = TestNavigationManager(),
             completeAuthorizationSession = completeAuthorizationSession,
             createAuthorizationSession = createAuthorizationSession,
             cancelAuthorizationSession = cancelAuthorizationSession,
+            retrieveAuthorizationSession = retrieveAuthorizationSession,
             eventTracker = mock(),
             postAuthSessionEvent = postAuthSessionEvent,
-            getManifest = getManifest,
-            goNext = goNext,
-            navigationManager = mock(),
+            getOrFetchSync = getSync,
             pollAuthorizationSessionOAuthResults = pollAuthorizationSessionOAuthResults,
             logger = mock(),
             initialState = initialState,
-            uriUtils = UriUtils(Logger.noop()),
+            uriUtils = UriUtils(Logger.noop(), mock()),
             applicationId = applicationId
         )
     }

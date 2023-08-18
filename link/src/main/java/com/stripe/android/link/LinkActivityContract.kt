@@ -6,11 +6,13 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.serialization.PopupPayload
-import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.networking.StripeRepository
+import javax.inject.Inject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LinkActivityContract :
-    ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
+class LinkActivityContract @Inject internal constructor(
+    private val stripeRepository: StripeRepository,
+) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
         val paymentConfiguration = PaymentConfiguration.getInstance(context)
@@ -19,6 +21,7 @@ class LinkActivityContract :
             context = context,
             publishableKey = paymentConfiguration.publishableKey,
             stripeAccount = paymentConfiguration.stripeAccountId,
+            paymentUserAgent = stripeRepository.buildPaymentUserAgent(),
         )
         return LinkForegroundActivity.createIntent(context, payload.toUrl())
     }
@@ -30,7 +33,6 @@ class LinkActivityContract :
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Args internal constructor(
         internal val configuration: LinkConfiguration,
-        internal val prefilledCardParams: PaymentMethodCreateParams? = null,
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

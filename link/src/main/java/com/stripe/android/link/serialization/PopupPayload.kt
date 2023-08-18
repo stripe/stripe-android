@@ -33,12 +33,27 @@ internal data class PopupPayload(
 
     @SerialName("locale")
     val locale: String,
+
+    @SerialName("paymentUserAgent")
+    val paymentUserAgent: String,
 ) {
     @SerialName("path")
     val path: String = "mobile_pay"
 
     @SerialName("integrationType")
     val integrationType: String = "mobile"
+
+    @SerialName("paymentObject")
+    val paymentObject: String = "link_payment_method"
+
+    @SerialName("loggerMetadata")
+    val loggerMetadata: Map<String, String> = emptyMap()
+
+    @SerialName("flags")
+    val flags: Map<String, String> = emptyMap()
+
+    @SerialName("experiments")
+    val experiments: Map<String, String> = emptyMap()
 
     @Serializable
     data class MerchantInfo(
@@ -73,7 +88,7 @@ internal data class PopupPayload(
     }
 
     companion object {
-        private const val baseUrl: String = "https://checkout.link.com/link-popup.html#"
+        private const val baseUrl: String = "https://checkout.link.com/#"
 
         val PopupPayloadJson = Json { encodeDefaults = true }
 
@@ -82,11 +97,13 @@ internal data class PopupPayload(
             context: Context,
             publishableKey: String,
             stripeAccount: String?,
+            paymentUserAgent: String,
         ): PopupPayload {
             return configuration.toPopupPayload(
                 context = context,
                 publishableKey = publishableKey,
                 stripeAccount = stripeAccount,
+                paymentUserAgent = paymentUserAgent,
             )
         }
 
@@ -94,6 +111,7 @@ internal data class PopupPayload(
             context: Context,
             publishableKey: String,
             stripeAccount: String?,
+            paymentUserAgent: String,
         ): PopupPayload {
             return PopupPayload(
                 publishableKey = publishableKey,
@@ -104,11 +122,12 @@ internal data class PopupPayload(
                 ),
                 customerInfo = CustomerInfo(
                     email = customerEmail,
-                    country = customerBillingCountryCode,
+                    country = customerBillingCountryCode ?: merchantCountryCode,
                 ),
                 paymentInfo = stripeIntent.toPaymentInfo(),
                 appId = context.applicationInfo.packageName,
                 locale = context.currentLocale(),
+                paymentUserAgent = paymentUserAgent,
             )
         }
 

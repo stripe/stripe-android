@@ -1,31 +1,30 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.common.ui.PrimaryButton
-import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.elements.CheckboxElementUI
+import javax.inject.Provider
 
 @Composable
 internal fun InputAddressScreen(
@@ -82,21 +81,18 @@ internal fun InputAddressScreen(
 
 @Composable
 internal fun InputAddressScreen(
-    injector: NonFallbackInjector
+    inputAddressViewModelSubcomponentBuilderProvider: Provider<InputAddressViewModelSubcomponent.Builder>
 ) {
     val viewModel: InputAddressViewModel = viewModel(
         factory = InputAddressViewModel.Factory(
-            injector
+            inputAddressViewModelSubcomponentBuilderProvider
         )
     )
     val formController by viewModel.formController.collectAsState()
     if (formController == null) {
-        Box(
-            contentAlignment = Alignment.Center,
+        LoadingIndicator(
             modifier = Modifier.fillMaxSize()
-        ) {
-            CircularProgressIndicator()
-        }
+        )
     } else {
         formController?.let {
             val completeValues by it.completeFormValues.collectAsState(null)

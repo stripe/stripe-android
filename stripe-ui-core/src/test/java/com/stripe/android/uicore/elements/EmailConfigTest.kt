@@ -41,4 +41,10 @@ class EmailConfigTest {
         assertThat(emailConfig.filter("12 3^@gm ail[\uD83E\uDD57 .com"))
             .isEqualTo("123^@gmail[\uD83E\uDD57.com")
     }
+
+    @Test
+    fun `verify filters whitespace`() {
+        assertThat(emailConfig.filter("example@email.com\n\t "))
+            .isEqualTo("example@email.com")
+    }
 }

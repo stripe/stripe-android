@@ -8,6 +8,7 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerEphemeralKeyProvider
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
@@ -26,6 +27,7 @@ import dagger.Module
 import dagger.Provides
 import java.util.Calendar
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -85,6 +87,14 @@ internal interface StripeCustomerAdapterModule {
             )
         }
 
+        /**
+         * Provides a non-singleton PaymentConfiguration.
+         *
+         * Should be fetched only when it's needed, to allow client to set the publishableKey and
+         * stripeAccountId in PaymentConfiguration any time before presenting Customer Sheet.
+         *
+         * Should always be injected with [Lazy] or [Provider].
+         */
         @Provides
         fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
             return PaymentConfiguration.getInstance(appContext)
@@ -92,9 +102,15 @@ internal interface StripeCustomerAdapterModule {
 
         @Provides
         @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(configuration: PaymentConfiguration): () -> String = {
-            configuration.publishableKey
-        }
+        fun providePublishableKey(
+            paymentConfiguration: Provider<PaymentConfiguration>
+        ): () -> String = { paymentConfiguration.get().publishableKey }
+
+        @Provides
+        @Named(STRIPE_ACCOUNT_ID)
+        fun provideStripeAccountId(
+            paymentConfiguration: Provider<PaymentConfiguration>
+        ): () -> String? = { paymentConfiguration.get().stripeAccountId }
 
         @Provides
         @Named(PRODUCT_USAGE)

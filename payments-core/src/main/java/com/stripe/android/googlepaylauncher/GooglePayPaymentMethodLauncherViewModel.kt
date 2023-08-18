@@ -33,7 +33,7 @@ import javax.inject.Inject
 internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     private val paymentsClient: PaymentsClient,
     private val requestOptions: ApiRequest.Options,
-    private val args: GooglePayPaymentMethodLauncherContract.Args,
+    private val args: GooglePayPaymentMethodLauncherContractV2.Args,
     private val stripeRepository: StripeRepository,
     private val googlePayJsonFactory: GooglePayJsonFactory,
     private val googlePayRepository: GooglePayRepository,
@@ -75,7 +75,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
 
     @VisibleForTesting
     internal fun createTransactionInfo(
-        args: GooglePayPaymentMethodLauncherContract.Args
+        args: GooglePayPaymentMethodLauncherContractV2.Args
     ): GooglePayJsonFactory.TransactionInfo {
         return GooglePayJsonFactory.TransactionInfo(
             currencyCode = args.currencyCode,
@@ -83,6 +83,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             countryCode = args.config.merchantCountryCode,
             transactionId = args.transactionId,
             totalPrice = args.amount,
+            totalPriceLabel = null,
             checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
         )
     }
@@ -103,11 +104,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
 
         val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
 
-        return runCatching {
-            requireNotNull(
-                stripeRepository.createPaymentMethod(params, requestOptions)
-            )
-        }.fold(
+        return stripeRepository.createPaymentMethod(params, requestOptions).fold(
             onSuccess = {
                 GooglePayPaymentMethodLauncher.Result.Completed(it)
             },
@@ -125,7 +122,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val args: GooglePayPaymentMethodLauncherContract.Args,
+        private val args: GooglePayPaymentMethodLauncherContractV2.Args,
     ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInjectionParams> {
 
         internal data class FallbackInjectionParams(

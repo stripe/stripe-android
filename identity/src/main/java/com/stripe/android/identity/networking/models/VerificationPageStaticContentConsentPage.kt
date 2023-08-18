@@ -17,7 +17,7 @@ internal data class VerificationPageStaticContentConsentPage(
     @SerialName("scroll_to_continue_button_text")
     val scrollToContinueButtonText: String,
     @SerialName("title")
-    val title: String,
+    val title: String?,
     @SerialName("privacy_policy")
     val privacyPolicy: String?,
     @SerialName("time_estimate")

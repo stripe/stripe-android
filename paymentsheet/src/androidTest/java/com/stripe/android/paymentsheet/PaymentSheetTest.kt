@@ -1,21 +1,20 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.utils.assertCompleted
+import com.stripe.android.paymentsheet.utils.assertFailed
+import com.stripe.android.paymentsheet.utils.expectNoResult
+import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 internal class PaymentSheetTest {
@@ -28,7 +27,9 @@ internal class PaymentSheetTest {
     val networkRule = NetworkRule()
 
     @Test
-    fun testSuccessfulCardPayment() {
+    fun testSuccessfulCardPayment() = runPaymentSheetTest(
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
         networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
@@ -36,21 +37,8 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        val countDownLatch = CountDownLatch(1)
-        val activityScenarioRule = composeTestRule.activityRule
-        val scenario = activityScenarioRule.scenario
-        scenario.moveToState(Lifecycle.State.CREATED)
-        lateinit var paymentSheet: PaymentSheet
-        scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
-            paymentSheet = PaymentSheet(it) { result ->
-                assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
-                countDownLatch.countDown()
-            }
-        }
-        scenario.moveToState(Lifecycle.State.RESUMED)
-        scenario.onActivity {
-            paymentSheet.presentWithPaymentIntent(
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = null,
             )
@@ -66,12 +54,12 @@ internal class PaymentSheetTest {
         }
 
         page.clickPrimaryButton()
-
-        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
     @Test
-    fun testSuccessfulDelayedSuccessPayment() {
+    fun testSuccessfulDelayedSuccessPayment() = runPaymentSheetTest(
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
         networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
@@ -79,21 +67,8 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        val countDownLatch = CountDownLatch(1)
-        val activityScenarioRule = composeTestRule.activityRule
-        val scenario = activityScenarioRule.scenario
-        scenario.moveToState(Lifecycle.State.CREATED)
-        lateinit var paymentSheet: PaymentSheet
-        scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
-            paymentSheet = PaymentSheet(it) { result ->
-                assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
-                countDownLatch.countDown()
-            }
-        }
-        scenario.moveToState(Lifecycle.State.RESUMED)
-        scenario.onActivity {
-            paymentSheet.presentWithPaymentIntent(
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = null,
             )
@@ -116,12 +91,12 @@ internal class PaymentSheetTest {
         }
 
         page.clickPrimaryButton()
-
-        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
     @Test
-    fun testFailureWhenSetupRequestsFail() {
+    fun testFailureWhenSetupRequestsFail() = runPaymentSheetTest(
+        resultCallback = ::assertFailed,
+    ) { testContext ->
         networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
@@ -136,32 +111,19 @@ internal class PaymentSheetTest {
             response.setResponseCode(400)
         }
 
-        val countDownLatch = CountDownLatch(1)
-        val activityScenarioRule = composeTestRule.activityRule
-        val scenario = activityScenarioRule.scenario
-        scenario.moveToState(Lifecycle.State.CREATED)
-        lateinit var paymentSheet: PaymentSheet
-        scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
-            paymentSheet = PaymentSheet(it) { result ->
-                assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
-                countDownLatch.countDown()
-            }
-        }
-        scenario.moveToState(Lifecycle.State.RESUMED)
-        scenario.onActivity {
-            paymentSheet.presentWithPaymentIntent(
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = null,
             )
         }
-
-        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
-    fun testDeferredIntentCardPayment() {
+    fun testDeferredIntentCardPayment() = runPaymentSheetTest(
+        createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
         networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
@@ -169,26 +131,8 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
         }
 
-        val countDownLatch = CountDownLatch(1)
-        val activityScenarioRule = composeTestRule.activityRule
-        val scenario = activityScenarioRule.scenario
-        scenario.moveToState(Lifecycle.State.CREATED)
-        lateinit var paymentSheet: PaymentSheet
-        scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
-            paymentSheet = PaymentSheet(
-                activity = it,
-                createIntentCallback = { _, _ ->
-                    CreateIntentResult.Success("pi_example_secret_example")
-                }
-            ) { result ->
-                assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
-                countDownLatch.countDown()
-            }
-        }
-        scenario.moveToState(Lifecycle.State.RESUMED)
-        scenario.onActivity {
-            paymentSheet.presentWithIntentConfiguration(
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5099,
@@ -233,13 +177,18 @@ internal class PaymentSheetTest {
         }
 
         page.clickPrimaryButton()
-
-        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
-    fun testDeferredIntentFailedCardPayment() {
+    fun testDeferredIntentFailedCardPayment() = runPaymentSheetTest(
+        createIntentCallback = { _, _ ->
+            CreateIntentResult.Failure(
+                cause = Exception("We don't accept visa"),
+                displayMessage = "We don't accept visa"
+            )
+        },
+        resultCallback = ::expectNoResult,
+    ) { testContext ->
         networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
@@ -247,27 +196,8 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
         }
 
-        val activityScenarioRule = composeTestRule.activityRule
-        val scenario = activityScenarioRule.scenario
-        scenario.moveToState(Lifecycle.State.CREATED)
-        lateinit var paymentSheet: PaymentSheet
-        scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
-            paymentSheet = PaymentSheet(
-                activity = it,
-                createIntentCallback = { _, _ ->
-                    CreateIntentResult.Failure(
-                        cause = Exception("We don't accept visa"),
-                        displayMessage = "We don't accept visa"
-                    )
-                }
-            ) {
-                error("Shouldn't call PaymentSheetResultCallback")
-            }
-        }
-        scenario.moveToState(Lifecycle.State.RESUMED)
-        scenario.onActivity {
-            paymentSheet.presentWithIntentConfiguration(
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 2000,
@@ -292,12 +222,19 @@ internal class PaymentSheetTest {
         }
 
         page.clickPrimaryButton()
+
         page.waitForText("We don't accept visa")
+        testContext.markTestSucceeded()
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
+    @OptIn(DelicatePaymentSheetApi::class)
     @Test
-    fun testDeferredIntentCardPaymentWithForcedSuccess() {
+    fun testDeferredIntentCardPaymentWithForcedSuccess() = runPaymentSheetTest(
+        createIntentCallback = { _, _ ->
+            CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
         networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
@@ -305,26 +242,8 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
         }
 
-        val countDownLatch = CountDownLatch(1)
-        val activityScenarioRule = composeTestRule.activityRule
-        val scenario = activityScenarioRule.scenario
-        scenario.moveToState(Lifecycle.State.CREATED)
-        lateinit var paymentSheet: PaymentSheet
-        scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
-            paymentSheet = PaymentSheet(
-                activity = it,
-                createIntentCallback = { _, _ ->
-                    CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
-                },
-            ) { result ->
-                assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
-                countDownLatch.countDown()
-            }
-        }
-        scenario.moveToState(Lifecycle.State.RESUMED)
-        scenario.onActivity {
-            paymentSheet.presentWithIntentConfiguration(
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 2000,
@@ -349,7 +268,5 @@ internal class PaymentSheetTest {
         }
 
         page.clickPrimaryButton()
-
-        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 }

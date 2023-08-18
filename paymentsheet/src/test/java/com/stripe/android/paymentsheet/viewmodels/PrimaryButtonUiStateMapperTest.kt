@@ -217,7 +217,6 @@ class PrimaryButtonUiStateMapperTest {
     private fun usBankAccountSelection(): PaymentSelection {
         return PaymentSelection.Saved(
             paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT,
-            isGooglePay = false,
         )
     }
 }

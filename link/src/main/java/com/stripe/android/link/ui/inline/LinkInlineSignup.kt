@@ -51,7 +51,6 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
@@ -67,6 +66,7 @@ import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.elements.menu.Checkbox
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeShapes
 
 @Preview
 @Composable
@@ -99,7 +99,7 @@ fun LinkInlineSignup(
 ) {
     linkConfigurationCoordinator.component?.let { component ->
         val viewModel: InlineSignupViewModel = viewModel(
-            factory = InlineSignupViewModel.Factory(component.injector)
+            factory = InlineSignupViewModel.Factory(component)
         )
 
         val viewState by viewModel.viewState.collectAsState()
@@ -164,47 +164,48 @@ internal fun LinkInlineSignup(
                 modifier = modifier
                     .border(
                         border = MaterialTheme.getBorderStroke(isSelected = false),
-                        shape = MaterialTheme.linkShapes.small
+                        shape = MaterialTheme.stripeShapes.roundedCornerShape,
                     )
                     .background(
                         color = MaterialTheme.stripeColors.component,
-                        shape = MaterialTheme.linkShapes.small
+                        shape = MaterialTheme.stripeShapes.roundedCornerShape,
                     )
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(MaterialTheme.linkShapes.small)
-                        .clickable {
-                            toggleExpanded()
-                        }
+                        .clip(MaterialTheme.stripeShapes.roundedCornerShape)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(16.dp)
+                    Column(
+                        modifier = Modifier.clickable { toggleExpanded() },
                     ) {
-                        Checkbox(
-                            checked = expanded,
-                            onCheckedChange = null, // needs to be null for accessibility on row click to work
-                            modifier = Modifier.padding(end = 8.dp),
-                            enabled = enabled
-                        )
-                        Column {
-                            Text(
-                                text = stringResource(id = R.string.stripe_inline_sign_up_header),
-                                style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colors.onSurface
-                                    .copy(alpha = LocalContentAlpha.current)
+                        Row(
+                            modifier = Modifier
+                                .padding(16.dp)
+                        ) {
+                            Checkbox(
+                                checked = expanded,
+                                onCheckedChange = null, // needs to be null for accessibility on row click to work
+                                modifier = Modifier.padding(end = 8.dp),
+                                enabled = enabled
                             )
-                            Text(
-                                text = stringResource(R.string.stripe_sign_up_message, merchantName),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 4.dp),
-                                style = MaterialTheme.typography.body1,
-                                color = MaterialTheme.colors.onSurface
-                                    .copy(alpha = LocalContentAlpha.current)
-                            )
+                            Column {
+                                Text(
+                                    text = stringResource(id = R.string.stripe_inline_sign_up_header),
+                                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colors.onSurface
+                                        .copy(alpha = LocalContentAlpha.current)
+                                )
+                                Text(
+                                    text = stringResource(R.string.stripe_sign_up_message, merchantName),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 4.dp),
+                                    style = MaterialTheme.typography.body1,
+                                    color = MaterialTheme.colors.onSurface
+                                        .copy(alpha = LocalContentAlpha.current)
+                                )
+                            }
                         }
                     }
 

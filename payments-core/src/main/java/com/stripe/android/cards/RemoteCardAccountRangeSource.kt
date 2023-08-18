@@ -26,23 +26,27 @@ internal class RemoteCardAccountRangeSource(
         cardNumber: CardNumber.Unvalidated
     ): List<AccountRange>? {
         return cardNumber.bin?.let { bin ->
-            _loading.value = true
+            val result = withLoading {
+                stripeRepository.getCardMetadata(
+                    bin = bin,
+                    options = requestOptions,
+                ).map { metadata ->
+                    metadata.accountRanges
+                }
+            }
 
-            val accountRanges =
-                stripeRepository.getCardMetadata(bin, requestOptions)?.accountRanges.orEmpty()
-            cardAccountRangeStore.save(bin, accountRanges)
+            result.onSuccess { accountRanges ->
+                cardAccountRangeStore.save(bin, accountRanges)
 
-            _loading.value = false
-
-            when {
-                accountRanges.isNotEmpty() -> {
-                    if (cardNumber.isValidLuhn) {
+                if (accountRanges.isNotEmpty()) {
+                    val hasMatch = accountRanges.any { it.binRange.matches(cardNumber) }
+                    if (!hasMatch && cardNumber.isValidLuhn) {
                         onCardMetadataMissingRange()
                     }
-                    accountRanges
                 }
-                else -> null
             }
+
+            result.getOrNull()
         }
     }
 
@@ -50,5 +54,14 @@ internal class RemoteCardAccountRangeSource(
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.CardMetadataMissingRange)
         )
+    }
+
+    private inline fun withLoading(
+        block: () -> Result<List<AccountRange>>,
+    ): Result<List<AccountRange>> {
+        _loading.value = true
+        val accountRanges = block()
+        _loading.value = false
+        return accountRanges
     }
 }

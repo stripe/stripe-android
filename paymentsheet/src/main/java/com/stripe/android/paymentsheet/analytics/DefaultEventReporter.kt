@@ -2,10 +2,13 @@ package com.stripe.android.paymentsheet.analytics
 
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -17,10 +20,9 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val mode: EventReporter.Mode,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-    private val eventTimeProvider: EventTimeProvider,
+    private val durationProvider: DurationProvider,
     @IOContext private val workContext: CoroutineContext
 ) : EventReporter {
-    private var paymentSheetShownMillis: Long? = null
 
     override fun onInit(
         configuration: PaymentSheet.Configuration?,
@@ -35,12 +37,40 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onLoadStarted(isDecoupling: Boolean) {
+        durationProvider.start(DurationProvider.Key.Loading)
+        fireEvent(PaymentSheetEvent.LoadStarted(isDecoupling))
+    }
+
+    override fun onLoadSucceeded(isDecoupling: Boolean) {
+        val duration = durationProvider.end(DurationProvider.Key.Loading)
+        fireEvent(
+            PaymentSheetEvent.LoadSucceeded(
+                duration = duration,
+                isDecoupled = isDecoupling,
+            )
+        )
+    }
+
+    override fun onLoadFailed(
+        isDecoupling: Boolean,
+        error: Throwable,
+    ) {
+        val duration = durationProvider.end(DurationProvider.Key.Loading)
+        fireEvent(
+            PaymentSheetEvent.LoadFailed(
+                duration = duration,
+                error = error.asPaymentSheetLoadingException.type,
+                isDecoupled = isDecoupling,
+            )
+        )
+    }
+
     override fun onDismiss(
         isDecoupling: Boolean,
     ) {
         fireEvent(
             PaymentSheetEvent.Dismiss(
-                mode = mode,
                 isDecoupled = isDecoupling,
             )
         )
@@ -48,16 +78,15 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onShowExistingPaymentOptions(
         linkEnabled: Boolean,
-        activeLinkSession: Boolean,
         currency: String?,
         isDecoupling: Boolean,
     ) {
-        paymentSheetShownMillis = eventTimeProvider.currentTimeMillis()
+        durationProvider.start(DurationProvider.Key.Checkout)
+
         fireEvent(
             PaymentSheetEvent.ShowExistingPaymentOptions(
                 mode = mode,
                 linkEnabled = linkEnabled,
-                activeLinkSession = activeLinkSession,
                 currency = currency,
                 isDecoupled = isDecoupling,
             )
@@ -66,18 +95,31 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onShowNewPaymentOptionForm(
         linkEnabled: Boolean,
-        activeLinkSession: Boolean,
         currency: String?,
         isDecoupling: Boolean,
     ) {
-        paymentSheetShownMillis = eventTimeProvider.currentTimeMillis()
+        durationProvider.start(DurationProvider.Key.Checkout)
+
         fireEvent(
             PaymentSheetEvent.ShowNewPaymentOptionForm(
                 mode = mode,
                 linkEnabled = linkEnabled,
-                activeLinkSession = activeLinkSession,
                 currency = currency,
                 isDecoupled = isDecoupling,
+            )
+        )
+    }
+
+    override fun onSelectPaymentMethod(
+        code: PaymentMethodCode,
+        currency: String?,
+        isDecoupling: Boolean,
+    ) {
+        fireEvent(
+            PaymentSheetEvent.SelectPaymentMethod(
+                code = code,
+                isDecoupled = isDecoupling,
+                currency = currency,
             )
         )
     }
@@ -97,26 +139,32 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onPressConfirmButton(currency: String?, isDecoupling: Boolean) {
+        fireEvent(
+            PaymentSheetEvent.PressConfirmButton(
+                currency = currency,
+                isDecoupled = isDecoupling,
+            )
+        )
+    }
+
     override fun onPaymentSuccess(
         paymentSelection: PaymentSelection?,
         currency: String?,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) {
-        // Google Pay is treated as a saved payment method after confirmation, so we need to
-        // "reset" to PaymentSelection.GooglePay for accurate reporting
-        val isGooglePay = (paymentSelection as? PaymentSelection.Saved)?.isGooglePay == true
+        // Wallets are treated as a saved payment method after confirmation, so we need
+        // to "reset" to the correct PaymentSelection for accurate reporting.
+        val savedSelection = (paymentSelection as? PaymentSelection.Saved)
 
-        val realSelection = if (isGooglePay) {
-            PaymentSelection.GooglePay
-        } else {
-            paymentSelection
-        }
+        val realSelection = savedSelection?.walletType?.paymentSelection ?: paymentSelection
+        val duration = durationProvider.end(DurationProvider.Key.Checkout)
 
         fireEvent(
             PaymentSheetEvent.Payment(
                 mode = mode,
                 paymentSelection = realSelection,
-                durationMillis = durationMillisFrom(paymentSheetShownMillis),
+                duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Success,
                 currency = currency,
                 isDecoupled = deferredIntentConfirmationType != null,
@@ -130,11 +178,13 @@ internal class DefaultEventReporter @Inject internal constructor(
         currency: String?,
         isDecoupling: Boolean,
     ) {
+        val duration = durationProvider.end(DurationProvider.Key.Checkout)
+
         fireEvent(
             PaymentSheetEvent.Payment(
                 mode = mode,
                 paymentSelection = paymentSelection,
-                durationMillis = durationMillisFrom(paymentSheetShownMillis),
+                duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Failure,
                 currency = currency,
                 isDecoupled = isDecoupling,
@@ -167,14 +217,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
-                    event,
-                    event.additionalParams
+                    event = event,
+                    additionalParams = event.params,
                 )
             )
         }
     }
-
-    private fun durationMillisFrom(start: Long?) = start?.let {
-        eventTimeProvider.currentTimeMillis() - it
-    }?.takeIf { it > 0 }
 }

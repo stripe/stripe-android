@@ -12,11 +12,10 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLinkAccounts
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAccountsSucceeded
-import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
@@ -27,6 +26,8 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
+import com.stripe.android.financialconnections.navigation.toNavigationCommand
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -38,8 +39,7 @@ internal class AccountPickerViewModel @Inject constructor(
     initialState: AccountPickerState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val selectAccounts: SelectAccounts,
-    private val getManifest: GetManifest,
-    private val goNext: GoNext,
+    private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
@@ -54,11 +54,12 @@ internal class AccountPickerViewModel @Inject constructor(
     private fun loadAccounts() {
         suspend {
             val state = awaitState()
-            val manifest = getManifest()
+            val sync = getOrFetchSync()
+            val manifest = sync.manifest
             val activeAuthSession = requireNotNull(manifest.activeAuthSession)
             val (partnerAccountList, millis) = measureTimeMillis {
                 pollAuthorizationSessionAccounts(
-                    manifest = manifest,
+                    sync = sync,
                     canRetry = state.canRetry
                 )
             }
@@ -119,6 +120,15 @@ internal class AccountPickerViewModel @Inject constructor(
                     selectedIds = setOf(payload.accounts.first().id),
                     updateLocalCache = true
                 )
+
+                // Auto-select the first selectable account.
+                payload.selectionMode == SelectionMode.RADIO -> setState {
+                    copy(
+                        selectedIds = setOfNotNull(
+                            payload.selectableAccounts.firstOrNull()?.id
+                        )
+                    )
+                }
             }
         })
     }
@@ -127,15 +137,23 @@ internal class AccountPickerViewModel @Inject constructor(
         onAsync(
             AccountPickerState::payload,
             onFail = {
-                eventTracker.track(Error(Pane.ACCOUNT_PICKER, it))
-                logger.error("Error retrieving accounts", it)
+                eventTracker.logError(
+                    logger = logger,
+                    pane = Pane.ACCOUNT_PICKER,
+                    extraMessage = "Error retrieving accounts",
+                    error = it
+                )
             },
         )
         onAsync(
             AccountPickerState::selectAccounts,
             onFail = {
-                eventTracker.track(Error(Pane.ACCOUNT_PICKER, it))
-                logger.error("Error selecting accounts", it)
+                eventTracker.logError(
+                    logger = logger,
+                    pane = Pane.ACCOUNT_PICKER,
+                    extraMessage = "Error selecting accounts",
+                    error = it
+                )
             }
         )
     }
@@ -182,22 +200,26 @@ internal class AccountPickerViewModel @Inject constructor(
         updateLocalCache: Boolean
     ) {
         suspend {
-            val manifest = getManifest()
+            val manifest = getOrFetchSync().manifest
             val accountsList: PartnerAccountsList = selectAccounts(
                 selectedAccountIds = selectedIds,
                 sessionId = requireNotNull(manifest.activeAuthSession).id,
                 updateLocalCache = updateLocalCache
             )
-            goNext(accountsList.nextPane)
+            navigationManager.navigate(
+                NavigateToRoute(accountsList.nextPane.toNavigationCommand())
+            )
             accountsList
         }.execute {
             copy(selectAccounts = it)
         }
     }
 
-    fun selectAnotherBank() = navigationManager.navigate(NavigationDirections.reset)
+    fun selectAnotherBank() =
+        navigationManager.navigate(NavigateToRoute(NavigationDirections.reset))
 
-    fun onEnterDetailsManually() = navigationManager.navigate(NavigationDirections.manualEntry)
+    fun onEnterDetailsManually() =
+        navigationManager.navigate(NavigateToRoute(NavigationDirections.manualEntry))
 
     fun onLoadAccountsAgain() {
         setState { copy(canRetry = false) }

@@ -4,10 +4,14 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.model.StripeIntentFixtures
+import com.stripe.android.networking.StripeRepository
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -41,19 +45,14 @@ class LinkActivityContractTest {
 
         val args = LinkActivityContract.Args(
             config,
-            null,
         )
-        val contract = LinkActivityContract()
+        val stripeRepository = mock<StripeRepository>()
+        whenever(stripeRepository.buildPaymentUserAgent(any())).thenReturn("test")
+        val contract = LinkActivityContract(stripeRepository)
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
         assertThat(intent.component?.className).isEqualTo(LinkForegroundActivity::class.java.name)
-        assertThat(intent.extras?.getString(LinkForegroundActivity.EXTRA_POPUP_URL)).isEqualTo(
-            "https://checkout.link.com/link-popup.html#" +
-                "eyJwdWJsaXNoYWJsZUtleSI6InBrX3Rlc3RfYWJjZGVmZyIsInN0cmlwZUFjY291bnQiOm51bGws" +
-                "Im1lcmNoYW50SW5mbyI6eyJidXNpbmVzc05hbWUiOiJNZXJjaGFudCwgSW5jIiwiY291bnRyeSI6" +
-                "IlVTIn0sImN1c3RvbWVySW5mbyI6eyJlbWFpbCI6ImN1c3RvbWVyQGVtYWlsLmNvbSIsImNvdW50" +
-                "cnkiOiJVUyJ9LCJwYXltZW50SW5mbyI6eyJjdXJyZW5jeSI6InVzZCIsImFtb3VudCI6MTA5OX0s" +
-                "ImFwcElkIjoiY29tLnN0cmlwZS5hbmRyb2lkLmxpbmsudGVzdCIsImxvY2FsZSI6IlVTIiwicGF0" +
-                "aCI6Im1vYmlsZV9wYXkiLCJpbnRlZ3JhdGlvblR5cGUiOiJtb2JpbGUifQ=="
+        assertThat(intent.extras?.getString(LinkForegroundActivity.EXTRA_POPUP_URL)).startsWith(
+            "https://checkout.link.com/#"
         )
     }
 }

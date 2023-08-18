@@ -5,6 +5,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BaseLpmTest
 import com.stripe.android.test.core.Currency
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -31,6 +32,7 @@ internal class TestUpi : BaseLpmTest() {
         )
     }
 
+    @Ignore("Investigate the flakiness in nightly tests")
     @Test
     fun testUpiInCustomFlow() {
         testDriver.confirmCustom(

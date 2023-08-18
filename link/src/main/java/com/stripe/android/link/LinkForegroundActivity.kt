@@ -85,6 +85,7 @@ internal class LinkForegroundActivity : AppCompatActivity() {
         }
         try {
             CustomTabsIntent.Builder()
+                .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
                 .build()
                 .launchUrl(this, popupUri)
         } catch (e: ActivityNotFoundException) {

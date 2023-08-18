@@ -7,6 +7,10 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.utils.DefaultDurationProvider
+import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
@@ -21,6 +25,7 @@ import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentSheetLoader
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
@@ -34,8 +39,16 @@ import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-@Module
+@Module(
+    subcomponents = [
+        LinkAnalyticsComponent::class,
+        LinkComponent::class,
+    ],
+)
 internal abstract class PaymentSheetCommonModule {
+
+    @Binds
+    abstract fun bindsDurationProvider(impl: DefaultDurationProvider): DurationProvider
 
     @Binds
     abstract fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
@@ -45,7 +58,7 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsStripeIntentRepository(
-        repository: ElementsSessionRepository.Api
+        impl: RealElementsSessionRepository,
     ): ElementsSessionRepository
 
     @Binds

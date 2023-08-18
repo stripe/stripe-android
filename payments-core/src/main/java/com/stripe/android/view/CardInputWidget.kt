@@ -36,6 +36,7 @@ import com.stripe.android.databinding.StripeCardInputWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.DelicateCardDetailsApi
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -178,6 +179,7 @@ class CardInputWidget @JvmOverloads constructor(
      * otherwise `null`. If a field is invalid focus will shift to the invalid field.
      */
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
+        @OptIn(DelicateCardDetailsApi::class)
         get() {
             return cardParams?.let {
                 PaymentMethodCreateParams.Card(

@@ -39,6 +39,7 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                         PARAM_SESSION_RESULT to "completed"
                     )
                 )
+
             is FinancialConnectionsSheetActivityResult.Canceled ->
                 FinancialConnectionsAnalyticsEvent(
                     FinancialConnectionsAnalyticsEvent.Code.SheetClosed,
@@ -47,6 +48,7 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                         PARAM_SESSION_RESULT to "cancelled"
                     )
                 )
+
             is FinancialConnectionsSheetActivityResult.Failed ->
                 FinancialConnectionsAnalyticsEvent(
                     FinancialConnectionsAnalyticsEvent.Code.SheetFailed,
@@ -54,7 +56,9 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                         PARAM_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
                         PARAM_SESSION_RESULT to "failure"
                     ).plus(
-                        financialConnectionsSheetResult.error.toEventParams().filterNotNullValues()
+                        financialConnectionsSheetResult.error
+                            .toEventParams(extraMessage = null)
+                            .filterNotNullValues()
                     )
                 )
         }

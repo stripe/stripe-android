@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,7 +26,6 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -33,7 +33,6 @@ import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.domain.toNavigationCommand
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.common.CloseDialog
@@ -54,6 +53,8 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.NavigationState
+import com.stripe.android.financialconnections.navigation.toNavigationCommand
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
@@ -302,34 +303,39 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     }
 
     @Composable
-    private fun NavigationEffect(navController: NavHostController) {
-        LaunchedEffect(navigationManager.commands) {
-            navigationManager.commands.collect { command ->
-                val from = navController.currentDestination?.route
-                if (command.destination.isNotEmpty() && command.destination != from) {
-                    logger.debug("Navigating from $from to ${command.destination}")
-                    navController.navigate(command.destination) {
-                        launchSingleTop = true
-                        popUpIfNotBackwardsNavigable(navController)
-                    }
+    private fun NavigationEffect(
+        navController: NavHostController
+    ) {
+        val navigationState by navigationManager.navigationState.collectAsState()
+
+        LaunchedEffect(navigationState) {
+            logger.debug("updateNavigationState to $navigationState")
+            val from = navController.currentDestination?.route
+            when (val viewState = navigationState) {
+                is NavigationState.NavigateToRoute -> {
+                    navigateToRoute(viewState, from, navController)
+                    navigationManager.onNavigated(navigationState)
                 }
+
+                is NavigationState.Idle -> {}
             }
         }
     }
 
-    /**
-     * Removes screens that are not backwards-navigable from the backstack.
-     */
-    private fun NavOptionsBuilder.popUpIfNotBackwardsNavigable(navController: NavHostController) {
-        val destination: String = navController.currentBackStackEntry?.destination?.route ?: return
-        val destinationsToSkipOnBack = listOf(
-            NavigationDirections.partnerAuth.destination,
-            NavigationDirections.reset.destination
-        )
-        if (destinationsToSkipOnBack.contains(navController.currentDestination?.route)
-        ) {
-            popUpTo(destination) {
-                inclusive = true
+    private fun navigateToRoute(
+        viewState: NavigationState.NavigateToRoute,
+        from: String?,
+        navController: NavHostController
+    ) {
+        val destination = viewState.command.destination
+        if (destination.isNotEmpty() && destination != from) {
+            logger.debug("Navigating from $from to $destination")
+            navController.navigate(destination) {
+                launchSingleTop = true
+                val currentScreen: String? = navController.currentBackStackEntry?.destination?.route
+                if (currentScreen != null && viewState.popCurrentFromBackStack) {
+                    popUpTo(currentScreen) { inclusive = true }
+                }
             }
         }
     }

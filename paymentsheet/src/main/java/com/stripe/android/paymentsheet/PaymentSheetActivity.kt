@@ -8,7 +8,7 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
@@ -55,14 +55,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.setupGooglePay(
             lifecycleScope,
             registerForActivityResult(
-                GooglePayPaymentMethodLauncherContract(),
+                GooglePayPaymentMethodLauncherContractV2(),
                 viewModel::onGooglePayResult
             )
         )
-
-        starterArgs?.statusBarColor?.let {
-            window.statusBarColor = it
-        }
 
         setContentView(viewBinding.root)
 

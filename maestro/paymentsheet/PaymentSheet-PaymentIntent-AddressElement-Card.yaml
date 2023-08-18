@@ -1,19 +1,27 @@
 appId: com.stripe.android.paymentsheet.example
 ---
 - launchApp
+- startRecording: /tmp/test_results/paymentsheet-paymentintent-addresselement-card
 - scroll
 # Android specific: Navigate to example
 - waitForAnimationToEnd:
     timeout: 5000
-- "scroll"
+- scrollUntilVisible:
+    element: "Playground"
 - tapOn: "Playground"
+- scrollUntilVisible:
+    element:
+      id: "com.stripe.android.paymentsheet.example:id/default_billing_off_button"
 - tapOn:
     id: "com.stripe.android.paymentsheet.example:id/default_billing_off_button"
-- "scroll"
+- scrollUntilVisible:
+    element:
+      id: "com.stripe.android.paymentsheet.example:id/reload_button"
 - tapOn:
     id: "com.stripe.android.paymentsheet.example:id/reload_button"
-- "scroll"
-- "scroll"
+- scrollUntilVisible:
+    element:
+      id: "com.stripe.android.paymentsheet.example:id/shipping_address_button"
 - tapOn:
       id: "com.stripe.android.paymentsheet.example:id/shipping_address_button"
 - waitForAnimationToEnd:
@@ -30,6 +38,10 @@ appId: com.stripe.android.paymentsheet.example
     file: ./card/subflow-card-details.yaml
     env:
         CARD_NUMBER: 4242424242424242
-- scroll
-- tapOn: "Pay.*"
+- scrollUntilVisible:
+    element:
+      id: "com.stripe.android.paymentsheet.example:id/primary_button"
+- tapOn:
+    id: "com.stripe.android.paymentsheet.example:id/primary_button"
 - assertVisible: ".*Success.*"
+- stopRecording

@@ -6,9 +6,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
@@ -34,20 +32,16 @@ internal class PaymentLauncherModule {
     @Singleton
     fun providePaymentAuthenticatorRegistry(
         context: Context,
-        stripeRepository: StripeRepository,
         @Named(ENABLE_LOGGING) enableLogging: Boolean,
         @IOContext workContext: CoroutineContext,
         @UIContext uiContext: CoroutineContext,
         threeDs1IntentReturnUrlMap: MutableMap<String, String>,
-        defaultAnalyticsRequestExecutor: DefaultAnalyticsRequestExecutor,
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
         @Named(PRODUCT_USAGE) productUsage: Set<String>,
         @Named(IS_INSTANT_APP) isInstantApp: Boolean
     ): PaymentAuthenticatorRegistry = DefaultPaymentAuthenticatorRegistry.createInstance(
         context,
-        stripeRepository,
-        defaultAnalyticsRequestExecutor,
         paymentAnalyticsRequestFactory,
         enableLogging,
         workContext,

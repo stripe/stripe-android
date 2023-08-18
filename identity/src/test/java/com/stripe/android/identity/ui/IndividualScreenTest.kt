@@ -1,12 +1,15 @@
 package com.stripe.android.identity.ui
 
 import android.os.Build
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
@@ -19,6 +22,7 @@ import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentIndividualPage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.uicore.elements.PHONE_NUMBER_TEXT_FIELD_TAG
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import org.junit.Rule
@@ -48,7 +52,8 @@ class IndividualScreenTest {
                 title = TITLE,
                 idNumberCountries = listOf(US, SG),
                 idNumberCountryNotListedTextButtonText = ID_COUNTRY_NOT_LISTED_BUTTON_TEXT,
-                addressCountryNotListedTextButtonText = ADDRESS_COUNTRY_NOT_LISTED_BUTTON_TEXT
+                addressCountryNotListedTextButtonText = ADDRESS_COUNTRY_NOT_LISTED_BUTTON_TEXT,
+                phoneNumberCountries = listOf(US, SG)
             )
         )
     }
@@ -107,6 +112,26 @@ class IndividualScreenTest {
                 },
                 any<NavOptionsBuilder.() -> Unit>()
             )
+        }
+    }
+
+    @Test
+    fun testMissingPhoneNumber() {
+        setComposeTestRuleWith(
+            setOf(Requirement.PHONE_NUMBER)
+        ) {
+            onNodeWithTag(INDIVIDUAL_SUBMIT_BUTTON_TAG).onChildAt(0).assertTextEquals(
+                BUTTON_TEXT.uppercase()
+            )
+            onNodeWithTag(INDIVIDUAL_TITLE_TAG).assertTextEquals(TITLE)
+
+            onNodeWithTag(INDIVIDUAL_SUBMIT_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
+
+            onNodeWithTag(PHONE_NUMBER_TEXT_FIELD_TAG).performTextInput("415123456") // incomplete US number
+            onNodeWithTag(INDIVIDUAL_SUBMIT_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
+
+            onNodeWithTag(PHONE_NUMBER_TEXT_FIELD_TAG).performTextInput("4151234567") // complete US number
+            onNodeWithTag(INDIVIDUAL_SUBMIT_BUTTON_TAG).onChildAt(0).assertIsEnabled()
         }
     }
 

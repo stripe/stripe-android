@@ -18,11 +18,13 @@ import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.navigation.NavigationDirections.success
+import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -42,7 +44,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     private val markLinkVerified: MarkLinkVerified,
     private val getCachedAccounts: GetCachedAccounts,
     private val saveAccountToLink: SaveAccountToLink,
-    private val goNext: GoNext,
+    private val navigationManager: NavigationManager,
     private val logger: Logger
 ) : MavericksViewModel<NetworkingSaveToLinkVerificationState>(initialState) {
 
@@ -85,14 +87,14 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
             NetworkingSaveToLinkVerificationState::confirmVerification,
             onSuccess = {
                 saveToLinkWithStripeSucceeded.set(true)
-                goNext(Pane.SUCCESS)
+                navigationManager.navigate(NavigateToRoute(success))
             },
             onFail = { error ->
                 logger.error("Error confirming verification", error)
                 eventTracker.track(Error(PANE, error))
                 if (error !is OTPError) {
                     saveToLinkWithStripeSucceeded.set(false)
-                    goNext(Pane.SUCCESS)
+                    navigationManager.navigate(NavigateToRoute(success))
                 }
             },
         )
@@ -122,7 +124,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     }.execute { copy(confirmVerification = it) }
 
     fun onSkipClick() {
-        goNext(Pane.SUCCESS)
+        navigationManager.navigate(NavigateToRoute(success))
     }
 
     companion object :

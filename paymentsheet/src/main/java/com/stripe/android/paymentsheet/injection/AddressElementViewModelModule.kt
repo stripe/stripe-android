@@ -1,11 +1,9 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -31,14 +29,6 @@ internal class AddressElementViewModelModule {
     @Singleton
     fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
 
-    /**
-     * This module is only used when the app is recovered from a killed process,
-     * where no [Injector] is available. Returns a dummy key instead.
-     */
-    @Provides
-    @InjectorKey
-    fun provideDummyInjectorKey(): String = DUMMY_INJECTOR_KEY
-
     @Provides
     @Named(PUBLISHABLE_KEY)
     @Singleton
@@ -55,7 +45,8 @@ internal class AddressElementViewModelModule {
         packageManager = context.packageManager,
         packageName = context.packageName.orEmpty(),
         packageInfo = context.packageInfo,
-        publishableKeyProvider = { publishableKey }
+        publishableKeyProvider = { publishableKey },
+        networkTypeProvider = NetworkTypeDetector(context)::invoke,
     )
 
     @Provides

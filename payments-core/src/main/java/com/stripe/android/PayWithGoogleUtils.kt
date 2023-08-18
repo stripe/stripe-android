@@ -18,8 +18,24 @@ object PayWithGoogleUtils {
      * @param currency the [Currency] used to determine how many digits after the decimal
      * @return a String that can be used as a Pay with Google price string
      */
+    @Deprecated(
+        message = "Use getPriceString(Long, Currency) instead.",
+        replaceWith = ReplaceWith("getPriceString(price.toLong(), currency)"),
+    )
     @JvmStatic
     fun getPriceString(price: Int, currency: Currency): String {
+        return getPriceString(price.toLong(), currency)
+    }
+
+    /**
+     * Converts an integer price in the lowest currency denomination to a Google string value.
+     * For instance: (100L, USD) -> "1.00", but (100L, JPY) -> "100".
+     * @param price the price in the lowest available currency denomination
+     * @param currency the [Currency] used to determine how many digits after the decimal
+     * @return a String that can be used as a Pay with Google price string
+     */
+    @JvmStatic
+    fun getPriceString(price: Long, currency: Currency): String {
         val fractionDigits = currency.defaultFractionDigits
         val totalLength = price.toString().length
         val builder = StringBuilder()

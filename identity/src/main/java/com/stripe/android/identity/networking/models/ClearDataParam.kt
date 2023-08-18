@@ -24,7 +24,11 @@ internal data class ClearDataParam(
     @SerialName("name")
     val name: Boolean = false,
     @SerialName("address")
-    val address: Boolean = false
+    val address: Boolean = false,
+    @SerialName("phone")
+    val phone: Boolean = false,
+    @SerialName("phone_otp")
+    val phoneOtp: Boolean = false
 ) {
     internal companion object {
         private const val CLEAR_DATA_PARAM = "clear_data"
@@ -47,7 +51,9 @@ internal data class ClearDataParam(
             idNumber = requirements.contains(Requirement.IDNUMBER),
             dob = requirements.contains(Requirement.DOB),
             name = requirements.contains(Requirement.NAME),
-            address = requirements.contains(Requirement.ADDRESS)
+            address = requirements.contains(Requirement.ADDRESS),
+            phone = requirements.contains(Requirement.PHONE_NUMBER),
+            phoneOtp = requirements.contains(Requirement.PHONE_OTP)
         )
     }
 }

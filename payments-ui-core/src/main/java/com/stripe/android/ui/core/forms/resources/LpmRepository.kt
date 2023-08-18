@@ -159,6 +159,23 @@ class LpmRepository constructor(
         }
     }
 
+    /**
+     * This method can be used to initialize the LpmRepository with the hardcoded card spec.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun initializeWithCardSpec(
+        billingConfiguration: CardBillingDetailsCollectionConfiguration =
+            CardBillingDetailsCollectionConfiguration(),
+    ) {
+        lpmInitialFormData.putAll(
+            mapOf(
+                PaymentMethod.Type.Card.code to hardcodedCardSpec(
+                    billingDetailsCollectionConfiguration = billingConfiguration
+                )
+            )
+        )
+    }
+
     @VisibleForTesting
     fun updateFromDisk(stripeIntent: StripeIntent) {
         update(stripeIntent, readFromDisk())
@@ -429,11 +446,8 @@ class LpmRepository constructor(
         PaymentMethod.Type.USBankAccount.code -> {
             val pmo = stripeIntent.getPaymentMethodOptions()[PaymentMethod.Type.USBankAccount.code]
             val verificationMethod = (pmo as? Map<*, *>)?.get("verification_method") as? String
-            val supportsVerificationMethod = verificationMethod == "instant" ||
-                verificationMethod == "automatic"
-            val supported =
-                (stripeIntent.clientSecret != null || arguments.enableACHV2InDeferredFlow) &&
-                    supportsVerificationMethod
+            val supportsVerificationMethod = verificationMethod in setOf("instant", "automatic")
+
             /**
              * US Bank Account requires the payment method option to have either automatic or
              * instant verification method in order to be a supported payment method. For example,
@@ -446,7 +460,7 @@ class LpmRepository constructor(
              *     }
              * }
              */
-            if (supported) {
+            if (supportsVerificationMethod) {
                 SupportedPaymentMethod(
                     code = "us_bank_account",
                     requiresMandate = true,
@@ -629,9 +643,6 @@ class LpmRepository constructor(
         val resources: Resources?,
         val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
             DefaultIsFinancialConnectionsAvailable(),
-        // Whether to enable ACHv2 in the deferred flow.
-        // To be deleted when https://jira.corp.stripe.com/browse/BANKCON-6731 is completed.
-        val enableACHV2InDeferredFlow: Boolean = false,
     )
 }
 

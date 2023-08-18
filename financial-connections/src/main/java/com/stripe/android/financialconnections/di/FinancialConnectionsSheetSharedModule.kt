@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
@@ -129,6 +130,7 @@ internal object FinancialConnectionsSheetSharedModule {
         packageManager = application.packageManager,
         packageName = application.packageName.orEmpty(),
         packageInfo = application.packageInfo,
-        publishableKeyProvider = { publishableKey }
+        publishableKeyProvider = { publishableKey },
+        networkTypeProvider = NetworkTypeDetector(application)::invoke,
     )
 }
