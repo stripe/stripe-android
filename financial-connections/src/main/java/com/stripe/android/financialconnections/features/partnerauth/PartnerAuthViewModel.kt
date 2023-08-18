@@ -108,7 +108,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 sync = sync
             )
             eventTracker.track(
-                FinancialConnectionsEvent.AuthSessionCreated(
+                FinancialConnectionsEvent.AuthSessionOpened(
                     id = authSession.id,
                     pane = Pane.PARTNER_AUTH,
                     flow = authSession.flow,
@@ -178,8 +178,18 @@ internal class PartnerAuthViewModel @Inject constructor(
         kotlin.runCatching { requireNotNull(getOrFetchSync().manifest.activeAuthSession) }
             .onSuccess {
                 it.browserReadyUrl()?.let { url ->
-                    eventTracker.track(PrepaneClickContinue(Pane.PARTNER_AUTH))
                     setState { copy(viewEffect = OpenPartnerAuth(url)) }
+                    eventTracker.track(
+                        FinancialConnectionsEvent.AuthSessionOpened(
+                            id = it.id,
+                            pane = Pane.PARTNER_AUTH,
+                            flow = it.flow,
+                            defaultBrowser = BrowserUtils.getPackageToHandleUri(
+                                context = context,
+                                uri = url.toUri()
+                            )
+                        )
+                    )
                 }
             }
             .onFailure {

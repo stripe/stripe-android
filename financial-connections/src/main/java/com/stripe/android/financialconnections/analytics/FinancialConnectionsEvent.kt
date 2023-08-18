@@ -318,13 +318,13 @@ internal sealed class FinancialConnectionsEvent(
         mapOf("pane" to pane.value)
     )
 
-    class AuthSessionCreated(
+    class AuthSessionOpened(
         pane: Pane,
         flow: String?,
         defaultBrowser: String?,
         id: String
     ) : FinancialConnectionsEvent(
-        "auth_session.created",
+        "auth_session.opened",
         mapOf(
             "auth_session_id" to id,
             "pane" to pane.value,
