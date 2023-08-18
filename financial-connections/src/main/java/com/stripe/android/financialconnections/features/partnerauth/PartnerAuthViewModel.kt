@@ -107,17 +107,6 @@ internal class PartnerAuthViewModel @Inject constructor(
                 institution = requireNotNull(manifest.activeInstitution),
                 sync = sync
             )
-            eventTracker.track(
-                FinancialConnectionsEvent.AuthSessionOpened(
-                    id = authSession.id,
-                    pane = Pane.PARTNER_AUTH,
-                    flow = authSession.flow,
-                    defaultBrowser = BrowserUtils.getPackageToHandleUri(
-                        context = context,
-                        uri = requireNotNull(authSession.browserReadyUrl()).toUri()
-                    )
-                )
-            )
             logger.debug("Created auth session ${authSession.id}")
             Payload(
                 authSession = authSession,
