@@ -77,12 +77,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        // prevent playground configuration from leaking to example apps.
-        connectionsDebugSharedPrefs.edit { clear() }
-    }
-
     @Composable
     private fun FinancialConnectionsScreen() {
         val state: FinancialConnectionsPlaygroundState by viewModel.state.collectAsState()
@@ -240,8 +234,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             connectionsDebugSharedPrefs.edit {
                 when (selectedOption) {
                     NativeOverride.None -> clear()
-                    NativeOverride.Native -> putBoolean("override_native", true)
-                    NativeOverride.Web -> putBoolean("override_native", false)
+                    NativeOverride.Native -> putBoolean("financial_connections_override_native", true)
+                    NativeOverride.Web -> putBoolean("financial_connections_override_native", false)
                 }
             }
         }

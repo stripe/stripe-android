@@ -26,8 +26,6 @@ import org.junit.Ignore
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
@@ -198,21 +196,50 @@ internal class DefaultCardAccountRangeRepositoryTest {
     }
 
     @Test
-    fun `getAccountRange should not access remote source if BIN is in store`() = runTest {
-        val remoteSource = mock<CardAccountRangeSource>()
+    fun `Should return local account ranges if BIN is in store`() = runTest {
+        val accountRanges = FAKE_ACCOUNT_RANGES.shuffled()
+
+        val repository = DefaultCardAccountRangeRepository(
+            inMemorySource = InMemoryCardAccountRangeSource(realStore),
+            remoteSource = FakeCardAccountRangeSource(),
+            staticSource = StaticCardAccountRangeSource(),
+            store = realStore,
+        )
+
+        val bin = requireNotNull(CardNumberFixtures.VISA.bin)
+        realStore.save(bin, accountRanges)
+
+        val ranges = repository.getAccountRanges(CardNumberFixtures.VISA)
+        assertThat(ranges).containsExactlyElementsIn(accountRanges)
+    }
+
+    @Test
+    fun `Should return static account ranges if remote source fails and BIN is not in store`() = runTest {
+        val repository = DefaultCardAccountRangeRepository(
+            inMemorySource = FakeCardAccountRangeSource(accountRanges = null),
+            remoteSource = mock(),
+            staticSource = StaticCardAccountRangeSource(),
+            store = realStore,
+        )
+
+        val ranges = repository.getAccountRanges(CardNumberFixtures.VISA)
+        assertThat(ranges).containsExactlyElementsIn(VISA_ACCOUNT_RANGES)
+    }
+
+    @Test
+    fun `Should load from remote source if BIN is not in store`() = runTest {
+        val accountRanges = FAKE_ACCOUNT_RANGES.shuffled()
+        val remoteSource = FakeCardAccountRangeSource(accountRanges = accountRanges)
+
         val repository = DefaultCardAccountRangeRepository(
             inMemorySource = FakeCardAccountRangeSource(),
             remoteSource = remoteSource,
             staticSource = FakeCardAccountRangeSource(),
-            store = realStore
+            store = realStore,
         )
 
-        val bin = requireNotNull(CardNumberFixtures.VISA.bin)
-        realStore.save(bin, emptyList())
-
-        // should not access remote source
-        repository.getAccountRange(CardNumberFixtures.VISA)
-        verify(remoteSource, never()).getAccountRanges(CardNumberFixtures.VISA)
+        val ranges = repository.getAccountRanges(CardNumberFixtures.VISA)
+        assertThat(ranges).containsExactlyElementsIn(accountRanges)
     }
 
     @Test
@@ -287,12 +314,13 @@ internal class DefaultCardAccountRangeRepositoryTest {
     }
 
     private class FakeCardAccountRangeSource(
-        isLoading: Boolean = false
+        isLoading: Boolean = false,
+        private val accountRanges: List<AccountRange>? = null,
     ) : CardAccountRangeSource {
         override suspend fun getAccountRanges(
             cardNumber: CardNumber.Unvalidated
         ): List<AccountRange>? {
-            return null
+            return accountRanges
         }
 
         override val loading: Flow<Boolean> = flowOf(isLoading)
@@ -300,5 +328,43 @@ internal class DefaultCardAccountRangeRepositoryTest {
 
     private companion object {
         private val DEFAULT_OPTIONS = ApiRequest.Options("pk_test_vOo1umqsYxSrP5UXfOeL3ecm")
+
+        private val VISA_ACCOUNT_RANGES = listOf(
+            AccountRange(
+                binRange = BinRange(
+                    low = "4000000000000000",
+                    high = "4999999999999999"
+                ),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.Visa,
+            )
+        )
+
+        private val FAKE_ACCOUNT_RANGES = listOf(
+            AccountRange(
+                binRange = BinRange(
+                    low = "4000000000000000",
+                    high = "4999999999999999"
+                ),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.Visa,
+            ),
+            AccountRange(
+                binRange = BinRange(
+                    low = "2221000000000000",
+                    high = "2720999999999999"
+                ),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.Mastercard,
+            ),
+            AccountRange(
+                BinRange(
+                    low = "5100000000000000",
+                    high = "5599999999999999"
+                ),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.Mastercard,
+            ),
+        )
     }
 }

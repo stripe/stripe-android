@@ -163,6 +163,7 @@ internal fun DocumentScanScreen(
                     cameraManager.toggleFound()
                 }
                 is IdentityScanState.Finished -> {
+                    identityScanViewModel.stopScan(lifecycleOwner)
                     cameraManager.toggleFinished()
                 }
                 else -> {} // no-op

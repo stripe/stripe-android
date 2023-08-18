@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -8,8 +7,6 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -20,9 +17,7 @@ internal class PaymentSheetContractV2 :
         context: Context,
         input: Args
     ): Intent {
-        val statusBarColor = (context as? Activity)?.window?.statusBarColor
-        return Intent(context, PaymentSheetActivity::class.java)
-            .putExtra(EXTRA_ARGS, input.copy(statusBarColor = statusBarColor))
+        return Intent(context, PaymentSheetActivity::class.java).putExtra(EXTRA_ARGS, input)
     }
 
     override fun parseResult(
@@ -40,8 +35,7 @@ internal class PaymentSheetContractV2 :
     data class Args(
         internal val initializationMode: PaymentSheet.InitializationMode,
         internal val config: PaymentSheet.Configuration?,
-        @ColorInt internal val statusBarColor: Int? = null,
-        @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
+        @ColorInt internal val statusBarColor: Int?,
     ) : ActivityStarter.Args {
 
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay

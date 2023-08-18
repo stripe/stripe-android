@@ -20,9 +20,10 @@ internal class CustomerSessionViewModel(
         configuration: CustomerSheet.Configuration,
         customerAdapter: CustomerAdapter,
         callback: CustomerSheetResultCallback,
+        statusBarColor: () -> Int?,
     ): CustomerSessionComponent {
-        val shouldCreateNewComponent = configuration != backingComponent?.configuration &&
-            customerAdapter != backingComponent?.customerAdapter &&
+        val shouldCreateNewComponent = configuration != backingComponent?.configuration ||
+            customerAdapter != backingComponent?.customerAdapter ||
             callback != backingComponent?.callback
         if (shouldCreateNewComponent) {
             backingComponent = DaggerCustomerSessionComponent
@@ -31,6 +32,7 @@ internal class CustomerSessionViewModel(
                 .configuration(configuration)
                 .customerAdapter(customerAdapter)
                 .callback(callback)
+                .statusBarColor(statusBarColor)
                 .customerSessionViewModel(this)
                 .build()
         }

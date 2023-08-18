@@ -8,9 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-internal class Debouncer(
-    private val initialEmail: String?
-) {
+internal class Debouncer {
     /**
      * Holds a Job that looks up the email after a delay, so that we can cancel it if the user
      * continues typing.
@@ -25,16 +23,6 @@ internal class Debouncer(
     ) {
         coroutineScope.launch {
             emailFlow.collect { email ->
-                // The first emitted value is the one provided in the constructor arguments, and
-                // shouldn't trigger a lookup.
-                if (email == initialEmail && lookupJob == null) {
-                    // If it's a valid email, collect phone number
-                    if (email != null) {
-                        onStateChanged(SignUpState.InputtingPhoneOrName)
-                    }
-                    return@collect
-                }
-
                 lookupJob?.cancel()
 
                 if (email != null) {

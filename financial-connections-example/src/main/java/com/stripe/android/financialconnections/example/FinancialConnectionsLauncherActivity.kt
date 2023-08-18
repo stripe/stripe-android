@@ -1,18 +1,24 @@
 package com.stripe.android.financialconnections.example
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.financialconnections.example.databinding.ActivityFinancialconnectionsLauncherBinding
 
 class FinancialConnectionsLauncherActivity : AppCompatActivity() {
+
+    private val connectionsDebugSharedPrefs by lazy {
+        getSharedPreferences("FINANCIAL_CONNECTIONS_DEBUG", Context.MODE_PRIVATE)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +42,12 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
             layoutManager = linearLayoutManager
             adapter = ExamplesAdapter(this@FinancialConnectionsLauncherActivity)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // prevent playground configuration from leaking to example apps.
+        connectionsDebugSharedPrefs.edit { clear() }
     }
 
     private class ExamplesAdapter constructor(

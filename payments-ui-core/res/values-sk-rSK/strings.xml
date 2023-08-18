@@ -6,6 +6,8 @@
   <string name="stripe_back">Späť</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Fakturačná adresa</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">Kód BLIK</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kontaktné informácie</string>
   <!-- Text for continue button -->
@@ -20,6 +22,10 @@
   <string name="stripe_iban_invalid_start">Váš IBAN by mal začínať dvojpísmenovým kódom krajiny.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">iDEAL banka</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Váš kód BLIK je neúplný.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Váš kód BLIK je neplatný.</string>
   <string name="stripe_invalid_email_address">Neplatná e-mailová adresa: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Neplatné identifikačné číslo UPI</string>

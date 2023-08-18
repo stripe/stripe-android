@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import com.stripe.android.ObjectBuilder
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -255,7 +254,7 @@ data class AccountParams internal constructor(
                 }
             }
 
-            class Builder : ObjectBuilder<Company> {
+            class Builder {
                 private var address: Address? = null
                 private var addressKana: AddressJapanParams? = null
                 private var addressKanji: AddressJapanParams? = null
@@ -411,7 +410,7 @@ data class AccountParams internal constructor(
                     this.verification = verification
                 }
 
-                override fun build(): Company {
+                fun build(): Company {
                     return Company(
                         address = address,
                         addressKana = addressKana,
@@ -677,7 +676,7 @@ data class AccountParams internal constructor(
                 }
             }
 
-            class Builder : ObjectBuilder<Individual> {
+            class Builder {
                 private var address: Address? = null
                 private var addressKana: AddressJapanParams? = null
                 private var addressKanji: AddressJapanParams? = null
@@ -865,7 +864,7 @@ data class AccountParams internal constructor(
                     this.verification = verification
                 }
 
-                override fun build(): Individual {
+                fun build(): Individual {
                     return Individual(
                         address = address,
                         addressKana = addressKana,

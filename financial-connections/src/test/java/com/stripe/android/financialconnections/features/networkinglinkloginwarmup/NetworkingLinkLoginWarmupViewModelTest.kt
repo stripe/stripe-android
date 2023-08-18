@@ -6,8 +6,10 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.DisableNetworking
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -21,14 +23,14 @@ class NetworkingLinkLoginWarmupViewModelTest {
     val mavericksTestRule = MavericksTestRule()
 
     private val getManifest = mock<GetManifest>()
-    private val goNext = mock<GoNext>()
+    private val navigationManager = TestNavigationManager()
     private val disableNetworking = mock<DisableNetworking>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
 
     private fun buildViewModel(
         state: NetworkingLinkLoginWarmupState
     ) = NetworkingLinkLoginWarmupViewModel(
-        goNext = goNext,
+        navigationManager = navigationManager,
         getManifest = getManifest,
         logger = Logger.noop(),
         disableNetworking = disableNetworking,
@@ -41,8 +43,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         val viewModel = buildViewModel(NetworkingLinkLoginWarmupState())
 
         viewModel.onContinueClick()
-
-        verify(goNext).invoke(Pane.NETWORKING_LINK_VERIFICATION)
+        navigationManager.assertNavigatedTo(NavigationDirections.networkingLinkVerification)
     }
 
     @Test
@@ -57,6 +58,6 @@ class NetworkingLinkLoginWarmupViewModelTest {
         viewModel.onClickableTextClick("skip_login")
 
         verify(disableNetworking).invoke()
-        verify(goNext).invoke(expectedNextPane)
+        navigationManager.assertNavigatedTo(expectedNextPane.toNavigationCommand())
     }
 }

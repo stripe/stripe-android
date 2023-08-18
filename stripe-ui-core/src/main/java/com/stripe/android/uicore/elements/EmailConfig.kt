@@ -28,7 +28,7 @@ class EmailConfig : TextFieldConfig {
      * This will allow all characters, but will show as invalid if it doesn't match
      * the regular expression.
      */
-    override fun filter(userTyped: String) = userTyped.filterNot { it == ' ' }
+    override fun filter(userTyped: String) = userTyped.filterNot { it.isWhitespace() }
 
     override fun convertToRaw(displayName: String) = displayName
 

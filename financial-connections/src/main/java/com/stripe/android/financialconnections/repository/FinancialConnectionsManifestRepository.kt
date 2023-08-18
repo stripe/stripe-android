@@ -116,6 +116,11 @@ internal interface FinancialConnectionsManifestRepository {
         sessionId: String
     ): FinancialConnectionsAuthorizationSession
 
+    suspend fun retrieveAuthorizationSession(
+        clientSecret: String,
+        sessionId: String
+    ): FinancialConnectionsAuthorizationSession
+
     /**
      * Save the authorized bank accounts to Link.
      *
@@ -338,6 +343,23 @@ private class FinancialConnectionsManifestRepositoryImpl(
         }
     }
 
+    override suspend fun retrieveAuthorizationSession(
+        clientSecret: String,
+        sessionId: String
+    ): FinancialConnectionsAuthorizationSession = requestExecutor.execute(
+        request = apiRequestFactory.createPost(
+            url = retrieveAuthSessionUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_ID to sessionId,
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
+            )
+        ),
+        FinancialConnectionsAuthorizationSession.serializer()
+    ).also {
+        updateCachedActiveAuthSession("retrieveAuthorizationSession", it)
+    }
+
     override suspend fun completeAuthorizationSession(
         clientSecret: String,
         sessionId: String,
@@ -523,6 +545,9 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
         internal val cancelAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/cancel"
+
+        internal val retrieveAuthSessionUrl: String =
+            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/retrieve"
 
         internal val eventsAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/events"

@@ -8,7 +8,7 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
@@ -47,19 +47,18 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             return
         }
 
-        viewModel.registerFromActivity(this)
+        viewModel.registerFromActivity(
+            activityResultCaller = this,
+            lifecycleOwner = this,
+        )
 
         viewModel.setupGooglePay(
             lifecycleScope,
             registerForActivityResult(
-                GooglePayPaymentMethodLauncherContract(),
+                GooglePayPaymentMethodLauncherContractV2(),
                 viewModel::onGooglePayResult
             )
         )
-
-        starterArgs?.statusBarColor?.let {
-            window.statusBarColor = it
-        }
 
         setContentView(viewBinding.root)
 
@@ -99,13 +98,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             Activity.RESULT_OK,
             Intent().putExtras(PaymentSheetContractV2.Result(result).toBundle())
         )
-    }
-
-    override fun onDestroy() {
-        if (!earlyExitDueToIllegalState) {
-            viewModel.unregisterFromActivity()
-        }
-        super.onDestroy()
     }
 
     private fun finishWithError(error: Throwable?) {

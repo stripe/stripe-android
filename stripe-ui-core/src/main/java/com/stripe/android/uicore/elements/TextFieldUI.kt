@@ -327,9 +327,7 @@ internal fun TrailingIcon(
             contentDescription = trailingIcon.contentDescription?.let {
                 stringResource(trailingIcon.contentDescription)
             },
-            modifier = Modifier.clickable {
-                trailingIcon.onClick?.invoke()
-            }
+            modifier = Modifier.conditionallyClickable(trailingIcon.onClick),
         )
     } else {
         Image(
@@ -337,9 +335,13 @@ internal fun TrailingIcon(
             contentDescription = trailingIcon.contentDescription?.let {
                 stringResource(trailingIcon.contentDescription)
             },
-            modifier = Modifier.clickable {
-                trailingIcon.onClick?.invoke()
-            }
+            modifier = Modifier.conditionallyClickable(trailingIcon.onClick),
         )
+    }
+}
+
+private fun Modifier.conditionallyClickable(onClick: (() -> Unit)?): Modifier {
+    return clickable(enabled = onClick != null) {
+        onClick?.invoke()
     }
 }

@@ -13,6 +13,8 @@ import java.io.OutputStream
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 import java.util.UUID
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.DurationUnit.SECONDS
 
 /**
  * Analytics request sent to r.stripe.com, which is the preferred service for analytics.
@@ -126,9 +128,9 @@ class AnalyticsRequestV2(
     /**
      * Parameters required by r.stripe.com
      */
-    private fun analyticParams() = mapOf(
+    private fun analyticParams(): Map<String, Any> = mapOf(
         PARAM_CLIENT_ID to clientId,
-        PARAM_CREATED to System.currentTimeMillis() / MILLIS_IN_SECOND,
+        PARAM_CREATED to System.currentTimeMillis().milliseconds.toDouble(SECONDS),
         PARAM_EVENT_NAME to eventName,
         PARAM_EVENT_ID to UUID.randomUUID().toString()
     )
@@ -156,7 +158,6 @@ class AnalyticsRequestV2(
     internal companion object {
         internal const val ANALYTICS_HOST = "https://r.stripe.com/0"
         internal const val HEADER_ORIGIN = "origin"
-        internal const val MILLIS_IN_SECOND = 1000
 
         internal const val PARAM_CLIENT_ID = "client_id"
         internal const val PARAM_CREATED = "created"

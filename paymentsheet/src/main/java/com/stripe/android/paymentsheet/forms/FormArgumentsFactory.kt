@@ -17,7 +17,6 @@ internal object FormArgumentsFactory {
         merchantName: String,
         amount: Amount? = null,
         newLpm: PaymentSelection.New?,
-        isShowingLinkInlineSignup: Boolean = false,
     ): FormArguments {
         val layoutFormDescriptor = paymentMethod.getPMAddForm(stripeIntent, config)
 
@@ -45,7 +44,7 @@ internal object FormArgumentsFactory {
 
         return FormArguments(
             paymentMethodCode = paymentMethod.code,
-            showCheckbox = layoutFormDescriptor.showCheckbox && !isShowingLinkInlineSignup,
+            showCheckbox = layoutFormDescriptor.showCheckbox,
             showCheckboxControlledFields = showCheckboxControlledFields,
             merchantName = merchantName,
             amount = amount,

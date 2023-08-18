@@ -14,11 +14,13 @@ internal class DefaultCardAccountRangeRepository(
         cardNumber: CardNumber.Unvalidated
     ): AccountRange? {
         return cardNumber.bin?.let { bin ->
-            if (store.contains(bin)) {
+            val range = if (store.contains(bin)) {
                 inMemorySource.getAccountRange(cardNumber)
             } else {
                 remoteSource.getAccountRange(cardNumber)
-            } ?: staticSource.getAccountRange(cardNumber)
+            }
+
+            range ?: staticSource.getAccountRange(cardNumber)
         }
     }
 
@@ -26,11 +28,13 @@ internal class DefaultCardAccountRangeRepository(
         cardNumber: CardNumber.Unvalidated
     ): List<AccountRange>? {
         return cardNumber.bin?.let { bin ->
-            if (store.contains(bin)) {
+            val ranges = if (store.contains(bin)) {
                 inMemorySource.getAccountRanges(cardNumber)
             } else {
                 remoteSource.getAccountRanges(cardNumber)
-            } ?: staticSource.getAccountRanges(cardNumber)
+            }
+
+            ranges?.takeIf { it.isNotEmpty() } ?: staticSource.getAccountRanges(cardNumber)
         }
     }
 

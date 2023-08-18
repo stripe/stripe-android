@@ -10,9 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
-import com.stripe.android.link.ui.inline.LinkInlineSignedIn
 import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentMethodsUI
@@ -32,10 +32,10 @@ internal fun PaymentElement(
     supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
     selectedItem: LpmRepository.SupportedPaymentMethod,
     showLinkInlineSignup: Boolean,
-    linkPaymentLauncher: LinkPaymentLauncher,
+    linkConfigurationCoordinator: LinkConfigurationCoordinator,
     showCheckboxFlow: Flow<Boolean>,
     onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit,
-    onLinkSignupStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit,
+    onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
     formArguments: FormArguments,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
 ) {
@@ -75,34 +75,20 @@ internal fun PaymentElement(
                 enabled = enabled,
                 onFormFieldValuesChanged = onFormFieldValuesChanged,
                 showCheckboxFlow = showCheckboxFlow,
-                injector = sheetViewModel.injector,
+                formViewModelSubComponentBuilderProvider = sheetViewModel.formViewModelSubComponentBuilderProvider,
                 modifier = Modifier.padding(horizontal = horizontalPadding)
             )
         }
 
-        val linkInlineSelection = sheetViewModel.linkHandler.linkInlineSelection.collectAsState()
-
         if (showLinkInlineSignup) {
-            if (linkInlineSelection.value != null) {
-                LinkInlineSignedIn(
-                    linkPaymentLauncher = linkPaymentLauncher,
-                    onLogout = {
-                        sheetViewModel.linkHandler.linkInlineSelection.value = null
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = horizontalPadding, vertical = 6.dp)
-                        .fillMaxWidth()
-                )
-            } else {
-                LinkInlineSignup(
-                    linkPaymentLauncher = linkPaymentLauncher,
-                    enabled = enabled,
-                    onStateChanged = onLinkSignupStateChanged,
-                    modifier = Modifier
-                        .padding(horizontal = horizontalPadding, vertical = 6.dp)
-                        .fillMaxWidth()
-                )
-            }
+            LinkInlineSignup(
+                linkConfigurationCoordinator = linkConfigurationCoordinator,
+                enabled = enabled,
+                onStateChanged = onLinkSignupStateChanged,
+                modifier = Modifier
+                    .padding(horizontal = horizontalPadding, vertical = 6.dp)
+                    .fillMaxWidth()
+            )
         }
     }
 }

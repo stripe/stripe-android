@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -38,27 +37,29 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.core.injection.NonFallbackInjector
+import com.stripe.android.common.ui.LoadingIndicator
+import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.darken
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.annotatedStringResource
+import javax.inject.Provider
 
 @VisibleForTesting
 internal const val TEST_TAG_ATTRIBUTION_DRAWABLE = "AutocompleteAttributionDrawable"
 
 @Composable
 internal fun AutocompleteScreen(
-    injector: NonFallbackInjector,
+    autoCompleteViewModelSubcomponentBuilderProvider: Provider<AutocompleteViewModelSubcomponent.Builder>,
     country: String?
 ) {
     val application = LocalContext.current.applicationContext as Application
     val viewModel: AutocompleteViewModel =
         viewModel(
             factory = AutocompleteViewModel.Factory(
-                injector = injector,
+                autoCompleteViewModelSubcomponentBuilderProvider = autoCompleteViewModelSubcomponentBuilderProvider,
                 args = AutocompleteViewModel.Args(
                     country = country
                 ),
@@ -139,12 +140,9 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                     )
                 }
                 if (loading) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
+                    LoadingIndicator(
                         modifier = Modifier.fillMaxWidth()
-                    ) {
-                        CircularProgressIndicator()
-                    }
+                    )
                 } else if (query.value.isNotBlank()) {
                     predictions?.let {
                         if (it.isNotEmpty()) {

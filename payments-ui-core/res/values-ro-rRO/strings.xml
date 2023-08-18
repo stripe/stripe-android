@@ -6,6 +6,8 @@
   <string name="stripe_back">Înapoi</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Adresă de facturare</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">Cod BLIK</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Informații de contact</string>
   <!-- Text for continue button -->
@@ -20,6 +22,10 @@
   <string name="stripe_iban_invalid_start">Codul dvs. IBAN trebuie să înceapă cu un cod de țară format din două litere.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">iDEAL Bank</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Codul dvs. BLIK nu este complet.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Codul dvs. BLIK nu este valid.</string>
   <string name="stripe_invalid_email_address">Adresă de e-mail nevalidă: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">ID UPI nevalid</string>

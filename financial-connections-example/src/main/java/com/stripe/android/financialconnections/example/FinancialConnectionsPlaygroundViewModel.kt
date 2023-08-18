@@ -236,7 +236,10 @@ class FinancialConnectionsPlaygroundViewModel(
 
 enum class Merchant(val flow: String) {
     Test("testmode"),
-    Live("mx"),
+    PartnerM("partner_m"),
+    PartnerF("partner_f"),
+    PartnerD("partner_d"),
+    PlatformC("strash"),
     App2App("app2app"),
     Networking("networking"),
     NetworkingTestMode("networking_testmode"),

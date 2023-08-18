@@ -49,13 +49,17 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             // Prevent back presses while confirming payment
         }
 
-        args.statusBarColor?.let {
-            window.statusBarColor = it
-        }
-
         viewModel.paymentLauncherResult.observe(this, ::finishWithResult)
-        viewModel.register(this)
-        val host = AuthActivityStarterHost.create(this)
+        viewModel.register(
+            activityResultCaller = this,
+            lifecycleOwner = this,
+        )
+
+        val host = AuthActivityStarterHost.create(
+            activity = this,
+            statusBarColor = args.statusBarColor,
+        )
+
         when (args) {
             is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
                 viewModel.confirmStripeIntent(args.confirmStripeIntentParams, host)
@@ -67,11 +71,6 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
                 viewModel.handleNextActionForStripeIntent(args.setupIntentClientSecret, host)
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.cleanUp()
     }
 
     override fun finish() {

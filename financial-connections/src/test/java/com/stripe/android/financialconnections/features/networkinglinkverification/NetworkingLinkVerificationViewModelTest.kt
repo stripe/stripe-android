@@ -10,13 +10,14 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.ConfirmVerification
+import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
-import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.LINK_ACCOUNT_PICKER
+import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,9 +39,9 @@ class NetworkingLinkVerificationViewModelTest {
     val mavericksTestRule = MavericksTestRule()
 
     private val getManifest = mock<GetManifest>()
-    private val goNext = mock<GoNext>()
+    private val navigationManager = TestNavigationManager()
     private val confirmVerification = mock<ConfirmVerification>()
-    private val pollNetworkedAccounts = mock<PollNetworkedAccounts>()
+    private val fetchNetworkedAccounts = mock<FetchNetworkedAccounts>()
     private val lookupConsumerAndStartVerification = mock<LookupConsumerAndStartVerification>()
     private val markLinkVerified = mock<MarkLinkVerified>()
     private val analyticsTracker = TestFinancialConnectionsAnalyticsTracker()
@@ -48,12 +49,12 @@ class NetworkingLinkVerificationViewModelTest {
     private fun buildViewModel(
         state: NetworkingLinkVerificationState = NetworkingLinkVerificationState()
     ) = NetworkingLinkVerificationViewModel(
-        goNext = goNext,
+        navigationManager = navigationManager,
         getManifest = getManifest,
         lookupConsumerAndStartVerification = lookupConsumerAndStartVerification,
         confirmVerification = confirmVerification,
         markLinkVerified = markLinkVerified,
-        pollNetworkedAccounts = pollNetworkedAccounts,
+        fetchNetworkedAccounts = fetchNetworkedAccounts,
         analyticsTracker = analyticsTracker,
         logger = Logger.noop(),
         initialState = state
@@ -120,7 +121,8 @@ class NetworkingLinkVerificationViewModelTest {
         onConsumerNotFoundCaptor.firstValue()
 
         assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
-        verify(goNext).invoke(INSTITUTION_PICKER)
+        navigationManager.assertNavigatedTo(NavigationDirections.institutionPicker)
+
         analyticsTracker.assertContainsEvent(
             "linked_accounts.networking.verification.error",
             mapOf(
@@ -145,7 +147,7 @@ class NetworkingLinkVerificationViewModelTest {
             // verify succeeds
             whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
             // polling returns no networked accounts
-            whenever(pollNetworkedAccounts(any()))
+            whenever(fetchNetworkedAccounts(any()))
                 .thenReturn(partnerAccountList().copy(data = emptyList()))
 
             val viewModel = buildViewModel()
@@ -172,7 +174,7 @@ class NetworkingLinkVerificationViewModelTest {
             }
 
             verify(confirmVerification).sms(any(), eq("111111"))
-            verify(goNext).invoke(linkVerifiedManifest.nextPane)
+            navigationManager.assertNavigatedTo(linkVerifiedManifest.nextPane.toNavigationCommand())
         }
 
     @Test
@@ -189,7 +191,7 @@ class NetworkingLinkVerificationViewModelTest {
 
             // polling returns some networked accounts
             val partnerAccountsList = partnerAccountList().copy(data = (listOf(partnerAccount())))
-            whenever(pollNetworkedAccounts(any())).thenReturn(partnerAccountsList)
+            whenever(fetchNetworkedAccounts(any())).thenReturn(partnerAccountsList)
             whenever(markLinkVerified()).thenReturn((linkVerifiedManifest))
 
             val viewModel = buildViewModel()
@@ -216,6 +218,6 @@ class NetworkingLinkVerificationViewModelTest {
             }
 
             verify(confirmVerification).sms(any(), eq("111111"))
-            verify(goNext).invoke(LINK_ACCOUNT_PICKER)
+            navigationManager.assertNavigatedTo(NavigationDirections.linkAccountPicker)
         }
 }

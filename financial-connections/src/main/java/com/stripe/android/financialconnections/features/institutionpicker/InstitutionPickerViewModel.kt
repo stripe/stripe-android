@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.InstitutionSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.SearchSucceeded
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.SearchInstitutions
@@ -25,6 +26,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.NavigationState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.isCancellationError
@@ -73,15 +75,34 @@ internal class InstitutionPickerViewModel @Inject constructor(
             InstitutionPickerState::payload,
             onSuccess = { eventTracker.track(PaneLoaded(Pane.INSTITUTION_PICKER)) },
             onFail = {
-                logger.error("Error fetching initial payload", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(Pane.INSTITUTION_PICKER, it))
+                eventTracker.logError(
+                    extraMessage = "Error fetching initial payload",
+                    error = it,
+                    pane = Pane.INSTITUTION_PICKER,
+                    logger = logger
+                )
             }
         )
         onAsync(
             InstitutionPickerState::searchInstitutions,
             onFail = {
-                logger.error("Error searching institutions", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(Pane.INSTITUTION_PICKER, it))
+                eventTracker.logError(
+                    extraMessage = "Error searching institutions",
+                    error = it,
+                    pane = Pane.INSTITUTION_PICKER,
+                    logger = logger
+                )
+            }
+        )
+        onAsync(
+            InstitutionPickerState::selectInstitution,
+            onFail = {
+                eventTracker.logError(
+                    extraMessage = "Error selecting institution institutions",
+                    error = it,
+                    pane = Pane.INSTITUTION_PICKER,
+                    logger = logger
+                )
             }
         )
     }
@@ -134,7 +155,9 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 )
             }
             // navigate to next step
-            navigationManager.navigate(NavigationDirections.partnerAuth)
+            navigationManager.navigate(
+                NavigationState.NavigateToRoute(NavigationDirections.partnerAuth)
+            )
         }.execute { this }
     }
 
@@ -163,7 +186,9 @@ internal class InstitutionPickerViewModel @Inject constructor(
     }
 
     fun onManualEntryClick() {
-        navigationManager.navigate(NavigationDirections.manualEntry)
+        navigationManager.navigate(
+            NavigationState.NavigateToRoute(NavigationDirections.manualEntry)
+        )
     }
 
     companion object :
@@ -190,7 +215,8 @@ internal data class InstitutionPickerState(
     val previewText: String? = null,
     val searchMode: Boolean = false,
     val payload: Async<Payload> = Uninitialized,
-    val searchInstitutions: Async<InstitutionResponse> = Uninitialized
+    val searchInstitutions: Async<InstitutionResponse> = Uninitialized,
+    val selectInstitution: Async<Unit> = Uninitialized
 ) : MavericksState {
 
     data class Payload(

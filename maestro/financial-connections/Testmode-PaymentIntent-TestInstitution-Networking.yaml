@@ -1,6 +1,7 @@
 appId: com.stripe.android.financialconnections.example
 ---
 - launchApp
+- startRecording: /tmp/test_results/testmode-paymentintent-testinstitution-networking
 # Android specific: Navigate to example
 - tapOn: "Playground"
 ###########################################
@@ -77,3 +78,4 @@ appId: com.stripe.android.financialconnections.example
 - assertVisible: "Success!"
 - tapOn: "Done"
 - assertVisible: ".*Intent Confirmed!.*"
+- stopRecording

@@ -1,9 +1,11 @@
 <!doctype html>
-<html>
+<html class="no-js">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>com.stripe.android.paymentsheet</title>
-<link href="../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+<link href="../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
     if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
@@ -18,10 +20,10 @@
     </script>
 <script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async></script>
 <link href="../../styles/style.css" rel="Stylesheet">
-<link href="../../styles/jetbrains-mono.css" rel="Stylesheet">
 <link href="../../styles/main.css" rel="Stylesheet">
 <link href="../../styles/prism.css" rel="Stylesheet">
 <link href="../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../styles/font-jb-sans-auto.css" rel="Stylesheet">
 <script type="text/javascript" src="../../scripts/clipboard.js" async></script>
 <script type="text/javascript" src="../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../scripts/platform-content-handler.js" async></script>
@@ -29,243 +31,227 @@
 <script type="text/javascript" src="../../scripts/prism.js" async></script>
 <script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
 <body>
-<div class="navigation-wrapper" id="navigation-wrapper">
-    <div id="leftToggler"><span class="icon-toggler"></span></div>
-    <div class="library-name">
-<a href="../../index.html">
-<span>stripe-android</span>            </a>    </div>
-    <div>
-    </div>
-    <div class="pull-right d-flex">
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+<a class="library-name--link" href="../../index.html">
+                            stripe-android
+                    </a>            </div>
+            <div class="library-version">
+            </div>
+        </div>
         <div class="filter-section" id="filter-section">
                 <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":paymentsheet:dokkaHtmlPartial/release">androidJvm</button>
         </div>
-        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
-        <div id="searchBar"></div>
     </div>
-</div>
-<div id="container">
-    <div id="leftColumn">
-        <div id="sideMenu"></div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
     </div>
-    <div id="main">
-<div class="main-content" id="content" pageids="paymentsheet::com.stripe.android.paymentsheet////PointingToDeclaration//2002900378">
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="package" id="content" pageids="paymentsheet::com.stripe.android.paymentsheet////PointingToDeclaration//2002900378">
   <div class="breadcrumbs"><a href="../index.html">paymentsheet</a><span class="delimiter">/</span><span class="current">com.stripe.android.paymentsheet</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
   </div>
   <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button><button class="section-tab" data-togglable="PROPERTY,EXTENSION_PROPERTY">Properties</button></div>
     <div class="tabs-section-body">
-      <h2 class="">Types</h2>
-      <div class="table" data-togglable="Types"><a data-name="2138794469%2FClasslikes%2F2002900378" anchor-label="AbsCreateIntentCallback" id="2138794469%2FClasslikes%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-abs-create-intent-callback/index.html"><span>Abs</span><wbr><span>Create</span><wbr><span>Intent</span><wbr><span><span>Callback</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2138794469%2FClasslikes%2F2002900378"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">interface </span><a href="-abs-create-intent-callback/index.html">AbsCreateIntentCallback</a></div></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-<a data-name="-2099134191%2FClasslikes%2F2002900378" anchor-label="CreateIntentCallback" id="-2099134191%2FClasslikes%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-create-intent-callback/index.html"><span>Create</span><wbr><span>Intent</span><wbr><span><span>Callback</span></span></a></div>
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="-2099134191%2FClasslikes%2F2002900378" anchor-label="CreateIntentCallback" id="-2099134191%2FClasslikes%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-create-intent-callback/index.html"><span>Create</span><wbr><span>Intent</span><wbr><span><span>Callback</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2099134191%2FClasslikes%2F2002900378"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-create-intent-callback/index.html">CreateIntentCallback</a> : <a href="-abs-create-intent-callback/index.html">AbsCreateIntentCallback</a></div><div class="brief "><p class="paragraph">Callback to be used when you use <code class="lang-kotlin">PaymentSheet</code> and intend to create and optionally confirm the <a href="../../payments-core/com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> or <a href="../../payments-core/com.stripe.android.model/-setup-intent/index.html">SetupIntent</a> on your server.</p></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-create-intent-callback/index.html">CreateIntentCallback</a></div><div class="brief "><p class="paragraph">Callback to be used when you use <code class="lang-kotlin">PaymentSheet</code> and intend to create and optionally confirm the <a href="../../payments-core/com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> or <a href="../../payments-core/com.stripe.android.model/-setup-intent/index.html">SetupIntent</a> on your server.</p></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="-682280583%2FClasslikes%2F2002900378" anchor-label="CreateIntentResult" id="-682280583%2FClasslikes%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-create-intent-result/index.html"><span>Create</span><wbr><span>Intent</span><wbr><span><span>Result</span></span></a></div>
+          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-create-intent-result/index.html"><span>Create</span><wbr><span>Intent</span><wbr><span><span>Result</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-682280583%2FClasslikes%2F2002900378"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-create-intent-result/index.html">CreateIntentResult</a></div><div class="brief "><p class="paragraph">Represents the result of a <a href="-create-intent-callback/index.html">CreateIntentCallback</a>.</p></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-create-intent-result/index.html">CreateIntentResult</a></div><div class="brief "><p class="paragraph">Represents the result of a <a href="-create-intent-callback/index.html">CreateIntentCallback</a>.</p></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-<a data-name="689242427%2FClasslikes%2F2002900378" anchor-label="DefaultIntentConfirmationInterceptor" id="689242427%2FClasslikes%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-default-intent-confirmation-interceptor/index.html"><span>Default</span><wbr><span>Intent</span><wbr><span>Confirmation</span><wbr><span><span>Interceptor</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="689242427%2FClasslikes%2F2002900378"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">class </span><a href="-default-intent-confirmation-interceptor/index.html">DefaultIntentConfirmationInterceptor</a>&nbsp;<span><span class="token annotation builtin">@</span><span data-unresolved-link="javax.inject/Inject///PointingToDeclaration/"><span class="token annotation builtin">Inject</span></span>&nbsp;</span><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter ">stripeRepository<span class="token operator">: </span><a href="../../payments-core/com.stripe.android.networking/-stripe-repository/index.html">StripeRepository</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="javax.inject/Named///PointingToDeclaration/"><span class="token annotation builtin">Named</span></span><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"publishableKey"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>publishableKeyProvider<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="javax.inject/Named///PointingToDeclaration/"><span class="token annotation builtin">Named</span></span><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"stripeAccountId"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>stripeAccountIdProvider<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span> : <a href="-intent-confirmation-interceptor/index.html">IntentConfirmationInterceptor</a></div></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
 <a data-name="-950382176%2FClasslikes%2F2002900378" anchor-label="DelicatePaymentSheetApi" id="-950382176%2FClasslikes%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-delicate-payment-sheet-api/index.html"><span>Delicate</span><wbr><span>Payment</span><wbr><span>Sheet</span><wbr><span><span>Api</span></span></a></div>
+          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-delicate-payment-sheet-api/index.html"><span>Delicate</span><wbr><span>Payment</span><wbr><span>Sheet</span><wbr><span><span>Api</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-950382176%2FClasslikes%2F2002900378"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="-delicate-payment-sheet-api/index.html">DelicatePaymentSheetApi</a></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="-delicate-payment-sheet-api/index.html">DelicatePaymentSheetApi</a></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-<a data-name="341205529%2FClasslikes%2F2002900378" anchor-label="ExperimentalPaymentSheetDecouplingApi" id="341205529%2FClasslikes%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-experimental-payment-sheet-decoupling-api/index.html"><span>Experimental</span><wbr><span>Payment</span><wbr><span>Sheet</span><wbr><span>Decoupling</span><wbr><span><span>Api</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="341205529%2FClasslikes%2F2002900378"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="-experimental-payment-sheet-decoupling-api/index.html">ExperimentalPaymentSheetDecouplingApi</a></div></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-<a data-name="-1977506432%2FClasslikes%2F2002900378" anchor-label="IntentConfirmationInterceptor" id="-1977506432%2FClasslikes%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-intent-confirmation-interceptor/index.html"><span>Intent</span><wbr><span>Confirmation</span><wbr><span><span>Interceptor</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1977506432%2FClasslikes%2F2002900378"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">interface </span><a href="-intent-confirmation-interceptor/index.html">IntentConfirmationInterceptor</a></div></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
 <a data-name="1010035444%2FClasslikes%2F2002900378" anchor-label="PaymentOptionCallback" id="1010035444%2FClasslikes%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-payment-option-callback/index.html"><span>Payment</span><wbr><span>Option</span><wbr><span><span>Callback</span></span></a></div>
+          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-payment-option-callback/index.html"><span>Payment</span><wbr><span>Option</span><wbr><span><span>Callback</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1010035444%2FClasslikes%2F2002900378"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-payment-option-callback/index.html">PaymentOptionCallback</a></div><div class="brief "><p class="paragraph">Callback that is invoked when the customer's <a href="../com.stripe.android.paymentsheet.model/-payment-option/index.html">PaymentOption</a> selection changes.</p></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-payment-option-callback/index.html">PaymentOptionCallback</a></div><div class="brief "><p class="paragraph">Callback that is invoked when the customer's <a href="../com.stripe.android.paymentsheet.model/-payment-option/index.html">PaymentOption</a> selection changes.</p></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="-1464659531%2FClasslikes%2F2002900378" anchor-label="PaymentSheet" id="-1464659531%2FClasslikes%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-payment-sheet/index.html"><span>Payment</span><wbr><span><span>Sheet</span></span></a></div>
+          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-payment-sheet/index.html"><span>Payment</span><wbr><span><span>Sheet</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1464659531%2FClasslikes%2F2002900378"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-payment-sheet/index.html">PaymentSheet</a></div><div class="brief "><p class="paragraph">A drop-in class that presents a bottom sheet to collect and process a customer's payment.</p></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-payment-sheet/index.html">PaymentSheet</a></div><div class="brief "><p class="paragraph">A drop-in class that presents a bottom sheet to collect and process a customer's payment.</p></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="-1118718781%2FClasslikes%2F2002900378" anchor-label="PaymentSheetContract" id="-1118718781%2FClasslikes%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-payment-sheet-contract/index.html"><span>Payment</span><wbr><span>Sheet</span><wbr><span><span>Contract</span></span></a></div>
+          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-payment-sheet-contract/index.html"><span>Payment</span><wbr><span>Sheet</span><wbr><span><span>Contract</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1118718781%2FClasslikes%2F2002900378"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-payment-sheet-contract/index.html">PaymentSheetContract</a> : <a href="https://developer.android.com/reference/kotlin/androidx/activity/result/contract/ActivityResultContract.html">ActivityResultContract</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-payment-sheet-contract/-args/index.html">PaymentSheetContract.Args</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="-payment-sheet-result/index.html">PaymentSheetResult</a><span class="token operator">&gt; </span></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-payment-sheet-contract/index.html"><strike>PaymentSheetContract</strike></a> : <a href="https://developer.android.com/reference/kotlin/androidx/activity/result/contract/ActivityResultContract.html">ActivityResultContract</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-payment-sheet-contract/-args/index.html">PaymentSheetContract.Args</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="-payment-sheet-result/index.html">PaymentSheetResult</a><span class="token operator">&gt; </span></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="-2139490024%2FClasslikes%2F2002900378" anchor-label="PaymentSheetResult" id="-2139490024%2FClasslikes%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-payment-sheet-result/index.html"><span>Payment</span><wbr><span>Sheet</span><wbr><span><span>Result</span></span></a></div>
+          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-payment-sheet-result/index.html"><span>Payment</span><wbr><span>Sheet</span><wbr><span><span>Result</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2139490024%2FClasslikes%2F2002900378"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">class </span><a href="-payment-sheet-result/index.html">PaymentSheetResult</a> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div><div class="brief "><p class="paragraph">The result of an attempt to confirm a <a href="../../payments-core/com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> or <a href="../../payments-core/com.stripe.android.model/-setup-intent/index.html">SetupIntent</a>.</p></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">class </span><a href="-payment-sheet-result/index.html">PaymentSheetResult</a> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div><div class="brief "><p class="paragraph">The result of an attempt to confirm a <a href="../../payments-core/com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> or <a href="../../payments-core/com.stripe.android.model/-setup-intent/index.html">SetupIntent</a>.</p></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="1044113747%2FClasslikes%2F2002900378" anchor-label="PaymentSheetResultCallback" id="1044113747%2FClasslikes%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-payment-sheet-result-callback/index.html"><span>Payment</span><wbr><span>Sheet</span><wbr><span>Result</span><wbr><span><span>Callback</span></span></a></div>
+          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-payment-sheet-result-callback/index.html"><span>Payment</span><wbr><span>Sheet</span><wbr><span>Result</span><wbr><span><span>Callback</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1044113747%2FClasslikes%2F2002900378"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-payment-sheet-result-callback/index.html">PaymentSheetResultCallback</a></div><div class="brief "><p class="paragraph">Callback that is invoked when a <a href="-payment-sheet-result/index.html">PaymentSheetResult</a> is available.</p></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-payment-sheet-result-callback/index.html">PaymentSheetResultCallback</a></div><div class="brief "><p class="paragraph">Callback that is invoked when a <a href="-payment-sheet-result/index.html">PaymentSheetResult</a> is available.</p></div></div></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <h2 class="">Properties</h2>
-      <div class="table" data-togglable="Properties"><a data-name="-884862618%2FProperties%2F2002900378" anchor-label="PAYMENT_OPTION_CARD_TEST_TAG" id="-884862618%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-p-a-y-m-e-n-t_-o-p-t-i-o-n_-c-a-r-d_-t-e-s-t_-t-a-g.html"><span><span>PAYMENT_OPTION_CARD_TEST_TAG</span></span></a></div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="-884862618%2FProperties%2F2002900378" anchor-label="PAYMENT_OPTION_CARD_TEST_TAG" id="-884862618%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-p-a-y-m-e-n-t_-o-p-t-i-o-n_-c-a-r-d_-t-e-s-t_-t-a-g.html"><span><span>PAYMENT_OPTION_CARD_TEST_TAG</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-884862618%2FProperties%2F2002900378"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><a data-name="-884862618%2FProperties%2F2002900378" anchor-label="PAYMENT_OPTION_CARD_TEST_TAG" id="-884862618%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-p-a-y-m-e-n-t_-o-p-t-i-o-n_-c-a-r-d_-t-e-s-t_-t-a-g.html">PAYMENT_OPTION_CARD_TEST_TAG</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-p-a-y-m-e-n-t_-o-p-t-i-o-n_-c-a-r-d_-t-e-s-t_-t-a-g.html">PAYMENT_OPTION_CARD_TEST_TAG</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-376560487%2FProperties%2F2002900378" anchor-label="TEST_TAG_LIST" id="-376560487%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-e-s-t_-t-a-g_-l-i-s-t.html"><span><span>TEST_TAG_LIST</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-376560487%2FProperties%2F2002900378"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-e-s-t_-t-a-g_-l-i-s-t.html">TEST_TAG_LIST</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-<a data-name="-376560487%2FProperties%2F2002900378" anchor-label="TEST_TAG_LIST" id="-376560487%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-t-e-s-t_-t-a-g_-l-i-s-t.html"><span><span>TEST_TAG_LIST</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-376560487%2FProperties%2F2002900378"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><a data-name="-376560487%2FProperties%2F2002900378" anchor-label="TEST_TAG_LIST" id="-376560487%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-e-s-t_-t-a-g_-l-i-s-t.html">TEST_TAG_LIST</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-192616072%2FFunctions%2F2002900378" anchor-label="rememberPaymentSheet" id="-192616072%2FFunctions%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remember-payment-sheet.html"><span>remember</span><wbr><span>Payment</span><wbr><span><span>Sheet</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-192616072%2FFunctions%2F2002900378"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="remember-payment-sheet.html"><span class="token function">rememberPaymentSheet</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">paymentResultCallback<span class="token operator">: </span><a href="-payment-sheet-result-callback/index.html">PaymentSheetResultCallback</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-payment-sheet/index.html">PaymentSheet</a></div><div class="brief "><p class="paragraph">Creates a <a href="-payment-sheet/index.html">PaymentSheet</a> that is remembered across compositions.</p></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="remember-payment-sheet.html"><span class="token function">rememberPaymentSheet</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">createIntentCallback<span class="token operator">: </span><a href="-create-intent-callback/index.html">CreateIntentCallback</a><span class="token punctuation">, </span></span><span class="parameter ">paymentResultCallback<span class="token operator">: </span><a href="-payment-sheet-result-callback/index.html">PaymentSheetResultCallback</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-payment-sheet/index.html">PaymentSheet</a></div><div class="brief "><p class="paragraph">Creates a <a href="-payment-sheet/index.html">PaymentSheet</a> that is remembered across compositions. Use this method when you intend to create the <a href="../../payments-core/com.stripe.android.model/-payment-intent/index.html">com.stripe.android.model.PaymentIntent</a> or <a href="../../payments-core/com.stripe.android.model/-setup-intent/index.html">com.stripe.android.model.SetupIntent</a> on your server.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="46357614%2FFunctions%2F2002900378" anchor-label="rememberPaymentSheetFlowController" id="46357614%2FFunctions%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remember-payment-sheet-flow-controller.html"><span>remember</span><wbr><span>Payment</span><wbr><span>Sheet</span><wbr><span>Flow</span><wbr><span><span>Controller</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="46357614%2FFunctions%2F2002900378"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="remember-payment-sheet-flow-controller.html"><span class="token function">rememberPaymentSheetFlowController</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">paymentOptionCallback<span class="token operator">: </span><a href="-payment-option-callback/index.html">PaymentOptionCallback</a><span class="token punctuation">, </span></span><span class="parameter ">paymentResultCallback<span class="token operator">: </span><a href="-payment-sheet-result-callback/index.html">PaymentSheetResultCallback</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-payment-sheet/-flow-controller/index.html">PaymentSheet.FlowController</a></div><div class="brief "><p class="paragraph">Creates a <a href="-payment-sheet/-flow-controller/index.html">PaymentSheet.FlowController</a> that is remembered across compositions.</p></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="remember-payment-sheet-flow-controller.html"><span class="token function">rememberPaymentSheetFlowController</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">createIntentCallback<span class="token operator">: </span><a href="-create-intent-callback/index.html">CreateIntentCallback</a><span class="token punctuation">, </span></span><span class="parameter ">paymentOptionCallback<span class="token operator">: </span><a href="-payment-option-callback/index.html">PaymentOptionCallback</a><span class="token punctuation">, </span></span><span class="parameter ">paymentResultCallback<span class="token operator">: </span><a href="-payment-sheet-result-callback/index.html">PaymentSheetResultCallback</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-payment-sheet/-flow-controller/index.html">PaymentSheet.FlowController</a></div><div class="brief "><p class="paragraph">Creates a <a href="-payment-sheet/-flow-controller/index.html">PaymentSheet.FlowController</a> that is remembered across compositions. Use this method when you intend to create the <a href="../../payments-core/com.stripe.android.model/-payment-intent/index.html">com.stripe.android.model.PaymentIntent</a> or <a href="../../payments-core/com.stripe.android.model/-setup-intent/index.html">com.stripe.android.model.SetupIntent</a> on your server.</p></div></div></div>
+                </div>
               </div>
             </div>
           </div>
@@ -277,8 +263,9 @@
       <div class="footer">
         <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
       </div>
+            </div>
+        </div>
     </div>
-</div>
 </body>
 </html>
 

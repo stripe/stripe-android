@@ -33,19 +33,14 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
         GooglePayPaymentMethodLauncherViewModel.Factory(args)
     }
 
-    private lateinit var args: GooglePayPaymentMethodLauncherContract.Args
+    private lateinit var args: GooglePayPaymentMethodLauncherContractV2.Args
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val statusColor = intent.getIntExtra(GooglePayPaymentMethodLauncherContract.EXTRA_STATUS_BAR_COLOR, -1)
-        if (statusColor != -1) {
-            window.statusBarColor = statusColor
-        }
-
         setFadeAnimations()
 
-        val nullableArgs = GooglePayPaymentMethodLauncherContract.Args.fromIntent(intent)
+        val nullableArgs = GooglePayPaymentMethodLauncherContractV2.Args.fromIntent(intent)
         if (nullableArgs == null) {
             finishWithResult(
                 GooglePayPaymentMethodLauncher.Result.Failed(

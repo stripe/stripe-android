@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.rememberGooglePayPaymentMethodLauncher
 import kotlinx.coroutines.launch
 
 class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
@@ -48,7 +49,7 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
         val scope = rememberCoroutineScope()
         var enabled by remember { mutableStateOf(false) }
 
-        val googlePayLauncher = GooglePayPaymentMethodLauncher.rememberLauncher(
+        val googlePayLauncher = rememberGooglePayPaymentMethodLauncher(
             config = googlePayConfig,
             readyCallback = { ready ->
                 if (ready) {
@@ -84,7 +85,7 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
             onLaunchGooglePay = {
                 googlePayLauncher.present(
                     currencyCode = "EUR",
-                    amount = 2500
+                    amount = 2500L,
                 )
             }
         )

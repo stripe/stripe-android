@@ -50,6 +50,8 @@ internal class ElementsSessionJsonParser(
             countryCode = countryCode
         )
 
+        val merchantCountry = json.optString(FIELD_MERCHANT_COUNTRY)
+
         return if (stripeIntent != null) {
             ElementsSession(
                 linkSettings = ElementsSession.LinkSettings(
@@ -57,6 +59,7 @@ internal class ElementsSessionJsonParser(
                 ),
                 paymentMethodSpecs = paymentMethodSpecs,
                 stripeIntent = stripeIntent,
+                merchantCountry = merchantCountry,
             )
         } else {
             null
@@ -130,6 +133,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_ORDERED_PAYMENT_METHOD_TYPES = "ordered_payment_method_types"
         private const val FIELD_LINK_SETTINGS = "link_settings"
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
+        private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"
         private const val FIELD_PAYMENT_METHOD_SPECS = "payment_method_specs"

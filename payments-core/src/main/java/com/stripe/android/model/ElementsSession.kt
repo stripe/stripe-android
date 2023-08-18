@@ -10,6 +10,7 @@ data class ElementsSession(
     val linkSettings: LinkSettings?,
     val paymentMethodSpecs: String?,
     val stripeIntent: StripeIntent,
+    val merchantCountry: String?,
 ) : StripeModel {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
