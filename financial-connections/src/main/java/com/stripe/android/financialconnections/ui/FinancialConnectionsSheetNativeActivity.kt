@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -24,7 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -33,6 +35,7 @@ import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.browser.BrowserUtils
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.common.CloseDialog
@@ -55,7 +58,6 @@ import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationState
 import com.stripe.android.financialconnections.navigation.toNavigationCommand
-import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
@@ -123,7 +125,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             state.viewEffect?.let { viewEffect ->
                 when (viewEffect) {
                     is OpenUrl -> startActivity(
-                        CreateBrowserIntentForUrl(
+                        BrowserUtils.createBrowserIntentForUrl(
                             context = this,
                             uri = Uri.parse(viewEffect.url)
                         )
@@ -154,9 +156,10 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         var currentPane by remember { mutableStateOf(initialPane) }
         DisposableEffect(lifecycleOwner) {
             val lifecycle = lifecycleOwner.lifecycle
-            val observer = LifecycleEventObserver { _, event ->
-                viewModel.onLifecycleEvent(currentPane, event)
-            }
+            val observer = ActivityVisibilityObserver(
+                onBackgrounded = { viewModel.onBackgrounded(currentPane, true) },
+                onForegrounded = { viewModel.onBackgrounded(currentPane, false) }
+            )
             lifecycle.addObserver(observer)
             onDispose { lifecycle.removeObserver(observer) }
         }
@@ -355,4 +358,38 @@ internal val LocalReducedBranding = staticCompositionLocalOf<Boolean> {
 
 internal val LocalImageLoader = staticCompositionLocalOf<StripeImageLoader> {
     error("No ImageLoader provided")
+}
+
+/**
+ * Observer that will notify the view model when the activity is moved to the background or
+ * brought back to the foreground.
+ */
+private class ActivityVisibilityObserver(
+    val onBackgrounded: () -> Unit,
+    val onForegrounded: () -> Unit
+) : DefaultLifecycleObserver {
+
+    private var isFirstStart = true
+    private var isInBackground = false
+
+    override fun onStart(owner: LifecycleOwner) {
+        super.onStart(owner)
+        if (!isFirstStart && isInBackground) {
+            Log.d("Test", "Returning to foreground")
+            onForegrounded()
+        }
+        isFirstStart = false
+        isInBackground = false
+    }
+
+    override fun onStop(owner: LifecycleOwner) {
+        super.onStop(owner)
+        // If the activity is being rotated, we don't want to notify a backgrounded state
+        val changingConfigurations = (owner as? AppCompatActivity)?.isChangingConfigurations ?: false
+        if (!changingConfigurations){
+            isInBackground = true
+            onBackgrounded()
+            Log.d("Test", "Moving to Background")
+        }
+    }
 }

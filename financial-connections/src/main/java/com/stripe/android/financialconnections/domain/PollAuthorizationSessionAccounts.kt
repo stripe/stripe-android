@@ -7,7 +7,7 @@ import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.common.showManualEntryInErrors
-import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
@@ -36,7 +36,8 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
         val activeAuthSession = requireNotNull(manifest.activeAuthSession)
         retryOnException(
             PollTimingOptions(
-                initialDelayMs = activeAuthSession.flow.toPollIntervalMs(),
+                initialDelayMs = Flow.values()
+                    .firstOrNull { it.value == activeAuthSession.flow }.toPollIntervalMs(),
             ),
             retryCondition = { exception -> exception.shouldRetry }
         ) {
@@ -90,18 +91,19 @@ private fun StripeException.toDomainException(
         )
     }
 
-private fun FinancialConnectionsAuthorizationSession.Flow?.toPollIntervalMs(): Long {
+private fun Flow?.toPollIntervalMs(): Long {
+
     val defaultInitialPollDelay: Long = 1.75.seconds.inWholeMilliseconds
     return when (this) {
-        FinancialConnectionsAuthorizationSession.Flow.TESTMODE,
-        FinancialConnectionsAuthorizationSession.Flow.TESTMODE_OAUTH,
-        FinancialConnectionsAuthorizationSession.Flow.TESTMODE_OAUTH_WEBVIEW,
-        FinancialConnectionsAuthorizationSession.Flow.FINICITY_CONNECT_V2_LITE -> {
+        Flow.TESTMODE,
+        Flow.TESTMODE_OAUTH,
+        Flow.TESTMODE_OAUTH_WEBVIEW,
+        Flow.FINICITY_CONNECT_V2_LITE -> {
             // Post auth flow, Finicity non-OAuth account retrieval latency is extremely quick - p90 < 1sec.
             0
         }
 
-        FinancialConnectionsAuthorizationSession.Flow.MX_CONNECT -> {
+        Flow.MX_CONNECT -> {
             // 10 account retrieval latency on MX non-OAuth sessions is currently 460 ms
             0.5.seconds.inWholeMilliseconds
         }

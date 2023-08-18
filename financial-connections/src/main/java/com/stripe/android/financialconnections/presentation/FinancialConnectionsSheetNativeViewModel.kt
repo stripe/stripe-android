@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.presentation
 import android.content.Intent
 import android.os.Parcelable
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.compose.NavHost
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
@@ -16,6 +15,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.AppBackgrounded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickNavBarBack
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickNavBarClose
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
@@ -305,23 +305,14 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    fun onLifecycleEvent(
-        currentPane: Pane,
-        event: Lifecycle.Event
-    ) {
+    fun onBackgrounded(currentPane: Pane, backgrounded: Boolean) {
         viewModelScope.launch {
-            when (event) {
-                Lifecycle.Event.ON_RESUME,
-                Lifecycle.Event.ON_PAUSE -> eventTracker.track(
-                    FinancialConnectionsEvent.PaneLifecycleChanged(
-                        pane = currentPane,
-                        state = event.name,
-                    )
+            eventTracker.track(
+                AppBackgrounded(
+                    pane = currentPane,
+                    backgrounded = backgrounded
                 )
-
-                else -> Unit
-            }
-
+            )
         }
     }
 

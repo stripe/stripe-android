@@ -26,13 +26,12 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
-    class PaneLifecycleChanged(
+    class AppBackgrounded(
         pane: Pane,
-        state: String,
+        backgrounded: Boolean,
     ) : FinancialConnectionsEvent(
-        "pane.lifecycle.changed",
+        if (backgrounded) "mobile.app_entered_background" else "mobile.app_entered_foreground",
         mapOf(
-            "state" to state,
             "pane" to pane.value,
         ).filterNotNullValues()
     )

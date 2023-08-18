@@ -15,11 +15,11 @@ import com.airbnb.mvrx.withState
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
+import com.stripe.android.financialconnections.browser.BrowserUtils
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
-import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.argsOrNull
@@ -82,7 +82,7 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity(), Maverick
             state.viewEffect?.let { viewEffect ->
                 when (viewEffect) {
                     is OpenAuthFlowWithUrl -> startBrowserForResult.launch(
-                        CreateBrowserIntentForUrl(
+                        BrowserUtils.createBrowserIntentForUrl(
                             context = this,
                             uri = Uri.parse(viewEffect.url)
                         )

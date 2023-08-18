@@ -1,6 +1,8 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
+import android.app.Application
 import android.webkit.URLUtil
+import androidx.core.net.toUri
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksViewModel
@@ -16,10 +18,10 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PrepaneClickContinue
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.browser.BrowserUtils
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
-import com.stripe.android.financialconnections.domain.GetDefaultAppToOpenUrl
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
@@ -29,7 +31,6 @@ import com.stripe.android.financialconnections.exception.WebAuthFlowFailedExcept
 import com.stripe.android.financialconnections.features.common.enableRetrieveAuthSession
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -58,8 +59,8 @@ internal class PartnerAuthViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
     private val uriUtils: UriUtils,
     private val postAuthSessionEvent: PostAuthSessionEvent,
-    private val getDefaultAppToOpenUrl: GetDefaultAppToOpenUrl,
     private val getOrFetchSync: GetOrFetchSync,
+    private val context: Application,
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
@@ -111,7 +112,10 @@ internal class PartnerAuthViewModel @Inject constructor(
                     id = authSession.id,
                     pane = Pane.PARTNER_AUTH,
                     flow = authSession.flow,
-                    defaultBrowser = getDefaultAppToOpenUrl(requireNotNull(authSession.urlToLaunch()))
+                    defaultBrowser = BrowserUtils.getBrowserPackage(
+                        context = context,
+                        uri = requireNotNull(authSession.browserReadyUrl()).toUri()
+                    )
                 )
             )
             logger.debug("Created auth session ${authSession.id}")
@@ -172,9 +176,11 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     private suspend fun launchAuthInBrowser() {
         kotlin.runCatching { requireNotNull(getOrFetchSync().manifest.activeAuthSession) }
-            .onSuccess { authSession ->
-                authSession.urlToLaunch()
-                    ?.let { setState { copy(viewEffect = OpenPartnerAuth(it)) } }
+            .onSuccess {
+                it.browserReadyUrl()?.let { url ->
+                    eventTracker.track(PrepaneClickContinue(Pane.PARTNER_AUTH))
+                    setState { copy(viewEffect = OpenPartnerAuth(url)) }
+                }
             }
             .onFailure {
                 eventTracker.logError(
@@ -187,8 +193,11 @@ internal class PartnerAuthViewModel @Inject constructor(
             }
     }
 
-    private fun FinancialConnectionsAuthorizationSession.urlToLaunch(): String? = url
-        ?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
+    /**
+     * Auth Session url after clearing the deep link prefix (required for non-native app2app flows).
+     */
+    private fun FinancialConnectionsAuthorizationSession.browserReadyUrl(): String? =
+        url?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
 
     fun onSelectAnotherBank() {
         navigationManager.navigate(
