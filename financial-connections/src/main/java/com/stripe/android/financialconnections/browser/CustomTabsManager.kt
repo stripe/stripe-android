@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.browser
 
 import android.app.Activity
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -49,6 +48,7 @@ internal class CustomTabsManagerImpl @Inject constructor(
     private var client: CustomTabsClient? = null
     private var connection: CustomTabsServiceConnection? = null
     private var session: CustomTabsSession? = null
+    private var serviceBound = false
 
     /**
      * Binds the Activity to the CustomTabsService.
@@ -57,9 +57,8 @@ internal class CustomTabsManagerImpl @Inject constructor(
         super.onStart(owner)
         val context = owner as? Context ?: return
         if (client != null) return
-        connection = object : CustomTabsServiceConnection() {
-            override fun onCustomTabsServiceConnected(
-                name: ComponentName,
+        connection = ServiceConnection(object : ServiceConnectionCallback {
+            override fun onServiceConnected(
                 client: CustomTabsClient
             ) {
                 log("Service connected")
@@ -68,12 +67,12 @@ internal class CustomTabsManagerImpl @Inject constructor(
                 session = this@CustomTabsManagerImpl.client?.newSession(CustomTabsCallback())
             }
 
-            override fun onServiceDisconnected(name: ComponentName) {
+            override fun onServiceDisconnected() {
                 log("Service disconnected")
                 client = null
                 session = null
             }
-        }
+        })
         bindCustomTabService(context)
     }
 
@@ -85,9 +84,16 @@ internal class CustomTabsManagerImpl @Inject constructor(
         val context = owner as? Context ?: return
         if (connection == null) return
         connection?.let {
-            runCatching { context.unbindService(it) }
+            runCatching {
+                if (serviceBound) {
+                    context.unbindService(it)
+                    serviceBound = false
+                } else {
+                    log("OnStop: service was not bound")
+                }
+            }
                 .onFailure { log("OnStop: couldn't unbind, ${it.stackTraceToString()}") }
-                .onSuccess { log("OnStop: service unbound") }
+                .onSuccess { }
         }
         client = null
         connection = null
@@ -156,6 +162,7 @@ internal class CustomTabsManagerImpl @Inject constructor(
         connection?.let {
             if (CustomTabsClient.bindCustomTabsService(context, packageName, it)) {
                 log("Bind successful")
+                serviceBound = true
             } else {
                 log("Bind failed")
             }
@@ -172,7 +179,7 @@ internal class CustomTabsManagerImpl @Inject constructor(
         val browserPackage = CustomTabsClient.getPackageName(
             context,
             emptyList(),
-            false
+            true
         )
         log("Browser package: $browserPackage")
         return browserPackage
