@@ -2,6 +2,11 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.28.3 - 2023-08-21
+
+### Financial Connections
+* [FIXED][7153](https://github.com/stripe/stripe-android/pull/7153) Updated launchMode to single task to fix browser returns to the SDK on certain browsers.
+
 ## 20.28.2 - 2023-08-14
 
 ### PaymentSheet
