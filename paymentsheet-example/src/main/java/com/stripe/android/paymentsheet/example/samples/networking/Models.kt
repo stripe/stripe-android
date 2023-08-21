@@ -177,6 +177,30 @@ data class ExampleCustomerSheetResponse(
 )
 
 @Serializable
+data class PlaygroundCustomerSheetRequest(
+    @SerialName("customer")
+    val customerId: String,
+    @SerialName("mode")
+    val mode: String,
+)
+
+@Serializable
+data class PlaygroundCustomerSheetResponse(
+    @SerialName("customerId")
+    val customerId: String,
+    @SerialName("intentClientSecret")
+    val clientSecret: String,
+    @SerialName("publishableKey")
+    val publishableKey: String,
+    @SerialName("customerEphemeralKeySecret")
+    val customerEphemeralKeySecret: String,
+    @SerialName("amount")
+    val amount: String,
+    @SerialName("paymentMethodTypes")
+    val paymentMethodTypes: String,
+)
+
+@Serializable
 data class ExampleCreateSetupIntentRequest(
     @SerialName("customer_id")
     val customerId: String,

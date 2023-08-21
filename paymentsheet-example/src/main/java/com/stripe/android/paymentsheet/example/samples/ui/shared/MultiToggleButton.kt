@@ -79,7 +79,7 @@ fun MultiToggleButton(
                         }
                     )
                     .padding(vertical = 4.dp, horizontal = 8.dp)
-                    .defaultMinSize(minWidth = 48.dp)
+                    .defaultMinSize(minWidth = 52.dp)
             )
         }
     }
