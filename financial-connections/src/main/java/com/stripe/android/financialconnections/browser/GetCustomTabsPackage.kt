@@ -6,11 +6,13 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Build
-import android.util.Log
 import androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION
+import com.stripe.android.core.Logger
 import javax.inject.Inject
 
-internal class GetCustomTabsPackage @Inject constructor() {
+internal class GetCustomTabsPackage @Inject constructor(
+    val logger: Logger
+) {
 
     /**
      * Goes through all apps that handle VIEW intents and have a warmup service. Picks
@@ -20,7 +22,7 @@ internal class GetCustomTabsPackage @Inject constructor() {
      * @param context to use for accessing [PackageManager].
      * @return The package name recommended to use for connecting to custom tabs related components.
      */
-    operator fun invoke(context: Context): String? {
+    operator fun invoke(context: Context): String? = runCatching {
         val pm = context.packageManager
         // Get default VIEW intent handler.
         val activityIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
@@ -46,6 +48,9 @@ internal class GetCustomTabsPackage @Inject constructor() {
             // pick the next favorite Custom Tabs provider.
             else -> packagesSupportingCustomTabs[0]
         }
+    }.getOrElse {
+       logger.error("Exception while retrieving Custom Tabs package", it)
+        null
     }
 
     /**
@@ -70,7 +75,7 @@ internal class GetCustomTabsPackage @Inject constructor() {
                     resolveInfo.activityInfo != null
             }
         }.getOrElse {
-            Log.e("Test", "Runtime exception while getting specialized handlers")
+            logger.error("Runtime exception while getting specialized handlers", it)
             false
         }
 
