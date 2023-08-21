@@ -75,15 +75,13 @@
         Added to check the default browser that will host the AuthFlow.
         -->
         <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+        <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="http" />
         </intent>
-    </queries>
 
-    <queries>
-        <intent>
-            <action android:name="android.support.customtabs.action.CustomTabsService" />
-        </intent>
     </queries>
 
 </manifest>

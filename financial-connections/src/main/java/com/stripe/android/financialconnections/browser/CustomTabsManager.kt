@@ -42,7 +42,8 @@ internal interface CustomTabsManager : DefaultLifecycleObserver {
  *
  */
 internal class CustomTabsManagerImpl @Inject constructor(
-    private val logger: Logger
+    private val logger: Logger,
+    private val getCustomTabsPackage: GetCustomTabsPackage
 ) : CustomTabsManager {
 
     private var client: CustomTabsClient? = null
@@ -119,7 +120,7 @@ internal class CustomTabsManagerImpl @Inject constructor(
         fallback: (Uri) -> Unit
     ) {
         runCatching {
-            val packageName: String? = getCustomTabPackage(activity)
+            val packageName: String? = getCustomTabsPackage(activity)
             val customTabsIntent = buildCustomTabsIntent()
 
             // If we cant find a package name no browser that supports Custom Tabs is installed.
@@ -154,7 +155,7 @@ internal class CustomTabsManagerImpl @Inject constructor(
             return
         }
 
-        val packageName = getCustomTabPackage(context)
+        val packageName = getCustomTabsPackage(context)
         if (packageName == null) {
             log("Unable to bind: No Custom Tabs compatible browser found")
             return
@@ -167,22 +168,6 @@ internal class CustomTabsManagerImpl @Inject constructor(
                 log("Bind failed")
             }
         }
-    }
-
-    /**
-     * Get the package name of the preferred browser to use that supports Custom Tabs.
-     *
-     * @return the package name of the preferred browser to use that supports Custom Tabs, or null
-     * if no browser that supports Custom Tabs is installed.
-     */
-    private fun getCustomTabPackage(context: Context): String? {
-        val browserPackage = CustomTabsClient.getPackageName(
-            context,
-            emptyList(),
-            true
-        )
-        log("Browser package: $browserPackage")
-        return browserPackage
     }
 
     private fun log(message: String) {
