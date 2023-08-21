@@ -126,6 +126,8 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$$serializer
 
 public final class com/stripe/android/uicore/elements/IdentifierSpec$Companion {
 	public final fun Generic (Ljava/lang/String;)Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getBlik ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getBlikCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getCardBrand ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getCardCvc ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getCardExpMonth ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
@@ -160,6 +162,13 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$Creator : a
 
 public final class com/stripe/android/uicore/elements/PhoneNumberState$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/uicore/elements/RequestDestination : java/lang/Enum {
+	public static final field Options Lcom/stripe/android/uicore/elements/RequestDestination;
+	public static final field Params Lcom/stripe/android/uicore/elements/RequestDestination;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/uicore/elements/RequestDestination;
+	public static fun values ()[Lcom/stripe/android/uicore/elements/RequestDestination;
 }
 
 public final class com/stripe/android/uicore/elements/RowElementUIKt {
