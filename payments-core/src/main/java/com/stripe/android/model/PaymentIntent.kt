@@ -183,8 +183,13 @@ constructor(
             is StripeIntent.NextActionData.BlikAuthorize -> {
                 StripeIntent.NextActionType.BlikAuthorize
             }
+            is StripeIntent.NextActionData.WeChatPayRedirect -> {
+                StripeIntent.NextActionType.WeChatPayRedirect
+            }
+            is StripeIntent.NextActionData.WeChatPayDisplayQrCode -> {
+                StripeIntent.NextActionType.WeChatPayDisplayQrCode
+            }
             is StripeIntent.NextActionData.AlipayRedirect,
-            is StripeIntent.NextActionData.WeChatPayRedirect,
             null -> {
                 null
             }

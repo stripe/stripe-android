@@ -89,6 +89,11 @@ internal class WebIntentAuthenticator @Inject constructor(
                 returnUrl = defaultReturnUrl.value
                 shouldCancelIntentOnUserNavigation = false
             }
+            is StripeIntent.NextActionData.WeChatPayDisplayQrCode -> {
+                authUrl = nextActionData.url
+                returnUrl = defaultReturnUrl.value
+                shouldCancelIntentOnUserNavigation = false
+            }
             else ->
                 throw IllegalArgumentException("WebAuthenticator can't process nextActionData: $nextActionData")
         }

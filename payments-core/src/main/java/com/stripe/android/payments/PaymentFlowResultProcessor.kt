@@ -155,8 +155,13 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         val shouldRefreshForCashApp = stripeIntent.requiresAction() &&
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.CashAppPay
 
+        // For WeChat Pay, the intent status can still be `requires_action` by the time the user
+        // gets back to the merchant app. We poll until it's succeeded.
+        val shouldRefreshForWeChatPay = stripeIntent.requiresAction() &&
+            stripeIntent.paymentMethod?.type == PaymentMethod.Type.WeChatPay
+
         return succeededMaybeRefresh || cancelledMaybeRefresh ||
-            actionNotProcessedMaybeRefresh || shouldRefreshForCashApp
+            actionNotProcessedMaybeRefresh || shouldRefreshForCashApp || shouldRefreshForWeChatPay
     }
 
     private fun determineFlowOutcome(intent: StripeIntent, originalFlowOutcome: Int): Int {

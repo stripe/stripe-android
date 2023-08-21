@@ -93,6 +93,7 @@ sealed interface StripeIntent : StripeModel {
         AlipayRedirect("alipay_handle_redirect"),
         BlikAuthorize("blik_authorize"),
         WeChatPayRedirect("wechat_pay_redirect_to_android_app"),
+        WeChatPayDisplayQrCode("wechat_pay_display_qr_code"),
         VerifyWithMicrodeposits("verify_with_microdeposits"),
         UpiAwaitNotification("upi_await_notification"),
         CashAppRedirect("cashapp_handle_redirect_or_display_qr_code");
@@ -287,6 +288,10 @@ sealed interface StripeIntent : StripeModel {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class WeChatPayRedirect(val weChat: WeChat) : NextActionData()
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class WeChatPayDisplayQrCode(val url: String) : NextActionData()
 
         @Parcelize
         data class VerifyWithMicrodeposits(

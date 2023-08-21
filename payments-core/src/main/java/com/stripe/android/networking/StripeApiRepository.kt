@@ -219,16 +219,31 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): Result<PaymentIntent> {
+        val originalParams = confirmPaymentIntentParams.toParamMap().let { confirmParams ->
+            // Omit client_secret with user key auth.
+            if (options.apiKeyIsUserKey) {
+                confirmParams - PARAM_CLIENT_SECRET
+            } else {
+                confirmParams
+            }
+        }
+
+        // Add payment_user_agent if the Payment Method is being created on this call
+        val paramsWithUserAgent = maybeAddPaymentUserAgent(
+            params = originalParams,
+            paymentMethodCreateParams = confirmPaymentIntentParams.paymentMethodCreateParams,
+            sourceParams = confirmPaymentIntentParams.sourceParams,
+        )
+
+        // Use a dirty hack to make WeChat Pay usable with test mode payments
+        val paramsWithUserAgentAndWeChatTweak = maybeOverrideWeChatPayOptions(
+            params = paramsWithUserAgent,
+            paymentMethodType = confirmPaymentIntentParams.paymentMethodCreateParams?.typeCode,
+        )
+
         val params = fraudDetectionDataParamsUtils.addFraudDetectionData(
-            // Add payment_user_agent if the Payment Method is being created on this call
-            maybeAddPaymentUserAgent(
-                confirmPaymentIntentParams.toParamMap()
-                    // Omit client_secret with user key auth.
-                    .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it },
-                confirmPaymentIntentParams.paymentMethodCreateParams,
-                confirmPaymentIntentParams.sourceParams
-            ).plus(createExpandParam(expandFields)),
-            fraudDetectionData
+            params = paramsWithUserAgentAndWeChatTweak + createExpandParam(expandFields),
+            fraudDetectionData = fraudDetectionData,
         )
 
         val paymentIntentId = runCatching {
@@ -256,6 +271,31 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 )
             )
         }
+    }
+
+    private fun maybeOverrideWeChatPayOptions(
+        params: Map<String, Any>,
+        paymentMethodType: String?,
+    ): Map<String, Any> {
+        val isUsingWeChat = paymentMethodType == PaymentMethod.Type.WeChatPay.code
+        if (!isUsingWeChat) {
+            return params
+        }
+
+        val isTestMode = publishableKeyProvider().startsWith("pk_test")
+        if (!isTestMode) {
+            return params
+        }
+
+        // Passing 'web' will make the backend return a NextActionType that includes a test page URL.
+        // Don't do dirty hacks like this at home, kids!
+        val fakePaymentMethodOptions = mapOf(
+            "payment_method_options" to mapOf(
+                "wechat_pay" to mapOf("client" to "web"),
+            ),
+        )
+
+        return (params - "payment_method_options") + fakePaymentMethodOptions
     }
 
     /**

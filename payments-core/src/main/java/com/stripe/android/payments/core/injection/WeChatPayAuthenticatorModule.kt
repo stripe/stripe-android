@@ -4,6 +4,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.payments.core.authentication.UnsupportedAuthenticator
+import com.stripe.android.payments.core.authentication.WebIntentAuthenticator
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoMap
@@ -15,6 +16,7 @@ import dagger.multibindings.IntoMap
  */
 @Module
 internal class WeChatPayAuthenticatorModule {
+
     @IntentAuthenticatorMap
     @Provides
     @IntoMap
@@ -29,5 +31,15 @@ internal class WeChatPayAuthenticatorModule {
             ).getConstructor()
                 .newInstance() as PaymentAuthenticator<StripeIntent>
         }.getOrDefault(unsupportedAuthenticator)
+    }
+
+    @IntentAuthenticatorMap
+    @Provides
+    @IntoMap
+    @IntentAuthenticatorKey(NextActionData.WeChatPayDisplayQrCode::class)
+    internal fun provideWeChatTestAuthenticator(
+        webIntentAuthenticator: WebIntentAuthenticator,
+    ): PaymentAuthenticator<StripeIntent> {
+        return webIntentAuthenticator
     }
 }

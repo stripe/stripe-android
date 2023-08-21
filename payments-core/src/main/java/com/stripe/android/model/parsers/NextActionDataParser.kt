@@ -23,6 +23,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.AlipayRedirect -> AlipayRedirectParser()
             StripeIntent.NextActionType.BlikAuthorize -> BlikAuthorizeParser()
             StripeIntent.NextActionType.WeChatPayRedirect -> WeChatPayRedirectParser()
+            StripeIntent.NextActionType.WeChatPayDisplayQrCode -> WeChatPayDisplayQrCodeParser()
             StripeIntent.NextActionType.VerifyWithMicrodeposits -> VerifyWithMicrodepositsParser()
             StripeIntent.NextActionType.UpiAwaitNotification -> UpiAwaitNotificationParser()
             StripeIntent.NextActionType.CashAppRedirect -> CashAppRedirectParser()
@@ -190,6 +191,20 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             private const val PREPAY_ID = "prepay_id"
             private const val TIMESTAMP = "timestamp"
             private const val SIGN = "sign"
+        }
+    }
+
+    internal class WeChatPayDisplayQrCodeParser :
+        ModelJsonParser<StripeIntent.NextActionData.WeChatPayDisplayQrCode> {
+
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.WeChatPayDisplayQrCode {
+            return StripeIntent.NextActionData.WeChatPayDisplayQrCode(
+                url = json.getString(DATA),
+            )
+        }
+
+        private companion object {
+            private const val DATA = "data"
         }
     }
 
