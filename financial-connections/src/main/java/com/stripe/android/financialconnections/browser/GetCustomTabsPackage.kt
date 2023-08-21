@@ -10,7 +10,6 @@ import android.util.Log
 import androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION
 import javax.inject.Inject
 
-
 internal class GetCustomTabsPackage @Inject constructor() {
 
     /**
