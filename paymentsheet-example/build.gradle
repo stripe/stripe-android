@@ -19,7 +19,7 @@ dependencies {
 
     implementation project(':wechatpay')
 
-    implementation "com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.7.0"
+    implementation "com.tencent.mm.opensdk:wechat-sdk-android:6.8.24"
 
     implementation libs.androidx.activity
     implementation libs.androidx.appCompat

@@ -277,25 +277,26 @@ class StripeApiRepository @JvmOverloads internal constructor(
         params: Map<String, Any>,
         paymentMethodType: String?,
     ): Map<String, Any> {
-        val isUsingWeChat = paymentMethodType == PaymentMethod.Type.WeChatPay.code
-        if (!isUsingWeChat) {
-            return params
-        }
-
-        val isTestMode = publishableKeyProvider().startsWith("pk_test")
-        if (!isTestMode) {
-            return params
-        }
-
-        // Passing 'web' will make the backend return a NextActionType that includes a test page URL.
-        // Don't do dirty hacks like this at home, kids!
-        val fakePaymentMethodOptions = mapOf(
-            "payment_method_options" to mapOf(
-                "wechat_pay" to mapOf("client" to "web"),
-            ),
-        )
-
-        return (params - "payment_method_options") + fakePaymentMethodOptions
+        return params
+//        val isUsingWeChat = paymentMethodType == PaymentMethod.Type.WeChatPay.code
+//        if (!isUsingWeChat) {
+//            return params
+//        }
+//
+//        val isTestMode = publishableKeyProvider().startsWith("pk_test")
+//        if (!isTestMode) {
+//            return params
+//        }
+//
+//        // Passing 'web' will make the backend return a NextActionType that includes a test page URL.
+//        // Don't do dirty hacks like this at home, kids!
+//        val fakePaymentMethodOptions = mapOf(
+//            "payment_method_options" to mapOf(
+//                "wechat_pay" to mapOf("client" to "web"),
+//            ),
+//        )
+//
+//        return (params - "payment_method_options") + fakePaymentMethodOptions
     }
 
     /**

@@ -12,7 +12,7 @@ import com.stripe.android.payments.PaymentFlowResult
 import kotlinx.coroutines.launch
 
 private const val MISSING_DEPENDENCY = "WeChatPay dependency not found. " +
-    "Add com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.7.0 in app's build.gradle."
+    "Add com.tencent.mm.opensdk:wechat-sdk-android:6.8.24 in app's build.gradle."
 
 internal class WeChatPayAuthActivity : AppCompatActivity() {
 

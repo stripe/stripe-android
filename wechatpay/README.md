@@ -13,8 +13,8 @@ This module provides support for `PaymentIntent` with `wechat_pay` as its paymen
       // Stripe dependencies, make sure they have the same $stripe_sdk_version
       implementation 'com.stripe:stripe-android:$stripe_sdk_version' // Main Stripe SDK
       implementation 'com.stripe:stripe-wechatpay:$stripe_sdk_version' // WeChat Pay module
-      // WeChat Pay SDK, make sure 6.7.0 is used
-      implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.7.0'
+      // WeChat Pay SDK, make sure 6.8.0 is used
+      implementation 'com.tencent.mm.opensdk:wechat-sdk-android:6.8.24'
     }
     ```
 

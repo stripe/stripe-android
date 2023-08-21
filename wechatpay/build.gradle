@@ -9,7 +9,7 @@ dependencies {
     implementation libs.androidx.appCompat
     implementation libs.androidx.coreKtx
 
-    compileOnly "com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.7.0"
+    compileOnly "com.tencent.mm.opensdk:wechat-sdk-android:6.8.24"
 
     testImplementation testLibs.androidx.coreKtx
     testImplementation testLibs.androidx.lifecycle
