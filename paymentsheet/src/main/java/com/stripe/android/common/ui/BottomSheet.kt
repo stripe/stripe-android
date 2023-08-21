@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetDefaults
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
@@ -28,8 +30,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.uicore.stripeShapes
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 
@@ -164,6 +168,10 @@ internal fun BottomSheet(
             .statusBarsPadding()
             .imePadding(),
         sheetState = state.modalBottomSheetState,
+        sheetShape = RoundedCornerShape(
+            topStart = MaterialTheme.stripeShapes.cornerRadius.dp,
+            topEnd = MaterialTheme.stripeShapes.cornerRadius.dp,
+        ),
         sheetContent = {
             Box(modifier = Modifier.testTag(BottomSheetContentTestTag)) {
                 sheetContent()
