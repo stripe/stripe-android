@@ -5,6 +5,133 @@ public final class com/stripe/android/common/ui/ComposableSingletons$BottomSheet
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public abstract interface class com/stripe/android/customersheet/CustomerAdapter {
+	public static final field Companion Lcom/stripe/android/customersheet/CustomerAdapter$Companion;
+	public abstract fun attachPaymentMethod (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun detachPaymentMethod (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getCanCreateSetupIntents ()Z
+	public abstract fun retrievePaymentMethods (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun retrieveSelectedPaymentOption (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun setSelectedPaymentOption (Lcom/stripe/android/customersheet/CustomerAdapter$PaymentOption;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun setupIntentClientSecretForCustomerAttach (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/customersheet/CustomerAdapter$Companion {
+	public final fun create (Landroid/content/Context;Lcom/stripe/android/customersheet/CustomerEphemeralKeyProvider;Lcom/stripe/android/customersheet/SetupIntentClientSecretProvider;)Lcom/stripe/android/customersheet/CustomerAdapter;
+}
+
+public abstract class com/stripe/android/customersheet/CustomerAdapter$PaymentOption {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/customersheet/CustomerAdapter$PaymentOption$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getId ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/customersheet/CustomerAdapter$PaymentOption$Companion {
+	public final fun fromId (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerAdapter$PaymentOption;
+}
+
+public abstract class com/stripe/android/customersheet/CustomerAdapter$Result {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/customersheet/CustomerAdapter$Result$Companion;
+}
+
+public final class com/stripe/android/customersheet/CustomerAdapter$Result$Companion {
+	public final fun failure (Ljava/lang/Throwable;Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerAdapter$Result$Failure;
+	public final fun success (Ljava/lang/Object;)Lcom/stripe/android/customersheet/CustomerAdapter$Result$Success;
+}
+
+public final class com/stripe/android/customersheet/CustomerAdapter$Result$Failure : com/stripe/android/customersheet/CustomerAdapter$Result {
+	public static final field $stable I
+	public final fun getCause ()Ljava/lang/Throwable;
+	public final fun getDisplayMessage ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/customersheet/CustomerAdapter$Result$Success : com/stripe/android/customersheet/CustomerAdapter$Result {
+	public static final field $stable I
+	public final fun getValue ()Ljava/lang/Object;
+}
+
+public final class com/stripe/android/customersheet/CustomerEphemeralKey {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/customersheet/CustomerEphemeralKey$Companion;
+}
+
+public final class com/stripe/android/customersheet/CustomerEphemeralKey$Companion {
+	public final fun create (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerEphemeralKey;
+}
+
+public abstract interface class com/stripe/android/customersheet/CustomerEphemeralKeyProvider {
+	public abstract fun provideCustomerEphemeralKey (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheet {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/customersheet/CustomerSheet$Companion;
+	public final fun present ()V
+	public final fun resetCustomer ()V
+	public final fun retrievePaymentOptionSelection (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheet$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/customersheet/CustomerSheet$Configuration;Lcom/stripe/android/customersheet/CustomerAdapter;Lcom/stripe/android/customersheet/CustomerSheetResultCallback;)Lcom/stripe/android/customersheet/CustomerSheet;
+	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/customersheet/CustomerSheet$Configuration;Lcom/stripe/android/customersheet/CustomerAdapter;Lcom/stripe/android/customersheet/CustomerSheetResultCallback;)Lcom/stripe/android/customersheet/CustomerSheet;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheet$Configuration {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun getAppearance ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;
+	public final fun getBillingDetailsCollectionConfiguration ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;
+	public final fun getDefaultBillingDetails ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;
+	public final fun getGooglePayEnabled ()Z
+	public final fun getHeaderTextForSelectionScreen ()Ljava/lang/String;
+	public final fun getMerchantDisplayName ()Ljava/lang/String;
+	public final fun newBuilder ()Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheet$Configuration$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun appearance (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public final fun build ()Lcom/stripe/android/customersheet/CustomerSheet$Configuration;
+	public final fun defaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public final fun googlePayEnabled (Z)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public final fun headerTextForSelectionScreen (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public final fun merchantDisplayName (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheetComposeKt {
+	public static final fun rememberCustomerSheet (Lcom/stripe/android/customersheet/CustomerSheet$Configuration;Lcom/stripe/android/customersheet/CustomerAdapter;Lcom/stripe/android/customersheet/CustomerSheetResultCallback;Landroidx/compose/runtime/Composer;II)Lcom/stripe/android/customersheet/CustomerSheet;
+}
+
+public abstract class com/stripe/android/customersheet/CustomerSheetResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/customersheet/CustomerSheetResult$Canceled : com/stripe/android/customersheet/CustomerSheetResult {
+	public static final field $stable I
+	public final fun getSelection ()Lcom/stripe/android/customersheet/PaymentOptionSelection;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheetResult$Error : com/stripe/android/customersheet/CustomerSheetResult {
+	public static final field $stable I
+	public final fun getException ()Ljava/lang/Throwable;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheetResult$Selected : com/stripe/android/customersheet/CustomerSheetResult {
+	public static final field $stable I
+	public final fun getSelection ()Lcom/stripe/android/customersheet/PaymentOptionSelection;
+}
+
+public abstract interface class com/stripe/android/customersheet/CustomerSheetResultCallback {
+	public abstract fun onResult (Lcom/stripe/android/customersheet/CustomerSheetResult;)V
+}
+
+public abstract interface annotation class com/stripe/android/customersheet/ExperimentalCustomerSheetApi : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/customersheet/InternalCustomerSheetResult$Canceled$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/customersheet/InternalCustomerSheetResult$Canceled;
@@ -27,6 +154,40 @@ public final class com/stripe/android/customersheet/InternalCustomerSheetResult$
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/customersheet/InternalCustomerSheetResult$Selected;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/customersheet/PaymentOptionSelection {
+	public static final field $stable I
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/model/PaymentOption;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getPaymentOption ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
+}
+
+public final class com/stripe/android/customersheet/PaymentOptionSelection$GooglePay : com/stripe/android/customersheet/PaymentOptionSelection {
+	public static final field $stable I
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
+	public final fun copy (Lcom/stripe/android/paymentsheet/model/PaymentOption;)Lcom/stripe/android/customersheet/PaymentOptionSelection$GooglePay;
+	public static synthetic fun copy$default (Lcom/stripe/android/customersheet/PaymentOptionSelection$GooglePay;Lcom/stripe/android/paymentsheet/model/PaymentOption;ILjava/lang/Object;)Lcom/stripe/android/customersheet/PaymentOptionSelection$GooglePay;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getPaymentOption ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/customersheet/PaymentOptionSelection$PaymentMethod : com/stripe/android/customersheet/PaymentOptionSelection {
+	public static final field $stable I
+	public final fun component1 ()Lcom/stripe/android/model/PaymentMethod;
+	public final fun component2 ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
+	public final fun copy (Lcom/stripe/android/model/PaymentMethod;Lcom/stripe/android/paymentsheet/model/PaymentOption;)Lcom/stripe/android/customersheet/PaymentOptionSelection$PaymentMethod;
+	public static synthetic fun copy$default (Lcom/stripe/android/customersheet/PaymentOptionSelection$PaymentMethod;Lcom/stripe/android/model/PaymentMethod;Lcom/stripe/android/paymentsheet/model/PaymentOption;ILjava/lang/Object;)Lcom/stripe/android/customersheet/PaymentOptionSelection$PaymentMethod;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentMethod ()Lcom/stripe/android/model/PaymentMethod;
+	public fun getPaymentOption ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/customersheet/SetupIntentClientSecretProvider {
+	public abstract fun provideSetupIntentClientSecret (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/stripe/android/paymentsheet/BuildConfig {

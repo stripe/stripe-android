@@ -3,7 +3,6 @@ package com.stripe.android.customersheet
 import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -18,13 +17,12 @@ import com.stripe.android.utils.AnimationConstants
 import javax.inject.Inject
 
 /**
- * 🏗 This feature is under construction 🏗
+ * 🏗 This feature is in private beta and could change 🏗
  *
  * [CustomerSheet] A class that presents a bottom sheet to manage a customer through the
  * [CustomerAdapter].
  */
 @ExperimentalCustomerSheetApi
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CustomerSheet @Inject internal constructor(
     private val application: Application,
     lifecycleOwner: LifecycleOwner,
@@ -113,7 +111,6 @@ class CustomerSheet @Inject internal constructor(
      * Configuration for [CustomerSheet]
      */
     @ExperimentalCustomerSheetApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration internal constructor(
         /**
          * Describes the appearance of [CustomerSheet].
@@ -165,7 +162,6 @@ class CustomerSheet @Inject internal constructor(
         }
 
         @ExperimentalCustomerSheetApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Builder {
             private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
             private var googlePayEnabled: Boolean = false
@@ -214,7 +210,6 @@ class CustomerSheet @Inject internal constructor(
     }
 
     @ExperimentalCustomerSheetApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
         /**

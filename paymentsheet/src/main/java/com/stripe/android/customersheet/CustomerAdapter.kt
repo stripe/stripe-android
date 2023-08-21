@@ -1,7 +1,6 @@
 package com.stripe.android.customersheet
 
 import android.content.Context
-import androidx.annotation.RestrictTo
 import com.stripe.android.customersheet.injection.DaggerStripeCustomerAdapterComponent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -20,7 +19,6 @@ import com.stripe.android.paymentsheet.model.SavedSelection
  * Use [CustomerAdapter.create] to create an instance of a [CustomerAdapter].
  */
 @ExperimentalCustomerSheetApi
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface CustomerAdapter {
 
     /**
@@ -75,7 +73,6 @@ interface CustomerAdapter {
     suspend fun setupIntentClientSecretForCustomerAttach(): Result<String>
 
     @ExperimentalCustomerSheetApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
         /**
@@ -110,7 +107,6 @@ interface CustomerAdapter {
      * method.
      */
     @ExperimentalCustomerSheetApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class PaymentOption(
         open val id: String
     ) {
@@ -150,7 +146,6 @@ interface CustomerAdapter {
         }
 
         @ExperimentalCustomerSheetApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             fun fromId(id: String): PaymentOption {
                 return when (id) {
@@ -180,33 +175,27 @@ interface CustomerAdapter {
     }
 
     @ExperimentalCustomerSheetApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class Result<T> {
 
         @ExperimentalCustomerSheetApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Success<T> internal constructor(
             val value: T
         ) : Result<T>()
 
         @ExperimentalCustomerSheetApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Failure<T> internal constructor(
             val cause: Throwable,
             val displayMessage: String? = null
         ) : Result<T>()
 
         @ExperimentalCustomerSheetApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             @ExperimentalCustomerSheetApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun <T> success(value: T): Success<T> {
                 return Success(value)
             }
 
             @ExperimentalCustomerSheetApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun <T> failure(cause: Throwable, displayMessage: String?): Failure<T> {
                 return Failure(cause, displayMessage)
             }
@@ -220,7 +209,6 @@ interface CustomerAdapter {
  * if something went wrong during the retrieval of the ephemeral key.
  */
 @ExperimentalCustomerSheetApi
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface CustomerEphemeralKeyProvider {
 
     suspend fun provideCustomerEphemeralKey(): CustomerAdapter.Result<CustomerEphemeralKey>
@@ -233,20 +221,17 @@ fun interface CustomerEphemeralKeyProvider {
  * the [SetupIntent] client secret.
  */
 @ExperimentalCustomerSheetApi
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface SetupIntentClientSecretProvider {
 
     suspend fun provideSetupIntentClientSecret(customerId: String): CustomerAdapter.Result<String>
 }
 
 @ExperimentalCustomerSheetApi
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CustomerEphemeralKey internal constructor(
     internal val customerId: String,
     internal val ephemeralKey: String,
 ) {
     @ExperimentalCustomerSheetApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun create(
             customerId: String,

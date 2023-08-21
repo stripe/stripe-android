@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## XX.XX.XX - 2023-XX-XX
+* [ADDED] [CustomerSheet](https://stripe.com/docs/elements/customer-sheet?platform=android) is now available (private beta)
 
 ### PaymentSheet
 * [CHANGED][7144](https://github.com/stripe/stripe-android/pull/7144) PaymentSheet now features rounded corners with the radius provided in `PaymentSheet.Shapes.cornerRadiusDp`.
