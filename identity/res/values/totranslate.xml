@@ -10,4 +10,7 @@
 
     <string name="stripe_upload_a_photo">Upload a photo</string>
     <string name="stripe_upload_your_photo_id">Upload your photo ID</string>
+
+    <string name="stripe_selfie_warmup_title">Get ready to take a selfie</string>
+    <string name="stripe_selfie_warmup_body">A few photos will be taken automatically on the next step to verify it\'s you</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.samples.ui.customersheet.playground
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -40,12 +43,15 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.edit
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.MultiToggleButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.utils.rememberDrawablePainter
+import com.stripe.android.paymentsheet.rememberPaymentSheet
 import java.util.Locale
 
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -53,6 +59,10 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<CustomerSheetPlaygroundViewModel> {
         CustomerSheetPlaygroundViewModel.Factory
+    }
+
+    private val preferences by lazy {
+        getPreferences(Context.MODE_PRIVATE)
     }
 
     @Suppress("LongMethod")
@@ -64,19 +74,27 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
         setContent {
             PaymentSheetExampleTheme {
                 val viewState by viewModel.viewState.collectAsState()
+                val paymentResult by viewModel.paymentResult.collectAsState()
                 val configurationState by viewModel.configurationState.collectAsState()
                 val config by viewModel.configuration.collectAsState()
                 val customerAdapter by viewModel.customerAdapter.collectAsState()
 
-                val customerSheet = rememberCustomerSheet(
-                    customerAdapter = customerAdapter,
-                    configuration = config,
-                    callback = viewModel::onCustomerSheetResult,
+                val customerSheet = customerAdapter?.let {
+                    rememberCustomerSheet(
+                        customerAdapter = it,
+                        configuration = config,
+                        callback = viewModel::onCustomerSheetResult,
+                    )
+                }
+
+                val paymentSheet = rememberPaymentSheet(
+                    paymentResultCallback = viewModel::handlePaymentResult
                 )
 
-                LaunchedEffect(viewState) {
-                    val result = customerSheet.retrievePaymentOptionSelection()
-                    viewModel.onCustomerSheetResult(result)
+                LaunchedEffect(customerAdapter) {
+                    customerSheet?.retrievePaymentOptionSelection()?.let {
+                        viewModel.onCustomerSheetResult(it)
+                    }
                 }
 
                 Column(
@@ -89,10 +107,8 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                         viewActionHandler = viewModel::handleViewAction,
                     )
 
-                    Text(
-                        text = "Payment Methods",
-                        color = MaterialTheme.colors.onBackground,
-                        fontSize = 18.sp,
+                    Divider(
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     when (val state = viewState) {
@@ -100,9 +116,30 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                             CustomerPaymentMethods(
                                 state = state,
                                 onUpdateDefaultPaymentMethod = {
-                                    customerSheet.present()
+                                    customerSheet?.present()
                                 }
                             )
+                            Button(
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = state.clientSecret != null,
+                                onClick = {
+                                    paymentSheet.presentWithPaymentIntent(
+                                        paymentIntentClientSecret = state.clientSecret!!,
+                                        configuration = PaymentSheet.Configuration(
+                                            merchantDisplayName = "Test Merchant Inc.",
+                                            customer = PaymentSheet.CustomerConfiguration(
+                                                id = state.currentCustomer!!,
+                                                ephemeralKeySecret = state.ephemeralKey!!
+                                            )
+                                        )
+                                    )
+                                }
+                            ) {
+                                Text("Launch PaymentSheet")
+                            }
+                            paymentResult?.let {
+                                Text(it.toString())
+                            }
                         }
                         is CustomerSheetPlaygroundViewState.FailedToLoad -> {
                             Text(
@@ -130,21 +167,22 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
         onUpdateDefaultPaymentMethod: () -> Unit
     ) {
         Column {
-            Text(
-                "Customer ${state.currentCustomer}",
-                color = MaterialTheme.colors.onBackground,
-                fontWeight = FontWeight.Bold,
-            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(
-                    "Payment default",
-                    color = MaterialTheme.colors.onBackground,
-                    fontWeight = FontWeight.Bold,
-                )
+                Column {
+                    Text(
+                        "Selected payment method",
+                        color = MaterialTheme.colors.onBackground,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        "${state.currentCustomer}",
+                        color = MaterialTheme.colors.onBackground,
+                    )
+                }
                 TextButton(
                     onClick = onUpdateDefaultPaymentMethod,
                 ) {
@@ -179,7 +217,9 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
         configurationState: CustomerSheetPlaygroundConfigurationState,
         viewActionHandler: (CustomerSheetPlaygroundViewAction) -> Unit
     ) {
-        var collapsed by rememberSaveable { mutableStateOf(false) }
+        var collapsed by rememberSaveable {
+            mutableStateOf(preferences.getBoolean(PREFERENCES_DEVELOPER_SETTINGS, false))
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -206,6 +246,10 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                     modifier = Modifier
                         .height(32.dp)
                         .clickable {
+                            preferences.edit {
+                                putBoolean(PREFERENCES_DEVELOPER_SETTINGS, !collapsed)
+                                apply()
+                            }
                             collapsed = !collapsed
                         }
                 )
@@ -361,7 +405,9 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 2.dp)
             ) {
                 Text(
                     text = "Name",
@@ -383,7 +429,9 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 2.dp)
             ) {
                 Text(
                     text = "Email",
@@ -405,7 +453,9 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 2.dp)
             ) {
                 Text(
                     text = "Phone",
@@ -427,7 +477,9 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 2.dp)
             ) {
                 Text(
                     text = "Address",
@@ -447,5 +499,9 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    companion object {
+        private const val PREFERENCES_DEVELOPER_SETTINGS = "PREFERENCES_DEVELOPER_SETTINGS"
     }
 }

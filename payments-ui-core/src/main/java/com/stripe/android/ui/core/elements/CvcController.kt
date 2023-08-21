@@ -6,6 +6,7 @@ import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.asIndividualDigits
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.TextFieldController
@@ -50,7 +51,7 @@ class CvcController constructor(
         _fieldValue.map { cvcTextFieldConfig.convertToRaw(it) }
 
     // This makes the screen reader read out numbers digit by digit
-    override val contentDescription: Flow<String> = _fieldValue.map { it.replace("\\d".toRegex(), "$0 ") }
+    override val contentDescription: Flow<String> = _fieldValue.map { it.asIndividualDigits() }
 
     private val _fieldState = combine(cardBrandFlow, _fieldValue) { brand, fieldValue ->
         cvcTextFieldConfig.determineState(brand, fieldValue, brand.maxCvcLength)

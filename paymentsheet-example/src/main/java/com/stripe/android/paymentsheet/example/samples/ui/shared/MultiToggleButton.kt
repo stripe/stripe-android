@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -40,7 +41,7 @@ fun MultiToggleButton(
         toggleStates.forEachIndexed { index, toggleState ->
             val isSelected = currentSelection.lowercase() == toggleState.lowercase()
             val backgroundTint = if (isSelected) selectedTint else unselectedTint
-            val textColor = if (isSelected) Color.White else Color.Unspecified
+            val textColor = if (isSelected) Color.White else MaterialTheme.colors.onBackground
             val shape = RoundedCornerShape(
                 topStart = if (index == 0) 4.dp else 0.dp,
                 bottomStart = if (index == 0) 4.dp else 0.dp,
@@ -78,6 +79,7 @@ fun MultiToggleButton(
                         }
                     )
                     .padding(vertical = 4.dp, horizontal = 8.dp)
+                    .defaultMinSize(minWidth = 52.dp)
             )
         }
     }

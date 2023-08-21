@@ -6,6 +6,8 @@
   <string name="stripe_back">Atrás</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Dirección de facturación</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">Código BLIK</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Datos de contacto</string>
   <!-- Text for continue button -->
@@ -20,6 +22,10 @@
   <string name="stripe_iban_invalid_start">El IBAN debe empezar con un código de país de dos letras.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">Banco iDEAL</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Tu código BLIK no está completo.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">El código BLIK no es válido.</string>
   <string name="stripe_invalid_email_address">Dirección de correo electrónico no válida: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">ID de UPI no válida</string>

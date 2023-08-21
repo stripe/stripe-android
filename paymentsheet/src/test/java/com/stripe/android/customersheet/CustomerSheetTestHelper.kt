@@ -8,6 +8,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
@@ -48,13 +49,17 @@ object CustomerSheetTestHelper {
         isLiveMode: Boolean = false,
         initialBackStack: List<CustomerSheetViewState> = listOf(CustomerSheetViewState.Loading(isLiveMode)),
         savedPaymentSelection: PaymentSelection? = null,
-        customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
+        customerAdapter: CustomerAdapter = FakeCustomerAdapter(
+            paymentMethods = CustomerAdapter.Result.success(listOf(CARD_PAYMENT_METHOD))
+        ),
         stripeRepository: StripeRepository = FakeStripeRepository(),
         paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
             publishableKey = "pk_test_123",
             stripeAccountId = null,
         ),
-        configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(),
+        configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
+            googlePayEnabled = true
+        ),
         isGooglePayAvailable: Boolean = true,
     ): CustomerSheetViewModel {
         val formViewModel = FormViewModel(

@@ -6,6 +6,8 @@
   <string name="stripe_back">Nazaj</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Naslov plačnika računa</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">Koda BLIK</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Podatki za stik</string>
   <!-- Text for continue button -->
@@ -20,6 +22,10 @@
   <string name="stripe_iban_invalid_start">Vaša koda IBAN se mora začeti z dvomestno kodo države.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">Banka iDEAL</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Vaša koda BLIK ni popolna.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Vaša koda BLIK ni veljavna.</string>
   <string name="stripe_invalid_email_address">Neveljaven e-poštni naslov: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Neveljaven UPI ID</string>

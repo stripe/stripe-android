@@ -3,11 +3,17 @@ package com.stripe.android.networking
 import android.content.Context
 import com.stripe.android.R
 import com.stripe.android.core.StripeError
+import java.util.Locale
 import com.stripe.android.uicore.R as UiCoreR
 
 @Suppress("ComplexMethod")
 internal fun StripeError.withLocalizedMessage(context: Context): StripeError {
-    val newMessage = context.mapErrorCodeToLocalizedMessage(code) ?: message
+    val newMessage = if (shouldFallBackToLocalizedError) {
+        context.mapErrorCodeToLocalizedMessage(code)
+    } else {
+        message ?: context.mapErrorCodeToLocalizedMessage(code)
+    }
+
     return copy(message = newMessage)
 }
 
@@ -29,3 +35,14 @@ internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String? {
     }
     return messageResourceId?.let { getString(it) }
 }
+
+/**
+ * For some language tags, our backend is unable to provide translated error messages. For these
+ * languages, we fall back to local error messages. As of right now, the only languages for which we
+ * are aware of this issue are Spanish languages outside of Spain, such as in Argentina or Chile.
+ */
+private val shouldFallBackToLocalizedError: Boolean
+    get() {
+        val locale = Locale.getDefault()
+        return locale.language.lowercase() == "es" && locale.country.lowercase() != "es"
+    }

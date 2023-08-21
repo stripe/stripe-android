@@ -20,10 +20,11 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentResponse
-import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerSheetRequest
-import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerSheetResponse
+import com.stripe.android.paymentsheet.example.samples.networking.PlaygroundCustomerSheetRequest
+import com.stripe.android.paymentsheet.example.samples.networking.PlaygroundCustomerSheetResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.Dispatchers
@@ -45,6 +46,9 @@ class CustomerSheetPlaygroundViewModel(
     private val _viewState =
         MutableStateFlow<CustomerSheetPlaygroundViewState>(CustomerSheetPlaygroundViewState.Loading)
     val viewState: StateFlow<CustomerSheetPlaygroundViewState> = _viewState
+
+    private val _paymentResult = MutableStateFlow<PaymentSheetResult?>(null)
+    val paymentResult: StateFlow<PaymentSheetResult?> = _paymentResult
 
     private val _configurationState = MutableStateFlow(CustomerSheetPlaygroundConfigurationState())
     val configurationState: StateFlow<CustomerSheetPlaygroundConfigurationState> = _configurationState
@@ -91,13 +95,13 @@ class CustomerSheetPlaygroundViewModel(
             .build()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialConfiguration)
 
-    internal val customerAdapter: StateFlow<CustomerSheetPlaygroundAdapter> = configurationState.map {
+    internal val customerAdapter: StateFlow<CustomerSheetPlaygroundAdapter?> = configurationState.map {
         CustomerSheetPlaygroundAdapter(
             overrideCanCreateSetupIntents = it.isSetupIntentEnabled,
             adapter = CustomerAdapter.create(
                 context = getApplication(),
                 customerEphemeralKeyProvider = {
-                    fetchCustomerEphemeralKey(viewState.value.currentCustomerId).fold(
+                    fetchClientSecret(viewState.value.currentCustomerId).fold(
                         success = {
                             CustomerAdapter.Result.success(
                                 CustomerEphemeralKey.create(
@@ -134,68 +138,58 @@ class CustomerSheetPlaygroundViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
-        initialValue = CustomerSheetPlaygroundAdapter(
-            adapter = CustomerAdapter.create(
-                context = getApplication(),
-                customerEphemeralKeyProvider = {
-                    CustomerAdapter.Result.failure(
-                        cause = NotImplementedError(),
-                        displayMessage = null
-                    )
-                },
-                setupIntentClientSecretProvider = null
-            )
-        )
+        initialValue = null
     )
 
     init {
         viewModelScope.launch {
-            fetchCustomerEphemeralKey()
+            fetchClientSecret()
         }
     }
 
-    private suspend fun fetchCustomerEphemeralKey(
+    private suspend fun fetchClientSecret(
         customerId: String = "returning"
-    ): Result<ExampleCustomerSheetResponse, FuelError> {
-        return withContext(Dispatchers.IO) {
-            val request = ExampleCustomerSheetRequest(
-                customerType = customerId
-            )
-            val requestBody = Json.encodeToString(
-                ExampleCustomerSheetRequest.serializer(),
-                request
-            )
+    ): Result<PlaygroundCustomerSheetResponse, FuelError> {
+        val request = PlaygroundCustomerSheetRequest(
+            customerId = customerId,
+            mode = "payment"
+        )
 
-            val result = Fuel
-                .post("$backendUrl/customer_ephemeral_key")
-                .jsonBody(requestBody)
-                .suspendable()
-                .awaitModel(ExampleCustomerSheetResponse.serializer())
+        val requestBody = Json.encodeToString(
+            PlaygroundCustomerSheetRequest.serializer(),
+            request
+        )
 
-            when (result) {
-                is Result.Success -> {
-                    PaymentConfiguration.init(
-                        context = getApplication(),
-                        publishableKey = result.value.publishableKey,
+        val result = Fuel
+            .post("$backendUrl/checkout")
+            .jsonBody(requestBody)
+            .suspendable()
+            .awaitModel(PlaygroundCustomerSheetResponse.serializer())
+
+        when (result) {
+            is Result.Success -> {
+                PaymentConfiguration.init(
+                    context = getApplication(),
+                    publishableKey = result.value.publishableKey,
+                )
+                _viewState.update {
+                    CustomerSheetPlaygroundViewState.Data(
+                        clientSecret = result.value.clientSecret,
+                        currentCustomer = result.value.customerId,
+                        ephemeralKey = result.value.customerEphemeralKeySecret,
                     )
-                    _viewState.update {
-                        CustomerSheetPlaygroundViewState.Data(
-                            currentCustomer = result.value.customerId,
-                        )
-                    }
-                }
-
-                is Result.Failure -> {
-                    _viewState.update {
-                        CustomerSheetPlaygroundViewState.FailedToLoad(
-                            message = result.error.message.toString()
-                        )
-                    }
                 }
             }
-
-            result
+            is Result.Failure -> {
+                _viewState.update {
+                    CustomerSheetPlaygroundViewState.FailedToLoad(
+                        message = result.error.message.toString()
+                    )
+                }
+            }
         }
+
+        return result
     }
 
     private suspend fun createSetupIntent(customerId: String):
@@ -269,6 +263,12 @@ class CustomerSheetPlaygroundViewModel(
         }
     }
 
+    fun handlePaymentResult(result: PaymentSheetResult) {
+        _paymentResult.update {
+            result
+        }
+    }
+
     private fun toggleSetupIntentEnabled() {
         updateConfiguration {
             it.copy(
@@ -293,7 +293,7 @@ class CustomerSheetPlaygroundViewModel(
         }
 
         viewModelScope.launch {
-            fetchCustomerEphemeralKey(
+            fetchClientSecret(
                 if (configurationState.value.isExistingCustomer) {
                     "returning"
                 } else {
@@ -397,6 +397,6 @@ class CustomerSheetPlaygroundViewModel(
     }
 
     private companion object {
-        const val backendUrl = "https://glistening-heavenly-radon.glitch.me"
+        const val backendUrl = "https://stp-mobile-playground-backend-v7.stripedemos.com"
     }
 }

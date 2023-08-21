@@ -11,4 +11,5 @@
     <dimen name="stripe_camera_permission_title_text_size">28sp</dimen>
     <dimen name="stripe_error_title_text_size">28sp</dimen>
     <dimen name="stripe_upload_title_text_size">28sp</dimen>
+    <dimen name="stripe_selfie_warmup_title_text_size">28sp</dimen>
 </resources>

@@ -23,7 +23,6 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
-import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import java.util.Calendar

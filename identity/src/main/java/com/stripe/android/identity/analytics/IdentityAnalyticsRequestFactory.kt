@@ -334,6 +334,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val SCREEN_NAME_FILE_UPLOAD_PASSPORT = "file_upload_passport"
         const val SCREEN_NAME_FILE_UPLOAD_ID = "file_upload_id"
         const val SCREEN_NAME_FILE_UPLOAD_DRIVER_LICENSE = "file_upload_driver_license"
+        const val SCREEN_NAME_SELFIE_WARMUP = "selfie_warmup"
         const val SCREEN_NAME_SELFIE = "selfie"
         const val SCREEN_NAME_CONFIRMATION = "confirmation"
         const val SCREEN_NAME_ERROR = "error"

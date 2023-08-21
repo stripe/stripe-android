@@ -1,6 +1,8 @@
 package com.stripe.android.customersheet.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -8,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.PrimaryButton
@@ -47,22 +50,24 @@ internal fun CustomerSheetScreen(
             )
         },
         content = {
-            when (viewState) {
-                is CustomerSheetViewState.Loading -> {
-                    BottomSheetLoadingIndicator()
-                }
-                is CustomerSheetViewState.SelectPaymentMethod -> {
-                    SelectPaymentMethod(
-                        viewState = viewState,
-                        viewActionHandler = viewActionHandler,
-                        paymentMethodNameProvider = paymentMethodNameProvider,
-                    )
-                }
-                is CustomerSheetViewState.AddPaymentMethod -> {
-                    AddCard(
-                        viewState = viewState,
-                        viewActionHandler = viewActionHandler,
-                    )
+            Box(modifier = Modifier.animateContentSize()) {
+                when (viewState) {
+                    is CustomerSheetViewState.Loading -> {
+                        BottomSheetLoadingIndicator()
+                    }
+                    is CustomerSheetViewState.SelectPaymentMethod -> {
+                        SelectPaymentMethod(
+                            viewState = viewState,
+                            viewActionHandler = viewActionHandler,
+                            paymentMethodNameProvider = paymentMethodNameProvider,
+                        )
+                    }
+                    is CustomerSheetViewState.AddPaymentMethod -> {
+                        AddCard(
+                            viewState = viewState,
+                            viewActionHandler = viewActionHandler,
+                        )
+                    }
                 }
             }
         },
@@ -83,8 +88,9 @@ internal fun SelectPaymentMethod(
         modifier = modifier
     ) {
         H4Text(
-            // TODO translate string
-            text = viewState.title ?: "Manage your payment methods",
+            text = viewState.title ?: stringResource(
+                id = R.string.stripe_paymentsheet_manage_your_payment_methods
+            ),
             modifier = Modifier
                 .padding(bottom = 20.dp)
                 .padding(horizontal = horizontalPadding)
@@ -149,8 +155,7 @@ internal fun AddCard(
             .verticalScroll(rememberScrollState())
     ) {
         H4Text(
-            // TODO (jameswoo) translate
-            text = "Save a new payment method",
+            text = stringResource(id = R.string.stripe_paymentsheet_save_a_new_payment_method),
             modifier = Modifier
                 .padding(bottom = 20.dp)
         )
@@ -160,25 +165,23 @@ internal fun AddCard(
             enabled = viewState.enabled,
             elements = viewState.formViewData.elements,
             lastTextFieldIdentifier = viewState.formViewData.lastTextFieldIdentifier,
+            modifier = Modifier.padding(bottom = 8.dp),
         )
 
         AnimatedVisibility(visible = viewState.errorMessage != null) {
             viewState.errorMessage?.let { error ->
-                ErrorMessage(
-                    error = error,
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
+                ErrorMessage(error = error)
             }
         }
 
         PrimaryButton(
-            // TODO (jameswoo) add to lokalize
-            label = "Save",
+            label = stringResource(id = R.string.stripe_paymentsheet_save),
             isEnabled = viewState.primaryButtonEnabled,
             isLoading = viewState.isProcessing,
             onButtonClick = {
                 viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
             },
+            modifier = Modifier.padding(top = 10.dp),
         )
     }
 }
