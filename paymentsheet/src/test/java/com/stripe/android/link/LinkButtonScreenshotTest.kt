@@ -48,4 +48,18 @@ internal class LinkButtonScreenshotTest {
             LinkButton(email = "jaynewstrom@test.com", enabled = false, onClick = { })
         }
     }
+
+    @Test
+    fun testExistingUserWithLongEmail() {
+        paparazziRule.snapshot {
+            LinkButton(email = "jaynewstrom12345678987654321@test.com", enabled = true, onClick = { })
+        }
+    }
+
+    @Test
+    fun testExistingUserWithLongEmailDisabled() {
+        paparazziRule.snapshot {
+            LinkButton(email = "jaynewstrom12345678987654321@test.com", enabled = false, onClick = { })
+        }
+    }
 }
