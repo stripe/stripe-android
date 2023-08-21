@@ -20,8 +20,8 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
     abstract fun create(paymentMethod: PaymentMethod): T
 
     abstract fun create(
-        confirmPaymentMethodOptions: PaymentMethodOptionsParams?,
         createParams: PaymentMethodCreateParams,
+        confirmPaymentMethodOptions: PaymentMethodOptionsParams? = null,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
     ): T
 
@@ -76,8 +76,8 @@ internal class ConfirmPaymentIntentParamsFactory(
     }
 
     override fun create(
-        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         createParams: PaymentMethodCreateParams,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -128,8 +128,8 @@ internal class ConfirmSetupIntentParamsFactory(
     }
 
     override fun create(
-        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         createParams: PaymentMethodCreateParams,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
