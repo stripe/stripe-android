@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.stripe.android.paymentsheet.BuildConfig
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 
@@ -56,7 +57,7 @@ internal class BottomSheetState(
     }
 
     suspend fun hide() {
-        if (isRunningTest) {
+        if (skipHideAnimation) {
             return
         }
 
@@ -185,15 +186,19 @@ private suspend fun repeatUntilSucceededOrLimit(
     }
 }
 
-private val isRunningTest: Boolean
+private val skipHideAnimation: Boolean
+    get() = BuildConfig.DEBUG && (isRunningUnitTest || isRunningUiTest)
+
+private val isRunningUnitTest: Boolean
     get() {
-        val isUnitTest = runCatching {
+        return runCatching {
             Build.FINGERPRINT.lowercase() == "robolectric"
         }.getOrDefault(false)
+    }
 
-        val isUiTest = runCatching {
+private val isRunningUiTest: Boolean
+    get() {
+        return runCatching {
             Class.forName("androidx.test.InstrumentationRegistry")
         }.isSuccess
-
-        return isUnitTest || isUiTest
     }
