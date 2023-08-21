@@ -126,7 +126,7 @@ internal suspend fun NavController.navigateOnVerificationPageData(
     } else if (verificationPageData.isMissingBack()) {
         onMissingBack()
     } else if (verificationPageData.isMissingSelfie()) {
-        navigateTo(SelfieDestination)
+        navigateTo(SelfieWarmupDestination)
     } else if (verificationPageData.isMissingIndividualRequirements()) {
         navigateTo(IndividualDestination)
     } else {

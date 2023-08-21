@@ -11,4 +11,5 @@
 
     <color name="stripe_flash_mask_color">#FFFFFF</color>
 
+    <color name="stripe_selfie_warmup_icon_tint">#1A1B25</color>
 </resources>
