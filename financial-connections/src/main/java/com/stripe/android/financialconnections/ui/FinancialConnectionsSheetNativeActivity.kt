@@ -27,7 +27,7 @@ import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.browser.CustomTabsManager
+import com.stripe.android.core.browser.customtabs.CustomTabsManager
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.common.CloseDialog

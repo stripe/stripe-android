@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.browser
+package com.stripe.android.core.browser.customtabs
 
 import android.content.Context
 import android.content.Intent
@@ -8,9 +8,8 @@ import android.net.Uri
 import android.os.Build
 import androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION
 import com.stripe.android.core.Logger
-import javax.inject.Inject
 
-internal class GetCustomTabsPackage @Inject constructor(
+internal class GetCustomTabsPackage(
     val logger: Logger
 ) {
 
@@ -49,7 +48,7 @@ internal class GetCustomTabsPackage @Inject constructor(
             else -> packagesSupportingCustomTabs[0]
         }
     }.getOrElse {
-       logger.error("Exception while retrieving Custom Tabs package", it)
+        logger.error("Exception while retrieving Custom Tabs package", it)
         null
     }
 

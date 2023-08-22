@@ -1,9 +1,10 @@
-package com.stripe.android.financialconnections.browser
+package com.stripe.android.core.browser.customtabs
 
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.annotation.RestrictTo
 import androidx.browser.customtabs.CustomTabsCallback
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
@@ -14,7 +15,8 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.Logger
 import javax.inject.Inject
 
-internal interface CustomTabsManager : DefaultLifecycleObserver {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface CustomTabsManager : DefaultLifecycleObserver {
 
     /**
      * Opens the URL on a Custom Tab if possible. Otherwise fallsback to opening it on a WebView.
@@ -35,13 +37,23 @@ internal interface CustomTabsManager : DefaultLifecycleObserver {
      * Warms up the browser for a given URL, so that it loads faster when launched.
      */
     fun mayLaunchUrl(url: String): Boolean
+
+    companion object {
+        operator fun invoke(logger: Logger): CustomTabsManager {
+            return CustomTabsManagerImpl(
+                logger,
+                GetCustomTabsPackage(logger)
+            )
+        }
+    }
 }
 
 /**
  * Manages the connection to the CustomTabsService.
  *
  */
-internal class CustomTabsManagerImpl @Inject constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+private class CustomTabsManagerImpl @Inject constructor(
     private val logger: Logger,
     private val getCustomTabsPackage: GetCustomTabsPackage
 ) : CustomTabsManager {

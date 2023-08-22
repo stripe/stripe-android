@@ -3,11 +3,10 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
+import com.stripe.android.core.browser.customtabs.CustomTabsManager
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.financialconnections.browser.CustomTabsManager
-import com.stripe.android.financialconnections.browser.CustomTabsManagerImpl
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
@@ -59,13 +58,16 @@ internal interface FinancialConnectionsSheetNativeModule {
         impl: NavigationManagerImpl
     ): NavigationManager
 
-    @Singleton
-    @Binds
-    fun bindsCustomTabsManager(
-        impl: CustomTabsManagerImpl,
-    ): CustomTabsManager
-
     companion object {
+
+        @Provides
+        @Singleton
+        fun providesCustomTabsManager(
+            logger: Logger,
+        ): CustomTabsManager = CustomTabsManager(
+            logger = logger
+        )
+
         @Provides
         @Singleton
         fun provideConsumersApiService(

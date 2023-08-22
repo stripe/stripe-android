@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.browser
+package com.stripe.android.core.browser.customtabs
 
 import android.content.ComponentName
 import androidx.browser.customtabs.CustomTabsClient
