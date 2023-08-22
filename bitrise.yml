@@ -225,6 +225,7 @@ workflows:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
       - git-clone@8: { }
       - cache-pull@2: { }
+      - restore-gradle-cache@1: { }
       - script-runner@0:
           # Maven doesn't like java 17, so running it before.
           run_if: '{{getenv "NEEDS_ROBOLECTRIC" | ne ""}}'
@@ -255,6 +256,7 @@ workflows:
             - is_enable_public_page: "false"
           title: Deploy test results artifacts
       - cache-push@2: { }
+      - save-gradle-cache@1: { }
 meta:
   bitrise.io:
     stack: linux-docker-android-20.04
