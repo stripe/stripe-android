@@ -14,6 +14,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -542,21 +543,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
                 }
             }
-            else -> {
-                if (paymentResult is PaymentResult.Failed) {
-                    eventReporter.onPaymentFailure(
-                        paymentSelection = selection.value,
-                        currency = stripeIntent.currency,
-                        isDecoupling = isDecoupling,
-                    )
-                }
+            is PaymentResult.Failed -> {
+                eventReporter.onPaymentFailure(
+                    paymentSelection = selection.value,
+                    currency = stripeIntent.currency,
+                    isDecoupling = isDecoupling,
+                )
 
                 resetViewState(
-                    userErrorMessage = when (paymentResult) {
-                        is PaymentResult.Failed -> paymentResult.throwable.localizedMessage
-                        else -> null // indicates canceled payment
-                    }
+                    userErrorMessage = paymentResult.throwable.stripeErrorMessage(getApplication())
                 )
+            }
+            is PaymentResult.Canceled -> {
+                resetViewState(userErrorMessage = null)
             }
         }
     }
