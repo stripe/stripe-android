@@ -57,6 +57,7 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
+      - restore-gradle-cache@1: { }
       - script@1:
           title: Execute Maestro tests (release)
           inputs:
@@ -79,6 +80,7 @@ workflows:
             - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests
       - deploy-to-bitrise-io@2: { }
+      - save-gradle-cache@1: {}
   maestro-edge-financial-connections:
     before_run:
       - start_emulator
@@ -89,6 +91,7 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
+      - restore-gradle-cache@1: {}
       - script@1:
           title: Execute Maestro tests (debug)
           inputs:
@@ -105,6 +108,7 @@ workflows:
             - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests
       - deploy-to-bitrise-io@2: { }
+      - save-gradle-cache@1: {}
   maestro-paymentsheet:
     before_run:
       - start_emulator
