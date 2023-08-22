@@ -54,12 +54,9 @@ internal fun PaymentSheetScreen(
                 toggleEditing = viewModel::toggleEditing,
             )
         },
-        content = { scrollModifier ->
+        content = {
             if (contentVisible) {
-                PaymentSheetScreenContent(
-                    viewModel = viewModel,
-                    modifier = scrollModifier,
-                )
+                PaymentSheetScreenContent(viewModel = viewModel)
             } else {
                 Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
             }
