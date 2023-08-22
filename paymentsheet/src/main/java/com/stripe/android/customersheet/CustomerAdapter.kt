@@ -88,6 +88,7 @@ interface CustomerAdapter {
          * secret. The client secret is used in this adapter to attach a payment method with a
          * [SetupIntent].
          */
+        @JvmStatic
         fun create(
             context: Context,
             customerEphemeralKeyProvider: CustomerEphemeralKeyProvider,
@@ -147,6 +148,8 @@ interface CustomerAdapter {
 
         @ExperimentalCustomerSheetApi
         companion object {
+
+            @JvmStatic
             fun fromId(id: String): PaymentOption {
                 return when (id) {
                     "google_pay" -> GooglePay
@@ -191,11 +194,13 @@ interface CustomerAdapter {
         @ExperimentalCustomerSheetApi
         companion object {
             @ExperimentalCustomerSheetApi
+            @JvmStatic
             fun <T> success(value: T): Success<T> {
                 return Success(value)
             }
 
             @ExperimentalCustomerSheetApi
+            @JvmStatic
             fun <T> failure(cause: Throwable, displayMessage: String?): Failure<T> {
                 return Failure(cause, displayMessage)
             }
@@ -233,6 +238,8 @@ class CustomerEphemeralKey internal constructor(
 ) {
     @ExperimentalCustomerSheetApi
     companion object {
+
+        @JvmStatic
         fun create(
             customerId: String,
             ephemeralKey: String,

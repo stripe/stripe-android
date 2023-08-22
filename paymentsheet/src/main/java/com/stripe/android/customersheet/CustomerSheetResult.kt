@@ -29,7 +29,7 @@ sealed class CustomerSheetResult {
      * An error occurred when presenting the sheet
      */
     @ExperimentalCustomerSheetApi
-    class Error internal constructor(
+    class Failed internal constructor(
         val exception: Throwable
     ) : CustomerSheetResult()
 
@@ -55,7 +55,7 @@ sealed class PaymentOptionSelection private constructor(
      * A Stripe payment method was selected.
      */
     @ExperimentalCustomerSheetApi
-    data class PaymentMethod internal constructor(
+    class PaymentMethod internal constructor(
         val paymentMethod: StripePaymentMethod,
         override val paymentOption: PaymentOption,
     ) : PaymentOptionSelection(paymentOption)
@@ -64,7 +64,7 @@ sealed class PaymentOptionSelection private constructor(
      * Google Pay is the selected payment option.
      */
     @ExperimentalCustomerSheetApi
-    data class GooglePay internal constructor(
+    class GooglePay internal constructor(
         override val paymentOption: PaymentOption,
     ) : PaymentOptionSelection(paymentOption)
 }

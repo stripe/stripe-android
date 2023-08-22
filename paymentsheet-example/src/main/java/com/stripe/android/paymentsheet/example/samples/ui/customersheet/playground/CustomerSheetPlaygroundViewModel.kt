@@ -252,7 +252,7 @@ class CustomerSheetPlaygroundViewModel(
                     )
                 }
             }
-            is CustomerSheetResult.Error -> {
+            is CustomerSheetResult.Failed -> {
                 updateViewState<CustomerSheetPlaygroundViewState.Data> {
                     it.copy(
                         selection = null,

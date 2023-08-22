@@ -6,5 +6,5 @@ package com.stripe.android.customersheet
  */
 @ExperimentalCustomerSheetApi
 fun interface CustomerSheetResultCallback {
-    fun onResult(result: CustomerSheetResult)
+    fun onCustomerSheetResult(result: CustomerSheetResult)
 }

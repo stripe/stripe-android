@@ -97,14 +97,14 @@ class CustomerSheet @Inject internal constructor(
                 CustomerSheetResult.Selected(it)
             },
             onFailure = { cause, _ ->
-                CustomerSheetResult.Error(cause)
+                CustomerSheetResult.Failed(cause)
             }
         )
     }
 
     private fun onCustomerSheetResult(result: InternalCustomerSheetResult?) {
         requireNotNull(result)
-        callback.onResult(result.toPublicResult(paymentOptionFactory))
+        callback.onCustomerSheetResult(result.toPublicResult(paymentOptionFactory))
     }
 
     /**
@@ -220,6 +220,7 @@ class CustomerSheet @Inject internal constructor(
          * @param customerAdapter The bridge to communicate with your server to manage a customer.
          * @param callback called when a [CustomerSheetResult] is available.
          */
+        @JvmStatic
         fun create(
             activity: ComponentActivity,
             configuration: Configuration,
@@ -245,6 +246,7 @@ class CustomerSheet @Inject internal constructor(
          * @param customerAdapter The bridge to communicate with your server to manage a customer.
          * @param callback called when a [CustomerSheetResult] is available.
          */
+        @JvmStatic
         fun create(
             fragment: Fragment,
             configuration: Configuration,
