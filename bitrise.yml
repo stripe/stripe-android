@@ -57,13 +57,19 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
-      - restore-gradle-cache@1: { }
+      - android-build@1:
+          inputs:
+            - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
+            - module: financial-connections-example
+            - variant: release
+            - build_type: apk
+            - cache_level: all
       - script@1:
-          title: Execute Maestro tests (release)
+          title: Execute Maestro tests
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh release
+                bash ./scripts/execute_maestro_tests.sh
       - slack@3:
           is_always_run: true
           inputs:
@@ -80,7 +86,6 @@ workflows:
             - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests
       - deploy-to-bitrise-io@2: { }
-      - save-gradle-cache@1: {}
   maestro-edge-financial-connections:
     before_run:
       - start_emulator
@@ -91,13 +96,19 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
-      - restore-gradle-cache@1: {}
+      - android-build@1:
+          inputs:
+            - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
+            - module: financial-connections-example
+            - variant: debug
+            - build_type: apk
+            - cache_level: all
       - script@1:
-          title: Execute Maestro tests (debug)
+          title: Execute Maestro tests
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh debug
+                bash ./scripts/execute_maestro_tests.sh
       - slack@3:
           is_always_run: true
           inputs:
@@ -108,7 +119,6 @@ workflows:
             - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests
       - deploy-to-bitrise-io@2: { }
-      - save-gradle-cache@1: {}
   maestro-paymentsheet:
     before_run:
       - start_emulator
@@ -215,6 +225,7 @@ workflows:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
       - git-clone@8: { }
       - cache-pull@2: { }
+      - restore-gradle-cache@1: { }
       - script-runner@0:
           # Maven doesn't like java 17, so running it before.
           run_if: '{{getenv "NEEDS_ROBOLECTRIC" | ne ""}}'
@@ -245,6 +256,7 @@ workflows:
             - is_enable_public_page: "false"
           title: Deploy test results artifacts
       - cache-push@2: { }
+      - save-gradle-cache@1: { }
 meta:
   bitrise.io:
     stack: linux-docker-android-20.04
