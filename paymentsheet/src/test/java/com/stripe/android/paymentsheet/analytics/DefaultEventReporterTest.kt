@@ -255,7 +255,7 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
 
         val errorType = argumentCaptor.firstValue.params["error_message"] as String
-        assertThat(errorType).isEqualTo("serverError")
+        assertThat(errorType).isEqualTo("apiError")
     }
 
     @Test
@@ -269,7 +269,7 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
 
         val errorType = argumentCaptor.firstValue.params["error_message"] as String
-        assertThat(errorType).isEqualTo("networkError")
+        assertThat(errorType).isEqualTo("connectionError")
     }
 
     @Test

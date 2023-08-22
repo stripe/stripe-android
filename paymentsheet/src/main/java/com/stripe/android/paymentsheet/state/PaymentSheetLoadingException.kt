@@ -74,8 +74,8 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
 
         override val type: String
             get() = when (StripeException.create(cause)) {
-                is APIException -> "serverError"
-                is APIConnectionException -> "networkError"
+                is APIException -> "apiError"
+                is APIConnectionException -> "connectionError"
                 is InvalidRequestException -> "invalidRequestError"
                 else -> "unknown"
             }
