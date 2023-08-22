@@ -24,7 +24,7 @@ class BlikConfig : TextFieldConfig {
     }
 
     @StringRes
-    override val label: Int = R.string.stripe_upi_id_label
+    override val label: Int = R.string.stripe_blik_code
 
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "blik_code"
