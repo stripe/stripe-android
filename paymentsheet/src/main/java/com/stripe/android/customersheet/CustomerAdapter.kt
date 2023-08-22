@@ -181,12 +181,44 @@ interface CustomerAdapter {
     sealed class Result<T> {
 
         @ExperimentalCustomerSheetApi
-        class Success<T> internal constructor(
+        val isSuccess: Boolean
+            get() = this is Success
+
+        @ExperimentalCustomerSheetApi
+        val isFailure: Boolean
+            get() = this is Failure
+
+        @ExperimentalCustomerSheetApi
+        fun getOrNull(): T? {
+            return when (this) {
+                is Failure -> null
+                is Success -> this.value
+            }
+        }
+
+        @ExperimentalCustomerSheetApi
+        fun failureCauseOrNull(): Throwable? {
+            return when (failureOrNull()) {
+                null -> null
+                else -> (this as Failure<*>).cause
+            }
+        }
+
+        @ExperimentalCustomerSheetApi
+        fun failureDisplayMessageOrNull(): String? {
+            return when (failureOrNull()) {
+                null -> null
+                else -> (this as Failure<*>).displayMessage
+            }
+        }
+
+        @ExperimentalCustomerSheetApi
+        internal class Success<T>(
             val value: T
         ) : Result<T>()
 
         @ExperimentalCustomerSheetApi
-        class Failure<T> internal constructor(
+        internal class Failure<T>(
             val cause: Throwable,
             val displayMessage: String? = null
         ) : Result<T>()
@@ -195,13 +227,13 @@ interface CustomerAdapter {
         companion object {
             @ExperimentalCustomerSheetApi
             @JvmStatic
-            fun <T> success(value: T): Success<T> {
+            fun <T> success(value: T): Result<T> {
                 return Success(value)
             }
 
             @ExperimentalCustomerSheetApi
             @JvmStatic
-            fun <T> failure(cause: Throwable, displayMessage: String?): Failure<T> {
+            fun <T> failure(cause: Throwable, displayMessage: String?): Result<T> {
                 return Failure(cause, displayMessage)
             }
         }

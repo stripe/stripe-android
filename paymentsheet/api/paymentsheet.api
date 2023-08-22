@@ -36,24 +36,18 @@ public final class com/stripe/android/customersheet/CustomerAdapter$PaymentOptio
 public abstract class com/stripe/android/customersheet/CustomerAdapter$Result {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/customersheet/CustomerAdapter$Result$Companion;
-	public static final fun failure (Ljava/lang/Throwable;Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerAdapter$Result$Failure;
-	public static final fun success (Ljava/lang/Object;)Lcom/stripe/android/customersheet/CustomerAdapter$Result$Success;
+	public static final fun failure (Ljava/lang/Throwable;Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerAdapter$Result;
+	public final fun failureCauseOrNull ()Ljava/lang/Throwable;
+	public final fun failureDisplayMessageOrNull ()Ljava/lang/String;
+	public final fun getOrNull ()Ljava/lang/Object;
+	public final fun isFailure ()Z
+	public final fun isSuccess ()Z
+	public static final fun success (Ljava/lang/Object;)Lcom/stripe/android/customersheet/CustomerAdapter$Result;
 }
 
 public final class com/stripe/android/customersheet/CustomerAdapter$Result$Companion {
-	public final fun failure (Ljava/lang/Throwable;Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerAdapter$Result$Failure;
-	public final fun success (Ljava/lang/Object;)Lcom/stripe/android/customersheet/CustomerAdapter$Result$Success;
-}
-
-public final class com/stripe/android/customersheet/CustomerAdapter$Result$Failure : com/stripe/android/customersheet/CustomerAdapter$Result {
-	public static final field $stable I
-	public final fun getCause ()Ljava/lang/Throwable;
-	public final fun getDisplayMessage ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/customersheet/CustomerAdapter$Result$Success : com/stripe/android/customersheet/CustomerAdapter$Result {
-	public static final field $stable I
-	public final fun getValue ()Ljava/lang/Object;
+	public final fun failure (Ljava/lang/Throwable;Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerAdapter$Result;
+	public final fun success (Ljava/lang/Object;)Lcom/stripe/android/customersheet/CustomerAdapter$Result;
 }
 
 public final class com/stripe/android/customersheet/CustomerEphemeralKey {
