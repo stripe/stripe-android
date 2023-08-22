@@ -42,7 +42,7 @@ import java.util.Locale
  * @param selectorContent content to display on the left side of the account item
  */
 @Composable
-@Suppress("MagicNumber", "LongMethod")
+@Suppress("LongMethod")
 internal fun AccountItem(
     selected: Boolean,
     onAccountClicked: (PartnerAccount) -> Unit,
@@ -81,7 +81,7 @@ internal fun AccountItem(
             selectorContent()
             Spacer(modifier = Modifier.size(16.dp))
             Column(
-                Modifier.weight(0.7f)
+                Modifier.weight(ACCOUNT_COLUMN_WEIGHT)
             ) {
                 Text(
                     text = title,
@@ -161,3 +161,5 @@ private fun PartnerAccount.getFormattedBalance(): String? {
         )
     }
 }
+
+private const val ACCOUNT_COLUMN_WEIGHT = 0.7f
