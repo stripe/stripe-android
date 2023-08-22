@@ -65,11 +65,11 @@ workflows:
             - build_type: apk
             - cache_level: all
       - script@1:
-          title: Execute Maestro tests (release)
+          title: Execute Maestro tests
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh release
+                bash ./scripts/execute_maestro_tests.sh
       - slack@3:
           is_always_run: true
           inputs:
@@ -104,11 +104,11 @@ workflows:
             - build_type: apk
             - cache_level: all
       - script@1:
-          title: Execute Maestro tests (debug)
+          title: Execute Maestro tests
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh debug
+                bash ./scripts/execute_maestro_tests.sh
       - slack@3:
           is_always_run: true
           inputs:
