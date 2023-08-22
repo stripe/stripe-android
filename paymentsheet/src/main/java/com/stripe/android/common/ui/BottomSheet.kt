@@ -1,15 +1,14 @@
 package com.stripe.android.common.ui
 
+import android.os.Build
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetDefaults
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
@@ -26,9 +25,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.uicore.stripeShapes
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
+
+internal const val BottomSheetContentTestTag = "BottomSheetContentTestTag"
 
 @OptIn(ExperimentalMaterialApi::class)
 internal class BottomSheetState(
@@ -55,6 +60,10 @@ internal class BottomSheetState(
     }
 
     suspend fun hide() {
+        if (skipHideAnimation) {
+            return
+        }
+
         dismissalType = DismissalType.Programmatically
         // We dismiss the keyboard before we dismiss the sheet. This looks cleaner and prevents
         // a CancellationException.
@@ -108,7 +117,7 @@ internal fun BottomSheet(
     modifier: Modifier = Modifier,
     onDismissed: () -> Unit,
     onShow: () -> Unit = {},
-    sheetContent: @Composable ColumnScope.() -> Unit,
+    sheetContent: @Composable () -> Unit,
 ) {
     val systemUiController = rememberSystemUiController()
     val scrimColor = ModalBottomSheetDefaults.scrimColor
@@ -155,9 +164,14 @@ internal fun BottomSheet(
             .statusBarsPadding()
             .imePadding(),
         sheetState = state.modalBottomSheetState,
+        sheetShape = RoundedCornerShape(
+            topStart = MaterialTheme.stripeShapes.cornerRadius.dp,
+            topEnd = MaterialTheme.stripeShapes.cornerRadius.dp,
+        ),
         sheetContent = {
-            sheetContent()
-            Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
+            Box(modifier = Modifier.testTag(BottomSheetContentTestTag)) {
+                sheetContent()
+            }
         },
         content = {},
     )
@@ -177,3 +191,20 @@ private suspend fun repeatUntilSucceededOrLimit(
         }
     }
 }
+
+private val skipHideAnimation: Boolean
+    get() = BuildConfig.DEBUG && (isRunningUnitTest || isRunningUiTest)
+
+private val isRunningUnitTest: Boolean
+    get() {
+        return runCatching {
+            Build.FINGERPRINT.lowercase() == "robolectric"
+        }.getOrDefault(false)
+    }
+
+private val isRunningUiTest: Boolean
+    get() {
+        return runCatching {
+            Class.forName("androidx.test.InstrumentationRegistry")
+        }.isSuccess
+    }

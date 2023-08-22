@@ -23,8 +23,12 @@
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Een betaalmethode kiezen</string>
   <string name="stripe_paymentsheet_close">Sluiten</string>
+  <!-- A button used to confirm selecting a saved payment method -->
+  <string name="stripe_paymentsheet_confirm">Bevestigen</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Adres handmatig invoeren</string>
+  <!-- Title shown above a carousel containing the customer's payment methods -->
+  <string name="stripe_paymentsheet_manage_your_payment_methods">Uw betaalmethoden beheren</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Binnen 1-2 werkdagen stort Stripe $ 0,01 op je rekening. Daarna krijg je een e-mail met instructies over hoe je de betaling aan %s kunt voltooien.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
@@ -43,6 +47,10 @@
   <string name="stripe_paymentsheet_remove_bank_account_title">Bankrekening verwijderen</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">%s verwijderen</string>
+  <!-- A button used for saving a new payment method -->
+  <string name="stripe_paymentsheet_save">Opslaan</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_save_a_new_payment_method">Een nieuwe betaalmethode opslaan</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Opslaan voor toekomstige betalingen</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->

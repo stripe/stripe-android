@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -38,14 +37,13 @@ internal fun PaymentOptionsScreen(
                 toggleEditing = viewModel::toggleEditing,
             )
         },
-        content = { scrollModifier ->
-            PaymentOptionsScreenContent(viewModel, scrollModifier)
+        content = {
+            PaymentOptionsScreenContent(viewModel)
         },
         modifier = modifier,
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun PaymentOptionsScreenContent(
     viewModel: PaymentOptionsViewModel,

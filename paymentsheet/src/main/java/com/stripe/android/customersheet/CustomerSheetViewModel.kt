@@ -32,6 +32,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -159,8 +160,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                             savedPaymentMethods = listOf(method) + viewState.savedPaymentMethods,
                             paymentSelection = PaymentSelection.Saved(paymentMethod = method),
                             primaryButtonVisible = true,
-                            // TODO (jameswoo) translate
-                            primaryButtonLabel = "Confirm",
+                            primaryButtonLabel = resources.getString(
+                                R.string.stripe_paymentsheet_confirm
+                            ),
                         )
                     } ?: viewState
                 }
@@ -345,8 +347,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                     it.copy(
                         paymentSelection = paymentSelection,
                         primaryButtonVisible = savedPaymentSelection != paymentSelection,
-                        // TODO (jameswoo) translate
-                        primaryButtonLabel = "Confirm",
+                        primaryButtonLabel = resources.getString(
+                            R.string.stripe_paymentsheet_confirm
+                        ),
                     )
                 }
             }
@@ -511,8 +514,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                             savedPaymentMethods = listOf(method) + viewState.savedPaymentMethods,
                             paymentSelection = PaymentSelection.Saved(paymentMethod = method),
                             primaryButtonVisible = true,
-                            // TODO (jameswoo) translate
-                            primaryButtonLabel = "Confirm",
+                            primaryButtonLabel = resources.getString(
+                                R.string.stripe_paymentsheet_confirm
+                            ),
                         )
                     } ?: viewState
                 }
@@ -595,8 +599,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                         savedPaymentMethods = listOf(paymentMethod) + it.savedPaymentMethods,
                         paymentSelection = PaymentSelection.Saved(paymentMethod = paymentMethod),
                         primaryButtonVisible = true,
-                        // TODO (jameswoo) translate
-                        primaryButtonLabel = "Confirm",
+                        primaryButtonLabel = resources.getString(
+                            R.string.stripe_paymentsheet_confirm
+                        ),
                     )
                 }
                 onBackPressed()
@@ -694,8 +699,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                 isEditing = false,
                 isGooglePayEnabled = isGooglePayReadyAndEnabled,
                 primaryButtonVisible = false,
-                // TODO (jameswoo) translate
-                primaryButtonLabel = "Confirm",
+                primaryButtonLabel = resources.getString(
+                    R.string.stripe_paymentsheet_confirm
+                ),
                 errorMessage = null,
             )
         )

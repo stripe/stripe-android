@@ -97,8 +97,9 @@ internal class InstitutionPickerPreviewParameterProvider :
 
     private fun payload() = InstitutionPickerState.Payload(
         featuredInstitutions = institutionResponse().data,
+        allowManualEntry = false,
         searchDisabled = false,
-        allowManualEntry = false
+        featuredInstitutionsDuration = 0
     )
 
     private fun institutionResponse() = InstitutionResponse(

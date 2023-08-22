@@ -5,11 +5,10 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.PrimaryButton
@@ -87,8 +86,9 @@ internal fun SelectPaymentMethod(
         modifier = modifier
     ) {
         H4Text(
-            // TODO translate string
-            text = viewState.title ?: "Manage your payment methods",
+            text = viewState.title ?: stringResource(
+                id = R.string.stripe_paymentsheet_manage_your_payment_methods
+            ),
             modifier = Modifier
                 .padding(bottom = 20.dp)
                 .padding(horizontal = horizontalPadding)
@@ -148,13 +148,10 @@ internal fun AddCard(
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     Column(
-        modifier = modifier
-            .padding(horizontal = horizontalPadding)
-            .verticalScroll(rememberScrollState())
+        modifier = modifier.padding(horizontal = horizontalPadding),
     ) {
         H4Text(
-            // TODO (jameswoo) translate
-            text = "Save a new payment method",
+            text = stringResource(id = R.string.stripe_paymentsheet_save_a_new_payment_method),
             modifier = Modifier
                 .padding(bottom = 20.dp)
         )
@@ -174,8 +171,7 @@ internal fun AddCard(
         }
 
         PrimaryButton(
-            // TODO (jameswoo) add to lokalize
-            label = "Save",
+            label = stringResource(id = R.string.stripe_paymentsheet_save),
             isEnabled = viewState.primaryButtonEnabled,
             isLoading = viewState.isProcessing,
             onButtonClick = {

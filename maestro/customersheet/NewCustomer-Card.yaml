@@ -11,7 +11,7 @@ appId: com.stripe.android.paymentsheet.example
 - waitForAnimationToEnd:
     timeout: 5000
 - extendedWaitUntil:
-    visible: "Payment default"
+    visible: "Selected payment method"
     timeout: 60000
 # Use a new customer
 - tapOn:

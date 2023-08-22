@@ -48,6 +48,7 @@ import com.stripe.android.identity.navigation.OTPDestination
 import com.stripe.android.identity.navigation.PassportScanDestination
 import com.stripe.android.identity.navigation.PassportUploadDestination
 import com.stripe.android.identity.navigation.SelfieDestination
+import com.stripe.android.identity.navigation.SelfieWarmupDestination
 import com.stripe.android.identity.navigation.navigateOnVerificationPageData
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
@@ -1165,7 +1166,7 @@ internal class IdentityViewModel constructor(
         fromRoute: String
     ) {
         if (requireNotNull(verificationPage.value?.data).requireSelfie()) {
-            navController.navigateTo(SelfieDestination)
+            navController.navigateTo(SelfieWarmupDestination)
         } else {
             submitAndNavigate(navController, fromRoute)
         }

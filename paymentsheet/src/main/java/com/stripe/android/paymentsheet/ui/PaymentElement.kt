@@ -1,5 +1,8 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,6 +28,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.Flow
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 internal fun PaymentElement(
     sheetViewModel: BaseSheetViewModel,
@@ -62,22 +66,24 @@ internal fun PaymentElement(
             )
         }
 
-        if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
-            USBankAccountForm(
-                formArgs = formArguments,
-                sheetViewModel = sheetViewModel,
-                isProcessing = primaryButtonState.value?.isProcessing == true,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
-            )
-        } else {
-            PaymentMethodForm(
-                args = formArguments,
-                enabled = enabled,
-                onFormFieldValuesChanged = onFormFieldValuesChanged,
-                showCheckboxFlow = showCheckboxFlow,
-                formViewModelSubComponentBuilderProvider = sheetViewModel.formViewModelSubComponentBuilderProvider,
-                modifier = Modifier.padding(horizontal = horizontalPadding)
-            )
+        Box(modifier = Modifier.animateContentSize()) {
+            if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
+                USBankAccountForm(
+                    formArgs = formArguments,
+                    sheetViewModel = sheetViewModel,
+                    isProcessing = primaryButtonState.value?.isProcessing == true,
+                    modifier = Modifier.padding(horizontal = horizontalPadding),
+                )
+            } else {
+                PaymentMethodForm(
+                    args = formArguments,
+                    enabled = enabled,
+                    onFormFieldValuesChanged = onFormFieldValuesChanged,
+                    showCheckboxFlow = showCheckboxFlow,
+                    formViewModelSubComponentBuilderProvider = sheetViewModel.formViewModelSubComponentBuilderProvider,
+                    modifier = Modifier.padding(horizontal = horizontalPadding)
+                )
+            }
         }
 
         if (showLinkInlineSignup) {
