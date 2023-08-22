@@ -329,7 +329,7 @@ internal sealed class FinancialConnectionsEvent(
             "auth_session_id" to id,
             "pane" to pane.value,
             "flow" to (flow ?: "unknown"),
-            "default_browser" to (defaultBrowser ?: "unknown")
+            "browser" to (defaultBrowser ?: "unknown")
         ).filterNotNullValues()
     )
 
