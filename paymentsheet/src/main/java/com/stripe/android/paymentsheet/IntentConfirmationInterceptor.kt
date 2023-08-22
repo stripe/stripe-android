@@ -117,7 +117,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     intentConfiguration = initializationMode.intentConfiguration,
                     shippingValues = shippingValues,
                     paymentMethodCreateParams = paymentMethodCreateParams,
-                    paymentMethodOptionsParams = paymentMethodOptionsParams,
                     setupForFutureUsage = setupForFutureUsage,
                 )
             }
@@ -182,7 +181,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private suspend fun handleDeferredIntent(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
-        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): NextStep {
@@ -190,7 +188,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             productUsage = paymentMethodCreateParams.attribution + "deferred-intent",
         )
 
-        return createPaymentMethod(params, paymentMethodOptionsParams).fold(
+        return createPaymentMethod(params).fold(
             onSuccess = { paymentMethod ->
                 handleDeferredIntent(
                     intentConfiguration = intentConfiguration,
@@ -236,7 +234,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private suspend fun createPaymentMethod(
         params: PaymentMethodCreateParams,
-        options: PaymentMethodOptionsParams?,
     ): Result<PaymentMethod> {
         return stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = params,
