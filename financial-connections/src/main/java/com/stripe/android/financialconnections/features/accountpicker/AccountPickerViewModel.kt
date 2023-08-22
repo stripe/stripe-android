@@ -11,6 +11,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.AccountSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLinkAccounts
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAccountsSucceeded
@@ -158,26 +159,53 @@ internal class AccountPickerViewModel @Inject constructor(
         )
     }
 
-    fun onAccountClicked(account: PartnerAccount) {
-        withState { state ->
-            state.payload()?.let { payload ->
-                when (payload.selectionMode) {
-                    SelectionMode.RADIO -> setState {
-                        copy(selectedIds = setOf(account.id))
-                    }
-
-                    SelectionMode.CHECKBOXES -> if (state.selectedIds.contains(account.id)) {
-                        setState {
-                            copy(selectedIds = selectedIds - account.id)
-                        }
-                    } else {
-                        setState {
-                            copy(selectedIds = selectedIds + account.id)
-                        }
-                    }
+    fun onAccountClicked(account: PartnerAccount) = withState { state ->
+        state.payload()?.let { payload ->
+            val selectedIds = state.selectedIds
+            val newSelectedIds = when (payload.selectionMode) {
+                SelectionMode.RADIO -> setOf(account.id)
+                SelectionMode.CHECKBOXES -> if (selectedIds.contains(account.id)) {
+                    selectedIds - account.id
+                } else {
+                    selectedIds + account.id
                 }
-            } ?: run {
-                logger.error("account clicked without available payload.")
+            }
+            setState { copy(selectedIds = newSelectedIds) }
+            logAccountSelectionChanges(
+                idsBefore = selectedIds,
+                idsAfter = newSelectedIds,
+                isSingleAccount = payload.singleAccount
+            )
+        } ?: run {
+            logger.error("account clicked without available payload.")
+        }
+    }
+
+    private fun logAccountSelectionChanges(
+        idsBefore: Set<String>,
+        idsAfter: Set<String>,
+        isSingleAccount: Boolean
+    ) {
+        viewModelScope.launch {
+            val newIds = idsAfter - idsBefore
+            val removedIds = idsBefore - idsAfter
+            if (newIds.size == 1) {
+                eventTracker.track(
+                    AccountSelected(
+                        isSingleAccount = isSingleAccount,
+                        selected = true,
+                        accountId = newIds.first()
+                    )
+                )
+            }
+            if (removedIds.size == 1) {
+                eventTracker.track(
+                    AccountSelected(
+                        isSingleAccount = isSingleAccount,
+                        selected = false,
+                        accountId = removedIds.first()
+                    )
+                )
             }
         }
     }
@@ -226,20 +254,22 @@ internal class AccountPickerViewModel @Inject constructor(
         loadAccounts()
     }
 
-    fun onSelectAllAccountsClicked() {
-        withState { state ->
-            state.payload()?.let { payload ->
-                if (state.allAccountsSelected) {
-                    // unselect all accounts
-                    setState { copy(selectedIds = emptySet()) }
-                } else {
-                    // select all accounts
-                    setState {
-                        val ids = payload.selectableAccounts.map { it.id }.toSet()
-                        copy(selectedIds = ids)
-                    }
-                }
+    fun onSelectAllAccountsClicked() = withState { state ->
+        state.payload()?.let { payload ->
+            val selectedIds = state.selectedIds
+            val newIds = if (state.allAccountsSelected) {
+                // unselect all accounts
+                emptySet()
+            } else {
+                // select all accounts
+                payload.selectableAccounts.map { it.id }.toSet()
             }
+            setState { copy(selectedIds = newIds) }
+            logAccountSelectionChanges(
+                idsBefore = selectedIds,
+                idsAfter = newIds,
+                isSingleAccount = payload.singleAccount
+            )
         }
     }
 

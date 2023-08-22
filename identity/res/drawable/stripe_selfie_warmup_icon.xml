@@ -1,0 +1,44 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="136dp"
+    android:height="136dp"
+    android:viewportWidth="136"
+    android:viewportHeight="136">
+  <path
+      android:pathData="M134,25.97V19.31C134,7.63 128.81,2 116.27,2H108.24M2,27.64V19.65C2,7.17 7.66,2 19.39,2H27.08M133.32,108.36V116.35C133.32,128.84 127.67,134 115.93,134H108.24M27.76,134H19.73C7.19,134 2,128.37 2,116.69L2,109.03"
+      android:strokeAlpha="0.3"
+      android:strokeWidth="3"
+      android:fillColor="#00000000"
+      android:strokeColor="@color/stripe_selfie_warmup_icon_tint"
+      android:fillAlpha="0.3"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M68,68m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0"
+      android:strokeWidth="3.89189"
+      android:fillColor="#00000000"
+      android:strokeColor="@color/stripe_selfie_warmup_icon_tint"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M52.43,81.97C60.22,92.35 75.78,92.35 83.57,81.97"
+      android:strokeWidth="3.89189"
+      android:fillColor="#00000000"
+      android:strokeColor="@color/stripe_selfie_warmup_icon_tint"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M51.84,59.32V61.92"
+      android:strokeWidth="5.18919"
+      android:fillColor="#00000000"
+      android:strokeColor="@color/stripe_selfie_warmup_icon_tint"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M85.16,59.32V61.92"
+      android:strokeWidth="5.18919"
+      android:fillColor="#00000000"
+      android:strokeColor="@color/stripe_selfie_warmup_icon_tint"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M70.59,68.05V69.35C70.59,71.31 69.01,72.89 67.05,72.89V72.89"
+      android:strokeWidth="3.89189"
+      android:fillColor="#00000000"
+      android:strokeColor="@color/stripe_selfie_warmup_icon_tint"
+      android:strokeLineCap="round"/>
+</vector>

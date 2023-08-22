@@ -105,6 +105,41 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
+    class FeaturedInstitutionsLoaded(
+        institutionIds: Set<String>,
+        duration: Long,
+        pane: Pane
+    ) : FinancialConnectionsEvent(
+        name = "search.feature_institutions_loaded",
+        params = (
+            institutionIds
+                .mapIndexed { index, id -> "institutions[$index]" to id }
+                .toMap()
+                .plus(
+                    mapOf(
+                        "pane" to pane.value,
+                        "result_count" to institutionIds.size.toString(),
+                        "duration" to duration.toString(),
+                    )
+                )
+            ).filterNotNullValues()
+    )
+
+    class SearchScroll(
+        institutionIds: Set<String>,
+        pane: Pane
+    ) : FinancialConnectionsEvent(
+        name = "search.scroll",
+        params = (
+            institutionIds
+                .mapIndexed { index, id -> "institution_ids[$index]" to id }
+                .toMap()
+                .plus(
+                    mapOf("pane" to pane.value)
+                )
+            ).filterNotNullValues()
+    )
+
     class InstitutionSelected(
         pane: Pane,
         fromFeatured: Boolean,
@@ -140,6 +175,22 @@ internal sealed class FinancialConnectionsEvent(
         mapOf(
             "authSessionId" to authSessionId,
             "duration" to duration.toString(),
+        ).filterNotNullValues()
+    )
+
+    class AccountSelected(
+        selected: Boolean,
+        isSingleAccount: Boolean,
+        accountId: String,
+    ) : FinancialConnectionsEvent(
+        name = if (selected) {
+            "click.account_picker.account_selected"
+        } else {
+            "click.account_picker.account_unselected"
+        },
+        mapOf(
+            "is_single_account" to isSingleAccount.toString(),
+            "account" to accountId,
         ).filterNotNullValues()
     )
 
