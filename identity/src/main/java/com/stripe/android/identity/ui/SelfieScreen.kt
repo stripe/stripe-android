@@ -160,8 +160,8 @@ internal fun SelfieScanScreen(
             mutableStateOf(false)
         }
 
-        var allowImageCollectionCheckboxEnabled by remember {
-            mutableStateOf(true)
+        var isSubmittingSelfie by remember {
+            mutableStateOf(false)
         }
 
         var flashed by remember {
@@ -259,7 +259,7 @@ internal fun SelfieScanScreen(
                     ResultView(
                         displayState = newDisplayState as IdentityScanState.Finished,
                         allowImageCollectionHtml = successSelfieCapturePage.consentText,
-                        allowImageCollectionCheckboxEnabled = allowImageCollectionCheckboxEnabled,
+                        isSubmittingSelfie = isSubmittingSelfie,
                         allowImageCollection = allowImageCollection,
                         navController = navController
                     ) {
@@ -277,7 +277,7 @@ internal fun SelfieScanScreen(
                 state = loadingButtonState
             ) {
                 loadingButtonState = LoadingButtonState.Loading
-                allowImageCollectionCheckboxEnabled = false
+                isSubmittingSelfie = true
 
                 coroutineScope.launch {
                     identityViewModel.collectDataForSelfieScreen(
@@ -300,7 +300,7 @@ internal fun SelfieScanScreen(
 private fun ResultView(
     displayState: IdentityScanState,
     allowImageCollectionHtml: String,
-    allowImageCollectionCheckboxEnabled: Boolean,
+    isSubmittingSelfie: Boolean,
     allowImageCollection: Boolean,
     navController: NavController,
     onAllowImageCollectionChanged: (Boolean) -> Unit
@@ -345,7 +345,8 @@ private fun ResultView(
     ) {
         TextButton(
             modifier = Modifier.testTag(RETAKE_SELFIE_BUTTON_TAG),
-            onClick = { navController.navigateTo(SelfieDestination) }
+            onClick = { navController.navigateTo(SelfieDestination) },
+            enabled = !isSubmittingSelfie
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.stripe_camera_icon),
@@ -367,7 +368,7 @@ private fun ResultView(
             modifier = Modifier.testTag(CONSENT_CHECKBOX_TAG),
             checked = allowImageCollection,
             onCheckedChange = { onAllowImageCollectionChanged(!allowImageCollection) },
-            enabled = allowImageCollectionCheckboxEnabled
+            enabled = !isSubmittingSelfie
         )
 
         Html(

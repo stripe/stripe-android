@@ -19,10 +19,10 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.ui.BottomSheetContentTestTag
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -33,7 +33,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -79,8 +78,8 @@ internal class PaymentOptionsActivityTest {
 
     private val eventReporter = mock<EventReporter>()
 
-    private val StripeActivityPaymentOptionsBinding.continueButton: PrimaryButton
-        get() = root.findViewById(R.id.primary_button)
+    private val PaymentOptionsActivity.continueButton: PrimaryButton
+        get() = findViewById(R.id.primary_button)
 
     @BeforeTest
     fun setup() {
@@ -97,12 +96,14 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `click outside of bottom sheet before selection should return cancel result without selection`() {
+    fun `dismissing bottom sheet before selection should return cancel result without selection`() {
         runActivityScenario {
-            it.onActivity { activity ->
-                activity.viewBinding.root.performClick()
-                activity.finish()
+            it.onActivity {
+                pressBack()
             }
+
+            composeTestRule.waitForIdle()
+            idleLooper()
 
             assertThat(
                 PaymentOptionResult.fromIntent(it.getResult().resultData)
@@ -113,7 +114,7 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `click outside of bottom sheet should return cancel result even if there is a selection`() {
+    fun `dismissing bottom sheet should return cancel result even if there is a selection`() {
         val initialSelection = PaymentSelection.Saved(
             paymentMethod = PaymentMethodFixtures.createCard(),
         )
@@ -127,7 +128,7 @@ internal class PaymentOptionsActivityTest {
         )
 
         runActivityScenario(args) {
-            it.onActivity { activity ->
+            it.onActivity {
                 // We use US Bank Account because they don't dismiss PaymentSheet upon selection
                 // due to their mandate requirement.
                 val usBankAccountLabel = usBankAccount.getLabel(context.resources)
@@ -135,9 +136,10 @@ internal class PaymentOptionsActivityTest {
                     .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_$usBankAccountLabel")
                     .performClick()
 
-                activity.viewBinding.root.performClick()
-                activity.finish()
+                pressBack()
             }
+
+            composeTestRule.waitForIdle()
 
             val result = PaymentOptionResult.fromIntent(it.getResult().resultData)
             assertThat(result).isEqualTo(
@@ -154,7 +156,7 @@ internal class PaymentOptionsActivityTest {
 
         runActivityScenario(args) {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.continueButton.isVisible).isFalse()
+                assertThat(activity.continueButton.isVisible).isFalse()
             }
         }
     }
@@ -167,7 +169,7 @@ internal class PaymentOptionsActivityTest {
 
         runActivityScenario(args) {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.continueButton.isVisible).isTrue()
+                assertThat(activity.continueButton.isVisible).isTrue()
             }
         }
     }
@@ -180,19 +182,19 @@ internal class PaymentOptionsActivityTest {
 
         runActivityScenario(args) {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.continueButton.isVisible).isFalse()
+                assertThat(activity.continueButton.isVisible).isFalse()
 
                 // Navigate to "Add Payment Method" fragment
                 composeTestRule
                     .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_+ Add")
                     .performClick()
 
-                assertThat(activity.viewBinding.continueButton.isVisible).isTrue()
+                assertThat(activity.continueButton.isVisible).isTrue()
 
                 // Navigate back to payment options list
                 pressBack()
 
-                assertThat(activity.viewBinding.continueButton.isVisible).isFalse()
+                assertThat(activity.continueButton.isVisible).isFalse()
             }
         }
     }
@@ -201,12 +203,12 @@ internal class PaymentOptionsActivityTest {
     fun `Verify Ready state updates the add button label`() {
         runActivityScenario {
             it.onActivity { activity ->
-                val addBinding = StripePrimaryButtonBinding.bind(activity.viewBinding.continueButton)
+                val addBinding = StripePrimaryButtonBinding.bind(activity.continueButton)
 
                 assertThat(addBinding.confirmedIcon.isVisible)
                     .isFalse()
 
-                assertThat(activity.viewBinding.continueButton.externalLabel)
+                assertThat(activity.continueButton.externalLabel)
                     .isEqualTo("Continue")
 
                 activity.finish()
@@ -217,11 +219,10 @@ internal class PaymentOptionsActivityTest {
     @Test
     fun `Verify bottom sheet expands on start`() {
         runActivityScenario {
-            it.onActivity { activity ->
-                assertThat(activity.bottomSheetBehavior.state)
-                    .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
-                assertThat(activity.bottomSheetBehavior.isFitToContents)
-                    .isFalse()
+            it.onActivity {
+                composeTestRule
+                    .onNodeWithTag(BottomSheetContentTestTag)
+                    .assertIsDisplayed()
             }
         }
     }
@@ -230,19 +231,22 @@ internal class PaymentOptionsActivityTest {
     fun `Verify selecting a payment method closes the sheet`() {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(isGooglePayReady = true)
 
-        runActivityScenario(args) {
-            it.onActivity { activity ->
+        runActivityScenario(args) { scenario ->
+            scenario.onActivity {
                 composeTestRule
                     .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_Google Pay")
                     .performClick()
-
-                composeTestRule.waitForIdle()
-
-                idleLooper()
-
-                assertThat(activity.bottomSheetBehavior.state)
-                    .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
             }
+
+            composeTestRule.waitForIdle()
+
+            val result = PaymentOptionResult.fromIntent(scenario.getResult().resultData)
+            assertThat(result).isEqualTo(
+                PaymentOptionResult.Succeeded(
+                    paymentSelection = PaymentSelection.GooglePay,
+                    paymentMethods = emptyList(),
+                )
+            )
         }
     }
 
@@ -300,8 +304,8 @@ internal class PaymentOptionsActivityTest {
 
         runActivityScenario(args) {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.continueButton.isVisible).isTrue()
-                assertThat(activity.viewBinding.continueButton.defaultTintList).isEqualTo(
+                assertThat(activity.continueButton.isVisible).isTrue()
+                assertThat(activity.continueButton.defaultTintList).isEqualTo(
                     ColorStateList.valueOf(Color.Magenta.toArgb())
                 )
             }

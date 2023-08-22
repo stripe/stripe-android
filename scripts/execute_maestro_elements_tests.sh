@@ -6,17 +6,8 @@ set -x
 MAX_RETRIES=3
 RETRY_COUNT=0
 
-# Get the first command line argument as the parameter
-buildType=$1
-
-if [ "$buildType" == "debug" ]; then
-  task="installDebug"
-elif [ "$buildType" == "release" ]; then
-  task="installRelease"
-else
-  echo "Invalid parameter. Please use 'debug' or 'release'."
-  exit 1
-fi
+# Get the first command line argument as the parameter, one of [customersheet, paymentsheet]
+elementType=$1
 
 now=$(date +%F_%H-%M-%S)
 echo $now
@@ -46,7 +37,7 @@ fi
 mkdir -p /tmp/test_results
 
 # Compile and install APK.
-./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL :financial-connections-example:$task
+./gradlew :paymentsheet-example:installDebug
 
 # Clear and start collecting logs
-maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml maestro/financial-connections/
+maestro test --format junit --output maestroReport.xml maestro/$elementType

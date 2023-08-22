@@ -115,10 +115,12 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
-      - script-runner@0:
+      - script@1:
           title: Execute Maestro tests
           inputs:
-            - file_path: ./scripts/execute_maestro_paymentsheet_tests.sh
+            - content: |-
+                #!/usr/bin/env bash
+                bash ./scripts/execute_maestro_elements_tests.sh paymentsheet
       - slack@3:
           is_always_run: true
           run_if: .IsBuildFailed
@@ -140,10 +142,12 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
-      - script-runner@0:
+      - script@1:
           title: Execute Maestro tests
           inputs:
-            - file_path: ./scripts/execute_maestro_customersheet_tests.sh
+            - content: |-
+                #!/usr/bin/env bash
+                bash ./scripts/execute_maestro_elements_tests.sh customersheet
       - slack@3:
           is_always_run: true
           run_if: .IsBuildFailed
@@ -189,8 +193,18 @@ workflows:
       - avd-manager@1:
           inputs:
             - profile: "pixel_3a"
-            - api_level: 30
-            - tag: "google_apis_playstore"
+            - abi: "x86_64"
+            - api_level: 32
+            - tag: "google_apis"
+            - start_command_flags: >
+               -camera-back none
+               -camera-front none
+               -netdelay none
+               -netspeed full
+               -memory 2048
+               -no-snapshot
+               -no-audio
+               -no-window
   prepare_all:
     steps:
       - activate-ssh-key@4:

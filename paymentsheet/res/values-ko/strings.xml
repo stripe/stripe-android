@@ -23,8 +23,12 @@
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">결제 방식 선택</string>
   <string name="stripe_paymentsheet_close">닫기</string>
+  <!-- A button used to confirm selecting a saved payment method -->
+  <string name="stripe_paymentsheet_confirm">확인</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">주소 직접 입력</string>
+  <!-- Title shown above a carousel containing the customer's payment methods -->
+  <string name="stripe_paymentsheet_manage_your_payment_methods">내 결제 방식 관리</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe에서 영업일 기준 1~2일 후에 계좌로 0.01$를 입금할 예정입니다. 그런 다음 %s에 대한 결제를 완료하기 위한 지침이 포함된 이메일을 전송할 것입니다.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
@@ -43,6 +47,10 @@
   <string name="stripe_paymentsheet_remove_bank_account_title">은행 계좌 삭제</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">%s 제거</string>
+  <!-- A button used for saving a new payment method -->
+  <string name="stripe_paymentsheet_save">저장</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_save_a_new_payment_method">새 결제 방식 저장</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">향후 결제에 사용하도록 저장</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
