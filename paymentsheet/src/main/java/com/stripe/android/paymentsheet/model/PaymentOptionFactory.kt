@@ -113,15 +113,6 @@ internal class PaymentOptionFactory @Inject constructor(
                     imageLoader = ::loadPaymentOption,
                 )
             }
-            is PaymentSelection.New.Blik -> {
-                PaymentOption(
-                    drawableResourceId = selection.iconResource,
-                    lightThemeIconUrl = selection.lightThemeIconUrl,
-                    darkThemeIconUrl = selection.darkThemeIconUrl,
-                    label = selection.labelResource,
-                    imageLoader = ::loadPaymentOption,
-                )
-            }
             is PaymentSelection.New.USBankAccount -> {
                 PaymentOption(
                     drawableResourceId = selection.iconResource,

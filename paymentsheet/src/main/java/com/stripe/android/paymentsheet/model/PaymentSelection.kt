@@ -109,9 +109,9 @@ internal sealed class PaymentSelection : Parcelable {
         @Parcelize
         data class Card(
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
-            override val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
             val brand: CardBrand,
-            override val customerRequestedSave: CustomerRequestedSave
+            override val customerRequestedSave: CustomerRequestedSave,
+            override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         ) : New() {
             @IgnoredOnParcel
             val last4: String = (
@@ -122,25 +122,14 @@ internal sealed class PaymentSelection : Parcelable {
         }
 
         @Parcelize
-        data class Blik(
-            val labelResource: String,
-            @DrawableRes val iconResource: Int,
-            val lightThemeIconUrl: String?,
-            val darkThemeIconUrl: String?,
-            override val paymentMethodCreateParams: PaymentMethodCreateParams,
-            override val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
-            override val customerRequestedSave: CustomerRequestedSave
-        ) : New()
-
-        @Parcelize
         data class USBankAccount(
             val labelResource: String,
             @DrawableRes val iconResource: Int,
             val input: Input,
             val screenState: USBankAccountFormScreenState,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
-            override val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
-            override val customerRequestedSave: CustomerRequestedSave
+            override val customerRequestedSave: CustomerRequestedSave,
+            override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         ) : New() {
 
             @Parcelize
@@ -187,8 +176,8 @@ internal sealed class PaymentSelection : Parcelable {
             val lightThemeIconUrl: String?,
             val darkThemeIconUrl: String?,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
-            override val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
-            override val customerRequestedSave: CustomerRequestedSave
+            override val customerRequestedSave: CustomerRequestedSave,
+            override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         ) : New()
     }
 }
