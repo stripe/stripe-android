@@ -16,7 +16,6 @@ data class BlikSpec(
     fun transform(): SectionElement {
         return createSectionElement(
             sectionFieldElement = BlikElement(identifier = IdentifierSpec.BlikCode),
-            label = R.string.stripe_paymentsheet_buy_using_upi_id
         )
     }
 }
