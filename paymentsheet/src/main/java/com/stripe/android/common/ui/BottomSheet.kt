@@ -4,12 +4,8 @@ import android.os.Build
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
@@ -176,7 +172,6 @@ internal fun BottomSheet(
             Box(modifier = Modifier.testTag(BottomSheetContentTestTag)) {
                 sheetContent()
             }
-            Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
         },
         content = {},
     )
