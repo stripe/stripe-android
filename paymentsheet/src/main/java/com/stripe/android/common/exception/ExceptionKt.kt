@@ -5,6 +5,7 @@ import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.paymentsheet.R
 
+@Suppress("ReturnCount")
 internal fun Throwable?.stripeErrorMessage(context: Context): String {
     (this as? StripeException)?.stripeError?.message?.let {
         return it
