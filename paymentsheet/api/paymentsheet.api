@@ -81,6 +81,7 @@ public final class com/stripe/android/customersheet/CustomerSheet$Companion {
 
 public final class com/stripe/android/customersheet/CustomerSheet$Configuration {
 	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Companion;
 	public final fun getAppearance ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;
 	public final fun getBillingDetailsCollectionConfiguration ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;
 	public final fun getDefaultBillingDetails ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;
@@ -92,7 +93,6 @@ public final class com/stripe/android/customersheet/CustomerSheet$Configuration 
 
 public final class com/stripe/android/customersheet/CustomerSheet$Configuration$Builder {
 	public static final field $stable I
-	public fun <init> ()V
 	public final fun appearance (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun build ()Lcom/stripe/android/customersheet/CustomerSheet$Configuration;
@@ -100,6 +100,10 @@ public final class com/stripe/android/customersheet/CustomerSheet$Configuration$
 	public final fun googlePayEnabled (Z)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun headerTextForSelectionScreen (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun merchantDisplayName (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+}
+
+public final class com/stripe/android/customersheet/CustomerSheet$Configuration$Companion {
+	public final fun builder ()Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 }
 
 public final class com/stripe/android/customersheet/CustomerSheetComposeKt {

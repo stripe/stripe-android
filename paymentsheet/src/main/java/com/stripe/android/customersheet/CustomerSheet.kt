@@ -171,7 +171,7 @@ class CustomerSheet @Inject internal constructor(
         }
 
         @ExperimentalCustomerSheetApi
-        class Builder {
+        class Builder internal constructor() {
             private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
             private var googlePayEnabled: Boolean = false
             private var headerTextForSelectionScreen: String? = null
@@ -215,6 +215,12 @@ class CustomerSheet @Inject internal constructor(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 merchantDisplayName = merchantDisplayName,
             )
+        }
+
+        companion object {
+            fun builder(): Builder {
+                return Builder()
+            }
         }
     }
 
