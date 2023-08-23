@@ -24,7 +24,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertFailsWith
 
@@ -170,7 +169,11 @@ class CustomerAdapterTest {
         val adapter = createAdapter(
             customerRepository = FakeCustomerRepository(
                 onAttachPaymentMethod = {
-                    Result.failure(IOException("could not attach payment method"))
+                    Result.failure(
+                        APIException(
+                            message = "could not attach payment method",
+                        )
+                    )
                 }
             )
         )
@@ -218,7 +221,11 @@ class CustomerAdapterTest {
         val adapter = createAdapter(
             customerRepository = FakeCustomerRepository(
                 onDetachPaymentMethod = {
-                    Result.failure(IOException("could not detach payment method"))
+                    Result.failure(
+                        APIException(
+                            message = "could not detach payment method",
+                        )
+                    )
                 }
             )
         )
