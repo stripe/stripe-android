@@ -120,6 +120,7 @@ enum class Currency {
     AUD,
     GBP,
     INR,
+    SGD,
 }
 
 /**
