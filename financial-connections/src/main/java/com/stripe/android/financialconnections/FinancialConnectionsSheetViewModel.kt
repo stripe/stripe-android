@@ -99,7 +99,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      *
      */
     private fun openAuthFlow(sync: SynchronizeSessionResponse) {
-        if (browserManager.getPackageToHandleUri(Uri.parse("https://")) == null) {
+        if (browserManager.canOpenHttpUrl().not()) {
             logNoBrowserAvailableAndFinish()
             return
         }

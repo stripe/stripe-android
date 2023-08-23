@@ -12,6 +12,11 @@ internal class BrowserManager @Inject constructor(
 ) {
 
     /**
+     * Returns `true` if there's an app that can open an http url.
+     */
+    fun canOpenHttpUrl(): Boolean = getPackageToHandleUri(Uri.parse("https://")) == null
+
+    /**
      * Get the default browser app package that will be used to open the given [Uri].
      */
     fun getPackageToHandleUri(uri: Uri): String? = runCatching {
