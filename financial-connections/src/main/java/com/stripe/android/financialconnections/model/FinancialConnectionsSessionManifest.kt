@@ -200,6 +200,9 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "consent")
         CONSENT("consent"),
 
+        @SerialName(value = "bank_auth_repair")
+        BANK_AUTH_REPAIR("bank_auth_repair"),
+
         @SerialName(value = "institution_picker")
         INSTITUTION_PICKER("institution_picker"),
 
