@@ -13,7 +13,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.UIContext
@@ -237,17 +237,17 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     PaymentResult.Completed
                 StripeIntentResult.Outcome.FAILED ->
                     PaymentResult.Failed(
-                        APIException(message = stripeIntentResult.failureMessage)
+                        LocalStripeException(message = stripeIntentResult.failureMessage)
                     )
                 StripeIntentResult.Outcome.CANCELED ->
                     PaymentResult.Canceled
                 StripeIntentResult.Outcome.TIMEDOUT ->
                     PaymentResult.Failed(
-                        APIException(message = TIMEOUT_ERROR + stripeIntentResult.failureMessage)
+                        LocalStripeException(message = TIMEOUT_ERROR + stripeIntentResult.failureMessage)
                     )
                 else ->
                     PaymentResult.Failed(
-                        APIException(message = UNKNOWN_ERROR + stripeIntentResult.failureMessage)
+                        LocalStripeException(message = UNKNOWN_ERROR + stripeIntentResult.failureMessage)
                     )
             }
         )
