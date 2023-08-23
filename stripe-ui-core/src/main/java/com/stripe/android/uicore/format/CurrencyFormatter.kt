@@ -70,7 +70,7 @@ object CurrencyFormatter {
         return currencyFormat.format(majorUnitAmount)
     }
 
-    private fun getDefaultDecimalDigits(currency: Currency): Int {
+    fun getDefaultDecimalDigits(currency: Currency): Int {
         /**
          * Handle special cases where the client's default fractional digits for a given currency
          * don't match the Stripe backend's assumption.
