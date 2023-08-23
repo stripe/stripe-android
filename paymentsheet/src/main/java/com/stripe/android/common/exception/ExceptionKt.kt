@@ -10,7 +10,7 @@ internal fun Throwable?.stripeErrorMessage(context: Context): String {
     (this as? StripeException)?.stripeError?.message?.let {
         return it
     }
-    (this as? LocalStripeException)?.message?.let {
+    (this as? LocalStripeException)?.displayMessage?.let {
         return it
     }
     return context.resources.getString(R.string.stripe_something_went_wrong)
