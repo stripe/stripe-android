@@ -17,6 +17,7 @@ internal object FormArgumentsFactory {
         merchantName: String,
         amount: Amount? = null,
         newLpm: PaymentSelection.New?,
+        isEligibleForCardBrandChoice: Boolean,
     ): FormArguments {
         val layoutFormDescriptor = paymentMethod.getPMAddForm(stripeIntent, config)
 
@@ -52,7 +53,8 @@ internal object FormArgumentsFactory {
             shippingDetails = config?.shippingDetails,
             initialPaymentMethodCreateParams = initialParams,
             billingDetailsCollectionConfiguration = config?.billingDetailsCollectionConfiguration
-                ?: PaymentSheet.BillingDetailsCollectionConfiguration()
+                ?: PaymentSheet.BillingDetailsCollectionConfiguration(),
+            isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
         )
     }
 }

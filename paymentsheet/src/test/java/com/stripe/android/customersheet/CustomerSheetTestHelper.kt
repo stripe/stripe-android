@@ -72,7 +72,8 @@ object CustomerSheetTestHelper {
                 merchantName = configuration.merchantDisplayName
                     ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
                 billingDetails = configuration.defaultBillingDetails,
-                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration
+                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+                isEligibleForCardBrandChoice = false,
             ),
             lpmRepository = lpmRepository,
             addressRepository = AddressRepository(

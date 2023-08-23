@@ -11,6 +11,7 @@ data class ElementsSession(
     val paymentMethodSpecs: String?,
     val stripeIntent: StripeIntent,
     val merchantCountry: String?,
+    val isEligibleForCardBrandChoice: Boolean,
 ) : StripeModel {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

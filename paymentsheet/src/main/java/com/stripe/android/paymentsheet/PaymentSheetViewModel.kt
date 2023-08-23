@@ -299,6 +299,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
         lpmServerSpec = lpmRepository.serverSpecLoadingState.serverLpmSpecs
+        isEligibleForCardBrandChoice = state.isEligibleForCardBrandChoice
 
         savedStateHandle[SAVE_PAYMENT_METHODS] = state.customerPaymentMethods
         updateSelection(state.paymentSelection)

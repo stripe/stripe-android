@@ -62,6 +62,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val eventReporter: EventReporter,
     @IOContext private val workContext: CoroutineContext,
     private val accountStatusProvider: LinkAccountStatusProvider,
+    private val cbcEnabled: CbcEnabledProvider,
 ) : PaymentSheetLoader {
 
     override suspend fun load(
@@ -177,6 +178,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 customerPaymentMethods = sortedPaymentMethods.await(),
                 isGooglePayReady = isGooglePayReady,
                 linkState = linkState.await(),
+                isEligibleForCardBrandChoice = elementsSession.isEligibleForCardBrandChoice && cbcEnabled(),
                 paymentSelection = initialPaymentSelection.await(),
             )
         } else {

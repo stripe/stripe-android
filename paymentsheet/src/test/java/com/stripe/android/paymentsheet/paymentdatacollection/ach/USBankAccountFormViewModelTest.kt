@@ -56,7 +56,8 @@ class USBankAccountFormViewModelTest {
             billingDetails = PaymentSheet.BillingDetails(
                 name = CUSTOMER_NAME,
                 email = CUSTOMER_EMAIL
-            )
+            ),
+            isEligibleForCardBrandChoice = false,
         ),
         isCompleteFlow = true,
         isPaymentFlow = true,

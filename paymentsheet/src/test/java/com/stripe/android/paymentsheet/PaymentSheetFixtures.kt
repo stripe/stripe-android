@@ -109,6 +109,7 @@ internal object PaymentSheetFixtures {
             isGooglePayReady = false,
             paymentSelection = null,
             linkState = null,
+            isEligibleForCardBrandChoice = false,
         ),
         statusBarColor = STATUS_BAR_COLOR,
         enableLogging = false,
@@ -194,6 +195,7 @@ internal object PaymentSheetFixtures {
                 email = "email",
                 name = "Jenny Rosen",
                 phone = "+18008675309"
-            )
+            ),
+            isEligibleForCardBrandChoice = false,
         )
 }

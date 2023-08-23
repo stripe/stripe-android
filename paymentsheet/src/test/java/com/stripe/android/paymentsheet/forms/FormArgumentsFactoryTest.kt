@@ -73,6 +73,7 @@ class FormArgumentsFactoryTest {
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
             ),
+            isEligibleForCardBrandChoice = false,
         )
 
         assertThat(actualArgs.initialPaymentMethodCreateParams).isEqualTo(paymentMethodCreateParams)
@@ -153,7 +154,8 @@ class FormArgumentsFactoryTest {
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 brand = CardBrand.Visa,
                 customerRequestedSave = customerReuse
-            )
+            ),
+            isEligibleForCardBrandChoice = false,
         )
 
         assertThat(actualArgs.initialPaymentMethodCreateParams).isEqualTo(paymentMethodCreateParams)
