@@ -82,6 +82,7 @@ public final class com/stripe/android/customersheet/CustomerSheet$Companion {
 public final class com/stripe/android/customersheet/CustomerSheet$Configuration {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Companion;
+	public static final fun builder ()Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun getAppearance ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;
 	public final fun getBillingDetailsCollectionConfiguration ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;
 	public final fun getDefaultBillingDetails ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;

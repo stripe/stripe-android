@@ -198,18 +198,12 @@ interface CustomerAdapter {
 
         @ExperimentalCustomerSheetApi
         fun failureCauseOrNull(): Throwable? {
-            return when (failureOrNull()) {
-                null -> null
-                else -> (this as Failure<*>).cause
-            }
+            return (this as? Failure<*>)?.cause
         }
 
         @ExperimentalCustomerSheetApi
         fun failureDisplayMessageOrNull(): String? {
-            return when (failureOrNull()) {
-                null -> null
-                else -> (this as Failure<*>).displayMessage
-            }
+            return (this as? Failure<*>)?.displayMessage
         }
 
         internal class Success<T>(

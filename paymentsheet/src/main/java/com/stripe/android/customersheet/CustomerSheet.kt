@@ -218,6 +218,8 @@ class CustomerSheet @Inject internal constructor(
         }
 
         companion object {
+
+            @JvmStatic
             fun builder(): Builder {
                 return Builder()
             }
