@@ -2,7 +2,6 @@ package com.stripe.android.core.browser.customtabs
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import androidx.annotation.RestrictTo
 import androidx.browser.customtabs.CustomTabsCallback
@@ -28,9 +27,7 @@ interface CustomTabsManager : DefaultLifecycleObserver {
     fun openCustomTab(
         activity: Activity,
         uri: Uri,
-        fallback: (Uri) -> Unit = {
-            activity.startActivity(Intent(Intent.ACTION_VIEW, uri))
-        }
+        fallback: () -> Unit
     )
 
     /**
@@ -38,6 +35,7 @@ interface CustomTabsManager : DefaultLifecycleObserver {
      */
     fun mayLaunchUrl(url: String): Boolean
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         operator fun invoke(logger: Logger): CustomTabsManager {
             return CustomTabsManagerImpl(
@@ -129,7 +127,7 @@ private class CustomTabsManagerImpl @Inject constructor(
     override fun openCustomTab(
         activity: Activity,
         uri: Uri,
-        fallback: (Uri) -> Unit
+        fallback: () -> Unit
     ) {
         runCatching {
             val packageName: String? = getCustomTabsPackage(activity)
@@ -137,13 +135,13 @@ private class CustomTabsManagerImpl @Inject constructor(
 
             // If we cant find a package name no browser that supports Custom Tabs is installed.
             if (packageName == null) {
-                fallback.invoke(uri)
+                fallback.invoke()
             } else {
                 customTabsIntent.intent.setPackage(packageName)
                 customTabsIntent.launchUrl(activity, uri)
             }
         }.onFailure {
-            fallback.invoke(uri)
+            fallback.invoke()
         }
     }
 

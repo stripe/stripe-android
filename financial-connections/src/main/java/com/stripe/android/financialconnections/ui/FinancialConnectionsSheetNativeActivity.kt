@@ -129,6 +129,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                             customTabsManager.openCustomTab(
                                 activity = this,
                                 uri = uri,
+                                fallback = { startActivity(Intent(Intent.ACTION_VIEW, uri)) }
                             )
                         } else {
                             // Use regular intent to open uri.
