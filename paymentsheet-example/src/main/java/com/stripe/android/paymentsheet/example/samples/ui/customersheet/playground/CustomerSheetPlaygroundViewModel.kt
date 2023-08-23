@@ -53,7 +53,7 @@ class CustomerSheetPlaygroundViewModel(
     private val _configurationState = MutableStateFlow(CustomerSheetPlaygroundConfigurationState())
     val configurationState: StateFlow<CustomerSheetPlaygroundConfigurationState> = _configurationState
 
-    private val initialConfiguration = CustomerSheet.Configuration.Builder()
+    private val initialConfiguration = CustomerSheet.Configuration.builder()
         .defaultBillingDetails(
             PaymentSheet.BillingDetails(
                 name = "CustomerSheet Testing"
@@ -252,7 +252,7 @@ class CustomerSheetPlaygroundViewModel(
                     )
                 }
             }
-            is CustomerSheetResult.Error -> {
+            is CustomerSheetResult.Failed -> {
                 updateViewState<CustomerSheetPlaygroundViewState.Data> {
                     it.copy(
                         selection = null,

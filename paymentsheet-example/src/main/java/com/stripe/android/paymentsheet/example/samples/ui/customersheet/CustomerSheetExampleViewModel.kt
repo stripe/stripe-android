@@ -160,7 +160,7 @@ class CustomerSheetExampleViewModel(
                     )
                 }
             }
-            is CustomerSheetResult.Error -> {
+            is CustomerSheetResult.Failed -> {
                 updateDataViewState {
                     it.copy(
                         selection = null,
