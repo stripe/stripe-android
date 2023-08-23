@@ -32,7 +32,7 @@ workflows:
       - conclude_all
     steps:
       - script@1:
-          timeout: 20
+          timeout: 1200
           inputs:
             - content: ./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources
   test:
@@ -46,7 +46,7 @@ workflows:
       - conclude_all
     steps:
       - script@1:
-          timeout: 20
+          timeout: 1200
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
   maestro-financial-connections:
@@ -187,7 +187,7 @@ workflows:
             - boot_timeout: 600
       - script-runner@0:
           title: Execute instrumentation tests
-          timeout: 20
+          timeout: 1200
           inputs:
             - file_path: ./scripts/execute_instrumentation_tests.sh
   run-paymentsheet-end-to-end-tests:
