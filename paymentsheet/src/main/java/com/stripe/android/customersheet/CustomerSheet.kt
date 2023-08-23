@@ -151,6 +151,7 @@ class CustomerSheet @Inject internal constructor(
         val merchantDisplayName: String? = null,
     ) {
 
+        // Hide no-argument constructor init
         internal constructor() : this(
             appearance = PaymentSheet.Appearance(),
             googlePayEnabled = false,
