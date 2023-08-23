@@ -882,7 +882,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 /**
                  * Modify this list if you want to change the countries displayed in the playground.
                  */
-                country.code.value in setOf("US", "GB", "AU", "FR", "IN")
+                country.code.value in setOf("US", "GB", "AU", "FR", "IN", "SG")
             }.map { country ->
                 /**
                  * Modify this statement to change the default currency associated with each
@@ -904,6 +904,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     "IN" -> {
                         country to "INR"
                     }
+                    "SG" -> {
+                        country to "SGD"
+                    }
                     else -> {
                         country to "USD"
                     }
@@ -912,7 +915,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         // List was created from: https://stripe.com/docs/currencies
         /** Modify this list if you want to change the currencies displayed in the playground **/
-        private val stripeSupportedCurrencies = listOf("AUD", "EUR", "GBP", "USD", "INR", "PLN")
+        private val stripeSupportedCurrencies = listOf("AUD", "EUR", "GBP", "USD", "INR", "PLN", "SGD")
 //            "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS",  "AWG", "AZN", "BAM",
 //            "BBD", "BDT", "BGN", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BWP", "BYN", "BZD",
 //            "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CVE", "CZK", "DJF", "DKK", "DOP",
