@@ -3,6 +3,13 @@ package com.stripe.android.customersheet
 import com.stripe.android.core.exception.StripeException
 
 @OptIn(ExperimentalCustomerSheetApi::class)
+internal fun <T> CustomerAdapter.Result<T>.getOrNull(): T? =
+    when (this) {
+        is CustomerAdapter.Result.Failure -> null
+        is CustomerAdapter.Result.Success -> this.value
+    }
+
+@OptIn(ExperimentalCustomerSheetApi::class)
 internal inline infix fun <R, T> CustomerAdapter.Result<T>.flatMap(
     transform: (T) -> CustomerAdapter.Result<R>
 ): CustomerAdapter.Result<R> {

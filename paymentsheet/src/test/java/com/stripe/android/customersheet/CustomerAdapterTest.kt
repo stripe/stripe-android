@@ -619,38 +619,6 @@ class CustomerAdapterTest {
     }
 
     @Test
-    fun `failureCauseOrNull returns the cause`() {
-        val failure = CustomerAdapter.Result.failure<String>(
-            cause = IllegalStateException(),
-            displayMessage = "hello"
-        )
-
-        assertThat(failure.failureCauseOrNull())
-            .isInstanceOf(IllegalStateException::class.java)
-
-        val nullFailure = CustomerAdapter.Result.success("hello")
-
-        assertThat(nullFailure.failureCauseOrNull())
-            .isEqualTo(null)
-    }
-
-    @Test
-    fun `failureDisplayMessageOrNull returns the display message`() {
-        val failure = CustomerAdapter.Result.failure<String>(
-            cause = IllegalStateException(),
-            displayMessage = "hello"
-        )
-
-        assertThat(failure.failureDisplayMessageOrNull())
-            .isEqualTo("hello")
-
-        val nullFailure = CustomerAdapter.Result.success("hello")
-
-        assertThat(nullFailure.failureCauseOrNull())
-            .isEqualTo(null)
-    }
-
-    @Test
     fun `Google Pay is retrievable when it is available and selected`() = runTest {
         val adapter = createAdapter(
             prefsRepositoryFactory = {

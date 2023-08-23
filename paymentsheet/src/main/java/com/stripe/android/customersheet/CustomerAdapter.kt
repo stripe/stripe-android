@@ -181,36 +181,12 @@ interface CustomerAdapter {
     sealed class Result<T> {
 
         @ExperimentalCustomerSheetApi
-        val isSuccess: Boolean
-            get() = this is Success
-
-        @ExperimentalCustomerSheetApi
-        val isFailure: Boolean
-            get() = this is Failure
-
-        @ExperimentalCustomerSheetApi
-        fun getOrNull(): T? {
-            return when (this) {
-                is Failure -> null
-                is Success -> this.value
-            }
-        }
-
-        @ExperimentalCustomerSheetApi
-        fun failureCauseOrNull(): Throwable? {
-            return (this as? Failure<*>)?.cause
-        }
-
-        @ExperimentalCustomerSheetApi
-        fun failureDisplayMessageOrNull(): String? {
-            return (this as? Failure<*>)?.displayMessage
-        }
-
-        internal class Success<T>(
+        class Success<T> internal constructor(
             val value: T
         ) : Result<T>()
 
-        internal class Failure<T>(
+        @ExperimentalCustomerSheetApi
+        class Failure<T> internal constructor(
             val cause: Throwable,
             val displayMessage: String? = null
         ) : Result<T>()
