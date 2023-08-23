@@ -9,6 +9,8 @@
     <ID>MaxLineLength:QueryStringFactoryTest.kt$QueryStringFactoryTest$"colors[]=blue&amp;colors[]=green&amp;empty_list=&amp;person[age]=45&amp;person[city]=San Francisco&amp;person[wishes]=&amp;person[friends][]=Alice&amp;person[friends][]=Bob"</ID>
     <ID>MaxLineLength:RequestHeadersFactoriesTest.kt$RequestHeadersFactoriesTest$.</ID>
     <ID>MaxLineLength:StripeErrorJsonParserTest.kt$StripeErrorJsonParserTest$message = "The Stripe API is only accessible over HTTPS. Please see &lt;https://stripe.com/docs> for more information."</ID>
+    <ID>NoUnusedImports:com.stripe.android.core.networking.SendAnalyticsEventWorkerTest.kt:9</ID>
+    <ID>ReturnCount:DefaultAnalyticsRequestExecutor.kt$DefaultAnalyticsRequestExecutor.SendAnalyticsEventWorker$override suspend fun doWork(): Result</ID>
     <ID>SerialVersionUIDInSerializableClass:StripeError.kt$StripeError : StripeModelSerializable</ID>
     <ID>SwallowedException:StripeJsonUtils.kt$StripeJsonUtils$classCastException: ClassCastException</ID>
     <ID>SwallowedException:StripeJsonUtils.kt$StripeJsonUtils$jsonException: JSONException</ID>

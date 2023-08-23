@@ -1,6 +1,7 @@
 package com.stripe.android.core.networking
 
 import android.content.Context
+import android.os.SystemClock
 import androidx.annotation.RestrictTo
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -16,6 +17,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultAnalyticsRequestExecutor(
@@ -111,6 +114,13 @@ class DefaultAnalyticsRequestExecutor(
             val request = inputData.getSerializable<AnalyticsRequest>(FIELD_DATA)
                 ?: return Result.failure()
 
+            val timestamp = inputData.getLong(FIELD_TIMESTAMP, 0)
+            val delta = (SystemClock.elapsedRealtime() - timestamp).milliseconds
+
+            if (delta > 10.minutes) {
+                return Result.failure()
+            }
+
             val stripeNetworkClient = WorkManagerHelpers.getOrCreateNetworkClient()
             val logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
 
@@ -135,6 +145,7 @@ class DefaultAnalyticsRequestExecutor(
             fun createInputData(request: AnalyticsRequest): Data {
                 return Data.Builder()
                     .putSerializable(FIELD_DATA, request)
+                    .putSerializable(FIELD_TIMESTAMP, SystemClock.elapsedRealtime())
                     .build()
             }
         }
@@ -142,6 +153,7 @@ class DefaultAnalyticsRequestExecutor(
 
     internal companion object {
         const val FIELD_DATA = "data"
+        const val FIELD_TIMESTAMP = "timestamp"
         const val FIELD_EVENT = "event"
 
         fun makeWorkerTag(): String {

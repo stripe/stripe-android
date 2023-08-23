@@ -6,7 +6,6 @@ import androidx.work.Data
 import androidx.work.ListenableWorker
 import androidx.work.testing.TestListenableWorkerBuilder
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor.Companion.FIELD_EVENT
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor.SendAnalyticsEventWorker
@@ -72,11 +71,6 @@ internal class SendAnalyticsEventWorkerTest {
     private fun enqueueSuccessResponse() {
         val response = StripeResponse<String>(code = 200, body = null)
         networkClient.enqueueResult(Result.success(response))
-    }
-
-    private fun enqueueRetryResponse() {
-        val response = APIConnectionException()
-        networkClient.enqueueResult(Result.failure(response))
     }
 
     private fun enqueueFailureResponse() {
