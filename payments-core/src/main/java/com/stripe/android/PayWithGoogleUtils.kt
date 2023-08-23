@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import com.stripe.android.uicore.format.CurrencyFormatter
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Currency
@@ -36,7 +37,7 @@ object PayWithGoogleUtils {
      */
     @JvmStatic
     fun getPriceString(price: Long, currency: Currency): String {
-        val fractionDigits = currency.defaultFractionDigits
+        val fractionDigits = CurrencyFormatter.getDefaultDecimalDigits(currency)
         val totalLength = price.toString().length
         val builder = StringBuilder()
 

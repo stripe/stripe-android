@@ -4,6 +4,7 @@
 
 ### PaymentSheet
 * [CHANGED][7144](https://github.com/stripe/stripe-android/pull/7144) PaymentSheet now features rounded corners with the radius provided in `PaymentSheet.Shapes.cornerRadiusDp`.
+* [FIXED][7190](https://github.com/stripe/stripe-android/pull/7190) Fixed an issue where amounts in Laotian Kip were displayed incorrectly.
 
 ## 20.28.3 - 2023-08-21
 
