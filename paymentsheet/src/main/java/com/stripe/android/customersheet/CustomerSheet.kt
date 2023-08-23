@@ -151,6 +151,15 @@ class CustomerSheet @Inject internal constructor(
         val merchantDisplayName: String? = null,
     ) {
 
+        internal constructor() : this(
+            appearance = PaymentSheet.Appearance(),
+            googlePayEnabled = false,
+            headerTextForSelectionScreen = null,
+            defaultBillingDetails = PaymentSheet.BillingDetails(),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            merchantDisplayName = null,
+        )
+
         fun newBuilder(): Builder {
             return Builder()
                 .appearance(appearance)
