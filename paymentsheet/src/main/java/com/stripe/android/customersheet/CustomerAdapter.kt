@@ -212,12 +212,10 @@ interface CustomerAdapter {
             }
         }
 
-        @ExperimentalCustomerSheetApi
         internal class Success<T>(
             val value: T
         ) : Result<T>()
 
-        @ExperimentalCustomerSheetApi
         internal class Failure<T>(
             val cause: Throwable,
             val displayMessage: String? = null
