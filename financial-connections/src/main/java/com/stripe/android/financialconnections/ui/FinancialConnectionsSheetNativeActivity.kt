@@ -35,7 +35,7 @@ import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.browser.BrowserUtils
+import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.common.CloseDialog
@@ -82,6 +82,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @Inject
     lateinit var imageLoader: StripeImageLoader
 
+    @Inject
+    lateinit var browserManager: BrowserManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (args == null) {
@@ -125,10 +128,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             state.viewEffect?.let { viewEffect ->
                 when (viewEffect) {
                     is OpenUrl -> startActivity(
-                        BrowserUtils.createBrowserIntentForUrl(
-                            context = this,
-                            uri = Uri.parse(viewEffect.url)
-                        )
+                        browserManager.createBrowserIntentForUrl(uri = Uri.parse(viewEffect.url))
                     )
 
                     is Finish -> {
@@ -165,7 +165,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         }
 
         val navController = rememberNavController()
-        val uriHandler = remember { CustomTabUriHandler(context) }
+        val uriHandler = remember { CustomTabUriHandler(context, browserManager) }
         val initialDestination =
             remember(initialPane) {
                 initialPane.toNavigationCommand(

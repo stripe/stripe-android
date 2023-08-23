@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections
 
 import android.app.Activity
-import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.ActivityResult
@@ -17,7 +16,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
-import com.stripe.android.financialconnections.browser.BrowserUtils
+import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
@@ -53,7 +52,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val logger: Logger,
-    private val context: Application,
+    private val browserManager: BrowserManager,
     private val eventReporter: FinancialConnectionsEventReporter,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val nativeRouter: NativeAuthFlowRouter,
@@ -100,7 +99,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      *
      */
     private fun openAuthFlow(sync: SynchronizeSessionResponse) {
-        if (BrowserUtils.getPackageToHandleUri(context, Uri.parse("https://")) == null) {
+        if (browserManager.getPackageToHandleUri(Uri.parse("https://")) == null) {
             logNoBrowserAvailableAndFinish()
             return
         }

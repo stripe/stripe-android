@@ -1,27 +1,30 @@
 package com.stripe.android.financialconnections.browser
 
-import android.content.Context
+import android.app.Application
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
+import javax.inject.Inject
 
-internal object BrowserUtils {
+internal class BrowserManager @Inject constructor(
+    val context: Application
+) {
 
     /**
      * Get the default browser app package that will be used to open the given [Uri].
      */
-    fun getPackageToHandleUri(context: Context, uri: Uri): String? = runCatching {
-        getPackageToHandleIntent(context, uri.toIntent())
+    fun getPackageToHandleUri(uri: Uri): String? = runCatching {
+        getPackageToHandleIntent(uri.toIntent())
     }.getOrNull()
 
     /**
      * Constructs an intent to launch the given [Uri] on a CustomTab or in a regular browser,
      * based on the default browser set for this device.
      */
-    fun createBrowserIntentForUrl(context: Context, uri: Uri): Intent {
+    fun createBrowserIntentForUrl(uri: Uri): Intent {
         val browserIntent = uri.toIntent()
-        val defaultPackage = getPackageToHandleIntent(context, browserIntent)
+        val defaultPackage = getPackageToHandleIntent(browserIntent)
         return when {
             /**
              * Firefox browser has a redirect issue when launching as a custom tab.
@@ -34,7 +37,7 @@ internal object BrowserUtils {
 
     private fun Uri.toIntent(): Intent = Intent(Intent.ACTION_VIEW, this)
 
-    private fun getPackageToHandleIntent(context: Context, intent: Intent): String? =
+    private fun getPackageToHandleIntent(intent: Intent): String? =
         context.packageManager
             .resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
             ?.activityInfo
@@ -45,6 +48,6 @@ internal object BrowserUtils {
         .build()
         .also { it.intent.data = uri }
         .intent
-
-    private const val FIREFOX_PACKAGE = "org.mozilla"
 }
+
+private const val FIREFOX_PACKAGE = "org.mozilla"

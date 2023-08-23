@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import android.app.Application
 import android.webkit.URLUtil
 import androidx.core.net.toUri
 import com.airbnb.mvrx.Fail
@@ -18,7 +17,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PrepaneClickContinue
 import com.stripe.android.financialconnections.analytics.logError
-import com.stripe.android.financialconnections.browser.BrowserUtils
+import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
@@ -60,7 +59,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val uriUtils: UriUtils,
     private val postAuthSessionEvent: PostAuthSessionEvent,
     private val getOrFetchSync: GetOrFetchSync,
-    private val context: Application,
+    private val browserManager: BrowserManager,
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
@@ -173,8 +172,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                             id = it.id,
                             pane = Pane.PARTNER_AUTH,
                             flow = it.flow,
-                            defaultBrowser = BrowserUtils.getPackageToHandleUri(
-                                context = context,
+                            defaultBrowser = browserManager.getPackageToHandleUri(
                                 uri = url.toUri()
                             )
                         )

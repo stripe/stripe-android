@@ -73,7 +73,7 @@ internal object ApiKeyFixtures {
     fun authorizationSession() = FinancialConnectionsAuthorizationSession(
         id = "id",
         nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
-        flow = FinancialConnectionsAuthorizationSession.Flow.MX_OAUTH,
+        flow = FinancialConnectionsAuthorizationSession.Flow.MX_OAUTH.value,
         institutionSkipAccountSelection = null,
         showPartnerDisclosure = null,
         skipAccountSelection = null,
