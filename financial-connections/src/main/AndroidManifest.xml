@@ -67,21 +67,4 @@
             android:multiprocess="true" />
     </application>
 
-    <!--
-    See https://developer.android.com/training/package-visibility/declaring for more details.
-    -->
-    <queries>
-        <!--
-        Added to check the default browser that will host the AuthFlow.
-        -->
-        <intent>
-            <action android:name="android.support.customtabs.action.CustomTabsService" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="http" />
-        </intent>
-
-    </queries>
-
 </manifest>
