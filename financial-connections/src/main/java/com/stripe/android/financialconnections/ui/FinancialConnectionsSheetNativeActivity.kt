@@ -75,7 +75,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
     @Inject
     lateinit var navigationManager: NavigationManager
-
     @Inject
     lateinit var logger: Logger
 
