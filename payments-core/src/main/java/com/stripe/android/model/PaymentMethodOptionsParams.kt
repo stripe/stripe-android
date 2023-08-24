@@ -79,8 +79,8 @@ sealed class PaymentMethodOptionsParams(
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.WeChatPay) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
-                PARAM_CLIENT to "android",
-                PARAM_APP_ID to appId
+                PARAM_CLIENT to "web",
+//                PARAM_APP_ID to appId
             )
         }
 
