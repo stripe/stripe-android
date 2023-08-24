@@ -13,7 +13,12 @@ import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
+import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.NetworkTypeDetector
+import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.customersheet.CustomerSheetViewState
+import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
+import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
@@ -40,6 +45,11 @@ internal interface CustomerSheetViewModelModule {
     fun bindsIntentConfirmationInterceptor(
         impl: DefaultIntentConfirmationInterceptor,
     ): IntentConfirmationInterceptor
+
+    @Binds
+    fun bindsCustomerSheetEventReporter(
+        impl: DefaultCustomerSheetEventReporter
+    ): CustomerSheetEventReporter
 
     @Suppress("TooManyFunctions")
     companion object {
@@ -73,6 +83,18 @@ internal interface CustomerSheetViewModelModule {
         fun isLiveMode(
             paymentConfiguration: Provider<PaymentConfiguration>
         ): () -> Boolean = { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
+
+        @Provides
+        internal fun provideAnalyticsRequestFactory(
+            application: Application,
+            paymentConfiguration: Provider<PaymentConfiguration>
+        ): AnalyticsRequestFactory = AnalyticsRequestFactory(
+            packageManager = application.packageManager,
+            packageName = application.packageName.orEmpty(),
+            packageInfo = application.packageInfo,
+            publishableKeyProvider = { paymentConfiguration.get().publishableKey },
+            networkTypeProvider = NetworkTypeDetector(application)::invoke,
+        )
 
         @Provides
         fun resources(application: Application): Resources {

@@ -123,6 +123,7 @@ object CustomerSheetTestHelper {
                 }
             },
             statusBarColor = { null },
+            eventReporter = mock(),
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
         }
