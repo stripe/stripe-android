@@ -820,5 +820,14 @@
     "type": "us_bank_account",
     "async": true,
     "fields": []
+  },
+  {
+    "type": "grabpay",
+    "async": false,
+    "fields": [],
+    "selector_icon": {
+      "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-grabpay@3x-e54da1d788668a5909e4801d5c243198.png",
+      "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-grabpay-97ee78fdbbf1890bdf19986e997e685d.svg"
+    }
   }
 ]
