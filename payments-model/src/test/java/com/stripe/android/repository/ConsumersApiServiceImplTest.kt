@@ -171,21 +171,18 @@ class ConsumersApiServiceImplTest {
 
     @Test
     fun testConsumerSessionLookupUrl() {
-        ApiRequest.apiTestHost = null
         assertThat("https://api.stripe.com/v1/consumers/sessions/lookup")
             .isEqualTo(ConsumersApiServiceImpl.consumerSessionLookupUrl)
     }
 
     @Test
     fun testStartConsumerVerificationUrl() {
-        ApiRequest.apiTestHost = null
         assertThat("https://api.stripe.com/v1/consumers/sessions/start_verification")
             .isEqualTo(ConsumersApiServiceImpl.startConsumerVerificationUrl)
     }
 
     @Test
     fun testConfirmConsumerVerificationUrl() {
-        ApiRequest.apiTestHost = null
         assertThat("https://api.stripe.com/v1/consumers/sessions/confirm_verification")
             .isEqualTo(ConsumersApiServiceImpl.confirmConsumerVerificationUrl)
     }

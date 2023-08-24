@@ -62,7 +62,8 @@ private class NetworkStatement(
             }
 
             return@lambda DelegatingStripeRequest(
-                request, request.url.replace(
+                request,
+                request.url.replace(
                     ApiRequest.API_HOST,
                     mockWebServer.baseUrl.toString().removeSuffix("/")
                 )
