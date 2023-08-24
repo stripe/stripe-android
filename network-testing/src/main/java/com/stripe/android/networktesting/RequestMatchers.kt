@@ -14,6 +14,10 @@ private class ToStringRequestMatcher(
 }
 
 object RequestMatchers {
+    fun host(host: String): RequestMatcher {
+        return header("original-host", host)
+    }
+
     fun header(key: String, value: String): RequestMatcher {
         return ToStringRequestMatcher("header($key, $value)") { request ->
             request.headers[key] == value
