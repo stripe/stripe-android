@@ -52,9 +52,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.edit
+import com.plaid.link.Plaid
 import com.stripe.android.financialconnections.FinancialConnections
-import com.stripe.android.financialconnections.FinancialConnectionsEventListener
-import com.stripe.android.financialconnections.FinancialConnectionsPublicEvent
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheet
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheetForToken
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
@@ -73,13 +72,10 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        FinancialConnections.setEventListener(
-            object : FinancialConnectionsEventListener {
-                override fun onEvent(event: FinancialConnectionsPublicEvent) {
-                    Log.d("EVENT", "Received event: $event")
-                }
-            }
-        )
+        Plaid
+        FinancialConnections.setEventListener {
+            event -> Log.d("EVENT", "Received event: $event")
+        }
         collectBankAccountLauncher = CollectBankAccountLauncher.create(
             this,
             viewModel::onCollectBankAccountLauncherResult
