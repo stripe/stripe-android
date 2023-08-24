@@ -16,6 +16,7 @@ import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnec
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
+import com.stripe.android.paymentsheet.forms.AmazonPayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
 import com.stripe.android.paymentsheet.forms.CardRequirement
@@ -87,6 +88,7 @@ class LpmRepository constructor(
             PaymentMethod.Type.USBankAccount.code,
             PaymentMethod.Type.Affirm.code,
             PaymentMethod.Type.RevolutPay.code,
+            PaymentMethod.Type.AmazonPay.code,
             PaymentMethod.Type.MobilePay.code,
             PaymentMethod.Type.Zip.code,
             PaymentMethod.Type.AuBecsDebit.code,
@@ -407,6 +409,18 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = RevolutPayRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.AmazonPay.code -> SupportedPaymentMethod(
+            code = "amazon_pay",
+            requiresMandate = false,
+            mandateRequirement = MandateRequirement.Never,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_amazon_pay,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_amazon_pay,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = AmazonPayRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.MobilePay.code -> SupportedPaymentMethod(

@@ -225,14 +225,7 @@
       },
       {
         "type": "country",
-        "allowed_country_codes": [
-          "AT",
-          "BE",
-          "DE",
-          "ES",
-          "IT",
-          "NL"
-        ],
+        "allowed_country_codes": ["AT", "BE", "DE", "ES", "IT", "NL"],
         "api_path": {
           "v1": "sofort[country]"
         }
@@ -733,8 +726,31 @@
   {
     "type": "revolut_pay",
     "async": false,
-    "fields": [
-    ],
+    "fields": [],
+    "next_action_spec": {
+      "confirm_response_status_specs": {
+        "requires_action": {
+          "type": "redirect_to_url"
+        }
+      },
+      "post_confirm_handling_pi_status_specs": {
+        "succeeded": {
+          "type": "finished"
+        },
+        "requires_action": {
+          "type": "canceled"
+        }
+      }
+    }
+  },
+  {
+    "type": "amazon_pay",
+    "async": false,
+    "selector_icon": {
+      "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-amazonpay_light-96e2ad49ffa7c7536dec91adaf68e898.png",
+      "dark_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-amazonpay_dark-fca78ef1a93824996126dfda200a8ec4.png"
+    },
+    "fields": [],
     "next_action_spec": {
       "confirm_response_status_specs": {
         "requires_action": {
@@ -759,7 +775,7 @@
       "confirm_response_status_specs": {
         "requires_action": {
           "type": "redirect_to_url",
-          "native_mobile_redirect_strategy" : "follow_redirects"
+          "native_mobile_redirect_strategy": "follow_redirects"
         }
       },
       "post_confirm_handling_pi_status_specs": {
@@ -795,8 +811,7 @@
   {
     "type": "card",
     "async": false,
-    "fields": [
-    ]
+    "fields": []
   },
   {
     "type": "cashapp",
