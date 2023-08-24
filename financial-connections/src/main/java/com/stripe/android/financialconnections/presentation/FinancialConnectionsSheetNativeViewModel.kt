@@ -12,6 +12,8 @@ import com.airbnb.mvrx.PersistState
 import com.airbnb.mvrx.ViewModelContext
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
+import com.stripe.android.financialconnections.FinancialConnectionsPublicEvent
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
@@ -305,6 +307,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
     fun onPaneLaunched(pane: Pane, referrer: Pane?) {
         viewModelScope.launch {
+            FinancialConnections.emitEvent(
+                FinancialConnectionsPublicEvent.Launched(pane.toString())
+            )
             eventTracker.track(
                 PaneLaunched(
                     referrer = referrer,
