@@ -89,6 +89,7 @@ private class NetworkStatement(
     private fun tearDown() {
         mockWebServer.dispatcher.clear()
         ConnectionFactory.Default.testConnectionCustomization = null
+        ConnectionFactory.Default.testHostCustomization = null
     }
 }
 
