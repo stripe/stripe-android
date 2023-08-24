@@ -107,6 +107,7 @@ internal interface EventReporter {
         paymentSelection: PaymentSelection?,
         currency: String?,
         isDecoupling: Boolean,
+        error: PaymentSheetConfirmationError,
     )
 
     /**
