@@ -2,12 +2,13 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
-### CustomerSheet
-* [ADDED] [CustomerSheet](https://stripe.com/docs/elements/customer-sheet?platform=android) is now available in private beta.
-
 ### PaymentSheet
+* [ADDED][7198](https://github.com/stripe/stripe-android/pull/7198) PaymentSheet now supports GrabPay for PaymentIntents.
 * [CHANGED][7144](https://github.com/stripe/stripe-android/pull/7144) PaymentSheet now features rounded corners with the radius provided in `PaymentSheet.Shapes.cornerRadiusDp`.
 * [FIXED][7190](https://github.com/stripe/stripe-android/pull/7190) Fixed an issue where amounts in Laotian Kip were displayed incorrectly.
+
+### CustomerSheet
+* [ADDED] [CustomerSheet](https://stripe.com/docs/elements/customer-sheet?platform=android) is now available in private beta.
 
 ## 20.28.3 - 2023-08-21
 
