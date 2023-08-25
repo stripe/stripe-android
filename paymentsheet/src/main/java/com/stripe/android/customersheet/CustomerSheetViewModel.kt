@@ -270,6 +270,11 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onEditPressed() {
+        if (viewState.value.isEditing) {
+            eventReporter.onEditCompleted()
+        } else {
+            eventReporter.onEditTapped()
+        }
         updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
             val isEditing = !it.isEditing
             it.copy(
