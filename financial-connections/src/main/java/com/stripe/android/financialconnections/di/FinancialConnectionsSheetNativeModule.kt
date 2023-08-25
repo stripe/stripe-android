@@ -150,10 +150,9 @@ internal interface FinancialConnectionsSheetNativeModule {
 
         @Singleton
         @Provides
-        fun providesSaveToLinkWithStripeSucceededRepository() =
-            SaveToLinkWithStripeSucceededRepository(
-                CoroutineScope(SupervisorJob() + Dispatchers.Default)
-            )
+        fun providesSaveToLinkWithStripeSucceededRepository() = SaveToLinkWithStripeSucceededRepository(
+            CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        )
 
         @Provides
         internal fun provideFinancialConnectionsConsumersApiService(

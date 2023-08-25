@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -27,7 +28,6 @@ import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
-import com.stripe.android.core.browser.customtabs.CustomTabsManager
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.common.CloseDialog
@@ -57,7 +57,6 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.argsOrNull
 import com.stripe.android.financialconnections.utils.viewModelLazy
-import com.stripe.android.uicore.compose.rememberActivity
 import com.stripe.android.uicore.image.StripeImageLoader
 import javax.inject.Inject
 
@@ -76,9 +75,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @Inject
     lateinit var imageLoader: StripeImageLoader
 
-    @Inject
-    lateinit var customTabsManager: CustomTabsManager
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (args == null) {
@@ -86,7 +82,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         } else {
             viewModel.activityRetainedComponent.inject(this)
             viewModel.onEach { postInvalidate() }
-            lifecycle.addObserver(customTabsManager)
             onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
             setContent {
                 FinancialConnectionsTheme {
@@ -122,25 +117,12 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         withState(viewModel) { state ->
             state.viewEffect?.let { viewEffect ->
                 when (viewEffect) {
-                    is OpenUrl -> {
-                        val uri = Uri.parse(viewEffect.url)
-                        if (viewEffect.useCustomTabsService) {
-                            // Use custom tabs service to open uri.
-                            customTabsManager.openCustomTab(
-                                activity = this,
-                                uri = uri,
-                                fallback = { startActivity(Intent(Intent.ACTION_VIEW, uri)) }
-                            )
-                        } else {
-                            // Use regular intent to open uri.
-                            startActivity(
-                                CreateBrowserIntentForUrl(
-                                    context = this,
-                                    uri = uri
-                                )
-                            )
-                        }
-                    }
+                    is OpenUrl -> startActivity(
+                        CreateBrowserIntentForUrl(
+                            context = this,
+                            uri = Uri.parse(viewEffect.url)
+                        )
+                    )
 
                     is Finish -> {
                         setResult(
@@ -162,7 +144,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         initialPane: Pane,
         reducedBranding: Boolean
     ) {
-        val context = rememberActivity { "NavHost must be created in the context of an Activity" }
+        val context = LocalContext.current
         val navController = rememberNavController()
         val uriHandler = remember { CustomTabUriHandler(context) }
         val initialDestination =

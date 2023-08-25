@@ -25,11 +25,9 @@ import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
-import com.stripe.android.financialconnections.features.common.enableCustomTabsService
 import com.stripe.android.financialconnections.features.common.enableRetrieveAuthSession
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -161,29 +159,22 @@ internal class PartnerAuthViewModel @Inject constructor(
         }
     }
 
-    private suspend fun launchAuthInBrowser() = kotlin.runCatching {
-        val manifest = requireNotNull(getOrFetchSync().manifest)
-        val authSession = requireNotNull(manifest.activeAuthSession)
-        val url = requireNotNull(
-            authSession.url
-                ?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
-        )
-        setState {
-            copy(
-                viewEffect = OpenPartnerAuth(
-                    url = url,
-                    useCustomTabsService = manifest.enableCustomTabsService()
+    private suspend fun launchAuthInBrowser() {
+        kotlin.runCatching { requireNotNull(getOrFetchSync().manifest.activeAuthSession) }
+            .onSuccess {
+                it.url
+                    ?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
+                    ?.let { setState { copy(viewEffect = OpenPartnerAuth(it)) } }
+            }
+            .onFailure {
+                eventTracker.logError(
+                    extraMessage = "failed retrieving active session from cache",
+                    error = it,
+                    logger = logger,
+                    pane = Pane.PARTNER_AUTH
                 )
-            )
-        }
-    }.onFailure {
-        eventTracker.logError(
-            extraMessage = "failed retrieving active session from cache",
-            error = it,
-            logger = logger,
-            pane = Pane.PARTNER_AUTH
-        )
-        setState { copy(authenticationStatus = Fail(it)) }
+                setState { copy(authenticationStatus = Fail(it)) }
+            }
     }
 
     fun onSelectAnotherBank() {
@@ -405,7 +396,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         if (URLUtil.isNetworkUrl(uri)) {
             setState {
                 copy(
-                    viewEffect = OpenUrl(
+                    viewEffect = PartnerAuthState.ViewEffect.OpenUrl(
                         uri,
                         Date().time
                     )
