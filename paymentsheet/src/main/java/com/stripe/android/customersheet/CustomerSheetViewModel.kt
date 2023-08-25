@@ -294,6 +294,7 @@ internal class CustomerSheetViewModel @Inject constructor(
             ).onSuccess {
                 when (val currentViewState = viewState.value) {
                     is CustomerSheetViewState.SelectPaymentMethod -> {
+                        eventReporter.onRemovePaymentMethodSucceeded()
                         val savedPaymentMethods = currentViewState.savedPaymentMethods.filter { pm ->
                             pm.id != paymentMethod.id!!
                         }
@@ -322,6 +323,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     else -> Unit
                 }
             }.onFailure { cause, displayMessage ->
+                eventReporter.onRemovePaymentMethodFailed()
                 logger.error(
                     msg = "Failed to detach payment method: $paymentMethod",
                     t = cause,
