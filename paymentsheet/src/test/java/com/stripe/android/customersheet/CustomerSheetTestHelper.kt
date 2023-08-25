@@ -14,6 +14,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -62,7 +63,10 @@ object CustomerSheetTestHelper {
             googlePayEnabled = true
         ),
         isGooglePayAvailable: Boolean = true,
-        eventReporter: CustomerSheetEventReporter = mock()
+        eventReporter: CustomerSheetEventReporter = mock(),
+        intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+            enqueueCompleteStep(true)
+        }
     ): CustomerSheetViewModel {
         val formViewModel = FormViewModel(
             context = application,
@@ -106,9 +110,7 @@ object CustomerSheetTestHelper {
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
-            intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
-                enqueueCompleteStep(true)
-            },
+            intentConfirmationInterceptor = intentConfirmationInterceptor,
             paymentLauncherFactory = object : StripePaymentLauncherAssistedFactory {
                 override fun create(
                     publishableKey: () -> String,

@@ -486,8 +486,16 @@ internal class CustomerSheetViewModel @Inject constructor(
                         stripeAccount = paymentConfigurationProvider.get().stripeAccountId,
                     ),
                 ).getOrThrow()
-                handleStripeIntent(intent, clientSecret, paymentMethod)
+
+                handleStripeIntent(intent, clientSecret, paymentMethod).getOrThrow()
+
+                eventReporter.onAttachPaymentMethodSucceeded(
+                    style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+                )
             }.onFailure { cause, displayMessage ->
+                eventReporter.onAttachPaymentMethodFailed(
+                    style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+                )
                 logger.error(
                     msg = "Failed to attach payment method to SetupIntent: $paymentMethod",
                     t = cause,
@@ -506,7 +514,7 @@ internal class CustomerSheetViewModel @Inject constructor(
         stripeIntent: StripeIntent,
         clientSecret: String,
         paymentMethod: PaymentMethod
-    ) {
+    ): Result<Unit> {
         val nextStep = intentConfirmationInterceptor.intercept(
             initializationMode = PaymentSheet.InitializationMode.SetupIntent(
                 clientSecret = clientSecret,
@@ -518,7 +526,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
         unconfirmedPaymentMethod = paymentMethod
 
-        when (nextStep) {
+        return when (nextStep) {
             is IntentConfirmationInterceptor.NextStep.Complete -> {
                 safeUpdateSelectPaymentMethodState { viewState ->
                     unconfirmedPaymentMethod?.let { method ->
@@ -535,9 +543,11 @@ internal class CustomerSheetViewModel @Inject constructor(
                     } ?: viewState
                 }
                 onBackPressed()
+                Result.success(Unit)
             }
             is IntentConfirmationInterceptor.NextStep.Confirm -> {
                 confirmStripeIntent(nextStep.confirmParams)
+                Result.success(Unit)
             }
             is IntentConfirmationInterceptor.NextStep.Fail -> {
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
@@ -546,12 +556,14 @@ internal class CustomerSheetViewModel @Inject constructor(
                         errorMessage = nextStep.message,
                     )
                 }
+                Result.failure(nextStep.cause)
             }
             is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
                 handleNextAction(
                     clientSecret = nextStep.clientSecret,
                     stripeIntent = stripeIntent
                 )
+                Result.success(Unit)
             }
         }
     }
