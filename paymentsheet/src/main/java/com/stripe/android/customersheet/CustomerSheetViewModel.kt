@@ -710,6 +710,14 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun transition(to: CustomerSheetViewState, reset: Boolean = false) {
+        when (to) {
+            is CustomerSheetViewState.AddPaymentMethod ->
+                eventReporter.onScreenPresented(CustomerSheetEventReporter.Screen.AddPaymentMethod)
+            is CustomerSheetViewState.SelectPaymentMethod ->
+                eventReporter.onScreenPresented(CustomerSheetEventReporter.Screen.SelectPaymentMethod)
+            else -> { }
+        }
+
         backStack.update {
             if (reset) listOf(to) else it + to
         }
