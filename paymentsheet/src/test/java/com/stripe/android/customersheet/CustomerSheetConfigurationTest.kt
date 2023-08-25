@@ -25,7 +25,7 @@ class CustomerSheetConfigurationTest {
         )
         val headerTextForSelectionScreen = "Test"
 
-        val configuration = CustomerSheet.Configuration.Builder()
+        val configuration = CustomerSheet.Configuration.builder()
             .googlePayEnabled(googlePayEnabled)
             .merchantDisplayName(merchantDisplayName)
             .appearance(appearance)
@@ -50,7 +50,7 @@ class CustomerSheetConfigurationTest {
 
     @Test
     fun `newBuilder returns a new builder with previous configuration`() {
-        val configuration = CustomerSheet.Configuration.Builder()
+        val configuration = CustomerSheet.Configuration.builder()
             .googlePayEnabled(true)
             .build()
 

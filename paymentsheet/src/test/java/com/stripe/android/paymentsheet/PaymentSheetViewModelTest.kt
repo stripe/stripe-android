@@ -12,6 +12,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -77,6 +79,7 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.robolectric.RobolectricTestRunner
+import java.io.IOException
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -515,13 +518,36 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `onPaymentResult() should update emit API errors`() =
+    fun `onPaymentResult() should update emit generic error on IOExceptions`() =
         runTest {
             val viewModel = createViewModel()
 
             viewModel.viewState.test {
                 val errorMessage = "very helpful error message"
-                viewModel.onPaymentResult(PaymentResult.Failed(Throwable(errorMessage)))
+                viewModel.onPaymentResult(PaymentResult.Failed(IOException(errorMessage)))
+
+                assertThat(awaitItem())
+                    .isEqualTo(
+                        PaymentSheetViewState.Reset(null)
+                    )
+                assertThat(awaitItem())
+                    .isEqualTo(
+                        PaymentSheetViewState.Reset(
+                            UserErrorMessage("Something went wrong")
+                        )
+                    )
+            }
+        }
+
+    @Test
+    fun `onPaymentResult() should update emit Stripe API errors`() =
+        runTest {
+            val viewModel = createViewModel()
+
+            viewModel.viewState.test {
+                val errorMessage = "very helpful error message"
+                val stripeError = StripeError(message = errorMessage)
+                viewModel.onPaymentResult(PaymentResult.Failed(APIException(stripeError)))
 
                 assertThat(awaitItem())
                     .isEqualTo(

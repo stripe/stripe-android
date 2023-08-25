@@ -16,6 +16,7 @@ import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnec
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
+import com.stripe.android.paymentsheet.forms.AmazonPayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
 import com.stripe.android.paymentsheet.forms.BlikRequirement
@@ -23,6 +24,7 @@ import com.stripe.android.paymentsheet.forms.CardRequirement
 import com.stripe.android.paymentsheet.forms.CashAppPayRequirement
 import com.stripe.android.paymentsheet.forms.EpsRequirement
 import com.stripe.android.paymentsheet.forms.GiropayRequirement
+import com.stripe.android.paymentsheet.forms.GrabPayRequirement
 import com.stripe.android.paymentsheet.forms.IdealRequirement
 import com.stripe.android.paymentsheet.forms.KlarnaRequirement
 import com.stripe.android.paymentsheet.forms.MandateRequirement
@@ -87,12 +89,14 @@ class LpmRepository constructor(
             PaymentMethod.Type.USBankAccount.code,
             PaymentMethod.Type.Affirm.code,
             PaymentMethod.Type.RevolutPay.code,
+            PaymentMethod.Type.AmazonPay.code,
             PaymentMethod.Type.MobilePay.code,
             PaymentMethod.Type.Zip.code,
             PaymentMethod.Type.AuBecsDebit.code,
             PaymentMethod.Type.Upi.code,
             PaymentMethod.Type.Blik.code,
             PaymentMethod.Type.CashAppPay.code,
+            PaymentMethod.Type.GrabPay.code,
         )
     }
 
@@ -409,6 +413,18 @@ class LpmRepository constructor(
             requirement = RevolutPayRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
+        PaymentMethod.Type.AmazonPay.code -> SupportedPaymentMethod(
+            code = "amazon_pay",
+            requiresMandate = false,
+            mandateRequirement = MandateRequirement.Never,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_amazon_pay,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_amazon_pay,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = AmazonPayRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
+        )
         PaymentMethod.Type.MobilePay.code -> SupportedPaymentMethod(
             code = "mobilepay",
             requiresMandate = false,
@@ -515,6 +531,18 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = CashAppPayRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields),
+        )
+        PaymentMethod.Type.GrabPay.code -> SupportedPaymentMethod(
+            code = "grabpay",
+            requiresMandate = false,
+            mandateRequirement = MandateRequirement.Never,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_grabpay,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_grabpay,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = GrabPayRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields),
         )
         else -> null

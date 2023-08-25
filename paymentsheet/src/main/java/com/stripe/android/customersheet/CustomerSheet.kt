@@ -3,7 +3,6 @@ package com.stripe.android.customersheet
 import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -18,13 +17,12 @@ import com.stripe.android.utils.AnimationConstants
 import javax.inject.Inject
 
 /**
- * 🏗 This feature is under construction 🏗
+ * 🏗 This feature is in private beta and could change 🏗
  *
  * [CustomerSheet] A class that presents a bottom sheet to manage a customer through the
  * [CustomerAdapter].
  */
 @ExperimentalCustomerSheetApi
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CustomerSheet @Inject internal constructor(
     private val application: Application,
     lifecycleOwner: LifecycleOwner,
@@ -99,21 +97,20 @@ class CustomerSheet @Inject internal constructor(
                 CustomerSheetResult.Selected(it)
             },
             onFailure = { cause, _ ->
-                CustomerSheetResult.Error(cause)
+                CustomerSheetResult.Failed(cause)
             }
         )
     }
 
     private fun onCustomerSheetResult(result: InternalCustomerSheetResult?) {
         requireNotNull(result)
-        callback.onResult(result.toPublicResult(paymentOptionFactory))
+        callback.onCustomerSheetResult(result.toPublicResult(paymentOptionFactory))
     }
 
     /**
      * Configuration for [CustomerSheet]
      */
     @ExperimentalCustomerSheetApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration internal constructor(
         /**
          * Describes the appearance of [CustomerSheet].
@@ -154,6 +151,16 @@ class CustomerSheet @Inject internal constructor(
         val merchantDisplayName: String? = null,
     ) {
 
+        // Hide no-argument constructor init
+        internal constructor() : this(
+            appearance = PaymentSheet.Appearance(),
+            googlePayEnabled = false,
+            headerTextForSelectionScreen = null,
+            defaultBillingDetails = PaymentSheet.BillingDetails(),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            merchantDisplayName = null,
+        )
+
         fun newBuilder(): Builder {
             return Builder()
                 .appearance(appearance)
@@ -165,8 +172,7 @@ class CustomerSheet @Inject internal constructor(
         }
 
         @ExperimentalCustomerSheetApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class Builder {
+        class Builder internal constructor() {
             private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
             private var googlePayEnabled: Boolean = false
             private var headerTextForSelectionScreen: String? = null
@@ -211,10 +217,17 @@ class CustomerSheet @Inject internal constructor(
                 merchantDisplayName = merchantDisplayName,
             )
         }
+
+        companion object {
+
+            @JvmStatic
+            fun builder(): Builder {
+                return Builder()
+            }
+        }
     }
 
     @ExperimentalCustomerSheetApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
         /**
@@ -225,6 +238,7 @@ class CustomerSheet @Inject internal constructor(
          * @param customerAdapter The bridge to communicate with your server to manage a customer.
          * @param callback called when a [CustomerSheetResult] is available.
          */
+        @JvmStatic
         fun create(
             activity: ComponentActivity,
             configuration: Configuration,
@@ -250,6 +264,7 @@ class CustomerSheet @Inject internal constructor(
          * @param customerAdapter The bridge to communicate with your server to manage a customer.
          * @param callback called when a [CustomerSheetResult] is available.
          */
+        @JvmStatic
         fun create(
             fragment: Fragment,
             configuration: Configuration,

@@ -278,6 +278,12 @@ internal val RevolutPayRequirement = PaymentMethodRequirements(
     confirmPMFromCustomer = null
 )
 
+internal val AmazonPayRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = null
+)
+
 internal val MobilePayRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
     siRequirements = null,
@@ -321,6 +327,12 @@ internal val BlikRequirement = PaymentMethodRequirements(
 )
 
 internal val CashAppPayRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = false,
+)
+
+internal val GrabPayRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
     siRequirements = null,
     confirmPMFromCustomer = false,

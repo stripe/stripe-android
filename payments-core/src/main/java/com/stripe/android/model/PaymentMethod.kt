@@ -342,6 +342,13 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false
         ),
+        AmazonPay(
+            "amazon_pay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
         MobilePay(
             "mobilepay",
             isReusable = false,

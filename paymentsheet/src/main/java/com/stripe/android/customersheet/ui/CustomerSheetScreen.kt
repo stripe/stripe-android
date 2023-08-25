@@ -5,8 +5,6 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
@@ -150,9 +148,7 @@ internal fun AddCard(
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     Column(
-        modifier = modifier
-            .padding(horizontal = horizontalPadding)
-            .verticalScroll(rememberScrollState())
+        modifier = modifier.padding(horizontal = horizontalPadding),
     ) {
         H4Text(
             text = stringResource(id = R.string.stripe_paymentsheet_save_a_new_payment_method),

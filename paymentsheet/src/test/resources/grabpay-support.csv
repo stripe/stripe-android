@@ -1,0 +1,49 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+grabpay, true, true, off_session, false, card/grabpay, false, false, not available, false
+grabpay, true, true, off_session, false, card/eps/grabpay, false, false, not available, false
+grabpay, true, false, off_session, false, card/grabpay, false, false, not available, false
+grabpay, true, false, off_session, false, card/eps/grabpay, false, false, not available, false
+grabpay, true, true, on_session, false, card/grabpay, false, false, not available, false
+grabpay, true, true, on_session, false, card/eps/grabpay, false, false, not available, false
+grabpay, true, false, on_session, false, card/grabpay, false, false, not available, false
+grabpay, true, false, on_session, false, card/eps/grabpay, false, false, not available, false
+grabpay, true, true, null, false, card/grabpay, false, true, oneTime, true
+grabpay, true, true, null, false, card/eps/grabpay, false, true, oneTime, true
+grabpay, true, false, null, false, card/grabpay, false, true, oneTime, true
+grabpay, true, false, null, false, card/eps/grabpay, false, true, oneTime, true
+grabpay, false, true, off_session, false, card/grabpay, false, false, not available, false
+grabpay, false, true, off_session, false, card/eps/grabpay, false, false, not available, false
+grabpay, false, false, off_session, false, card/grabpay, false, false, not available, false
+grabpay, false, false, off_session, false, card/eps/grabpay, false, false, not available, false
+grabpay, false, true, on_session, false, card/grabpay, false, false, not available, false
+grabpay, false, true, on_session, false, card/eps/grabpay, false, false, not available, false
+grabpay, false, false, on_session, false, card/grabpay, false, false, not available, false
+grabpay, false, false, on_session, false, card/eps/grabpay, false, false, not available, false
+grabpay, false, true, null, false, card/grabpay, false, true, oneTime, true
+grabpay, false, true, null, false, card/eps/grabpay, false, true, oneTime, true
+grabpay, false, false, null, false, card/grabpay, false, true, oneTime, true
+grabpay, false, false, null, false, card/eps/grabpay, false, true, oneTime, true
+grabpay, true, true, off_session, true, card/grabpay, false, false, not available, false
+grabpay, true, true, off_session, true, card/eps/grabpay, false, false, not available, false
+grabpay, true, false, off_session, true, card/grabpay, false, false, not available, false
+grabpay, true, false, off_session, true, card/eps/grabpay, false, false, not available, false
+grabpay, true, true, on_session, true, card/grabpay, false, false, not available, false
+grabpay, true, true, on_session, true, card/eps/grabpay, false, false, not available, false
+grabpay, true, false, on_session, true, card/grabpay, false, false, not available, false
+grabpay, true, false, on_session, true, card/eps/grabpay, false, false, not available, false
+grabpay, true, true, null, true, card/grabpay, false, true, oneTime, true
+grabpay, true, true, null, true, card/eps/grabpay, false, true, oneTime, true
+grabpay, true, false, null, true, card/grabpay, false, true, oneTime, true
+grabpay, true, false, null, true, card/eps/grabpay, false, true, oneTime, true
+grabpay, false, true, off_session, true, card/grabpay, false, false, not available, false
+grabpay, false, true, off_session, true, card/eps/grabpay, false, false, not available, false
+grabpay, false, false, off_session, true, card/grabpay, false, false, not available, false
+grabpay, false, false, off_session, true, card/eps/grabpay, false, false, not available, false
+grabpay, false, true, on_session, true, card/grabpay, false, false, not available, false
+grabpay, false, true, on_session, true, card/eps/grabpay, false, false, not available, false
+grabpay, false, false, on_session, true, card/grabpay, false, false, not available, false
+grabpay, false, false, on_session, true, card/eps/grabpay, false, false, not available, false
+grabpay, false, true, null, true, card/grabpay, false, true, oneTime, true
+grabpay, false, true, null, true, card/eps/grabpay, false, true, oneTime, true
+grabpay, false, false, null, true, card/grabpay, false, true, oneTime, true
+grabpay, false, false, null, true, card/eps/grabpay, false, true, oneTime, true

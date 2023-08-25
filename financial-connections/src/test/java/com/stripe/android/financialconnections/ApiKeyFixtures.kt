@@ -84,9 +84,7 @@ internal object ApiKeyFixtures {
 
     fun partnerAccountList() = PartnerAccountsList(
         data = emptyList(),
-        hasMore = false,
         nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
-        url = ""
     )
 
     fun institution() = FinancialConnectionsInstitution(
