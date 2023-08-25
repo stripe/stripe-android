@@ -33,12 +33,18 @@ internal class PaymentSheetPage(
             .performClick()
     }
 
-    fun waitForText(text: String) {
+    fun waitForText(text: String, substring: Boolean = false) {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
-                .onAllNodes(hasText(text))
+                .onAllNodes(hasText(text, substring = substring))
                 .fetchSemanticsNodes().isNotEmpty()
         }
+    }
+
+    fun assertNoText(text: String, substring: Boolean = false) {
+        composeTestRule
+            .onAllNodes(hasText(text, substring = substring))
+            .fetchSemanticsNodes().isEmpty()
     }
 
     fun addPaymentMethod() {

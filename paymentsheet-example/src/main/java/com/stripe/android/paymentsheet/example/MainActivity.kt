@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
                 klass = CustomerSheetExampleActivity::class.java,
                 section = MenuItem.Section.CustomerSheet,
                 badge = MenuItem.Badge(
-                    labelResId = R.string.under_construction_badge_label,
+                    labelResId = R.string.beta_badge_label,
                 )
             ),
             MenuItem(

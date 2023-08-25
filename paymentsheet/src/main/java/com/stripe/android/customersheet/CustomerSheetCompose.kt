@@ -1,9 +1,6 @@
-@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-
 package com.stripe.android.customersheet
 
 import androidx.activity.compose.LocalActivityResultRegistryOwner
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalLifecycleOwner

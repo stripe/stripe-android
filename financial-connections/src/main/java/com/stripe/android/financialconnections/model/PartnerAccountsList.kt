@@ -1,38 +1,25 @@
 package com.stripe.android.financialconnections.model
 
+import android.os.Parcelable
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
  *
- * @param `data`
- * @param hasMore True if this list has another page of items after this one that can be fetched.
+ * @param data list of partner accounts
  * @param nextPane
- * @param url The URL where this list can be accessed.
- * @param count
- * @param repairAuthorizationEnabled
- * @param totalCount
  **/
 @Serializable
 internal data class PartnerAccountsList(
 
     @SerialName(value = "data") @Required val data: List<PartnerAccount>,
 
-    @SerialName(value = "has_more") @Required val hasMore: Boolean,
-
-    @SerialName(value = "next_pane") @Required val nextPane: FinancialConnectionsSessionManifest.Pane,
-
-    @SerialName(value = "url") @Required val url: String,
-
-    @SerialName(value = "count") val count: Int? = null,
-
-    @SerialName(value = "repair_authorization_enabled") val repairAuthorizationEnabled: Boolean? = null,
+    @SerialName(value = "next_pane") @Required val nextPane: Pane,
 
     @SerialName(value = "skip_account_selection") val skipAccountSelection: Boolean? = null,
-
-    @SerialName(value = "total_count") val totalCount: Int? = null
-
 )
 
 /**
@@ -55,6 +42,7 @@ internal data class PartnerAccountsList(
  * @param status
  */
 @Serializable
+@Parcelize
 @Suppress("ConstructorParameterNaming")
 internal data class PartnerAccount(
 
@@ -88,6 +76,8 @@ internal data class PartnerAccount(
 
     @SerialName(value = "allow_selection_message") val allowSelectionMessage: String? = null,
 
+    @SerialName(value = "next_pane_on_selection") val nextPaneOnSelection: Pane? = null,
+
     @SerialName(value = "institution_url") val institutionUrl: String? = null,
 
     @SerialName(value = "linked_account_id") val linkedAccountId: String? = null,
@@ -96,12 +86,10 @@ internal data class PartnerAccount(
 
     @SerialName(value = "status") val status: FinancialConnectionsAccount.Status? = null
 
-) {
+) : Parcelable {
 
     internal val allowSelection: Boolean
         get() = _allowSelection ?: true
 
-    internal val encryptedNumbers get() = displayableAccountNumbers?.let { "••••$it" } ?: ""
-
-    internal val fullName get() = "${this.name} $encryptedNumbers"
+    internal val redactedAccountNumbers: String? get() = displayableAccountNumbers?.let { "••••$it" }
 }

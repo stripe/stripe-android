@@ -14,9 +14,11 @@
     <string name="stripe_paymentsheet_payment_method_us_bank_account">US Bank Account</string>
     <string name="stripe_paymentsheet_payment_method_upi">UPI</string>
     <string name="stripe_paymentsheet_payment_method_cashapp">Cash App Pay</string>
+    <string name="stripe_paymentsheet_payment_method_grabpay">GrabPay</string>
 
     <string name="stripe_paymentsheet_payment_method_affirm">Affirm</string>
     <string name="stripe_paymentsheet_payment_method_revolut_pay">Revolut Pay</string>
+    <string name="stripe_paymentsheet_payment_method_amazon_pay">Amazon Pay</string>
     <string name="stripe_paymentsheet_payment_method_mobile_pay">MobilePay</string>
     <string name="stripe_paymentsheet_payment_method_zip">Zip</string>
     <!--    <string name="paymentsheet_payment_method_item_card_number">····%1$s</string>-->

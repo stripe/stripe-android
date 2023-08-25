@@ -6,7 +6,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
-import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.ConfirmVerification
@@ -15,6 +14,7 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
+import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.toNavigationCommand
 import com.stripe.android.financialconnections.utils.TestNavigationManager
@@ -148,7 +148,7 @@ class NetworkingLinkVerificationViewModelTest {
             whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
             // polling returns no networked accounts
             whenever(fetchNetworkedAccounts(any()))
-                .thenReturn(partnerAccountList().copy(data = emptyList()))
+                .thenReturn(NetworkedAccountsList(emptyList()))
 
             val viewModel = buildViewModel()
 
@@ -190,7 +190,7 @@ class NetworkingLinkVerificationViewModelTest {
             )
 
             // polling returns some networked accounts
-            val partnerAccountsList = partnerAccountList().copy(data = (listOf(partnerAccount())))
+            val partnerAccountsList = NetworkedAccountsList(data = (listOf(partnerAccount())))
             whenever(fetchNetworkedAccounts(any())).thenReturn(partnerAccountsList)
             whenever(markLinkVerified()).thenReturn((linkVerifiedManifest))
 
