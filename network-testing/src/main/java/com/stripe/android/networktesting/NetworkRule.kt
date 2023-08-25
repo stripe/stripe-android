@@ -11,11 +11,22 @@ import org.junit.runners.model.Statement
 import java.io.OutputStream
 import javax.net.ssl.HttpsURLConnection
 
-class NetworkRule : TestRule {
+class NetworkRule private constructor(
+    private val hostsToTrack: Set<String>,
+) : TestRule {
     private val mockWebServer = TestMockWebServer()
 
+    constructor(
+        hostsToTrack: List<String> = listOf(ApiRequest.API_HOST)
+    ) : this(hostsToTrack.map { it.hostFromUrl() }.toSet())
+
     override fun apply(base: Statement, description: Description): Statement {
-        return NetworkStatement(base, description, mockWebServer)
+        return NetworkStatement(
+            base,
+            description,
+            mockWebServer,
+            hostsToTrack,
+        )
     }
 
     fun enqueue(
@@ -41,6 +52,7 @@ private class NetworkStatement(
     private val baseStatement: Statement,
     private val description: Description,
     private val mockWebServer: TestMockWebServer,
+    private val hostsToTrack: Set<String>,
 ) : Statement() {
     override fun evaluate() {
         try {
@@ -54,7 +66,8 @@ private class NetworkStatement(
 
     private fun setup() {
         ConnectionFactory.Default.testHostCustomization = lambda@{ request ->
-            if (!request.url.startsWith(ApiRequest.API_HOST)) {
+            val requestHost = request.url.hostFromUrl()
+            if (!hostsToTrack.contains(requestHost)) {
                 throw RequestNotFoundException(
                     "Test request attempted to reach a non test endpoint. " +
                         "Url: ${request.url}"
@@ -64,7 +77,7 @@ private class NetworkStatement(
             return@lambda DelegatingStripeRequest(
                 request,
                 request.url.replace(
-                    ApiRequest.API_HOST,
+                    "https://$requestHost",
                     mockWebServer.baseUrl.toString().removeSuffix("/")
                 )
             )
@@ -98,7 +111,7 @@ private class DelegatingStripeRequest(
     private val testUrl: String,
 ) : StripeRequest() {
 
-    private val originalHost: String = original.url.toHttpUrl().host
+    private val originalHost: String = original.url.hostFromUrl()
 
     override val method: Method
         get() = original.method
@@ -124,3 +137,5 @@ private class DelegatingStripeRequest(
         original.writePostBody(outputStream)
     }
 }
+
+private fun String.hostFromUrl(): String = toHttpUrl().host

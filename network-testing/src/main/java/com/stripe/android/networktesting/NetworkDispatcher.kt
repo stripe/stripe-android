@@ -1,5 +1,6 @@
 package com.stripe.android.networktesting
 
+import android.util.Log
 import com.stripe.android.networktesting.RequestMatchers.composite
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
@@ -58,7 +59,10 @@ internal class NetworkDispatcher : Dispatcher() {
             return capturedEntry.responseFactory(testRequest)
         }
 
-        throw RequestNotFoundException("$request not mocked\n${testRequest.bodyText}")
+        val exception = RequestNotFoundException("$request not mocked\n${testRequest.bodyText}")
+        Log.d("NetworkDispatcher", "Request not found.", exception)
+        android.os.Process.killProcess(android.os.Process.myPid())
+        throw exception
     }
 }
 

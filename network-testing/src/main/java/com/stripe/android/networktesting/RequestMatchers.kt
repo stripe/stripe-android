@@ -116,6 +116,12 @@ object RequestMatchers {
         }
     }
 
+    fun hasQueryParam(param: String): RequestMatcher {
+        return ToStringRequestMatcher("queryParam($param)") { request ->
+            request.queryParameterValues(param).size == 1
+        }
+    }
+
     fun composite(vararg matchers: RequestMatcher): RequestMatcher {
         val friendlyName = "composite(${matchers.joinToString { it.toString() }})"
         return ToStringRequestMatcher(friendlyName) { request ->
