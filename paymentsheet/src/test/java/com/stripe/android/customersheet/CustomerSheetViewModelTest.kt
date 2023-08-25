@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -1589,6 +1590,108 @@ class CustomerSheetViewModelTest {
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
             verify(eventReporter).onAttachPaymentMethodFailed(
                 style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When attach with setup intent succeeds, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onSetupIntentClientSecretForCustomerAttach = {
+                    CustomerAdapter.Result.success("seti_123")
+                },
+                canCreateSetupIntents = true,
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onAttachPaymentMethodSucceeded(
+                style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When attach with setup intent fails, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onSetupIntentClientSecretForCustomerAttach = {
+                    CustomerAdapter.Result.failure(
+                        cause = Exception("Unable to retrieve setup intent"),
+                        displayMessage = "Something went wrong"
+                    )
+                },
+                canCreateSetupIntents = true,
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onAttachPaymentMethodFailed(
+                style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When attach with setup intent handle next action fails, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onSetupIntentClientSecretForCustomerAttach = {
+                    CustomerAdapter.Result.success("seti_123")
+                },
+                canCreateSetupIntents = true,
+            ),
+            intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+                enqueueFailureStep(
+                    cause = Exception("Unable to confirm setup intent"),
+                    message = "Something went wrong"
+                )
+            },
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onAttachPaymentMethodFailed(
+                style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
             )
             cancelAndIgnoreRemainingEvents()
         }
