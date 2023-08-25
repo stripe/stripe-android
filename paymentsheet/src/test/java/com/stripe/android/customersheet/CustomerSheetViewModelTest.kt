@@ -1354,6 +1354,23 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `When edit is tapped, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+            verify(eventReporter).onEditTapped()
+            viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+            verify(eventReporter).onEditCompleted()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `When remove payment method succeeds, event is reported`() = runTest {
         val eventReporter: CustomerSheetEventReporter = mock()
 
