@@ -10,6 +10,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
+import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -22,6 +23,8 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFailsWith
 
@@ -1324,6 +1327,30 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             assertThat(awaitViewState<SelectPaymentMethod>().isGooglePayEnabled).isTrue()
         }
+    }
+
+    @Test
+    fun `When select payment screen is presented, event is reported`() {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        createViewModel(
+            eventReporter = eventReporter,
+        )
+
+        verify(eventReporter).onScreenPresented(CustomerSheetEventReporter.Screen.SelectPaymentMethod)
+    }
+
+    @Test
+    fun `When add payment screen is presented, event is reported`() {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            eventReporter = eventReporter,
+        )
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+        verify(eventReporter).onScreenPresented(CustomerSheetEventReporter.Screen.AddPaymentMethod)
     }
 
     @Suppress("UNCHECKED_CAST")

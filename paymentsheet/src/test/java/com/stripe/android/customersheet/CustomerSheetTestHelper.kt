@@ -6,6 +6,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -61,6 +62,7 @@ object CustomerSheetTestHelper {
             googlePayEnabled = true
         ),
         isGooglePayAvailable: Boolean = true,
+        eventReporter: CustomerSheetEventReporter = mock()
     ): CustomerSheetViewModel {
         val formViewModel = FormViewModel(
             context = application,
@@ -123,7 +125,7 @@ object CustomerSheetTestHelper {
                 }
             },
             statusBarColor = { null },
-            eventReporter = mock(),
+            eventReporter = eventReporter,
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
         }
