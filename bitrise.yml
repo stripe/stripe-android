@@ -32,6 +32,7 @@ workflows:
       - conclude_all
     steps:
       - script@1:
+          timeout: 1200
           inputs:
             - content: ./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources
   test:
@@ -45,6 +46,7 @@ workflows:
       - conclude_all
     steps:
       - script@1:
+          timeout: 1200
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
   maestro-financial-connections:
@@ -57,12 +59,19 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
+      - android-build@1:
+          inputs:
+            - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
+            - module: financial-connections-example
+            - variant: release
+            - build_type: apk
+            - cache_level: all
       - script@1:
-          title: Execute Maestro tests (release)
+          title: Execute Maestro tests
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh release
+                bash ./scripts/execute_maestro_tests.sh
       - slack@3:
           is_always_run: true
           inputs:
@@ -89,12 +98,19 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
+      - android-build@1:
+          inputs:
+            - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
+            - module: financial-connections-example
+            - variant: debug
+            - build_type: apk
+            - cache_level: all
       - script@1:
-          title: Execute Maestro tests (debug)
+          title: Execute Maestro tests
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh debug
+                bash ./scripts/execute_maestro_tests.sh
       - slack@3:
           is_always_run: true
           inputs:
@@ -171,6 +187,7 @@ workflows:
             - boot_timeout: 600
       - script-runner@0:
           title: Execute instrumentation tests
+          timeout: 1200
           inputs:
             - file_path: ./scripts/execute_instrumentation_tests.sh
   run-paymentsheet-end-to-end-tests:
@@ -211,6 +228,7 @@ workflows:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
       - git-clone@8: { }
       - cache-pull@2: { }
+      - restore-gradle-cache@1: { }
       - script-runner@0:
           # Maven doesn't like java 17, so running it before.
           run_if: '{{getenv "NEEDS_ROBOLECTRIC" | ne ""}}'
@@ -241,6 +259,7 @@ workflows:
             - is_enable_public_page: "false"
           title: Deploy test results artifacts
       - cache-push@2: { }
+      - save-gradle-cache@1: { }
 meta:
   bitrise.io:
     stack: linux-docker-android-20.04

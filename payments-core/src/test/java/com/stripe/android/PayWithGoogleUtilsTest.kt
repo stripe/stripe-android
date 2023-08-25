@@ -66,4 +66,11 @@ class PayWithGoogleUtilsTest {
         val bigPrice = getPriceString(20000000L, Currency.getInstance("GBP"))
         assertThat(bigPrice).isEqualTo("200000.00")
     }
+
+    @Test
+    fun getPriceString_whenLocaleWithWrongSystemDecimalDigits_returnsExpectedValue() {
+        // Currency.defaultFractionDigits returns an incorrect value for LAK
+        val priceString = getPriceString(2_000_000L, Currency.getInstance("LAK"))
+        assertThat(priceString).isEqualTo("20000.00")
+    }
 }

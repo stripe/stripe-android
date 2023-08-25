@@ -4,9 +4,9 @@ package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
@@ -50,7 +49,9 @@ import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.PaneFooter
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.Payload
+import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -107,6 +108,7 @@ private fun LinkAccountPickerContent(
             is Success -> LinkAccountPickerLoaded(
                 scrollState = scrollState,
                 payload = payload(),
+                cta = state.cta,
                 selectedAccountId = state.selectedAccountId,
                 selectNetworkedAccountAsync = state.selectNetworkedAccountAsync,
                 onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick,
@@ -140,7 +142,8 @@ private fun LinkAccountPickerLoaded(
     onSelectAccountClick: () -> Unit,
     onNewBankAccountClick: () -> Unit,
     onAccountClick: (PartnerAccount) -> Unit,
-    scrollState: ScrollState
+    scrollState: ScrollState,
+    cta: String?
 ) {
     Column(
         Modifier
@@ -153,11 +156,11 @@ private fun LinkAccountPickerLoaded(
                 .weight(1f)
         ) {
             Spacer(modifier = Modifier.size(16.dp))
-            Title(merchantName = payload.businessName)
+            Title(payload.title)
             Spacer(modifier = Modifier.size(24.dp))
             payload.accounts.forEach { account ->
                 NetworkedAccountItem(
-                    selected = account.id == selectedAccountId,
+                    selected = account.first.id == selectedAccountId,
                     account = account,
                     onAccountClicked = { selected ->
                         if (selectNetworkedAccountAsync !is Loading) onAccountClick(selected)
@@ -165,7 +168,12 @@ private fun LinkAccountPickerLoaded(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
-            SelectNewAccount(onClick = onNewBankAccountClick)
+            SelectNewAccount(
+                text = payload.addNewAccount,
+                onClick = {
+                    if (selectNetworkedAccountAsync !is Loading) onNewBankAccountClick()
+                }
+            )
             Spacer(modifier = Modifier.size(16.dp))
         }
         PaneFooter(elevation = scrollState.elevation) {
@@ -181,7 +189,7 @@ private fun LinkAccountPickerLoaded(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                Text(text = stringResource(R.string.stripe_link_account_picker_cta))
+                Text(text = cta ?: stringResource(R.string.stripe_link_account_picker_cta))
             }
         }
     }
@@ -189,24 +197,21 @@ private fun LinkAccountPickerLoaded(
 
 @Composable
 private fun NetworkedAccountItem(
-    account: PartnerAccount,
+    account: Pair<PartnerAccount, NetworkedAccount>,
     onAccountClicked: (PartnerAccount) -> Unit,
     selected: Boolean
 ) {
+    val (partnerAccount, networkedAccount) = account
     AccountItem(
         selected = selected,
         onAccountClicked = onAccountClicked,
-        // Override the default disabled to show that the account is disconnected
-        account = account.copy(
-            allowSelectionMessage = stringResource(
-                id = R.string.stripe_link_account_picker_disconnected
-            )
-        )
+        account = partnerAccount,
+        networkedAccount = networkedAccount
     ) {
         val modifier = Modifier
             .size(24.dp)
             .clip(RoundedCornerShape(3.dp))
-        val institutionIcon = account.institution?.icon?.default
+        val institutionIcon = partnerAccount.institution?.icon?.default
         when {
             institutionIcon.isNullOrEmpty() -> InstitutionPlaceholder(modifier)
             else -> StripeImage(
@@ -223,7 +228,8 @@ private fun NetworkedAccountItem(
 
 @Composable
 private fun SelectNewAccount(
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    text: AddNewAccount
 ) {
     val shape = remember { RoundedCornerShape(8.dp) }
     Box(
@@ -241,20 +247,13 @@ private fun SelectNewAccount(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val brandColor = FinancialConnectionsTheme.colors.textBrand
-            Image(
-                modifier = Modifier
-                    .size(24.dp)
-                    .background(color = brandColor.copy(alpha = 0.1f), CircleShape)
-                    .padding(3.dp)
-                    .clip(CircleShape),
-                imageVector = Icons.Filled.Add,
-                colorFilter = ColorFilter.tint(brandColor),
-                contentDescription = stringResource(id = R.string.stripe_link_account_picker_new_account)
+            SelectNewAccountIcon(
+                icon = text.icon?.default,
+                contentDescription = text.body ?: "",
             )
             Spacer(modifier = Modifier.size(16.dp))
             Text(
-                text = stringResource(id = R.string.stripe_link_account_picker_new_account),
+                text = text.body ?: "",
                 style = FinancialConnectionsTheme.typography.body,
                 color = FinancialConnectionsTheme.colors.textBrand
             )
@@ -263,22 +262,46 @@ private fun SelectNewAccount(
 }
 
 @Composable
+fun SelectNewAccountIcon(
+    icon: String?,
+    contentDescription: String,
+) {
+    Box {
+        val brandColor = FinancialConnectionsTheme.colors.textBrand
+        val modifier = Modifier
+            .size(12.dp)
+            .align(Alignment.Center)
+        val placeholderImage = @Composable {
+            Image(
+                modifier = modifier,
+                imageVector = Icons.Filled.Add,
+                contentScale = ContentScale.FillBounds,
+                colorFilter = ColorFilter.tint(brandColor),
+                contentDescription = contentDescription
+            )
+        }
+        Canvas(modifier = Modifier.size(24.dp)) {
+            drawCircle(color = brandColor.copy(alpha = 0.1f))
+        }
+        when {
+            icon.isNullOrEmpty() -> placeholderImage()
+            else -> StripeImage(
+                url = icon,
+                imageLoader = LocalImageLoader.current,
+                contentDescription = null,
+                modifier = modifier.padding(),
+                errorContent = { placeholderImage() }
+            )
+        }
+    }
+}
+
+@Composable
 private fun Title(
-    merchantName: String?
+    title: String
 ) {
     AnnotatedText(
-        text = TextResource.Text(
-            when {
-                merchantName != null -> stringResource(
-                    R.string.stripe_link_account_picker_title,
-                    merchantName
-                )
-
-                else -> stringResource(
-                    R.string.stripe_link_account_picker_title_nobusiness
-                )
-            }
-        ),
+        text = TextResource.Text(title),
         defaultStyle = FinancialConnectionsTheme.typography.subtitle,
         annotationStyles = emptyMap(),
         onClickableTextClick = {}

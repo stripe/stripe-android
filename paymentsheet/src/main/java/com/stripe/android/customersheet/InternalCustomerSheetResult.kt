@@ -58,7 +58,7 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
         override fun toPublicResult(
             paymentOptionFactory: PaymentOptionFactory,
         ): CustomerSheetResult {
-            return CustomerSheetResult.Error(exception)
+            return CustomerSheetResult.Failed(exception)
         }
     }
 

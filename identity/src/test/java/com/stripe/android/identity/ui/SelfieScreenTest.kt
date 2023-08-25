@@ -190,9 +190,9 @@ class SelfieScreenTest {
         newDisplayState: IdentityScanState?,
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
-        newDisplayState?.let { newDisplayState ->
+        newDisplayState?.let { state ->
             displayStateChangedFlow.update {
-                newDisplayState to mock()
+                state to mock()
             }
         }
         composeTestRule.setContent {

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
@@ -194,7 +195,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     }
                     LazyColumn {
                         items(state.status) { item ->
-                            Row(Modifier.padding(8.dp), verticalAlignment = Alignment.Top) {
+                            Row(Modifier.padding(4.dp), verticalAlignment = Alignment.Top) {
                                 Canvas(
                                     modifier = Modifier
                                         .padding(end = 8.dp, top = 6.dp)
@@ -202,7 +203,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                                 ) {
                                     drawCircle(Color.Black)
                                 }
-                                Text(text = item, fontSize = 12.sp)
+                                SelectionContainer {
+                                    Text(text = item, fontSize = 12.sp)
+                                }
                             }
                         }
                     }
@@ -217,7 +220,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         onEmailChange: (String) -> Unit
     ) {
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .semantics { testTagsAsResourceId = true }
                 .testTag("email_input"),
             value = email,
@@ -234,8 +238,15 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             connectionsDebugSharedPrefs.edit {
                 when (selectedOption) {
                     NativeOverride.None -> clear()
-                    NativeOverride.Native -> putBoolean("financial_connections_override_native", true)
-                    NativeOverride.Web -> putBoolean("financial_connections_override_native", false)
+                    NativeOverride.Native -> putBoolean(
+                        "financial_connections_override_native",
+                        true
+                    )
+
+                    NativeOverride.Web -> putBoolean(
+                        "financial_connections_override_native",
+                        false
+                    )
                 }
             }
         }

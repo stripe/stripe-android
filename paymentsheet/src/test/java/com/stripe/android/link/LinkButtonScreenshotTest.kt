@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.LinkButton
+import com.stripe.android.utils.screenshots.FontSize
 import com.stripe.android.utils.screenshots.PaparazziRule
 import com.stripe.android.utils.screenshots.SystemAppearance
 import org.junit.Rule
@@ -14,6 +15,7 @@ internal class LinkButtonScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
         arrayOf(SystemAppearance.LightTheme),
+        FontSize.values(),
         boxModifier = Modifier
             .padding(0.dp)
             .fillMaxWidth(),
@@ -44,6 +46,20 @@ internal class LinkButtonScreenshotTest {
     fun testExistingUserDisabled() {
         paparazziRule.snapshot {
             LinkButton(email = "jaynewstrom@test.com", enabled = false, onClick = { })
+        }
+    }
+
+    @Test
+    fun testExistingUserWithLongEmail() {
+        paparazziRule.snapshot {
+            LinkButton(email = "jaynewstrom12345678987654321@test.com", enabled = true, onClick = { })
+        }
+    }
+
+    @Test
+    fun testExistingUserWithLongEmailDisabled() {
+        paparazziRule.snapshot {
+            LinkButton(email = "jaynewstrom12345678987654321@test.com", enabled = false, onClick = { })
         }
     }
 }

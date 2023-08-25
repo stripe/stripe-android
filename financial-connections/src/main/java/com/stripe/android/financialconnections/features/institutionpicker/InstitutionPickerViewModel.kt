@@ -12,8 +12,10 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.FeaturedInstitutionsLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.InstitutionSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.SearchScroll
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.SearchSucceeded
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
@@ -32,6 +34,7 @@ import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @Suppress("LongParameterList")
@@ -53,17 +56,22 @@ internal class InstitutionPickerViewModel @Inject constructor(
         logErrors()
         suspend {
             val manifest = getManifest()
-            val institutions = kotlin.runCatching {
-                featuredInstitutions(
-                    clientSecret = configuration.financialConnectionsSessionClientSecret
-                )
-            }.onFailure {
-                logger.error("Error fetching featured institutions", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(Pane.INSTITUTION_PICKER, it))
-            }
-            val institutionsResult = institutions.getOrNull()?.data ?: emptyList()
+            val result: Result<Pair<List<FinancialConnectionsInstitution>, Long>> =
+                kotlin.runCatching {
+                    measureTimeMillis {
+                        featuredInstitutions(
+                            clientSecret = configuration.financialConnectionsSessionClientSecret
+                        ).data
+                    }
+                }.onFailure {
+                    logger.error("Error fetching featured institutions", it)
+                    eventTracker.track(FinancialConnectionsEvent.Error(Pane.INSTITUTION_PICKER, it))
+                }
+
+            val (institutions, duration) = result.getOrNull() ?: Pair(emptyList(), 0L)
             Payload(
-                featuredInstitutions = institutionsResult,
+                featuredInstitutionsDuration = duration,
+                featuredInstitutions = institutions,
                 searchDisabled = manifest.institutionSearchDisabled,
                 allowManualEntry = manifest.allowManualEntry
             )
@@ -73,7 +81,16 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private fun logErrors() {
         onAsync(
             InstitutionPickerState::payload,
-            onSuccess = { eventTracker.track(PaneLoaded(Pane.INSTITUTION_PICKER)) },
+            onSuccess = { payload ->
+                eventTracker.track(PaneLoaded(Pane.INSTITUTION_PICKER))
+                eventTracker.track(
+                    FeaturedInstitutionsLoaded(
+                        pane = Pane.INSTITUTION_PICKER,
+                        duration = payload.featuredInstitutionsDuration,
+                        institutionIds = payload.featuredInstitutions.map { it.id }.toSet()
+                    )
+                )
+            },
             onFail = {
                 eventTracker.logError(
                     extraMessage = "Error fetching initial payload",
@@ -191,6 +208,20 @@ internal class InstitutionPickerViewModel @Inject constructor(
         )
     }
 
+    fun onScrollChanged() {
+        viewModelScope.launch {
+            eventTracker.track(
+                SearchScroll(
+                    pane = Pane.INSTITUTION_PICKER,
+                    institutionIds = awaitState().searchInstitutions()
+                        ?.data
+                        ?.map { it.id }
+                        ?.toSet() ?: emptySet(),
+                )
+            )
+        }
+    }
+
     companion object :
         MavericksViewModelFactory<InstitutionPickerViewModel, InstitutionPickerState> {
 
@@ -222,6 +253,7 @@ internal data class InstitutionPickerState(
     data class Payload(
         val featuredInstitutions: List<FinancialConnectionsInstitution>,
         val allowManualEntry: Boolean,
-        val searchDisabled: Boolean
+        val searchDisabled: Boolean,
+        val featuredInstitutionsDuration: Long
     )
 }
