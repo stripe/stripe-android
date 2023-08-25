@@ -603,6 +603,9 @@ internal class CustomerSheetViewModel @Inject constructor(
     private suspend fun attachPaymentMethod(paymentMethod: PaymentMethod) {
         customerAdapter.attachPaymentMethod(paymentMethod.id!!)
             .onSuccess {
+                eventReporter.onAttachPaymentMethodSucceeded(
+                    style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
+                )
                 safeUpdateSelectPaymentMethodState {
                     it.copy(
                         savedPaymentMethods = listOf(paymentMethod) + it.savedPaymentMethods,
@@ -615,6 +618,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                 }
                 onBackPressed()
             }.onFailure { cause, displayMessage ->
+                eventReporter.onAttachPaymentMethodFailed(
+                    style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
+                )
                 logger.error(
                     msg = "Failed to attach payment method to Customer: $paymentMethod",
                     t = cause,

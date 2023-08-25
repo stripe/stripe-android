@@ -1529,6 +1529,71 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When attach without setup intent succeeds, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onAttachPaymentMethod = {
+                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD)
+                },
+                canCreateSetupIntents = false,
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onAttachPaymentMethodSucceeded(
+                style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When attach without setup intent fails, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onAttachPaymentMethod = {
+                    CustomerAdapter.Result.failure(
+                        cause = Exception("Unable to attach payment option"),
+                        displayMessage = "Something went wrong"
+                    )
+                },
+                canCreateSetupIntents = false,
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onAttachPaymentMethodFailed(
+                style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     private suspend inline fun <R> ReceiveTurbine<*>.awaitViewState(): R {
         return awaitItem() as R
