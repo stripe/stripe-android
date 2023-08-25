@@ -14,11 +14,20 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.Logger
 import javax.inject.Inject
 
+/**
+ * Custom Tabs Service Connection manager implementation.
+ *
+ * Usage:
+ *
+ * 1. Register the CustomTabsManager as a lifecycle observer in your activity.
+ * 2. (Optional) Call [CustomTabsManager.mayLaunchUrl] to pre-fetch the url.
+ * 3. Call [CustomTabsManager.openCustomTab] to open URLs.
+ */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface CustomTabsManager : DefaultLifecycleObserver {
 
     /**
-     * Opens the URL on a Custom Tab if possible. Otherwise fallsback to opening it on a WebView.
+     * Opens the URL on a Custom Tab if possible.
      *
      * @param activity The host activity.
      * @param uri the Uri to be opened.
