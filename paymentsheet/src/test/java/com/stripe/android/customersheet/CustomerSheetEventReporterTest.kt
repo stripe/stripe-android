@@ -72,7 +72,7 @@ class CustomerSheetEventReporterTest {
 
     @Test
     fun `onConfirmPaymentMethodSucceeded should fire analytics request with expected event value`() {
-        eventReporter.onConfirmPaymentMethodSucceeded(PaymentMethod.Type.Card)
+        eventReporter.onConfirmPaymentMethodSucceeded(PaymentMethod.Type.Card.code)
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_SUCCEEDED &&
@@ -83,7 +83,7 @@ class CustomerSheetEventReporterTest {
 
     @Test
     fun `onConfirmPaymentMethodFailed should fire analytics request with expected event value`() {
-        eventReporter.onConfirmPaymentMethodFailed(PaymentMethod.Type.Card)
+        eventReporter.onConfirmPaymentMethodFailed(PaymentMethod.Type.Card.code)
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_FAILED &&

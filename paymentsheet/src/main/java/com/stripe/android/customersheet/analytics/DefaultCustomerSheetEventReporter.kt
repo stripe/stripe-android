@@ -3,7 +3,6 @@ package com.stripe.android.customersheet.analytics
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.model.PaymentMethod
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,7 +21,7 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
         )
     }
 
-    override fun onConfirmPaymentMethodSucceeded(type: PaymentMethod.Type) {
+    override fun onConfirmPaymentMethodSucceeded(type: String) {
         fireEvent(
             CustomerSheetEvent.ConfirmPaymentMethodSucceeded(
                 type = type
@@ -30,7 +29,7 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
         )
     }
 
-    override fun onConfirmPaymentMethodFailed(type: PaymentMethod.Type) {
+    override fun onConfirmPaymentMethodFailed(type: String) {
         fireEvent(
             CustomerSheetEvent.ConfirmPaymentMethodFailed(
                 type = type

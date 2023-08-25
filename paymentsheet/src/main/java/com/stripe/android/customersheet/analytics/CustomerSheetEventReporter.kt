@@ -1,7 +1,5 @@
 package com.stripe.android.customersheet.analytics
 
-import com.stripe.android.model.PaymentMethod
-
 internal interface CustomerSheetEventReporter {
 
     /**
@@ -12,12 +10,12 @@ internal interface CustomerSheetEventReporter {
     /**
      * User attempted to confirm their saved payment method selection and succeeded
      */
-    fun onConfirmPaymentMethodSucceeded(type: PaymentMethod.Type)
+    fun onConfirmPaymentMethodSucceeded(type: String)
 
     /**
      * User attempted to confirm their saved payment method selection and failed
      */
-    fun onConfirmPaymentMethodFailed(type: PaymentMethod.Type)
+    fun onConfirmPaymentMethodFailed(type: String)
 
     /**
      * User tapped on edit button

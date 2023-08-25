@@ -1404,6 +1404,114 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When google pay is confirmed, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState.copy(
+                    isGooglePayEnabled = true,
+                ),
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnItemSelected(PaymentSelection.GooglePay))
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onConfirmPaymentMethodSucceeded("google_pay")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When google pay selection errors, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState.copy(
+                    isGooglePayEnabled = true,
+                ),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onSetSelectedPaymentOption = {
+                    CustomerAdapter.Result.failure(
+                        cause = Exception("Unable to set payment option"),
+                        displayMessage = "Something went wrong"
+                    )
+                }
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnItemSelected(PaymentSelection.GooglePay))
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onConfirmPaymentMethodFailed("google_pay")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When payment selection is confirmed, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    PaymentSelection.Saved(
+                        CARD_PAYMENT_METHOD,
+                    )
+                )
+            )
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onConfirmPaymentMethodSucceeded("card")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When payment selection errors, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onSetSelectedPaymentOption = {
+                    CustomerAdapter.Result.failure(
+                        cause = Exception("Unable to set payment option"),
+                        displayMessage = "Something went wrong"
+                    )
+                }
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    PaymentSelection.Saved(
+                        CARD_PAYMENT_METHOD,
+                    )
+                )
+            )
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onConfirmPaymentMethodFailed("card")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     private suspend inline fun <R> ReceiveTurbine<*>.awaitViewState(): R {
         return awaitItem() as R

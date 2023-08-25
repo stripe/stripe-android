@@ -1,7 +1,6 @@
 package com.stripe.android.customersheet.analytics
 
 import com.stripe.android.core.networking.AnalyticsEvent
-import com.stripe.android.model.PaymentMethod
 
 internal sealed class CustomerSheetEvent : AnalyticsEvent {
 
@@ -20,19 +19,19 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
     }
 
     class ConfirmPaymentMethodSucceeded(
-        type: PaymentMethod.Type,
+        type: String,
     ) : CustomerSheetEvent() {
         override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_PAYMENT_METHOD_TYPE to type.code
+            FIELD_PAYMENT_METHOD_TYPE to type
         )
         override val eventName: String = CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_SUCCEEDED
     }
 
     class ConfirmPaymentMethodFailed(
-        type: PaymentMethod.Type,
+        type: String,
     ) : CustomerSheetEvent() {
         override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_PAYMENT_METHOD_TYPE to type.code
+            FIELD_PAYMENT_METHOD_TYPE to type
         )
         override val eventName: String = CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_FAILED
     }
