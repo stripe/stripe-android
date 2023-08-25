@@ -33,13 +33,13 @@ internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent>() {
     ) {
         val args = when (authenticatable.paymentMethod?.type) {
             PaymentMethod.Type.Upi ->
-                 PollingContract.Args(
+                PollingContract.Args(
                     clientSecret = requireNotNull(authenticatable.clientSecret),
                     statusBarColor = host.statusBarColor,
                     timeLimitInSeconds = UPI_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = UPI_INITIAL_DELAY_IN_SECONDS,
                     maxAttempts = UPI_MAX_ATTEMPTS,
-                     ctaText = R.string.stripe_upi_polling_message,
+                    ctaText = R.string.stripe_upi_polling_message,
                 )
             PaymentMethod.Type.Blik ->
                 PollingContract.Args(
