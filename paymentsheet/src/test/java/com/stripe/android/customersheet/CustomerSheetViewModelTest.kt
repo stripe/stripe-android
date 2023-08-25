@@ -1353,6 +1353,57 @@ class CustomerSheetViewModelTest {
         verify(eventReporter).onScreenPresented(CustomerSheetEventReporter.Screen.AddPaymentMethod)
     }
 
+    @Test
+    fun `When remove payment method succeeds, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                onDetachPaymentMethod = {
+                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD)
+                }
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemRemoved(
+                    CARD_PAYMENT_METHOD
+                )
+            )
+            verify(eventReporter).onRemovePaymentMethodSucceeded()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When remove payment method failed, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                onDetachPaymentMethod = {
+                    CustomerAdapter.Result.failure(
+                        cause = Exception("Unable to detach payment option"),
+                        displayMessage = "Something went wrong"
+                    )
+                }
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemRemoved(
+                    CARD_PAYMENT_METHOD
+                )
+            )
+            verify(eventReporter).onRemovePaymentMethodFailed()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     private suspend inline fun <R> ReceiveTurbine<*>.awaitViewState(): R {
         return awaitItem() as R
