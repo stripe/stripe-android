@@ -4,6 +4,7 @@ import android.app.Application
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.browser.customtabs.CustomTabsManager
+import com.stripe.android.core.browser.customtabs.CustomTabsManagerImpl
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
@@ -58,15 +59,13 @@ internal interface FinancialConnectionsSheetNativeModule {
         impl: NavigationManagerImpl
     ): NavigationManager
 
-    companion object {
+    @Singleton
+    @Binds
+    fun bindsCustomTabsManager(
+        impl: CustomTabsManagerImpl,
+    ): CustomTabsManager
 
-        @Provides
-        @Singleton
-        fun providesCustomTabsManager(
-            logger: Logger,
-        ): CustomTabsManager = CustomTabsManager(
-            logger = logger
-        )
+    companion object {
 
         @Provides
         @Singleton

@@ -6,10 +6,13 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Build
+import androidx.annotation.RestrictTo
 import androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION
 import com.stripe.android.core.Logger
+import javax.inject.Inject
 
-internal class GetCustomTabsPackage(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class GetCustomTabsPackage @Inject constructor(
     val logger: Logger
 ) {
 

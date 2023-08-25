@@ -34,16 +34,6 @@ interface CustomTabsManager : DefaultLifecycleObserver {
      * Warms up the browser for a given URL, so that it loads faster when launched.
      */
     fun mayLaunchUrl(url: String): Boolean
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    companion object {
-        operator fun invoke(logger: Logger): CustomTabsManager {
-            return CustomTabsManagerImpl(
-                logger,
-                GetCustomTabsPackage(logger)
-            )
-        }
-    }
 }
 
 /**
@@ -51,7 +41,7 @@ interface CustomTabsManager : DefaultLifecycleObserver {
  *
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-private class CustomTabsManagerImpl @Inject constructor(
+class CustomTabsManagerImpl @Inject constructor(
     private val logger: Logger,
     private val getCustomTabsPackage: GetCustomTabsPackage
 ) : CustomTabsManager {
