@@ -42,6 +42,7 @@ import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.utils.mapAsStateFlow
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -184,11 +185,15 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private fun loadPaymentMethods() {
         viewModelScope.launch {
-            val paymentMethodsResult = customerAdapter.retrievePaymentMethods()
-            val selectedPaymentOption = customerAdapter.retrieveSelectedPaymentOption()
+            val paymentMethodsResult = async {
+                customerAdapter.retrievePaymentMethods()
+            }
+            val selectedPaymentOption = async {
+                customerAdapter.retrieveSelectedPaymentOption()
+            }
 
-            paymentMethodsResult.flatMap { paymentMethods ->
-                selectedPaymentOption.map { paymentOption ->
+            paymentMethodsResult.await().flatMap { paymentMethods ->
+                selectedPaymentOption.await().map { paymentOption ->
                     Pair(paymentMethods, paymentOption)
                 }
             }.map {
