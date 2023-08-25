@@ -65,7 +65,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val customerAdapter: CustomerAdapter,
     private val lpmRepository: LpmRepository,
     private val statusBarColor: () -> Int?,
-    @Suppress("unused") private val eventReporter: CustomerSheetEventReporter,
+    private val eventReporter: CustomerSheetEventReporter,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
@@ -628,22 +628,17 @@ internal class CustomerSheetViewModel @Inject constructor(
             customerAdapter.setSelectedPaymentOption(
                 savedPaymentSelection?.toPaymentOption()
             ).onSuccess {
-                _result.tryEmit(
-                    InternalCustomerSheetResult.Selected(
-                        paymentSelection = savedPaymentSelection,
-                    )
+                confirmPaymentSelection(
+                    paymentSelection = savedPaymentSelection,
+                    type = savedPaymentSelection?.paymentMethod?.type?.code,
                 )
             }.onFailure { cause, displayMessage ->
-                logger.error(
-                    msg = "Failed to persist the payment selection: $savedPaymentSelection",
-                    t = cause,
+                confirmPaymentSelectionError(
+                    paymentSelection = savedPaymentSelection,
+                    type = savedPaymentSelection?.paymentMethod?.type?.code,
+                    cause = cause,
+                    displayMessage = displayMessage,
                 )
-                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                    it.copy(
-                        errorMessage = displayMessage,
-                        isProcessing = false,
-                    )
-                }
             }
         }
     }
@@ -652,23 +647,50 @@ internal class CustomerSheetViewModel @Inject constructor(
         viewModelScope.launch {
             customerAdapter.setSelectedPaymentOption(CustomerAdapter.PaymentOption.GooglePay)
                 .onSuccess {
-                    _result.tryEmit(
-                        InternalCustomerSheetResult.Selected(
-                            paymentSelection = PaymentSelection.GooglePay,
-                        )
+                    confirmPaymentSelection(
+                        paymentSelection = PaymentSelection.GooglePay,
+                        type = "google_pay"
                     )
                 }.onFailure { cause, displayMessage ->
-                    logger.error(
-                        msg = "Failed to persist Google Pay",
-                        t = cause,
+                    confirmPaymentSelectionError(
+                        paymentSelection = PaymentSelection.GooglePay,
+                        type = "google_pay",
+                        cause = cause,
+                        displayMessage = displayMessage,
                     )
-                    updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                        it.copy(
-                            errorMessage = displayMessage,
-                            isProcessing = false,
-                        )
-                    }
                 }
+        }
+    }
+
+    private fun confirmPaymentSelection(paymentSelection: PaymentSelection?, type: String?) {
+        type?.let {
+            eventReporter.onConfirmPaymentMethodSucceeded(type)
+        }
+        _result.tryEmit(
+            InternalCustomerSheetResult.Selected(
+                paymentSelection = paymentSelection,
+            )
+        )
+    }
+
+    private fun confirmPaymentSelectionError(
+        paymentSelection: PaymentSelection?,
+        type: String?,
+        cause: Throwable,
+        displayMessage: String?
+    ) {
+        type?.let {
+            eventReporter.onConfirmPaymentMethodFailed(type)
+        }
+        logger.error(
+            msg = "Failed to persist payment selection: $paymentSelection",
+            t = cause,
+        )
+        updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+            it.copy(
+                errorMessage = displayMessage,
+                isProcessing = false,
+            )
         }
     }
 
