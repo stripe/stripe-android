@@ -49,7 +49,14 @@ internal class StripeCustomerAdapter @Inject constructor(
                     id = customerEphemeralKey.customerId,
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 ),
-                types = listOf(PaymentMethod.Type.Card),
+                types = listOfNotNull(
+                    PaymentMethod.Type.Card,
+                    if (CustomerSheetACHV2Flag) {
+                        PaymentMethod.Type.USBankAccount
+                    } else {
+                        null
+                    },
+                ),
                 silentlyFail = false,
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
