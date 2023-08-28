@@ -217,9 +217,7 @@ class PlaygroundTestDriver(
 
         pressBuy()
 
-        if (testParameters.authorizationAction != AuthorizeAction.PollingSucceedsAfterDelay) {
-            doAuthorization()
-        }
+        doAuthorization()
 
         teardown()
     }
@@ -382,14 +380,9 @@ class PlaygroundTestDriver(
     private fun doAuthorization() {
         selectors.apply {
             if (testParameters.authorizationAction != null && authorizeAction != null) {
-                // If a specific browser is requested we will use it, otherwise, we will
-                // select the first browser found
                 if (testParameters.authorizationAction != AuthorizeAction.PollingSucceedsAfterDelay) {
-                    // No browser is needed when using the built in authorization for non redirect flows
-
-                    // If there is only one browser installed we will use it
-                    Assume.assumeTrue(getInstalledBrowsers().size > 1)
-
+                    // If a specific browser is requested we will use it, otherwise, we will
+                    // select the first browser found
                     val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
 
                     // If there are multiple browser there is a browser selector window
