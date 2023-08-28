@@ -416,6 +416,13 @@ class PlaygroundTestDriver(
 
                 when (val authAction = testParameters.authorizationAction) {
                     is AuthorizeAction.Authorize -> {}
+                    is AuthorizeAction.PollingSucceedsAfterDelay -> {
+                        buyButton.apply {
+                            waitProcessingComplete()
+                            isEnabled()
+                            isDisplayed()
+                        }
+                    }
                     is AuthorizeAction.Cancel -> {
                         buyButton.apply {
                             waitProcessingComplete()
@@ -450,7 +457,7 @@ class PlaygroundTestDriver(
             }
         }
 
-        val isDone = testParameters.authorizationAction in setOf(AuthorizeAction.Authorize, null)
+        val isDone = testParameters.authorizationAction in setOf(AuthorizeAction.Authorize, AuthorizeAction.PollingSucceedsAfterDelay, null)
 
         if (isDone) {
             waitForPlaygroundActivity()
