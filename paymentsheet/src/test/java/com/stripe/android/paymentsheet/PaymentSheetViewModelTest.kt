@@ -76,6 +76,7 @@ import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.robolectric.RobolectricTestRunner
@@ -1356,7 +1357,8 @@ internal class PaymentSheetViewModelTest {
         viewModel.registerFromActivity(DummyActivityResultCaller(), lifecycleOwner)
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
-        verify(paymentLauncher.authenticatorRegistry).unregisterAuthenticator(any())
+        // unregisterAuthenticator should be called for each call to registerAuthenticator.
+        verify(paymentLauncher.authenticatorRegistry, times(2)).unregisterAuthenticator(any())
     }
 
     @Test
