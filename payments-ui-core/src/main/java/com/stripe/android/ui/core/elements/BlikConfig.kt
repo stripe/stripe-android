@@ -35,13 +35,22 @@ class BlikConfig : TextFieldConfig {
 
     override fun determineState(input: String): TextFieldState {
         val isValid = blikPattern.matches(input) && input.length <= BLIK_MAX_LENGTH
-
         return if (input.isEmpty()) {
             TextFieldStateConstants.Error.Blank
         } else if (isValid) {
             TextFieldStateConstants.Valid.Limitless
+        } else if (!input.all { VALID_INPUT_RANGES.contains(it) }) {
+            TextFieldStateConstants.Error.Invalid(
+                errorMessageResId = R.string.stripe_invalid_blik_code
+            )
+        } else if (input.length < BLIK_MAX_LENGTH) {
+            TextFieldStateConstants.Error.Incomplete(
+                errorMessageResId = R.string.stripe_incomplete_blik_code
+            )
         } else {
-            TextFieldStateConstants.Error.Incomplete(errorMessageResId = R.string.stripe_invalid_blik_code)
+            TextFieldStateConstants.Error.Invalid(
+                errorMessageResId = R.string.stripe_invalid_blik_code
+            )
         }
     }
 
