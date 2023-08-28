@@ -161,6 +161,29 @@ class CustomerAdapterTest {
     }
 
     @Test
+    fun `When CustomerSheetACHV2Flag is enabled, retrievePaymentMethods requests US Bank Account payment methods`() = runTest {
+        CustomerSheetACHV2Flag = true
+        val customerRepository = mock<CustomerRepository>()
+
+        val adapter = createAdapter(
+            customerRepository = customerRepository
+        )
+
+        adapter.retrievePaymentMethods()
+
+        verify(customerRepository).getPaymentMethods(
+            customerConfig = any(),
+            types = eq(
+                listOf(
+                    PaymentMethod.Type.Card,
+                    PaymentMethod.Type.USBankAccount,
+                )
+            ),
+            silentlyFail = eq(false),
+        )
+    }
+
+    @Test
     fun `retrievePaymentMethods returns failure when customer is not fetched`() = runTest {
         val error = CustomerAdapter.Result.failure<CustomerEphemeralKey>(
             cause = Exception("Cannot get customer"),
