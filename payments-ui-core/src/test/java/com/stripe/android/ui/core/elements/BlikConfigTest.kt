@@ -1,4 +1,3 @@
-
 package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
