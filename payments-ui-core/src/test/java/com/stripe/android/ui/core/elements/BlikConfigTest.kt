@@ -1,3 +1,4 @@
+
 package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
@@ -33,11 +34,12 @@ class BlikConfigTest {
     }
 
     @Test
-    fun `Treats blikCode more than six digits as invalid`() {
+    fun `Treats input more than six digits as invalid`() {
         assertThat(config.determineState("1234567")).isInstanceOf(Invalid::class.java)
     }
+
     @Test
-    fun `Treats non-numeric blikCode as blank`() {
+    fun `Treats non-numeric input as blank`() {
         assertThat(config.determineState("12a456")).isInstanceOf(Invalid::class.java)
         assertThat(config.determineState("abcdef")).isInstanceOf(Invalid::class.java)
         assertThat(config.determineState("stripe.com")).isInstanceOf(Invalid::class.java)

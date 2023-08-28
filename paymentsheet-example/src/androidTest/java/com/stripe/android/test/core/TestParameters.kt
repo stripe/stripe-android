@@ -88,7 +88,7 @@ sealed interface AuthorizeAction {
 
     abstract val text: String
 
-    object PollingSucceedsAfterDelay: AuthorizeAction {
+    object PollingSucceedsAfterDelay : AuthorizeAction {
         override val text: String = "POLLING SUCCEEDS AFTER DELAY"
     }
 

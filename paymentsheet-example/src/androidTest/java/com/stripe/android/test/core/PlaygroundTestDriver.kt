@@ -217,7 +217,9 @@ class PlaygroundTestDriver(
 
         pressBuy()
 
-        doAuthorization()
+        if (testParameters.authorizationAction != AuthorizeAction.PollingSucceedsAfterDelay) {
+            doAuthorization()
+        }
 
         teardown()
     }
@@ -387,7 +389,6 @@ class PlaygroundTestDriver(
 
                     // If there is only one browser installed we will use it
                     Assume.assumeTrue(getInstalledBrowsers().size > 1)
-
 
                     val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
 
