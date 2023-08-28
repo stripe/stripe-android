@@ -48,9 +48,6 @@ import kotlin.coroutines.CoroutineContext
 internal abstract class PaymentSheetCommonModule {
 
     @Binds
-    abstract fun bindsDurationProvider(impl: DefaultDurationProvider): DurationProvider
-
-    @Binds
     abstract fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
 
     @Binds
@@ -131,6 +128,12 @@ internal abstract class PaymentSheetCommonModule {
         ): String {
             val application = appContext as Application
             return application.applicationInfo.loadLabel(application.packageManager).toString()
+        }
+
+        @Provides
+        @Singleton
+        fun provideDurationProvider(): DurationProvider {
+            return DefaultDurationProvider.instance
         }
     }
 }

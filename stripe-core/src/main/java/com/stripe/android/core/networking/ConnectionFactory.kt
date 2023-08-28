@@ -1,6 +1,7 @@
 package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.exception.InvalidRequestException
 import java.io.File
 import java.io.IOException
@@ -31,6 +32,9 @@ interface ConnectionFactory {
         @Volatile
         var testConnectionCustomization: ((HttpURLConnection) -> Unit)? = null
 
+        @Volatile
+        var testHostCustomization: ((StripeRequest) -> StripeRequest)? = null
+
         @Throws(IOException::class, InvalidRequestException::class)
         @JvmSynthetic
         override fun create(request: StripeRequest): StripeConnection<String> {
@@ -48,24 +52,31 @@ interface ConnectionFactory {
         }
 
         private fun openConnectionAndApplyFields(request: StripeRequest): HttpURLConnection {
-            return (URL(request.url).openConnection() as HttpURLConnection).apply {
-                testConnectionCustomization?.invoke(this)
+            val actualRequest = if (BuildConfig.DEBUG) {
+                testHostCustomization?.invoke(request) ?: request
+            } else {
+                request
+            }
+            return (URL(actualRequest.url).openConnection() as HttpURLConnection).apply {
+                if (BuildConfig.DEBUG) {
+                    testConnectionCustomization?.invoke(this)
+                }
 
                 connectTimeout = CONNECT_TIMEOUT
                 readTimeout = READ_TIMEOUT
-                useCaches = request.shouldCache
-                requestMethod = request.method.code
+                useCaches = actualRequest.shouldCache
+                requestMethod = actualRequest.method.code
 
-                request.headers.forEach { (key, value) ->
+                actualRequest.headers.forEach { (key, value) ->
                     setRequestProperty(key, value)
                 }
 
-                if (StripeRequest.Method.POST == request.method) {
+                if (StripeRequest.Method.POST == actualRequest.method) {
                     doOutput = true
-                    request.postHeaders?.forEach { (key, value) ->
+                    actualRequest.postHeaders?.forEach { (key, value) ->
                         setRequestProperty(key, value)
                     }
-                    outputStream.use { output -> request.writePostBody(output) }
+                    outputStream.use { output -> actualRequest.writePostBody(output) }
                 }
             }
         }

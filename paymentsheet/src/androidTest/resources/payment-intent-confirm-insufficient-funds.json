@@ -1,0 +1,155 @@
+{
+  "error": {
+    "charge": "ch_3Ni2nGLu5o3P18Zp0hHEq8M3",
+    "code": "card_declined",
+    "decline_code": "insufficient_funds",
+    "doc_url": "https://stripe.com/docs/error-codes/card-declined",
+    "message": "Your card has insufficient funds.",
+    "payment_intent": {
+      "id": "pi_example",
+      "object": "payment_intent",
+      "amount": 5099,
+      "amount_details": {
+        "tip": {}
+      },
+      "automatic_payment_methods": {
+        "allow_redirects": "always",
+        "enabled": true
+      },
+      "canceled_at": null,
+      "cancellation_reason": null,
+      "capture_method": "automatic",
+      "client_secret": "pi_example_secret_example",
+      "confirmation_method": "automatic",
+      "created": 1692742282,
+      "currency": "usd",
+      "description": null,
+      "last_payment_error": {
+        "charge": "ch_3Ni2nGLu5o3P18Zp0hHEq8M3",
+        "code": "card_declined",
+        "decline_code": "insufficient_funds",
+        "doc_url": "https://stripe.com/docs/error-codes/card-declined",
+        "message": "Your card has insufficient funds.",
+        "payment_method": {
+          "id": "pm_1MUXVpLu5o3P18ZpS2NCqb2F",
+          "object": "payment_method",
+          "billing_details": {
+            "address": {
+              "city": "South San Francisco",
+              "country": "US",
+              "line1": "354 Oyster Point Blvd",
+              "line2": null,
+              "postal_code": "94080",
+              "state": "CA"
+            },
+            "email": "email@email.com",
+            "name": "Jenny Rosen",
+            "phone": "+18008675309"
+          },
+          "card": {
+            "brand": "visa",
+            "checks": {
+              "address_line1_check": null,
+              "address_postal_code_check": null,
+              "cvc_check": null
+            },
+            "country": "US",
+            "exp_month": 12,
+            "exp_year": 2034,
+            "funding": "credit",
+            "generated_from": null,
+            "last4": "9995",
+            "networks": {
+              "available": [
+                "visa"
+              ],
+              "preferred": null
+            },
+            "three_d_secure_usage": {
+              "supported": true
+            },
+            "wallet": null
+          },
+          "created": 1692742304,
+          "customer": null,
+          "livemode": false,
+          "type": "card"
+        },
+        "type": "card_error"
+      },
+      "livemode": false,
+      "next_action": null,
+      "payment_method": null,
+      "payment_method_options": {
+        "us_bank_account": {
+          "verification_method": "automatic"
+        }
+      },
+      "payment_method_types": [
+        "card",
+        "acss_debit",
+        "afterpay_clearpay",
+        "alipay",
+        "klarna",
+        "link",
+        "us_bank_account",
+        "wechat_pay",
+        "affirm",
+        "cashapp"
+      ],
+      "processing": null,
+      "receipt_email": null,
+      "setup_future_usage": null,
+      "shipping": null,
+      "source": null,
+      "status": "requires_payment_method"
+    },
+    "payment_method": {
+      "id": "pm_1MUXVpLu5o3P18ZpS2NCqb2F",
+      "object": "payment_method",
+      "billing_details": {
+        "address": {
+          "city": "South San Francisco",
+          "country": "US",
+          "line1": "354 Oyster Point Blvd",
+          "line2": null,
+          "postal_code": "94080",
+          "state": "CA"
+        },
+        "email": "email@email.com",
+        "name": "Jenny Rosen",
+        "phone": "+18008675309"
+      },
+      "card": {
+        "brand": "visa",
+        "checks": {
+          "address_line1_check": null,
+          "address_postal_code_check": null,
+          "cvc_check": null
+        },
+        "country": "US",
+        "exp_month": 12,
+        "exp_year": 2034,
+        "funding": "credit",
+        "generated_from": null,
+        "last4": "9995",
+        "networks": {
+          "available": [
+            "visa"
+          ],
+          "preferred": null
+        },
+        "three_d_secure_usage": {
+          "supported": true
+        },
+        "wallet": null
+      },
+      "created": 1692742304,
+      "customer": null,
+      "livemode": false,
+      "type": "card"
+    },
+    "request_log_url": "https://dashboard.stripe.com/test/logs/req_EqLBV1aambW25P?t=1692742304",
+    "type": "card_error"
+  }
+}

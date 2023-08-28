@@ -4,6 +4,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -12,6 +13,7 @@ import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import okhttp3.mockwebserver.SocketPolicy
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,6 +33,7 @@ internal class PaymentSheetTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
+            host("api.stripe.com"),
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
@@ -54,6 +57,73 @@ internal class PaymentSheetTest {
         }
 
         page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testSocketErrorCardPayment() = runPaymentSheetTest(
+        resultCallback = ::expectNoResult,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = null,
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+        ) { response ->
+            response.socketPolicy = SocketPolicy.DISCONNECT_AFTER_REQUEST
+        }
+
+        page.clickPrimaryButton()
+        page.waitForText("Something went wrong")
+        page.assertNoText("IOException", substring = true)
+        testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testInsufficientFundsCardPayment() = runPaymentSheetTest(
+        resultCallback = ::expectNoResult,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = null,
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+        ) { response ->
+            response.setResponseCode(402)
+            response.testBodyFromFile("payment-intent-confirm-insufficient-funds.json")
+        }
+
+        page.clickPrimaryButton()
+        page.waitForText("Your card has insufficient funds.")
+        page.assertNoText("StripeException", substring = true)
+        testContext.markTestSucceeded()
     }
 
     @Test

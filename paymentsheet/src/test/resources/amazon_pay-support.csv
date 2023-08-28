@@ -1,0 +1,49 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+amazon_pay, true, true, off_session, false, card/amazon_pay, false, false, not available, false
+amazon_pay, true, true, off_session, false, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, true, false, off_session, false, card/amazon_pay, false, false, not available, false
+amazon_pay, true, false, off_session, false, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, true, true, on_session, false, card/amazon_pay, false, false, not available, false
+amazon_pay, true, true, on_session, false, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, true, false, on_session, false, card/amazon_pay, false, false, not available, false
+amazon_pay, true, false, on_session, false, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, true, true, null, false, card/amazon_pay, false, true, oneTime, true
+amazon_pay, true, true, null, false, card/eps/amazon_pay, false, true, oneTime, true
+amazon_pay, true, false, null, false, card/amazon_pay, false, true, oneTime, true
+amazon_pay, true, false, null, false, card/eps/amazon_pay, false, true, oneTime, true
+amazon_pay, false, true, off_session, false, card/amazon_pay, false, false, not available, false
+amazon_pay, false, true, off_session, false, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, false, false, off_session, false, card/amazon_pay, false, false, not available, false
+amazon_pay, false, false, off_session, false, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, false, true, on_session, false, card/amazon_pay, false, false, not available, false
+amazon_pay, false, true, on_session, false, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, false, false, on_session, false, card/amazon_pay, false, false, not available, false
+amazon_pay, false, false, on_session, false, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, false, true, null, false, card/amazon_pay, false, true, oneTime, true
+amazon_pay, false, true, null, false, card/eps/amazon_pay, false, true, oneTime, true
+amazon_pay, false, false, null, false, card/amazon_pay, false, true, oneTime, true
+amazon_pay, false, false, null, false, card/eps/amazon_pay, false, true, oneTime, true
+amazon_pay, true, true, off_session, true, card/amazon_pay, false, false, not available, false
+amazon_pay, true, true, off_session, true, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, true, false, off_session, true, card/amazon_pay, false, false, not available, false
+amazon_pay, true, false, off_session, true, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, true, true, on_session, true, card/amazon_pay, false, false, not available, false
+amazon_pay, true, true, on_session, true, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, true, false, on_session, true, card/amazon_pay, false, false, not available, false
+amazon_pay, true, false, on_session, true, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, true, true, null, true, card/amazon_pay, false, true, oneTime, true
+amazon_pay, true, true, null, true, card/eps/amazon_pay, false, true, oneTime, true
+amazon_pay, true, false, null, true, card/amazon_pay, false, true, oneTime, true
+amazon_pay, true, false, null, true, card/eps/amazon_pay, false, true, oneTime, true
+amazon_pay, false, true, off_session, true, card/amazon_pay, false, false, not available, false
+amazon_pay, false, true, off_session, true, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, false, false, off_session, true, card/amazon_pay, false, false, not available, false
+amazon_pay, false, false, off_session, true, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, false, true, on_session, true, card/amazon_pay, false, false, not available, false
+amazon_pay, false, true, on_session, true, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, false, false, on_session, true, card/amazon_pay, false, false, not available, false
+amazon_pay, false, false, on_session, true, card/eps/amazon_pay, false, false, not available, false
+amazon_pay, false, true, null, true, card/amazon_pay, false, true, oneTime, true
+amazon_pay, false, true, null, true, card/eps/amazon_pay, false, true, oneTime, true
+amazon_pay, false, false, null, true, card/amazon_pay, false, true, oneTime, true
+amazon_pay, false, false, null, true, card/eps/amazon_pay, false, true, oneTime, true
