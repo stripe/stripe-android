@@ -2,7 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>EmptyFunctionBlock:BottomSheetController.kt$BottomSheetController.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:PrimaryButtonAnimator.kt$PrimaryButtonAnimator.&lt;no name provided>${ }</ID>
     <ID>ForbiddenComment:PaymentOptionFactory.kt$PaymentOptionFactory$// TODO: Should use labelResource paymentMethodCreateParams or extension function</ID>
     <ID>FunctionNaming:PaymentOptionUi.kt$@Preview(name = "Payment option in editing mode") @Composable private fun PaymentOptionUi_Editing()</ID>
@@ -47,7 +46,7 @@
     <ID>MagicNumber:StateFlows.kt$4</ID>
     <ID>MagicNumber:StateFlows.kt$5</ID>
     <ID>MagicNumber:USBankAccountForm.kt$0.5f</ID>
-    <ID>MatchingDeclarationName:BottomSheet.kt$BottomSheetState</ID>
+    <ID>MaxLineLength:CustomerAdapterTest.kt$CustomerAdapterTest$fun</ID>
     <ID>MaxLineLength:CustomerRepositoryTest.kt$CustomerRepositoryTest$fun</ID>
     <ID>MaxLineLength:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest$fun</ID>
     <ID>MaxLineLength:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest$publishableKey = "pk_test_51HvTI7Lu5o3livep6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"</ID>
