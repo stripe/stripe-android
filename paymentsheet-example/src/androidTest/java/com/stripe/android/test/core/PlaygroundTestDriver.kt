@@ -382,17 +382,25 @@ class PlaygroundTestDriver(
             if (testParameters.authorizationAction != null && authorizeAction != null) {
                 // If a specific browser is requested we will use it, otherwise, we will
                 // select the first browser found
-                val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
+                if (testParameters.authorizationAction != AuthorizeAction.PollingSucceedsAfterDelay) {
+                    // No browser is needed when using the built in authorization for non redirect flows
 
-                // If there are multiple browser there is a browser selector window
-                selectBrowserPrompt.wait(4000)
-                if (selectBrowserPrompt.exists()) {
-                    browserIconAtPrompt(selectedBrowser).click()
+                    // If there is only one browser installed we will use it
+                    Assume.assumeTrue(getInstalledBrowsers().size > 1)
+
+
+                    val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
+
+                    // If there are multiple browser there is a browser selector window
+                    selectBrowserPrompt.wait(4000)
+                    if (selectBrowserPrompt.exists()) {
+                        browserIconAtPrompt(selectedBrowser).click()
+                    }
+
+                    assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
+
+                    blockUntilAuthorizationPageLoaded()
                 }
-
-                assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
-
-                blockUntilAuthorizationPageLoaded()
 
                 if (authorizeAction.exists()) {
                     authorizeAction.click()
