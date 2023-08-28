@@ -14,6 +14,8 @@
   <string name="stripe_continue_button_label">Continue</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">EPS Bank</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">The IBAN you entered is incomplete.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
