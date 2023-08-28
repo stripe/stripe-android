@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.29.0 - 2023-08-28
+
 ### PaymentSheet
 * [ADDED][7198](https://github.com/stripe/stripe-android/pull/7198) PaymentSheet now supports GrabPay for PaymentIntents.
 * [ADDED][7214](https://github.com/stripe/stripe-android/pull/7214) PaymentSheet now supports FPX for PaymentIntents.
