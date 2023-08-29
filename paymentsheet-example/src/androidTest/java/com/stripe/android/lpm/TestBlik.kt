@@ -5,7 +5,6 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BaseLpmTest
 import com.stripe.android.test.core.AuthorizeAction
-import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Currency
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,7 +16,7 @@ internal class TestBlik : BaseLpmTest() {
         currency = Currency.PLN,
         merchantCountryCode = "FR",
         authorizationAction = AuthorizeAction.PollingSucceedsAfterDelay,
-        automatic = Automatic.On,
+        supportedPaymentMethods = listOf("card", "blik"),
     )
 
     @Test
