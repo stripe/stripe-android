@@ -379,7 +379,7 @@ class PlaygroundTestDriver(
 
     private fun doAuthorization() {
         selectors.apply {
-            if (testParameters.authorizationAction != null && authorizeAction != null) {
+            if (testParameters.authorizationAction != null) {
                 if (testParameters.authorizationAction != AuthorizeAction.PollingSucceedsAfterDelay) {
                     // If a specific browser is requested we will use it, otherwise, we will
                     // select the first browser found
@@ -396,52 +396,56 @@ class PlaygroundTestDriver(
                     blockUntilAuthorizationPageLoaded()
                 }
 
-                if (authorizeAction.exists()) {
-                    authorizeAction.click()
-                } else if (!authorizeAction.exists()) {
-                // Buttons aren't showing the same way each time in the web page.
-                    object : UiAutomatorText(
-                        label = requireNotNull(testParameters.authorizationAction).text,
-                        className = "android.widget.TextView",
-                        device = device
-                    ) {}.click()
-                    Log.e("Stripe", "Fail authorization was a text view not a button this time")
+                if (authorizeAction != null) {
+                    if (authorizeAction.exists()) {
+                        authorizeAction.click()
+                    } else if (!authorizeAction.exists()) {
+                        // Buttons aren't showing the same way each time in the web page.
+                        object : UiAutomatorText(
+                            label = requireNotNull(testParameters.authorizationAction).text,
+                            className = "android.widget.TextView",
+                            device = device
+                        ) {}.click()
+                        Log.e("Stripe", "Fail authorization was a text view not a button this time")
+                    }
                 }
 
-                when (val authAction = testParameters.authorizationAction) {
-                    is AuthorizeAction.Authorize -> {}
-                    is AuthorizeAction.PollingSucceedsAfterDelay -> {
-                        buyButton.apply {
-                            waitProcessingComplete()
-                            isEnabled()
-                            isDisplayed()
-                        }
-                    }
-                    is AuthorizeAction.Cancel -> {
-                        buyButton.apply {
-                            waitProcessingComplete()
-                            isEnabled()
-                            isDisplayed()
-                        }
-                    }
-                    is AuthorizeAction.Fail -> {
-                        buyButton.apply {
-                            waitProcessingComplete()
-                            isEnabled()
-                            isDisplayed()
+                    when (val authAction = testParameters.authorizationAction) {
+                        is AuthorizeAction.Authorize -> {}
+                        is AuthorizeAction.PollingSucceedsAfterDelay -> {
+                            buyButton.apply {
+                                waitPollingComplete()
+                            }
                         }
 
-                        // The text comes after the buy button animation is complete
-                        composeTestRule.waitUntil {
-                            runCatching {
-                                composeTestRule
-                                    .onNodeWithText(authAction.expectedError)
-                                    .assertIsDisplayed()
-                            }.isSuccess
+                        is AuthorizeAction.Cancel -> {
+                            buyButton.apply {
+                                waitProcessingComplete()
+                                isEnabled()
+                                isDisplayed()
+                            }
                         }
+
+                        is AuthorizeAction.Fail -> {
+                            buyButton.apply {
+                                waitProcessingComplete()
+                                isEnabled()
+                                isDisplayed()
+                            }
+
+                            // The text comes after the buy button animation is complete
+                            composeTestRule.waitUntil {
+                                runCatching {
+                                    composeTestRule
+                                        .onNodeWithText(authAction.expectedError)
+                                        .assertIsDisplayed()
+                                }.isSuccess
+                            }
+                        }
+
+                        null -> {}
                     }
-                    null -> {}
-                }
+
             } else {
                 // Make sure there is no prompt and no browser window open
                 assertThat(selectBrowserPrompt.exists()).isFalse()

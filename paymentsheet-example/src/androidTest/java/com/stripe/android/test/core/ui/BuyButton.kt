@@ -50,4 +50,18 @@ class BuyButton(
             }.isSuccess && checkEnabled()
         }
     }
+
+    fun waitPollingComplete() {
+        val expectedText =
+            InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
+                StripePaymentSheetExampleR.string.success
+            )
+        composeTestRule.waitUntil(timeoutMillis = processingCompleteTimeout.inWholeMilliseconds) {
+            runCatching {
+
+                composeTestRule.onNode(hasText(text = expectedText, substring = false))
+                    .assertExists()
+            }.isSuccess
+        }
+    }
 }
