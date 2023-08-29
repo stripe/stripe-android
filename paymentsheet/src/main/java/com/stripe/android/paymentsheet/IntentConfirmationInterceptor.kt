@@ -177,7 +177,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): NextStep {
-        val attribution =
+        val productUsage =
             if (intentConfiguration.paymentMethodTypes.isEmpty()) {
                 buildSet {
                     addAll(paymentMethodCreateParams.attribution)
@@ -191,7 +191,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 }
             }
         val params = paymentMethodCreateParams.copy(
-            productUsage = attribution,
+            productUsage = productUsage,
         )
 
         return createPaymentMethod(params).fold(
