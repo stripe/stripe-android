@@ -126,8 +126,6 @@ internal class PaymentSheetTest {
         testContext.markTestSucceeded()
     }
 
-    // TODO: Add a test for
-
     @Test
     fun testSuccessfulDelayedSuccessPayment() = runPaymentSheetTest(
         resultCallback = ::assertCompleted,
