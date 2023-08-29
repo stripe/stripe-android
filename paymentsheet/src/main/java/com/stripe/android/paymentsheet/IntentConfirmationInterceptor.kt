@@ -177,19 +177,13 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): NextStep {
-        val productUsage =
+        val productUsage =buildSet {
+            addAll(paymentMethodCreateParams.attribution)
+            add("deferred-intent")
             if (intentConfiguration.paymentMethodTypes.isEmpty()) {
-                buildSet {
-                    addAll(paymentMethodCreateParams.attribution)
-                    add("deferred-intent")
-                    add("autopm")
-                }
-            } else {
-                buildSet {
-                    addAll(paymentMethodCreateParams.attribution)
-                    add("deferred-intent")
-                }
+                add("autopm")
             }
+        }
         val params = paymentMethodCreateParams.copy(
             productUsage = productUsage,
         )
