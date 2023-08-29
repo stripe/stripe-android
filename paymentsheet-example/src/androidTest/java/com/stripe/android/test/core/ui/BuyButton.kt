@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.ui.core.R as StripeUiCoreR
+import com.stripe.android.paymentsheet.example.R as StripePaymentSheetExampleR
 
 class BuyButton(
     private val composeTestRule: ComposeTestRule,
