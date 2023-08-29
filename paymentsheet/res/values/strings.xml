@@ -71,4 +71,6 @@
   <string name="stripe_upi_polling_payment_failed_message">Please go back and select another payment method</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Payment failed</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">An error occurred. Check your connection and try again.</string>
 </resources>
