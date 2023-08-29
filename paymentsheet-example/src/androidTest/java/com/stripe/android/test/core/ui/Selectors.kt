@@ -16,6 +16,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
+import com.stripe.android.model.PaymentMethod.Type.Blik
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.model.InitializationType
@@ -138,6 +139,8 @@ class Selectors(
             // We're using a longer timeout for Cash App Pay until we fix an issue where we
             // needlessly poll after a canceled payment attempt.
             15.seconds
+        } else if (testParameters.paymentMethod.code == Blik.code) {
+            30.seconds
         } else {
             5.seconds
         }
