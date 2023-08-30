@@ -21,7 +21,7 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
 
     abstract fun create(
         createParams: PaymentMethodCreateParams,
-        confirmPaymentMethodOptions: PaymentMethodOptionsParams? = null,
+        optionsParams: PaymentMethodOptionsParams? = null,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
     ): T
 
@@ -77,7 +77,7 @@ internal class ConfirmPaymentIntentParamsFactory(
 
     override fun create(
         createParams: PaymentMethodCreateParams,
-        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        optionsParams: PaymentMethodOptionsParams?,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -100,7 +100,7 @@ internal class ConfirmPaymentIntentParamsFactory(
                     PaymentMethodOptionsParams.USBankAccount(setupFutureUsage = setupFutureUsage)
                 }
                 PaymentMethod.Type.Blik.code -> {
-                    paymentMethodOptionsParams
+                    optionsParams
                 }
                 PaymentMethod.Type.Link.code -> {
                     null
@@ -129,7 +129,7 @@ internal class ConfirmSetupIntentParamsFactory(
 
     override fun create(
         createParams: PaymentMethodCreateParams,
-        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        optionsParams: PaymentMethodOptionsParams?,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
