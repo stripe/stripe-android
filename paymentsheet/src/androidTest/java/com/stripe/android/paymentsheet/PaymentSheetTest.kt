@@ -87,7 +87,7 @@ internal class PaymentSheetTest {
         }
 
         page.clickPrimaryButton()
-        page.waitForText("Something went wrong")
+        page.waitForText("An error occurred. Check your connection and try again.")
         page.assertNoText("IOException", substring = true)
         testContext.markTestSucceeded()
     }
