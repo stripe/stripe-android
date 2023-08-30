@@ -51,15 +51,7 @@ internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent>() {
                     ctaText = R.string.stripe_blik_confirm_payment,
                 )
             else ->
-                // Just default to UPI
-                PollingContract.Args(
-                    clientSecret = requireNotNull(authenticatable.clientSecret),
-                    statusBarColor = host.statusBarColor,
-                    timeLimitInSeconds = UPI_TIME_LIMIT_IN_SECONDS,
-                    initialDelayInSeconds = UPI_INITIAL_DELAY_IN_SECONDS,
-                    maxAttempts = UPI_MAX_ATTEMPTS,
-                    ctaText = R.string.stripe_upi_polling_message,
-                )
+                error("Received invalid payment method type ${authenticatable.paymentMethod?.type?.code} in PollingAuthenticator")
         }
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
