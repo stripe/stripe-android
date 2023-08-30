@@ -34,7 +34,7 @@ class BlikConfig : TextFieldConfig {
     override val loading: StateFlow<Boolean> = MutableStateFlow(value = false)
 
     override fun determineState(input: String): TextFieldState {
-        val isValid = blikPattern.matches(input) && input.length <= BLIK_MAX_LENGTH
+        val isValid = blikPattern.matches(input)
         return if (input.isEmpty()) {
             TextFieldStateConstants.Error.Blank
         } else if (isValid) {
