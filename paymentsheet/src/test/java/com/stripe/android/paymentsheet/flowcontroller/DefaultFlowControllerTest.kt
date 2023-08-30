@@ -335,6 +335,7 @@ internal class DefaultFlowControllerTest {
                 isGooglePayReady = false,
                 paymentSelection = null,
                 linkState = null,
+                isEligibleForCardBrandChoice = false,
             ),
             statusBarColor = STATUS_BAR_COLOR,
             enableLogging = ENABLE_LOGGING,
@@ -508,6 +509,7 @@ internal class DefaultFlowControllerTest {
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
+                isEligibleForCardBrandChoice = false,
             )
         )
 
@@ -545,6 +547,7 @@ internal class DefaultFlowControllerTest {
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
+                isEligibleForCardBrandChoice = false,
             )
         )
 
@@ -585,6 +588,7 @@ internal class DefaultFlowControllerTest {
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
+                isEligibleForCardBrandChoice = false,
             )
         )
 
