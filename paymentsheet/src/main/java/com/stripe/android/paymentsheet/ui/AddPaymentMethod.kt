@@ -174,9 +174,9 @@ internal fun FormFieldValues.transformToPaymentSelection(
     resources: Resources,
     paymentMethod: LpmRepository.SupportedPaymentMethod
 ): PaymentSelection.New {
+    val params = transformToPaymentMethodCreateParams(paymentMethod)
+    val options = transformToPaymentMethodOptionsParams(paymentMethod)
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
-        val params = transformToPaymentMethodCreateParams(paymentMethod)
-        val options = transformToPaymentMethodOptionsParams(paymentMethod)
         PaymentSelection.New.Card(
             paymentMethodOptionsParams = options,
             paymentMethodCreateParams = params,
@@ -184,8 +184,6 @@ internal fun FormFieldValues.transformToPaymentSelection(
             customerRequestedSave = userRequestedReuse,
         )
     } else {
-        val params = transformToPaymentMethodCreateParams(paymentMethod)
-        val options = transformToPaymentMethodOptionsParams(paymentMethod)
         PaymentSelection.New.GenericPaymentMethod(
             labelResource = resources.getString(paymentMethod.displayNameResource),
             iconResource = paymentMethod.iconResource,
