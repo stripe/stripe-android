@@ -25,6 +25,8 @@ internal object PaymentSheetFixtures {
         CLIENT_SECRET
     )
 
+    internal val SETUP_INTENT_CLIENT_SECRET = PaymentIntentClientSecret("seti_1234_secret_4321")
+
     internal val CONFIG_MINIMUM = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME
     )
