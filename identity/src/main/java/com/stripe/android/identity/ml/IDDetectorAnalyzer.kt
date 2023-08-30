@@ -7,6 +7,7 @@ import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.util.maxAspectRatioInSize
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.states.LaplacianBlurDetector
 import com.stripe.android.identity.utils.roundToMaxDecimals
 import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
 import com.stripe.android.mlcore.base.InterpreterWrapper
@@ -24,7 +25,8 @@ import java.io.File
 internal class IDDetectorAnalyzer(
     modelFile: File,
     private val idDetectorMinScore: Float,
-    private val modelPerformanceTracker: ModelPerformanceTracker
+    private val modelPerformanceTracker: ModelPerformanceTracker,
+    private val laplacianBlurDetector: LaplacianBlurDetector,
 ) :
     Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
 
@@ -106,14 +108,16 @@ internal class IDDetectorAnalyzer(
             bestScore,
             LIST_OF_INDICES.map {
                 categories[bestIndex][it].roundToMaxDecimals(2)
-            }
+            },
+            laplacianBlurDetector.calculateBlurOutput(croppedImage)
         )
     }
 
     internal class Factory(
         private val modelFile: File,
         private val idDetectorMinScore: Float,
-        private val modelPerformanceTracker: ModelPerformanceTracker
+        private val modelPerformanceTracker: ModelPerformanceTracker,
+        private val laplacianBlurDetector: LaplacianBlurDetector
     ) : AnalyzerFactory<
             AnalyzerInput,
             IdentityScanState,
@@ -124,7 +128,8 @@ internal class IDDetectorAnalyzer(
             return IDDetectorAnalyzer(
                 modelFile,
                 idDetectorMinScore,
-                modelPerformanceTracker
+                modelPerformanceTracker,
+                laplacianBlurDetector
             )
         }
     }

@@ -196,7 +196,8 @@ class CameraScreenLaunchedEffectTest {
                     boundingBox = mock(),
                     category = mock(),
                     resultScore = ID_FRONT_SCORE,
-                    allScores = mock()
+                    allScores = mock(),
+                    blurScore = 1.0f
                 ),
                 identityState = IdentityScanState.Finished(
                     type = IdentityScanState.ScanType.ID_FRONT,
@@ -230,7 +231,8 @@ class CameraScreenLaunchedEffectTest {
                     boundingBox = mock(),
                     category = mock(),
                     resultScore = ID_FRONT_SCORE,
-                    allScores = mock()
+                    allScores = mock(),
+                    blurScore = 1.0f
                 ),
                 identityState = IdentityScanState.TimeOut(
                     type = IdentityScanState.ScanType.ID_FRONT,
@@ -268,7 +270,8 @@ class CameraScreenLaunchedEffectTest {
                     boundingBox = mock(),
                     category = mock(),
                     resultScore = ID_BACK_SCORE,
-                    allScores = mock()
+                    allScores = mock(),
+                    blurScore = 1.0f
                 ),
                 identityState = IdentityScanState.Finished(
                     type = IdentityScanState.ScanType.ID_BACK,
@@ -302,7 +305,8 @@ class CameraScreenLaunchedEffectTest {
                     boundingBox = mock(),
                     category = mock(),
                     resultScore = ID_BACK_SCORE,
-                    allScores = mock()
+                    allScores = mock(),
+                    blurScore = 1.0f
                 ),
                 identityState = IdentityScanState.TimeOut(
                     type = IdentityScanState.ScanType.ID_BACK,
