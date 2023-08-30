@@ -41,6 +41,7 @@ class LinkActivityContractTest {
             customerPhone = "1234567890",
             customerBillingCountryCode = "US",
             shippingValues = null,
+            passthroughModeEnabled = false,
         )
 
         val args = LinkActivityContract.Args(
