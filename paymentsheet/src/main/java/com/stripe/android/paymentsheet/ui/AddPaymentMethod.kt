@@ -163,7 +163,6 @@ internal fun FormFieldValues.transformToPaymentMethodOptionsParams(
     paymentMethod: LpmRepository.SupportedPaymentMethod
 ): PaymentMethodOptionsParams? {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodOptionsParams(
-        // only provide pairs of type
         fieldValuePairs = fieldValuePairs.filter { entry ->
             entry.key.requestDestination == RequestDestination.Options
         },
