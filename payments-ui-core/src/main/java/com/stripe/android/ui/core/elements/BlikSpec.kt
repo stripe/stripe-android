@@ -14,7 +14,7 @@ data class BlikSpec(
 ) : FormItemSpec() {
     fun transform(): SectionElement {
         return createSectionElement(
-            sectionFieldElement = BlikElement(identifier = IdentifierSpec.BlikCode),
+            sectionFieldElement = BlikElement(),
         )
     }
 }

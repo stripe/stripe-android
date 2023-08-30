@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class BlikElement(
-    override val identifier: IdentifierSpec,
+    override val identifier: IdentifierSpec = IdentifierSpec.BlikCode,
     override val controller: InputController = SimpleTextFieldController(
         textFieldConfig = BlikConfig()
     )
