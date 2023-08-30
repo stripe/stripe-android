@@ -26,7 +26,6 @@ internal fun <T : ConfirmStripeIntentParams> ConfirmStripeIntentParamsFactory<T>
     }
 
     return create(
-        confirmPaymentMethodOptions = paymentSelection.paymentMethodOptionsParams,
         createParams = paymentSelection.paymentMethodCreateParams,
         setupFutureUsage = setupFutureUsage,
     )
