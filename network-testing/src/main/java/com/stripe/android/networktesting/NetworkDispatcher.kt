@@ -1,5 +1,6 @@
 package com.stripe.android.networktesting
 
+import android.util.Log
 import com.stripe.android.networktesting.RequestMatchers.composite
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
@@ -58,7 +59,18 @@ internal class NetworkDispatcher : Dispatcher() {
             return capturedEntry.responseFactory(testRequest)
         }
 
-        throw RequestNotFoundException("$request not mocked\n${testRequest.bodyText}")
+        val exception = RequestNotFoundException("$request not mocked\n${testRequest.bodyText}")
+        Log.d("NetworkDispatcher", "Request not found.", exception)
+
+        // Some places that make requests silently ignore failures and cause the thrown exception
+        // to be ignored (think analytics, and non critical request paths).
+        // Given these requests are typically not critical to the flow of the tests, sometimes the
+        // rest of the test will continue, even if a request was missed.
+        // Killing the process will ensure the test fails for a missing request even if the
+        // exception is silently ignored.
+        android.os.Process.killProcess(android.os.Process.myPid())
+
+        throw exception
     }
 }
 

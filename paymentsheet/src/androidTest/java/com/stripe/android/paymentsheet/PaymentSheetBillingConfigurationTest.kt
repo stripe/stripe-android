@@ -29,13 +29,14 @@ internal class PaymentSheetBillingConfigurationTest {
 
     @Test
     fun testPayloadWithDefaultsAndOverrides() {
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.setResponseCode(500)
+        repeat(2) {
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/sessions/lookup"),
+            ) { response ->
+                response.setResponseCode(500)
+            }
         }
-
         networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
@@ -105,11 +106,13 @@ internal class PaymentSheetBillingConfigurationTest {
 
     @Test
     fun testPayloadWithoutDefaults() {
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.setResponseCode(500)
+        repeat(2) {
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/sessions/lookup"),
+            ) { response ->
+                response.setResponseCode(500)
+            }
         }
 
         networkRule.enqueue(

@@ -126,6 +126,7 @@ enum class Currency {
     INR,
     SGD,
     PLN,
+    MYR,
 }
 
 /**

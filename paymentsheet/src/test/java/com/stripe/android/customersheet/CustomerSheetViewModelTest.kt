@@ -10,6 +10,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
+import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -19,9 +20,12 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFailsWith
 
@@ -1323,6 +1327,373 @@ class CustomerSheetViewModelTest {
 
         viewModel.viewState.test {
             assertThat(awaitViewState<SelectPaymentMethod>().isGooglePayEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `When select payment screen is presented, event is reported`() {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        createViewModel(
+            eventReporter = eventReporter,
+        )
+
+        verify(eventReporter).onScreenPresented(CustomerSheetEventReporter.Screen.SelectPaymentMethod)
+    }
+
+    @Test
+    fun `When add payment screen is presented, event is reported`() {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            eventReporter = eventReporter,
+        )
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+        verify(eventReporter).onScreenPresented(CustomerSheetEventReporter.Screen.AddPaymentMethod)
+    }
+
+    @Test
+    fun `When edit is tapped, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+            verify(eventReporter).onEditTapped()
+            viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+            verify(eventReporter).onEditCompleted()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When remove payment method succeeds, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                onDetachPaymentMethod = {
+                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD)
+                }
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemRemoved(
+                    CARD_PAYMENT_METHOD
+                )
+            )
+            verify(eventReporter).onRemovePaymentMethodSucceeded()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When remove payment method failed, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                onDetachPaymentMethod = {
+                    CustomerAdapter.Result.failure(
+                        cause = Exception("Unable to detach payment option"),
+                        displayMessage = "Something went wrong"
+                    )
+                }
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemRemoved(
+                    CARD_PAYMENT_METHOD
+                )
+            )
+            verify(eventReporter).onRemovePaymentMethodFailed()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When google pay is confirmed, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState.copy(
+                    isGooglePayEnabled = true,
+                ),
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnItemSelected(PaymentSelection.GooglePay))
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onConfirmPaymentMethodSucceeded("google_pay")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When google pay selection errors, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState.copy(
+                    isGooglePayEnabled = true,
+                ),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onSetSelectedPaymentOption = {
+                    CustomerAdapter.Result.failure(
+                        cause = Exception("Unable to set payment option"),
+                        displayMessage = "Something went wrong"
+                    )
+                }
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnItemSelected(PaymentSelection.GooglePay))
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onConfirmPaymentMethodFailed("google_pay")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When payment selection is confirmed, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    PaymentSelection.Saved(
+                        CARD_PAYMENT_METHOD,
+                    )
+                )
+            )
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onConfirmPaymentMethodSucceeded("card")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When payment selection errors, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onSetSelectedPaymentOption = {
+                    CustomerAdapter.Result.failure(
+                        cause = Exception("Unable to set payment option"),
+                        displayMessage = "Something went wrong"
+                    )
+                }
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    PaymentSelection.Saved(
+                        CARD_PAYMENT_METHOD,
+                    )
+                )
+            )
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onConfirmPaymentMethodFailed("card")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When attach without setup intent succeeds, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onAttachPaymentMethod = {
+                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD)
+                },
+                canCreateSetupIntents = false,
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onAttachPaymentMethodSucceeded(
+                style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When attach without setup intent fails, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onAttachPaymentMethod = {
+                    CustomerAdapter.Result.failure(
+                        cause = Exception("Unable to attach payment option"),
+                        displayMessage = "Something went wrong"
+                    )
+                },
+                canCreateSetupIntents = false,
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onAttachPaymentMethodFailed(
+                style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When attach with setup intent succeeds, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onSetupIntentClientSecretForCustomerAttach = {
+                    CustomerAdapter.Result.success("seti_123")
+                },
+                canCreateSetupIntents = true,
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onAttachPaymentMethodSucceeded(
+                style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When attach with setup intent fails, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onSetupIntentClientSecretForCustomerAttach = {
+                    CustomerAdapter.Result.failure(
+                        cause = Exception("Unable to retrieve setup intent"),
+                        displayMessage = "Something went wrong"
+                    )
+                },
+                canCreateSetupIntents = true,
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onAttachPaymentMethodFailed(
+                style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When attach with setup intent handle next action fails, event is reported`() = runTest {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onSetupIntentClientSecretForCustomerAttach = {
+                    CustomerAdapter.Result.success("seti_123")
+                },
+                canCreateSetupIntents = true,
+            ),
+            intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+                enqueueFailureStep(
+                    cause = Exception("Unable to confirm setup intent"),
+                    message = "Something went wrong"
+                )
+            },
+            eventReporter = eventReporter,
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onAttachPaymentMethodFailed(
+                style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+            )
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
