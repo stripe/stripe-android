@@ -467,7 +467,6 @@ class PlaygroundTestDriver(
 
                         null -> {}
                     }
-
             } else {
                 // Make sure there is no prompt and no browser window open
                 assertThat(selectBrowserPrompt.exists()).isFalse()
