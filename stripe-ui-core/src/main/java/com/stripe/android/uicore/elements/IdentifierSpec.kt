@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 enum class RequestDestination {
     Params,
     Options
