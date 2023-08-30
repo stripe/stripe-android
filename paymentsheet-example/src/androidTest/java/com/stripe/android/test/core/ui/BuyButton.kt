@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.ui.core.R as StripeUiCoreR
-import com.stripe.android.paymentsheet.example.R as StripePaymentSheetExampleR
 
 class BuyButton(
     private val composeTestRule: ComposeTestRule,
@@ -49,20 +48,6 @@ class BuyButton(
                 composeTestRule.onNode(hasText(text = expectedText, substring = true))
                     .assertIsDisplayed()
             }.isSuccess && checkEnabled()
-        }
-    }
-
-    fun waitPollingComplete() {
-        val expectedText =
-            InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-                StripePaymentSheetExampleR.string.success
-            )
-        composeTestRule.waitUntil(timeoutMillis = processingCompleteTimeout.inWholeMilliseconds) {
-            runCatching {
-
-                composeTestRule.onNode(hasText(text = expectedText, substring = false))
-                    .assertExists()
-            }.isSuccess
         }
     }
 }
