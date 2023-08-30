@@ -1,11 +1,24 @@
 package com.stripe.android.next
 
 import android.app.Activity
+import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material.Button
+import androidx.compose.material.Text
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetResult
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 
 // Prioritization
@@ -17,18 +30,20 @@ import kotlinx.coroutines.flow.StateFlow
 internal sealed interface Configurer {
     val initializationMode: PaymentSheet.InitializationMode
 
-    class Intent(val intentConfiguration: PaymentSheet.IntentConfiguration) : Configurer{
-        override val initializationMode: PaymentSheet.InitializationMode = PaymentSheet.InitializationMode.DeferredIntent()
+    class Intent(val intentConfiguration: PaymentSheet.IntentConfiguration) : Configurer {
+        override val initializationMode: PaymentSheet.InitializationMode =
+            PaymentSheet.InitializationMode.DeferredIntent()
 
     }
 
-    class Payment(val clientSecret: String) : Configurer{
-
+    class Payment(val clientSecret: String) : Configurer {
+        override val initializationMode: PaymentSheet.InitializationMode =
+            PaymentSheet.InitializationMode.DeferredIntent()
     }
 }
 
-class FlowController<C : Configurer> internal constructor(
-    val configurer: Configurer,
+class FlowController internal constructor(
+    private val configurer: Configurer,
 ) {
     // 2 different configurations
     // - Initial setup
@@ -39,27 +54,32 @@ class FlowController<C : Configurer> internal constructor(
 
     val state: StateFlow<State> = TODO()
 
-    suspend fun confirm(selected: PaymentMethod): Result<Unit> {
-        TODO()
-    }
-
     fun registerActivity(activity: Activity) {
 
     }
 
     sealed class State {
-        var paymentMethod: PaymentMethod? = null
+        class Loading internal constructor() : State()
 
-        class Loading : State()
-
-        class Data(val selected: PaymentMethod?) : State() {
-            fun launch() {
-                val flowController: FlowController<Configurer.Payment> = TODO()
+        // TODO: Add data for payment method icon/title
+        class Data internal constructor(private val selected: PaymentMethod?, val canConfirm: Boolean) : State() {
+            fun launch(activity: Activity) {
+                val flowController: FlowController = TODO()
                 flowController.configurer.initializationMode
+            }
+
+            suspend fun confirm(): Result<PaymentMethod> {
+                if (!canConfirm) {
+                    return
+                }
             }
         }
 
-        class Failure : State() {
+        class Displayed internal constructor()  : State() {
+
+        }
+
+        class Failure internal constructor()  : State() {
             fun retry() {
 
             }
@@ -67,24 +87,36 @@ class FlowController<C : Configurer> internal constructor(
     }
 
     companion object {
-        fun create(createIntentCallback: CreateIntentCallback): FlowController<Configurer.Intent> {
-            return FlowController()
+        fun createDeferredIntent(createIntentCallback: CreateIntentCallback): FlowController {
+            return FlowController(Configurer.Intent(createIntentCallback))
         }
 
-        fun createPaymentIntent(): FlowController<Configurer.Payment> {
-            return FlowController()
+        fun createPaymentIntent(clientSecret: String): FlowController {
+            return FlowController(Configurer.Payment(clientSecret))
         }
     }
 }
 
-class PaymentSheet(val flowController: FlowController) {
-    fun present() {
+class PaymentSheet private constructor(private val flowController: FlowController) {
+    val result: Flow<PaymentSheetResult> = flowController.state.map { TODO() }
 
+    fun present(activity: Activity) {
+        // Launch a secondary (invisible) activity
+        // In the secondary activity view model, we collect the flow controller state
+        // When flow controller state is data that is confirmable we call confirm
+        // We expose a state from payment sheet
+    }
+
+    companion object {
+        fun create(flowController: FlowController): PaymentSheet {
+            return PaymentSheet(flowController)
+        }
     }
 }
 
-class MerchantViewModel : CreateIntentCallback {
-    val flowController = FlowController(this)
+class MerchantViewModel : ViewModel(), CreateIntentCallback {
+    val state: MutableStateFlow<FlowController.State> =
+        MutableStateFlow(FlowController.State.Loading()) // TODO: This is internal, how do we do this?
 
     private var clientSecret: String? = null
 
@@ -93,9 +125,12 @@ class MerchantViewModel : CreateIntentCallback {
             // Do some network call
             // Use the result to store the client secret
             clientSecret = "networkResult"
-            flowController.configure()
+            val flowController = FlowController.createDeferredIntent(this@MerchantViewModel)
+            flowController.state.collect {
+            }
         }
     }
+
     override suspend fun onCreateIntent(
         paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean
@@ -108,28 +143,42 @@ class MerchantViewModel : CreateIntentCallback {
     }
 }
 
-class MerchantActivity {
+class MerchantActivity : AppCompatActivity() {
     val viewModel = MerchantViewModel()
 
     fun onCreate() {
-        var paymentMethod: PaymentMethod? = null
-        // Some compose code
-        when (viewModel.flowController.state.value) {
-            is FlowController.State.Data -> {
-                // TODO: Need to consume currently selected and display it
-                // TODO: Need or pay with button/icon/view
+        setContent {
+            val _state by viewModel.state.collectAsState()
+            // Some compose code
+            when (val state = _state) {
+                is FlowController.State.Data -> {
+                    // TODO: Need to consume currently selected and display it
+                    // TODO: Need or pay with button/icon/view
 //                data = it
-                // Observe current flow controller state
-                val state = FlowController.State.Data(null)
-                // Buy button onClick { state.launch(this) }
-                state.launch()
-            }
-            is FlowController.State.Failure -> {
-                // Display message, show retry button
-                // Add button for retry and call state.retry()
-            }
-            is FlowController.State.Loading -> {
-                // Show loading
+                    // Observe current flow controller state
+                    // Buy button onClick { state.launch(this) }
+                    Button(onClick = { state.launch() }) {
+                        Text("Show Payment Methods")
+                    }
+                }
+
+                is FlowController.State.Displayed -> {
+
+                }
+
+                is FlowController.State.Failure -> {
+                    Button(onClick = { state.retry() }) {
+                        Text("Retry")
+                    }
+                    // Display message, show retry button
+                    // Add button for retry and call state.retry()
+                }
+
+                is FlowController.State.Loading -> {
+                    Button(onClick = {  }, enabled = false) {
+                        Text("Loading")
+                    }
+                }
             }
         }
 
