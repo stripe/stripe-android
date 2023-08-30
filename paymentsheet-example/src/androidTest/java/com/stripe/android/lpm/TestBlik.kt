@@ -21,8 +21,7 @@ internal class TestBlik : BaseLpmTest() {
 
     @Test
     fun testBlik() {
-        // BLIK currently polls by default and will run in test mode for 10 seconds which is too long for a test
-        // so instead we will not wait for the success polling and instead just check that the pay button is enabled when the code is entered
+        // BLIK currently polls by default and will run in test mode for 10 seconds. this is increased by the polling check status frequency. usually ~15 seconds for polling to complete.
         testDriver.confirmNewOrGuestComplete(
             testParameters = blik,
             populateCustomLpmFields = {
