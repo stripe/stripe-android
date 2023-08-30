@@ -4,6 +4,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -32,6 +33,7 @@ internal class PaymentSheetTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
+            host("api.stripe.com"),
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
