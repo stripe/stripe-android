@@ -6,6 +6,7 @@
     <application>
         <activity
             android:name=".FinancialConnectionsSheetRedirectActivity"
+            android:launchMode="singleTask"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
