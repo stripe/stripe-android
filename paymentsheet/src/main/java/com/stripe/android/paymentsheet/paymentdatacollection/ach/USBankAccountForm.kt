@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,8 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -65,9 +61,6 @@ internal fun USBankAccountForm(
     isProcessing: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
-
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory {
             val initializationMode = (sheetViewModel as? PaymentSheetViewModel)
@@ -90,33 +83,13 @@ internal fun USBankAccountForm(
         },
     )
 
-    SyncViewModels(
+    val currentScreenState by viewModel.currentScreenState.collectAsState()
+    val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState(null)
+
+    USBankAccountEmitters(
         viewModel = viewModel,
         usBankAccountFormArgs = usBankAccountFormArgs,
     )
-
-    DisposableEffect(Unit) {
-        viewModel.register(activityResultRegistryOwner!!)
-
-        onDispose {
-            sheetViewModel.resetUSBankPrimaryButton()
-            viewModel.onDestroy()
-        }
-    }
-
-    val currentScreenState by viewModel.currentScreenState.collectAsState()
-    val hasRequiredFields by viewModel.requiredFields.collectAsState()
-    val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState(null)
-
-    LaunchedEffect(currentScreenState, hasRequiredFields) {
-        sheetViewModel.handleScreenStateChanged(
-            context = context,
-            screenState = currentScreenState,
-            enabled = hasRequiredFields,
-            merchantName = viewModel.formattedMerchantName(),
-            onPrimaryButtonClick = viewModel::handlePrimaryButtonClick,
-        )
-    }
 
     Box(modifier) {
         when (val screenState = currentScreenState) {

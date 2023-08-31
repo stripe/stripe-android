@@ -21,6 +21,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
@@ -109,9 +110,12 @@ internal fun AddPaymentMethod(
                 },
                 formArguments = arguments,
                 usBankAccountFormArguments = USBankAccountFormArguments(
+                    isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
                     onMandateTextChanged = sheetViewModel::updateBelowButtonText,
                     onHandleUSBankAccount = sheetViewModel::handleConfirmUSBankAccount,
                     onUpdatePrimaryButtonUIState = sheetViewModel::updateCustomPrimaryButtonUiState,
+                    onUpdatePrimaryButtonState = sheetViewModel::updatePrimaryButtonState,
+                    onError = sheetViewModel::onError
                 ),
                 onFormFieldValuesChanged = { formValues ->
                     val newSelection = formValues?.transformToPaymentSelection(
