@@ -2,10 +2,12 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [ADDED][7062](https://github.com/stripe/stripe-android/pull/7062) PaymentSheet now supports BLIK for PaymentIntents.
+
 ## 20.29.0 - 2023-08-28
 
 ### PaymentSheet
-* [ADDED][7198](https://github.com/stripe/stripe-android/pull/7062) PaymentSheet now supports BLIK for PaymentIntents.
 * [ADDED][7198](https://github.com/stripe/stripe-android/pull/7198) PaymentSheet now supports GrabPay for PaymentIntents.
 * [ADDED][7214](https://github.com/stripe/stripe-android/pull/7214) PaymentSheet now supports FPX for PaymentIntents.
 * [ADDED][7199](https://github.com/stripe/stripe-android/pull/7199) PaymentSheet now supports AmazonPay for PaymentIntents in private beta.
