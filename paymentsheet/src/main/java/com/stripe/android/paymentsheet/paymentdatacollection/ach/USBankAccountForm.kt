@@ -60,6 +60,7 @@ import com.stripe.android.ui.core.R as PaymentsUiCoreR
 @Composable
 internal fun USBankAccountForm(
     formArgs: FormArguments,
+    usBankAccountFormArgs: USBankAccountFormArguments,
     sheetViewModel: BaseSheetViewModel,
     isProcessing: Boolean,
     modifier: Modifier = Modifier,
@@ -91,6 +92,7 @@ internal fun USBankAccountForm(
 
     SyncViewModels(
         viewModel = viewModel,
+        usBankAccountFormArgs = usBankAccountFormArgs,
         sheetViewModel = sheetViewModel,
     )
 

@@ -23,6 +23,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -107,6 +108,9 @@ internal fun AddPaymentMethod(
                     linkSignupState = inlineSignupViewState
                 },
                 formArguments = arguments,
+                usBankAccountFormArguments = USBankAccountFormArguments(
+                    onMandateTextChanged = sheetViewModel::updateBelowButtonText
+                ),
                 onFormFieldValuesChanged = { formValues ->
                     val newSelection = formValues?.transformToPaymentSelection(
                         resources = context.resources,
