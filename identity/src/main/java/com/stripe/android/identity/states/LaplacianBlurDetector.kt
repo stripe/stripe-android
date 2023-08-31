@@ -114,7 +114,7 @@ internal class LaplacianBlurDetector @Inject constructor(context: Context) {
             edgesTargetAllocation.copyTo(edgesBitmap)
 
             // Scale the score from 0~255(0xFF)
-            return mostLuminousIntensityFromBitmap(edgesBitmap).toFloat() / COLOR_MAX
+            return mostLuminousIntensityFromGreyscaleBitmap(edgesBitmap).toFloat() / COLOR_MAX
         } catch (e: Exception) {
             Log.e(TAG, "Failed to calculate blur score. $e")
             return DEFAULT_SCORE
@@ -127,7 +127,7 @@ internal class LaplacianBlurDetector @Inject constructor(context: Context) {
      * @param bitmap Source greyscale bitmap, with same RGB channel value.
      * @return The most luminous color in bitmap, ranging from 0x00 to 0xFF.
      */
-    private fun mostLuminousIntensityFromBitmap(bitmap: Bitmap): Int {
+    private fun mostLuminousIntensityFromGreyscaleBitmap(bitmap: Bitmap): Int {
         bitmap.setHasAlpha(false)
         val pixels = IntArray(bitmap.height * bitmap.width)
         bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
