@@ -1,6 +1,7 @@
 package com.stripe.android.stripecardscan.cardscan
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.PointF
@@ -14,6 +15,8 @@ import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.core.view.updateMargins
 import androidx.fragment.app.setFragmentResult
+import com.stripe.android.camera.CameraAdapter
+import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.camera.scanui.ScanErrorListener
@@ -22,6 +25,7 @@ import com.stripe.android.camera.scanui.ViewFinderBackground
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.R
+import com.stripe.android.stripecardscan.camera.getScanCameraAdapter
 import com.stripe.android.stripecardscan.cardscan.exception.InvalidStripePublishableKeyException
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
@@ -84,6 +88,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
     override var scanStatePrevious: CardScanState? = null
 
     override val scanErrorListener: ScanErrorListener = ScanErrorListener()
+    override val cameraAdapterBuilder: (Activity, ViewGroup, Size, CameraErrorListener) -> CameraAdapter<CameraPreviewImage<Bitmap>> = ::getScanCameraAdapter
 
     /**
      * The listener which handles results from the scan.

@@ -1,18 +1,24 @@
 package com.stripe.android.stripecardscan.cardimageverification
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.util.Size
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.Keep
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import com.stripe.android.camera.CameraAdapter
+import com.stripe.android.camera.CameraErrorListener
+import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.StatTracker
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.camera.scanui.ScanErrorListener
@@ -20,6 +26,7 @@ import com.stripe.android.camera.scanui.ScanState
 import com.stripe.android.camera.scanui.SimpleScanStateful
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.R
+import com.stripe.android.stripecardscan.camera.getVerifyCameraAdapter
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidCivException
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidStripePublishableKeyException
 import com.stripe.android.stripecardscan.cardimageverification.exception.StripeNetworkException
@@ -500,6 +507,8 @@ internal open class CardImageVerificationActivity :
             connect(it.id, ConstraintSet.BOTTOM, cardDescriptionTextView.id, ConstraintSet.TOP)
         }
     }
+
+    override val cameraAdapterBuilder: (Activity, ViewGroup, Size, CameraErrorListener) -> CameraAdapter<CameraPreviewImage<Bitmap>> = ::getVerifyCameraAdapter
 
     protected open fun setupCannotScanTextViewConstraints() {
         cannotScanTextView.layoutParams = ConstraintLayout.LayoutParams(
