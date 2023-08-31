@@ -10,7 +10,6 @@ import com.stripe.android.camera.Camera1Adapter
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraPreviewImage
-import com.stripe.android.camera.CameraXAdapter
 
 private const val LOG_TAG = "CameraSelector"
 
@@ -26,7 +25,9 @@ internal fun getCameraAdapter(
 ): CameraAdapter<CameraPreviewImage<Bitmap>> =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
         try {
-            CameraXAdapter(activity, previewView, minimumResolution, cameraErrorListener)
+            // Unfortunately, cameraX is crashing in OCR cardscan, so we're stuck with camera1 until
+            // we figure out why.
+            Camera1Adapter(activity, previewView, minimumResolution, cameraErrorListener)
         } catch (t: Throwable) {
             Log.w(LOG_TAG, "Unable to instantiate CameraX", t)
             Camera1Adapter(activity, previewView, minimumResolution, cameraErrorListener)
