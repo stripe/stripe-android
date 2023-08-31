@@ -19,8 +19,8 @@ class PostalCodeConfig(
 
     override val capitalization: KeyboardCapitalization = when (format) {
         CountryPostalFormat.US -> KeyboardCapitalization.None
-        CountryPostalFormat.CA -> KeyboardCapitalization.Characters
-        CountryPostalFormat.Other -> KeyboardCapitalization.Words
+        CountryPostalFormat.CA,
+        CountryPostalFormat.Other -> KeyboardCapitalization.Characters
     }
 
     override val keyboard: KeyboardType = when (format) {

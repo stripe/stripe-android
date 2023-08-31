@@ -28,7 +28,7 @@ class PostalCodeConfigTest {
     @Test
     fun `verify Other config uses proper keyboard capitalization & keyboard type`() {
         with(createConfigForCountry("UK")) {
-            Truth.assertThat(capitalization).isEqualTo(KeyboardCapitalization.Words)
+            Truth.assertThat(capitalization).isEqualTo(KeyboardCapitalization.Characters)
             Truth.assertThat(keyboard).isEqualTo(KeyboardType.Text)
         }
     }
