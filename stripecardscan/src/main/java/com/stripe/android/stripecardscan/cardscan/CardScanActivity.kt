@@ -1,7 +1,6 @@
 package com.stripe.android.stripecardscan.cardscan
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.PointF
@@ -12,8 +11,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.activity.addCallback
 import androidx.annotation.RestrictTo
-import com.stripe.android.camera.CameraAdapter
-import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.camera.scanui.ScanErrorListener
@@ -106,7 +103,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
 
     override val scanErrorListener: ScanErrorListener = ScanErrorListener()
 
-    override val cameraAdapterBuilder: (Activity, ViewGroup, Size, CameraErrorListener) -> CameraAdapter<CameraPreviewImage<Bitmap>> = ::getScanCameraAdapter
+    override val cameraAdapterBuilder = ::getScanCameraAdapter
 
     /**
      * The listener which handles results from the scan.

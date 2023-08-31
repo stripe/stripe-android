@@ -88,7 +88,12 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
     override var scanStatePrevious: CardScanState? = null
 
     override val scanErrorListener: ScanErrorListener = ScanErrorListener()
-    override val cameraAdapterBuilder: (Activity, ViewGroup, Size, CameraErrorListener) -> CameraAdapter<CameraPreviewImage<Bitmap>> = ::getScanCameraAdapter
+    override val cameraAdapterBuilder: (
+        Activity,
+        ViewGroup,
+        Size,
+        CameraErrorListener
+    ) -> CameraAdapter<CameraPreviewImage<Bitmap>> = ::getScanCameraAdapter
 
     /**
      * The listener which handles results from the scan.

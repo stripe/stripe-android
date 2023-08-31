@@ -46,7 +46,12 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
     protected var isFlashlightOn: Boolean = false
         private set
 
-    abstract val cameraAdapterBuilder: (Activity, ViewGroup, Size, CameraErrorListener) -> CameraAdapter<CameraPreviewImage<Bitmap>>
+    abstract val cameraAdapterBuilder: (
+        Activity,
+        ViewGroup,
+        Size,
+        CameraErrorListener
+    ) -> CameraAdapter<CameraPreviewImage<Bitmap>>
     internal val cameraAdapter by lazy { buildCameraAdapter(cameraAdapterBuilder) }
     private val cameraErrorListener by lazy {
         DefaultCameraErrorListener(requireActivity()) { t -> scanFailure(t) }
