@@ -1081,7 +1081,8 @@ internal class IdentityViewModelTest {
                 boundingBox = BOUNDING_BOX,
                 category = mock(),
                 resultScore = 0.8f,
-                allScores = ALL_SCORES
+                allScores = ALL_SCORES,
+                blurScore = 1.0f
             ),
             identityState = mock<IdentityScanState.Finished>()
         )

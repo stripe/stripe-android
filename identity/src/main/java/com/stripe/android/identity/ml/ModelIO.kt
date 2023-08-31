@@ -39,7 +39,8 @@ internal data class IDDetectorOutput(
     val boundingBox: BoundingBox,
     val category: Category,
     val resultScore: Float,
-    val allScores: List<Float>
+    val allScores: List<Float>,
+    val blurScore: Float
 ) : AnalyzerOutput
 
 /**
