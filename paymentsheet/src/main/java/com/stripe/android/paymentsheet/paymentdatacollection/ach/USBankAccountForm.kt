@@ -62,6 +62,7 @@ internal fun USBankAccountForm(
     formArgs: FormArguments,
     sheetViewModel: BaseSheetViewModel,
     isProcessing: Boolean,
+    onMandateTextChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -92,6 +93,7 @@ internal fun USBankAccountForm(
     SyncViewModels(
         viewModel = viewModel,
         sheetViewModel = sheetViewModel,
+        onMandateTextChanged = onMandateTextChanged,
     )
 
     DisposableEffect(Unit) {

@@ -70,6 +70,7 @@ internal fun PaymentElement(
                     formArgs = formArguments,
                     sheetViewModel = sheetViewModel,
                     isProcessing = primaryButtonState.value?.isProcessing == true,
+                    onMandateTextChanged = sheetViewModel::updateBelowButtonText,
                     modifier = Modifier.padding(horizontal = horizontalPadding),
                 )
             } else {
