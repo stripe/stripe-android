@@ -40,6 +40,7 @@ class FieldValuesToParamsMapConverter {
         /**
          * This function will convert fieldValuePairs to PaymentMethodOptionsParams.
          */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun transformToPaymentMethodOptionsParams(
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
             code: PaymentMethodCode,
