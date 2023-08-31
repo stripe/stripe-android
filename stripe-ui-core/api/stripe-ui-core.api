@@ -218,9 +218,10 @@ public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Er
 
 public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Error$Invalid : com/stripe/android/uicore/elements/TextFieldStateConstants$Error {
 	public static final field $stable I
-	public fun <init> (I[Ljava/lang/Object;)V
-	public synthetic fun <init> (I[Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (I[Ljava/lang/Object;Z)V
+	public synthetic fun <init> (I[Ljava/lang/Object;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun isBlank ()Z
+	public fun isFull ()Z
 	public fun shouldShowError (Z)Z
 }
 
