@@ -2,7 +2,6 @@ package com.stripe.android.stripecardscan.camera
 
 import android.app.Activity
 import android.graphics.Bitmap
-import android.os.Build
 import android.util.Log
 import android.util.Size
 import android.view.ViewGroup
@@ -23,18 +22,6 @@ internal fun getScanCameraAdapter(
     minimumResolution: Size,
     cameraErrorListener: CameraErrorListener
 ): CameraAdapter<CameraPreviewImage<Bitmap>> =
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-        try {
-            // Unfortunately, cameraX is crashing in OCR cardscan, so we're stuck with camera1 until
-            // we figure out why.
-            Camera1Adapter(activity, previewView, minimumResolution, cameraErrorListener)
-        } catch (t: Throwable) {
-            Log.w(LOG_TAG, "Unable to instantiate CameraX", t)
-            Camera1Adapter(activity, previewView, minimumResolution, cameraErrorListener)
-        }
-    } else {
-        // older versions of android (API 20 and older) do not support YUV_420_888
-        Camera1Adapter(activity, previewView, minimumResolution, cameraErrorListener)
-    }.apply {
+    Camera1Adapter(activity, previewView, minimumResolution, cameraErrorListener).apply {
         Log.d(LOG_TAG, "Using camera implementation ${this.implementationName}")
     }
