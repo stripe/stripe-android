@@ -6,7 +6,7 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-enum class RequestDestination {
+enum class ApiParameterDestination {
     Params,
     Options
 }
@@ -23,7 +23,7 @@ enum class RequestDestination {
 data class IdentifierSpec(
     val v1: String,
     val ignoreField: Boolean = false,
-    val requestDestination: RequestDestination = RequestDestination.Params,
+    val apiParameterDestination: ApiParameterDestination = ApiParameterDestination.Params,
 ) : Parcelable {
     constructor() : this("")
 
@@ -73,10 +73,10 @@ data class IdentifierSpec(
         val Vpa = IdentifierSpec("upi[vpa]")
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val Blik = IdentifierSpec("blik", requestDestination = RequestDestination.Options)
+        val Blik = IdentifierSpec("blik", apiParameterDestination = ApiParameterDestination.Options)
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val BlikCode = IdentifierSpec("blik[code]", requestDestination = RequestDestination.Options)
+        val BlikCode = IdentifierSpec("blik[code]", apiParameterDestination = ApiParameterDestination.Options)
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {
