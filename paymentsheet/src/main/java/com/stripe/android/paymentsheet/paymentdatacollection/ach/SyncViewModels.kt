@@ -2,16 +2,21 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.flow.filterNot
 
 @Composable
 internal fun SyncViewModels(
     viewModel: USBankAccountFormViewModel,
+    usBankAccountFormArgs: USBankAccountFormArguments,
     sheetViewModel: BaseSheetViewModel,
 ) {
     val context = LocalContext.current
+    val screenState by viewModel.currentScreenState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.result.collect { result ->
@@ -29,18 +34,25 @@ internal fun SyncViewModels(
 
     LaunchedEffect(Unit) {
         viewModel.saveForFutureUse.filterNot {
-            viewModel.currentScreenState.value is USBankAccountFormScreenState.BillingDetailsCollection
+            screenState is USBankAccountFormScreenState.BillingDetailsCollection
         }.collect { saved ->
+            val merchantName = viewModel.formattedMerchantName()
             val mandateText = ACHText.getContinueMandateText(
                 context = context,
-                merchantName = viewModel.formattedMerchantName(),
+                merchantName = merchantName,
                 isSaveForFutureUseSelected = saved,
             )
-            sheetViewModel.updateMandateText(
-                context = context,
-                screenState = viewModel.currentScreenState.value,
-                mandateText = mandateText,
-                merchantName = viewModel.formattedMerchantName(),
+            val microdepositsText = if (screenState is USBankAccountFormScreenState.VerifyWithMicrodeposits) {
+                context.getString(R.string.stripe_paymentsheet_microdeposit, merchantName)
+            } else {
+                ""
+            }
+            usBankAccountFormArgs.onMandateTextChanged(
+                """
+                    $microdepositsText
+                        
+                    $mandateText
+                """.trimIndent(),
             )
         }
     }
