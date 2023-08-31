@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.PaymentDetailsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -277,7 +278,9 @@ class PaymentSheetEventTest {
                 mock()
             ),
             duration = 1.milliseconds,
-            result = PaymentSheetEvent.Payment.Result.Failure,
+            result = PaymentSheetEvent.Payment.Result.Failure(
+                error = PaymentSheetConfirmationError.Stripe(APIException()),
+            ),
             currency = "usd",
             isDecoupled = false,
             deferredIntentConfirmationType = null,
@@ -295,6 +298,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "selected_lpm" to "card",
+                "error_message" to "apiError",
             )
         )
     }
@@ -305,7 +309,9 @@ class PaymentSheetEventTest {
             mode = EventReporter.Mode.Complete,
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             duration = 1.milliseconds,
-            result = PaymentSheetEvent.Payment.Result.Failure,
+            result = PaymentSheetEvent.Payment.Result.Failure(
+                error = PaymentSheetConfirmationError.Stripe(APIException()),
+            ),
             currency = "usd",
             isDecoupled = false,
             deferredIntentConfirmationType = null,
@@ -323,6 +329,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "selected_lpm" to "card",
+                "error_message" to "apiError",
             )
         )
     }
@@ -333,7 +340,9 @@ class PaymentSheetEventTest {
             mode = EventReporter.Mode.Complete,
             paymentSelection = PaymentSelection.GooglePay,
             duration = 1.milliseconds,
-            result = PaymentSheetEvent.Payment.Result.Failure,
+            result = PaymentSheetEvent.Payment.Result.Failure(
+                error = PaymentSheetConfirmationError.Stripe(APIException()),
+            ),
             currency = "usd",
             isDecoupled = false,
             deferredIntentConfirmationType = null,
@@ -351,6 +360,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "selected_lpm" to "google_pay",
+                "error_message" to "apiError",
             )
         )
     }
@@ -361,7 +371,9 @@ class PaymentSheetEventTest {
             mode = EventReporter.Mode.Complete,
             paymentSelection = PaymentSelection.Link,
             duration = 1.milliseconds,
-            result = PaymentSheetEvent.Payment.Result.Failure,
+            result = PaymentSheetEvent.Payment.Result.Failure(
+                error = PaymentSheetConfirmationError.Stripe(APIException()),
+            ),
             currency = "usd",
             isDecoupled = false,
             deferredIntentConfirmationType = null,
@@ -379,6 +391,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "selected_lpm" to "link",
+                "error_message" to "apiError",
             )
         )
     }
@@ -395,7 +408,9 @@ class PaymentSheetEventTest {
                 )
             ),
             duration = 1.milliseconds,
-            result = PaymentSheetEvent.Payment.Result.Failure,
+            result = PaymentSheetEvent.Payment.Result.Failure(
+                error = PaymentSheetConfirmationError.Stripe(APIException()),
+            ),
             currency = "usd",
             isDecoupled = false,
             deferredIntentConfirmationType = null,
@@ -412,6 +427,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "error_message" to "apiError",
             )
         )
     }

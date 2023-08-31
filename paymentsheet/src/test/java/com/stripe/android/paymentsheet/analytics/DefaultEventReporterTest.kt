@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.PaymentMethodFixtures
@@ -204,13 +205,16 @@ class DefaultEventReporterTest {
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             currency = "usd",
             isDecoupling = false,
+            error = PaymentSheetConfirmationError.Stripe(APIException())
         )
+
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_payment_savedpm_failure" &&
                     req.params["duration"] == 0.456f &&
                     req.params["currency"] == "usd" &&
-                    req.params["locale"] == "en_US"
+                    req.params["locale"] == "en_US" &&
+                    req.params["error_message"] == "apiError"
             }
         )
     }

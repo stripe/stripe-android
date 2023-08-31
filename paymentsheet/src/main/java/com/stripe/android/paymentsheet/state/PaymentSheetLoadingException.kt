@@ -1,11 +1,9 @@
 package com.stripe.android.paymentsheet.state
 
-import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.analytics.analyticsValue
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.Unknown
 
 internal sealed class PaymentSheetLoadingException : Throwable() {
@@ -73,12 +71,7 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
     ) : PaymentSheetLoadingException() {
 
         override val type: String
-            get() = when (StripeException.create(cause)) {
-                is APIException -> "apiError"
-                is APIConnectionException -> "connectionError"
-                is InvalidRequestException -> "invalidRequestError"
-                else -> "unknown"
-            }
+            get() = StripeException.create(cause).analyticsValue
 
         override val message: String? = cause.message
     }

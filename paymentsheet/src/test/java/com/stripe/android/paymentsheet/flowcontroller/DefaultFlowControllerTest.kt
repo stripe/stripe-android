@@ -15,6 +15,7 @@ import app.cash.turbine.plusAssign
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
@@ -53,6 +54,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -235,14 +237,65 @@ internal class DefaultFlowControllerTest {
             mock()
         )
 
-        flowController.onPaymentResult(PaymentResult.Failed(RuntimeException()))
+        val error = APIConnectionException()
+        flowController.onPaymentResult(PaymentResult.Failed(error))
 
         verify(eventReporter)
             .onPaymentFailure(
                 paymentSelection = isA<PaymentSelection.New>(),
                 currency = eq("usd"),
                 isDecoupling = eq(false),
+                error = eq(PaymentSheetConfirmationError.Stripe(error)),
             )
+    }
+
+    @Test
+    fun `Sends correct event for failed Google Pay payment`() = runTest {
+        val viewModel = createViewModel()
+        val flowController = createFlowController(viewModel = viewModel)
+
+        flowController.configureExpectingSuccess()
+
+        viewModel.paymentSelection = PaymentSelection.GooglePay
+
+        val errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR
+
+        flowController.onGooglePayResult(
+            GooglePayPaymentMethodLauncher.Result.Failed(
+                error = RuntimeException(),
+                errorCode = errorCode,
+            )
+        )
+
+        verify(eventReporter).onPaymentFailure(
+            paymentSelection = isA<PaymentSelection.GooglePay>(),
+            currency = eq("usd"),
+            isDecoupling = eq(false),
+            error = eq(PaymentSheetConfirmationError.GooglePay(errorCode)),
+        )
+    }
+
+    @Test
+    fun `Sends correct event for invalid local state when confirming payment`() = runTest {
+        val viewModel = createViewModel()
+        val flowController = createFlowController(viewModel = viewModel)
+
+        flowController.configureExpectingSuccess()
+
+        viewModel.state = null
+
+        flowController.onGooglePayResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            )
+        )
+
+        verify(eventReporter).onPaymentFailure(
+            paymentSelection = isA<PaymentSelection.GooglePay>(),
+            currency = isNull(),
+            isDecoupling = eq(false),
+            error = eq(PaymentSheetConfirmationError.InvalidState),
+        )
     }
 
     @Test

@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -505,15 +506,18 @@ internal class PaymentSheetViewModelTest {
     fun `onPaymentResult() with non-success outcome should report failure event`() = runTest {
         val viewModel = createViewModel()
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val error = APIException()
+
         viewModel.updateSelection(selection)
 
         viewModel.stripeIntent.test {
-            viewModel.onPaymentResult(PaymentResult.Failed(Throwable()))
+            viewModel.onPaymentResult(PaymentResult.Failed(error))
             verify(eventReporter)
                 .onPaymentFailure(
                     paymentSelection = selection,
                     currency = "usd",
                     isDecoupling = false,
+                    error = PaymentSheetConfirmationError.Stripe(error),
                 )
 
             val stripeIntent = awaitItem()

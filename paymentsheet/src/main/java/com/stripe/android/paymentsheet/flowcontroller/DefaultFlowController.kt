@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
 import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.intercept
@@ -371,14 +372,15 @@ internal class DefaultFlowController @Inject internal constructor(
                             state
                         )
                     },
-                    onFailure = {
+                    onFailure = { error ->
                         eventReporter.onPaymentFailure(
                             paymentSelection = PaymentSelection.GooglePay,
                             currency = viewModel.state?.stripeIntent?.currency,
                             isDecoupling = isDecoupling,
+                            error = PaymentSheetConfirmationError.InvalidState,
                         )
                         paymentResultCallback.onPaymentSheetResult(
-                            PaymentSheetResult.Failed(it)
+                            PaymentSheetResult.Failed(error)
                         )
                     }
                 )
@@ -388,6 +390,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     paymentSelection = PaymentSelection.GooglePay,
                     currency = viewModel.state?.stripeIntent?.currency,
                     isDecoupling = isDecoupling,
+                    error = PaymentSheetConfirmationError.GooglePay(googlePayResult.errorCode),
                 )
                 paymentResultCallback.onPaymentSheetResult(
                     PaymentSheetResult.Failed(
@@ -422,14 +425,15 @@ internal class DefaultFlowController @Inject internal constructor(
                         state
                     )
                 },
-                onFailure = {
+                onFailure = { error ->
                     eventReporter.onPaymentFailure(
                         paymentSelection = PaymentSelection.Link,
                         currency = viewModel.state?.stripeIntent?.currency,
                         isDecoupling = isDecoupling,
+                        error = PaymentSheetConfirmationError.InvalidState,
                     )
                     paymentResultCallback.onPaymentSheetResult(
-                        PaymentSheetResult.Failed(it)
+                        PaymentSheetResult.Failed(error)
                     )
                 }
             )
@@ -498,6 +502,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     paymentSelection = viewModel.paymentSelection,
                     currency = viewModel.state?.stripeIntent?.currency,
                     isDecoupling = isDecoupling,
+                    error = PaymentSheetConfirmationError.Stripe(paymentResult.throwable),
                 )
             }
             else -> {
