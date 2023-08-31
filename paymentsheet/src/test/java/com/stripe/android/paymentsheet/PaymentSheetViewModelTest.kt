@@ -89,7 +89,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration
 
-
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentSheetViewModelTest {
     @get:Rule

@@ -27,7 +27,6 @@ data class IdentifierSpec(
 ) : Parcelable {
     constructor() : this("")
 
-
     companion object {
         fun Generic(_value: String) = IdentifierSpec(_value)
 
@@ -75,6 +74,7 @@ data class IdentifierSpec(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val Blik = IdentifierSpec("blik", requestDestination = RequestDestination.Options)
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val BlikCode = IdentifierSpec("blik[code]", requestDestination = RequestDestination.Options)
 
