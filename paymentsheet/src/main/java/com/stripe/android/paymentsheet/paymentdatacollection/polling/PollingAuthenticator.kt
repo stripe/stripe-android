@@ -51,9 +51,11 @@ internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent>() {
                     ctaText = R.string.stripe_blik_confirm_payment,
                 )
             else ->
-                error("Received invalid payment method type " +
+                error(
+                    "Received invalid payment method type " +
                     "${authenticatable.paymentMethod?.type?.code} " +
-                    "in PollingAuthenticator")
+                    "in PollingAuthenticator"
+                )
         }
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
