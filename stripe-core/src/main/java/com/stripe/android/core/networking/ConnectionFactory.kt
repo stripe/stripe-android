@@ -1,7 +1,6 @@
 package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.exception.InvalidRequestException
 import java.io.File
 import java.io.IOException
@@ -30,10 +29,18 @@ interface ConnectionFactory {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object Default : ConnectionFactory {
         @Volatile
-        var testConnectionCustomization: ((HttpURLConnection) -> Unit)? = null
+        var connectionOpener: ((
+            request: StripeRequest,
+            callback: HttpURLConnection.(request: StripeRequest) -> Unit
+        ) -> HttpURLConnection) = ::defaultConnectionOpener
 
-        @Volatile
-        var testHostCustomization: ((StripeRequest) -> StripeRequest)? = null
+        fun defaultConnectionOpener(
+            request: StripeRequest,
+            callback: HttpURLConnection.(request: StripeRequest) -> Unit): HttpURLConnection {
+            return (URL(request.url).openConnection() as HttpURLConnection).apply {
+                callback(request)
+            }
+        }
 
         @Throws(IOException::class, InvalidRequestException::class)
         @JvmSynthetic
@@ -52,31 +59,22 @@ interface ConnectionFactory {
         }
 
         private fun openConnectionAndApplyFields(request: StripeRequest): HttpURLConnection {
-            val actualRequest = if (BuildConfig.DEBUG) {
-                testHostCustomization?.invoke(request) ?: request
-            } else {
-                request
-            }
-            return (URL(actualRequest.url).openConnection() as HttpURLConnection).apply {
-                if (BuildConfig.DEBUG) {
-                    testConnectionCustomization?.invoke(this)
-                }
-
+            return connectionOpener(request) {
                 connectTimeout = CONNECT_TIMEOUT
                 readTimeout = READ_TIMEOUT
-                useCaches = actualRequest.shouldCache
-                requestMethod = actualRequest.method.code
+                useCaches = request.shouldCache
+                requestMethod = request.method.code
 
-                actualRequest.headers.forEach { (key, value) ->
+                request.headers.forEach { (key, value) ->
                     setRequestProperty(key, value)
                 }
 
-                if (StripeRequest.Method.POST == actualRequest.method) {
+                if (StripeRequest.Method.POST == request.method) {
                     doOutput = true
-                    actualRequest.postHeaders?.forEach { (key, value) ->
+                    request.postHeaders?.forEach { (key, value) ->
                         setRequestProperty(key, value)
                     }
-                    outputStream.use { output -> actualRequest.writePostBody(output) }
+                    outputStream.use { output -> request.writePostBody(output) }
                 }
             }
         }

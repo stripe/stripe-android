@@ -9,6 +9,8 @@ import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import java.io.OutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
 class NetworkRule private constructor(
@@ -65,26 +67,33 @@ private class NetworkStatement(
     }
 
     private fun setup() {
-        ConnectionFactory.Default.testHostCustomization = lambda@{ request ->
-            val requestHost = request.url.hostFromUrl()
-            if (!hostsToTrack.contains(requestHost)) {
-                throw RequestNotFoundException(
-                    "Test request attempted to reach a non test endpoint. " +
-                        "Url: ${request.url}"
-                )
-            }
+        ConnectionFactory.Default.connectionOpener = ::connectionOpener
+    }
 
-            return@lambda DelegatingStripeRequest(
-                request,
-                request.url.replace(
-                    "https://$requestHost",
-                    mockWebServer.baseUrl.toString().removeSuffix("/")
-                )
+    private fun connectionOpener(
+        request: StripeRequest,
+        callback: HttpURLConnection.(request: StripeRequest) -> Unit
+    ): HttpURLConnection {
+        val requestHost = request.url.hostFromUrl()
+        if (!hostsToTrack.contains(requestHost)) {
+            throw RequestNotFoundException(
+                "Test request attempted to reach a non test endpoint. " +
+                    "Url: ${request.url}"
             )
         }
-        ConnectionFactory.Default.testConnectionCustomization = lambda@{ insecureConnection ->
-            val connection = insecureConnection as? HttpsURLConnection ?: return@lambda
-            connection.sslSocketFactory = mockWebServer.clientSocketFactory()
+
+        val delegatingRequest = DelegatingStripeRequest(
+            request,
+            request.url.replace(
+                "https://$requestHost",
+                mockWebServer.baseUrl.toString().removeSuffix("/")
+            )
+        )
+        return (URL(delegatingRequest.url).openConnection() as HttpURLConnection).apply {
+            if (this is HttpsURLConnection) {
+                sslSocketFactory = mockWebServer.clientSocketFactory()
+            }
+            callback(delegatingRequest)
         }
     }
 
@@ -101,8 +110,7 @@ private class NetworkStatement(
 
     private fun tearDown() {
         mockWebServer.dispatcher.clear()
-        ConnectionFactory.Default.testConnectionCustomization = null
-        ConnectionFactory.Default.testHostCustomization = null
+        ConnectionFactory.Default.connectionOpener = ConnectionFactory.Default::defaultConnectionOpener
     }
 }
 
