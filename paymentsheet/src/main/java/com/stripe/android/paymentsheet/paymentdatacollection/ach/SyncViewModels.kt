@@ -6,14 +6,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.flow.filterNot
 
 @Composable
 internal fun SyncViewModels(
     viewModel: USBankAccountFormViewModel,
     usBankAccountFormArgs: USBankAccountFormArguments,
-    sheetViewModel: BaseSheetViewModel,
 ) {
     val context = LocalContext.current
     val screenState by viewModel.currentScreenState.collectAsState()
@@ -26,7 +24,7 @@ internal fun SyncViewModels(
 
     LaunchedEffect(Unit) {
         viewModel.requiredFields.collect { hasRequiredFields ->
-            sheetViewModel.updateCustomPrimaryButtonUiState {
+            usBankAccountFormArgs.onUpdatePrimaryButtonUIState {
                 it?.copy(enabled = hasRequiredFields)
             }
         }

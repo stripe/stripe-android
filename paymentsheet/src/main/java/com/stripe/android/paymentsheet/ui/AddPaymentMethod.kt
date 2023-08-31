@@ -111,6 +111,7 @@ internal fun AddPaymentMethod(
                 usBankAccountFormArguments = USBankAccountFormArguments(
                     onMandateTextChanged = sheetViewModel::updateBelowButtonText,
                     onHandleUSBankAccount = sheetViewModel::handleConfirmUSBankAccount,
+                    onUpdatePrimaryButtonUIState = sheetViewModel::updateCustomPrimaryButtonUiState,
                 ),
                 onFormFieldValuesChanged = { formValues ->
                     val newSelection = formValues?.transformToPaymentSelection(
