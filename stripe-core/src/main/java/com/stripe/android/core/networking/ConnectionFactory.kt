@@ -29,14 +29,17 @@ interface ConnectionFactory {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object Default : ConnectionFactory {
         @Volatile
-        var connectionOpener: ((
-            request: StripeRequest,
-            callback: HttpURLConnection.(request: StripeRequest) -> Unit
-        ) -> HttpURLConnection) = ::defaultConnectionOpener
+        var connectionOpener: (
+            (
+                request: StripeRequest,
+                callback: HttpURLConnection.(request: StripeRequest) -> Unit
+            ) -> HttpURLConnection
+        ) = ::defaultConnectionOpener
 
         fun defaultConnectionOpener(
             request: StripeRequest,
-            callback: HttpURLConnection.(request: StripeRequest) -> Unit): HttpURLConnection {
+            callback: HttpURLConnection.(request: StripeRequest) -> Unit
+        ): HttpURLConnection {
             return (URL(request.url).openConnection() as HttpURLConnection).apply {
                 callback(request)
             }
