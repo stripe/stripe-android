@@ -12,6 +12,7 @@ class CardDetailsSectionController(
     initialValues: Map<IdentifierSpec, String?>,
     viewOnlyFields: Set<IdentifierSpec>,
     collectName: Boolean = false,
+    isEligibleForCardBrandChoice: Boolean = false,
 ) : SectionFieldErrorController {
 
     internal val cardDetailsElement = CardDetailsElement(
@@ -20,6 +21,7 @@ class CardDetailsSectionController(
         initialValues,
         viewOnlyFields,
         collectName,
+        isEligibleForCardBrandChoice,
     )
 
     internal val isCardScanEnabled = cardDetailsElement.isCardScanEnabled

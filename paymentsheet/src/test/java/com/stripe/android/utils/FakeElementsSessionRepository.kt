@@ -22,6 +22,7 @@ internal class FakeElementsSessionRepository(
                     paymentMethodSpecs = null,
                     stripeIntent = stripeIntent,
                     merchantCountry = null,
+                    isEligibleForCardBrandChoice = true,
                 )
             )
         }

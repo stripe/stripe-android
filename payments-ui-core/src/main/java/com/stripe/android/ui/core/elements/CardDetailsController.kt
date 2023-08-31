@@ -24,6 +24,7 @@ internal class CardDetailsController constructor(
     initialValues: Map<IdentifierSpec, String?>,
     cardNumberReadOnly: Boolean = false,
     collectName: Boolean = false,
+    isEligibleForCardBrandChoice: Boolean = false,
 ) : SectionFieldErrorController, SectionFieldComposable {
 
     val nameElement = if (collectName) {
@@ -54,7 +55,8 @@ internal class CardDetailsController constructor(
             CardNumberEditableController(
                 CardNumberConfig(),
                 context,
-                initialValues[IdentifierSpec.CardNumber]
+                initialValues[IdentifierSpec.CardNumber],
+                isEligibleForCardBrandChoice,
             )
         }
     )

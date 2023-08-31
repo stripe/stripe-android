@@ -25,6 +25,8 @@ internal object PaymentSheetFixtures {
         CLIENT_SECRET
     )
 
+    internal val SETUP_INTENT_CLIENT_SECRET = PaymentIntentClientSecret("seti_1234_secret_4321")
+
     internal val CONFIG_MINIMUM = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME
     )
@@ -109,6 +111,7 @@ internal object PaymentSheetFixtures {
             isGooglePayReady = false,
             paymentSelection = null,
             linkState = null,
+            isEligibleForCardBrandChoice = false,
         ),
         statusBarColor = STATUS_BAR_COLOR,
         enableLogging = false,
@@ -194,6 +197,7 @@ internal object PaymentSheetFixtures {
                 email = "email",
                 name = "Jenny Rosen",
                 phone = "+18008675309"
-            )
+            ),
+            isEligibleForCardBrandChoice = false,
         )
 }

@@ -28,6 +28,7 @@
     <ID>LargeClass:CardMultilineWidgetTest.kt$CardMultilineWidgetTest</ID>
     <ID>LargeClass:CardNumberEditTextTest.kt$CardNumberEditTextTest</ID>
     <ID>LargeClass:CustomerSessionTest.kt$CustomerSessionTest</ID>
+    <ID>LargeClass:ElementsSessionFixtures.kt$ElementsSessionFixtures</ID>
     <ID>LargeClass:PaymentIntentFixtures.kt$PaymentIntentFixtures</ID>
     <ID>LargeClass:SetupIntentFixtures.kt$SetupIntentFixtures</ID>
     <ID>LargeClass:SourceParamsTest.kt$SourceParamsTest</ID>
@@ -227,7 +228,6 @@
     <ID>TooManyFunctions:StripePaymentController.kt$StripePaymentController : PaymentController</ID>
     <ID>TooManyFunctions:StripeRepository.kt$StripeRepository</ID>
     <ID>UnusedPrivateMember:CustomerSession.kt$CustomerSession$private fun &lt;L : RetrievalListener?> getListener(operationId: String): L?</ID>
-    <ID>UnusedPrivateMember:GooglePayPaymentMethodLauncherModule.kt$GooglePayPaymentMethodLauncherModule.Companion$context: Context</ID>
     <ID>UnusedPrivateMember:PayWithGoogleUtils.kt$PayWithGoogleUtils$i</ID>
     <ID>UnusedPrivateMember:PaymentFlowActivityStarter.kt$PaymentFlowActivityStarter$config: PaymentSessionConfig</ID>
     <ID>UnusedPrivateMember:PaymentMethod.kt$PaymentMethod.CardPresent$private val ignore: Boolean = true</ID>

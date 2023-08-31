@@ -126,6 +126,8 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$$serializer
 
 public final class com/stripe/android/uicore/elements/IdentifierSpec$Companion {
 	public final fun Generic (Ljava/lang/String;)Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getBlik ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getBlikCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getCardBrand ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getCardCvc ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getCardExpMonth ()Lcom/stripe/android/uicore/elements/IdentifierSpec;

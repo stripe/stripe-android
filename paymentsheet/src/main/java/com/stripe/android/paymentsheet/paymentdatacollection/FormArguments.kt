@@ -15,6 +15,7 @@ internal data class FormArguments(
     val paymentMethodCode: PaymentMethodCode,
     val showCheckbox: Boolean,
     val showCheckboxControlledFields: Boolean,
+    val isEligibleForCardBrandChoice: Boolean,
     val merchantName: String,
     val amount: Amount? = null,
     val billingDetails: PaymentSheet.BillingDetails? = null,

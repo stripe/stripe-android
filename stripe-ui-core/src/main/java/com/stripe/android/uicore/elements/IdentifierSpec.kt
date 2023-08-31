@@ -5,6 +5,12 @@ import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class ApiParameterDestination {
+    Params,
+    Options
+}
+
 /**
  * This uniquely identifies a element in the form.  The vals here are for identifier
  * specs that need to be found when pre-populating fields, or when extracting data.
@@ -16,7 +22,8 @@ import kotlinx.serialization.Serializable
 @Parcelize
 data class IdentifierSpec(
     val v1: String,
-    val ignoreField: Boolean = false
+    val ignoreField: Boolean = false,
+    val apiParameterDestination: ApiParameterDestination = ApiParameterDestination.Params,
 ) : Parcelable {
     constructor() : this("")
 
@@ -64,6 +71,12 @@ data class IdentifierSpec(
 
         val Upi = IdentifierSpec("upi")
         val Vpa = IdentifierSpec("upi[vpa]")
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val Blik = IdentifierSpec("blik", apiParameterDestination = ApiParameterDestination.Options)
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val BlikCode = IdentifierSpec("blik[code]", apiParameterDestination = ApiParameterDestination.Options)
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {

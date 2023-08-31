@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
 import android.os.SystemClock
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -76,6 +77,7 @@ internal fun PollingState.toFlowResult(
 
 internal data class PollingUiState(
     val durationRemaining: Duration,
+    @StringRes val ctaText: Int,
     val pollingState: PollingState = PollingState.Active,
 )
 
@@ -87,7 +89,7 @@ internal class PollingViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(PollingUiState(durationRemaining = args.timeLimit))
+    private val _uiState = MutableStateFlow(PollingUiState(durationRemaining = args.timeLimit, ctaText = args.ctaText))
     val uiState: StateFlow<PollingUiState> = _uiState
 
     init {
@@ -226,6 +228,7 @@ internal class PollingViewModel @Inject constructor(
         val timeLimit: Duration,
         val initialDelay: Duration,
         val maxAttempts: Int,
+        @StringRes val ctaText: Int,
     )
 }
 

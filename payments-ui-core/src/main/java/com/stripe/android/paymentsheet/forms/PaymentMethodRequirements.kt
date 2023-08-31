@@ -320,6 +320,12 @@ internal val UpiRequirement = PaymentMethodRequirements(
     confirmPMFromCustomer = null
 )
 
+internal val BlikRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = null
+)
+
 internal val CashAppPayRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
     siRequirements = null,
@@ -327,6 +333,12 @@ internal val CashAppPayRequirement = PaymentMethodRequirements(
 )
 
 internal val GrabPayRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = false,
+)
+
+internal val FpxRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
     siRequirements = null,
     confirmPMFromCustomer = false,

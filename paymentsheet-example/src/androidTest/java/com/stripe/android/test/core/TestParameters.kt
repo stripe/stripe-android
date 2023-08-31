@@ -88,6 +88,10 @@ sealed interface AuthorizeAction {
 
     abstract val text: String
 
+    object PollingSucceedsAfterDelay : AuthorizeAction {
+        override val text: String = "POLLING SUCCEEDS AFTER DELAY"
+    }
+
     object Authorize : AuthorizeAction {
         override val text: String = "AUTHORIZE TEST PAYMENT"
     }
@@ -121,6 +125,8 @@ enum class Currency {
     GBP,
     INR,
     SGD,
+    PLN,
+    MYR,
 }
 
 /**

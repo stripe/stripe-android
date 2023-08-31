@@ -87,6 +87,7 @@ internal class FormViewModel @Inject internal constructor(
                 context = context,
                 shippingValues = formArguments.shippingDetails
                     ?.toIdentifierMap(formArguments.billingDetails),
+                isEligibleForCardBrandChoice = formArguments.isEligibleForCardBrandChoice,
             ).transform(specs)
         )
     }

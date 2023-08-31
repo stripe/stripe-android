@@ -19,9 +19,11 @@ import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AmazonPayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
+import com.stripe.android.paymentsheet.forms.BlikRequirement
 import com.stripe.android.paymentsheet.forms.CardRequirement
 import com.stripe.android.paymentsheet.forms.CashAppPayRequirement
 import com.stripe.android.paymentsheet.forms.EpsRequirement
+import com.stripe.android.paymentsheet.forms.FpxRequirement
 import com.stripe.android.paymentsheet.forms.GiropayRequirement
 import com.stripe.android.paymentsheet.forms.GrabPayRequirement
 import com.stripe.android.paymentsheet.forms.IdealRequirement
@@ -93,8 +95,10 @@ class LpmRepository constructor(
             PaymentMethod.Type.Zip.code,
             PaymentMethod.Type.AuBecsDebit.code,
             PaymentMethod.Type.Upi.code,
+            PaymentMethod.Type.Blik.code,
             PaymentMethod.Type.CashAppPay.code,
             PaymentMethod.Type.GrabPay.code,
+            PaymentMethod.Type.Fpx.code,
         )
     }
 
@@ -505,6 +509,20 @@ class LpmRepository constructor(
             requirement = UpiRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
+
+        PaymentMethod.Type.Blik.code -> SupportedPaymentMethod(
+            code = "blik",
+            requiresMandate = false,
+            mandateRequirement = MandateRequirement.Never,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_blik,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_blik,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = BlikRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
+        )
+
         PaymentMethod.Type.CashAppPay.code -> SupportedPaymentMethod(
             code = "cashapp",
             requiresMandate = false,
@@ -527,6 +545,18 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = GrabPayRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields),
+        )
+        PaymentMethod.Type.Fpx.code -> SupportedPaymentMethod(
+            code = "fpx",
+            requiresMandate = false,
+            mandateRequirement = MandateRequirement.Never,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_fpx,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_fpx,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = FpxRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields),
         )
         else -> null

@@ -20,11 +20,13 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.uicore.elements.ApiParameterDestination
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -147,11 +149,24 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
     paymentMethod: LpmRepository.SupportedPaymentMethod
 ): PaymentMethodCreateParams {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
-        fieldValuePairs = fieldValuePairs.filterNot { entry ->
+        fieldValuePairs = fieldValuePairs.filter { entry ->
+            entry.key.apiParameterDestination == ApiParameterDestination.Params
+        }.filterNot { entry ->
             entry.key == IdentifierSpec.SaveForFutureUse || entry.key == IdentifierSpec.CardBrand
         },
         code = paymentMethod.code,
         requiresMandate = paymentMethod.requiresMandate,
+    )
+}
+
+internal fun FormFieldValues.transformToPaymentMethodOptionsParams(
+    paymentMethod: LpmRepository.SupportedPaymentMethod
+): PaymentMethodOptionsParams? {
+    return FieldValuesToParamsMapConverter.transformToPaymentMethodOptionsParams(
+        fieldValuePairs = fieldValuePairs.filter { entry ->
+            entry.key.apiParameterDestination == ApiParameterDestination.Options
+        },
+        code = paymentMethod.code,
     )
 }
 
@@ -160,9 +175,10 @@ internal fun FormFieldValues.transformToPaymentSelection(
     paymentMethod: LpmRepository.SupportedPaymentMethod
 ): PaymentSelection.New {
     val params = transformToPaymentMethodCreateParams(paymentMethod)
-
+    val options = transformToPaymentMethodOptionsParams(paymentMethod)
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
         PaymentSelection.New.Card(
+            paymentMethodOptionsParams = options,
             paymentMethodCreateParams = params,
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,
@@ -174,6 +190,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
             paymentMethodCreateParams = params,
+            paymentMethodOptionsParams = options,
             customerRequestedSave = userRequestedReuse,
         )
     }

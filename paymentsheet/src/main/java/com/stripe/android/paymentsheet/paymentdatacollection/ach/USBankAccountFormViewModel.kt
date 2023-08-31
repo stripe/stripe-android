@@ -467,6 +467,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     address = address.value,
                 )
             ),
+            paymentMethodOptionsParams = null,
             customerRequestedSave = if (args.formArgs.showCheckbox) {
                 if (saveForFutureUse.value) {
                     PaymentSelection.CustomerRequestedSave.RequestReuse

@@ -35,6 +35,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
 import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
@@ -300,6 +301,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
         lpmServerSpec = lpmRepository.serverSpecLoadingState.serverLpmSpecs
+        isEligibleForCardBrandChoice = state.isEligibleForCardBrandChoice
 
         savedStateHandle[SAVE_PAYMENT_METHODS] = state.customerPaymentMethods
         updateSelection(state.paymentSelection)
@@ -548,6 +550,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     paymentSelection = selection.value,
                     currency = stripeIntent.currency,
                     isDecoupling = isDecoupling,
+                    error = PaymentSheetConfirmationError.Stripe(paymentResult.throwable),
                 )
 
                 resetViewState(
@@ -578,6 +581,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     paymentSelection = PaymentSelection.GooglePay,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = isDecoupling,
+                    error = PaymentSheetConfirmationError.GooglePay(result.errorCode),
                 )
                 onError(
                     when (result.errorCode) {

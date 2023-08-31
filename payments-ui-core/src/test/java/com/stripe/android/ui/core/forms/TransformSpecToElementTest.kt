@@ -68,7 +68,8 @@ internal class TransformSpecToElementTest {
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
                 context = context,
-                shippingValues = null
+                shippingValues = null,
+                isEligibleForCardBrandChoice = false,
             )
     }
 
@@ -199,7 +200,8 @@ internal class TransformSpecToElementTest {
                 merchantName = "Merchant, Inc.",
                 context = context,
                 viewOnlyFields = setOf(IdentifierSpec.CardNumber),
-                shippingValues = null
+                shippingValues = null,
+                isEligibleForCardBrandChoice = false,
             )
 
         val formElements = transformSpecToElements.transform(
