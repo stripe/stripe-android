@@ -375,7 +375,6 @@ private class ActivityVisibilityObserver(
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
         if (!isFirstStart && isInBackground) {
-            Log.d("Test", "Returning to foreground")
             onForegrounded()
         }
         isFirstStart = false
@@ -389,7 +388,6 @@ private class ActivityVisibilityObserver(
         if (!changingConfigurations) {
             isInBackground = true
             onBackgrounded()
-            Log.d("Test", "Moving to Background")
         }
     }
 }
