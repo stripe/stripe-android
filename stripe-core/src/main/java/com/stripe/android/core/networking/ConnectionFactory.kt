@@ -61,8 +61,10 @@ interface ConnectionFactory {
             )
         }
 
-        private fun openConnectionAndApplyFields(request: StripeRequest): HttpURLConnection {
-            return connectionOpener(request) {
+        private fun openConnectionAndApplyFields(
+            originalRequest: StripeRequest
+        ): HttpURLConnection {
+            return connectionOpener(originalRequest) { request ->
                 connectTimeout = CONNECT_TIMEOUT
                 readTimeout = READ_TIMEOUT
                 useCaches = request.shouldCache
