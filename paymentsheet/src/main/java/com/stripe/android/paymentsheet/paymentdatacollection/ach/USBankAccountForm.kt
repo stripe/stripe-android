@@ -93,7 +93,6 @@ internal fun USBankAccountForm(
     SyncViewModels(
         viewModel = viewModel,
         usBankAccountFormArgs = usBankAccountFormArgs,
-        sheetViewModel = sheetViewModel,
     )
 
     DisposableEffect(Unit) {
