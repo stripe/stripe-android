@@ -40,6 +40,7 @@ internal class ElementsSessionRepositoryTest {
                     paymentMethodSpecs = null,
                     stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
                     merchantCountry = null,
+                    isEligibleForCardBrandChoice = false,
                 )
             )
         )
@@ -118,6 +119,7 @@ internal class ElementsSessionRepositoryTest {
                     paymentMethodSpecs = null,
                     stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
                     merchantCountry = null,
+                    isEligibleForCardBrandChoice = false,
                 )
             )
         )

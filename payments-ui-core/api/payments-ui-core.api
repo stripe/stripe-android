@@ -166,9 +166,6 @@ public final class com/stripe/android/ui/core/elements/CardBillingSpec$Companion
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/CardDetailsElementKt {
-}
-
 public final class com/stripe/android/ui/core/elements/CardDetailsSectionElementUIKt {
 }
 

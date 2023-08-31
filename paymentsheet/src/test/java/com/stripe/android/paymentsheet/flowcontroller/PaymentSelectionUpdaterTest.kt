@@ -257,6 +257,7 @@ class PaymentSelectionUpdaterTest {
             isGooglePayReady = true,
             linkState = null,
             paymentSelection = paymentSelection,
+            isEligibleForCardBrandChoice = false,
         )
     }
 
@@ -277,6 +278,7 @@ class PaymentSelectionUpdaterTest {
             isGooglePayReady = true,
             linkState = null,
             paymentSelection = paymentSelection,
+            isEligibleForCardBrandChoice = false,
         )
     }
 

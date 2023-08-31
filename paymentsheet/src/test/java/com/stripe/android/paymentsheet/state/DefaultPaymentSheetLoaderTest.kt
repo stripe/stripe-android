@@ -120,6 +120,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 ),
                 linkState = null,
+                isEligibleForCardBrandChoice = false,
             )
         )
     }
@@ -641,12 +642,39 @@ internal class DefaultPaymentSheetLoaderTest {
         )
     }
 
+    @Test
+    fun `Doesn't include card brand choice state if feature is disabled`() = runTest {
+        val loader = createPaymentSheetLoader(isCbcEnabled = false)
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+        ).getOrThrow()
+
+        assertThat(result.isEligibleForCardBrandChoice).isFalse()
+    }
+
+    @Test
+    fun `Includes card brand choice state if feature is enabled`() = runTest {
+        val loader = createPaymentSheetLoader(isCbcEnabled = true)
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+        ).getOrThrow()
+
+        assertThat(result.isEligibleForCardBrandChoice).isTrue()
+    }
+
     private fun createPaymentSheetLoader(
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         customerRepo: CustomerRepository = customerRepository,
         linkAccountState: AccountStatus = AccountStatus.Verified,
         error: Throwable? = null,
+        isCbcEnabled: Boolean = false,
     ): PaymentSheetLoader {
         return DefaultPaymentSheetLoader(
             appName = "App Name",
@@ -664,6 +692,7 @@ internal class DefaultPaymentSheetLoaderTest {
             eventReporter = eventReporter,
             workContext = testDispatcher,
             accountStatusProvider = { linkAccountState },
+            cbcEnabled = { isCbcEnabled },
         )
     }
 

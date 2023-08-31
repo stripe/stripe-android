@@ -23,6 +23,7 @@ internal class RelayingPaymentSheetLoader : PaymentSheetLoader {
                     isGooglePayReady = false,
                     paymentSelection = null,
                     linkState = null,
+                    isEligibleForCardBrandChoice = false,
                 ),
             )
         )

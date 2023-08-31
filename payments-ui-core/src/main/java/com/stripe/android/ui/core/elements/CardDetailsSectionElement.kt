@@ -13,9 +13,15 @@ class CardDetailsSectionElement(
     initialValues: Map<IdentifierSpec, String?>,
     viewOnlyFields: Set<IdentifierSpec>,
     private val collectName: Boolean = false,
+    private val isEligibleForCardBrandChoice: Boolean = false,
     override val identifier: IdentifierSpec,
-    override val controller: CardDetailsSectionController =
-        CardDetailsSectionController(context, initialValues, viewOnlyFields, collectName),
+    override val controller: CardDetailsSectionController = CardDetailsSectionController(
+        context = context,
+        initialValues = initialValues,
+        viewOnlyFields = viewOnlyFields,
+        collectName = collectName,
+        isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+    ),
 ) : FormElement {
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         controller.cardDetailsElement.getFormFieldValueFlow()

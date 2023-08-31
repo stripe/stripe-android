@@ -61,7 +61,8 @@ class FormArgumentsTest {
             merchantName = "Merchant, Inc.",
             amount = Amount(50, "USD"),
             billingDetails = billingDetails,
-            initialPaymentMethodCreateParams = paymentMethodCreateParams
+            initialPaymentMethodCreateParams = paymentMethodCreateParams,
+            isEligibleForCardBrandChoice = false,
         )
 
         assertThat(formArguments.getInitialValuesMap()).isEqualTo(
@@ -93,7 +94,8 @@ class FormArgumentsTest {
             merchantName = "Merchant, Inc.",
             amount = Amount(50, "USD"),
             billingDetails = billingDetails,
-            initialPaymentMethodCreateParams = null
+            initialPaymentMethodCreateParams = null,
+            isEligibleForCardBrandChoice = false,
         )
 
         assertThat(formArguments.getInitialValuesMap()).isEqualTo(

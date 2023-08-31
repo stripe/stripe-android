@@ -26,10 +26,12 @@ import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
+import com.stripe.android.paymentsheet.state.CbcEnabledProvider
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentSheetLoader
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.RealCbcEnabledProvider
 import dagger.Binds
 import dagger.Lazy
 import dagger.Module
@@ -65,6 +67,9 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsLinkAccountStatusProvider(
         impl: DefaultLinkAccountStatusProvider,
     ): LinkAccountStatusProvider
+
+    @Binds
+    abstract fun bindsCbcEnabledProvider(impl: RealCbcEnabledProvider): CbcEnabledProvider
 
     @Binds
     abstract fun bindsIntentConfirmationInterceptor(

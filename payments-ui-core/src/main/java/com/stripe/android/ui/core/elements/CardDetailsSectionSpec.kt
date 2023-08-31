@@ -20,6 +20,7 @@ data class CardDetailsSectionSpec(
 ) : FormItemSpec() {
     fun transform(
         context: Context,
+        isEligibleForCardBrandChoice: Boolean,
         initialValues: Map<IdentifierSpec, String?>,
         viewOnlyFields: Set<IdentifierSpec>,
     ): FormElement =
@@ -29,5 +30,6 @@ data class CardDetailsSectionSpec(
             viewOnlyFields = viewOnlyFields,
             identifier = apiPath,
             collectName = collectName,
+            isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
         )
 }

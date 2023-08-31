@@ -54,6 +54,7 @@ class TransformSpecToElements(
     private val saveForFutureUseInitialValue: Boolean,
     private val merchantName: String,
     private val context: Context,
+    private val isEligibleForCardBrandChoice: Boolean,
     private val viewOnlyFields: Set<IdentifierSpec> = emptySet(),
 ) {
     fun transform(list: List<FormItemSpec>): List<FormElement> =
@@ -69,7 +70,12 @@ class TransformSpecToElements(
                 is EmptyFormSpec -> EmptyFormElement()
                 is MandateTextSpec -> it.transform(merchantName)
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
-                is CardDetailsSectionSpec -> it.transform(context, initialValues, viewOnlyFields)
+                is CardDetailsSectionSpec -> it.transform(
+                    context = context,
+                    isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+                    initialValues = initialValues,
+                    viewOnlyFields = viewOnlyFields,
+                )
                 is BsbSpec -> it.transform(initialValues)
                 is OTPSpec -> it.transform()
                 is NameSpec -> it.transform(initialValues)

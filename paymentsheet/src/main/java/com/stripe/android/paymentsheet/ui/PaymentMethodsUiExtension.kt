@@ -28,7 +28,7 @@ internal fun CardBrand.getCardBrandIcon(): Int = when (this) {
     CardBrand.DinersClub -> R.drawable.stripe_ic_paymentsheet_card_dinersclub
     CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard
     CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay
-    CardBrand.CartesBancaires -> PaymentsModelR.drawable.stripe_ic_cartebancaire
+    CardBrand.CartesBancaires -> PaymentsModelR.drawable.stripe_ic_cartes_bancaires
     CardBrand.Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
 }
 
