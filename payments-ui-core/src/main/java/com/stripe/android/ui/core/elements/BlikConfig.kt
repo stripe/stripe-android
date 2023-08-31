@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 private const val BLIK_MAX_LENGTH = 6
-private val VALID_INPUT_RANGES = ('0'..'9')
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class BlikConfig : TextFieldConfig {
@@ -39,7 +38,7 @@ class BlikConfig : TextFieldConfig {
             TextFieldStateConstants.Error.Blank
         } else if (isValid) {
             TextFieldStateConstants.Valid.Limitless
-        } else if (!input.all { VALID_INPUT_RANGES.contains(it) }) {
+        } else if (!input.all { it.isDigit() }) {
             TextFieldStateConstants.Error.Invalid(
                 errorMessageResId = R.string.stripe_invalid_blik_code
             )
@@ -55,7 +54,7 @@ class BlikConfig : TextFieldConfig {
     }
 
     override fun filter(userTyped: String) =
-        userTyped.filter { VALID_INPUT_RANGES.contains(it) }.take(BLIK_MAX_LENGTH)
+        userTyped.filter { it.isDigit() }.take(BLIK_MAX_LENGTH)
 
     override fun convertToRaw(displayName: String): String = displayName
 
