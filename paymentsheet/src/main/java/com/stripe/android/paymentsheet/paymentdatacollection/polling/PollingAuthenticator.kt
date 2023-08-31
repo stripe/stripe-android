@@ -53,8 +53,8 @@ internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent>() {
             else ->
                 error(
                     "Received invalid payment method type " +
-                    "${authenticatable.paymentMethod?.type?.code} " +
-                    "in PollingAuthenticator"
+                        "${authenticatable.paymentMethod?.type?.code} " +
+                        "in PollingAuthenticator"
                 )
         }
 
