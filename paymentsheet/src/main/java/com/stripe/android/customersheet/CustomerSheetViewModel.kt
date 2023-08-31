@@ -16,8 +16,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
-import com.stripe.android.googlepaylauncher.GooglePayEnvironment
-import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -38,19 +36,21 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
-import com.stripe.android.paymentsheet.state.toInternal
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.utils.mapAsStateFlow
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import kotlinx.coroutines.async
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
+import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSheetViewModelScope
@@ -67,11 +67,12 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val lpmRepository: LpmRepository,
     private val statusBarColor: () -> Int?,
     private val eventReporter: CustomerSheetEventReporter,
+    private val workContext: CoroutineContext = Dispatchers.IO,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
-    private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
+    private val customerSheetLoader: CustomerSheetLoader,
 ) : ViewModel() {
 
     private val backStack = MutableStateFlow(initialBackStack)
@@ -82,19 +83,42 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private var isGooglePayReadyAndEnabled: Boolean = false
     private var paymentLauncher: PaymentLauncher? = null
-
     private var unconfirmedPaymentMethod: PaymentMethod? = null
+    private var stripeIntent: StripeIntent? = null
 
     init {
-        lpmRepository.initializeWithCardSpec(
-            configuration.billingDetailsCollectionConfiguration.toInternal()
-        )
-
         configuration.appearance.parseAppearance()
-
         if (viewState.value is CustomerSheetViewState.Loading) {
-            loadPaymentMethods()
+            viewModelScope.launch {
+                loadCustomerSheetState()
+            }
         }
+    }
+
+    private suspend fun loadCustomerSheetState() {
+        val result = withContext(workContext) {
+            customerSheetLoader.load(
+                configuration = configuration,
+            )
+        }
+
+        result.fold(
+            onSuccess = { state ->
+                savedPaymentSelection = state.paymentSelection
+                isGooglePayReadyAndEnabled = state.isGooglePayReady
+                stripeIntent = state.stripeIntent
+
+                transitionToInitialScreen(
+                    paymentMethods = state.customerPaymentMethods,
+                    paymentSelection = state.paymentSelection
+                )
+            },
+            onFailure = { cause ->
+                _result.update {
+                    InternalCustomerSheetResult.Error(exception = cause)
+                }
+            }
+        )
     }
 
     fun handleViewAction(viewAction: CustomerSheetViewAction) {
@@ -107,6 +131,17 @@ internal class CustomerSheetViewModel @Inject constructor(
             is CustomerSheetViewAction.OnItemSelected -> onItemSelected(viewAction.selection)
             is CustomerSheetViewAction.OnPrimaryButtonPressed -> onPrimaryButtonPressed()
             is CustomerSheetViewAction.OnFormDataUpdated -> onFormDataUpdated(viewAction.formData)
+            is CustomerSheetViewAction.OnPaymentOptionFormItemSelected -> onUpdateForm(viewAction.selection)
+            is CustomerSheetViewAction.OnUpdatePrimaryButton -> onUpdatePrimaryButton(
+                text = viewAction.text,
+                enabled = viewAction.enabled,
+                shouldShowProcessing = viewAction.shouldShowProcessing,
+                onClick = viewAction.onClick,
+            )
+            is CustomerSheetViewAction.OnUpdatePrimaryButtonUiState -> onUpdatePrimaryButtonUiState(viewAction.uiState)
+            is CustomerSheetViewAction.OnAddPaymentMethodError -> onAddPaymentMethodError(viewAction.error)
+            is CustomerSheetViewAction.OnUpdateMandateText -> onUpdateMandateText(viewAction.mandate)
+            is CustomerSheetViewAction.OnConfirmUSBankAccount -> onConfirmUSBankAccount(viewAction.selection)
         }
     }
 
@@ -183,62 +218,6 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    private fun loadPaymentMethods() {
-        viewModelScope.launch {
-            val paymentMethodsResult = async {
-                customerAdapter.retrievePaymentMethods()
-            }
-            val selectedPaymentOption = async {
-                customerAdapter.retrieveSelectedPaymentOption()
-            }
-
-            paymentMethodsResult.await().flatMap { paymentMethods ->
-                selectedPaymentOption.await().map { paymentOption ->
-                    Pair(paymentMethods, paymentOption)
-                }
-            }.map {
-                val paymentMethods = it.first
-                val paymentOption = it.second
-                val selection = paymentOption?.toPaymentSelection { id ->
-                    paymentMethods.find { it.id == id }
-                }
-                Pair(paymentMethods, selection)
-            }.onFailure { cause, _ ->
-                _result.update {
-                    InternalCustomerSheetResult.Error(exception = cause)
-                }
-            }.onSuccess { result ->
-                var paymentMethods = result.first
-                val paymentSelection = result.second
-
-                paymentSelection?.apply {
-                    val selectedPaymentMethod = (this as? PaymentSelection.Saved)?.paymentMethod
-                    // The order of the payment methods should be selected PM and then any additional PMs
-                    // The carousel always starts with Add and Google Pay (if enabled)
-                    paymentMethods = paymentMethods.sortedWith { left, right ->
-                        // We only care to move the selected payment method, all others stay in the
-                        // order they were before
-                        when {
-                            left.id == selectedPaymentMethod?.id -> -1
-                            right.id == selectedPaymentMethod?.id -> 1
-                            else -> 0
-                        }
-                    }
-                }
-
-                savedPaymentSelection = paymentSelection
-                isGooglePayReadyAndEnabled = configuration.googlePayEnabled && googlePayRepositoryFactory(
-                    if (isLiveModeProvider()) GooglePayEnvironment.Production else GooglePayEnvironment.Test
-                ).isReady().first()
-
-                transitionToInitialScreen(
-                    paymentMethods = paymentMethods,
-                    paymentSelection = paymentSelection
-                )
-            }
-        }
-    }
-
     private fun transitionToInitialScreen(paymentMethods: List<PaymentMethod>, paymentSelection: PaymentSelection?) {
         if (paymentMethods.isEmpty() && !isGooglePayReadyAndEnabled) {
             transitionToAddPaymentMethod(isFirstPaymentMethod = true)
@@ -292,9 +271,103 @@ internal class CustomerSheetViewModel @Inject constructor(
     private fun onFormDataUpdated(formData: FormViewModel.ViewData) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
-                formViewData = formData,
+                formViewDataMap = it.formViewDataMap.toMutableMap().apply {
+                    this[it.selectedPaymentMethod.code] = formData
+                },
             )
         }
+    }
+
+    private fun onUpdateForm(selection: LpmRepository.SupportedPaymentMethod) {
+        val formArguments = FormArguments(
+            paymentMethodCode = selection.code,
+            showCheckbox = false,
+            showCheckboxControlledFields = false,
+            merchantName = configuration.merchantDisplayName
+                ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+            billingDetails = configuration.defaultBillingDetails,
+            billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration
+        )
+
+        val observe = buildFormObserver(
+            formArguments = formArguments,
+            formViewModelSubcomponentBuilderProvider = formViewModelSubcomponentBuilderProvider,
+            onFormDataUpdated = ::onFormDataUpdated
+        )
+
+        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+            it.copy(
+                selectedPaymentMethod = selection,
+            )
+        }
+
+        observe()
+    }
+
+    private fun onUpdatePrimaryButton(
+        text: String,
+        enabled: Boolean,
+        shouldShowProcessing: Boolean,
+        onClick: () -> Unit,
+    ) {
+        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+            it.copy(
+                primaryButtonUiState = it.primaryButtonUiState.copy(
+                    label = text,
+                    enabled = enabled,
+                    onClick = onClick,
+                ),
+                // TODO primary button state controls us bank form enabled
+                primaryButtonState = if (shouldShowProcessing) {
+                    PrimaryButton.State.Ready
+                } else {
+                    PrimaryButton.State.Ready
+                },
+            )
+        }
+    }
+
+    private fun onUpdatePrimaryButtonUiState(
+        uiState: PrimaryButton.UIState?
+    ) {
+        if (uiState != null) {
+            updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                it.copy(
+                    primaryButtonUiState = uiState,
+                )
+            }
+        } else {
+            updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                it.copy(
+                    primaryButtonUiState = PrimaryButton.UIState(
+                        label = resources.getString(R.string.stripe_paymentsheet_save),
+                        onClick = {},
+                        enabled = true,
+                        lockVisible = false,
+                    ),
+                )
+            }
+        }
+    }
+
+    private fun onAddPaymentMethodError(error: String?) {
+        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+            it.copy(
+                errorMessage = error,
+            )
+        }
+    }
+
+    private fun onUpdateMandateText(mandate: String?) {
+        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+            it.copy(
+                mandateText = mandate,
+            )
+        }
+    }
+
+    private fun onConfirmUSBankAccount(selection: PaymentSelection.New.USBankAccount) {
+        createAndAttach(selection.paymentMethodCreateParams)
     }
 
     private fun onItemRemoved(paymentMethod: PaymentMethod) {
@@ -374,18 +447,21 @@ internal class CustomerSheetViewModel @Inject constructor(
     private fun onPrimaryButtonPressed() {
         when (val currentViewState = viewState.value) {
             is CustomerSheetViewState.AddPaymentMethod -> {
-                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
-                    it.copy(
-                        isProcessing = true,
-                        enabled = false,
-                    )
-                }
-                lpmRepository.fromCode(currentViewState.paymentMethodCode)?.let { paymentMethodSpec ->
+                val paymentMethodSpec = currentViewState.selectedPaymentMethod
+                if (paymentMethodSpec.code == PaymentMethod.Type.USBankAccount.code) {
+                    currentViewState.primaryButtonUiState.onClick()
+                } else {
+                    updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                        it.copy(
+                            isProcessing = true,
+                            enabled = false,
+                        )
+                    }
                     addPaymentMethod(
                         paymentMethodSpec = paymentMethodSpec,
                         formViewData = currentViewState.formViewData,
                     )
-                } ?: error("${currentViewState.paymentMethodCode} is not supported")
+                }
             }
             is CustomerSheetViewState.SelectPaymentMethod -> {
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
@@ -406,16 +482,22 @@ internal class CustomerSheetViewModel @Inject constructor(
         paymentMethodSpec: LpmRepository.SupportedPaymentMethod,
         formViewData: FormViewModel.ViewData,
     ) {
+        if (formViewData.completeFormValues == null) error("completeFormValues cannot be null")
+        val params = formViewData.completeFormValues
+            .transformToPaymentMethodCreateParams(paymentMethodSpec)
+        createAndAttach(params)
+    }
+
+    private fun createAndAttach(
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+    ) {
         viewModelScope.launch {
-            if (formViewData.completeFormValues == null) error("completeFormValues cannot be null")
-            val params = formViewData.completeFormValues
-                .transformToPaymentMethodCreateParams(paymentMethodSpec)
-            createPaymentMethod(params)
+            createPaymentMethod(paymentMethodCreateParams)
                 .onSuccess { paymentMethod ->
                     attachPaymentMethodToCustomer(paymentMethod)
                 }.onFailure { throwable ->
                     logger.error(
-                        msg = "Failed to create payment method for $paymentMethodSpec",
+                        msg = "Failed to create payment method for $paymentMethodCreateParams",
                         t = throwable,
                     )
                     updateViewState<CustomerSheetViewState.AddPaymentMethod> {
@@ -429,24 +511,68 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun transitionToAddPaymentMethod(isFirstPaymentMethod: Boolean) {
-        val paymentMethodCode = PaymentMethod.Type.Card.code
-
         val observe = buildFormObserver(
-            paymentMethodCode = paymentMethodCode,
-            application = application,
-            configuration = configuration,
+            formArguments = FormArguments(
+                paymentMethodCode = PaymentMethod.Type.Card.code,
+                showCheckbox = false,
+                showCheckboxControlledFields = false,
+                merchantName = configuration.merchantDisplayName
+                    ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+                billingDetails = configuration.defaultBillingDetails,
+                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration
+            ),
             formViewModelSubcomponentBuilderProvider = formViewModelSubcomponentBuilderProvider,
             onFormDataUpdated = ::onFormDataUpdated
         )
 
+        val supportedPaymentMethods = listOf(
+            PaymentMethod.Type.Card.code,
+            PaymentMethod.Type.USBankAccount.code
+        ).mapNotNull {
+            lpmRepository.fromCode(it)
+        }
+
         transition(
             to = CustomerSheetViewState.AddPaymentMethod(
-                paymentMethodCode = paymentMethodCode,
-                formViewData = FormViewModel.ViewData(),
+                formViewDataMap = mapOf(
+                    PaymentMethod.Type.Card.code to FormViewModel.ViewData(),
+                    PaymentMethod.Type.USBankAccount.code to FormViewModel.ViewData(),
+                ),
                 enabled = true,
                 isLiveMode = isLiveModeProvider(),
                 isProcessing = false,
-                isFirstPaymentMethod = isFirstPaymentMethod
+                isFirstPaymentMethod = isFirstPaymentMethod,
+                supportedPaymentMethods = supportedPaymentMethods,
+                selectedPaymentMethod = supportedPaymentMethods.first(),
+                formArgumentsMap = mapOf(
+                    PaymentMethod.Type.Card.code to FormArguments(
+                        paymentMethodCode = PaymentMethod.Type.Card.code,
+                        showCheckbox = false,
+                        showCheckboxControlledFields = false,
+                        merchantName = configuration.merchantDisplayName
+                            ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+                        billingDetails = configuration.defaultBillingDetails,
+                        billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration
+                    ),
+                    PaymentMethod.Type.USBankAccount.code to FormArguments(
+                        paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                        showCheckbox = false,
+                        showCheckboxControlledFields = false,
+                        merchantName = configuration.merchantDisplayName
+                            ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+                        billingDetails = configuration.defaultBillingDetails,
+                        billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration
+                    )
+                ),
+                primaryButtonUiState = PrimaryButton.UIState(
+                    label = resources.getString(R.string.stripe_paymentsheet_save),
+                    onClick = {},
+                    enabled = true,
+                    lockVisible = false,
+                ),
+                primaryButtonState = PrimaryButton.State.Ready,
+                mandateText = null,
+                stripeIntent = stripeIntent,
             ),
             reset = isFirstPaymentMethod
         )
@@ -757,6 +883,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     R.string.stripe_paymentsheet_confirm
                 ),
                 errorMessage = null,
+                stripeIntent = stripeIntent,
             )
         )
     }

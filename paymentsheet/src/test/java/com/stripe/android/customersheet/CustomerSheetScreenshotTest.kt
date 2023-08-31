@@ -157,7 +157,7 @@ class CustomerSheetScreenshotTest {
             CustomerSheetScreen(
                 viewState = CustomerSheetViewState.AddPaymentMethod(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
-                    formViewData = FormViewModel.ViewData(),
+                    formViewDataMap = FormViewModel.ViewData(),
                     enabled = true,
                     isLiveMode = false,
                     isProcessing = false,
@@ -175,7 +175,7 @@ class CustomerSheetScreenshotTest {
             CustomerSheetScreen(
                 viewState = CustomerSheetViewState.AddPaymentMethod(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
-                    formViewData = FormViewModel.ViewData(
+                    formViewDataMap = FormViewModel.ViewData(
                         completeFormValues = FormFieldValues(
                             fieldValuePairs = mapOf(
                                 IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
@@ -200,7 +200,7 @@ class CustomerSheetScreenshotTest {
             CustomerSheetScreen(
                 viewState = CustomerSheetViewState.AddPaymentMethod(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
-                    formViewData = FormViewModel.ViewData(),
+                    formViewDataMap = FormViewModel.ViewData(),
                     enabled = true,
                     isLiveMode = false,
                     isProcessing = false,
@@ -218,7 +218,7 @@ class CustomerSheetScreenshotTest {
             CustomerSheetScreen(
                 viewState = CustomerSheetViewState.AddPaymentMethod(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
-                    formViewData = FormViewModel.ViewData(
+                    formViewDataMap = FormViewModel.ViewData(
                         completeFormValues = FormFieldValues(
                             fieldValuePairs = mapOf(
                                 IdentifierSpec.Generic("test") to FormFieldEntry("test", true)

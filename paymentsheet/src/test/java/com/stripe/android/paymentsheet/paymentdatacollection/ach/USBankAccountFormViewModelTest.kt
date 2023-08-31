@@ -63,7 +63,7 @@ class USBankAccountFormViewModelTest {
         stripeIntentId = "id_12345",
         clientSecret = "pi_12345_secret_54321",
         onBehalfOf = "on_behalf_of_id",
-        savedPaymentMethod = null,
+        savedPaymentSelection = null,
         shippingDetails = null,
     )
 
@@ -246,7 +246,7 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(billingDetails = null),
-                savedPaymentMethod = PaymentSelection.New.USBankAccount(
+                savedPaymentSelection = PaymentSelection.New.USBankAccount(
                     labelResource = "Test",
                     iconResource = 0,
                     paymentMethodCreateParams = mock(),
@@ -297,7 +297,7 @@ class USBankAccountFormViewModelTest {
                         address = CUSTOMER_ADDRESS,
                     ),
                 ),
-                savedPaymentMethod = PaymentSelection.New.USBankAccount(
+                savedPaymentSelection = PaymentSelection.New.USBankAccount(
                     labelResource = "Test",
                     iconResource = 0,
                     paymentMethodCreateParams = mock(),
@@ -388,7 +388,7 @@ class USBankAccountFormViewModelTest {
         for (screenState in screenStates) {
             val viewModel = createViewModel(
                 defaultArgs.copy(
-                    savedPaymentMethod = PaymentSelection.New.USBankAccount(
+                    savedPaymentSelection = PaymentSelection.New.USBankAccount(
                         labelResource = "Test",
                         iconResource = 0,
                         paymentMethodCreateParams = mock(),
@@ -414,7 +414,7 @@ class USBankAccountFormViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel(
                 defaultArgs.copy(
-                    savedPaymentMethod = PaymentSelection.New.USBankAccount(
+                    savedPaymentSelection = PaymentSelection.New.USBankAccount(
                         labelResource = "Test",
                         iconResource = 0,
                         paymentMethodCreateParams = mock(),

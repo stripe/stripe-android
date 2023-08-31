@@ -29,15 +29,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.model.PaymentSelection.New
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
@@ -60,45 +58,50 @@ import com.stripe.android.ui.core.R as PaymentsUiCoreR
 @Composable
 internal fun USBankAccountForm(
     formArgs: FormArguments,
-    sheetViewModel: BaseSheetViewModel,
+    onBehalfOf: String?,
+    isCompleteFlow: Boolean,
+    isPaymentFlow: Boolean,
+    stripeIntentId: String?,
+    clientSecret: String?,
+    shippingDetails: AddressDetails?,
     isProcessing: Boolean,
+    savedPaymentSelection: PaymentSelection.New.USBankAccount?,
     modifier: Modifier = Modifier,
+    confirmUSBankAccount: (PaymentSelection.New.USBankAccount) -> Unit,
+    updateMandateText: (mandateText: String?) -> Unit,
+    updatePrimaryButton: (text: String, enabled: Boolean, shouldShowProcessing: Boolean, onClick: () -> Unit) -> Unit,
+    updateCustomPrimaryButtonUiState: ((PrimaryButton.UIState?) -> PrimaryButton.UIState?) -> Unit,
+    onError: (String?) -> Unit,
 ) {
-    val context = LocalContext.current
     val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
 
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory {
-            val initializationMode = (sheetViewModel as? PaymentSheetViewModel)
-                ?.args
-                ?.initializationMode
-            val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
-                ?.intentConfiguration
-                ?.onBehalfOf
-            val stripeIntent = sheetViewModel.stripeIntent.value
             USBankAccountFormViewModel.Args(
                 formArgs = formArgs,
-                isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
-                isPaymentFlow = stripeIntent is PaymentIntent,
-                stripeIntentId = stripeIntent?.id,
-                clientSecret = stripeIntent?.clientSecret,
+                isCompleteFlow = isCompleteFlow,
+                isPaymentFlow = isPaymentFlow,
+                stripeIntentId = stripeIntentId,
+                clientSecret = clientSecret,
                 onBehalfOf = onBehalfOf,
-                savedPaymentMethod = sheetViewModel.newPaymentSelection as? New.USBankAccount,
-                shippingDetails = sheetViewModel.config?.shippingDetails,
+                savedPaymentSelection = savedPaymentSelection,
+                shippingDetails = shippingDetails,
             )
         },
     )
 
     SyncViewModels(
         viewModel = viewModel,
-        sheetViewModel = sheetViewModel,
+        handleConfirmUSBankAccount = confirmUSBankAccount,
+        updatePrimaryButton = updateCustomPrimaryButtonUiState,
+        updateMandateText = updateMandateText,
     )
 
     DisposableEffect(Unit) {
         viewModel.register(activityResultRegistryOwner!!)
 
         onDispose {
-            sheetViewModel.resetUSBankPrimaryButton()
+            updateCustomPrimaryButtonUiState { null }
             viewModel.onDestroy()
         }
     }
@@ -106,14 +109,23 @@ internal fun USBankAccountForm(
     val currentScreenState by viewModel.currentScreenState.collectAsState()
     val hasRequiredFields by viewModel.requiredFields.collectAsState()
     val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState(null)
+    val context = LocalContext.current
 
     LaunchedEffect(currentScreenState, hasRequiredFields) {
-        sheetViewModel.handleScreenStateChanged(
-            context = context,
-            screenState = currentScreenState,
-            enabled = hasRequiredFields,
-            merchantName = viewModel.formattedMerchantName(),
-            onPrimaryButtonClick = viewModel::handlePrimaryButtonClick,
+        currentScreenState.error?.let {
+            onError(context.getString(it))
+        }
+
+        updatePrimaryButton(
+            currentScreenState.primaryButtonText,
+            hasRequiredFields,
+            currentScreenState is USBankAccountFormScreenState.BillingDetailsCollection,
+        ) {
+            viewModel.handlePrimaryButtonClick(currentScreenState)
+        }
+
+        updateMandateText(
+            currentScreenState.mandateText,
         )
     }
 

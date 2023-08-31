@@ -2,26 +2,32 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import kotlinx.coroutines.flow.filterNot
 
 @Composable
 internal fun SyncViewModels(
     viewModel: USBankAccountFormViewModel,
-    sheetViewModel: BaseSheetViewModel,
+    handleConfirmUSBankAccount: (PaymentSelection.New.USBankAccount) -> Unit,
+    updatePrimaryButton: ((PrimaryButton.UIState?) -> PrimaryButton.UIState?) -> Unit,
+    updateMandateText: (String) -> Unit
 ) {
     val context = LocalContext.current
+    val screenState = viewModel.currentScreenState.collectAsState().value
 
     LaunchedEffect(Unit) {
         viewModel.result.collect { result ->
-            sheetViewModel.handleConfirmUSBankAccount(result)
+            handleConfirmUSBankAccount(result)
         }
     }
 
     LaunchedEffect(Unit) {
         viewModel.requiredFields.collect { hasRequiredFields ->
-            sheetViewModel.updateCustomPrimaryButtonUiState {
+            updatePrimaryButton {
                 it?.copy(enabled = hasRequiredFields)
             }
         }
@@ -29,18 +35,27 @@ internal fun SyncViewModels(
 
     LaunchedEffect(Unit) {
         viewModel.saveForFutureUse.filterNot {
-            viewModel.currentScreenState.value is USBankAccountFormScreenState.BillingDetailsCollection
+            screenState is USBankAccountFormScreenState.BillingDetailsCollection
         }.collect { saved ->
+            val merchantName = viewModel.formattedMerchantName()
             val mandateText = ACHText.getContinueMandateText(
                 context = context,
-                merchantName = viewModel.formattedMerchantName(),
+                merchantName = merchantName,
                 isSaveForFutureUseSelected = saved,
             )
-            sheetViewModel.updateMandateText(
-                context = context,
-                screenState = viewModel.currentScreenState.value,
-                mandateText = mandateText,
-                merchantName = viewModel.formattedMerchantName(),
+
+            val microdepositsText = if (screenState is USBankAccountFormScreenState.VerifyWithMicrodeposits) {
+                context.getString(R.string.stripe_paymentsheet_microdeposit, merchantName)
+            } else {
+                ""
+            }
+
+            updateMandateText(
+                """
+                    $microdepositsText
+                        
+                    $mandateText
+                """.trimIndent(),
             )
         }
     }

@@ -47,7 +47,7 @@ class CustomerSheetViewModelTest {
 
     private val addPaymentMethodViewState = AddPaymentMethod(
         paymentMethodCode = PaymentMethod.Type.Card.code,
-        formViewData = FormViewModel.ViewData(
+        formViewDataMap = FormViewModel.ViewData(
             completeFormValues = FormFieldValues(
                 showsMandate = false,
                 userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
@@ -932,7 +932,7 @@ class CustomerSheetViewModelTest {
         val viewModel = createViewModel(
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
-                    formViewData = FormViewModel.ViewData(),
+                    formViewDataMap = FormViewModel.ViewData(),
                 )
             ),
         )
@@ -963,7 +963,7 @@ class CustomerSheetViewModelTest {
         val viewModel = createViewModel(
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
-                    formViewData = FormViewModel.ViewData()
+                    formViewDataMap = FormViewModel.ViewData()
                 )
             ),
         )

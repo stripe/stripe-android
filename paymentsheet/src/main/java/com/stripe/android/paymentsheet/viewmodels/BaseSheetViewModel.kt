@@ -356,10 +356,6 @@ internal abstract class BaseSheetViewModel(
         customPrimaryButtonUiState.update(block)
     }
 
-    fun resetUSBankPrimaryButton() {
-        customPrimaryButtonUiState.value = null
-    }
-
     fun updatePrimaryButtonState(state: PrimaryButton.State) {
         _primaryButtonState.value = state
     }

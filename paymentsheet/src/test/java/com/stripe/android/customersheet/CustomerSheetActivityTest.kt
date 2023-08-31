@@ -251,7 +251,7 @@ internal class CustomerSheetActivityTest {
     ): CustomerSheetViewState.AddPaymentMethod {
         return CustomerSheetViewState.AddPaymentMethod(
             paymentMethodCode = paymentMethodCode,
-            formViewData = formViewData,
+            formViewDataMap = formViewData,
             enabled = enabled,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
