@@ -27,23 +27,29 @@ interface ConnectionFactory {
     fun createForFile(request: StripeRequest, outputFile: File): StripeConnection<File>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object Default : ConnectionFactory {
-        @Volatile
-        var connectionOpener: (
-            (
-                request: StripeRequest,
-                callback: HttpURLConnection.(request: StripeRequest) -> Unit
-            ) -> HttpURLConnection
-        ) = ::defaultConnectionOpener
-
-        fun defaultConnectionOpener(
+    fun interface ConnectionOpener {
+        fun open(
             request: StripeRequest,
             callback: HttpURLConnection.(request: StripeRequest) -> Unit
-        ): HttpURLConnection {
-            return (URL(request.url).openConnection() as HttpURLConnection).apply {
-                callback(request)
+        ): HttpURLConnection
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        object Default : ConnectionOpener {
+            override fun open(
+                request: StripeRequest,
+                callback: HttpURLConnection.(request: StripeRequest) -> Unit
+            ): HttpURLConnection {
+                return (URL(request.url).openConnection() as HttpURLConnection).apply {
+                    callback(request)
+                }
             }
         }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    object Default : ConnectionFactory {
+        @Volatile
+        var connectionOpener: ConnectionOpener = ConnectionOpener.Default
 
         @Throws(IOException::class, InvalidRequestException::class)
         @JvmSynthetic
@@ -64,7 +70,7 @@ interface ConnectionFactory {
         private fun openConnectionAndApplyFields(
             originalRequest: StripeRequest
         ): HttpURLConnection {
-            return connectionOpener(originalRequest) { request ->
+            return connectionOpener.open(originalRequest) { request ->
                 connectTimeout = CONNECT_TIMEOUT
                 readTimeout = READ_TIMEOUT
                 useCaches = request.shouldCache

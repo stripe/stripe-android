@@ -67,34 +67,7 @@ private class NetworkStatement(
     }
 
     private fun setup() {
-        ConnectionFactory.Default.connectionOpener = ::connectionOpener
-    }
-
-    private fun connectionOpener(
-        request: StripeRequest,
-        callback: HttpURLConnection.(request: StripeRequest) -> Unit
-    ): HttpURLConnection {
-        val requestHost = request.url.hostFromUrl()
-        if (!hostsToTrack.contains(requestHost)) {
-            throw RequestNotFoundException(
-                "Test request attempted to reach a non test endpoint. " +
-                    "Url: ${request.url}"
-            )
-        }
-
-        val delegatingRequest = DelegatingStripeRequest(
-            request,
-            request.url.replace(
-                "https://$requestHost",
-                mockWebServer.baseUrl.toString().removeSuffix("/")
-            )
-        )
-        return (URL(delegatingRequest.url).openConnection() as HttpURLConnection).apply {
-            if (this is HttpsURLConnection) {
-                sslSocketFactory = mockWebServer.clientSocketFactory()
-            }
-            callback(delegatingRequest)
-        }
+        ConnectionFactory.Default.connectionOpener = NetworkRuleConnectionOpener()
     }
 
     private fun validate() {
@@ -110,7 +83,36 @@ private class NetworkStatement(
 
     private fun tearDown() {
         mockWebServer.dispatcher.clear()
-        ConnectionFactory.Default.connectionOpener = ConnectionFactory.Default::defaultConnectionOpener
+        ConnectionFactory.Default.connectionOpener = ConnectionFactory.ConnectionOpener.Default
+    }
+
+    inner class NetworkRuleConnectionOpener : ConnectionFactory.ConnectionOpener {
+        override fun open(
+            request: StripeRequest,
+            callback: HttpURLConnection.(request: StripeRequest) -> Unit
+        ): HttpURLConnection {
+            val requestHost = request.url.hostFromUrl()
+            if (!hostsToTrack.contains(requestHost)) {
+                throw RequestNotFoundException(
+                    "Test request attempted to reach a non test endpoint. " +
+                        "Url: ${request.url}"
+                )
+            }
+
+            val delegatingRequest = DelegatingStripeRequest(
+                request,
+                request.url.replace(
+                    "https://$requestHost",
+                    mockWebServer.baseUrl.toString().removeSuffix("/")
+                )
+            )
+            return (URL(delegatingRequest.url).openConnection() as HttpURLConnection).apply {
+                if (this is HttpsURLConnection) {
+                    sslSocketFactory = mockWebServer.clientSocketFactory()
+                }
+                callback(delegatingRequest)
+            }
+        }
     }
 }
 
