@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [ADDED][7062](https://github.com/stripe/stripe-android/pull/7062) PaymentSheet now supports BLIK for PaymentIntents.
+
 ## 20.29.0 - 2023-08-28
 
 ### PaymentSheet

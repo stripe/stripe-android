@@ -20,6 +20,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
 
             intercept(
                 initializationMode = initializationMode,
+                paymentMethodOptionsParams = paymentSelection.paymentMethodOptionsParams,
                 paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
                 shippingValues = shippingValues,
                 setupForFutureUsage = setupFutureUsage,

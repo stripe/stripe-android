@@ -32,6 +32,7 @@ import com.stripe.android.model.PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.StripeIntent.NextActionData
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -70,12 +71,14 @@ import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.robolectric.RobolectricTestRunner
@@ -83,6 +86,7 @@ import java.io.IOException
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.time.Duration
 
 @RunWith(RobolectricTestRunner::class)
@@ -1356,7 +1360,14 @@ internal class PaymentSheetViewModelTest {
         viewModel.registerFromActivity(DummyActivityResultCaller(), lifecycleOwner)
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
-        verify(paymentLauncher.authenticatorRegistry).unregisterAuthenticator(any())
+        val argumentCaptor = argumentCaptor<Class<out NextActionData>>()
+
+        // unregisterAuthenticator should be called for each call to registerAuthenticator.
+        verify(paymentLauncher.authenticatorRegistry, times(2)).unregisterAuthenticator(argumentCaptor.capture())
+
+        val capturedArguments = argumentCaptor.allValues
+        assertEquals(NextActionData.UpiAwaitNotification::class.java, capturedArguments[0])
+        assertEquals(NextActionData.BlikAuthorize::class.java, capturedArguments[1])
     }
 
     @Test

@@ -16,6 +16,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.polling.IntentStatusPoller
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils
@@ -156,6 +157,7 @@ internal class PollingActivityTest {
                 args.timeLimitInSeconds.seconds,
                 args.initialDelayInSeconds.seconds,
                 args.maxAttempts,
+                args.ctaText,
             ),
             poller = poller,
             timeProvider = timeProvider,
@@ -197,6 +199,7 @@ internal class PollingActivityTest {
             timeLimitInSeconds = 60,
             maxAttempts = 3,
             statusBarColor = null,
+            ctaText = R.string.stripe_upi_polling_message,
         )
     }
 }

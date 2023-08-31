@@ -8,6 +8,7 @@ import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
+import com.stripe.android.ui.core.elements.BlikSpec
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
@@ -99,6 +100,7 @@ class TransformSpecToElements(
                 )
                 is SepaMandateTextSpec -> it.transform(merchantName)
                 is UpiSpec -> it.transform()
+                is BlikSpec -> it.transform()
                 is ContactInformationSpec -> it.transform(initialValues)
                 is PlaceholderSpec ->
                     error("Placeholders should be processed before calling transform.")

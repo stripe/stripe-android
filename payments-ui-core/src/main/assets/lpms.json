@@ -832,6 +832,15 @@
     ]
   },
   {
+    "type": "blik",
+    "async": false,
+    "fields": [
+      {
+        "type": "blik"
+      }
+    ]
+  },
+  {
     "type": "us_bank_account",
     "async": true,
     "fields": []
