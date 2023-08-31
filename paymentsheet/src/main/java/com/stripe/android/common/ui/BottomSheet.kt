@@ -69,7 +69,11 @@ internal class BottomSheetState(
         // a CancellationException.
         keyboardHandler.dismiss()
         if (modalBottomSheetState.isVisible) {
-            modalBottomSheetState.hide()
+            repeatUntilSucceededOrLimit(10) {
+                // Hiding the bottom sheet can be interrupted.
+                // We keep trying until it's fully hidden.
+                modalBottomSheetState.hide()
+            }
         }
     }
 
