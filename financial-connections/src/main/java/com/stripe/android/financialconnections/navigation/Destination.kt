@@ -71,8 +71,9 @@ internal sealed class Destination(protected val route: String, vararg params: St
         fun microdeposits(backStackEntry: NavBackStackEntry): MicrodepositVerificationMethod =
             backStackEntry.arguments
                 ?.getString(KEY_MICRODEPOSITS)
-                ?.let { MicrodepositVerificationMethod.fromValue(it) }
-                ?: MicrodepositVerificationMethod.UNKNOWN
+                ?.let { value ->
+                    MicrodepositVerificationMethod.values().firstOrNull { it.value == value }
+                } ?: MicrodepositVerificationMethod.UNKNOWN
 
         fun last4(backStackEntry: NavBackStackEntry): String? =
             backStackEntry.arguments?.getString(KEY_LAST4)
