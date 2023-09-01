@@ -56,6 +56,23 @@ internal class CustomerSheetActivityTest {
     }
 
     @Test
+    fun `Finish without result emits null result and contract parses error`() {
+        runActivityScenario {
+            activity.finish()
+            assertThat(
+                InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
+            ).isEqualTo(
+                null
+            )
+            val result = contract.parseResult(
+                scenario.getResult().resultCode,
+                scenario.getResult().resultData,
+            )
+            assertThat(result).isInstanceOf(InternalCustomerSheetResult.Error::class.java)
+        }
+    }
+
+    @Test
     fun `Finish with cancel and payment selection on back press`() {
         runActivityScenario(
             viewState = createSelectPaymentMethodViewState(
