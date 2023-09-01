@@ -18,7 +18,7 @@ private const val LOG_TAG = "CameraSelector"
  * Get the appropriate camera adapter. If the customer has provided an additional camera adapter,
  * use that in place of camera 1.
  */
-internal fun getCameraAdapter(
+internal fun getVerifyCameraAdapter(
     activity: Activity,
     previewView: ViewGroup,
     minimumResolution: Size,
