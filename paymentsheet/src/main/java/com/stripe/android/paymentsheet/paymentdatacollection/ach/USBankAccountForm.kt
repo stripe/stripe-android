@@ -25,14 +25,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection.New
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
@@ -56,22 +53,20 @@ import com.stripe.android.ui.core.R as PaymentsUiCoreR
 internal fun USBankAccountForm(
     formArgs: FormArguments,
     usBankAccountFormArgs: USBankAccountFormArguments,
-    sheetViewModel: BaseSheetViewModel,
     isProcessing: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory {
-            val stripeIntent = sheetViewModel.stripeIntent.value
             USBankAccountFormViewModel.Args(
                 formArgs = formArgs,
-                isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
-                isPaymentFlow = stripeIntent is PaymentIntent,
-                stripeIntentId = stripeIntent?.id,
-                clientSecret = stripeIntent?.clientSecret,
+                isCompleteFlow = usBankAccountFormArgs.isCompleteFlow,
+                isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
+                stripeIntentId = usBankAccountFormArgs.stripeIntentId,
+                clientSecret = usBankAccountFormArgs.clientSecret,
                 onBehalfOf = usBankAccountFormArgs.onBehalfOf,
-                savedPaymentMethod = sheetViewModel.newPaymentSelection as? New.USBankAccount,
-                shippingDetails = sheetViewModel.config?.shippingDetails,
+                savedPaymentMethod = usBankAccountFormArgs.draftPaymentSelection as? New.USBankAccount,
+                shippingDetails = usBankAccountFormArgs.shippingDetails,
             )
         },
     )

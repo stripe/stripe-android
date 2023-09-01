@@ -71,7 +71,6 @@ internal fun PaymentElement(
                 USBankAccountForm(
                     formArgs = formArguments,
                     usBankAccountFormArgs = usBankAccountFormArguments,
-                    sheetViewModel = sheetViewModel,
                     isProcessing = primaryButtonState.value?.isProcessing == true,
                     modifier = Modifier.padding(horizontal = horizontalPadding),
                 )

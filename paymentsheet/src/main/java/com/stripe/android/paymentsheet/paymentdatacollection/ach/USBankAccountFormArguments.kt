@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 
@@ -7,7 +8,12 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
  * [USBankAccountFormArguments] provides the arguments required to render the [USBankAccountForm].
  *
  * @param onBehalfOf the connected account of the business of record to attach this US bank account.
- * @param isCompleteFlow whether or not the USBankAccount is being presented in [PaymentSheet]
+ * @param isCompleteFlow whether or not the USBankAccount is being presented in [PaymentSheet].
+ * @param isPaymentFlow whether or not the USBankAccount is being used for payment.
+ * @param stripeIntentId the [StripeIntent] id.
+ * @param clientSecret the client secret.
+ * @param shippingDetails the shipping details for this transaction.
+ * @param draftPaymentSelection the draft payment information before the customer has confirmed it.
  * @param onMandateTextChanged emitted when the mandate text has been updated, this updated text
  * should be displayed to the user.
  * @param onHandleUSBankAccount emitted when the payment selection has been updated. The
@@ -22,6 +28,11 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 internal class USBankAccountFormArguments(
     val onBehalfOf: String?,
     val isCompleteFlow: Boolean,
+    val isPaymentFlow: Boolean,
+    val stripeIntentId: String?,
+    val clientSecret: String?,
+    val shippingDetails: AddressDetails?,
+    val draftPaymentSelection: PaymentSelection?,
     val onMandateTextChanged: (String?) -> Unit,
     val onHandleUSBankAccount: (PaymentSelection.New.USBankAccount) -> Unit,
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
