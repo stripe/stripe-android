@@ -22,40 +22,40 @@ internal sealed class Destination(protected val route: String, vararg params: St
         override operator fun invoke(args: Map<String, String?>): String = route
     }
 
-    object InstitutionPicker : NoArgumentsDestination(Pane.INSTITUTION_PICKER.name)
+    object InstitutionPicker : NoArgumentsDestination(Pane.INSTITUTION_PICKER.value)
 
-    object Consent : NoArgumentsDestination(Pane.CONSENT.name)
+    object Consent : NoArgumentsDestination(Pane.CONSENT.value)
 
-    object PartnerAuth : NoArgumentsDestination(Pane.PARTNER_AUTH.name)
+    object PartnerAuth : NoArgumentsDestination(Pane.PARTNER_AUTH.value)
 
-    object AccountPicker : NoArgumentsDestination(Pane.ACCOUNT_PICKER.name)
+    object AccountPicker : NoArgumentsDestination(Pane.ACCOUNT_PICKER.value)
 
-    object Success : NoArgumentsDestination(Pane.SUCCESS.name)
+    object Success : NoArgumentsDestination(Pane.SUCCESS.value)
 
-    object ManualEntry : NoArgumentsDestination(Pane.MANUAL_ENTRY.name)
+    object ManualEntry : NoArgumentsDestination(Pane.MANUAL_ENTRY.value)
 
     object AttachLinkedPaymentAccount :
-        NoArgumentsDestination(Pane.ATTACH_LINKED_PAYMENT_ACCOUNT.name)
+        NoArgumentsDestination(Pane.ATTACH_LINKED_PAYMENT_ACCOUNT.value)
 
-    object NetworkingLinkSignup : NoArgumentsDestination(Pane.NETWORKING_LINK_SIGNUP_PANE.name)
+    object NetworkingLinkSignup : NoArgumentsDestination(Pane.NETWORKING_LINK_SIGNUP_PANE.value)
 
     object NetworkingLinkLoginWarmup :
-        NoArgumentsDestination(Pane.NETWORKING_LINK_LOGIN_WARMUP.name)
+        NoArgumentsDestination(Pane.NETWORKING_LINK_LOGIN_WARMUP.value)
 
     object NetworkingLinkVerification :
-        NoArgumentsDestination(Pane.NETWORKING_LINK_VERIFICATION.name)
+        NoArgumentsDestination(Pane.NETWORKING_LINK_VERIFICATION.value)
 
     object NetworkingSaveToLinkVerification :
-        NoArgumentsDestination(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION.name)
+        NoArgumentsDestination(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION.value)
 
-    object LinkAccountPicker : NoArgumentsDestination(Pane.LINK_ACCOUNT_PICKER.name)
+    object LinkAccountPicker : NoArgumentsDestination(Pane.LINK_ACCOUNT_PICKER.value)
 
-    object LinkStepUpVerification : NoArgumentsDestination(Pane.LINK_STEP_UP_VERIFICATION.name)
+    object LinkStepUpVerification : NoArgumentsDestination(Pane.LINK_STEP_UP_VERIFICATION.value)
 
-    object Reset : NoArgumentsDestination(Pane.RESET.name)
+    object Reset : NoArgumentsDestination(Pane.RESET.value)
 
     object ManualEntrySuccess : Destination(
-        route = Pane.MANUAL_ENTRY_SUCCESS.name,
+        route = Pane.MANUAL_ENTRY_SUCCESS.value,
         KEY_MICRODEPOSITS,
         KEY_LAST4
     ) {
