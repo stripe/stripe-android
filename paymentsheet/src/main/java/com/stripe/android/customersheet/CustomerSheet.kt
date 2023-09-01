@@ -110,9 +110,10 @@ class CustomerSheet @Inject internal constructor(
         )
     }
 
-    private fun onCustomerSheetResult(result: InternalCustomerSheetResult?) {
-        requireNotNull(result)
-        callback.onCustomerSheetResult(result.toPublicResult(paymentOptionFactory))
+    private fun onCustomerSheetResult(result: InternalCustomerSheetResult) {
+        callback.onCustomerSheetResult(
+            result.toPublicResult(paymentOptionFactory)
+        )
     }
 
     /**
