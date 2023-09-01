@@ -233,8 +233,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 sessionId = requireNotNull(manifest.activeAuthSession).id,
                 updateLocalCache = updateLocalCache
             )
-            val paneToDestination: Destination = accountsList.nextPane.toDestination()
-            navigationManager.navigateTo(paneToDestination())
+            navigationManager.navigateTo(accountsList.nextPane.toDestination().invoke())
             accountsList
         }.execute {
             copy(selectAccounts = it)
