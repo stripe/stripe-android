@@ -6,6 +6,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 /**
  * [USBankAccountFormArguments] provides the arguments required to render the [USBankAccountForm].
  *
+ * @param onBehalfOf the connected account of the business of record to attach this US bank account.
  * @param isCompleteFlow whether or not the USBankAccount is being presented in [PaymentSheet]
  * @param onMandateTextChanged emitted when the mandate text has been updated, this updated text
  * should be displayed to the user.
@@ -19,6 +20,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
  * @param onError emitted when there is an error
  */
 internal class USBankAccountFormArguments(
+    val onBehalfOf: String?,
     val isCompleteFlow: Boolean,
     val onMandateTextChanged: (String?) -> Unit,
     val onHandleUSBankAccount: (PaymentSelection.New.USBankAccount) -> Unit,

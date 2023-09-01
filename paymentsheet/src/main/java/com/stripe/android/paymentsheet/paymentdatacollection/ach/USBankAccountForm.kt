@@ -26,7 +26,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
@@ -63,12 +62,6 @@ internal fun USBankAccountForm(
 ) {
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory {
-            val initializationMode = (sheetViewModel as? PaymentSheetViewModel)
-                ?.args
-                ?.initializationMode
-            val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
-                ?.intentConfiguration
-                ?.onBehalfOf
             val stripeIntent = sheetViewModel.stripeIntent.value
             USBankAccountFormViewModel.Args(
                 formArgs = formArgs,
@@ -76,7 +69,7 @@ internal fun USBankAccountForm(
                 isPaymentFlow = stripeIntent is PaymentIntent,
                 stripeIntentId = stripeIntent?.id,
                 clientSecret = stripeIntent?.clientSecret,
-                onBehalfOf = onBehalfOf,
+                onBehalfOf = usBankAccountFormArgs.onBehalfOf,
                 savedPaymentMethod = sheetViewModel.newPaymentSelection as? New.USBankAccount,
                 shippingDetails = sheetViewModel.config?.shippingDetails,
             )

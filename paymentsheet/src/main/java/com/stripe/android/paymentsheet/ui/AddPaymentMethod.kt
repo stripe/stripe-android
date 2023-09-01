@@ -21,6 +21,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -91,6 +92,12 @@ internal fun AddPaymentMethod(
         CompositionLocalProvider(
             LocalAutofillEventReporter provides sheetViewModel::reportAutofillEvent
         ) {
+            val initializationMode = (sheetViewModel as? PaymentSheetViewModel)
+                ?.args
+                ?.initializationMode
+            val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+                ?.intentConfiguration
+                ?.onBehalfOf
             PaymentElement(
                 sheetViewModel = sheetViewModel,
                 enabled = !processing,
@@ -110,6 +117,7 @@ internal fun AddPaymentMethod(
                 },
                 formArguments = arguments,
                 usBankAccountFormArguments = USBankAccountFormArguments(
+                    onBehalfOf = onBehalfOf,
                     isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
                     onMandateTextChanged = sheetViewModel::updateBelowButtonText,
                     onHandleUSBankAccount = sheetViewModel::handleConfirmUSBankAccount,
