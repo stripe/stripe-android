@@ -8,7 +8,7 @@ import com.stripe.android.financialconnections.domain.DisableNetworking
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.toDestination
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -58,6 +58,6 @@ class NetworkingLinkLoginWarmupViewModelTest {
         viewModel.onClickableTextClick("skip_login")
 
         verify(disableNetworking).invoke()
-        navigationManager.assertNavigatedTo(expectedNextPane.toDestination())
+        navigationManager.assertNavigatedTo(expectedNextPane.destination)
     }
 }

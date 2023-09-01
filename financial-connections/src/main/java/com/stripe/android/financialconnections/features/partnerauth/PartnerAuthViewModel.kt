@@ -34,7 +34,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.toDestination
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -281,7 +281,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 } else {
                     // auth session succeeded although client didn't retrieve any deeplink.
                     postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
-                    navigationManager.tryNavigateTo(nextPane.toDestination().invoke(),)
+                    navigationManager.tryNavigateTo(nextPane.destination(),)
                 }
             } else {
                 cancelAuthSessionAndContinue(authSession)
@@ -317,7 +317,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             // For non-OAuth institutions, navigate to Session cancellation's next pane.
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
             navigationManager.tryNavigateTo(
-                result.nextPane.toDestination().invoke(),
+                result.nextPane.destination(),
                 popUpToCurrent = true,
                 inclusive = true
             )
@@ -347,7 +347,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 )
                 logger.debug("Session authorized!")
                 navigationManager.tryNavigateTo(
-                    updatedSession.nextPane.toDestination().invoke(),
+                    updatedSession.nextPane.destination(),
                     popUpToCurrent = true,
                     inclusive = true
                 )

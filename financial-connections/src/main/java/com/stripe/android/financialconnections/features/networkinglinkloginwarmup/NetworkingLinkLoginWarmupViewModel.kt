@@ -19,7 +19,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.toDestination
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -80,7 +80,7 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
                     // skipping disables networking, which means
                     // we don't want the user to navigate back to
                     // the warm-up pane.
-                    it.nextPane.toDestination().invoke(),
+                    it.nextPane.destination(),
                     popUpToCurrent = true,
                     inclusive = true
                 )

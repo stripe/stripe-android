@@ -16,7 +16,7 @@ import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
 import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.toDestination
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -174,7 +174,7 @@ class NetworkingLinkVerificationViewModelTest {
             }
 
             verify(confirmVerification).sms(any(), eq("111111"))
-            navigationManager.assertNavigatedTo(linkVerifiedManifest.nextPane.toDestination())
+            navigationManager.assertNavigatedTo(linkVerifiedManifest.nextPane.destination)
         }
 
     @Test

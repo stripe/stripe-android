@@ -47,8 +47,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.composable
-import com.stripe.android.financialconnections.navigation.toDestination
-import com.stripe.android.financialconnections.navigation.toPane
+import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
@@ -145,7 +145,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         val context = LocalContext.current
         val navController = rememberNavController()
         val uriHandler = remember { CustomTabUriHandler(context) }
-        val initialDestination = remember(initialPane) { initialPane.toDestination() }
+        val initialDestination = remember(initialPane) { initialPane.destination }
         NavigationEffects(viewModel.navigationChannel, navController)
 
         CompositionLocalProvider(
@@ -156,11 +156,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         ) {
             LaunchedEffect(Unit) {
                 navController.addOnDestinationChangedListener { _, navDestination, _ ->
-                    viewModel.onPaneLaunched(navDestination.toPane())
+                    viewModel.onPaneLaunched(navDestination.pane)
                 }
             }
             BackHandler(true) {
-                viewModel.onBackClick(navController.currentDestination?.toPane())
+                viewModel.onBackClick(navController.currentDestination?.pane)
                 if (navController.popBackStack().not()) onBackPressedDispatcher.onBackPressed()
             }
             NavHost(

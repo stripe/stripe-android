@@ -20,7 +20,7 @@ import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAc
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.toDestination
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -66,7 +66,7 @@ internal class AttachPaymentViewModel @Inject constructor(
                     params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
                 ).also {
                     val nextPane = it.nextPane ?: Pane.SUCCESS
-                    navigationManager.tryNavigateTo(nextPane.toDestination()())
+                    navigationManager.tryNavigateTo(nextPane.destination())
                 }
             }
             eventTracker.track(PollAttachPaymentsSucceeded(authSession.id, millis))

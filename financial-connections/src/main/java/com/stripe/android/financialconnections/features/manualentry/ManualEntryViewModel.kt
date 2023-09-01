@@ -21,7 +21,7 @@ import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.toDestination
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
@@ -139,7 +139,7 @@ internal class ManualEntryViewModel @Inject constructor(
                     microdepositVerificationMethod = it.microdepositVerificationMethod,
                     last4 = state.account.takeLast(4)
                 )
-                val destination = (it.nextPane ?: Pane.MANUAL_ENTRY_SUCCESS).toDestination()
+                val destination = (it.nextPane ?: Pane.MANUAL_ENTRY_SUCCESS).destination
                 navigationManager.tryNavigateTo(destination(args))
             }
         }.execute { copy(linkPaymentAccount = it) }

@@ -30,7 +30,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.toDestination
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -135,7 +135,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         logger.error("Error fetching networked accounts", error)
         analyticsTracker.track(Error(PANE, error))
         analyticsTracker.track(VerificationError(PANE, NetworkedAccountsRetrieveMethodError))
-        navigationManager.tryNavigateTo(updatedManifest.nextPane.toDestination().invoke())
+        navigationManager.tryNavigateTo(updatedManifest.nextPane.destination())
     }
 
     private suspend fun onNetworkedAccountsSuccess(
@@ -145,7 +145,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         if (accounts.data.isEmpty()) {
             // Networked user has no accounts
             analyticsTracker.track(VerificationSuccessNoAccounts(PANE))
-            navigationManager.tryNavigateTo(updatedManifest.nextPane.toDestination().invoke())
+            navigationManager.tryNavigateTo(updatedManifest.nextPane.destination())
         } else {
             // Networked user has linked accounts
             analyticsTracker.track(VerificationSuccess(PANE))
