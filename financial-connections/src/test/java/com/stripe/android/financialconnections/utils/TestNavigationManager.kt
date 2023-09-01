@@ -16,7 +16,7 @@ internal class TestNavigationManager : NavigationManager {
     val emittedIntents = mutableListOf<NavigationIntent>()
 
     override val navigationChannel: Channel<NavigationIntent>
-        get() = TODO("Not required in the test implementation")
+        get() = Channel { }
 
     override suspend fun navigateBack(route: String?, inclusive: Boolean) {
         emittedIntents.add(

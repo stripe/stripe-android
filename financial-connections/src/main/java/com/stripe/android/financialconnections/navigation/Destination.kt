@@ -12,7 +12,7 @@ import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAc
 internal sealed class Destination(protected val route: String, vararg params: String) {
     val fullRoute: String = if (params.isEmpty()) route else {
         val builder = StringBuilder(route)
-        params.forEach { builder.append("/{${it}}") }
+        params.forEach { builder.append("/{$it}") }
         builder.toString()
     }
 
@@ -87,7 +87,6 @@ internal sealed class Destination(protected val route: String, vararg params: St
         const val KEY_MICRODEPOSITS = "microdeposits"
         const val KEY_LAST4 = "last4"
     }
-
 }
 
 internal fun String.appendParams(vararg params: Pair<String, Any?>): String {

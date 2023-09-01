@@ -67,7 +67,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
     val viewModel: FinancialConnectionsSheetNativeViewModel by viewModelLazy()
 
-
     @Inject
     lateinit var logger: Logger
 
@@ -268,7 +267,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             }
         }
     }
-
 
     internal companion object {
         internal const val EXTRA_RESULT = "result"
