@@ -2,7 +2,11 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.29.1 - 2023-08-31
+
 ### PaymentSheet
+
+* [FIXED][7239](https://github.com/stripe/stripe-android/pull/7239) Fix bottom sheet for APIs below 30.
 * [ADDED][7062](https://github.com/stripe/stripe-android/pull/7062) PaymentSheet now supports BLIK for PaymentIntents.
 
 ## 20.29.0 - 2023-08-28
