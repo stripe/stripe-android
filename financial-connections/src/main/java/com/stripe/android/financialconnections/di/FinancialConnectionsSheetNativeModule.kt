@@ -53,7 +53,7 @@ internal interface FinancialConnectionsSheetNativeModule {
 
     @Singleton
     @Binds
-    fun providesAppNavigator(
+    fun providesNavigationManager(
         impl: NavigationManagerImpl
     ): NavigationManager
 

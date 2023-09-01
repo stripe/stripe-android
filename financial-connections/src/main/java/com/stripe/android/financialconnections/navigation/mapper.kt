@@ -21,13 +21,8 @@ private val paneToDestination = mapOf(
     Pane.MANUAL_ENTRY_SUCCESS to Destination.ManualEntrySuccess,
 )
 
-private val destinationToPane = paneToDestination.entries.associate { it.value to it.key }
-
 internal fun Pane.toDestination(): Destination = paneToDestination[this]
     ?: throw IllegalArgumentException("No corresponding destination for $this")
-
-internal fun Destination.toPane(): Pane = destinationToPane[this]
-    ?: throw IllegalArgumentException("No corresponding pane for $this")
 
 internal fun NavDestination.toPane(): Pane = paneToDestination.entries
     .firstOrNull { (_, destination) -> destination.fullRoute == route }
