@@ -24,7 +24,7 @@ import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
 import com.stripe.android.financialconnections.model.TextUpdate
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.toDestination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -203,7 +203,7 @@ class LinkAccountPickerViewModelTest {
             }
             verifyNoInteractions(updateLocalManifest)
             verifyNoInteractions(selectNetworkedAccount)
-            navigationManager.assertNavigatedTo(NavigationDirections.linkStepUpVerification)
+            navigationManager.assertNavigatedTo(Destination.LinkStepUpVerification)
         }
 
     private fun twoAccounts() = NetworkedAccountsList(

@@ -15,7 +15,7 @@ import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVeri
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
 import com.stripe.android.financialconnections.model.NetworkedAccountsList
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.toDestination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
@@ -121,7 +121,7 @@ class NetworkingLinkVerificationViewModelTest {
         onConsumerNotFoundCaptor.firstValue()
 
         assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
-        navigationManager.assertNavigatedTo(NavigationDirections.institutionPicker)
+        navigationManager.assertNavigatedTo(Destination.InstitutionPicker)
 
         analyticsTracker.assertContainsEvent(
             "linked_accounts.networking.verification.error",
@@ -218,6 +218,6 @@ class NetworkingLinkVerificationViewModelTest {
             }
 
             verify(confirmVerification).sms(any(), eq("111111"))
-            navigationManager.assertNavigatedTo(NavigationDirections.linkAccountPicker)
+            navigationManager.assertNavigatedTo(Destination.LinkAccountPicker)
         }
 }
