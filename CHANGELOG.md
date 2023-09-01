@@ -8,6 +8,9 @@
 ## 20.29.0 - 2023-08-28
 
 ### PaymentSheet
+
+:warning: has a bug on customer devices running Android APIs 29 and below where PaymentSheet doesn't dismiss. Customers can't cancel out of PaymentSheet and it doesn't dismiss when payment completes.
+
 * [ADDED][7198](https://github.com/stripe/stripe-android/pull/7198) PaymentSheet now supports GrabPay for PaymentIntents.
 * [ADDED][7214](https://github.com/stripe/stripe-android/pull/7214) PaymentSheet now supports FPX for PaymentIntents.
 * [ADDED][7199](https://github.com/stripe/stripe-android/pull/7199) PaymentSheet now supports AmazonPay for PaymentIntents in private beta.
