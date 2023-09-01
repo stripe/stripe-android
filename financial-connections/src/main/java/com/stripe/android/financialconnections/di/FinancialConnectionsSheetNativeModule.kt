@@ -15,8 +15,8 @@ import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthS
 import com.stripe.android.financialconnections.features.reset.ResetSubcomponent
 import com.stripe.android.financialconnections.features.success.SuccessSubcomponent
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
-import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
+import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
@@ -51,9 +51,10 @@ import javax.inject.Singleton
 )
 internal interface FinancialConnectionsSheetNativeModule {
 
+
     @Singleton
     @Binds
-    fun providesNavigationManager(
+    fun providesAppNavigator(
         impl: NavigationManagerImpl
     ): NavigationManager
 

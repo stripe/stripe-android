@@ -22,9 +22,8 @@ import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.NavigationDirections.success
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -87,14 +86,14 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
             NetworkingSaveToLinkVerificationState::confirmVerification,
             onSuccess = {
                 saveToLinkWithStripeSucceeded.set(true)
-                navigationManager.navigate(NavigateToRoute(success))
+                navigationManager.tryNavigateTo(Destination.Success())
             },
             onFail = { error ->
                 logger.error("Error confirming verification", error)
                 eventTracker.track(Error(PANE, error))
                 if (error !is OTPError) {
                     saveToLinkWithStripeSucceeded.set(false)
-                    navigationManager.navigate(NavigateToRoute(success))
+                    navigationManager.tryNavigateTo(Destination.Success())
                 }
             },
         )
@@ -124,7 +123,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     }.execute { copy(confirmVerification = it) }
 
     fun onSkipClick() {
-        navigationManager.navigate(NavigateToRoute(success))
+        navigationManager.tryNavigateTo(Destination.Success())
     }
 
     companion object :

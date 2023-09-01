@@ -18,10 +18,9 @@ import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.navigation.toDestination
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -67,7 +66,7 @@ internal class AttachPaymentViewModel @Inject constructor(
                     params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
                 ).also {
                     val nextPane = it.nextPane ?: Pane.SUCCESS
-                    navigationManager.navigate(NavigateToRoute(nextPane.toNavigationCommand()))
+                    navigationManager.tryNavigateTo(nextPane.toDestination()())
                 }
             }
             eventTracker.track(PollAttachPaymentsSucceeded(authSession.id, millis))
@@ -108,10 +107,10 @@ internal class AttachPaymentViewModel @Inject constructor(
     }
 
     fun onEnterDetailsManually() =
-        navigationManager.navigate(NavigateToRoute(NavigationDirections.manualEntry))
+        navigationManager.tryNavigateTo(Destination.ManualEntry())
 
     fun onSelectAnotherBank() =
-        navigationManager.navigate(NavigateToRoute(NavigationDirections.reset))
+        navigationManager.tryNavigateTo(Destination.Reset())
 
     companion object : MavericksViewModelFactory<AttachPaymentViewModel, AttachPaymentState> {
 

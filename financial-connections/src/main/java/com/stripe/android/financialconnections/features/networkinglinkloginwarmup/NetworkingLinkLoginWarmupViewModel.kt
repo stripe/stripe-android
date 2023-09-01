@@ -17,10 +17,9 @@ import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.common.getRedactedEmail
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.NavigationDirections.networkingLinkVerification
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.navigation.toDestination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -65,7 +64,7 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
 
     fun onContinueClick() = viewModelScope.launch {
         eventTracker.track(Click("click.continue", PANE))
-        navigationManager.navigate(NavigateToRoute(networkingLinkVerification))
+        navigationManager.tryNavigateTo(Destination.NetworkingLinkVerification())
     }
 
     fun onClickableTextClick(text: String) = when (text) {
@@ -77,14 +76,13 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
         suspend {
             eventTracker.track(Click("click.skip_sign_in", PANE))
             disableNetworking().also {
-                navigationManager.navigate(
-                    NavigateToRoute(
-                        command = it.nextPane.toNavigationCommand(),
-                        // skipping disables networking, which means
-                        // we don't want the user to navigate back to
-                        // the warm-up pane.
-                        popCurrentFromBackStack = true
-                    )
+                navigationManager.tryNavigateTo(
+                    // skipping disables networking, which means
+                    // we don't want the user to navigate back to
+                    // the warm-up pane.
+                    it.nextPane.toDestination().invoke(),
+                    popUpToCurrent = true,
+                    inclusive = true
                 )
             }
         }.execute { copy(disableNetworkingAsync = it) }

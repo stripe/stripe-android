@@ -36,6 +36,8 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.UNEXPECTED_ERROR
+import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.CloseDialog
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
@@ -56,6 +58,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      */
     val activityRetainedComponent: FinancialConnectionsSheetNativeComponent,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+    private val navigationManager: NavigationManager,
     private val getManifest: GetManifest,
     private val uriUtils: UriUtils,
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
@@ -66,6 +69,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
     private val mutex = Mutex()
+    val navigationChannel = navigationManager.navigationChannel
 
     init {
         setState { copy(firstInit = false) }
@@ -193,9 +197,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(closeDialog = CloseDialog(description = description)) }
     }
 
-    fun onBackClick(pane: Pane) {
+    fun onBackClick(pane: Pane?) {
         viewModelScope.launch {
-            eventTracker.track(ClickNavBarBack(pane))
+            pane?.let { eventTracker.track(ClickNavBarBack(pane)) }
         }
     }
 
@@ -296,10 +300,10 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    fun onPaneLaunched(pane: Pane) {
+    fun onPaneLaunched(pane: Pane?) {
         viewModelScope.launch {
             eventTracker.track(
-                FinancialConnectionsEvent.PaneLaunched(pane)
+                FinancialConnectionsEvent.PaneLaunched(pane ?: UNEXPECTED_ERROR)
             )
         }
     }

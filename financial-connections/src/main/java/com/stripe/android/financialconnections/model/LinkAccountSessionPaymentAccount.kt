@@ -36,5 +36,15 @@ internal data class LinkAccountSessionPaymentAccount(
 
         @SerialName(value = "unknown")
         UNKNOWN("unknown");
+
+        companion object {
+            fun fromValue(value: String): MicrodepositVerificationMethod {
+                return when (value) {
+                    "amounts" -> AMOUNTS
+                    "descriptor_code" -> DESCRIPTOR_CODE
+                    else -> UNKNOWN
+                }
+            }
+        }
     }
 }

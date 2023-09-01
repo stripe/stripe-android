@@ -25,10 +25,9 @@ import com.stripe.android.financialconnections.features.consent.FinancialConnect
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.navigation.toDestination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -234,9 +233,8 @@ internal class AccountPickerViewModel @Inject constructor(
                 sessionId = requireNotNull(manifest.activeAuthSession).id,
                 updateLocalCache = updateLocalCache
             )
-            navigationManager.navigate(
-                NavigateToRoute(accountsList.nextPane.toNavigationCommand())
-            )
+            val paneToDestination: Destination = accountsList.nextPane.toDestination()
+            navigationManager.navigateTo(paneToDestination())
             accountsList
         }.execute {
             copy(selectAccounts = it)
@@ -244,10 +242,10 @@ internal class AccountPickerViewModel @Inject constructor(
     }
 
     fun selectAnotherBank() =
-        navigationManager.navigate(NavigateToRoute(NavigationDirections.reset))
+        navigationManager.tryNavigateTo(Destination.Reset())
 
     fun onEnterDetailsManually() =
-        navigationManager.navigate(NavigateToRoute(NavigationDirections.manualEntry))
+        navigationManager.tryNavigateTo(Destination.ManualEntry())
 
     fun onLoadAccountsAgain() {
         setState { copy(canRetry = false) }

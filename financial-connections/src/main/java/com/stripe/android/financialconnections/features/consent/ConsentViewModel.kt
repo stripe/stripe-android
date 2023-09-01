@@ -17,10 +17,9 @@ import com.stripe.android.financialconnections.features.consent.ConsentState.Vie
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.navigation.toDestination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -72,9 +71,8 @@ internal class ConsentViewModel @Inject constructor(
         suspend {
             eventTracker.track(ConsentAgree)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
-            navigationManager.navigate(
-                NavigateToRoute(updatedManifest.nextPane.toNavigationCommand())
-            )
+            val destination = updatedManifest.nextPane.toDestination()
+            navigationManager.tryNavigateTo(destination())
         }.execute { copy(acceptConsent = it) }
     }
 
@@ -101,9 +99,7 @@ internal class ConsentViewModel @Inject constructor(
                     }
 
                     ConsentClickableText.MANUAL_ENTRY -> {
-                        navigationManager.navigate(
-                            NavigateToRoute(NavigationDirections.manualEntry)
-                        )
+                        navigationManager.tryNavigateTo(Destination.ManualEntry())
                     }
 
                     ConsentClickableText.LEGAL_DETAILS -> {

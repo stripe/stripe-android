@@ -251,6 +251,12 @@ internal data class FinancialConnectionsSessionManifest(
 
         internal object Serializer :
             EnumIgnoreUnknownSerializer<Pane>(Pane.values(), UNEXPECTED_ERROR)
+
+        companion object {
+            fun fromValue(value: String): Pane =
+                Pane.values()
+                    .firstOrNull { it.value.equals(value, ignoreCase = true) } ?: UNEXPECTED_ERROR
+        }
     }
 
     /**

@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.utils
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.navigation.NavigationCommand
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.test.assertIs
 

@@ -25,7 +25,7 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
 import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.NavigationDirections
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.navigation.toDestination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -116,7 +116,7 @@ class LinkAccountPickerViewModelTest {
         val viewModel = buildViewModel(LinkAccountPickerState())
         viewModel.onNewBankAccountClick()
 
-        val navigation = response.nextPaneOnAddAccount!!.toNavigationCommand()
+        val navigation = response.nextPaneOnAddAccount!!.toDestination()
         navigationManager.assertNavigatedTo(navigation)
     }
 
@@ -158,7 +158,7 @@ class LinkAccountPickerViewModelTest {
             verify(updateCachedAccounts).invoke(capture())
             assertThat(firstValue(null)).isEqualTo(listOf(selectedAccount))
         }
-        val destination = accounts.data.first().nextPaneOnSelection!!.toNavigationCommand()
+        val destination = accounts.data.first().nextPaneOnSelection!!.toDestination()
         navigationManager.assertNavigatedTo(destination)
     }
 
