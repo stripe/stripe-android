@@ -70,6 +70,7 @@ internal fun AddPaymentMethod(
         showCheckboxFlow.emit(arguments.showCheckbox)
     }
 
+    val stripeIntent = sheetViewModel.stripeIntent.collectAsState()
     val paymentSelection by sheetViewModel.selection.collectAsState()
     val linkInlineSelection by linkHandler.linkInlineSelection.collectAsState()
     var linkSignupState by remember {
@@ -119,6 +120,11 @@ internal fun AddPaymentMethod(
                 usBankAccountFormArguments = USBankAccountFormArguments(
                     onBehalfOf = onBehalfOf,
                     isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
+                    isPaymentFlow = initializationMode is PaymentSheet.InitializationMode.PaymentIntent,
+                    stripeIntentId = stripeIntent.value?.id,
+                    clientSecret = stripeIntent.value?.clientSecret,
+                    shippingDetails = sheetViewModel.config?.shippingDetails,
+                    draftPaymentSelection = sheetViewModel.newPaymentSelection,
                     onMandateTextChanged = sheetViewModel::updateBelowButtonText,
                     onHandleUSBankAccount = sheetViewModel::handleConfirmUSBankAccount,
                     onUpdatePrimaryButtonUIState = sheetViewModel::updateCustomPrimaryButtonUiState,
