@@ -247,8 +247,9 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
      * @param transactionId A unique ID that identifies a transaction attempt. Merchants may use an
      * existing ID or generate a specific one for Google Pay transaction attempts.
      * This field is required when you send callbacks to the Google Transaction Events API.
-     * @param label An optional label to display with the amount. If none is provided, Google Pay
-     * will display a generic label.
+     * @param label An optional label to display with the amount. Google Pay may or may not display
+     * this label depending on its own internal logic. Defaults to a generic label if none is
+     * provided.
      */
     @JvmOverloads
     fun present(

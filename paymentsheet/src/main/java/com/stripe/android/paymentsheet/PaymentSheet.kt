@@ -1045,11 +1045,11 @@ class PaymentSheet internal constructor(
      * See your account's country value [here](https://dashboard.stripe.com/settings/account).
      * @param currencyCode The three-letter ISO 4217 alphabetic currency code, e.g. "USD" or "EUR".
      * Required in order to support Google Pay when processing a Setup Intent.
-     * @param amount An optional amount to display for setup intents. If none is provided, this
-     * method launches Google Pay with an amount of 0. Google Pay may or may not display this price
-     * depending on its own internal logic.
-     * @param label An optional label to display with the amount. If none is provided, Google Pay
-     * will display a generic label.
+     * @param amount An optional amount to display for setup intents. Google Pay may or may not
+     * display this amount depending on its own internal logic. Defaults to 0 if none is provided.
+     * @param label An optional label to display with the amount. Google Pay may or may not display
+     * this label depending on its own internal logic. Defaults to a generic label if none is
+     * provided.
      */
     @Parcelize
     data class GooglePayConfiguration(
