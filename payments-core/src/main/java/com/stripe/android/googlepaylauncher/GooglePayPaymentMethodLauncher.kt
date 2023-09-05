@@ -247,12 +247,15 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
      * @param transactionId A unique ID that identifies a transaction attempt. Merchants may use an
      * existing ID or generate a specific one for Google Pay transaction attempts.
      * This field is required when you send callbacks to the Google Transaction Events API.
+     * @param label An optional label to display with the amount. If none is provided, Google Pay
+     * will display a generic label.
      */
     @JvmOverloads
     fun present(
         currencyCode: String,
         amount: Long = 0L,
-        transactionId: String? = null
+        transactionId: String? = null,
+        label: String? = null,
     ) {
         check(skipReadyCheck || isReady) {
             "present() may only be called when Google Pay is available on this device."
@@ -263,6 +266,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 config = config,
                 currencyCode = currencyCode,
                 amount = amount,
+                label = label,
                 transactionId = transactionId,
                 injectionParams = GooglePayPaymentMethodLauncherContractV2.Args.InjectionParams(
                     injectorKey,

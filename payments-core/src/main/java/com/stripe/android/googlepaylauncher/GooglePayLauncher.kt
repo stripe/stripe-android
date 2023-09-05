@@ -152,8 +152,14 @@ class GooglePayLauncher internal constructor(
      * object.
      *
      * @param clientSecret the PaymentIntent's [client secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
+     * @param label An optional label to display with the amount. If none is provided, Google Pay
+     * will display a generic pay label.
      */
-    fun presentForPaymentIntent(clientSecret: String) {
+    @JvmOverloads
+    fun presentForPaymentIntent(
+        clientSecret: String,
+        label: String? = null,
+    ) {
         check(isReady) {
             "presentForPaymentIntent() may only be called when Google Pay is available on this device."
         }
@@ -161,7 +167,8 @@ class GooglePayLauncher internal constructor(
         activityResultLauncher.launch(
             GooglePayLauncherContract.PaymentIntentArgs(
                 clientSecret = clientSecret,
-                config = config
+                config = config,
+                label = label,
             )
         )
     }
@@ -175,10 +182,18 @@ class GooglePayLauncher internal constructor(
      *
      * @param clientSecret the SetupIntent's [client secret](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret)
      * @param currencyCode The ISO 4217 alphabetic currency code.
+     * @param amount An optional amount to display. If none is provided, this method launches Google
+     * Pay with an amount of 0. Google Pay may or may not display this price depending on its own
+     * internal logic.
+     * @param label An optional label to display with the amount. If none is provided, Google Pay
+     * will display a generic pay label.
      */
+    @JvmOverloads
     fun presentForSetupIntent(
         clientSecret: String,
-        currencyCode: String
+        currencyCode: String,
+        amount: Long? = null,
+        label: String? = null,
     ) {
         check(isReady) {
             "presentForSetupIntent() may only be called when Google Pay is available on this device."
@@ -188,7 +203,9 @@ class GooglePayLauncher internal constructor(
             GooglePayLauncherContract.SetupIntentArgs(
                 clientSecret = clientSecret,
                 config = config,
-                currencyCode = currencyCode
+                currencyCode = currencyCode,
+                amount = amount,
+                label = label,
             )
         )
     }

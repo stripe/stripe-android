@@ -37,7 +37,8 @@ class GooglePayLauncherContract :
     @Parcelize
     data class PaymentIntentArgs(
         override val clientSecret: String,
-        override val config: GooglePayLauncher.Config
+        override val config: GooglePayLauncher.Config,
+        internal val label: String? = null,
     ) : Args()
 
     /**
@@ -47,7 +48,9 @@ class GooglePayLauncherContract :
     data class SetupIntentArgs(
         override val clientSecret: String,
         override val config: GooglePayLauncher.Config,
-        internal val currencyCode: String
+        internal val currencyCode: String,
+        internal val amount: Long? = null,
+        internal val label: String? = null,
     ) : Args()
 
     sealed class Args : Parcelable {

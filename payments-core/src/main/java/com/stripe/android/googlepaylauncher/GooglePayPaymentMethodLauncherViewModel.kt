@@ -83,7 +83,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             countryCode = args.config.merchantCountryCode,
             transactionId = args.transactionId,
             totalPrice = args.amount,
-            totalPriceLabel = null,
+            totalPriceLabel = args.label,
             checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
         )
     }
