@@ -1060,19 +1060,6 @@ class PaymentSheet internal constructor(
         val label: String? = null,
     ) : Parcelable {
 
-        constructor(
-            environment: Environment,
-            countryCode: String,
-            amount: Long? = null,
-            label: String? = null,
-        ) : this(
-            environment = environment,
-            countryCode = countryCode,
-            currencyCode = null,
-            amount = amount,
-            label = label,
-        )
-
         enum class Environment {
             Production,
             Test,
