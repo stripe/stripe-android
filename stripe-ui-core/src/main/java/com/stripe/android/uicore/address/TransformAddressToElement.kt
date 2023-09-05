@@ -307,8 +307,6 @@ private fun FieldType.toConfig(
     return when (this) {
         FieldType.PostalCode -> PostalCodeConfig(
             label = label,
-            capitalization = capitalization,
-            keyboard = keyboardType,
             country = countryCode
         )
         else -> SimpleTextFieldConfig(

@@ -96,11 +96,17 @@ internal fun CameraScreenLaunchedEffect(
                     is IDDetectorOutput -> {
                         if (finalResult.identityState.type.isFront()) {
                             identityViewModel.updateAnalyticsState { oldState ->
-                                oldState.copy(docFrontModelScore = finalResult.result.resultScore)
+                                oldState.copy(
+                                    docFrontModelScore = finalResult.result.resultScore,
+                                    docFrontBlurScore = finalResult.result.blurScore
+                                )
                             }
                         } else if (finalResult.identityState.type.isBack()) {
                             identityViewModel.updateAnalyticsState { oldState ->
-                                oldState.copy(docBackModelScore = finalResult.result.resultScore)
+                                oldState.copy(
+                                    docBackModelScore = finalResult.result.resultScore,
+                                    docBackBlurScore = finalResult.result.blurScore
+                                )
                             }
                         }
                     }

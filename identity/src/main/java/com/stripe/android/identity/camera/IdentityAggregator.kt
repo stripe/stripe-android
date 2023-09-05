@@ -43,7 +43,9 @@ internal class IdentityAggregator(
             IDDetectorTransitioner(
                 timeout = verificationPage.documentCapture.autocaptureTimeout.milliseconds,
                 iouThreshold = verificationPage.documentCapture.motionBlurMinIou,
-                timeRequired = verificationPage.documentCapture.motionBlurMinDuration
+                timeRequired = verificationPage.documentCapture.motionBlurMinDuration,
+                blurThreshold = verificationPage.documentCapture.blurThreshold
+                    ?: IDDetectorTransitioner.DEFAULT_BLUR_THRESHOLD
             )
         }
     ),

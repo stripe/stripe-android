@@ -28,7 +28,7 @@
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
     <ID>LongMethod:PaymentSheetLoader.kt$DefaultPaymentSheetLoader$private suspend fun create( elementsSession: ElementsSession, config: PaymentSheet.Configuration?, isGooglePayReady: Boolean, ): PaymentSheetState.Full</ID>
-    <ID>LongMethod:USBankAccountForm.kt$@Composable internal fun USBankAccountForm( formArgs: FormArguments, sheetViewModel: BaseSheetViewModel, isProcessing: Boolean, modifier: Modifier = Modifier, )</ID>
+    <ID>LongMethod:USBankAccountForm.kt$@Composable internal fun USBankAccountForm( formArgs: FormArguments, usBankAccountFormArgs: USBankAccountFormArguments, isProcessing: Boolean, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable private fun AccountDetailsForm( formArgs: FormArguments, isProcessing: Boolean, bankName: String?, last4: String?, saveForFutureUseElement: SaveForFutureUseElement, onRemoveAccount: () -> Unit, )</ID>
     <ID>MagicNumber:AutocompleteScreen.kt$0.07f</ID>
     <ID>MagicNumber:BaseSheetActivity.kt$BaseSheetActivity$30</ID>

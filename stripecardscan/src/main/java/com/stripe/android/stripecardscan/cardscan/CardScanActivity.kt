@@ -21,6 +21,7 @@ import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.camera.scanui.util.setDrawable
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.R
+import com.stripe.android.stripecardscan.camera.getScanCameraAdapter
 import com.stripe.android.stripecardscan.cardscan.exception.InvalidStripePublishableKeyException
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
@@ -101,6 +102,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     override var scanStatePrevious: CardScanState? = null
 
     override val scanErrorListener: ScanErrorListener = ScanErrorListener()
+
+    override val cameraAdapterBuilder = ::getScanCameraAdapter
 
     /**
      * The listener which handles results from the scan.

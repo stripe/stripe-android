@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,8 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,21 +20,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection.New
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
@@ -60,62 +52,32 @@ import com.stripe.android.ui.core.R as PaymentsUiCoreR
 @Composable
 internal fun USBankAccountForm(
     formArgs: FormArguments,
-    sheetViewModel: BaseSheetViewModel,
+    usBankAccountFormArgs: USBankAccountFormArguments,
     isProcessing: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
-
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory {
-            val initializationMode = (sheetViewModel as? PaymentSheetViewModel)
-                ?.args
-                ?.initializationMode
-            val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
-                ?.intentConfiguration
-                ?.onBehalfOf
-            val stripeIntent = sheetViewModel.stripeIntent.value
             USBankAccountFormViewModel.Args(
                 formArgs = formArgs,
-                isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
-                isPaymentFlow = stripeIntent is PaymentIntent,
-                stripeIntentId = stripeIntent?.id,
-                clientSecret = stripeIntent?.clientSecret,
-                onBehalfOf = onBehalfOf,
-                savedPaymentMethod = sheetViewModel.newPaymentSelection as? New.USBankAccount,
-                shippingDetails = sheetViewModel.config?.shippingDetails,
+                isCompleteFlow = usBankAccountFormArgs.isCompleteFlow,
+                isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
+                stripeIntentId = usBankAccountFormArgs.stripeIntentId,
+                clientSecret = usBankAccountFormArgs.clientSecret,
+                onBehalfOf = usBankAccountFormArgs.onBehalfOf,
+                savedPaymentMethod = usBankAccountFormArgs.draftPaymentSelection as? New.USBankAccount,
+                shippingDetails = usBankAccountFormArgs.shippingDetails,
             )
         },
     )
 
-    SyncViewModels(
-        viewModel = viewModel,
-        sheetViewModel = sheetViewModel,
-    )
-
-    DisposableEffect(Unit) {
-        viewModel.register(activityResultRegistryOwner!!)
-
-        onDispose {
-            sheetViewModel.resetUSBankPrimaryButton()
-            viewModel.onDestroy()
-        }
-    }
-
     val currentScreenState by viewModel.currentScreenState.collectAsState()
-    val hasRequiredFields by viewModel.requiredFields.collectAsState()
     val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState(null)
 
-    LaunchedEffect(currentScreenState, hasRequiredFields) {
-        sheetViewModel.handleScreenStateChanged(
-            context = context,
-            screenState = currentScreenState,
-            enabled = hasRequiredFields,
-            merchantName = viewModel.formattedMerchantName(),
-            onPrimaryButtonClick = viewModel::handlePrimaryButtonClick,
-        )
-    }
+    USBankAccountEmitters(
+        viewModel = viewModel,
+        usBankAccountFormArgs = usBankAccountFormArgs,
+    )
 
     Box(modifier) {
         when (val screenState = currentScreenState) {

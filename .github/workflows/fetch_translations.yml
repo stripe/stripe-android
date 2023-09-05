@@ -9,7 +9,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Check out the current state
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Fetch translations
         run: cd scripts && ./localize.sh
         shell: bash

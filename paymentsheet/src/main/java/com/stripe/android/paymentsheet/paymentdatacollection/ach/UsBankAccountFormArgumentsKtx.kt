@@ -1,23 +1,22 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.content.Context
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.BillingDetailsCollection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
-internal fun BaseSheetViewModel.handleScreenStateChanged(
+internal fun USBankAccountFormArguments.handleScreenStateChanged(
     context: Context,
     screenState: USBankAccountFormScreenState,
     enabled: Boolean,
     merchantName: String,
     onPrimaryButtonClick: (USBankAccountFormScreenState) -> Unit,
 ) {
-    onError(screenState.error)
+    screenState.error?.let {
+        onError(context.getString(it))
+    }
 
-    val completePayment = this is PaymentSheetViewModel
-    val showProcessingWhenClicked = screenState is BillingDetailsCollection || completePayment
+    val showProcessingWhenClicked = screenState is BillingDetailsCollection || isCompleteFlow
 
     updatePrimaryButton(
         text = screenState.primaryButtonText,
@@ -34,32 +33,32 @@ internal fun BaseSheetViewModel.handleScreenStateChanged(
     )
 }
 
-private fun BaseSheetViewModel.updatePrimaryButton(
+private fun USBankAccountFormArguments.updatePrimaryButton(
     text: String,
     onClick: () -> Unit,
     shouldShowProcessingWhenClicked: Boolean,
     enabled: Boolean,
 ) {
-    updatePrimaryButtonState(PrimaryButton.State.Ready)
-    updateCustomPrimaryButtonUiState {
+    onUpdatePrimaryButtonState(PrimaryButton.State.Ready)
+    onUpdatePrimaryButtonUIState {
         PrimaryButton.UIState(
             label = text,
             onClick = {
                 if (shouldShowProcessingWhenClicked) {
-                    updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
+                    onUpdatePrimaryButtonState(PrimaryButton.State.StartProcessing)
                 }
                 onClick()
-                updateCustomPrimaryButtonUiState { button ->
+                onUpdatePrimaryButtonUIState { button ->
                     button?.copy(enabled = false)
                 }
             },
             enabled = enabled,
-            lockVisible = this is PaymentSheetViewModel,
+            lockVisible = isCompleteFlow,
         )
     }
 }
 
-internal fun BaseSheetViewModel.updateMandateText(
+internal fun USBankAccountFormArguments.updateMandateText(
     context: Context,
     screenState: USBankAccountFormScreenState,
     mandateText: String?,
@@ -80,5 +79,5 @@ internal fun BaseSheetViewModel.updateMandateText(
         """.trimIndent()
     }
 
-    updateBelowButtonText(updatedText)
+    onMandateTextChanged(updatedText)
 }
