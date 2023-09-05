@@ -233,7 +233,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 sessionId = requireNotNull(manifest.activeAuthSession).id,
                 updateLocalCache = updateLocalCache
             )
-            navigationManager.navigateTo(accountsList.nextPane.destination())
+            navigationManager.tryNavigateTo(accountsList.nextPane.destination())
             accountsList
         }.execute {
             copy(selectAccounts = it)
