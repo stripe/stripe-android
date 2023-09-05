@@ -94,7 +94,7 @@ class TestFieldPopulation {
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
         useBrowser = Browser.Chrome,
-        authorizationAction = AuthorizeAction.Authorize,
+        authorizationAction = AuthorizeAction.AuthorizePayment,
         merchantCountryCode = "GB",
         supportedPaymentMethods = listOf(
             PaymentMethod.Type.Card.code,

@@ -86,14 +86,18 @@ enum class Browser {
  */
 sealed interface AuthorizeAction {
 
-    abstract val text: String
+    val text: String
 
     object PollingSucceedsAfterDelay : AuthorizeAction {
         override val text: String = "POLLING SUCCEEDS AFTER DELAY"
     }
 
-    object Authorize : AuthorizeAction {
+    object AuthorizePayment : AuthorizeAction {
         override val text: String = "AUTHORIZE TEST PAYMENT"
+    }
+
+    object AuthorizeSetup : AuthorizeAction {
+        override val text: String = "AUTHORIZE TEST SETUP"
     }
 
     data class Fail(val expectedError: String) : AuthorizeAction {

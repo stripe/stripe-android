@@ -15,8 +15,8 @@ import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.model.PaymentMethod.Type.Blik
+import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.model.InitializationType
@@ -154,11 +154,11 @@ class Selectors(
 
     fun browserWindow(browser: BrowserUI): UiObject? = browserWindow(device, browser)
 
-    fun blockUntilAuthorizationPageLoaded() {
+    fun blockUntilAuthorizationPageLoaded(isSetup: Boolean) {
         assertThat(
             device.wait(
                 Until.findObject(
-                    By.textContains("test payment page")
+                    By.textContains("test ${if (isSetup) "setup" else "payment"} page")
                 ),
                 HOOKS_PAGE_LOAD_TIMEOUT * 1000
             )
@@ -183,7 +183,7 @@ class Selectors(
         .getInstalledApplications(PackageManager.GET_META_DATA)
 
     val authorizeAction = when (testParameters.authorizationAction) {
-        is AuthorizeAction.Authorize -> {
+        is AuthorizeAction.AuthorizePayment, AuthorizeAction.AuthorizeSetup -> {
             object : UiAutomatorText(
                 label = testParameters.authorizationAction.text,
                 className = "android.widget.Button",

@@ -2,6 +2,7 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BaseLpmTest
+import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.IntentType
@@ -39,6 +40,7 @@ internal class TestBancontact : BaseLpmTest() {
                 delayed = DelayedPMs.On,
                 automatic = Automatic.On,
                 intentType = IntentType.Setup,
+                authorizationAction = AuthorizeAction.AuthorizeSetup,
             ),
         )
     }

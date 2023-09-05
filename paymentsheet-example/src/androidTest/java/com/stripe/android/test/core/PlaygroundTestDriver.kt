@@ -417,7 +417,9 @@ class PlaygroundTestDriver(
 
                     assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
 
-                    blockUntilAuthorizationPageLoaded()
+                    blockUntilAuthorizationPageLoaded(
+                        isSetup = testParameters.authorizationAction is AuthorizeAction.AuthorizeSetup
+                    )
                 }
 
                 if (authorizeAction != null) {
@@ -434,39 +436,40 @@ class PlaygroundTestDriver(
                     }
                 }
 
-                    when (val authAction = testParameters.authorizationAction) {
-                        is AuthorizeAction.Authorize -> {}
-                        is AuthorizeAction.PollingSucceedsAfterDelay -> {
-                            waitForPollingToFinish()
-                        }
-
-                        is AuthorizeAction.Cancel -> {
-                            buyButton.apply {
-                                waitProcessingComplete()
-                                isEnabled()
-                                isDisplayed()
-                            }
-                        }
-
-                        is AuthorizeAction.Fail -> {
-                            buyButton.apply {
-                                waitProcessingComplete()
-                                isEnabled()
-                                isDisplayed()
-                            }
-
-                            // The text comes after the buy button animation is complete
-                            composeTestRule.waitUntil {
-                                runCatching {
-                                    composeTestRule
-                                        .onNodeWithText(authAction.expectedError)
-                                        .assertIsDisplayed()
-                                }.isSuccess
-                            }
-                        }
-
-                        null -> {}
+                when (val authAction = testParameters.authorizationAction) {
+                    is AuthorizeAction.AuthorizePayment -> {}
+                    is AuthorizeAction.AuthorizeSetup -> {}
+                    is AuthorizeAction.PollingSucceedsAfterDelay -> {
+                        waitForPollingToFinish()
                     }
+
+                    is AuthorizeAction.Cancel -> {
+                        buyButton.apply {
+                            waitProcessingComplete()
+                            isEnabled()
+                            isDisplayed()
+                        }
+                    }
+
+                    is AuthorizeAction.Fail -> {
+                        buyButton.apply {
+                            waitProcessingComplete()
+                            isEnabled()
+                            isDisplayed()
+                        }
+
+                        // The text comes after the buy button animation is complete
+                        composeTestRule.waitUntil {
+                            runCatching {
+                                composeTestRule
+                                    .onNodeWithText(authAction.expectedError)
+                                    .assertIsDisplayed()
+                            }.isSuccess
+                        }
+                    }
+
+                    null -> {}
+                }
             } else {
                 // Make sure there is no prompt and no browser window open
                 assertThat(selectBrowserPrompt.exists()).isFalse()
@@ -476,7 +479,12 @@ class PlaygroundTestDriver(
             }
         }
 
-        val isDone = testParameters.authorizationAction in setOf(AuthorizeAction.Authorize, AuthorizeAction.PollingSucceedsAfterDelay, null)
+        val isDone = testParameters.authorizationAction in setOf(
+            AuthorizeAction.AuthorizePayment,
+            AuthorizeAction.AuthorizeSetup,
+            AuthorizeAction.PollingSucceedsAfterDelay,
+            null
+        )
 
         if (isDone) {
             waitForPlaygroundActivity()

@@ -40,7 +40,7 @@ internal open class BaseLpmTest {
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
         useBrowser = null,
-        authorizationAction = AuthorizeAction.Authorize,
+        authorizationAction = AuthorizeAction.AuthorizePayment,
         merchantCountryCode = "GB",
     )
 
