@@ -128,11 +128,10 @@ internal sealed class Destination(
         },
     )
 
-    object LinkStepUpVerification :
-        NoArgumentsDestination(
-            route = Pane.LINK_STEP_UP_VERIFICATION.value,
-            composable = { LinkStepUpVerificationScreen() }
-        )
+    object LinkStepUpVerification : NoArgumentsDestination(
+        route = Pane.LINK_STEP_UP_VERIFICATION.value,
+        composable = { LinkStepUpVerificationScreen() }
+    )
 
     object Reset : NoArgumentsDestination(
         route = Pane.RESET.value,
