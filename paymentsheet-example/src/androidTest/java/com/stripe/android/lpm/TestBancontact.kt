@@ -33,6 +33,17 @@ internal class TestBancontact : BaseLpmTest() {
     }
 
     @Test
+    fun testBancontactSetup() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = bancontact.copy(
+                delayed = DelayedPMs.On,
+                automatic = Automatic.On,
+                intentType = IntentType.Setup,
+            ),
+        )
+    }
+
+    @Test
     fun testBancontactInCustomFlow() {
         testDriver.confirmCustom(
             testParameters = bancontact,
