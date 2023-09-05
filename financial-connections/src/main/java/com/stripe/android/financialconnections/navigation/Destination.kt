@@ -1,63 +1,151 @@
 package com.stripe.android.financialconnections.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
+import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
+import com.stripe.android.financialconnections.features.consent.ConsentScreen
+import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
+import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerScreen
+import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationScreen
+import com.stripe.android.financialconnections.features.manualentry.ManualEntryScreen
+import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessScreen
+import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupScreen
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupScreen
+import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationScreen
+import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationScreen
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
+import com.stripe.android.financialconnections.features.reset.ResetScreen
+import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod
+import com.stripe.android.financialconnections.presentation.parentViewModel
 
-internal sealed class Destination(protected val route: String, vararg params: String) {
-    val fullRoute: String = if (params.isEmpty()) route else {
+internal sealed class Destination(
+    protected val route: String,
+    protected val params: List<String>,
+    protected val screenBuilder: @Composable (NavBackStackEntry) -> Unit
+) {
+    val fullRoute: String = if (params.isEmpty()) {
+        route
+    } else {
         val builder = StringBuilder(route)
         params.forEach { builder.append("/{$it}") }
         builder.toString()
     }
 
+    @Composable
+    fun Composable(navBackStackEntry: NavBackStackEntry) {
+        val viewModel = parentViewModel()
+        // prevents the launched event to be re-triggered on configuration changes
+        var paneLaunchedTriggered by rememberSaveable { mutableStateOf(false) }
+        if (!paneLaunchedTriggered) {
+            LaunchedEffect(Unit) {
+                viewModel.onPaneLaunched(
+                    previousPane = null,
+                    navBackStackEntry.destination.pane
+                )
+                paneLaunchedTriggered = true
+            }
+        }
+        screenBuilder(navBackStackEntry)
+    }
+
     abstract operator fun invoke(args: Map<String, String?> = emptyMap()): String
 
-    sealed class NoArgumentsDestination(route: String) : Destination(route) {
+    sealed class NoArgumentsDestination(
+        route: String,
+        composable: @Composable (NavBackStackEntry) -> Unit
+    ) : Destination(route, emptyList(), composable) {
         override operator fun invoke(args: Map<String, String?>): String = route
     }
 
-    object InstitutionPicker : NoArgumentsDestination(Pane.INSTITUTION_PICKER.value)
+    object InstitutionPicker : NoArgumentsDestination(
+        Pane.INSTITUTION_PICKER.value,
+        composable = { InstitutionPickerScreen() }
+    )
 
-    object Consent : NoArgumentsDestination(Pane.CONSENT.value)
+    object Consent : NoArgumentsDestination(
+        route = Pane.CONSENT.value,
+        composable = { ConsentScreen() }
+    )
 
-    object PartnerAuth : NoArgumentsDestination(Pane.PARTNER_AUTH.value)
+    object PartnerAuth : NoArgumentsDestination(
+        route = Pane.PARTNER_AUTH.value,
+        composable = { PartnerAuthScreen() }
+    )
 
-    object AccountPicker : NoArgumentsDestination(Pane.ACCOUNT_PICKER.value)
+    object AccountPicker : NoArgumentsDestination(
+        route = Pane.ACCOUNT_PICKER.value,
+        composable = { AccountPickerScreen() }
+    )
 
-    object Success : NoArgumentsDestination(Pane.SUCCESS.value)
+    object Success : NoArgumentsDestination(
+        route = Pane.SUCCESS.value,
+        composable = { SuccessScreen() }
+    )
 
-    object ManualEntry : NoArgumentsDestination(Pane.MANUAL_ENTRY.value)
+    object ManualEntry : NoArgumentsDestination(
+        route = Pane.MANUAL_ENTRY.value,
+        composable = { ManualEntryScreen() }
+    )
 
-    object AttachLinkedPaymentAccount :
-        NoArgumentsDestination(Pane.ATTACH_LINKED_PAYMENT_ACCOUNT.value)
+    object AttachLinkedPaymentAccount : NoArgumentsDestination(
+        route = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT.value,
+        composable = { AttachPaymentScreen() }
+    )
 
-    object NetworkingLinkSignup : NoArgumentsDestination(Pane.NETWORKING_LINK_SIGNUP_PANE.value)
+    object NetworkingLinkSignup : NoArgumentsDestination(
+        route = Pane.NETWORKING_LINK_SIGNUP_PANE.value,
+        composable = { NetworkingLinkSignupScreen() }
+    )
 
-    object NetworkingLinkLoginWarmup :
-        NoArgumentsDestination(Pane.NETWORKING_LINK_LOGIN_WARMUP.value)
+    object NetworkingLinkLoginWarmup : NoArgumentsDestination(
+        route = Pane.NETWORKING_LINK_LOGIN_WARMUP.value,
+        composable = { NetworkingLinkLoginWarmupScreen() }
+    )
 
-    object NetworkingLinkVerification :
-        NoArgumentsDestination(Pane.NETWORKING_LINK_VERIFICATION.value)
+    object NetworkingLinkVerification : NoArgumentsDestination(
+        route = Pane.NETWORKING_LINK_VERIFICATION.value,
+        composable = { NetworkingLinkVerificationScreen() }
+    )
 
-    object NetworkingSaveToLinkVerification :
-        NoArgumentsDestination(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION.value)
+    object NetworkingSaveToLinkVerification : NoArgumentsDestination(
+        route = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION.value,
+        composable = { NetworkingSaveToLinkVerificationScreen() }
+    )
 
-    object LinkAccountPicker : NoArgumentsDestination(Pane.LINK_ACCOUNT_PICKER.value)
+    object LinkAccountPicker : NoArgumentsDestination(
+        route = Pane.LINK_ACCOUNT_PICKER.value,
+        composable = {
+            LinkAccountPickerScreen()
+        },
+    )
 
-    object LinkStepUpVerification : NoArgumentsDestination(Pane.LINK_STEP_UP_VERIFICATION.value)
+    object LinkStepUpVerification :
+        NoArgumentsDestination(
+            route = Pane.LINK_STEP_UP_VERIFICATION.value,
+            composable = { LinkStepUpVerificationScreen() }
+        )
 
-    object Reset : NoArgumentsDestination(Pane.RESET.value)
+    object Reset : NoArgumentsDestination(
+        route = Pane.RESET.value,
+        composable = { ResetScreen() }
+    )
 
     object ManualEntrySuccess : Destination(
         route = Pane.MANUAL_ENTRY_SUCCESS.value,
-        KEY_MICRODEPOSITS,
-        KEY_LAST4
+        params = listOf(KEY_MICRODEPOSITS, KEY_LAST4),
+        screenBuilder = { ManualEntrySuccessScreen(it) }
     ) {
 
         fun argMap(
@@ -106,12 +194,11 @@ internal fun NavGraphBuilder.composable(
     destination: Destination,
     arguments: List<NamedNavArgument> = emptyList(),
     deepLinks: List<NavDeepLink> = emptyList(),
-    content: @Composable (NavBackStackEntry) -> Unit
 ) {
     composable(
         route = destination.fullRoute,
         arguments = arguments,
         deepLinks = deepLinks,
-        content = content
+        content = { destination.Composable(navBackStackEntry = it) }
     )
 }

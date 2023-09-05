@@ -26,22 +26,7 @@ import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
-import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.common.CloseDialog
-import com.stripe.android.financialconnections.features.consent.ConsentScreen
-import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
-import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerScreen
-import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationScreen
-import com.stripe.android.financialconnections.features.manualentry.ManualEntryScreen
-import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessScreen
-import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupScreen
-import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupScreen
-import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationScreen
-import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationScreen
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
-import com.stripe.android.financialconnections.features.reset.ResetScreen
-import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
@@ -146,6 +131,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         val navController = rememberNavController()
         val uriHandler = remember { CustomTabUriHandler(context) }
         val initialDestination = remember(initialPane) { initialPane.destination }
+
         NavigationEffects(viewModel.navigationChannel, navController)
 
         CompositionLocalProvider(
@@ -154,11 +140,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             LocalImageLoader provides imageLoader,
             LocalUriHandler provides uriHandler
         ) {
-            LaunchedEffect(Unit) {
-                navController.addOnDestinationChangedListener { _, navDestination, _ ->
-                    viewModel.onPaneLaunched(navDestination.pane)
-                }
-            }
             BackHandler(true) {
                 viewModel.onBackClick(navController.currentDestination?.pane)
                 if (navController.popBackStack().not()) onBackPressedDispatcher.onBackPressed()
@@ -167,52 +148,21 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 navController,
                 startDestination = initialDestination.fullRoute,
             ) {
-                composable(Destination.Consent) {
-                    ConsentScreen()
-                }
-                composable(Destination.ManualEntry) {
-                    ManualEntryScreen()
-                }
-
-                composable(Destination.PartnerAuth) {
-                    PartnerAuthScreen()
-                }
-                composable(Destination.InstitutionPicker) {
-                    InstitutionPickerScreen()
-                }
-                composable(Destination.AccountPicker) {
-                    AccountPickerScreen()
-                }
-                composable(Destination.Success) {
-                    SuccessScreen()
-                }
-                composable(Destination.Reset) {
-                    ResetScreen()
-                }
-                composable(Destination.AttachLinkedPaymentAccount) {
-                    AttachPaymentScreen()
-                }
-                composable(Destination.NetworkingLinkSignup) {
-                    NetworkingLinkSignupScreen()
-                }
-                composable(Destination.NetworkingLinkLoginWarmup) {
-                    NetworkingLinkLoginWarmupScreen()
-                }
-                composable(Destination.NetworkingLinkVerification) {
-                    NetworkingLinkVerificationScreen()
-                }
-                composable(Destination.NetworkingSaveToLinkVerification) {
-                    NetworkingSaveToLinkVerificationScreen()
-                }
-                composable(Destination.LinkAccountPicker) {
-                    LinkAccountPickerScreen()
-                }
-                composable(Destination.LinkStepUpVerification) {
-                    LinkStepUpVerificationScreen()
-                }
-                composable(Destination.ManualEntrySuccess) {
-                    ManualEntrySuccessScreen(it)
-                }
+                composable(Destination.Consent)
+                composable(Destination.ManualEntry)
+                composable(Destination.PartnerAuth)
+                composable(Destination.InstitutionPicker)
+                composable(Destination.AccountPicker)
+                composable(Destination.Success)
+                composable(Destination.Reset)
+                composable(Destination.AttachLinkedPaymentAccount)
+                composable(Destination.NetworkingLinkSignup)
+                composable(Destination.NetworkingLinkLoginWarmup)
+                composable(Destination.NetworkingLinkVerification)
+                composable(Destination.NetworkingSaveToLinkVerification)
+                composable(Destination.LinkAccountPicker)
+                composable(Destination.LinkStepUpVerification)
+                composable(Destination.ManualEntrySuccess)
             }
         }
     }
@@ -251,8 +201,8 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     }
 
                     is NavigationIntent.NavigateTo -> {
-                        val from = navHostController.currentDestination?.route
-                        val destination = intent.route
+                        val from: String? = navHostController.currentDestination?.route
+                        val destination: String = intent.route
                         if (destination.isNotEmpty() && destination != from) {
                             logger.debug("Navigating from $from to $destination")
                             navHostController.navigate(destination) {
