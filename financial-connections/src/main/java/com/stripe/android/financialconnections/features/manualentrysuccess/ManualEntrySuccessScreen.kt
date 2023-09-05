@@ -2,6 +2,7 @@
 
 package com.stripe.android.financialconnections.features.manualentrysuccess
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,7 +52,7 @@ internal fun ManualEntrySuccessScreen(
 ) {
     val parentViewModel = parentViewModel()
     val viewModel: ManualEntrySuccessViewModel = mavericksViewModel()
-//    BackHandler(true) {}
+    BackHandler(true) {}
     val completeAuthSessionAsync = viewModel
         .collectAsState(ManualEntrySuccessState::completeSession)
     ManualEntrySuccessContent(
