@@ -44,6 +44,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
+import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.ContactInformationSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.EmptyFormSpec
@@ -519,18 +520,27 @@ class LpmRepository constructor(
             requirement = BlikRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
+        PaymentMethod.Type.CashAppPay.code -> {
+            val requiresMandate = stripeIntent.cashAppPayRequiresMandate()
 
-        PaymentMethod.Type.CashAppPay.code -> SupportedPaymentMethod(
-            code = "cashapp",
-            requiresMandate = false,
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_cashapp,
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_cash_app_pay,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-            tintIconOnSelection = false,
-            requirement = CashAppPayRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields),
-        )
+            val localLayoutSpecs = if (requiresMandate) {
+                listOf(CashAppPayMandateTextSpec())
+            } else {
+                emptyList()
+            }
+
+            SupportedPaymentMethod(
+                code = "cashapp",
+                requiresMandate = requiresMandate,
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_cashapp,
+                iconResource = R.drawable.stripe_ic_paymentsheet_pm_cash_app_pay,
+                lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+                darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+                tintIconOnSelection = false,
+                requirement = CashAppPayRequirement,
+                formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs),
+            )
+        }
         PaymentMethod.Type.GrabPay.code -> SupportedPaymentMethod(
             code = "grabpay",
             requiresMandate = false,
@@ -729,5 +739,12 @@ private fun StripeIntent.sepaMandateLayout(
         )
     } else {
         emptyList()
+    }
+}
+
+private fun StripeIntent.cashAppPayRequiresMandate(): Boolean {
+    return when (this) {
+        is PaymentIntent -> setupFutureUsage != null
+        is SetupIntent -> true
     }
 }

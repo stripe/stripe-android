@@ -59,7 +59,7 @@ data class PaymentMethodRequirements(
 
     /**
      * This indicates if the payment method can be confirmed when attached to a customer
-     * and only the Payment Method id is available.  This also implies that the PaymentMethod
+     * and only the Payment Method id is available. This also implies that the PaymentMethod
      * is internally supported in the SDK so it can be parsed in the customer repository requests.
      *  - Null means that it is not supported, or that it is attached as a different type
      *  - false means that it is supported by the payment method, but not currently enabled
@@ -250,8 +250,8 @@ internal val BlikRequirement = PaymentMethodRequirements(
 
 internal val CashAppPayRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
-    siRequirements = null,
-    confirmPMFromCustomer = false,
+    siRequirements = emptySet(),
+    confirmPMFromCustomer = true,
 )
 
 internal val GrabPayRequirement = PaymentMethodRequirements(
