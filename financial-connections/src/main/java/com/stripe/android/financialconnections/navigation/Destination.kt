@@ -50,10 +50,7 @@ internal sealed class Destination(
         var paneLaunchedTriggered by rememberSaveable { mutableStateOf(false) }
         if (!paneLaunchedTriggered) {
             LaunchedEffect(Unit) {
-                viewModel.onPaneLaunched(
-                    previousPane = null,
-                    navBackStackEntry.destination.pane
-                )
+                viewModel.onPaneLaunched(navBackStackEntry.destination.pane)
                 paneLaunchedTriggered = true
             }
         }
