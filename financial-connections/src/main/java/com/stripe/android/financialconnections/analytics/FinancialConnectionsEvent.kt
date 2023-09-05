@@ -19,12 +19,10 @@ internal sealed class FinancialConnectionsEvent(
 
     class PaneLaunched(
         pane: Pane,
-        referrer: Pane?,
     ) : FinancialConnectionsEvent(
         "pane.launched",
         mapOf(
             "pane" to pane.value,
-            "referrer" to referrer?.value
         ).filterNotNullValues()
     )
 

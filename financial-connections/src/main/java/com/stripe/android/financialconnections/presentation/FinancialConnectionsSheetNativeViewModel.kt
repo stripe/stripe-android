@@ -71,18 +71,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     val navigationChannel = navigationManager.navigationChannel
 
     init {
-        withState {
-            if (it.firstInit) {
-                viewModelScope.launch {
-                    eventTracker.track(
-                        FinancialConnectionsEvent.PaneLaunched(
-                            pane = it.initialPane,
-                            referrer = null
-                        )
-                    )
-                }
-            }
-        }
         setState { copy(firstInit = false) }
         viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->
@@ -311,13 +299,10 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    fun onPaneLaunched(
-        previousPane: Pane?,
-        pane: Pane
-    ) {
+    fun onPaneLaunched(pane: Pane) {
         viewModelScope.launch {
             eventTracker.track(
-                FinancialConnectionsEvent.PaneLaunched(referrer = previousPane, pane = pane)
+                FinancialConnectionsEvent.PaneLaunched(pane)
             )
         }
     }
