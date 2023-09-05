@@ -262,8 +262,9 @@ class LpmRepository constructor(
             }
         )
         PaymentMethod.Type.Bancontact.code -> {
-            val sfu = (stripeIntent as? PaymentIntent)?.setupFutureUsage != null
-            val localLayoutSpecs: List<FormItemSpec> = if (sfu) {
+            val isSfu = (stripeIntent as? PaymentIntent)?.setupFutureUsage != null
+            val isSetupIntent = stripeIntent is SetupIntent
+            val localLayoutSpecs: List<FormItemSpec> = if (isSfu || isSetupIntent) {
                 listOf(
                     EmailSpec(),
                     SepaMandateTextSpec()
