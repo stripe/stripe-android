@@ -45,12 +45,14 @@ import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Compani
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.ContactInformationSpec
+import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.EmptyFormSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
+import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.ui.core.elements.transform
 import java.io.InputStream
@@ -259,18 +261,30 @@ class LpmRepository constructor(
                 LayoutSpec(sharedDataSpec.fields)
             }
         )
-        PaymentMethod.Type.Bancontact.code -> SupportedPaymentMethod(
-            code = "bancontact",
-            requiresMandate = true,
-            mandateRequirement = MandateRequirement.Always,
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_bancontact,
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-            tintIconOnSelection = false,
-            requirement = BancontactRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields)
-        )
+        PaymentMethod.Type.Bancontact.code -> {
+            val sfu = (stripeIntent as? PaymentIntent)?.setupFutureUsage != null
+            val localLayoutSpecs: List<FormItemSpec> = if (sfu) {
+                listOf(
+                    EmailSpec(),
+                    SepaMandateTextSpec()
+                )
+            } else {
+                emptyList()
+            }
+
+            SupportedPaymentMethod(
+                code = "bancontact",
+                requiresMandate = true,
+                mandateRequirement = MandateRequirement.Always,
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_bancontact,
+                iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+                lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+                darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+                tintIconOnSelection = false,
+                requirement = BancontactRequirement,
+                formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs)
+            )
+        }
         PaymentMethod.Type.Sofort.code -> SupportedPaymentMethod(
             code = "sofort",
             requiresMandate = true,
