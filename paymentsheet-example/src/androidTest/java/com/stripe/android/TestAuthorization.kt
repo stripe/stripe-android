@@ -59,7 +59,7 @@ class TestAuthorization {
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
         useBrowser = Browser.Chrome,
-        authorizationAction = AuthorizeAction.Authorize,
+        authorizationAction = AuthorizeAction.AuthorizePayment,
         merchantCountryCode = "GB",
     )
 
@@ -67,7 +67,7 @@ class TestAuthorization {
     fun testAuthorizeSuccess() {
         testDriver.confirmNewOrGuestComplete(
             bancontactNewUser.copy(
-                authorizationAction = AuthorizeAction.Authorize,
+                authorizationAction = AuthorizeAction.AuthorizePayment,
             )
         )
     }

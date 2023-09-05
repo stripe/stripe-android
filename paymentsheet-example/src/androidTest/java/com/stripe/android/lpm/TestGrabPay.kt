@@ -14,7 +14,7 @@ internal class TestGrabPay : BaseLpmTest() {
         paymentMethod = lpmRepository.fromCode("grabpay")!!,
         currency = Currency.SGD,
         merchantCountryCode = "SG",
-        authorizationAction = AuthorizeAction.Authorize,
+        authorizationAction = AuthorizeAction.AuthorizePayment,
     )
 
     @Test
