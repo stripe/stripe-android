@@ -26,8 +26,16 @@ class PostalCodeConfigTest {
     }
 
     @Test
+    fun `verify GB config uses proper keyboard capitalization & keyboard type`() {
+        with(createConfigForCountry("GB")) {
+            Truth.assertThat(capitalization).isEqualTo(KeyboardCapitalization.Characters)
+            Truth.assertThat(keyboard).isEqualTo(KeyboardType.Text)
+        }
+    }
+
+    @Test
     fun `verify Other config uses proper keyboard capitalization & keyboard type`() {
-        with(createConfigForCountry("UK")) {
+        with(createConfigForCountry("IN")) {
             Truth.assertThat(capitalization).isEqualTo(KeyboardCapitalization.Characters)
             Truth.assertThat(keyboard).isEqualTo(KeyboardType.Text)
         }
@@ -60,8 +68,26 @@ class PostalCodeConfigTest {
     }
 
     @Test
+    fun `verify GB postal codes`() {
+        with(createConfigForCountry("GB")) {
+            Truth.assertThat(determineStateForInput("").isValid()).isFalse()
+            Truth.assertThat(determineStateForInput("").isFull()).isFalse()
+            Truth.assertThat(determineStateForInput("1M1AA").isValid()).isFalse()
+            Truth.assertThat(determineStateForInput("1M 1AA").isValid()).isFalse()
+            Truth.assertThat(determineStateForInput("EC1A 1BBB").isValid()).isFalse()
+            Truth.assertThat(determineStateForInput("M11AA").isValid()).isTrue()
+            Truth.assertThat(determineStateForInput("B2 3DF").isValid()).isTrue()
+            Truth.assertThat(determineStateForInput("CR26XH").isValid()).isTrue()
+            Truth.assertThat(determineStateForInput("M60 1NW").isValid()).isTrue()
+            Truth.assertThat(determineStateForInput("DN551PT").isValid()).isTrue()
+            Truth.assertThat(determineStateForInput("EC1A 1BB").isValid()).isTrue()
+            Truth.assertThat(determineStateForInput("EC1A 1BB").isFull()).isTrue()
+        }
+    }
+
+    @Test
     fun `verify other postal codes`() {
-        with(createConfigForCountry("UK")) {
+        with(createConfigForCountry("IN")) {
             Truth.assertThat(determineStateForInput("").isValid()).isFalse()
             Truth.assertThat(determineStateForInput("").isFull()).isFalse()
             Truth.assertThat(determineStateForInput(" ").isValid()).isFalse()
@@ -90,6 +116,18 @@ class PostalCodeConfigTest {
             Truth.assertThat(determineStateForInput("").getError()).isNull()
             Truth.assertThat(determineStateForInput("1N8E8R").getError()).isNotNull()
             Truth.assertThat(determineStateForInput("141124").getError()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `invalid GB postal codes emit error`() {
+        with(createConfigForCountry("GB")) {
+            Truth.assertThat(determineStateForInput("").getError()).isNull()
+            Truth.assertThat(determineStateForInput("N18E").getError()).isNotNull()
+            Truth.assertThat(determineStateForInput("4C1A 1BB").getError()).isNotNull()
+            Truth.assertThat(determineStateForInput("EC1  1BB").getError()).isNotNull()
+            Truth.assertThat(determineStateForInput("EC1 1BB ").getError()).isNotNull()
+            Truth.assertThat(determineStateForInput("DN55 1PTT").getError()).isNotNull()
         }
     }
 

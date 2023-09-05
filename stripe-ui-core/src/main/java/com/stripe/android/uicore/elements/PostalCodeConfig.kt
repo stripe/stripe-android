@@ -19,12 +19,14 @@ class PostalCodeConfig(
     override val capitalization: KeyboardCapitalization = when (format) {
         CountryPostalFormat.US -> KeyboardCapitalization.None
         CountryPostalFormat.CA,
+        CountryPostalFormat.GB,
         CountryPostalFormat.Other -> KeyboardCapitalization.Characters
     }
 
     override val keyboard: KeyboardType = when (format) {
         CountryPostalFormat.US -> KeyboardType.NumberPassword
         CountryPostalFormat.CA,
+        CountryPostalFormat.GB,
         CountryPostalFormat.Other -> KeyboardType.Text
     }
 
@@ -67,6 +69,9 @@ class PostalCodeConfig(
         return when (format) {
             CountryPostalFormat.US -> userTyped.filter { it.isDigit() }
             CountryPostalFormat.CA -> userTyped.filter { it.isLetterOrDigit() }.uppercase()
+            CountryPostalFormat.GB -> userTyped.filter {
+                it.isLetterOrDigit() || it.isWhitespace()
+            }.uppercase()
             CountryPostalFormat.Other -> userTyped
         }.take(format.maximumLength)
     }
@@ -90,6 +95,13 @@ class PostalCodeConfig(
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        object GB : CountryPostalFormat(
+            minimumLength = 5,
+            maximumLength = 8,
+            regexPattern = Regex("^[A-Za-z][A-Za-z0-9]*(?: [A-Za-z0-9]*)?\$")
+        )
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         object US : CountryPostalFormat(
             minimumLength = 5,
             maximumLength = 5,
@@ -109,6 +121,7 @@ class PostalCodeConfig(
                 return when (country) {
                     "US" -> US
                     "CA" -> CA
+                    "GB" -> GB
                     else -> Other
                 }
             }
