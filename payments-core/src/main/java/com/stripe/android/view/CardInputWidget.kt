@@ -8,6 +8,7 @@ import android.text.Layout
 import android.text.TextPaint
 import android.text.TextWatcher
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -28,6 +29,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
+import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
@@ -361,6 +363,8 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
+    private val viewModel: CardWidgetViewModel by cardWidgetViewModel()
+
     init {
         // This ensures that onRestoreInstanceState is called
         // during rotations.
@@ -381,6 +385,14 @@ class CardInputWidget @JvmOverloads constructor(
         allFields = requiredFields.plus(postalCodeEditText)
 
         initView(attrs)
+
+        doWithLifecycleOwner { owner ->
+            viewModel.isCbcEligible.launchAndCollectIn(owner) { isCbcEligible ->
+                if (BuildConfig.DEBUG) {
+                    Log.d("CardInputWidget", "Is CBC eligible: $isCbcEligible")
+                }
+            }
+        }
     }
 
     override fun onFinishInflate() {
