@@ -16,6 +16,7 @@ import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnec
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
+import com.stripe.android.paymentsheet.forms.AlipayRequirement
 import com.stripe.android.paymentsheet.forms.AmazonPayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
@@ -101,6 +102,7 @@ class LpmRepository constructor(
             PaymentMethod.Type.CashAppPay.code,
             PaymentMethod.Type.GrabPay.code,
             PaymentMethod.Type.Fpx.code,
+            PaymentMethod.Type.Alipay.code,
         )
     }
 
@@ -585,6 +587,18 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = FpxRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields),
+        )
+        PaymentMethod.Type.Alipay.code -> SupportedPaymentMethod(
+            code = "alipay",
+            requiresMandate = false,
+            mandateRequirement = MandateRequirement.Never,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_alipay,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_alipay,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = AlipayRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields),
         )
         else -> null

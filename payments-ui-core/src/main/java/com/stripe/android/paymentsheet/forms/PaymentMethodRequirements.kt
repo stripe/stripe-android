@@ -309,3 +309,9 @@ internal val FpxRequirement = PaymentMethodRequirements(
     siRequirements = null,
     confirmPMFromCustomer = false,
 )
+
+internal val AlipayRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = false,
+)
