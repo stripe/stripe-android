@@ -32,14 +32,14 @@ import com.stripe.android.financialconnections.presentation.parentViewModel
 
 internal sealed class Destination(
     protected val route: String,
-    protected val params: List<String>,
+    protected val paramKeys: List<String>,
     protected val screenBuilder: @Composable (NavBackStackEntry) -> Unit
 ) {
-    val fullRoute: String = if (params.isEmpty()) {
+    val fullRoute: String = if (paramKeys.isEmpty()) {
         route
     } else {
         val builder = StringBuilder(route)
-        params.forEach { builder.append("/{$it}") }
+        paramKeys.forEach { builder.append("/{$it}") }
         builder.toString()
     }
 
@@ -145,7 +145,7 @@ internal sealed class Destination(
 
     object ManualEntrySuccess : Destination(
         route = Pane.MANUAL_ENTRY_SUCCESS.value,
-        params = listOf(KEY_MICRODEPOSITS, KEY_LAST4),
+        paramKeys = listOf(KEY_MICRODEPOSITS, KEY_LAST4),
         screenBuilder = { ManualEntrySuccessScreen(it) }
     ) {
 
@@ -167,7 +167,7 @@ internal sealed class Destination(
         fun last4(backStackEntry: NavBackStackEntry): String? =
             backStackEntry.arguments?.getString(KEY_LAST4)
 
-        override fun invoke(args: Map<String, String?>): String = route.appendParams(
+        override fun invoke(args: Map<String, String?>): String = route.appendParamValues(
             KEY_MICRODEPOSITS to args[KEY_MICRODEPOSITS],
             KEY_LAST4 to args[KEY_LAST4]
         )
@@ -179,7 +179,7 @@ internal sealed class Destination(
     }
 }
 
-internal fun String.appendParams(vararg params: Pair<String, Any?>): String {
+internal fun String.appendParamValues(vararg params: Pair<String, Any?>): String {
     val builder = StringBuilder(this)
 
     params.forEach {
