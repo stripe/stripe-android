@@ -132,13 +132,15 @@ internal class CardNumberEditableController constructor(
         workContext,
         staticCardAccountRanges,
         object : CardAccountRangeService.AccountRangeResultListener {
-            override fun onAccountRangeResult(newAccountRange: AccountRange?) {
+            override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
+                val newAccountRange = accountRanges.firstOrNull()
                 newAccountRange?.panLength?.let { panLength ->
                     (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan =
                         panLength
                 }
             }
-        }
+        },
+        isCbcEligible = { isEligibleForCardBrandChoice },
     )
 
     override val loading: Flow<Boolean> = accountRangeService.isLoading

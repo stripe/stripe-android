@@ -63,9 +63,10 @@ class CardAccountRangeServiceTest {
             testDispatcher,
             DefaultStaticCardAccountRanges(),
             object : CardAccountRangeService.AccountRangeResultListener {
-                override fun onAccountRangeResult(newAccountRange: AccountRange?) {
+                override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
                 }
-            }
+            },
+            isCbcEligible = { false },
         )
 
         val cardNumber = CardNumber.Unvalidated(cardNumberString)
@@ -77,7 +78,7 @@ class CardAccountRangeServiceTest {
             } else {
                 never()
             }
-        ).getAccountRange(cardNumber)
+        ).getAccountRanges(cardNumber)
     }
 
     private fun createMockRemoteDefaultCardAccountRangeRepository(
@@ -105,11 +106,13 @@ class CardAccountRangeServiceTest {
             testDispatcher,
             DefaultStaticCardAccountRanges(),
             object : CardAccountRangeService.AccountRangeResultListener {
-                override fun onAccountRangeResult(newAccountRange: AccountRange?) {
+                override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
+                    val newAccountRange = accountRanges.firstOrNull()
                     panLength = newAccountRange?.panLength
                     latch.countDown()
                 }
-            }
+            },
+            isCbcEligible = { false },
         )
 
         val cardNumber = CardNumber.Unvalidated(cardNumberString)

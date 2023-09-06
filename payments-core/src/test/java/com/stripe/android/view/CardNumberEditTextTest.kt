@@ -134,8 +134,8 @@ internal class CardNumberEditTextTest {
     @Test
     fun calculateCursorPosition_whenAmEx_increasesIndexWhenGoingPastTheSpaces() =
         runTest {
-            cardNumberEditText.accountRangeService.updateAccountRangeResult(
-                AccountRangeFixtures.AMERICANEXPRESS
+            cardNumberEditText.accountRangeService.updateAccountRangesResult(
+                listOf(AccountRangeFixtures.AMERICANEXPRESS)
             )
 
             assertThat(
@@ -149,8 +149,8 @@ internal class CardNumberEditTextTest {
     @Test
     fun calculateCursorPosition_whenDinersClub16_decreasesIndexWhenDeletingPastTheSpaces() =
         runTest {
-            cardNumberEditText.accountRangeService.updateAccountRangeResult(
-                AccountRangeFixtures.DINERSCLUB16
+            cardNumberEditText.accountRangeService.updateAccountRangesResult(
+                listOf(AccountRangeFixtures.DINERSCLUB16)
             )
 
             assertThat(
@@ -167,8 +167,8 @@ internal class CardNumberEditTextTest {
     @Test
     fun calculateCursorPosition_whenDeletingNotOnGaps_doesNotDecreaseIndex() =
         runTest {
-            cardNumberEditText.accountRangeService.updateAccountRangeResult(
-                AccountRangeFixtures.DINERSCLUB14
+            cardNumberEditText.accountRangeService.updateAccountRangesResult(
+                listOf(AccountRangeFixtures.DINERSCLUB14)
             )
 
             assertThat(
@@ -179,8 +179,8 @@ internal class CardNumberEditTextTest {
     @Test
     fun calculateCursorPosition_whenAmEx_decreasesIndexWhenDeletingPastTheSpaces() =
         runTest {
-            cardNumberEditText.accountRangeService.updateAccountRangeResult(
-                AccountRangeFixtures.AMERICANEXPRESS
+            cardNumberEditText.accountRangeService.updateAccountRangesResult(
+                listOf(AccountRangeFixtures.AMERICANEXPRESS)
             )
 
             assertThat(
@@ -194,8 +194,8 @@ internal class CardNumberEditTextTest {
     @Test
     fun calculateCursorPosition_whenSelectionInTheMiddle_increasesIndexOverASpace() =
         runTest {
-            cardNumberEditText.accountRangeService.updateAccountRangeResult(
-                AccountRangeFixtures.VISA
+            cardNumberEditText.accountRangeService.updateAccountRangesResult(
+                listOf(AccountRangeFixtures.VISA)
             )
 
             assertThat(

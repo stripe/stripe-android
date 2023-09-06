@@ -37,6 +37,7 @@ internal class CardWidgetViewModel(
     }
 
     private suspend fun determineCbcEligibility(): Boolean {
+        // TODO(tillh-stripe) Query /wallets-config here
         delay(1.seconds)
         return DEBUG
     }
