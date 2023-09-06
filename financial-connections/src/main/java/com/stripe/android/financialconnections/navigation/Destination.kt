@@ -57,6 +57,11 @@ internal sealed class Destination(
         screenBuilder(navBackStackEntry)
     }
 
+    /**
+     * Builds the navigation route with arg keys and values.
+     *
+     * @param args a map of arguments to be appended to the route
+     */
     abstract operator fun invoke(args: Map<String, String?> = emptyMap()): String
 
     sealed class NoArgumentsDestination(
