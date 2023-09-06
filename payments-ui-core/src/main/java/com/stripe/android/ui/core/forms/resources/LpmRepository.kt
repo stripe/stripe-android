@@ -110,7 +110,9 @@ class LpmRepository constructor(
 
         // If the server does not return specs, or they are not parsed successfully
         // we will use the LPM on disk if found
-        val lpmsNotParsedFromServerSpec = expectedLpms.filter { it !in lpmInitialFormData }
+        val lpmsNotParsedFromServerSpec = expectedLpms.filter { lpm ->
+            !lpmInitialFormData.containsKey(lpm)
+        }
 
         if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
             parseMissingLpmsFromDisk(
@@ -140,7 +142,7 @@ class LpmRepository constructor(
             it.code
         }
 
-        lpmInitialFormData += missingLpmsByType
+        lpmInitialFormData.putAll(missingLpmsByType)
     }
 
     /**
@@ -151,9 +153,11 @@ class LpmRepository constructor(
         billingConfiguration: CardBillingDetailsCollectionConfiguration =
             CardBillingDetailsCollectionConfiguration(),
     ) {
-        lpmInitialFormData += mapOf(
-            PaymentMethod.Type.Card.code to hardcodedCardSpec(
-                billingDetailsCollectionConfiguration = billingConfiguration
+        lpmInitialFormData.putAll(
+            mapOf(
+                PaymentMethod.Type.Card.code to hardcodedCardSpec(
+                    billingDetailsCollectionConfiguration = billingConfiguration
+                )
             )
         )
     }
@@ -188,7 +192,7 @@ class LpmRepository constructor(
         }
 
         val supportedPaymentMethodsByType = supportedPaymentMethods.associateBy { it.code }
-        lpmInitialFormData += supportedPaymentMethodsByType
+        lpmInitialFormData.putAll(supportedPaymentMethodsByType)
 
         val nextActionSpecsByType = validSpecs.associate { spec ->
             spec.type to spec.nextActionSpec.transform()
@@ -596,9 +600,9 @@ class LpmRepository constructor(
             codeToSupportedPaymentMethod[paymentMethodCode]
         }
 
-        operator fun contains(key: String) = codeToSupportedPaymentMethod.containsKey(key)
+        fun containsKey(it: String) = codeToSupportedPaymentMethod.containsKey(it)
 
-        operator fun plusAssign(map: Map<PaymentMethodCode, SupportedPaymentMethod>) {
+        fun putAll(map: Map<PaymentMethodCode, SupportedPaymentMethod>) {
             codeToSupportedPaymentMethod.putAll(map)
         }
 
