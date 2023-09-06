@@ -7,6 +7,7 @@ import org.junit.Test
 
 class DestinationMappersTest {
 
+    // Panes that don't have a matching screen on the Android SDK side
     private val nonImplementedPanes = listOf(
         Pane.UNEXPECTED_ERROR,
         Pane.BANK_AUTH_REPAIR,
