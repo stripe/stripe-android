@@ -14,7 +14,7 @@ import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -105,7 +105,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
                 "linked_accounts.networking.verification.success",
                 mapOf("pane" to "networking_save_to_link_verification")
             )
-            navigationManager.assertNavigatedTo(NavigationDirections.success)
+            navigationManager.assertNavigatedTo(Destination.Success)
         }
 
     @Test
@@ -161,6 +161,6 @@ class NetworkingSaveToLinkVerificationViewModelTest {
 
         verifyNoInteractions(confirmVerification)
         verifyNoInteractions(saveAccountToLink)
-        navigationManager.assertNavigatedTo(NavigationDirections.success)
+        navigationManager.assertNavigatedTo(Destination.Success)
     }
 }

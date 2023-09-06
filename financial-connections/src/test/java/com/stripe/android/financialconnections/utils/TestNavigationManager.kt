@@ -1,10 +1,11 @@
 package com.stripe.android.financialconnections.utils
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.financialconnections.navigation.NavigationCommand
+import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlin.test.assertIs
 
 /**
@@ -13,20 +14,30 @@ import kotlin.test.assertIs
 
 internal class TestNavigationManager : NavigationManager {
 
-    val emittedEvents = mutableListOf<NavigationState>()
+    val emittedIntents = mutableListOf<NavigationIntent>()
 
-    override val navigationState: MutableStateFlow<NavigationState> =
-        MutableStateFlow(NavigationState.Idle)
+    override val navigationFlow: SharedFlow<NavigationIntent>
+        get() = MutableSharedFlow()
 
-    override fun navigate(state: NavigationState) {
-        emittedEvents.add(state)
+    override fun tryNavigateTo(
+        route: String,
+        popUpToCurrent: Boolean,
+        inclusive: Boolean,
+        isSingleTop: Boolean
+    ) {
+        emittedIntents.add(
+            NavigationIntent.NavigateTo(
+                route = route,
+                popUpToCurrent = popUpToCurrent,
+                inclusive = inclusive,
+                isSingleTop = isSingleTop,
+            )
+        )
     }
 
-    override fun onNavigated(state: NavigationState) = Unit
-
-    fun assertNavigatedTo(destination: NavigationCommand) {
-        val last = emittedEvents.last()
-        assertIs<NavigationState.NavigateToRoute>(last)
-        assertThat(last.command.destination).isEqualTo(destination.destination)
+    fun assertNavigatedTo(destination: Destination) {
+        val last: NavigationIntent = emittedIntents.last()
+        assertIs<NavigationIntent.NavigateTo>(last)
+        assertThat(last.route).isEqualTo(destination.fullRoute)
     }
 }
