@@ -75,8 +75,6 @@ class LpmRepository constructor(
     private val lpmPostConfirmData: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance
 ) {
 
-    var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
-
     fun fromCode(code: PaymentMethodCode?) = lpmInitialFormData.fromCode(code)
 
     fun values(): List<SupportedPaymentMethod> = lpmInitialFormData.values()
@@ -100,16 +98,13 @@ class LpmRepository constructor(
         serverLpmSpecs: String?,
         cardBillingDetailsCollectionConfiguration: CardBillingDetailsCollectionConfiguration =
             CardBillingDetailsCollectionConfiguration(),
-    ) {
+    ): Boolean {
         val expectedLpms = stripeIntent.paymentMethodTypes
+        var didParseServerResponse = false
 
-        serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
         if (!serverLpmSpecs.isNullOrEmpty()) {
-            serverSpecLoadingState = ServerSpecState.ServerNotParsed(serverLpmSpecs)
             val serverLpmObjects = LpmSerializer.deserializeList(serverLpmSpecs)
-            if (serverLpmObjects.isNotEmpty()) {
-                serverSpecLoadingState = ServerSpecState.ServerParsed(serverLpmSpecs)
-            }
+            didParseServerResponse = serverLpmObjects.isNotEmpty()
             update(stripeIntent, serverLpmObjects, cardBillingDetailsCollectionConfiguration)
         }
 
@@ -124,6 +119,8 @@ class LpmRepository constructor(
                 cardBillingDetailsCollectionConfiguration = cardBillingDetailsCollectionConfiguration,
             )
         }
+
+        return didParseServerResponse
     }
 
     private fun parseMissingLpmsFromDisk(
@@ -654,14 +651,6 @@ class LpmRepository constructor(
                 formSpec = LayoutSpec(specs),
             )
         }
-    }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    sealed class ServerSpecState(val serverLpmSpecs: String?) {
-        object Uninitialized : ServerSpecState(null)
-        class NoServerSpec(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
-        class ServerParsed(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
-        class ServerNotParsed(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

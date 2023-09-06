@@ -174,8 +174,6 @@ internal abstract class BaseSheetViewModel(
         !isProcessing && !isEditing
     }
 
-    internal var lpmServerSpec: String? = null
-
     private val paymentOptionsStateMapper: PaymentOptionsStateMapper by lazy {
         PaymentOptionsStateMapper(
             paymentMethods = paymentMethods,
