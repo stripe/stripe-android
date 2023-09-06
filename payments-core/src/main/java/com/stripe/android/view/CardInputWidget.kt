@@ -77,7 +77,7 @@ class CardInputWidget @JvmOverloads constructor(
     private val cardNumberTextInputLayout = viewBinding.cardNumberTextInputLayout
     private val expiryDateTextInputLayout = viewBinding.expiryDateTextInputLayout
     private val cvcNumberTextInputLayout = viewBinding.cvcTextInputLayout
-    internal val postalCodeTextInputLayout = viewBinding.postalCodeTextInputLayout
+    private val postalCodeTextInputLayout = viewBinding.postalCodeTextInputLayout
 
     @JvmSynthetic
     internal val cardNumberEditText = viewBinding.cardNumberEditText
@@ -786,6 +786,21 @@ class CardInputWidget @JvmOverloads constructor(
             cardBrandView.brand = brand
             hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
             updateCvc()
+        }
+
+        cardNumberEditText.possibleCardBrandsCallback = { brands ->
+            val currentBrand = cardBrandView.brand
+            cardBrandView.possibleBrands = brands
+
+            if (currentBrand !in brands) {
+                cardBrandView.brand = CardBrand.Unknown
+            }
+
+            hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
+            updateCvc()
+
+            isViewInitialized = false
+            requestLayout()
         }
 
         expiryDateEditText.completionCallback = {

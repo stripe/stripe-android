@@ -17,7 +17,7 @@ class CardAccountRangeService constructor(
     private val cardAccountRangeRepository: CardAccountRangeRepository,
     private val workContext: CoroutineContext,
     val staticCardAccountRanges: StaticCardAccountRanges,
-    private val accountRangeResultListener: AccountRangeResultListener
+    private val accountRangeResultListener: AccountRangeResultListener,
 ) {
 
     val isLoading: Flow<Boolean> = cardAccountRangeRepository.loading
@@ -28,7 +28,15 @@ class CardAccountRangeService constructor(
     @VisibleForTesting
     var accountRangeRepositoryJob: Job? = null
 
+    private var delegate: CardAccountRangeServiceDelegate? = null
+
     fun onCardNumberChanged(cardNumber: CardNumber.Unvalidated) {
+        val handled = delegate?.onCardNumberChanged(cardNumber) ?: false
+
+        if (handled) {
+            return
+        }
+
         val staticAccountRange = staticCardAccountRanges.filter(cardNumber)
             .let { accountRanges ->
                 if (accountRanges.size == 1) {
@@ -37,6 +45,7 @@ class CardAccountRangeService constructor(
                     null
                 }
             }
+
         if (staticAccountRange == null || shouldQueryRepository(staticAccountRange)) {
             // query for AccountRange data
             queryAccountRangeRepository(cardNumber)
@@ -44,6 +53,15 @@ class CardAccountRangeService constructor(
             // use static AccountRange data
             updateAccountRangeResult(staticAccountRange)
         }
+    }
+
+    fun registerDelegate(delegate: CardAccountRangeServiceDelegate) {
+        this.delegate = delegate
+    }
+
+    fun unregisterDelegate() {
+        delegate?.onUnregister()
+        this.delegate = null
     }
 
     @JvmSynthetic
@@ -57,14 +75,16 @@ class CardAccountRangeService constructor(
 
             accountRangeRepositoryJob = CoroutineScope(workContext).launch {
                 val bin = cardNumber.bin
-                val accountRange = if (bin != null) {
-                    cardAccountRangeRepository.getAccountRange(cardNumber)
+
+                val accountRanges = if (bin != null) {
+                    cardAccountRangeRepository.getAccountRanges(cardNumber)
                 } else {
                     null
                 }
 
                 withContext(Dispatchers.Main) {
-                    updateAccountRangeResult(accountRange)
+                    updateAccountRangeResult(accountRanges?.firstOrNull())
+                    delegate?.onResult(accountRanges)
                 }
             }
         }

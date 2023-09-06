@@ -11,7 +11,9 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardAccountRangeService
+import com.stripe.android.cards.CardAccountRangeServiceDelegate
 import com.stripe.android.cards.CardNumber
+import com.stripe.android.cards.CbcDelegate
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
@@ -21,6 +23,8 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.utils.doWithViewModel
+import com.stripe.android.utils.launchAndCollect
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -43,7 +47,7 @@ class CardNumberEditText internal constructor(
     var workContext: CoroutineContext,
 
     private val cardAccountRangeRepository: CardAccountRangeRepository,
-    private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
+    staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
 ) : StripeEditText(context, attrs, defStyleAttr) {
@@ -102,6 +106,27 @@ class CardNumberEditText internal constructor(
             callback(cardBrand)
         }
 
+    @VisibleForTesting
+    var possibleCardBrands: List<CardBrand> = emptyList()
+        internal set(value) {
+            val prevBrands = field
+            field = value
+            if (value != prevBrands) {
+                possibleCardBrandsCallback(value)
+                updateLengthFilter()
+            }
+        }
+
+    @JvmSynthetic
+    internal var possibleCardBrandsCallback: (List<CardBrand>) -> Unit = {}
+        set(callback) {
+            field = callback
+
+            // Immediately display the brand if known, in case this method is invoked when
+            // partial data already exists.
+            callback(possibleCardBrands)
+        }
+
     // invoked when a valid card has been entered
     @JvmSynthetic
     internal var completionCallback: () -> Unit = {}
@@ -131,16 +156,25 @@ class CardNumberEditText internal constructor(
 
     @VisibleForTesting
     val accountRangeService = CardAccountRangeService(
-        cardAccountRangeRepository,
-        workContext,
-        staticCardAccountRanges,
-        object : CardAccountRangeService.AccountRangeResultListener {
+        cardAccountRangeRepository = cardAccountRangeRepository,
+        workContext = workContext,
+        staticCardAccountRanges = staticCardAccountRanges,
+        accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
             override fun onAccountRangeResult(newAccountRange: AccountRange?) {
                 updateLengthFilter()
-                cardBrand = newAccountRange?.brand ?: CardBrand.Unknown
+
+                doWithViewModel<CardWidgetViewModel> { viewModel ->
+                    if (!viewModel.isCbcEligible.value) {
+                        cardBrand = newAccountRange?.brand ?: CardBrand.Unknown
+                    }
+                }
             }
         }
     )
+
+    private val cbcDelegate: CardAccountRangeServiceDelegate by lazy {
+        CbcDelegate(brandsListener = possibleCardBrandsCallback)
+    }
 
     @JvmSynthetic
     internal var isLoadingCallback: (Boolean) -> Unit = {}
@@ -166,10 +200,21 @@ class CardNumberEditText internal constructor(
         updateLengthFilter()
 
         this.layoutDirection = LAYOUT_DIRECTION_LTR
+
+        doWithViewModel<CardWidgetViewModel> { viewModel ->
+            viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
+                if (isCbcEligible) {
+                    accountRangeService.registerDelegate(cbcDelegate)
+                } else {
+                    accountRangeService.unregisterDelegate()
+                }
+            }
+        }
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+
         loadingJob = CoroutineScope(workContext).launch {
             cardAccountRangeRepository.loading.collect {
                 withContext(Dispatchers.Main) {
@@ -189,6 +234,7 @@ class CardNumberEditText internal constructor(
         loadingJob = null
 
         accountRangeService.cancelAccountRangeRepositoryJob()
+        accountRangeService.unregisterDelegate()
 
         super.onDetachedFromWindow()
     }

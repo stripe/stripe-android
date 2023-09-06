@@ -5,10 +5,11 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.view.doOnNextLayout
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.stripe.android.databinding.StripeCardBrandViewBinding
 import com.stripe.android.model.CardBrand
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.properties.Delegates
 
 internal class CardBrandView @JvmOverloads constructor(
@@ -26,12 +27,18 @@ internal class CardBrandView @JvmOverloads constructor(
     @ColorInt
     internal var tintColorInt: Int = 0
 
+    private val isLoadingFlow = MutableStateFlow(false)
+    private val brandFlow = MutableStateFlow(CardBrand.Unknown)
+    private val possibleBrandsFlow = MutableStateFlow(emptyList<CardBrand>())
+    private val shouldShowCvcFlow = MutableStateFlow(false)
+    private val shouldShowErrorIconFlow = MutableStateFlow(false)
+
     var isLoading: Boolean by Delegates.observable(
         false
     ) { _, wasLoading, isLoading ->
-        if (wasLoading != isLoading) {
-            updateIcon()
+        isLoadingFlow.value = isLoading
 
+        if (wasLoading != isLoading) {
             if (isLoading) {
                 progressView.show()
             } else {
@@ -40,72 +47,54 @@ internal class CardBrandView @JvmOverloads constructor(
         }
     }
 
-    var brand: CardBrand by Delegates.observable(
-        CardBrand.Unknown
-    ) { _, prevValue, newValue ->
-        if (prevValue != newValue) {
-            updateIcon()
+    var brand: CardBrand
+        get() = brandFlow.value
+        set(value) {
+            brandFlow.value = value
         }
-    }
+
+    var possibleBrands: List<CardBrand>
+        get() = possibleBrandsFlow.value
+        set(value) {
+            possibleBrandsFlow.value = value
+        }
 
     var shouldShowCvc: Boolean by Delegates.observable(
         false
-    ) { _, prevValue, newValue ->
-        if (prevValue != newValue) {
-            updateIcon()
-        }
+    ) { _, _, newValue ->
+        shouldShowCvcFlow.value = newValue
     }
 
     var shouldShowErrorIcon: Boolean by Delegates.observable(
         false
-    ) { _, prevValue, newValue ->
-        if (prevValue != newValue) {
-            updateIcon()
-        }
+    ) { _, _, newValue ->
+        shouldShowErrorIconFlow.value = newValue
     }
 
     init {
         isClickable = false
         isFocusable = false
 
-        doOnNextLayout {
-            updateIcon()
-        }
-    }
+        iconView.setContent {
+            val isLoading by isLoadingFlow.collectAsState()
+            val currentBrand by brandFlow.collectAsState()
+            val possibleBrands by possibleBrandsFlow.collectAsState()
+            val shouldShowCvc by shouldShowCvcFlow.collectAsState()
+            val shouldShowErrorIcon by shouldShowErrorIconFlow.collectAsState()
 
-    private fun updateIcon() {
-        when {
-            isLoading -> {
-                renderBrandIcon()
-            }
-            shouldShowErrorIcon -> {
-                iconView.setImageResource(brand.errorIcon)
-            }
-            shouldShowCvc -> {
-                iconView.setImageResource(brand.cvcIcon)
-                applyTint()
-            }
-            else -> {
-                renderBrandIcon()
-            }
-        }
-    }
-
-    private fun renderBrandIcon() {
-        iconView.setImageResource(brand.icon)
-
-        if (brand == CardBrand.Unknown) {
-            applyTint()
-        }
-    }
-
-    private fun applyTint() {
-        iconView.setImageDrawable(
-            DrawableCompat.unwrap(
-                DrawableCompat.wrap(iconView.drawable).also { compatIcon ->
-                    DrawableCompat.setTint(compatIcon.mutate(), tintColorInt)
-                }
+            CardBrandSelectorIcon(
+                isLoading = isLoading,
+                currentBrand = currentBrand,
+                possibleBrands = possibleBrands,
+                shouldShowCvc = shouldShowCvc,
+                shouldShowErrorIcon = shouldShowErrorIcon,
+                tintColorInt = tintColorInt,
+                onBrandSelected = this::handleBrandSelected,
             )
-        )
+        }
+    }
+
+    private fun handleBrandSelected(brand: CardBrand?) {
+        brandFlow.value = brand ?: CardBrand.Unknown
     }
 }
