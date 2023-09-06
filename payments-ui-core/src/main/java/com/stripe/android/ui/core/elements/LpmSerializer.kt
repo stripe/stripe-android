@@ -20,12 +20,10 @@ internal object LpmSerializer {
      * LPMs being read.
      */
     @WorkerThread
-    fun deserializeList(str: String) = if (str.isEmpty()) {
-        emptyList()
-    } else {
-        try {
-            format.decodeFromString<ArrayList<SharedDataSpec>>(serializer(), str)
-        } catch (e: Exception) {
+    fun deserializeList(str: String): List<SharedDataSpec> {
+        return try {
+            format.decodeFromString(serializer(), str)
+        } catch (e: IllegalArgumentException) {
             Log.w("STRIPE", "Error parsing LPMs", e)
             emptyList()
         }

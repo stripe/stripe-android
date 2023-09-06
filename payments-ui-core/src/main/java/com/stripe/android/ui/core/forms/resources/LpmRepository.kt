@@ -140,7 +140,7 @@ class LpmRepository constructor(
             it.code
         }
 
-        lpmInitialFormData.putAll(missingLpmsByType)
+        lpmInitialFormData += missingLpmsByType
     }
 
     /**
@@ -151,11 +151,9 @@ class LpmRepository constructor(
         billingConfiguration: CardBillingDetailsCollectionConfiguration =
             CardBillingDetailsCollectionConfiguration(),
     ) {
-        lpmInitialFormData.putAll(
-            mapOf(
-                PaymentMethod.Type.Card.code to hardcodedCardSpec(
-                    billingDetailsCollectionConfiguration = billingConfiguration
-                )
+        lpmInitialFormData += mapOf(
+            PaymentMethod.Type.Card.code to hardcodedCardSpec(
+                billingDetailsCollectionConfiguration = billingConfiguration
             )
         )
     }
@@ -166,7 +164,7 @@ class LpmRepository constructor(
     }
 
     private fun readFromDisk(): List<SharedDataSpec> {
-        return parseLpms(arguments.resources?.assets?.open("lpms.json"))
+        return parseLpms(arguments.resources.assets?.open("lpms.json"))
     }
 
     private fun update(
@@ -189,7 +187,7 @@ class LpmRepository constructor(
         }
 
         val supportedPaymentMethodsByType = supportedPaymentMethods.associateBy { it.code }
-        lpmInitialFormData.putAll(supportedPaymentMethodsByType)
+        lpmInitialFormData += supportedPaymentMethodsByType
 
         val nextActionSpecsByType = validSpecs.associate { spec ->
             spec.type to spec.nextActionSpec.transform()
@@ -589,7 +587,7 @@ class LpmRepository constructor(
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     class LpmInitialFormData {
 
-        private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
+        private val codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
 
         fun values(): List<SupportedPaymentMethod> = codeToSupportedPaymentMethod.values.toList()
 
@@ -599,7 +597,7 @@ class LpmRepository constructor(
 
         operator fun contains(key: String) = codeToSupportedPaymentMethod.containsKey(key)
 
-        fun putAll(map: Map<PaymentMethodCode, SupportedPaymentMethod>) {
+        operator fun plusAssign(map: Map<PaymentMethodCode, SupportedPaymentMethod>) {
             codeToSupportedPaymentMethod.putAll(map)
         }
 
@@ -655,7 +653,7 @@ class LpmRepository constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class LpmRepositoryArguments(
-        val resources: Resources?,
+        val resources: Resources,
         val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
             DefaultIsFinancialConnectionsAvailable(),
     )
