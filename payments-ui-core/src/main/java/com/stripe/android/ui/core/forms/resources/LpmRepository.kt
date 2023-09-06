@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.forms.GiropayRequirement
 import com.stripe.android.paymentsheet.forms.GrabPayRequirement
 import com.stripe.android.paymentsheet.forms.IdealRequirement
 import com.stripe.android.paymentsheet.forms.KlarnaRequirement
-import com.stripe.android.paymentsheet.forms.MandateRequirement
 import com.stripe.android.paymentsheet.forms.MobilePayRequirement
 import com.stripe.android.paymentsheet.forms.P24Requirement
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
@@ -249,7 +248,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
             code = "card",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -265,7 +263,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.Bancontact.code -> SupportedPaymentMethod(
             code = "bancontact",
             requiresMandate = true,
-            mandateRequirement = MandateRequirement.Always,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_bancontact,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -277,7 +274,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.Sofort.code -> SupportedPaymentMethod(
             code = "sofort",
             requiresMandate = true,
-            mandateRequirement = MandateRequirement.Always,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_sofort,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_klarna,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -301,7 +297,6 @@ class LpmRepository constructor(
             SupportedPaymentMethod(
                 code = "ideal",
                 requiresMandate = true,
-                mandateRequirement = MandateRequirement.Always,
                 displayNameResource = R.string.stripe_paymentsheet_payment_method_ideal,
                 iconResource = R.drawable.stripe_ic_paymentsheet_pm_ideal,
                 lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -314,7 +309,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.SepaDebit.code -> SupportedPaymentMethod(
             code = "sepa_debit",
             requiresMandate = true,
-            mandateRequirement = MandateRequirement.Always,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_sepa_debit,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -326,7 +320,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.Eps.code -> SupportedPaymentMethod(
             code = "eps",
             requiresMandate = true,
-            mandateRequirement = MandateRequirement.Always,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_eps,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_eps,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -338,7 +331,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.P24.code -> SupportedPaymentMethod(
             code = "p24",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_p24,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_p24,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -350,7 +342,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.Giropay.code -> SupportedPaymentMethod(
             code = "giropay",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_giropay,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_giropay,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -362,7 +353,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.AfterpayClearpay.code -> SupportedPaymentMethod(
             code = "afterpay_clearpay",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = if (isClearpay()) {
                 R.string.stripe_paymentsheet_payment_method_clearpay
             } else {
@@ -378,7 +368,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.Klarna.code -> SupportedPaymentMethod(
             code = "klarna",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_klarna,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_klarna,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -397,7 +386,6 @@ class LpmRepository constructor(
             SupportedPaymentMethod(
                 code = "paypal",
                 requiresMandate = stripeIntent.payPalRequiresMandate(),
-                mandateRequirement = MandateRequirement.Dynamic,
                 displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
                 iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
                 lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -410,7 +398,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.Affirm.code -> SupportedPaymentMethod(
             code = "affirm",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_affirm,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_affirm,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -422,7 +409,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.RevolutPay.code -> SupportedPaymentMethod(
             code = "revolut_pay",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_revolut_pay,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_revolut_pay,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -434,7 +420,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.AmazonPay.code -> SupportedPaymentMethod(
             code = "amazon_pay",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_amazon_pay,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_amazon_pay,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -446,7 +431,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.MobilePay.code -> SupportedPaymentMethod(
             code = "mobilepay",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_mobile_pay,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_mobile_pay,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -458,7 +442,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.Zip.code -> SupportedPaymentMethod(
             code = "zip",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_zip,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_zip,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -470,7 +453,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.AuBecsDebit.code -> SupportedPaymentMethod(
             code = "au_becs_debit",
             requiresMandate = true,
-            mandateRequirement = MandateRequirement.Always,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_au_becs_debit,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -500,7 +482,6 @@ class LpmRepository constructor(
                 SupportedPaymentMethod(
                     code = "us_bank_account",
                     requiresMandate = true,
-                    mandateRequirement = MandateRequirement.Always,
                     displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
                     iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
                     lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -516,7 +497,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.Upi.code -> SupportedPaymentMethod(
             code = "upi",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_upi,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_upi,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -529,7 +509,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.Blik.code -> SupportedPaymentMethod(
             code = "blik",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_blik,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_blik,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -542,7 +521,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.CashAppPay.code -> SupportedPaymentMethod(
             code = "cashapp",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_cashapp,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_cash_app_pay,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -554,7 +532,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.GrabPay.code -> SupportedPaymentMethod(
             code = "grabpay",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_grabpay,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_grabpay,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -566,7 +543,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.Fpx.code -> SupportedPaymentMethod(
             code = "fpx",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_fpx,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_fpx,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -595,9 +571,6 @@ class LpmRepository constructor(
 
         /** This describes if the LPM requires a mandate see [ConfirmPaymentIntentParams.mandateDataParams]. */
         val requiresMandate: Boolean,
-
-        /** This describes when the LPM requires a mandate (see [ConfirmPaymentIntentParams.mandateDataParams]). */
-        val mandateRequirement: MandateRequirement,
 
         /** This describes the name that appears under the selector. */
         @StringRes val displayNameResource: Int,
@@ -692,7 +665,6 @@ class LpmRepository constructor(
             return SupportedPaymentMethod(
                 code = "card",
                 requiresMandate = false,
-                mandateRequirement = MandateRequirement.Never,
                 displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
                 iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
                 lightThemeIconUrl = null,
