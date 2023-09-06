@@ -556,7 +556,6 @@ class LpmRepository constructor(
         PaymentMethod.Type.Alipay.code -> SupportedPaymentMethod(
             code = "alipay",
             requiresMandate = false,
-            mandateRequirement = MandateRequirement.Never,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_alipay,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_alipay,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
