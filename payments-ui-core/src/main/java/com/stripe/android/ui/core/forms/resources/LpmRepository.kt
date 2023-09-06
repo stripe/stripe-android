@@ -298,18 +298,31 @@ class LpmRepository constructor(
             requirement = SofortRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
-        PaymentMethod.Type.Ideal.code -> SupportedPaymentMethod(
-            code = "ideal",
-            requiresMandate = true,
-            mandateRequirement = MandateRequirement.Always,
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_ideal,
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_ideal,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-            tintIconOnSelection = false,
-            requirement = IdealRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields)
-        )
+        PaymentMethod.Type.Ideal.code -> {
+            val isSfu = (stripeIntent as? PaymentIntent)?.setupFutureUsage != null
+            val isSetupIntent = stripeIntent is SetupIntent
+            val localLayoutSpecs: List<FormItemSpec> = if (isSfu || isSetupIntent) {
+                listOf(
+                    EmailSpec(),
+                    SepaMandateTextSpec()
+                )
+            } else {
+                emptyList()
+            }
+
+            SupportedPaymentMethod(
+                code = "ideal",
+                requiresMandate = true,
+                mandateRequirement = MandateRequirement.Always,
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_ideal,
+                iconResource = R.drawable.stripe_ic_paymentsheet_pm_ideal,
+                lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+                darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+                tintIconOnSelection = false,
+                requirement = IdealRequirement,
+                formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs)
+            )
+        }
         PaymentMethod.Type.SepaDebit.code -> SupportedPaymentMethod(
             code = "sepa_debit",
             requiresMandate = true,
