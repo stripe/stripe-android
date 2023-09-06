@@ -51,6 +51,7 @@ import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.MandateTextSpec
+import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
@@ -261,31 +262,18 @@ class LpmRepository constructor(
                 LayoutSpec(sharedDataSpec.fields)
             }
         )
-        PaymentMethod.Type.Bancontact.code -> {
-            val isSfu = (stripeIntent as? PaymentIntent)?.setupFutureUsage != null
-            val isSetupIntent = stripeIntent is SetupIntent
-            val localLayoutSpecs: List<FormItemSpec> = if (isSfu || isSetupIntent) {
-                listOf(
-                    EmailSpec(),
-                    SepaMandateTextSpec()
-                )
-            } else {
-                emptyList()
-            }
-
-            SupportedPaymentMethod(
-                code = "bancontact",
-                requiresMandate = true,
-                mandateRequirement = MandateRequirement.Always,
-                displayNameResource = R.string.stripe_paymentsheet_payment_method_bancontact,
-                iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
-                lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-                darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-                tintIconOnSelection = false,
-                requirement = BancontactRequirement,
-                formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs)
-            )
-        }
+        PaymentMethod.Type.Bancontact.code -> SupportedPaymentMethod(
+            code = "bancontact",
+            requiresMandate = true,
+            mandateRequirement = MandateRequirement.Always,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_bancontact,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = BancontactRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields + stripeIntent.sepaMandateLayout())
+        )
         PaymentMethod.Type.Sofort.code -> SupportedPaymentMethod(
             code = "sofort",
             requiresMandate = true,
@@ -296,7 +284,7 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = SofortRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields)
+            formSpec = LayoutSpec(sharedDataSpec.fields + stripeIntent.sepaMandateLayout(requireName = true))
         )
         PaymentMethod.Type.Ideal.code -> {
             val isSfu = (stripeIntent as? PaymentIntent)?.setupFutureUsage != null
@@ -736,5 +724,25 @@ private fun StripeIntent.payPalRequiresMandate(): Boolean {
     return when (this) {
         is PaymentIntent -> setupFutureUsage != null
         is SetupIntent -> true
+    }
+}
+
+private fun StripeIntent.sepaMandateLayout(
+    requireName: Boolean = false,
+): List<FormItemSpec> {
+    val isSfu = (this as? PaymentIntent)?.setupFutureUsage != null
+    val isSetupIntent = this is SetupIntent
+    return if (isSfu || isSetupIntent) {
+        listOfNotNull(
+            if (requireName) {
+                NameSpec()
+            } else {
+                null
+            },
+            EmailSpec(),
+            SepaMandateTextSpec()
+        )
+    } else {
+        emptyList()
     }
 }
