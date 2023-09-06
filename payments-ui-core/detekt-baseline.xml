@@ -64,6 +64,7 @@
     <ID>ReturnCount:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
     <ID>ReturnCount:IbanConfig.kt$IbanConfig$override fun determineState(input: String): TextFieldState</ID>
     <ID>SpreadOperator:BsbElementUI.kt$( it.errorMessage, *args )</ID>
+    <ID>SpreadOperator:MandateTextUI.kt$(element.stringResId, *element.args.toTypedArray())</ID>
     <ID>TooGenericExceptionCaught:LpmSerializer.kt$LpmSerializer$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PlacesClientProxy.kt$DefaultPlacesClientProxy$e: Exception</ID>
     <ID>UtilityClassWithPublicConstructor:FieldValuesToParamsMapConverter.kt$FieldValuesToParamsMapConverter</ID>
