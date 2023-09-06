@@ -217,8 +217,8 @@ internal val MobilePayRequirement = PaymentMethodRequirements(
  */
 internal val AuBecsDebitRequirement = PaymentMethodRequirements(
     piRequirements = setOf(Delayed),
-    siRequirements = null,
-    confirmPMFromCustomer = null
+    siRequirements = setOf(Delayed),
+    confirmPMFromCustomer = true
 )
 
 internal val ZipRequirement = PaymentMethodRequirements(
