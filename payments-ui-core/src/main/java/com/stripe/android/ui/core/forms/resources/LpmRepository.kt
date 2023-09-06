@@ -9,6 +9,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -73,38 +74,8 @@ class LpmRepository constructor(
     private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance,
     private val lpmPostConfirmData: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance
 ) {
-    private val lpmSerializer = LpmSerializer()
 
     var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
-
-    val supportedPaymentMethodTypes: List<String> by lazy {
-        listOf(
-            PaymentMethod.Type.Card.code,
-            PaymentMethod.Type.Bancontact.code,
-            PaymentMethod.Type.Sofort.code,
-            PaymentMethod.Type.Ideal.code,
-            PaymentMethod.Type.SepaDebit.code,
-            PaymentMethod.Type.Eps.code,
-            PaymentMethod.Type.Giropay.code,
-            PaymentMethod.Type.P24.code,
-            PaymentMethod.Type.Klarna.code,
-            PaymentMethod.Type.PayPal.code,
-            PaymentMethod.Type.AfterpayClearpay.code,
-            PaymentMethod.Type.USBankAccount.code,
-            PaymentMethod.Type.Affirm.code,
-            PaymentMethod.Type.RevolutPay.code,
-            PaymentMethod.Type.AmazonPay.code,
-            PaymentMethod.Type.MobilePay.code,
-            PaymentMethod.Type.Zip.code,
-            PaymentMethod.Type.AuBecsDebit.code,
-            PaymentMethod.Type.Upi.code,
-            PaymentMethod.Type.Blik.code,
-            PaymentMethod.Type.CashAppPay.code,
-            PaymentMethod.Type.GrabPay.code,
-            PaymentMethod.Type.Fpx.code,
-            PaymentMethod.Type.Alipay.code,
-        )
-    }
 
     fun fromCode(code: PaymentMethodCode?) = lpmInitialFormData.fromCode(code)
 
@@ -135,7 +106,7 @@ class LpmRepository constructor(
         serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
         if (!serverLpmSpecs.isNullOrEmpty()) {
             serverSpecLoadingState = ServerSpecState.ServerNotParsed(serverLpmSpecs)
-            val serverLpmObjects = lpmSerializer.deserializeList(serverLpmSpecs)
+            val serverLpmObjects = LpmSerializer.deserializeList(serverLpmSpecs)
             if (serverLpmObjects.isNotEmpty()) {
                 serverSpecLoadingState = ServerSpecState.ServerParsed(serverLpmSpecs)
             }
@@ -144,31 +115,35 @@ class LpmRepository constructor(
 
         // If the server does not return specs, or they are not parsed successfully
         // we will use the LPM on disk if found
-        val lpmsNotParsedFromServerSpec = expectedLpms
-            .filter { !lpmInitialFormData.containsKey(it) }
-            .filter { supportsPaymentMethod(it) }
+        val lpmsNotParsedFromServerSpec = expectedLpms.filter { it !in lpmInitialFormData }
 
         if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
-            val mapFromDisk: Map<String, SharedDataSpec>? =
-                readFromDisk()
-                    ?.associateBy { it.type }
-                    ?.filterKeys { expectedLpms.contains(it) }
-            lpmInitialFormData.putAll(
-                lpmsNotParsedFromServerSpec
-                    .mapNotNull { mapFromDisk?.get(it) }
-                    .mapNotNull {
-                        convertToSupportedPaymentMethod(stripeIntent, it, cardBillingDetailsCollectionConfiguration)
-                    }
-                    .associateBy { it.code }
+            parseMissingLpmsFromDisk(
+                missingLpms = lpmsNotParsedFromServerSpec,
+                stripeIntent = stripeIntent,
+                cardBillingDetailsCollectionConfiguration = cardBillingDetailsCollectionConfiguration,
             )
-            mapFromDisk
-                ?.mapValues { it.value.nextActionSpec.transform() }
-                ?.let {
-                    lpmPostConfirmData.update(
-                        it
-                    )
-                }
         }
+    }
+
+    private fun parseMissingLpmsFromDisk(
+        missingLpms: List<String>,
+        stripeIntent: StripeIntent,
+        cardBillingDetailsCollectionConfiguration: CardBillingDetailsCollectionConfiguration,
+    ) {
+        val missingLpmsOnDisk = readFromDisk().filter { it.type in missingLpms }
+
+        val missingLpmsByType = missingLpmsOnDisk.mapNotNull { spec ->
+            convertToSupportedPaymentMethod(
+                stripeIntent = stripeIntent,
+                sharedDataSpec = spec,
+                cardBillingDetailsCollectionConfiguration = cardBillingDetailsCollectionConfiguration,
+            )
+        }.associateBy {
+            it.code
+        }
+
+        lpmInitialFormData.putAll(missingLpmsByType)
     }
 
     /**
@@ -193,51 +168,43 @@ class LpmRepository constructor(
         update(stripeIntent, readFromDisk())
     }
 
-    private fun readFromDisk() = parseLpms(arguments.resources?.assets?.open("lpms.json"))
+    private fun readFromDisk(): List<SharedDataSpec> {
+        return parseLpms(arguments.resources?.assets?.open("lpms.json"))
+    }
 
     private fun update(
         stripeIntent: StripeIntent,
-        lpms: List<SharedDataSpec>?,
+        specs: List<SharedDataSpec>,
         cardBillingDetailsCollectionConfiguration: CardBillingDetailsCollectionConfiguration =
             CardBillingDetailsCollectionConfiguration(),
     ) {
-        val parsedSharedData = lpms
-            ?.filter { supportsPaymentMethod(it.type) }
-            ?.filterNot {
-                !arguments.isFinancialConnectionsAvailable() &&
-                    it.type == PaymentMethod.Type.USBankAccount.code
-            }
+        val validSpecs = specs.filterNot { spec ->
+            !arguments.isFinancialConnectionsAvailable() && spec.type == USBankAccount.code
+        }
 
         // By mapNotNull we will not accept any LPMs that are not known by the platform.
-        parsedSharedData
-            ?.mapNotNull {
-                convertToSupportedPaymentMethod(stripeIntent, it, cardBillingDetailsCollectionConfiguration)
-            }
-            ?.toMutableList()
-            ?.let {
-                lpmInitialFormData.putAll(
-                    it.associateBy { it.code }
-                )
-            }
-
-        // Here nextActionSpec if null will convert to an explicit internal next action and status.
-        parsedSharedData
-            ?.associate { it.type to it.nextActionSpec.transform() }
-            ?.let {
-                lpmPostConfirmData.update(
-                    it
-                )
-            }
-    }
-
-    private fun supportsPaymentMethod(paymentMethodCode: String): Boolean {
-        return supportedPaymentMethodTypes.contains(paymentMethodCode)
-    }
-
-    private fun parseLpms(inputStream: InputStream?) =
-        getJsonStringFromInputStream(inputStream)?.let { string ->
-            lpmSerializer.deserializeList(string)
+        val supportedPaymentMethods = validSpecs.mapNotNull { spec ->
+            convertToSupportedPaymentMethod(
+                stripeIntent = stripeIntent,
+                sharedDataSpec = spec,
+                cardBillingDetailsCollectionConfiguration = cardBillingDetailsCollectionConfiguration,
+            )
         }
+
+        val supportedPaymentMethodsByType = supportedPaymentMethods.associateBy { it.code }
+        lpmInitialFormData.putAll(supportedPaymentMethodsByType)
+
+        val nextActionSpecsByType = validSpecs.associate { spec ->
+            spec.type to spec.nextActionSpec.transform()
+        }
+        lpmPostConfirmData.update(nextActionSpecsByType)
+    }
+
+    private fun parseLpms(inputStream: InputStream?): List<SharedDataSpec> {
+        return getJsonStringFromInputStream(inputStream)?.let { string ->
+            LpmSerializer.deserializeList(string)
+        }.orEmpty()
+    }
 
     private fun getJsonStringFromInputStream(inputStream: InputStream?) =
         inputStream?.bufferedReader().use { it?.readText() }
@@ -463,8 +430,8 @@ class LpmRepository constructor(
             requirement = AuBecsDebitRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
-        PaymentMethod.Type.USBankAccount.code -> {
-            val pmo = stripeIntent.getPaymentMethodOptions()[PaymentMethod.Type.USBankAccount.code]
+        USBankAccount.code -> {
+            val pmo = stripeIntent.getPaymentMethodOptions()[USBankAccount.code]
             val verificationMethod = (pmo as? Map<*, *>)?.get("verification_method") as? String
             val supportsVerificationMethod = verificationMethod in setOf("instant", "automatic")
 
@@ -633,7 +600,7 @@ class LpmRepository constructor(
             codeToSupportedPaymentMethod[paymentMethodCode]
         }
 
-        fun containsKey(it: String) = codeToSupportedPaymentMethod.containsKey(it)
+        operator fun contains(key: String) = codeToSupportedPaymentMethod.containsKey(key)
 
         fun putAll(map: Map<PaymentMethodCode, SupportedPaymentMethod>) {
             codeToSupportedPaymentMethod.putAll(map)

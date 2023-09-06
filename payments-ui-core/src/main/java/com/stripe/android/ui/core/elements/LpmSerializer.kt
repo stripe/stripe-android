@@ -5,7 +5,8 @@ import androidx.annotation.WorkerThread
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
-internal class LpmSerializer {
+internal object LpmSerializer {
+
     private val format = Json {
         ignoreUnknownKeys = true
         classDiscriminator = "#class"
@@ -13,13 +14,6 @@ internal class LpmSerializer {
         // needed so that null values in the spec are parsed correctly
         coerceInputValues = true
     }
-
-    fun serialize(data: SharedDataSpec) =
-        format.encodeToJsonElement(serializer(), data)
-
-    fun deserialize(str: String) = runCatching {
-        format.decodeFromString<SharedDataSpec>(serializer(), str)
-    }.onFailure { }
 
     /**
      * Any error in parsing an LPM (say a missing required field) will result in none of the
