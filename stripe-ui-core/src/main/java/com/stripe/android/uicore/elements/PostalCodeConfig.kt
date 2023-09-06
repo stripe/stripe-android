@@ -69,10 +69,8 @@ class PostalCodeConfig(
     override fun filter(userTyped: String): String {
         return when (format) {
             CountryPostalFormat.US -> userTyped.filter { it.isDigit() }
-            CountryPostalFormat.CA -> userTyped.filter { it.isLetterOrDigit() }.uppercase()
-            CountryPostalFormat.GB -> userTyped.filter {
-                it.isLetterOrDigit() || it.isWhitespace()
-            }.uppercase()
+            CountryPostalFormat.CA,
+            CountryPostalFormat.GB -> userTyped.filter { it.isLetterOrDigit() }.uppercase()
             CountryPostalFormat.Other -> userTyped
         }.dropLast(max(0, userTyped.length - format.maximumLength))
     }
@@ -98,7 +96,7 @@ class PostalCodeConfig(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         object GB : CountryPostalFormat(
             minimumLength = 5,
-            maximumLength = 8,
+            maximumLength = 7,
             regexPattern = Regex("^[A-Za-z][A-Za-z0-9]*(?: [A-Za-z0-9]*)?\$")
         )
 
