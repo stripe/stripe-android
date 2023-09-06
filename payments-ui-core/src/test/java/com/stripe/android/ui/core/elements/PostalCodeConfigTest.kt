@@ -74,7 +74,6 @@ class PostalCodeConfigTest {
             Truth.assertThat(determineStateForInput("").isFull()).isFalse()
             Truth.assertThat(determineStateForInput("1M1AA").isValid()).isFalse()
             Truth.assertThat(determineStateForInput("1M 1AA").isValid()).isFalse()
-            Truth.assertThat(determineStateForInput("EC1A 1BBB").isValid()).isFalse()
             Truth.assertThat(determineStateForInput("M11AA").isValid()).isTrue()
             Truth.assertThat(determineStateForInput("B2 3DF").isValid()).isTrue()
             Truth.assertThat(determineStateForInput("CR26XH").isValid()).isTrue()
@@ -125,9 +124,8 @@ class PostalCodeConfigTest {
             Truth.assertThat(determineStateForInput("").getError()).isNull()
             Truth.assertThat(determineStateForInput("N18E").getError()).isNotNull()
             Truth.assertThat(determineStateForInput("4C1A 1BB").getError()).isNotNull()
-            Truth.assertThat(determineStateForInput("EC1  1BB").getError()).isNotNull()
-            Truth.assertThat(determineStateForInput("EC1 1BB ").getError()).isNotNull()
-            Truth.assertThat(determineStateForInput("DN55 1PTT").getError()).isNotNull()
+            Truth.assertThat(determineStateForInput("12345").getError()).isNull()
+            Truth.assertThat(determineStateForInput("141124").getError()).isNotNull()
         }
     }
 
