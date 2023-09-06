@@ -42,8 +42,9 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.utils.argsOrNull
 import com.stripe.android.financialconnections.utils.viewModelLazy
 import com.stripe.android.uicore.image.StripeImageLoader
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), MavericksView {
@@ -132,7 +133,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         val uriHandler = remember { CustomTabUriHandler(context) }
         val initialDestination = remember(initialPane) { initialPane.destination }
 
-        NavigationEffects(viewModel.navigationChannel, navController)
+        NavigationEffects(viewModel.navigationFlow, navController)
 
         CompositionLocalProvider(
             LocalReducedBranding provides reducedBranding,
@@ -182,14 +183,14 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
     @Composable
     fun NavigationEffects(
-        navigationChannel: Channel<NavigationIntent>,
+        navigationChannel: SharedFlow<NavigationIntent>,
         navHostController: NavHostController
     ) {
         val activity = (LocalContext.current as? Activity)
         LaunchedEffect(activity, navHostController, navigationChannel) {
-            navigationChannel.receiveAsFlow().collect { intent ->
+            navigationChannel.onEach { intent ->
                 if (activity?.isFinishing == true) {
-                    return@collect
+                    return@onEach
                 }
                 when (intent) {
                     is NavigationIntent.NavigateBack -> {
@@ -214,7 +215,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                         }
                     }
                 }
-            }
+            }.launchIn(this)
         }
     }
 

@@ -4,7 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlin.test.assertIs
 
 /**
@@ -15,8 +16,8 @@ internal class TestNavigationManager : NavigationManager {
 
     val emittedIntents = mutableListOf<NavigationIntent>()
 
-    override val navigationChannel: Channel<NavigationIntent>
-        get() = Channel { }
+    override val navigationFlow: SharedFlow<NavigationIntent>
+        get() = MutableSharedFlow()
 
     override fun tryNavigateTo(
         route: String,

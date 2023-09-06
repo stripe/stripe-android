@@ -68,7 +68,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
     private val mutex = Mutex()
-    val navigationChannel = navigationManager.navigationChannel
+    val navigationFlow = navigationManager.navigationFlow
 
     init {
         setState { copy(firstInit = false) }

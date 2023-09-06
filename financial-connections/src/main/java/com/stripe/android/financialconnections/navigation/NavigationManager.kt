@@ -1,11 +1,12 @@
 package com.stripe.android.financialconnections.navigation
 
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import javax.inject.Inject
 
 internal interface NavigationManager {
-    val navigationChannel: Channel<NavigationIntent>
+    val navigationFlow: SharedFlow<NavigationIntent>
 
     fun tryNavigateTo(
         route: String,
@@ -30,10 +31,9 @@ internal sealed class NavigationIntent {
 }
 
 internal class NavigationManagerImpl @Inject constructor() : NavigationManager {
-    override val navigationChannel = Channel<NavigationIntent>(
-        capacity = Int.MAX_VALUE,
-        onBufferOverflow = BufferOverflow.DROP_LATEST,
-    )
+    private val _navigationFlow = MutableSharedFlow<NavigationIntent>(extraBufferCapacity = 1)
+
+    override val navigationFlow = _navigationFlow.asSharedFlow()
 
     override fun tryNavigateTo(
         route: String,
@@ -41,7 +41,7 @@ internal class NavigationManagerImpl @Inject constructor() : NavigationManager {
         inclusive: Boolean,
         isSingleTop: Boolean
     ) {
-        navigationChannel.trySend(
+        _navigationFlow.tryEmit(
             NavigationIntent.NavigateTo(
                 route = route,
                 popUpToCurrent = popUpToCurrent,
