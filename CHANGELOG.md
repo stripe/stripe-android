@@ -2,6 +2,7 @@
 
 ## XX.XX.XX - 2023-XX-XX
 * [ADDED][7269](https://github.com/stripe/stripe-android/pull/7269) PaymentSheet now supports Ideal with SetupIntent and PaymentIntent with setup for future usage.
+* [ADDED][7270](https://github.com/stripe/stripe-android/pull/7270) PaymentSheet now supports SEPA with SetupIntent and PaymentIntent with setup for future usage.
 
 ## 20.29.2 - 2023-09-05
 * [ADDED][7263](https://github.com/stripe/stripe-android/pull/7263) PaymentSheet now supports Bancontact SetupIntent and PaymentIntent with setup for future usage.
