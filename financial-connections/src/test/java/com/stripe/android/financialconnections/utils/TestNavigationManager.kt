@@ -18,15 +18,6 @@ internal class TestNavigationManager : NavigationManager {
     override val navigationChannel: Channel<NavigationIntent>
         get() = Channel { }
 
-    override fun tryNavigateBack(route: String?, inclusive: Boolean) {
-        emittedIntents.add(
-            NavigationIntent.NavigateBack(
-                route = route,
-                inclusive = inclusive
-            )
-        )
-    }
-
     override fun tryNavigateTo(
         route: String,
         popUpToCurrent: Boolean,

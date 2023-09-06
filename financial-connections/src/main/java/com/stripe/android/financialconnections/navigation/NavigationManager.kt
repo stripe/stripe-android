@@ -7,11 +7,6 @@ import javax.inject.Inject
 internal interface NavigationManager {
     val navigationChannel: Channel<NavigationIntent>
 
-    fun tryNavigateBack(
-        route: String? = null,
-        inclusive: Boolean = false,
-    )
-
     fun tryNavigateTo(
         route: String,
         popUpToCurrent: Boolean = false,
@@ -39,15 +34,6 @@ internal class NavigationManagerImpl @Inject constructor() : NavigationManager {
         capacity = Int.MAX_VALUE,
         onBufferOverflow = BufferOverflow.DROP_LATEST,
     )
-
-    override fun tryNavigateBack(route: String?, inclusive: Boolean) {
-        navigationChannel.trySend(
-            NavigationIntent.NavigateBack(
-                route = route,
-                inclusive = inclusive
-            )
-        )
-    }
 
     override fun tryNavigateTo(
         route: String,
