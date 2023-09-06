@@ -1,49 +1,49 @@
 lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
-sofort, true, true, off_session, false, card/sofort, false, false, not available, false
-sofort, true, true, off_session, false, card/eps/sofort, false, false, not available, false
+sofort, true, true, off_session, false, card/sofort, true, true, merchantRequiredSave, true
+sofort, true, true, off_session, false, card/eps/sofort, true, true, merchantRequiredSave, true
 sofort, true, false, off_session, false, card/sofort, false, false, not available, false
 sofort, true, false, off_session, false, card/eps/sofort, false, false, not available, false
-sofort, true, true, on_session, false, card/sofort, false, false, not available, false
-sofort, true, true, on_session, false, card/eps/sofort, false, false, not available, false
+sofort, true, true, on_session, false, card/sofort, true, true, merchantRequiredSave, true
+sofort, true, true, on_session, false, card/eps/sofort, true, true, merchantRequiredSave, true
 sofort, true, false, on_session, false, card/sofort, false, false, not available, false
 sofort, true, false, on_session, false, card/eps/sofort, false, false, not available, false
-sofort, true, true, null, false, card/sofort, false, true, oneTime, true
-sofort, true, true, null, false, card/eps/sofort, false, true, oneTime, true
+sofort, true, true, null, false, card/sofort, true, true, userSelectedSave, true
+sofort, true, true, null, false, card/eps/sofort, true, true, userSelectedSave, true
 sofort, true, false, null, false, card/sofort, false, false, not available, false
 sofort, true, false, null, false, card/eps/sofort, false, false, not available, false
-sofort, false, true, off_session, false, card/sofort, false, false, not available, false
-sofort, false, true, off_session, false, card/eps/sofort, false, false, not available, false
+sofort, false, true, off_session, false, card/sofort, true, true, merchantRequiredSave, true
+sofort, false, true, off_session, false, card/eps/sofort, true, true, merchantRequiredSave, true
 sofort, false, false, off_session, false, card/sofort, false, false, not available, false
 sofort, false, false, off_session, false, card/eps/sofort, false, false, not available, false
-sofort, false, true, on_session, false, card/sofort, false, false, not available, false
-sofort, false, true, on_session, false, card/eps/sofort, false, false, not available, false
+sofort, false, true, on_session, false, card/sofort, true, true, merchantRequiredSave, true
+sofort, false, true, on_session, false, card/eps/sofort, true, true, merchantRequiredSave, true
 sofort, false, false, on_session, false, card/sofort, false, false, not available, false
 sofort, false, false, on_session, false, card/eps/sofort, false, false, not available, false
-sofort, false, true, null, false, card/sofort, false, true, oneTime, true
-sofort, false, true, null, false, card/eps/sofort, false, true, oneTime, true
+sofort, false, true, null, false, card/sofort, true, true, oneTime, true
+sofort, false, true, null, false, card/eps/sofort, true, true, oneTime, true
 sofort, false, false, null, false, card/sofort, false, false, not available, false
 sofort, false, false, null, false, card/eps/sofort, false, false, not available, false
-sofort, true, true, off_session, true, card/sofort, false, false, not available, false
-sofort, true, true, off_session, true, card/eps/sofort, false, false, not available, false
+sofort, true, true, off_session, true, card/sofort, true, true, merchantRequiredSave, true
+sofort, true, true, off_session, true, card/eps/sofort, true, true, merchantRequiredSave, true
 sofort, true, false, off_session, true, card/sofort, false, false, not available, false
 sofort, true, false, off_session, true, card/eps/sofort, false, false, not available, false
-sofort, true, true, on_session, true, card/sofort, false, false, not available, false
-sofort, true, true, on_session, true, card/eps/sofort, false, false, not available, false
+sofort, true, true, on_session, true, card/sofort, true, true, merchantRequiredSave, true
+sofort, true, true, on_session, true, card/eps/sofort, true, true, merchantRequiredSave, true
 sofort, true, false, on_session, true, card/sofort, false, false, not available, false
 sofort, true, false, on_session, true, card/eps/sofort, false, false, not available, false
-sofort, true, true, null, true, card/sofort, false, true, oneTime, true
-sofort, true, true, null, true, card/eps/sofort, false, true, oneTime, true
+sofort, true, true, null, true, card/sofort, true, true, userSelectedSave, true
+sofort, true, true, null, true, card/eps/sofort, true, true, userSelectedSave, true
 sofort, true, false, null, true, card/sofort, false, false, not available, false
 sofort, true, false, null, true, card/eps/sofort, false, false, not available, false
-sofort, false, true, off_session, true, card/sofort, false, false, not available, false
-sofort, false, true, off_session, true, card/eps/sofort, false, false, not available, false
+sofort, false, true, off_session, true, card/sofort, true, true, merchantRequiredSave, true
+sofort, false, true, off_session, true, card/eps/sofort, true, true, merchantRequiredSave, true
 sofort, false, false, off_session, true, card/sofort, false, false, not available, false
 sofort, false, false, off_session, true, card/eps/sofort, false, false, not available, false
-sofort, false, true, on_session, true, card/sofort, false, false, not available, false
-sofort, false, true, on_session, true, card/eps/sofort, false, false, not available, false
+sofort, false, true, on_session, true, card/sofort, true, true, merchantRequiredSave, true
+sofort, false, true, on_session, true, card/eps/sofort, true, true, merchantRequiredSave, true
 sofort, false, false, on_session, true, card/sofort, false, false, not available, false
 sofort, false, false, on_session, true, card/eps/sofort, false, false, not available, false
-sofort, false, true, null, true, card/sofort, false, true, oneTime, true
-sofort, false, true, null, true, card/eps/sofort, false, true, oneTime, true
+sofort, false, true, null, true, card/sofort, true, true, oneTime, true
+sofort, false, true, null, true, card/eps/sofort, true, true, oneTime, true
 sofort, false, false, null, true, card/sofort, false, false, not available, false
 sofort, false, false, null, true, card/eps/sofort, false, false, not available, false

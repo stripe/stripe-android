@@ -1,6 +1,6 @@
 apply from: configs.androidLibrary
 
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
@@ -30,7 +30,7 @@ dependencies {
     // https://github.com/stripe/stripe-android/issues/3173#issuecomment-785176608
     implementation libs.stripe3ds2
 
-    kapt libs.daggerCompiler
+    ksp libs.daggerCompiler
 
     javadocDeps libs.androidx.annotation
     javadocDeps libs.androidx.appCompat
