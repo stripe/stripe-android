@@ -9,7 +9,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -174,7 +173,8 @@ class LpmRepository constructor(
             CardBillingDetailsCollectionConfiguration(),
     ) {
         val validSpecs = specs.filterNot { spec ->
-            !arguments.isFinancialConnectionsAvailable() && spec.type == USBankAccount.code
+            !arguments.isFinancialConnectionsAvailable() &&
+                spec.type == PaymentMethod.Type.USBankAccount.code
         }
 
         // By mapNotNull we will not accept any LPMs that are not known by the platform.
@@ -425,8 +425,8 @@ class LpmRepository constructor(
             requirement = AuBecsDebitRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
-        USBankAccount.code -> {
-            val pmo = stripeIntent.getPaymentMethodOptions()[USBankAccount.code]
+        PaymentMethod.Type.USBankAccount.code -> {
+            val pmo = stripeIntent.getPaymentMethodOptions()[PaymentMethod.Type.USBankAccount.code]
             val verificationMethod = (pmo as? Map<*, *>)?.get("verification_method") as? String
             val supportsVerificationMethod = verificationMethod in setOf("instant", "automatic")
 
