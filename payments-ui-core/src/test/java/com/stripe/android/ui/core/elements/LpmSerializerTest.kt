@@ -25,7 +25,7 @@ class LpmSerializerTest {
             .open("lpms.json")
             .bufferedReader().use { it.readText() }
 
-        val result = LpmSerializer.deserializeList(serializedString)
+        val result = LpmSerializer.deserializeList(serializedString).getOrThrow()
 
         val countrySpec = result.first { it.type == "sofort" }.fields[3] as CountrySpec
 
@@ -62,7 +62,7 @@ class LpmSerializerTest {
             .open("lpms.json")
             .bufferedReader().use { it.readText() }
 
-        val result = LpmSerializer.deserializeList(serializedString)
+        val result = LpmSerializer.deserializeList(serializedString).getOrThrow()
 
         val dropdownSpec = result.first { it.type == "eps" }
             .fields[3] as DropdownSpec
@@ -108,7 +108,7 @@ class LpmSerializerTest {
             ]
         """.trimIndent()
 
-        val results = LpmSerializer.deserializeList(serializedString)
+        val results = LpmSerializer.deserializeList(serializedString).getOrThrow()
         val addressSpec = results.first().fields.first() as SimpleTextSpec
 
         assertThat(addressSpec.label).isEqualTo(R.string.stripe_ideal_bank)
@@ -137,7 +137,7 @@ class LpmSerializerTest {
             ]
         """.trimIndent()
 
-        val results = LpmSerializer.deserializeList(serializedString)
+        val results = LpmSerializer.deserializeList(serializedString).getOrThrow()
         val addressSpec = results.first().fields.first() as SimpleTextSpec
 
         assertThat(addressSpec.label).isEqualTo(R.string.stripe_ideal_bank)
@@ -174,7 +174,7 @@ class LpmSerializerTest {
             ]
         """.trimIndent()
 
-        val results = LpmSerializer.deserializeList(serializedString)
+        val results = LpmSerializer.deserializeList(serializedString).getOrThrow()
         val dropdownSpec = results.first().fields.first() as DropdownSpec
 
         assertThat(dropdownSpec.apiPath.v1).isEqualTo("something_bogus")
@@ -213,7 +213,7 @@ class LpmSerializerTest {
             ]
         """.trimIndent()
 
-        val results = LpmSerializer.deserializeList(serializedString)
+        val results = LpmSerializer.deserializeList(serializedString).getOrThrow()
         val addressSpec = results.first().fields.first() as AddressSpec
 
         assertThat(addressSpec.allowedCountryCodes).isEqualTo(setOf("AT", "BE"))
@@ -247,7 +247,7 @@ class LpmSerializerTest {
               ]
             """.trimIndent()
 
-            val result = LpmSerializer.deserializeList(serializedString).first()
+            val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
             val fieldItemSpec = result.fields.first()
             assertThat(fieldItemSpec.apiPath.v1).isEqualTo("something_bogus")
         }
@@ -293,7 +293,7 @@ class LpmSerializerTest {
               ]
             """.trimIndent()
 
-            val result = LpmSerializer.deserializeList(serializedString).first()
+            val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
             val fieldSpec = result.fields.first()
             assertThat(fieldSpec.apiPath.v1).isEqualTo(value)
         }
@@ -318,7 +318,8 @@ class LpmSerializerTest {
              ]
             """.trimIndent()
 
-        assertThat(LpmSerializer.deserializeList(serializedString).size).isEqualTo(0)
+        val result = LpmSerializer.deserializeList(serializedString)
+        assertThat(result.isFailure).isTrue()
     }
 
     @Test
@@ -340,7 +341,7 @@ class LpmSerializerTest {
                 ]
             """.trimIndent()
 
-        val result = LpmSerializer.deserializeList(serializedString).first()
+        val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
         assertThat(result.fields).isEqualTo(listOf(EmptyFormSpec))
     }
 
@@ -355,14 +356,14 @@ class LpmSerializerTest {
                 ]
             """.trimIndent()
 
-        val result = LpmSerializer.deserializeList(serializedString).first()
+        val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
         assertThat(result.async).isFalse()
         assertThat(result.fields).isEqualTo(listOf(EmptyFormSpec))
     }
 
     @Test
     fun `Deserialize each field type`() {
-        val lpms = LpmSerializer.deserializeList(JSON_ALL_FIELDS)
+        val lpms = LpmSerializer.deserializeList(JSON_ALL_FIELDS).getOrThrow()
         assertThat(lpms.first().fields.size).isEqualTo(17)
 
         // Empty would mean a field is not recognized/ignored.
@@ -520,7 +521,7 @@ class LpmSerializerTest {
             ]
         """.trimIndent()
 
-        val result = LpmSerializer.deserializeList(serializedString).first()
+        val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
 
         assertThat(result.nextActionSpec?.confirmResponseStatusSpecs).isEqualTo(
             ConfirmStatusSpecAssociation(
@@ -557,7 +558,7 @@ class LpmSerializerTest {
             ]
             """.trimIndent()
 
-        val result = LpmSerializer.deserializeList(serializedString).first()
+        val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
 
         assertThat(result.fields.first()).isEqualTo(
             PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name)

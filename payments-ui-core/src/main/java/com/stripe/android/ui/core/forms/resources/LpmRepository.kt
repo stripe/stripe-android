@@ -99,11 +99,12 @@ class LpmRepository constructor(
             CardBillingDetailsCollectionConfiguration(),
     ): Boolean {
         val expectedLpms = stripeIntent.paymentMethodTypes
-        var didParseServerResponse = false
+        var failedToParseServerResponse = false
 
         if (!serverLpmSpecs.isNullOrEmpty()) {
-            val serverLpmObjects = LpmSerializer.deserializeList(serverLpmSpecs)
-            didParseServerResponse = serverLpmObjects.isNotEmpty()
+            val deserializationResult = LpmSerializer.deserializeList(serverLpmSpecs)
+            failedToParseServerResponse = deserializationResult.isFailure
+            val serverLpmObjects = deserializationResult.getOrElse { emptyList() }
             update(stripeIntent, serverLpmObjects, cardBillingDetailsCollectionConfiguration)
         }
 
@@ -119,7 +120,7 @@ class LpmRepository constructor(
             )
         }
 
-        return didParseServerResponse
+        return !failedToParseServerResponse
     }
 
     private fun parseMissingLpmsFromDisk(
@@ -197,7 +198,7 @@ class LpmRepository constructor(
 
     private fun parseLpms(inputStream: InputStream?): List<SharedDataSpec> {
         return getJsonStringFromInputStream(inputStream)?.let { string ->
-            LpmSerializer.deserializeList(string)
+            LpmSerializer.deserializeList(string).getOrElse { emptyList() }
         }.orEmpty()
     }
 
