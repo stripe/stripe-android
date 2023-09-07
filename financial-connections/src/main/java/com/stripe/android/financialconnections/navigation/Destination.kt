@@ -50,7 +50,10 @@ internal sealed class Destination(
         var paneLaunchedTriggered by rememberSaveable { mutableStateOf(false) }
         if (!paneLaunchedTriggered) {
             LaunchedEffect(Unit) {
-                viewModel.onPaneLaunched(navBackStackEntry.destination.pane)
+                viewModel.onPaneLaunched(
+                    referrer = referrer(navBackStackEntry),
+                    pane = navBackStackEntry.destination.pane
+                )
                 paneLaunchedTriggered = true
             }
         }
@@ -190,6 +193,10 @@ internal sealed class Destination(
     }
 
     companion object {
+        private fun referrer(entry: NavBackStackEntry): Pane? = entry.arguments
+            ?.getString(KEY_REFERRER)
+            ?.let { value -> Pane.values().firstOrNull { it.value == value } }
+
         const val KEY_REFERRER = "referrer"
         const val KEY_MICRODEPOSITS = "microdeposits"
         const val KEY_LAST4 = "last4"
