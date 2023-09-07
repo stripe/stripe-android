@@ -81,6 +81,9 @@ public final class com/stripe/android/uicore/elements/AddressTextFieldUIKt {
 public final class com/stripe/android/uicore/elements/CheckboxElementUIKt {
 }
 
+public final class com/stripe/android/uicore/elements/CheckboxFieldUIKt {
+}
+
 public final class com/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
