@@ -124,7 +124,7 @@ class PostalCodeConfigTest {
             Truth.assertThat(determineStateForInput("").getError()).isNull()
             Truth.assertThat(determineStateForInput("N18E").getError()).isNotNull()
             Truth.assertThat(determineStateForInput("4C1A 1BB").getError()).isNotNull()
-            Truth.assertThat(determineStateForInput("12345").getError()).isNull()
+            Truth.assertThat(determineStateForInput("12345").getError()).isNotNull()
             Truth.assertThat(determineStateForInput("141124").getError()).isNotNull()
         }
     }
