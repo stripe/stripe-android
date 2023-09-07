@@ -1599,6 +1599,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             args = args,
             isGooglePayReady = true,
+            stripeIntent = SETUP_INTENT,
         )
 
         viewModel.setupGooglePay(
@@ -1685,5 +1686,6 @@ internal class PaymentSheetViewModelTest {
         private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        val SETUP_INTENT = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
     }
 }
