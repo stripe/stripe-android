@@ -1,7 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import app.cash.turbine.test
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.R
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -12,25 +12,25 @@ class CheckboxFieldControllerTest {
     fun `on init, controller checked state should be initialized to false`() {
         val controller = CheckboxFieldController()
 
-        Truth.assertThat(controller.isChecked.value).isFalse()
+        assertThat(controller.isChecked.value).isFalse()
     }
 
     @Test
     fun `on init with initial value set to true, controller checked state should be initialized to true`() {
         val controller = CheckboxFieldController(initialValue = true)
 
-        Truth.assertThat(controller.isChecked.value).isTrue()
+        assertThat(controller.isChecked.value).isTrue()
     }
 
     @Test
     fun `on value change, check state value should be updated`() {
         val controller = CheckboxFieldController()
 
-        Truth.assertThat(controller.isChecked.value).isFalse()
+        assertThat(controller.isChecked.value).isFalse()
 
         controller.onValueChange(value = true)
 
-        Truth.assertThat(controller.isChecked.value).isTrue()
+        assertThat(controller.isChecked.value).isTrue()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -51,7 +51,7 @@ class CheckboxFieldControllerTest {
 
             val value = awaitItem()
 
-            Truth.assertThat(value?.errorMessage).isEqualTo(R.string.stripe_field_required)
+            assertThat(value?.errorMessage).isEqualTo(R.string.stripe_field_required)
         }
     }
 }

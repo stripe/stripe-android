@@ -55,6 +55,6 @@ class CheckboxFieldController constructor(
         nextFocusDirection: FocusDirection,
         previousFocusDirection: FocusDirection
     ) {
-        CheckboxFieldUI(controller = this, enabled = enabled)
+        CheckboxFieldUI(modifier = modifier, controller = this, enabled = enabled)
     }
 }

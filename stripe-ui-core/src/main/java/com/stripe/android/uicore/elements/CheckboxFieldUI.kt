@@ -16,6 +16,7 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -35,13 +36,15 @@ import com.stripe.android.uicore.stripeColors
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun CheckboxFieldUI(
+    modifier: Modifier = Modifier,
     controller: CheckboxFieldController,
     enabled: Boolean = true
 ) {
-    val isChecked = controller.isChecked.collectAsState().value
-    val error = controller.error.collectAsState(initial = null).value
+    val isChecked by controller.isChecked.collectAsState()
+    val error by controller.error.collectAsState(initial = null)
 
     CheckboxFieldUIView(
+        modifier = modifier,
         isChecked = isChecked,
         enabled = enabled,
         debugTag = controller.debugTag,
@@ -63,6 +66,7 @@ fun CheckboxFieldUI(
 
 @Composable
 internal fun CheckboxFieldUIView(
+    modifier: Modifier = Modifier,
     isChecked: Boolean,
     enabled: Boolean,
     debugTag: String,
@@ -95,8 +99,7 @@ internal fun CheckboxFieldUIView(
     }
 
     Column(
-        modifier = Modifier
-            .padding(vertical = 8.dp)
+        modifier = modifier
             .semantics {
                 testTag = debugTag
                 stateDescription = accessibilityDescription
@@ -165,6 +168,7 @@ private fun CheckboxFieldUIViewPreview() {
 
     StripeTheme {
         CheckboxFieldUIView(
+            modifier = Modifier.padding(vertical = 8.dp),
             enabled = true,
             isChecked = value,
             debugTag = "",
