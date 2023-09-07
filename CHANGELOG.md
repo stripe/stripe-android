@@ -3,14 +3,17 @@
 ## XX.XX.XX - 2023-XX-XX
 
 ### PaymentSheet
-
-* [ADDED][7269](https://github.com/stripe/stripe-android/pull/7269) PaymentSheet now supports Ideal with SetupIntent and PaymentIntent with setup for future usage.
-* [ADDED][7270](https://github.com/stripe/stripe-android/pull/7270) PaymentSheet now supports SEPA with SetupIntent and PaymentIntent with setup for future usage.
-* [ADDED][7272](https://github.com/stripe/stripe-android/pull/7272) PaymentSheet now supports Sofort with SetupIntent and PaymentIntent with setup for future usage.
-* [ADDED][7273](https://github.com/stripe/stripe-android/pull/7273) PaymentSheet now supports BECS Direct Debit with SetupIntent and PaymentIntent with setup for future usage.
-* [ADDED][7274](https://github.com/stripe/stripe-android/pull/7274) PaymentSheet now supports Alipay for PaymentIntents.
+* [ADDED] PaymentSheet now supports the following payment methods for SetupIntents and PaymentIntents with setup for future usage:
+  * [7274](https://github.com/stripe/stripe-android/pull/7274) Alipay
+  * [7273](https://github.com/stripe/stripe-android/pull/7273) BECS Direct Debit
+  * [7264](https://github.com/stripe/stripe-android/pull/7264) Cash App Pay
+  * [7269](https://github.com/stripe/stripe-android/pull/7269) iDEAL
+  * [7270](https://github.com/stripe/stripe-android/pull/7270) SEPA
+  * [7272](https://github.com/stripe/stripe-android/pull/7272) Sofort
 
 ## 20.29.2 - 2023-09-05
+
+### PaymentSheet
 * [ADDED][7263](https://github.com/stripe/stripe-android/pull/7263) PaymentSheet now supports Bancontact SetupIntent and PaymentIntent with setup for future usage.
 
 ## 20.29.1 - 2023-08-31
