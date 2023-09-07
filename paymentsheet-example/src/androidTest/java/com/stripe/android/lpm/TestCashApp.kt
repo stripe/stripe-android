@@ -14,7 +14,7 @@ internal class TestCashApp : BaseLpmTest() {
         paymentMethod = lpmRepository.fromCode("cashapp")!!,
         currency = Currency.USD,
         merchantCountryCode = "US",
-        authorizationAction = AuthorizeAction.Authorize,
+        authorizationAction = AuthorizeAction.AuthorizePayment,
         supportedPaymentMethods = listOf("card", "cashapp"),
     )
 

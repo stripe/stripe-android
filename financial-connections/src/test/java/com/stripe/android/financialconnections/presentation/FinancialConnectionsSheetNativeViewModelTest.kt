@@ -18,6 +18,7 @@ import com.stripe.android.financialconnections.exception.CustomManualEntryRequir
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
+import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -189,6 +190,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         logger = mock(),
         getManifest = mock(),
+        navigationManager = TestNavigationManager(),
         initialState = initialState
     )
 }
