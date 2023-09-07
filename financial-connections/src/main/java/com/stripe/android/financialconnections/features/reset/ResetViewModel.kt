@@ -15,8 +15,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.ClearPartnerWebAuth
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
@@ -35,11 +34,10 @@ internal class ResetViewModel @Inject constructor(
             val updatedManifest = linkMoreAccounts()
             nativeAuthFlowCoordinator().emit(ClearPartnerWebAuth)
             eventTracker.track(PaneLoaded(Pane.RESET))
-            navigationManager.navigate(
-                NavigateToRoute(
-                    updatedManifest.nextPane.toNavigationCommand(),
-                    popCurrentFromBackStack = true
-                )
+            navigationManager.tryNavigateTo(
+                updatedManifest.nextPane.destination(),
+                popUpToCurrent = true,
+                inclusive = true
             )
         }.execute { copy(payload = it) }
     }

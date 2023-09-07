@@ -34,12 +34,9 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAuthori
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
-import com.stripe.android.financialconnections.navigation.NavigationDirections
-import com.stripe.android.financialconnections.navigation.NavigationDirections.accountPicker
-import com.stripe.android.financialconnections.navigation.NavigationDirections.manualEntry
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -197,11 +194,10 @@ internal class PartnerAuthViewModel @Inject constructor(
         url?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
 
     fun onSelectAnotherBank() {
-        navigationManager.navigate(
-            NavigateToRoute(
-                command = NavigationDirections.reset,
-                popCurrentFromBackStack = true
-            )
+        navigationManager.tryNavigateTo(
+            Destination.Reset(),
+            popUpToCurrent = true,
+            inclusive = true
         )
     }
 
@@ -304,7 +300,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 } else {
                     // auth session succeeded although client didn't retrieve any deeplink.
                     postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
-                    navigationManager.navigate(NavigateToRoute(nextPane.toNavigationCommand()))
+                    navigationManager.tryNavigateTo(nextPane.destination(),)
                 }
             } else {
                 cancelAuthSessionAndContinue(authSession)
@@ -339,11 +335,10 @@ internal class PartnerAuthViewModel @Inject constructor(
         } else {
             // For non-OAuth institutions, navigate to Session cancellation's next pane.
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
-            navigationManager.navigate(
-                NavigateToRoute(
-                    command = result.nextPane.toNavigationCommand(),
-                    popCurrentFromBackStack = true
-                )
+            navigationManager.tryNavigateTo(
+                result.nextPane.destination(),
+                popUpToCurrent = true,
+                inclusive = true
             )
         }
     }
@@ -370,18 +365,16 @@ internal class PartnerAuthViewModel @Inject constructor(
                     publicToken = oAuthResults.publicToken
                 )
                 logger.debug("Session authorized!")
-                navigationManager.navigate(
-                    NavigateToRoute(
-                        command = updatedSession.nextPane.toNavigationCommand(),
-                        popCurrentFromBackStack = true
-                    )
+                navigationManager.tryNavigateTo(
+                    updatedSession.nextPane.destination(),
+                    popUpToCurrent = true,
+                    inclusive = true
                 )
             } else {
-                navigationManager.navigate(
-                    NavigateToRoute(
-                        command = accountPicker,
-                        popCurrentFromBackStack = true
-                    )
+                navigationManager.tryNavigateTo(
+                    Destination.AccountPicker(),
+                    popUpToCurrent = true,
+                    inclusive = true
                 )
             }
         }.onFailure {
@@ -395,11 +388,10 @@ internal class PartnerAuthViewModel @Inject constructor(
         }
     }
 
-    fun onEnterDetailsManuallyClick() = navigationManager.navigate(
-        NavigateToRoute(
-            command = manualEntry,
-            popCurrentFromBackStack = true
-        )
+    fun onEnterDetailsManuallyClick() = navigationManager.tryNavigateTo(
+        Destination.ManualEntry(),
+        popUpToCurrent = true,
+        inclusive = true
     )
 
     // if clicked uri contains an eventName query param, track click event.
