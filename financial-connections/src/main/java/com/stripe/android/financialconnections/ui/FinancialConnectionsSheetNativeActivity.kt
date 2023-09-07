@@ -15,11 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,14 +31,9 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.browser.BrowserManager
-import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
-import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.common.CloseDialog
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.NavigationDirections
-import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.composable
@@ -142,21 +133,12 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         reducedBranding: Boolean
     ) {
         val context = LocalContext.current
-        val lifecycleOwner = LocalLifecycleOwner.current
         val navController = rememberNavController()
-        DisposableEffect(lifecycleOwner) {
-            val lifecycle = lifecycleOwner.lifecycle
-            val observer = ActivityVisibilityObserver(
-                onBackgrounded = { viewModel.onBackgrounded(navController.currentDestination?.pane, true) },
-                onForegrounded = { viewModel.onBackgrounded(navController.currentDestination?.pane, false) }
-            )
-            lifecycle.addObserver(observer)
-            onDispose { lifecycle.removeObserver(observer) }
-        }
 
         val uriHandler = remember { CustomTabUriHandler(context, browserManager) }
         val initialDestination = remember(initialPane) { initialPane.destination }
 
+        PaneBackgroundEffects(navController)
         NavigationEffects(viewModel.navigationFlow, navController)
 
         CompositionLocalProvider(
@@ -189,6 +171,26 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 composable(Destination.LinkStepUpVerification)
                 composable(Destination.ManualEntrySuccess)
             }
+        }
+    }
+
+    @Composable
+    private fun PaneBackgroundEffects(
+        navController: NavHostController
+    ) {
+        val lifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner) {
+            val lifecycle = lifecycleOwner.lifecycle
+            val observer = ActivityVisibilityObserver(
+                onBackgrounded = {
+                    viewModel.onBackgrounded(navController.currentDestination, true)
+                },
+                onForegrounded = {
+                    viewModel.onBackgrounded(navController.currentDestination, false)
+                }
+            )
+            lifecycle.addObserver(observer)
+            onDispose { lifecycle.removeObserver(observer) }
         }
     }
 
@@ -284,7 +286,8 @@ private class ActivityVisibilityObserver(
     override fun onStop(owner: LifecycleOwner) {
         super.onStop(owner)
         // If the activity is being rotated, we don't want to notify a backgrounded state
-        val changingConfigurations = (owner as? AppCompatActivity)?.isChangingConfigurations ?: false
+        val changingConfigurations =
+            (owner as? AppCompatActivity)?.isChangingConfigurations ?: false
         if (!changingConfigurations) {
             isInBackground = true
             onBackgrounded()

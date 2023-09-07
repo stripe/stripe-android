@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.presentation
 import android.content.Intent
 import android.os.Parcelable
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
@@ -37,7 +38,9 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.UNEXPECTED_ERROR
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.CloseDialog
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
@@ -308,11 +311,11 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    fun onBackgrounded(currentPane: Pane, backgrounded: Boolean) {
+    fun onBackgrounded(currentDestination: NavDestination?, backgrounded: Boolean) {
         viewModelScope.launch {
             eventTracker.track(
                 AppBackgrounded(
-                    pane = currentPane,
+                    pane = currentDestination?.pane ?: UNEXPECTED_ERROR,
                     backgrounded = backgrounded
                 )
             )
