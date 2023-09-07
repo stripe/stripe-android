@@ -130,9 +130,9 @@ class LpmRepository constructor(
         stripeIntent: StripeIntent,
         cardBillingDetailsCollectionConfiguration: CardBillingDetailsCollectionConfiguration,
     ) {
-        val missingLpmsOnDisk = readFromDisk().filter { it.type in missingLpms }
+        val missingSpecsOnDisk = readFromDisk().filter { it.type in missingLpms }
 
-        val missingLpmsByType = missingLpmsOnDisk.mapNotNull { spec ->
+        val missingLpmsByType = missingSpecsOnDisk.mapNotNull { spec ->
             convertToSupportedPaymentMethod(
                 stripeIntent = stripeIntent,
                 sharedDataSpec = spec,

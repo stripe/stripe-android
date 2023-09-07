@@ -223,13 +223,13 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 configuration?.billingDetailsCollectionConfiguration?.toInternal()
                     ?: CardBillingDetailsCollectionConfiguration()
 
-            val parsedServerResponse = lpmRepository.update(
+            val didParseServerResponse = lpmRepository.update(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
                 cardBillingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
             )
 
-            if (!parsedServerResponse) {
+            if (!didParseServerResponse) {
                 eventReporter.onLpmSpecFailure(
                     isDecoupling = initializationMode is DeferredIntent,
                 )
