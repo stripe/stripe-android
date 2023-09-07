@@ -1,6 +1,11 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.isEnabled
+import androidx.test.espresso.matcher.ViewMatchers.isNotEnabled
+import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -338,5 +343,40 @@ internal class PaymentSheetTest {
         }
 
         page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testOxxoPayment() = runPaymentSheetTest(
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-mx-requires_payment_method.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration(
+                    merchantDisplayName = "MX Mobile Example Account",
+                    allowsDelayedPaymentMethods = true,
+                ),
+            )
+        }
+
+        page.waitForText("OXXO")
+        page.clickViewWithText("OXXO")
+
+        // Only testing that the buy button is disabled initially and enabled after entering
+        // name and email.
+        onView(withId(R.id.primary_button)).check(matches(isNotEnabled()))
+        page.replaceText("Full name", "Jenny Rosen")
+        page.replaceText("Email", "email@email.com")
+        onView(withId(R.id.primary_button)).check(matches(isEnabled()))
+
+        testContext.markTestSucceeded()
     }
 }

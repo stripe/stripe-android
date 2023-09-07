@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.forms.GrabPayRequirement
 import com.stripe.android.paymentsheet.forms.IdealRequirement
 import com.stripe.android.paymentsheet.forms.KlarnaRequirement
 import com.stripe.android.paymentsheet.forms.MobilePayRequirement
+import com.stripe.android.paymentsheet.forms.OxxoRequirement
 import com.stripe.android.paymentsheet.forms.P24Requirement
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.forms.PaypalRequirement
@@ -74,7 +75,6 @@ class LpmRepository constructor(
     private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance,
     private val lpmPostConfirmData: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance
 ) {
-
     fun fromCode(code: PaymentMethodCode?) = lpmInitialFormData.fromCode(code)
 
     fun values(): List<SupportedPaymentMethod> = lpmInitialFormData.values()
@@ -539,6 +539,17 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = AlipayRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields),
+        )
+        PaymentMethod.Type.Oxxo.code -> SupportedPaymentMethod(
+            code = "oxxo",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_oxxo,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_oxxo,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            tintIconOnSelection = false,
+            requirement = OxxoRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields),
         )
         else -> null

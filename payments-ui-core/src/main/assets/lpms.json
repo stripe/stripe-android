@@ -969,5 +969,23 @@
       "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-alipay@3x-d216a94882c3c5422274faaec75a3c81.png"
     },
     "fields": []
+  },
+  {
+    "type": "oxxo",
+    "async": true,
+    "fields": [
+      {
+        "type": "name",
+        "api_path": {
+          "v1": "billing_details[name]"
+        }
+      },
+      {
+        "type": "email",
+        "api_path": {
+          "v1": "billing_details[email]"
+        }
+      }
+    ]
   }
 ]

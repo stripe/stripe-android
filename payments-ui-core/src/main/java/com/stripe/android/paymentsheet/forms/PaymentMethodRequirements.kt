@@ -271,3 +271,9 @@ internal val AlipayRequirement = PaymentMethodRequirements(
     siRequirements = null,
     confirmPMFromCustomer = false,
 )
+
+internal val OxxoRequirement = PaymentMethodRequirements(
+    piRequirements = setOf(Delayed),
+    siRequirements = null,
+    confirmPMFromCustomer = false,
+)
