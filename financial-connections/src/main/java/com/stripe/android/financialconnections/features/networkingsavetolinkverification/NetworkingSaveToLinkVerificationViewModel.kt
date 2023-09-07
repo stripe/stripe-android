@@ -22,7 +22,7 @@ import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -86,14 +86,14 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
             NetworkingSaveToLinkVerificationState::confirmVerification,
             onSuccess = {
                 saveToLinkWithStripeSucceeded.set(true)
-                navigationManager.tryNavigateTo(Destination.Success())
+                navigationManager.tryNavigateTo(Success(referrer = PANE))
             },
             onFail = { error ->
                 logger.error("Error confirming verification", error)
                 eventTracker.track(Error(PANE, error))
                 if (error !is OTPError) {
                     saveToLinkWithStripeSucceeded.set(false)
-                    navigationManager.tryNavigateTo(Destination.Success())
+                    navigationManager.tryNavigateTo(Success(referrer = PANE))
                 }
             },
         )
@@ -123,7 +123,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     }.execute { copy(confirmVerification = it) }
 
     fun onSkipClick() {
-        navigationManager.tryNavigateTo(Destination.Success())
+        navigationManager.tryNavigateTo(Success(referrer = PANE))
     }
 
     companion object :

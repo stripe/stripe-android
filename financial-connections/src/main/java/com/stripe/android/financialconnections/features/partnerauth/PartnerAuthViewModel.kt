@@ -34,7 +34,9 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAuthori
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
-import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.AccountPicker
+import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
+import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
@@ -142,10 +144,10 @@ internal class PartnerAuthViewModel @Inject constructor(
                     extraMessage = "Error fetching payload / posting AuthSession",
                     error = it,
                     logger = logger,
-                    pane = Pane.PARTNER_AUTH
+                    pane = PANE
                 )
             },
-            onSuccess = { eventTracker.track(PaneLoaded(Pane.PARTNER_AUTH)) }
+            onSuccess = { eventTracker.track(PaneLoaded(PANE)) }
         )
     }
 
@@ -153,7 +155,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         viewModelScope.launch {
             awaitState().payload()?.authSession?.let {
                 postAuthSessionEvent(it.id, AuthSessionEvent.OAuthLaunched(Date()))
-                eventTracker.track(PrepaneClickContinue(Pane.PARTNER_AUTH))
+                eventTracker.track(PrepaneClickContinue(PANE))
             }
             launchAuthInBrowser()
         }
@@ -167,7 +169,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                     eventTracker.track(
                         FinancialConnectionsEvent.AuthSessionOpened(
                             id = it.id,
-                            pane = Pane.PARTNER_AUTH,
+                            pane = PANE,
                             flow = it.flow,
                             defaultBrowser = browserManager.getPackageToHandleUri(
                                 uri = url.toUri()
@@ -181,7 +183,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                     extraMessage = "failed retrieving active session from cache",
                     error = it,
                     logger = logger,
-                    pane = Pane.PARTNER_AUTH
+                    pane = PANE
                 )
                 setState { copy(authenticationStatus = Fail(it)) }
             }
@@ -195,7 +197,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     fun onSelectAnotherBank() {
         navigationManager.tryNavigateTo(
-            Destination.Reset(),
+            Reset(referrer = PANE),
             popUpToCurrent = true,
             inclusive = true
         )
@@ -247,7 +249,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 extraMessage = "Auth failed, cancelling AuthSession",
                 error = error,
                 logger = logger,
-                pane = Pane.PARTNER_AUTH
+                pane = PANE
             )
             when {
                 authSession != null -> {
@@ -263,7 +265,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 extraMessage = "failed cancelling session after failed web flow",
                 error = it,
                 logger = logger,
-                pane = Pane.PARTNER_AUTH
+                pane = PANE
             )
         }
     }
@@ -294,13 +296,13 @@ internal class PartnerAuthViewModel @Inject constructor(
                         nextPane = nextPane
                     )
                 )
-                if (nextPane == Pane.PARTNER_AUTH) {
+                if (nextPane == PANE) {
                     // auth session was not completed, proceed with cancellation
                     cancelAuthSessionAndContinue(authSession = retrievedAuthSession)
                 } else {
                     // auth session succeeded although client didn't retrieve any deeplink.
                     postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
-                    navigationManager.tryNavigateTo(nextPane.destination(),)
+                    navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
                 }
             } else {
                 cancelAuthSessionAndContinue(authSession)
@@ -310,7 +312,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 "failed cancelling session after cancelled web flow. url: $url",
                 it,
                 logger,
-                Pane.PARTNER_AUTH
+                PANE
             )
             setState { copy(authenticationStatus = Fail(it)) }
         }
@@ -336,7 +338,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             // For non-OAuth institutions, navigate to Session cancellation's next pane.
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
             navigationManager.tryNavigateTo(
-                result.nextPane.destination(),
+                result.nextPane.destination(referrer = PANE),
                 popUpToCurrent = true,
                 inclusive = true
             )
@@ -366,13 +368,13 @@ internal class PartnerAuthViewModel @Inject constructor(
                 )
                 logger.debug("Session authorized!")
                 navigationManager.tryNavigateTo(
-                    updatedSession.nextPane.destination(),
+                    updatedSession.nextPane.destination(referrer = PANE),
                     popUpToCurrent = true,
                     inclusive = true
                 )
             } else {
                 navigationManager.tryNavigateTo(
-                    Destination.AccountPicker(),
+                    AccountPicker(referrer = PANE),
                     popUpToCurrent = true,
                     inclusive = true
                 )
@@ -382,14 +384,14 @@ internal class PartnerAuthViewModel @Inject constructor(
                 extraMessage = "failed authorizing session",
                 error = it,
                 logger = logger,
-                pane = Pane.PARTNER_AUTH
+                pane = PANE
             )
             setState { copy(authenticationStatus = Fail(it)) }
         }
     }
 
     fun onEnterDetailsManuallyClick() = navigationManager.tryNavigateTo(
-        Destination.ManualEntry(),
+        ManualEntry(referrer = PANE),
         popUpToCurrent = true,
         inclusive = true
     )
@@ -400,7 +402,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             eventTracker.track(
                 FinancialConnectionsEvent.Click(
                     eventName,
-                    pane = Pane.PARTNER_AUTH
+                    pane = PANE
                 )
             )
         }
@@ -450,5 +452,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        private val PANE = Pane.PARTNER_AUTH
     }
 }
