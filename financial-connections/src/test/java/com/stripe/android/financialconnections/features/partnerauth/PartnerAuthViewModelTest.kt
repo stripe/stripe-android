@@ -249,6 +249,7 @@ internal class PartnerAuthViewModelTest {
             pollAuthorizationSessionOAuthResults = pollAuthorizationSessionOAuthResults,
             logger = mock(),
             initialState = initialState,
+            browserManager = mock(),
             uriUtils = UriUtils(Logger.noop(), mock()),
             applicationId = applicationId
         )

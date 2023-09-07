@@ -18,9 +18,19 @@ internal sealed class FinancialConnectionsEvent(
     val eventName = if (includePrefix) "$EVENT_PREFIX.$name" else name
 
     class PaneLaunched(
-        pane: Pane,
+        pane: Pane
     ) : FinancialConnectionsEvent(
         "pane.launched",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class AppBackgrounded(
+        pane: Pane,
+        backgrounded: Boolean,
+    ) : FinancialConnectionsEvent(
+        if (backgrounded) "mobile.app_entered_background" else "mobile.app_entered_foreground",
         mapOf(
             "pane" to pane.value,
         ).filterNotNullValues()
@@ -357,6 +367,21 @@ internal sealed class FinancialConnectionsEvent(
     ) : FinancialConnectionsEvent(
         name = "click.prepane.continue",
         mapOf("pane" to pane.value)
+    )
+
+    class AuthSessionOpened(
+        pane: Pane,
+        flow: String?,
+        defaultBrowser: String?,
+        id: String
+    ) : FinancialConnectionsEvent(
+        "auth_session.opened",
+        mapOf(
+            "auth_session_id" to id,
+            "pane" to pane.value,
+            "flow" to (flow ?: "unknown"),
+            "browser" to (defaultBrowser ?: "unknown")
+        ).filterNotNullValues()
     )
 
     override fun toString(): String {

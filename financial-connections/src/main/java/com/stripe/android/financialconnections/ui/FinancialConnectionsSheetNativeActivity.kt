@@ -13,12 +13,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -26,6 +30,7 @@ import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.features.common.CloseDialog
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -34,7 +39,6 @@ import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.composable
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.pane
-import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
@@ -58,6 +62,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
     @Inject
     lateinit var imageLoader: StripeImageLoader
+
+    @Inject
+    lateinit var browserManager: BrowserManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,10 +109,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             state.viewEffect?.let { viewEffect ->
                 when (viewEffect) {
                     is OpenUrl -> startActivity(
-                        CreateBrowserIntentForUrl(
-                            context = this,
-                            uri = Uri.parse(viewEffect.url)
-                        )
+                        browserManager.createBrowserIntentForUrl(uri = Uri.parse(viewEffect.url))
                     )
 
                     is Finish -> {
@@ -130,9 +134,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     ) {
         val context = LocalContext.current
         val navController = rememberNavController()
-        val uriHandler = remember { CustomTabUriHandler(context) }
+
+        val uriHandler = remember { CustomTabUriHandler(context, browserManager) }
         val initialDestination = remember(initialPane) { initialPane.destination }
 
+        PaneBackgroundEffects(navController)
         NavigationEffects(viewModel.navigationFlow, navController)
 
         CompositionLocalProvider(
@@ -165,6 +171,26 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 composable(Destination.LinkStepUpVerification)
                 composable(Destination.ManualEntrySuccess)
             }
+        }
+    }
+
+    @Composable
+    private fun PaneBackgroundEffects(
+        navController: NavHostController
+    ) {
+        val lifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner) {
+            val lifecycle = lifecycleOwner.lifecycle
+            val observer = ActivityVisibilityObserver(
+                onBackgrounded = {
+                    viewModel.onBackgrounded(navController.currentDestination, true)
+                },
+                onForegrounded = {
+                    viewModel.onBackgrounded(navController.currentDestination, false)
+                }
+            )
+            lifecycle.addObserver(observer)
+            onDispose { lifecycle.removeObserver(observer) }
         }
     }
 
@@ -234,4 +260,37 @@ internal val LocalReducedBranding = staticCompositionLocalOf<Boolean> {
 
 internal val LocalImageLoader = staticCompositionLocalOf<StripeImageLoader> {
     error("No ImageLoader provided")
+}
+
+/**
+ * Observer that will notify the view model when the activity is moved to the background or
+ * brought back to the foreground.
+ */
+private class ActivityVisibilityObserver(
+    val onBackgrounded: () -> Unit,
+    val onForegrounded: () -> Unit
+) : DefaultLifecycleObserver {
+
+    private var isFirstStart = true
+    private var isInBackground = false
+
+    override fun onStart(owner: LifecycleOwner) {
+        super.onStart(owner)
+        if (!isFirstStart && isInBackground) {
+            onForegrounded()
+        }
+        isFirstStart = false
+        isInBackground = false
+    }
+
+    override fun onStop(owner: LifecycleOwner) {
+        super.onStop(owner)
+        // If the activity is being rotated, we don't want to notify a backgrounded state
+        val changingConfigurations =
+            (owner as? AppCompatActivity)?.isChangingConfigurations ?: false
+        if (!changingConfigurations) {
+            isInBackground = true
+            onBackgrounded()
+        }
+    }
 }
