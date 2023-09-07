@@ -23,7 +23,7 @@ internal sealed class FinancialConnectionsEvent(
     ) : FinancialConnectionsEvent(
         "pane.launched",
         mapOf(
-            "referrer" to referrer?.value,
+            "referrer_pane" to referrer?.value,
             "pane" to pane.value,
         ).filterNotNullValues()
     )
