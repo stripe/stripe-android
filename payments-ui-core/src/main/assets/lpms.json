@@ -961,5 +961,13 @@
         }
       }
     }
+  },
+  {
+    "type": "alipay",
+    "async": false,
+    "selector_icon": {
+      "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-alipay@3x-d216a94882c3c5422274faaec75a3c81.png"
+    },
+    "fields": []
   }
 ]

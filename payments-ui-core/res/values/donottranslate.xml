@@ -23,6 +23,7 @@
     <string name="stripe_paymentsheet_payment_method_mobile_pay">MobilePay</string>
     <string name="stripe_paymentsheet_payment_method_zip">Zip</string>
     <string name="stripe_paymentsheet_payment_method_blik">BLIK</string>
+    <string name="stripe_paymentsheet_payment_method_alipay">Alipay</string>
     <!--    <string name="paymentsheet_payment_method_item_card_number">····%1$s</string>-->
 
     <!--    &lt;!&ndash; Label indicating the payment intent is in testmode &ndash;&gt;-->
