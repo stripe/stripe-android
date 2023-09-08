@@ -11,6 +11,7 @@ import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec.PlaceholderField
+import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.uicore.elements.IdentifierSpec
 import org.junit.Test
@@ -32,11 +33,14 @@ class PlaceholderHelperTest {
 
         val specs = specsForConfiguration(
             configuration = billingDetailsCollectionConfiguration,
+            placeholderOverrideList = emptyList(),
+            requiresMandate = false,
             specs = listOf(
                 NameSpec(),
                 EmailSpec(),
                 PhoneSpec(),
                 AddressSpec(),
+                SepaMandateTextSpec(),
             ),
         )
         assertThat(specs).isEmpty()
@@ -54,6 +58,8 @@ class PlaceholderHelperTest {
 
         val specs = specsForConfiguration(
             configuration = billingDetailsCollectionConfiguration,
+            placeholderOverrideList = emptyList(),
+            requiresMandate = false,
             specs = listOf(
                 PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name),
                 PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Email),
@@ -76,6 +82,8 @@ class PlaceholderHelperTest {
 
         val specs = specsForConfiguration(
             configuration = billingDetailsCollectionConfiguration,
+            placeholderOverrideList = emptyList(),
+            requiresMandate = false,
             specs = listOf(
                 NameSpec(),
                 PlaceholderSpec(
@@ -114,32 +122,42 @@ class PlaceholderHelperTest {
 
         assertThat(
             specForPlaceholderField(
-                PlaceholderField.Name,
-                billingDetailsCollectionConfiguration,
+                field = PlaceholderField.Name,
+                placeholderOverrideList = emptyList(),
+                requiresMandate = false,
+                configuration = billingDetailsCollectionConfiguration,
             )
         ).isEqualTo(NameSpec())
         assertThat(
             specForPlaceholderField(
-                PlaceholderField.Email,
-                billingDetailsCollectionConfiguration,
+                field = PlaceholderField.Email,
+                placeholderOverrideList = emptyList(),
+                requiresMandate = false,
+                configuration = billingDetailsCollectionConfiguration,
             )
         ).isEqualTo(EmailSpec())
         assertThat(
             specForPlaceholderField(
-                PlaceholderField.Phone,
-                billingDetailsCollectionConfiguration,
+                field = PlaceholderField.Phone,
+                placeholderOverrideList = emptyList(),
+                requiresMandate = false,
+                configuration = billingDetailsCollectionConfiguration,
             )
         ).isEqualTo(PhoneSpec())
         assertThat(
             specForPlaceholderField(
-                PlaceholderField.BillingAddress,
-                billingDetailsCollectionConfiguration,
+                field = PlaceholderField.BillingAddress,
+                placeholderOverrideList = emptyList(),
+                requiresMandate = false,
+                configuration = billingDetailsCollectionConfiguration,
             )
         ).isEqualTo(AddressSpec())
         assertThat(
             specForPlaceholderField(
-                PlaceholderField.BillingAddressWithoutCountry,
-                billingDetailsCollectionConfiguration,
+                field = PlaceholderField.BillingAddressWithoutCountry,
+                placeholderOverrideList = emptyList(),
+                requiresMandate = false,
+                configuration = billingDetailsCollectionConfiguration,
             )
         ).isEqualTo(AddressSpec(hideCountry = true))
     }
@@ -156,32 +174,42 @@ class PlaceholderHelperTest {
 
         assertThat(
             specForPlaceholderField(
-                PlaceholderField.Name,
-                billingDetailsCollectionConfiguration,
+                field = PlaceholderField.Name,
+                placeholderOverrideList = emptyList(),
+                requiresMandate = false,
+                configuration = billingDetailsCollectionConfiguration,
             )
         ).isNull()
         assertThat(
             specForPlaceholderField(
-                PlaceholderField.Email,
-                billingDetailsCollectionConfiguration,
+                field = PlaceholderField.Email,
+                placeholderOverrideList = emptyList(),
+                requiresMandate = false,
+                configuration = billingDetailsCollectionConfiguration,
             )
         ).isNull()
         assertThat(
             specForPlaceholderField(
-                PlaceholderField.Phone,
-                billingDetailsCollectionConfiguration,
+                field = PlaceholderField.Phone,
+                placeholderOverrideList = emptyList(),
+                requiresMandate = false,
+                configuration = billingDetailsCollectionConfiguration,
             )
         ).isNull()
         assertThat(
             specForPlaceholderField(
-                PlaceholderField.BillingAddress,
-                billingDetailsCollectionConfiguration,
+                field = PlaceholderField.BillingAddress,
+                placeholderOverrideList = emptyList(),
+                requiresMandate = false,
+                configuration = billingDetailsCollectionConfiguration,
             )
         ).isNull()
         assertThat(
             specForPlaceholderField(
-                PlaceholderField.BillingAddressWithoutCountry,
-                billingDetailsCollectionConfiguration,
+                field = PlaceholderField.BillingAddressWithoutCountry,
+                placeholderOverrideList = emptyList(),
+                requiresMandate = false,
+                configuration = billingDetailsCollectionConfiguration,
             )
         ).isNull()
     }
@@ -273,6 +301,80 @@ class PlaceholderHelperTest {
             PlaceholderField.Name,
             PlaceholderField.Email,
             PlaceholderField.Phone,
+        )
+    }
+
+    @Test
+    fun `Test requires mandate`() {
+        assertThat(
+            specForPlaceholderField(
+                field = PlaceholderField.SepaMandate,
+                placeholderOverrideList = emptyList(),
+                requiresMandate = false,
+                configuration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            )
+        ).isNull()
+        assertThat(
+            specForPlaceholderField(
+                field = PlaceholderField.SepaMandate,
+                placeholderOverrideList = emptyList(),
+                requiresMandate = true,
+                configuration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            )
+        ).isInstanceOf(
+            SepaMandateTextSpec::class.java
+        )
+    }
+
+    @Test
+    fun `Test overrideable placeholders`() {
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+            attachDefaultsToPaymentMethod = false,
+        )
+
+        assertThat(
+            specForPlaceholderField(
+                field = PlaceholderField.Name,
+                placeholderOverrideList = listOf(IdentifierSpec.Name),
+                requiresMandate = false,
+                configuration = billingDetailsCollectionConfiguration,
+            )
+        ).isInstanceOf(
+            NameSpec::class.java
+        )
+        assertThat(
+            specForPlaceholderField(
+                field = PlaceholderField.Email,
+                placeholderOverrideList = listOf(IdentifierSpec.Email),
+                requiresMandate = false,
+                configuration = billingDetailsCollectionConfiguration,
+            )
+        ).isInstanceOf(
+            EmailSpec::class.java
+        )
+        assertThat(
+            specForPlaceholderField(
+                field = PlaceholderField.Phone,
+                placeholderOverrideList = listOf(IdentifierSpec.Phone),
+                requiresMandate = false,
+                configuration = billingDetailsCollectionConfiguration,
+            )
+        ).isInstanceOf(
+            PhoneSpec::class.java
+        )
+        assertThat(
+            specForPlaceholderField(
+                field = PlaceholderField.BillingAddress,
+                placeholderOverrideList = listOf(IdentifierSpec.Generic("billing_details[address]")),
+                requiresMandate = false,
+                configuration = billingDetailsCollectionConfiguration,
+            )
+        ).isInstanceOf(
+            AddressSpec::class.java
         )
     }
 

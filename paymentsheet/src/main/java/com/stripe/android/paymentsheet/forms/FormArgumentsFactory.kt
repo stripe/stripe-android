@@ -56,6 +56,7 @@ internal object FormArgumentsFactory {
                 ?: PaymentSheet.BillingDetailsCollectionConfiguration(),
             isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
             requiresMandate = paymentMethod.requiresMandate,
+            requiredFields = paymentMethod.placeholderOverrideList,
         )
     }
 }

@@ -73,6 +73,7 @@ internal class FormViewModel @Inject internal constructor(
         if (formArguments.paymentMethodCode != PaymentMethod.Type.Card.code) {
             specs = specsForConfiguration(
                 configuration = formArguments.billingDetailsCollectionConfiguration,
+                placeholderOverrideList = formArguments.requiredFields,
                 requiresMandate = formArguments.requiresMandate,
                 specs = specs,
             )

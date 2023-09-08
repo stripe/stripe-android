@@ -15,6 +15,7 @@ import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.coroutines.flow.Flow
@@ -29,6 +30,7 @@ internal object PlaceholderHelper {
      */
     internal fun specsForConfiguration(
         specs: List<FormItemSpec>,
+        placeholderOverrideList: List<IdentifierSpec>,
         requiresMandate: Boolean,
         configuration: PaymentSheet.BillingDetailsCollectionConfiguration,
     ): List<FormItemSpec> {
@@ -46,24 +48,42 @@ internal object PlaceholderHelper {
                 is NameSpec -> it.takeUnless {
                     configuration.name == CollectionMode.Never
                 }
+
                 is EmailSpec -> it.takeUnless {
                     configuration.email == CollectionMode.Never
                 }
+
                 is PhoneSpec -> it.takeUnless {
                     configuration.phone == CollectionMode.Never
                 }
+
                 is AddressSpec -> it.takeUnless {
                     configuration.address == AddressCollectionMode.Never
                 }
+
                 is SepaMandateTextSpec -> it.takeIf {
                     requiresMandate
                 }
-                is PlaceholderSpec -> specForPlaceholderField(it.field, requiresMandate, configuration)
+
+                is PlaceholderSpec -> specForPlaceholderField(
+                    it.field,
+                    placeholderOverrideList,
+                    requiresMandate,
+                    configuration
+                )
+
                 else -> it
             }
         }.plus(
             // Add additional fields that don't have a placeholder, if necessary.
-            billingDetailsPlaceholders.mapNotNull { specForPlaceholderField(it, requiresMandate, configuration) }
+            billingDetailsPlaceholders.mapNotNull {
+                specForPlaceholderField(
+                    it,
+                    placeholderOverrideList,
+                    requiresMandate,
+                    configuration
+                )
+            }
         )
 
         return modifiedSpecs
@@ -80,12 +100,15 @@ internal object PlaceholderHelper {
             is PhoneSpec -> placeholderFields.remove(PlaceholderSpec.PlaceholderField.Phone)
             is AddressSpec ->
                 placeholderFields.remove(PlaceholderSpec.PlaceholderField.BillingAddress)
+
             is SepaMandateTextSpec -> placeholderFields.remove(PlaceholderField.SepaMandate)
             is PlaceholderSpec -> when (spec.field) {
                 PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry ->
                     placeholderFields.remove(PlaceholderSpec.PlaceholderField.BillingAddress)
+
                 else -> placeholderFields.remove(spec.field)
             }
+
             else -> Unit
         }
     }
@@ -93,28 +116,55 @@ internal object PlaceholderHelper {
     @VisibleForTesting
     internal fun specForPlaceholderField(
         field: PlaceholderField,
+        placeholderOverrideList: List<IdentifierSpec>,
         requiresMandate: Boolean,
         configuration: PaymentSheet.BillingDetailsCollectionConfiguration,
     ) = when (field) {
         PlaceholderField.Name -> NameSpec().takeIf {
-            configuration.name == CollectionMode.Always
+            configuration.name == CollectionMode.Always ||
+                (
+                    placeholderOverrideList.contains(it.apiPath) &&
+                        configuration.name != CollectionMode.Never
+                    )
         }
+
         PlaceholderField.Email -> EmailSpec().takeIf {
-            configuration.email == CollectionMode.Always
+            configuration.email == CollectionMode.Always ||
+                (
+                    placeholderOverrideList.contains(it.apiPath) &&
+                        configuration.email != CollectionMode.Never
+                    )
         }
+
         PlaceholderField.Phone -> PhoneSpec().takeIf {
-            configuration.phone == CollectionMode.Always
+            configuration.phone == CollectionMode.Always ||
+                (
+                    placeholderOverrideList.contains(it.apiPath) &&
+                        configuration.phone != CollectionMode.Never
+                    )
         }
+
         PlaceholderField.BillingAddress -> AddressSpec().takeIf {
-            configuration.address == AddressCollectionMode.Full
+            configuration.address == AddressCollectionMode.Full ||
+                (
+                    placeholderOverrideList.contains(it.apiPath) &&
+                        configuration.address != AddressCollectionMode.Never
+                    )
         }
+
         PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry ->
             AddressSpec(hideCountry = true).takeIf {
-                configuration.address == AddressCollectionMode.Full
+                configuration.address == AddressCollectionMode.Full ||
+                    (
+                        placeholderOverrideList.contains(it.apiPath) &&
+                            configuration.address != AddressCollectionMode.Never
+                        )
             }
+
         PlaceholderField.SepaMandate -> SepaMandateTextSpec().takeIf {
             requiresMandate
         }
+
         else -> null
     }
 

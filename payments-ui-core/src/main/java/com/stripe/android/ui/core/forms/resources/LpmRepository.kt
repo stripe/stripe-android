@@ -54,6 +54,7 @@ import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.ui.core.elements.transform
+import com.stripe.android.uicore.elements.IdentifierSpec
 import java.io.InputStream
 
 /**
@@ -236,7 +237,12 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = BancontactRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields)
+            formSpec = LayoutSpec(sharedDataSpec.fields),
+            placeholderOverrideList = if (stripeIntent.requiresMandate()) {
+                listOf(IdentifierSpec.Name, IdentifierSpec.Email)
+            } else {
+                emptyList()
+            }
         )
         PaymentMethod.Type.Sofort.code -> SupportedPaymentMethod(
             code = "sofort",
@@ -247,7 +253,12 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = SofortRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields)
+            formSpec = LayoutSpec(sharedDataSpec.fields),
+            placeholderOverrideList = if (stripeIntent.requiresMandate()) {
+                listOf(IdentifierSpec.Name, IdentifierSpec.Email)
+            } else {
+                emptyList()
+            }
         )
         PaymentMethod.Type.Ideal.code -> {
             SupportedPaymentMethod(
@@ -259,7 +270,12 @@ class LpmRepository constructor(
                 darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
                 tintIconOnSelection = false,
                 requirement = IdealRequirement,
-                formSpec = LayoutSpec(sharedDataSpec.fields)
+                formSpec = LayoutSpec(sharedDataSpec.fields),
+                placeholderOverrideList = if (stripeIntent.requiresMandate()) {
+                    listOf(IdentifierSpec.Name, IdentifierSpec.Email)
+                } else {
+                    emptyList()
+                }
             )
         }
         PaymentMethod.Type.SepaDebit.code -> SupportedPaymentMethod(
@@ -575,7 +591,12 @@ class LpmRepository constructor(
         /**
          * This describes how the UI should look.
          */
-        val formSpec: LayoutSpec
+        val formSpec: LayoutSpec,
+
+        /**
+         * This forces the UI to render the required fields
+         */
+        val placeholderOverrideList: List<IdentifierSpec> = emptyList()
     ) {
         /**
          * Returns true if the payment method supports confirming from a saved
