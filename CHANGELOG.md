@@ -10,6 +10,7 @@
   * [7269](https://github.com/stripe/stripe-android/pull/7269) iDEAL
   * [7270](https://github.com/stripe/stripe-android/pull/7270) SEPA
   * [7272](https://github.com/stripe/stripe-android/pull/7272) Sofort
+* [FIXED][7283](https://github.com/stripe/stripe-android/pull/7283) Fixed an issue where Bancontact SetupIntent or PaymentIntent with setup for future usage would show the mandate text in the middle of the form. 
 
 ## 20.29.2 - 2023-09-05
 

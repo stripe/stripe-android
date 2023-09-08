@@ -263,6 +263,18 @@
         "api_path": {
           "v1": "billing_details[name]"
         }
+      },
+      {
+        "type": "placeholder",
+        "for": "email"
+      },
+      {
+        "type": "placeholder",
+        "for": "phone"
+      },
+      {
+        "type": "placeholder",
+        "for": "billing_address"
       }
     ],
     "next_action_spec": {

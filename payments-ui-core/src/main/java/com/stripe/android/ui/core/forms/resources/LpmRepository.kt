@@ -39,7 +39,7 @@ import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.paymentsheet.forms.UpiRequirement
 import com.stripe.android.paymentsheet.forms.ZipRequirement
-import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.elements.CardBillingSpec
@@ -96,8 +96,8 @@ class LpmRepository constructor(
     fun update(
         stripeIntent: StripeIntent,
         serverLpmSpecs: String?,
-        cardBillingDetailsCollectionConfiguration: CardBillingDetailsCollectionConfiguration =
-            CardBillingDetailsCollectionConfiguration(),
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+            BillingDetailsCollectionConfiguration(),
     ): Boolean {
         val expectedLpms = stripeIntent.paymentMethodTypes
         var failedToParseServerResponse = false
@@ -106,7 +106,7 @@ class LpmRepository constructor(
             val deserializationResult = LpmSerializer.deserializeList(serverLpmSpecs)
             failedToParseServerResponse = deserializationResult.isFailure
             val serverLpmObjects = deserializationResult.getOrElse { emptyList() }
-            update(stripeIntent, serverLpmObjects, cardBillingDetailsCollectionConfiguration)
+            update(stripeIntent, serverLpmObjects, billingDetailsCollectionConfiguration)
         }
 
         // If the server does not return specs, or they are not parsed successfully
@@ -119,7 +119,7 @@ class LpmRepository constructor(
             parseMissingLpmsFromDisk(
                 missingLpms = lpmsNotParsedFromServerSpec,
                 stripeIntent = stripeIntent,
-                cardBillingDetailsCollectionConfiguration = cardBillingDetailsCollectionConfiguration,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             )
         }
 
@@ -129,7 +129,7 @@ class LpmRepository constructor(
     private fun parseMissingLpmsFromDisk(
         missingLpms: List<String>,
         stripeIntent: StripeIntent,
-        cardBillingDetailsCollectionConfiguration: CardBillingDetailsCollectionConfiguration,
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     ) {
         val missingSpecsOnDisk = readFromDisk().filter { it.type in missingLpms }
 
@@ -137,7 +137,7 @@ class LpmRepository constructor(
             convertToSupportedPaymentMethod(
                 stripeIntent = stripeIntent,
                 sharedDataSpec = spec,
-                cardBillingDetailsCollectionConfiguration = cardBillingDetailsCollectionConfiguration,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             )
         }.associateBy {
             it.code
@@ -151,8 +151,8 @@ class LpmRepository constructor(
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun initializeWithCardSpec(
-        billingConfiguration: CardBillingDetailsCollectionConfiguration =
-            CardBillingDetailsCollectionConfiguration(),
+        billingConfiguration: BillingDetailsCollectionConfiguration =
+            BillingDetailsCollectionConfiguration(),
     ) {
         lpmInitialFormData.putAll(
             mapOf(
@@ -175,8 +175,8 @@ class LpmRepository constructor(
     private fun update(
         stripeIntent: StripeIntent,
         specs: List<SharedDataSpec>,
-        cardBillingDetailsCollectionConfiguration: CardBillingDetailsCollectionConfiguration =
-            CardBillingDetailsCollectionConfiguration(),
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+            BillingDetailsCollectionConfiguration(),
     ) {
         val validSpecs = specs.filterNot { spec ->
             !arguments.isFinancialConnectionsAvailable() &&
@@ -188,7 +188,7 @@ class LpmRepository constructor(
             convertToSupportedPaymentMethod(
                 stripeIntent = stripeIntent,
                 sharedDataSpec = spec,
-                cardBillingDetailsCollectionConfiguration = cardBillingDetailsCollectionConfiguration,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             )
         }
 
@@ -213,7 +213,7 @@ class LpmRepository constructor(
     private fun convertToSupportedPaymentMethod(
         stripeIntent: StripeIntent,
         sharedDataSpec: SharedDataSpec,
-        cardBillingDetailsCollectionConfiguration: CardBillingDetailsCollectionConfiguration,
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     ) = when (sharedDataSpec.type) {
         PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
             code = "card",
@@ -225,7 +225,7 @@ class LpmRepository constructor(
             tintIconOnSelection = true,
             requirement = CardRequirement,
             formSpec = if (sharedDataSpec.fields.isEmpty() || sharedDataSpec.fields == listOf(EmptyFormSpec)) {
-                hardcodedCardSpec(cardBillingDetailsCollectionConfiguration).formSpec
+                hardcodedCardSpec(billingDetailsCollectionConfiguration).formSpec
             } else {
                 LayoutSpec(sharedDataSpec.fields)
             }
@@ -239,7 +239,7 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = BancontactRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields + stripeIntent.sepaMandateLayout())
+            formSpec = LayoutSpec(sharedDataSpec.fields + stripeIntent.sepaMandateLayout(billingDetailsCollectionConfiguration))
         )
         PaymentMethod.Type.Sofort.code -> SupportedPaymentMethod(
             code = "sofort",
@@ -250,20 +250,9 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = SofortRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields + stripeIntent.sepaMandateLayout(requireName = true))
+            formSpec = LayoutSpec(sharedDataSpec.fields + stripeIntent.sepaMandateLayout(billingDetailsCollectionConfiguration, requireName = true))
         )
         PaymentMethod.Type.Ideal.code -> {
-            val isSfu = (stripeIntent as? PaymentIntent)?.setupFutureUsage != null
-            val isSetupIntent = stripeIntent is SetupIntent
-            val localLayoutSpecs: List<FormItemSpec> = if (isSfu || isSetupIntent) {
-                listOf(
-                    EmailSpec(),
-                    SepaMandateTextSpec()
-                )
-            } else {
-                emptyList()
-            }
-
             SupportedPaymentMethod(
                 code = "ideal",
                 requiresMandate = true,
@@ -273,7 +262,7 @@ class LpmRepository constructor(
                 darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
                 tintIconOnSelection = false,
                 requirement = IdealRequirement,
-                formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs)
+                formSpec = LayoutSpec(sharedDataSpec.fields + stripeIntent.sepaMandateLayout(billingDetailsCollectionConfiguration))
             )
         }
         PaymentMethod.Type.SepaDebit.code -> SupportedPaymentMethod(
@@ -630,11 +619,11 @@ class LpmRepository constructor(
             }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val HardcodedCard = hardcodedCardSpec(CardBillingDetailsCollectionConfiguration())
+        val HardcodedCard = hardcodedCardSpec(BillingDetailsCollectionConfiguration())
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun hardcodedCardSpec(
-            billingDetailsCollectionConfiguration: CardBillingDetailsCollectionConfiguration
+            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
         ): SupportedPaymentMethod {
             val specs = listOfNotNull(
                 ContactInformationSpec(
@@ -682,18 +671,24 @@ private fun StripeIntent.payPalRequiresMandate(): Boolean {
 }
 
 private fun StripeIntent.sepaMandateLayout(
+    billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     requireName: Boolean = false,
 ): List<FormItemSpec> {
     val isSfu = (this as? PaymentIntent)?.setupFutureUsage != null
     val isSetupIntent = this is SetupIntent
+
     return if (isSfu || isSetupIntent) {
         listOfNotNull(
-            if (requireName) {
+            if (requireName && !billingDetailsCollectionConfiguration.collectName) {
                 NameSpec()
             } else {
                 null
             },
-            EmailSpec(),
+            if (!billingDetailsCollectionConfiguration.collectEmail) {
+                EmailSpec()
+            } else {
+                null
+            },
             SepaMandateTextSpec()
         )
     } else {

@@ -26,7 +26,7 @@ import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.model.requireValidOrThrow
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
-import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -227,12 +227,12 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
             val billingDetailsCollectionConfig =
                 configuration?.billingDetailsCollectionConfiguration?.toInternal()
-                    ?: CardBillingDetailsCollectionConfiguration()
+                    ?: BillingDetailsCollectionConfiguration()
 
             val didParseServerResponse = lpmRepository.update(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
-                cardBillingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
             )
 
             if (!didParseServerResponse) {
@@ -370,20 +370,20 @@ private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
 }
 
 internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal():
-    CardBillingDetailsCollectionConfiguration {
-    return CardBillingDetailsCollectionConfiguration(
+    BillingDetailsCollectionConfiguration {
+    return BillingDetailsCollectionConfiguration(
         collectName = name == Always,
         collectEmail = email == Always,
         collectPhone = phone == Always,
         address = when (address) {
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
-                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
             }
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
-                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
             }
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
-                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             }
         },
     )
