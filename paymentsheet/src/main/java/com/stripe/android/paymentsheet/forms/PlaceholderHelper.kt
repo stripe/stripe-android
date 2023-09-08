@@ -11,6 +11,7 @@ import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec.PlaceholderField
+import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
@@ -22,12 +23,13 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
 
-internal object BillingDetailsHelpers {
+internal object PlaceholderHelper {
     /**
      * Returns the list of specs by adding or removing billing details fields.
      */
     internal fun specsForConfiguration(
         specs: List<FormItemSpec>,
+        requiresMandate: Boolean,
         configuration: PaymentSheet.BillingDetailsCollectionConfiguration,
     ): List<FormItemSpec> {
         val billingDetailsPlaceholders = mutableListOf(
@@ -35,6 +37,7 @@ internal object BillingDetailsHelpers {
             PlaceholderField.Email,
             PlaceholderField.Phone,
             PlaceholderField.BillingAddress,
+            PlaceholderField.SepaMandate,
         )
 
         val modifiedSpecs = specs.mapNotNull {
@@ -52,12 +55,15 @@ internal object BillingDetailsHelpers {
                 is AddressSpec -> it.takeUnless {
                     configuration.address == AddressCollectionMode.Never
                 }
-                is PlaceholderSpec -> specForPlaceholderField(it.field, configuration)
+                is SepaMandateTextSpec -> it.takeIf {
+                    requiresMandate
+                }
+                is PlaceholderSpec -> specForPlaceholderField(it.field, requiresMandate, configuration)
                 else -> it
             }
         }.plus(
             // Add additional fields that don't have a placeholder, if necessary.
-            billingDetailsPlaceholders.mapNotNull { specForPlaceholderField(it, configuration) }
+            billingDetailsPlaceholders.mapNotNull { specForPlaceholderField(it, requiresMandate, configuration) }
         )
 
         return modifiedSpecs
@@ -74,6 +80,7 @@ internal object BillingDetailsHelpers {
             is PhoneSpec -> placeholderFields.remove(PlaceholderSpec.PlaceholderField.Phone)
             is AddressSpec ->
                 placeholderFields.remove(PlaceholderSpec.PlaceholderField.BillingAddress)
+            is SepaMandateTextSpec -> placeholderFields.remove(PlaceholderField.SepaMandate)
             is PlaceholderSpec -> when (spec.field) {
                 PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry ->
                     placeholderFields.remove(PlaceholderSpec.PlaceholderField.BillingAddress)
@@ -86,6 +93,7 @@ internal object BillingDetailsHelpers {
     @VisibleForTesting
     internal fun specForPlaceholderField(
         field: PlaceholderField,
+        requiresMandate: Boolean,
         configuration: PaymentSheet.BillingDetailsCollectionConfiguration,
     ) = when (field) {
         PlaceholderField.Name -> NameSpec().takeIf {
@@ -104,6 +112,9 @@ internal object BillingDetailsHelpers {
             AddressSpec(hideCountry = true).takeIf {
                 configuration.address == AddressCollectionMode.Full
             }
+        PlaceholderField.SepaMandate -> SepaMandateTextSpec().takeIf {
+            requiresMandate
+        }
         else -> null
     }
 

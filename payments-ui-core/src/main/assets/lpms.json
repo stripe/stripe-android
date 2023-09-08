@@ -189,6 +189,10 @@
       {
         "type": "placeholder",
         "for": "billing_address"
+      },
+      {
+        "type": "placeholder",
+        "for": "sepa_mandate"
       }
     ],
     "next_action_spec": {
@@ -233,6 +237,10 @@
       {
         "type": "placeholder",
         "for": "billing_address_without_country"
+      },
+      {
+        "type": "placeholder",
+        "for": "sepa_mandate"
       }
     ],
     "next_action_spec": {
@@ -275,6 +283,10 @@
       {
         "type": "placeholder",
         "for": "billing_address"
+      },
+      {
+        "type": "placeholder",
+        "for": "sepa_mandate"
       }
     ],
     "next_action_spec": {

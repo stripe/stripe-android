@@ -46,15 +46,12 @@ import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.ContactInformationSpec
-import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.EmptyFormSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.MandateTextSpec
-import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.ui.core.elements.transform
 import java.io.InputStream
@@ -232,37 +229,37 @@ class LpmRepository constructor(
         )
         PaymentMethod.Type.Bancontact.code -> SupportedPaymentMethod(
             code = "bancontact",
-            requiresMandate = true,
+            requiresMandate = stripeIntent.requiresMandate(),
             displayNameResource = R.string.stripe_paymentsheet_payment_method_bancontact,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = BancontactRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields + stripeIntent.sepaMandateLayout(billingDetailsCollectionConfiguration))
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.Sofort.code -> SupportedPaymentMethod(
             code = "sofort",
-            requiresMandate = true,
+            requiresMandate = stripeIntent.requiresMandate(),
             displayNameResource = R.string.stripe_paymentsheet_payment_method_sofort,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_klarna,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = SofortRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields + stripeIntent.sepaMandateLayout(billingDetailsCollectionConfiguration, requireName = true))
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.Ideal.code -> {
             SupportedPaymentMethod(
                 code = "ideal",
-                requiresMandate = true,
+                requiresMandate = stripeIntent.requiresMandate(),
                 displayNameResource = R.string.stripe_paymentsheet_payment_method_ideal,
                 iconResource = R.drawable.stripe_ic_paymentsheet_pm_ideal,
                 lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
                 darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
                 tintIconOnSelection = false,
                 requirement = IdealRequirement,
-                formSpec = LayoutSpec(sharedDataSpec.fields + stripeIntent.sepaMandateLayout(billingDetailsCollectionConfiguration))
+                formSpec = LayoutSpec(sharedDataSpec.fields)
             )
         }
         PaymentMethod.Type.SepaDebit.code -> SupportedPaymentMethod(
@@ -336,7 +333,7 @@ class LpmRepository constructor(
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.PayPal.code -> {
-            val localLayoutSpecs: List<FormItemSpec> = if (stripeIntent.payPalRequiresMandate()) {
+            val localLayoutSpecs: List<FormItemSpec> = if (stripeIntent.requiresMandate()) {
                 listOf(MandateTextSpec(stringResId = R.string.stripe_paypal_mandate))
             } else {
                 emptyList()
@@ -344,7 +341,7 @@ class LpmRepository constructor(
 
             SupportedPaymentMethod(
                 code = "paypal",
-                requiresMandate = stripeIntent.payPalRequiresMandate(),
+                requiresMandate = stripeIntent.requiresMandate(),
                 displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
                 iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
                 lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -477,7 +474,7 @@ class LpmRepository constructor(
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.CashAppPay.code -> {
-            val requiresMandate = stripeIntent.cashAppPayRequiresMandate()
+            val requiresMandate = stripeIntent.requiresMandate()
 
             val localLayoutSpecs = if (requiresMandate) {
                 listOf(CashAppPayMandateTextSpec())
@@ -663,40 +660,7 @@ class LpmRepository constructor(
     )
 }
 
-private fun StripeIntent.payPalRequiresMandate(): Boolean {
-    return when (this) {
-        is PaymentIntent -> setupFutureUsage != null
-        is SetupIntent -> true
-    }
-}
-
-private fun StripeIntent.sepaMandateLayout(
-    billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
-    requireName: Boolean = false,
-): List<FormItemSpec> {
-    val isSfu = (this as? PaymentIntent)?.setupFutureUsage != null
-    val isSetupIntent = this is SetupIntent
-
-    return if (isSfu || isSetupIntent) {
-        listOfNotNull(
-            if (requireName && !billingDetailsCollectionConfiguration.collectName) {
-                NameSpec()
-            } else {
-                null
-            },
-            if (!billingDetailsCollectionConfiguration.collectEmail) {
-                EmailSpec()
-            } else {
-                null
-            },
-            SepaMandateTextSpec()
-        )
-    } else {
-        emptyList()
-    }
-}
-
-private fun StripeIntent.cashAppPayRequiresMandate(): Boolean {
+private fun StripeIntent.requiresMandate(): Boolean {
     return when (this) {
         is PaymentIntent -> setupFutureUsage != null
         is SetupIntent -> true

@@ -7,8 +7,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
-import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.connectBillingDetailsFields
-import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.specsForConfiguration
+import com.stripe.android.paymentsheet.forms.PlaceholderHelper.connectBillingDetailsFields
+import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -73,6 +73,7 @@ internal class FormViewModel @Inject internal constructor(
         if (formArguments.paymentMethodCode != PaymentMethod.Type.Card.code) {
             specs = specsForConfiguration(
                 configuration = formArguments.billingDetailsCollectionConfiguration,
+                requiresMandate = formArguments.requiresMandate,
                 specs = specs,
             )
         }

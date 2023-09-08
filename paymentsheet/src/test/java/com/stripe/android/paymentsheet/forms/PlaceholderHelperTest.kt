@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.removeCorrespondingPlaceholder
-import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.specForPlaceholderField
-import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.specsForConfiguration
+import com.stripe.android.paymentsheet.forms.PlaceholderHelper.removeCorrespondingPlaceholder
+import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specForPlaceholderField
+import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.NameSpec
@@ -19,7 +19,7 @@ import org.robolectric.RobolectricTestRunner
 import com.stripe.android.R as StripeR
 
 @RunWith(RobolectricTestRunner::class)
-class BillingDetailsHelpersTest {
+class PlaceholderHelperTest {
     @Test
     fun `Test unused elements are removed`() {
         val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
