@@ -277,3 +277,9 @@ internal val OxxoRequirement = PaymentMethodRequirements(
     siRequirements = null,
     confirmPMFromCustomer = false,
 )
+
+internal val BoletoRequirement = PaymentMethodRequirements(
+    piRequirements = setOf(Delayed),
+    siRequirements = setOf(Delayed),
+    confirmPMFromCustomer = true,
+)

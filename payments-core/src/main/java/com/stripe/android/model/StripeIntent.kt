@@ -95,7 +95,8 @@ sealed interface StripeIntent : StripeModel {
         WeChatPayRedirect("wechat_pay_redirect_to_android_app"),
         VerifyWithMicrodeposits("verify_with_microdeposits"),
         UpiAwaitNotification("upi_await_notification"),
-        CashAppRedirect("cashapp_handle_redirect_or_display_qr_code");
+        CashAppRedirect("cashapp_handle_redirect_or_display_qr_code"),
+        DisplayBoletoDetails("boleto_display_details");
 
         @Keep
         override fun toString(): String {
@@ -170,7 +171,7 @@ sealed interface StripeIntent : StripeModel {
     sealed class NextActionData : StripeModel {
 
         @Parcelize
-        data class DisplayOxxoDetails(
+        data class DisplayOxxoDetails constructor(
             /**
              * The timestamp after which the OXXO expires.
              */
@@ -185,6 +186,15 @@ sealed interface StripeIntent : StripeModel {
              * URL of a webpage containing the voucher for this OXXO payment.
              */
             val hostedVoucherUrl: String? = null
+        ) : NextActionData()
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayBoletoDetails(
+            /**
+             * URL of a webpage containing the voucher for this payment.
+             */
+            val hostedVoucherUrl: String? = null,
         ) : NextActionData()
 
         /**
