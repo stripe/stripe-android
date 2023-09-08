@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_CUSTOMER
@@ -49,7 +50,9 @@ class SupportedPaymentMethodTest {
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
         ).apply {
             this.update(
-                PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethodTypes),
+                PaymentIntentFactory.create(
+                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                ),
                 null
             )
         }
@@ -105,7 +108,9 @@ class SupportedPaymentMethodTest {
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
         ).apply {
             this.update(
-                PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethodTypes),
+                PaymentIntentFactory.create(
+                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                ),
                 null
             )
         }
@@ -128,7 +133,9 @@ class SupportedPaymentMethodTest {
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
         ).apply {
             this.update(
-                PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethodTypes),
+                PaymentIntentFactory.create(
+                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                ),
                 null
             )
         }
@@ -151,7 +158,9 @@ class SupportedPaymentMethodTest {
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
         ).apply {
             this.update(
-                PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethodTypes),
+                PaymentIntentFactory.create(
+                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                ),
                 null
             )
         }
@@ -174,7 +183,9 @@ class SupportedPaymentMethodTest {
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
         ).apply {
             this.update(
-                PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethodTypes),
+                PaymentIntentFactory.create(
+                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                ),
                 null
             )
         }

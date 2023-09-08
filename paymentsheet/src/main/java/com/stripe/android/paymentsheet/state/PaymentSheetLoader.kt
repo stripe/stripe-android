@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.LpmRepository.ServerSpecState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -224,13 +223,13 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 configuration?.billingDetailsCollectionConfiguration?.toInternal()
                     ?: CardBillingDetailsCollectionConfiguration()
 
-            lpmRepository.update(
+            val didParseServerResponse = lpmRepository.update(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
                 cardBillingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
             )
 
-            if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
+            if (!didParseServerResponse) {
                 eventReporter.onLpmSpecFailure(
                     isDecoupling = initializationMode is DeferredIntent,
                 )
