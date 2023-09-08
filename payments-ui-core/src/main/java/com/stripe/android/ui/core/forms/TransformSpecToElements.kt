@@ -12,6 +12,7 @@ import com.stripe.android.ui.core.elements.BlikSpec
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
+import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.ContactInformationSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownSpec
@@ -102,8 +103,8 @@ class TransformSpecToElements(
                 is UpiSpec -> it.transform()
                 is BlikSpec -> it.transform()
                 is ContactInformationSpec -> it.transform(initialValues)
-                is PlaceholderSpec ->
-                    error("Placeholders should be processed before calling transform.")
+                is PlaceholderSpec -> error("Placeholders should be processed before calling transform.")
+                is CashAppPayMandateTextSpec -> it.transform(merchantName)
             }
         }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
 }
