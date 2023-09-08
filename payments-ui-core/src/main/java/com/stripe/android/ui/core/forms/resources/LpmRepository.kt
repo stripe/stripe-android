@@ -596,7 +596,7 @@ class LpmRepository constructor(
          * payment method of this type.  See [PaymentMethodRequirements] for
          * description of the values
          */
-        fun supportsCustomerSavedPM() = requirement.getConfirmPMFromCustomer(code)
+        fun supportsCustomerSavedPM(): Boolean = requirement.canBeUsedAsSavedPaymentMethod
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)

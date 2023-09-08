@@ -211,12 +211,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         return paymentMethods.filter { paymentMethod ->
             paymentMethod.hasExpectedDetails()
-        }.filter { paymentMethod ->
-            // PayPal isn't supported yet as a saved payment method (backend limitation).
-            paymentMethod.type != PaymentMethod.Type.PayPal
-        }.filter { paymentMethod ->
-            // CashAppPay isn't supported yet as a saved payment method (backend limitation).
-            paymentMethod.type != PaymentMethod.Type.CashAppPay
         }
     }
 

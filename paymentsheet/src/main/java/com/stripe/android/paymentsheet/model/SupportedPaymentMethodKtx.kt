@@ -5,8 +5,8 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.Delayed
-import com.stripe.android.paymentsheet.forms.PIRequirement
-import com.stripe.android.paymentsheet.forms.SIRequirement
+import com.stripe.android.paymentsheet.forms.PaymentIntentSupport
+import com.stripe.android.paymentsheet.forms.SetupIntentSupport
 import com.stripe.android.paymentsheet.forms.ShippingAddress
 import com.stripe.android.ui.core.elements.LayoutFormDescriptor
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -97,8 +97,7 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
  */
 private fun SupportedPaymentMethod.supportsSetupIntent(
     config: PaymentSheet.Configuration?
-) = requirement.getConfirmPMFromCustomer(code) &&
-    checkSetupIntentRequirements(requirement.siRequirements, config)
+) = checkSetupIntentRequirements(requirement.setupIntentSupport, config)
 
 /**
  * This checks if there is support using this payment method when SFU
@@ -109,9 +108,8 @@ private fun SupportedPaymentMethod.supportsSetupIntent(
 private fun SupportedPaymentMethod.supportsPaymentIntentSfuSet(
     paymentIntent: PaymentIntent,
     config: PaymentSheet.Configuration?
-) = requirement.getConfirmPMFromCustomer(code) &&
-    checkSetupIntentRequirements(requirement.siRequirements, config) &&
-    checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config)
+) = checkSetupIntentRequirements(requirement.setupIntentSupport, config) &&
+    checkPaymentIntentRequirements(requirement.paymentIntentSupport, paymentIntent, config)
 
 /**
  * This detects if there is support with using this PM with the PI
@@ -120,7 +118,7 @@ private fun SupportedPaymentMethod.supportsPaymentIntentSfuSet(
 private fun SupportedPaymentMethod.supportsPaymentIntentSfuNotSettable(
     paymentIntent: PaymentIntent,
     config: PaymentSheet.Configuration?
-) = checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config)
+) = checkPaymentIntentRequirements(requirement.paymentIntentSupport, paymentIntent, config)
 
 /**
  * This checks to see if this PM is supported with the given
@@ -136,43 +134,54 @@ private fun SupportedPaymentMethod.supportsPaymentIntentSfuSettable(
     paymentIntent: PaymentIntent,
     config: PaymentSheet.Configuration?
 ) = config?.customer != null &&
-    requirement.getConfirmPMFromCustomer(code) &&
-    checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config) &&
-    checkSetupIntentRequirements(requirement.siRequirements, config)
+    checkPaymentIntentRequirements(requirement.paymentIntentSupport, paymentIntent, config) &&
+    checkSetupIntentRequirements(requirement.setupIntentSupport, config)
 
 /**
  * Verifies that all Setup Intent [requirements] are met.
  */
 private fun checkSetupIntentRequirements(
-    requirements: Set<SIRequirement>?,
+    support: SetupIntentSupport,
     config: PaymentSheet.Configuration?
 ): Boolean {
-    return requirements?.map { requirement ->
-        when (requirement) {
-            Delayed -> config?.allowsDelayedPaymentMethods == true
+    return when (support) {
+        is SetupIntentSupport.AlwaysSupported -> true
+        is SetupIntentSupport.SupportedWithRequirements -> {
+            support.requirements.all { requirement ->
+                when (requirement) {
+                    Delayed -> config?.allowsDelayedPaymentMethods == true
+                }
+            }
         }
-    }?.contains(false) == false
+        is SetupIntentSupport.NotSupported -> false
+    }
 }
 
 /**
  * Verifies that all Payment Intent [requirements] are met.
  */
 private fun checkPaymentIntentRequirements(
-    requirements: Set<PIRequirement>?,
+    support: PaymentIntentSupport,
     paymentIntent: PaymentIntent,
     config: PaymentSheet.Configuration?
 ): Boolean {
-    return requirements?.map { requirement ->
-        when (requirement) {
-            Delayed -> {
-                config?.allowsDelayedPaymentMethods == true
-            }
-            ShippingAddress -> {
-                val forceAllow = config?.allowsPaymentMethodsRequiringShippingAddress == true
-                paymentIntent.containsValidShippingInfo || forceAllow
+    return when (support) {
+        is PaymentIntentSupport.AlwaysSupported -> true
+        is PaymentIntentSupport.SupportedWithRequirements -> {
+            support.requirements.all { requirement ->
+                when (requirement) {
+                    Delayed -> {
+                        config?.allowsDelayedPaymentMethods == true
+                    }
+                    ShippingAddress -> {
+                        val forceAllow = config?.allowsPaymentMethodsRequiringShippingAddress == true
+                        paymentIntent.containsValidShippingInfo || forceAllow
+                    }
+                }
             }
         }
-    }?.contains(false) == false
+        is PaymentIntentSupport.NotSupported -> false
+    }
 }
 
 private val PaymentIntent.containsValidShippingInfo: Boolean
