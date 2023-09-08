@@ -1,6 +1,5 @@
 package com.stripe.android.common.ui
 
-import android.os.Build
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -28,7 +27,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.uicore.stripeShapes
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
@@ -60,14 +58,12 @@ internal class BottomSheetState(
     }
 
     suspend fun hide() {
-        if (skipHideAnimation) {
-            return
-        }
-
         dismissalType = DismissalType.Programmatically
+
         // We dismiss the keyboard before we dismiss the sheet. This looks cleaner and prevents
         // a CancellationException.
         keyboardHandler.dismiss()
+
         if (modalBottomSheetState.isVisible) {
             repeatUntilSucceededOrLimit(10) {
                 // Hiding the bottom sheet can be interrupted.
@@ -195,20 +191,3 @@ private suspend fun repeatUntilSucceededOrLimit(
         }
     }
 }
-
-private val skipHideAnimation: Boolean
-    get() = BuildConfig.DEBUG && (isRunningUnitTest || isRunningUiTest)
-
-private val isRunningUnitTest: Boolean
-    get() {
-        return runCatching {
-            Build.FINGERPRINT.lowercase() == "robolectric"
-        }.getOrDefault(false)
-    }
-
-private val isRunningUiTest: Boolean
-    get() {
-        return runCatching {
-            Class.forName("androidx.test.InstrumentationRegistry")
-        }.isSuccess
-    }

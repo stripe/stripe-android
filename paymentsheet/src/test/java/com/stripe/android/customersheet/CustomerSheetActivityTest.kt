@@ -1,7 +1,6 @@
 package com.stripe.android.customersheet
 
 import android.content.Context
-import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.core.app.ApplicationProvider
@@ -15,16 +14,15 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
+import com.stripe.android.utils.StableComposeTestRule
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.annotation.Config
 import java.util.Stack
 
 @RunWith(AndroidJUnit4::class)
-@Config(sdk = [Build.VERSION_CODES.Q])
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSheetActivityTest {
     @get:Rule
@@ -32,6 +30,9 @@ internal class CustomerSheetActivityTest {
 
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
+
+    @get:Rule
+    val stableComposeRule = StableComposeTestRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val contract = CustomerSheetContract()

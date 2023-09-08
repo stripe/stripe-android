@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
-import android.os.Build
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -19,6 +18,7 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.polling.IntentStatusPoller
 import com.stripe.android.utils.InjectableActivityScenario
+import com.stripe.android.utils.StableComposeTestRule
 import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.CoroutineDispatcher
@@ -26,15 +26,16 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.annotation.Config
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(AndroidJUnit4::class)
-@Config(sdk = [Build.VERSION_CODES.Q])
 internal class PollingActivityTest {
 
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
+
+    @get:Rule
+    val stableComposeRule = StableComposeTestRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
