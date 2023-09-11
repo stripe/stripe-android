@@ -4,16 +4,22 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Pague em <num_installments/> vezes sem juros de <installment_price/> com <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Voltar</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">O número da conta está incompleto.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Endereço de cobrança</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">Código BLIK</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Ao continuar, você autoriza %1$s a debitar sua conta do Cash App para este pagamento e futuros pagamentos, em conformidade com os temos da empresa %2$s, até que a autorização seja revogada. É possível alterar isso a qualquer momento nas Configurações do Cash App.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Dados de contato</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Continuar</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">Banco EPS</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">Banco do FPX</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">O IBAN inserido está incompleto.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->

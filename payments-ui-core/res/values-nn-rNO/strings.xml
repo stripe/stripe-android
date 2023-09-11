@@ -4,16 +4,22 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Betal i <num_installments/> rentefrie betalingar på <installment_price/> med <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Tilbake</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Kontonummeret ditt er ufullstendig.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Fakturaadresse</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">BLIK-kode</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Ved å gå vidare gir du %1$s tillating til å debitere Cash App-kontoen din for denne betalinga og framtidige betalingar i samsvar med %2$s sine vilkår, fram til denne autoriseringa blir trekt tilbake. Du kan endre dette når som helst i Cash App-innstillingane.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kontaktopplysningar</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Fortsett</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">EPS Bank</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX-bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Du skreiv inn eit ufullstendig IBAN-nummer.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
