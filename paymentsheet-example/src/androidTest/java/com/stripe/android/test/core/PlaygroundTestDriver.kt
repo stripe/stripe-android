@@ -447,8 +447,10 @@ class PlaygroundTestDriver(
 
                 when (val authAction = testParameters.authorizationAction) {
                     is AuthorizeAction.DisplayQrCode -> {
-                        closeQrCodeButton.wait(5000)
-                        onView(withText("CLOSE")).perform(click())
+                        if (testParameters.intentType != IntentType.Setup) {
+                            closeQrCodeButton.wait(5000)
+                            onView(withText("CLOSE")).perform(click())
+                        }
                     }
                     is AuthorizeAction.AuthorizePayment -> {}
                     is AuthorizeAction.AuthorizeSetup -> {}
