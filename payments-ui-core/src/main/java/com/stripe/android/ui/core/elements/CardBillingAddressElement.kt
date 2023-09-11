@@ -1,7 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.address.FieldType
 import com.stripe.android.uicore.elements.AddressElement
@@ -30,8 +30,8 @@ class CardBillingAddressElement(
     ),
     sameAsShippingElement: SameAsShippingElement?,
     shippingValuesMap: Map<IdentifierSpec, String?>?,
-    private val collectionMode: CardBillingDetailsCollectionConfiguration.AddressCollectionMode =
-        CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+    private val collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode =
+        BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
 ) : AddressElement(
     identifier,
     addressRepository,
@@ -47,15 +47,15 @@ class CardBillingAddressElement(
     val hiddenIdentifiers: Flow<Set<IdentifierSpec>> =
         countryDropdownFieldController.rawFieldValue.map { countryCode ->
             when (collectionMode) {
-                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
                     FieldType.values()
                         .map { it.identifierSpec }
                         .toSet()
                 }
-                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
                     emptySet()
                 }
-                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
                     when (countryCode) {
                         "US", "GB", "CA" -> {
                             FieldType.values()
