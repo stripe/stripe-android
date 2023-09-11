@@ -80,8 +80,8 @@
   <string name="stripe_becs_mandate_acceptance">\n    Esitades oma pangakonto andmed ja kinnitades selle makse, nõustute käesoleva\n    otsekorralduse taotluse ja otsekorralduse taotluse teenuselepinguga ning volitate ettevõtet\n    Stripe Payments Australia Pty Ltd ACN 160 180 343, otsekorralduse kasutaja ID number 507156\n    („Stripe“), sooritama teenuse Bulk Electronic Clearing System (BECS)\n    kaudu %1$s („Kaupleja“) nimel makseid teie kontolt kooskõlas teie ja Kaupleja\n    vahel kokku lepitud summades. Te kinnitate, et olete ülalnimetatud konto\n    omanik või volitatud allkirjaõiguslik isik.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Kontonumber</string>
-  <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="stripe_becs_widget_account_number_incomplete">Teie kontonumber on puudulik.</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">Sisestatud kontonumber on puudulik.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="stripe_becs_widget_account_number_required">Kontonumbri esitamine on kohustuslik.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->

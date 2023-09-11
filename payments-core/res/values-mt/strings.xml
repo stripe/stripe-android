@@ -80,8 +80,8 @@
   <string name="stripe_becs_mandate_acceptance">\n    Meta tipprovdi d-dettalji tal-kont bankarju tiegħek u tikkonferma dan il-ħlas, inti\n    taqbel ma\' din it-Talba ta\' Debitu Dirett u l-ftehim ta\' servizz tat-Talba ta\'\n    Debitu Dirett, u tawtorizza lil Stripe Payments Australia Pty Ltd ACN 160 180 343\n    Utent ta\' Debitu Dirett bin-numru tal-ID 507156 (“Stripe”) biex tiddebita l-kont tiegħek\n    permezz tas-Sistema tal-Ikklirjar Elettroniku bl-Ingrossa (BECS) f\'isem %1$s\n    (in-“Negozjant”) għal kwalunkwe ammonti kkomunikati b\'mod separat lilek min-Negozjant.\n    Inti tiċċertifika li inti detentur ta\' kont jew li inti firmatarju awtorizzat fil-kont elenkat hawn fuq.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">In-numru tal-kont</string>
-  <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="stripe_becs_widget_account_number_incomplete">In-numru tal-kont tiegħek mhux komplut.</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">In-numru tal-kont li daħħalt mhux komplut.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="stripe_becs_widget_account_number_required">In-numru tal-kont tiegħek huwa meħtieġ.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->

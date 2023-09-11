@@ -80,8 +80,8 @@
   <string name="stripe_becs_mandate_acceptance">\n    Indem Sie Ihre Bankkontodetails angeben und diese Zahlung bestätigen, stimmen Sie dieser\n   Lastschriftanfrage und der Dienstleistungsvereinbarung zu Lastschriftenanfragen zu und autorisieren\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Lastschriftnutzer-ID, Nummer 507156\n    (\"Stripe\"), Ihr Konto über das Bulk Electronic Clearing System (BECS) im\n    Namen von %1$s (der \"Händler\") mit jedem mit dem Händler separat abgesprochenen\n    Betrag zu belasten. Sie bestätigen ferner, dass Sie entweder Kontoinhaber/in oder Zeichnungsberechtigter/Zeichnungsberechtigte\n    des oben angeführten Kontos sind.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Kontonummer</string>
-  <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="stripe_becs_widget_account_number_incomplete">Die Kontonummer ist unvollständig.</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">Die von Ihnen eingegebene Kontonummer ist unvollständig.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="stripe_becs_widget_account_number_required">Ihre Kontonummer ist erforderlich.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->

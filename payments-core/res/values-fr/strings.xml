@@ -80,8 +80,8 @@
   <string name="stripe_becs_mandate_acceptance">\n    En fournissant vos données bancaires et en confirmant ce paiement, vous acceptez cette\n    demande de prélèvement automatique et les conditions d\'utilisation du service correspondantes, et autorisez\n    Stripe Account Australia Pty Ltd, ACN 160 180 343, ID de compte de prélèvement numéro 507156\n    (\"Stripe\"), à débiter votre compte par le biais du système de prélèvement BECS\n    pour le compte de %1$s (le \"marchand\") pour tout montant vous étant communiqué séparément\n    par ce dernier. Vous certifiez que vous êtes le titulaire ou un signataire autorisé\n    du compte susmentionné.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Numéro de compte</string>
-  <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="stripe_becs_widget_account_number_incomplete">Votre numéro de compte est incomplet.</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">Le numéro de compte saisi est incomplet.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="stripe_becs_widget_account_number_required">Votre numéro de compte est obligatoire.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
