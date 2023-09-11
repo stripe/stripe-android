@@ -6,6 +6,8 @@
   <string name="stripe_bank_account_ending_in">Remove bank account ending in %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Confirm the payment in your bank\'s app within %s to complete the purchase.</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">An error occurred. Check your connection and try again.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[By continuing, you agree to authorize payments pursuant to <terms>these terms</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -71,6 +73,4 @@
   <string name="stripe_upi_polling_payment_failed_message">Please go back and select another payment method</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Payment failed</string>
-  <!-- Text that is displayed when a network error occurs -->
-  <string name="stripe_network_error_message">An error occurred. Check your connection and try again.</string>
 </resources>

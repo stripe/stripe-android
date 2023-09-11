@@ -80,8 +80,8 @@
   <string name="stripe_becs_mandate_acceptance">\n    Παρέχοντας τα στοιχεία του αριθμού λογαριασμού σας και επιβεβαιώνοντας αυτήν την πληρωμή, συμφωνείτε με το παρόν\n    Αίτημα άμεσης χρέωσης και με τη σύμβαση παροχής υπηρεσιών Αιτήματος άμεσης χρέωσης και εξουσιοδοτείτε τη\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 με Αναγνωριστικό αριθμό χρήστη 507156 για την Άμεση χρέωση\n    (η «Stripe»), προκειμένου να χρεώνει τον λογαριασμό σας μέσω του συστήματος Bulk Electronic Clearing System (BECS) για\n    λογαριασμό της %1$s (ο «Έμπορος») για οποιαδήποτε ποσά που αναφέρει ο Έμπορος\n    μόνο σε εσάς. Επιβεβαιώνετε είτε ότι είστε ο δικαιούχος του λογαριασμού είτε εξουσιοδοτημένος\n    υπογράφων για τον προαναφερθέντα λογαριασμό.</string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Αριθμός λογαριασμού</string>
-  <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="stripe_becs_widget_account_number_incomplete">Ο αριθμός λογαριασμού σας είναι ελλιπής.</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">Ο αριθμός λογαριασμού που εισαγάγατε είναι ελλιπής.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="stripe_becs_widget_account_number_required">Ο αριθμός λογαριασμού σας απαιτείται.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->

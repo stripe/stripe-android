@@ -4,16 +4,22 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Betala av genom <num_installments/> räntefria delbetalningar på <installment_price/> med <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Tillbaka</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Kontonumret är ofullständigt.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Faktureringsadress</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">BLIK-kod</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Genom att fortsätta godkänner du att %1$s debiterar ditt Cash App-konto för den här betalningen och framtida betalningar i enlighet med %2$ss villkor, tills detta godkännande återkallas. Du kan när som helst ändra detta i dina Cash App-inställningar.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kontaktinformation</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Fortsätt</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">EPS Bank</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Angivet IBAN är ofullständigt.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
