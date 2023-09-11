@@ -171,7 +171,7 @@ sealed interface StripeIntent : StripeModel {
     sealed class NextActionData : StripeModel {
 
         @Parcelize
-        data class DisplayOxxoDetails constructor(
+        data class DisplayOxxoDetails(
             /**
              * The timestamp after which the OXXO expires.
              */

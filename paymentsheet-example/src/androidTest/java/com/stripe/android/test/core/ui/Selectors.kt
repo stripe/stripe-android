@@ -37,6 +37,7 @@ import java.util.Locale
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.R as UiCoreR
 
 /**
@@ -154,6 +155,8 @@ class Selectors(
 
     fun browserWindow(browser: BrowserUI): UiObject? = browserWindow(device, browser)
 
+    val closeQrCodeButton = UiAutomatorText("Close", device = device)
+
     fun blockUntilAuthorizationPageLoaded(isSetup: Boolean) {
         assertThat(
             device.wait(
@@ -258,12 +261,20 @@ class Selectors(
         getResourceString(CoreR.string.stripe_address_label_zip_code)
     )
 
+    fun getPostalCode() = composeTestRule.onNodeWithText(
+        getResourceString(CoreR.string.stripe_address_label_postal_code)
+    )
+
     fun getAuBsb() = composeTestRule.onNodeWithText(
         getResourceString(StripeR.string.stripe_becs_widget_bsb)
     )
 
     fun getAuAccountNumber() = composeTestRule.onNodeWithText(
         getResourceString(StripeR.string.stripe_becs_widget_account_number)
+    )
+
+    fun getBoletoTaxId() = composeTestRule.onNodeWithText(
+        getResourceString(PaymentsUiCoreR.string.stripe_boleto_tax_id_label)
     )
 
     fun getGoogleDividerText() = composeTestRule.onNodeWithText(

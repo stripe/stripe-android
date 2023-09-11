@@ -12,6 +12,7 @@ import androidx.test.espresso.Espresso
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
+import com.stripe.android.ui.core.elements.BoletoTaxIdSpec
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
@@ -27,7 +28,8 @@ class FieldPopulator(
     private val selectors: Selectors,
     private val testParameters: TestParameters,
     private val populateCustomLpmFields: () -> Unit,
-    private val verifyCustomLpmFields: () -> Unit = {}
+    private val verifyCustomLpmFields: () -> Unit = {},
+    private val values: Values,
 ) {
     private val formSpec = testParameters.paymentMethod.formSpec
 
@@ -94,10 +96,11 @@ class FieldPopulator(
         val cardExpiration: String = "1230",
         val cardCvc: String = "321",
         val auBecsBsbNumber: String = "000000",
-        val auBecsAccountNumber: String = "000123456"
+        val auBecsAccountNumber: String = "000123456",
+        val boletoTaxId: String = "00000000000",
     )
 
-    private fun verifyPlatformLpmFields(values: Values = Values()) {
+    private fun verifyPlatformLpmFields() {
         formSpec.items.forEach {
             when (it) {
                 is BsbSpec -> {
@@ -129,15 +132,26 @@ class FieldPopulator(
                 }
                 is AddressSpec -> {
                     if (testParameters.billing == Billing.Off) {
-                        // TODO: This will not work when other countries are selected or defaulted
                         selectors.getLine1()
                             .assertContentDescriptionEquals(values.line1)
                         selectors.getCity()
                             .assertContentDescriptionEquals(values.city)
-                        selectors.getZip()
-                            .assertContentDescriptionEquals(values.zip)
-                        selectors.getState()
-                            .assertTextContains(values.state)
+
+                        if (testParameters.merchantCountryCode == "US") {
+                            selectors.getZip()
+                                .assertContentDescriptionEquals(values.zip)
+                        } else {
+                            selectors.getPostalCode()
+                                .assertContentDescriptionEquals(values.zip)
+                        }
+
+                        if (testParameters.merchantCountryCode == "US") {
+                            selectors.getState()
+                                .assertTextContains(values.state)
+                        } else {
+                            selectors.getState()
+                                .assertContentDescriptionEquals(values.state)
+                        }
                     }
                 }
                 is CountrySpec -> {}
@@ -161,12 +175,18 @@ class FieldPopulator(
         }
     }
 
-    private fun populatePlatformLpmFields(values: Values = Values()) {
+    private fun populatePlatformLpmFields() {
         formSpec.items.forEach {
             when (it) {
                 is BsbSpec -> {
                     selectors.getAuBsb().apply {
                         performTextInput(values.auBecsBsbNumber)
+                    }
+                }
+                is BoletoTaxIdSpec -> {
+                    selectors.getBoletoTaxId().apply {
+                        performScrollTo()
+                        performTextInput(values.boletoTaxId)
                     }
                 }
                 is CardDetailsSectionSpec -> {
@@ -202,15 +222,11 @@ class FieldPopulator(
                 is KlarnaCountrySpec -> {}
                 is CardBillingSpec -> {
                     if (testParameters.billing == Billing.Off) {
-                        // TODO: This will not work when other countries are selected or defaulted
-                        selectors.getZip().apply {
-                            performTextInput(values.zip)
-                        }
+                        populateZip()
                     }
                 }
                 is AddressSpec -> {
                     if (testParameters.billing == Billing.Off) {
-                        // TODO: This will not work when other countries are selected or defaulted
                         selectors
                             .getLine1()
                             .performScrollTo()
@@ -223,24 +239,42 @@ class FieldPopulator(
                             .performClick()
                             .performTextInput(values.city)
 
-                        selectors
-                            .getZip()
-                            .performScrollTo()
-                            .performClick()
-                            .performTextInput(values.zip)
+                        populateZip()
 
-                        selectors
-                            .getState()
-                            .performScrollTo()
-                            .performClick()
+                        if (testParameters.merchantCountryCode == "US") {
+                            selectors
+                                .getState()
+                                .performScrollTo()
+                                .performClick()
 
-                        selectors.selectState(values.state)
+                            selectors.selectState(values.state)
+                        } else {
+                            selectors
+                                .getState()
+                                .performScrollTo()
+                                .performClick()
+                                .performTextInput(values.state)
+                        }
                     }
                 }
                 is CountrySpec -> {}
                 is SimpleTextSpec -> {}
                 is DropdownSpec -> {}
                 else -> {}
+            }
+        }
+    }
+
+    private fun populateZip() {
+        if (testParameters.merchantCountryCode == "US") {
+            selectors.getZip().apply {
+                performScrollTo()
+                performTextInput(values.zip)
+            }
+        } else {
+            selectors.getPostalCode().apply {
+                performScrollTo()
+                performTextInput(values.zip)
             }
         }
     }
