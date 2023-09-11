@@ -70,6 +70,8 @@ class Processor
             value = key[:value]
 
             is_new_android_key = !lokalise_android_keys.include?(key_name)
+            lokalise_entry = find_lokalise_entry_for_key(key_name)
+            is_missing_filename = lokalise_entry['filenames']['android'].empty?
 
             if is_new_android_key
                 existing_key = find_existing_key(value)
@@ -79,6 +81,8 @@ class Processor
                 else
                     unsynced_keys << Action.new("update", key, existing_key)
                 end
+            elsif is_missing_filename
+                unsynced_keys << Action.new("update", key, lokalise_entry)
             end
         end
 
@@ -111,6 +115,10 @@ class Processor
         end
 
         return nil
+    end
+
+    def find_lokalise_entry_for_key(local_key)
+        @all_keys.find { |key| key['key_name']['android'] == local_key }
     end
 
     def escape_for_lokalise(value)
