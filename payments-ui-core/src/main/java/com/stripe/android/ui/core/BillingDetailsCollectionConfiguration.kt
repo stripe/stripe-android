@@ -6,7 +6,7 @@ import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-data class CardBillingDetailsCollectionConfiguration(
+data class BillingDetailsCollectionConfiguration(
     val collectName: Boolean = false,
     val collectEmail: Boolean = false,
     val collectPhone: Boolean = false,

@@ -23,6 +23,8 @@ internal data class FormArguments(
     val initialPaymentMethodCreateParams: PaymentMethodCreateParams? = null,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
         PaymentSheet.BillingDetailsCollectionConfiguration(),
+    val requiresMandate: Boolean = false,
+    val requiredFields: List<IdentifierSpec> = emptyList()
 ) : Parcelable
 
 internal fun FormArguments.getInitialValuesMap(): Map<IdentifierSpec, String?> {
