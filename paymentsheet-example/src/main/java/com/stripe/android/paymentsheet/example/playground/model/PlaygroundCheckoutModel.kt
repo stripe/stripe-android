@@ -52,6 +52,7 @@ data class CheckoutCurrency(val value: String) {
         val AUD = CheckoutCurrency("aud")
         val GBP = CheckoutCurrency("gbp")
         val PLN = CheckoutCurrency("pln")
+        val SEK = CheckoutCurrency("sek")
     }
 }
 

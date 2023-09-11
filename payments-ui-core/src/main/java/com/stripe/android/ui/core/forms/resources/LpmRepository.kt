@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.forms.PaypalRequirement
 import com.stripe.android.paymentsheet.forms.RevolutPayRequirement
 import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
+import com.stripe.android.paymentsheet.forms.SwishRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.paymentsheet.forms.UpiRequirement
 import com.stripe.android.paymentsheet.forms.ZipRequirement
@@ -598,6 +599,17 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = KonbiniRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields),
+        )
+        PaymentMethod.Type.Swish.code -> SupportedPaymentMethod(
+            code = "swish",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_swish,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_swish,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = SwishRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields),
         )
         else -> null

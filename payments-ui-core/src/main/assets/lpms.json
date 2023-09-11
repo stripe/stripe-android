@@ -1086,5 +1086,14 @@
         "type": "konbini_confirmation_number"
       }
     ]
+  },
+  {
+    "type": "swish",
+    "async": false,
+    "fields": [],
+    "selector_icon": {
+      "light_theme_png": null,
+      "light_theme_svg": null
+    }
   }
 ]

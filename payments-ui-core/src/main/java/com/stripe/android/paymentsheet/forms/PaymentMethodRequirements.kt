@@ -295,3 +295,9 @@ internal val KonbiniRequirement = PaymentMethodRequirements(
     siRequirements = null,
     confirmPMFromCustomer = null,
 )
+
+internal val SwishRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = false,
+)
