@@ -137,15 +137,9 @@ class FieldPopulator(
                         selectors.getCity()
                             .assertContentDescriptionEquals(values.city)
 
-                        if (testParameters.merchantCountryCode == "US") {
-                            selectors.getZip()
-                                .assertContentDescriptionEquals(values.zip)
-                        } else {
-                            selectors.getPostalCode()
-                                .assertContentDescriptionEquals(values.zip)
-                        }
+                        validateZip()
 
-                        if (testParameters.merchantCountryCode == "US") {
+                        if (usesStateDropdown()) {
                             selectors.getState()
                                 .assertTextContains(values.state)
                         } else {
@@ -165,9 +159,7 @@ class FieldPopulator(
                 is KlarnaCountrySpec -> {}
                 is CardBillingSpec -> {
                     if (testParameters.billing == Billing.Off) {
-                        // TODO: This will not work when other countries are selected or defaulted
-                        selectors.getZip()
-                            .assertContentDescriptionEquals(values.zip)
+                        validateZip()
                     }
                 }
                 else -> {}
@@ -241,7 +233,7 @@ class FieldPopulator(
 
                         populateZip()
 
-                        if (testParameters.merchantCountryCode == "US") {
+                        if (usesStateDropdown()) {
                             selectors
                                 .getState()
                                 .performScrollTo()
@@ -266,7 +258,7 @@ class FieldPopulator(
     }
 
     private fun populateZip() {
-        if (testParameters.merchantCountryCode == "US") {
+        if (usesZip()) {
             selectors.getZip().apply {
                 performScrollTo()
                 performTextInput(values.zip)
@@ -277,5 +269,23 @@ class FieldPopulator(
                 performTextInput(values.zip)
             }
         }
+    }
+
+    private fun validateZip() {
+        if (usesZip()) {
+            selectors.getZip()
+                .assertContentDescriptionEquals(values.zip)
+        } else {
+            selectors.getPostalCode()
+                .assertContentDescriptionEquals(values.zip)
+        }
+    }
+
+    private fun usesStateDropdown(): Boolean {
+        return testParameters.merchantCountryCode in setOf("US", "GB")
+    }
+
+    private fun usesZip(): Boolean {
+        return testParameters.merchantCountryCode in setOf("US", "GB")
     }
 }
