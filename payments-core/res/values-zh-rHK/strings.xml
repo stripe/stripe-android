@@ -125,7 +125,7 @@
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">我們未能驗證您的支付方式。請選擇另一支付方式並重試。</string>
   <!-- Error when 3DS2 authentication timed out. -->
-  <string name="stripe_failure_reason_timed_out">驗證您的付款方式時超時 -- 請重試</string>
+  <string name="stripe_failure_reason_timed_out">驗證您的支付方式時超時 -- 請重試</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="stripe_fpx_bank_offline">%s - 線下</string>
   <!-- Error message when a payment method gets declined. -->

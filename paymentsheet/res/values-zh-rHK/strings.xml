@@ -19,7 +19,7 @@
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">保存地址</string>
   <!-- Title for shipping address entry section -->
-  <string name="stripe_paymentsheet_address_element_shipping_address">收货地址</string>
+  <string name="stripe_paymentsheet_address_element_shipping_address">收貨地址</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">選擇一個支付方式</string>
   <string name="stripe_paymentsheet_close">關閉</string>

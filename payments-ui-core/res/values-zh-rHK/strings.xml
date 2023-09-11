@@ -4,16 +4,22 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[用 <img/> 分 <num_installments/> 支付，無利息，每期 <installment_price/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">上一步</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">您的帳號不完整。</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">帳單地址</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">BLIK 代碼</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">繼續操作，即表示您授權 %1$s 按照 %2$s 的條款從您的 Cash App 賬戶中扣取該款項及未來的款項，直至撤銷授權。您可以隨時在 Cash App 設置中進行修改。</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">聯絡資訊</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">繼續</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">EPS 銀行</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX 銀行</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">您輸入的 IBAN 不完整。</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
