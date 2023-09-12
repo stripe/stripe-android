@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.30.0 - 2023-09-11
+
 ### PaymentSheet
 * [ADDED] PaymentSheet now supports the following payment methods for PaymentIntents:
   * [7274](https://github.com/stripe/stripe-android/pull/7274) Alipay
