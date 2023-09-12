@@ -34,7 +34,6 @@ class ShippingInfoWidget @JvmOverloads constructor(
             this
         )
     }
-    private val postalCodeValidator: PostalCodeValidator = PostalCodeValidator()
 
     /**
      * Address fields that should be optional.
@@ -178,7 +177,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
         countryAutoCompleteTextView.validateCountry()
         val selectedCountry = countryAutoCompleteTextView.selectedCountry
 
-        val isPostalCodeValid = postalCodeValidator.isValid(
+        val isPostalCodeValid = PostalCodeValidator.isValid(
             postalCode,
             selectedCountry?.code?.value,
             optionalFields,

@@ -68,8 +68,6 @@ class CardFormView @JvmOverloads constructor(
 
     private val countryLayout = viewBinding.countryLayout
 
-    private val postalCodeValidator = PostalCodeValidator()
-
     private var style: Style = Style.Standard
 
     private val errorsMap = mutableMapOf<Fields, String?>()
@@ -153,7 +151,7 @@ class CardFormView @JvmOverloads constructor(
                 cvc = cardMultilineWidget.cvcEditText.text?.toString(),
                 address = Address.Builder()
                     .setCountryCode(countryLayout.selectedCountryCode)
-                    .setPostalCode(postalCodeView.text?.toString())
+                    .setPostalCode(postalCodeView.formattedPostalCode)
                     .build()
             )
         }
@@ -268,18 +266,25 @@ class CardFormView @JvmOverloads constructor(
     }
 
     private fun updatePostalCodeViewLocale(countryCode: CountryCode?) {
-        if (CountryCode.isUS(countryCode)) {
-            postalCodeView.config = PostalCodeEditText.Config.US
-            postalCodeView.setErrorMessage(resources.getString(UiCoreR.string.stripe_address_zip_invalid))
-        } else {
-            postalCodeView.config = PostalCodeEditText.Config.Global
-            postalCodeView.setErrorMessage(resources.getString(R.string.stripe_address_postal_code_invalid))
+        when (countryCode) {
+            CountryCode.US -> {
+                postalCodeView.config = PostalCodeEditText.Config.US
+                postalCodeView.setErrorMessage(resources.getString(UiCoreR.string.stripe_address_zip_invalid))
+            }
+            CountryCode.CA -> {
+                postalCodeView.config = PostalCodeEditText.Config.CA
+                postalCodeView.setErrorMessage(resources.getString(R.string.stripe_address_postal_code_invalid))
+            }
+            else -> {
+                postalCodeView.config = PostalCodeEditText.Config.Global
+                postalCodeView.setErrorMessage(resources.getString(R.string.stripe_address_postal_code_invalid))
+            }
         }
     }
 
     private fun isPostalValid() =
         countryLayout.selectedCountryCode?.let { countryCode ->
-            postalCodeValidator.isValid(
+            PostalCodeValidator.isValid(
                 postalCode = postalCodeView.postalCode.orEmpty(),
                 countryCode = countryCode.value
             )

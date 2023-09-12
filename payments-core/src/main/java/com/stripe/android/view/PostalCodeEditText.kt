@@ -12,7 +12,6 @@ import androidx.annotation.StringRes
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
-import java.util.regex.Pattern
 import kotlin.properties.Delegates
 import androidx.appcompat.R as AppCompatR
 import com.stripe.android.core.R as CoreR
@@ -25,21 +24,27 @@ class PostalCodeEditText @JvmOverloads constructor(
 
     internal var config: Config by Delegates.observable(
         Config.Global
-    ) { _, oldValue, newValue ->
+    ) { _, _, newValue ->
         when (newValue) {
             Config.Global -> configureForGlobal()
+            Config.CA -> configureForCA()
             Config.US -> configureForUs()
         }
     }
 
     internal val postalCode: String?
-        get() {
-            return if (config == Config.US) {
-                fieldText.takeIf {
-                    ZIP_CODE_PATTERN.matcher(fieldText).matches()
+        get() = fieldText.takeIf { hasValidPostal() }
+
+    internal val formattedPostalCode: String?
+        get() = when (config) {
+            Config.Global, Config.US -> {
+                postalCode
+            }
+            Config.CA -> {
+                postalCode?.let {
+                    val normalized = it.uppercase().replace("\\s+", "")
+                    normalized.take(3) + " " + normalized.takeLast(3)
                 }
-            } else {
-                fieldText
             }
         }
 
@@ -82,6 +87,16 @@ class PostalCodeEditText @JvmOverloads constructor(
     }
 
     /**
+     * Configure the field for Canadian users
+     */
+    private fun configureForCA() {
+        updateHint(CoreR.string.stripe_address_label_postal_code)
+        keyListener = TextKeyListener.getInstance()
+        inputType = InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS or InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
+        filters = arrayOf()
+    }
+
+    /**
      * If a `TextInputLayout` is an ancestor of this view, set the hint on it. Otherwise, set
      * the hint on this view.
      */
@@ -109,21 +124,23 @@ class PostalCodeEditText @JvmOverloads constructor(
         return null
     }
 
-    internal enum class Config {
-        Global,
-        US
+    internal enum class Config(val countryCode: String) {
+        Global(countryCode = ""),
+        CA(countryCode = "CA"),
+        US(countryCode = "US"),
     }
 
     /**
      * Returns if the postal is valid. If config is not US, any non-empty postal is valid.
      */
-    internal fun hasValidPostal() =
-        config == Config.US && ZIP_CODE_PATTERN.matcher(fieldText)
-            .matches() || config == Config.Global && fieldText.isNotEmpty()
+    internal fun hasValidPostal(): Boolean {
+        return PostalCodeValidator.isValid(
+            postalCode = fieldText,
+            countryCode = config.countryCode,
+        )
+    }
 
     private companion object {
         private const val MAX_LENGTH_US = 5
-
-        private val ZIP_CODE_PATTERN = Pattern.compile("^[0-9]{5}$")
     }
 }

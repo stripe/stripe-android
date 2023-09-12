@@ -1,15 +1,10 @@
 package com.stripe.android.view
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.CountryUtils
 import java.util.Locale
 import java.util.regex.Pattern
 
-/**
- * Validation rules for postal codes
- */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-class PostalCodeValidator {
+internal object PostalCodeValidator {
 
     /**
      * 1. if there is a regex for the country code, validate the postal code against it
@@ -50,21 +45,25 @@ class PostalCodeValidator {
         }
     }
 
-    private companion object {
-        private val POSTAL_CODE_PATTERNS = mapOf(
-            Locale.US.country to
-                Pattern.compile("^[0-9]{5}(?:-[0-9]{4})?$")
-        )
+    private const val usZipCodeRegex = "^[0-9]{5}(?:-[0-9]{4})?$"
 
-        private fun isPostalCodeNotRequired(
-            optionalShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>,
-            hiddenShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>
-        ): Boolean {
-            return optionalShippingInfoFields.contains(
-                ShippingInfoWidget.CustomizableShippingField.PostalCode
-            ) || hiddenShippingInfoFields.contains(
-                ShippingInfoWidget.CustomizableShippingField.PostalCode
-            )
-        }
+    private val canadaPostalCodeRegex = """
+            ^[ABCEGHJKLMNPRSTVXY][0-9][ABCEGHJKLMNPRSTVWXYZ]\s?[0-9][ABCEGHJKLMNPRSTVWXYZ][0-9]$
+        """.trimIndent()
+
+    private val POSTAL_CODE_PATTERNS = mapOf(
+        Locale.US.country to Pattern.compile(usZipCodeRegex),
+        Locale.CANADA.country to Pattern.compile(canadaPostalCodeRegex, Pattern.CASE_INSENSITIVE),
+    )
+
+    private fun isPostalCodeNotRequired(
+        optionalShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>,
+        hiddenShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>
+    ): Boolean {
+        return optionalShippingInfoFields.contains(
+            ShippingInfoWidget.CustomizableShippingField.PostalCode
+        ) || hiddenShippingInfoFields.contains(
+            ShippingInfoWidget.CustomizableShippingField.PostalCode
+        )
     }
 }
