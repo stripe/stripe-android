@@ -3,9 +3,10 @@
 ## XX.XX.XX - 2023-XX-XX
 
 ### PaymentSheet
-
 * [ADDED] PaymentSheet now supports the following payment methods for PaymentIntents:
   * [7281](https://github.com/stripe/stripe-android/pull/7281) OXXO
+* [ADDED] PaymentSheet now supports the following payment methods for SetupIntents and PaymentIntents with setup for future usage:
+  * [7282](https://github.com/stripe/stripe-android/pull/7282) Boleto
 
 ## 20.30.1 - 2023-09-11
 
