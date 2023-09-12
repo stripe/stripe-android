@@ -25,7 +25,8 @@ import com.stripe.android.financialconnections.features.consent.FinancialConnect
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
-import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
+import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -100,7 +101,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 businessName = manifest.businessName,
                 stripeDirect = manifest.isStripeDirect ?: false
             ).also {
-                eventTracker.track(PaneLoaded(Pane.ACCOUNT_PICKER))
+                eventTracker.track(PaneLoaded(PANE))
             }
         }.execute { copy(payload = it) }
     }
@@ -139,7 +140,7 @@ internal class AccountPickerViewModel @Inject constructor(
             onFail = {
                 eventTracker.logError(
                     logger = logger,
-                    pane = Pane.ACCOUNT_PICKER,
+                    pane = PANE,
                     extraMessage = "Error retrieving accounts",
                     error = it
                 )
@@ -150,7 +151,7 @@ internal class AccountPickerViewModel @Inject constructor(
             onFail = {
                 eventTracker.logError(
                     logger = logger,
-                    pane = Pane.ACCOUNT_PICKER,
+                    pane = PANE,
                     extraMessage = "Error selecting accounts",
                     error = it
                 )
@@ -211,7 +212,7 @@ internal class AccountPickerViewModel @Inject constructor(
 
     fun onSubmit() {
         viewModelScope.launch {
-            eventTracker.track(ClickLinkAccounts(Pane.ACCOUNT_PICKER))
+            eventTracker.track(ClickLinkAccounts(PANE))
         }
         withState { state ->
             state.payload()?.let {
@@ -233,7 +234,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 sessionId = requireNotNull(manifest.activeAuthSession).id,
                 updateLocalCache = updateLocalCache
             )
-            navigationManager.tryNavigateTo(accountsList.nextPane.destination())
+            navigationManager.tryNavigateTo(accountsList.nextPane.destination(referrer = PANE))
             accountsList
         }.execute {
             copy(selectAccounts = it)
@@ -241,10 +242,10 @@ internal class AccountPickerViewModel @Inject constructor(
     }
 
     fun selectAnotherBank() =
-        navigationManager.tryNavigateTo(Destination.Reset())
+        navigationManager.tryNavigateTo(Reset(referrer = PANE))
 
     fun onEnterDetailsManually() =
-        navigationManager.tryNavigateTo(Destination.ManualEntry())
+        navigationManager.tryNavigateTo(ManualEntry(referrer = PANE))
 
     fun onLoadAccountsAgain() {
         setState { copy(canRetry = false) }
@@ -293,6 +294,8 @@ internal class AccountPickerViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        private val PANE = Pane.ACCOUNT_PICKER
     }
 }
 

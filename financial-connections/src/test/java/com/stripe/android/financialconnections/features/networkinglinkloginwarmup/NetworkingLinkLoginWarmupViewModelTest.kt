@@ -43,7 +43,10 @@ class NetworkingLinkLoginWarmupViewModelTest {
         val viewModel = buildViewModel(NetworkingLinkLoginWarmupState())
 
         viewModel.onContinueClick()
-        navigationManager.assertNavigatedTo(Destination.NetworkingLinkVerification)
+        navigationManager.assertNavigatedTo(
+            destination = Destination.NetworkingLinkVerification,
+            pane = Pane.NETWORKING_LINK_LOGIN_WARMUP
+        )
     }
 
     @Test
@@ -58,6 +61,9 @@ class NetworkingLinkLoginWarmupViewModelTest {
         viewModel.onClickableTextClick("skip_login")
 
         verify(disableNetworking).invoke()
-        navigationManager.assertNavigatedTo(expectedNextPane.destination)
+        navigationManager.assertNavigatedTo(
+            destination = expectedNextPane.destination,
+            pane = Pane.NETWORKING_LINK_LOGIN_WARMUP
+        )
     }
 }

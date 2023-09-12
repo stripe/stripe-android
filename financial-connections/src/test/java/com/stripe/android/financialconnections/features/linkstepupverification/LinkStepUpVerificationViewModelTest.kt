@@ -125,7 +125,10 @@ class LinkStepUpVerificationViewModelTest {
         onConsumerNotFoundCaptor.firstValue()
 
         assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
-        navigationManager.assertNavigatedTo(Destination.InstitutionPicker)
+        navigationManager.assertNavigatedTo(
+            destination = Destination.InstitutionPicker,
+            pane = Pane.LINK_STEP_UP_VERIFICATION
+        )
         eventTracker.assertContainsEvent(
             "linked_accounts.networking.verification.step_up.error",
             mapOf(
@@ -183,7 +186,10 @@ class LinkStepUpVerificationViewModelTest {
                 consumerSession.clientSecret,
                 selectedAccount.id
             )
-            navigationManager.assertNavigatedTo(Destination.Success)
+            navigationManager.assertNavigatedTo(
+                Destination.Success,
+                pane = Pane.LINK_STEP_UP_VERIFICATION
+            )
         }
 
     private suspend fun getManifestReturnsManifestWithEmail(

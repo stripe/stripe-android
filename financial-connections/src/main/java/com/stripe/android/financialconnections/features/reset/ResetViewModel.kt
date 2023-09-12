@@ -33,9 +33,9 @@ internal class ResetViewModel @Inject constructor(
         suspend {
             val updatedManifest = linkMoreAccounts()
             nativeAuthFlowCoordinator().emit(ClearPartnerWebAuth)
-            eventTracker.track(PaneLoaded(Pane.RESET))
+            eventTracker.track(PaneLoaded(PANE))
             navigationManager.tryNavigateTo(
-                updatedManifest.nextPane.destination(),
+                updatedManifest.nextPane.destination(referrer = PANE),
                 popUpToCurrent = true,
                 inclusive = true
             )
@@ -47,7 +47,7 @@ internal class ResetViewModel @Inject constructor(
             ResetState::payload,
             onFail = { error ->
                 logger.error("Error linking more accounts", error)
-                eventTracker.track(Error(Pane.RESET, error))
+                eventTracker.track(Error(PANE, error))
             },
         )
     }
@@ -66,6 +66,8 @@ internal class ResetViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        internal val PANE = Pane.RESET
     }
 }
 

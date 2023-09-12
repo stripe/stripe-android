@@ -50,7 +50,10 @@ internal sealed class Destination(
         var paneLaunchedTriggered by rememberSaveable { mutableStateOf(false) }
         if (!paneLaunchedTriggered) {
             LaunchedEffect(Unit) {
-                viewModel.onPaneLaunched(navBackStackEntry.destination.pane)
+                viewModel.onPaneLaunched(
+                    referrer = referrer(navBackStackEntry),
+                    pane = navBackStackEntry.destination.pane
+                )
                 paneLaunchedTriggered = true
             }
         }
@@ -62,13 +65,25 @@ internal sealed class Destination(
      *
      * @param args a map of arguments to be appended to the route
      */
-    abstract operator fun invoke(args: Map<String, String?> = emptyMap()): String
+    abstract operator fun invoke(
+        referrer: Pane?,
+        args: Map<String, String?> = emptyMap()
+    ): String
 
     sealed class NoArgumentsDestination(
         route: String,
         composable: @Composable (NavBackStackEntry) -> Unit
-    ) : Destination(route, emptyList(), composable) {
-        override operator fun invoke(args: Map<String, String?>): String = route
+    ) : Destination(
+        route = route,
+        paramKeys = listOf(KEY_REFERRER),
+        screenBuilder = composable
+    ) {
+        override operator fun invoke(
+            referrer: Pane?,
+            args: Map<String, String?>
+        ): String = route.appendParamValues(
+            KEY_REFERRER to referrer?.value
+        )
     }
 
     object InstitutionPicker : NoArgumentsDestination(
@@ -167,13 +182,22 @@ internal sealed class Destination(
         fun last4(backStackEntry: NavBackStackEntry): String? =
             backStackEntry.arguments?.getString(KEY_LAST4)
 
-        override fun invoke(args: Map<String, String?>): String = route.appendParamValues(
+        override fun invoke(
+            referrer: Pane?,
+            args: Map<String, String?>
+        ): String = route.appendParamValues(
+            KEY_REFERRER to referrer?.value,
             KEY_MICRODEPOSITS to args[KEY_MICRODEPOSITS],
             KEY_LAST4 to args[KEY_LAST4]
         )
     }
 
     companion object {
+        private fun referrer(entry: NavBackStackEntry): Pane? = entry.arguments
+            ?.getString(KEY_REFERRER)
+            ?.let { value -> Pane.values().firstOrNull { it.value == value } }
+
+        const val KEY_REFERRER = "referrer"
         const val KEY_MICRODEPOSITS = "microdeposits"
         const val KEY_LAST4 = "last4"
     }

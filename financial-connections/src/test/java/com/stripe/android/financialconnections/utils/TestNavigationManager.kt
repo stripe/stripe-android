@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.utils
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -35,9 +36,13 @@ internal class TestNavigationManager : NavigationManager {
         )
     }
 
-    fun assertNavigatedTo(destination: Destination) {
+    fun assertNavigatedTo(
+        destination: Destination,
+        pane: Pane,
+        args: Map<String, String?> = emptyMap()
+    ) {
         val last: NavigationIntent = emittedIntents.last()
         assertIs<NavigationIntent.NavigateTo>(last)
-        assertThat(last.route).isEqualTo(destination.fullRoute)
+        assertThat(last.route).isEqualTo(destination(pane, args))
     }
 }

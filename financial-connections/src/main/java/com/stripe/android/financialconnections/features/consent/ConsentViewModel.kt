@@ -17,7 +17,7 @@ import com.stripe.android.financialconnections.features.consent.ConsentState.Vie
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -71,7 +71,7 @@ internal class ConsentViewModel @Inject constructor(
         suspend {
             eventTracker.track(ConsentAgree)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
-            navigationManager.tryNavigateTo(updatedManifest.nextPane.destination())
+            navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = Pane.CONSENT))
         }.execute { copy(acceptConsent = it) }
     }
 
@@ -98,7 +98,7 @@ internal class ConsentViewModel @Inject constructor(
                     }
 
                     ConsentClickableText.MANUAL_ENTRY -> {
-                        navigationManager.tryNavigateTo(Destination.ManualEntry())
+                        navigationManager.tryNavigateTo(ManualEntry(referrer = Pane.CONSENT))
                     }
 
                     ConsentClickableText.LEGAL_DETAILS -> {
