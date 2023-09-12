@@ -160,7 +160,7 @@ internal sealed class Destination(
 
     object ManualEntrySuccess : Destination(
         route = Pane.MANUAL_ENTRY_SUCCESS.value,
-        paramKeys = listOf(KEY_MICRODEPOSITS, KEY_LAST4),
+        paramKeys = listOf(KEY_REFERRER, KEY_MICRODEPOSITS, KEY_LAST4),
         screenBuilder = { ManualEntrySuccessScreen(it) }
     ) {
 

@@ -149,7 +149,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         ) {
             BackHandler(true) {
                 viewModel.onBackClick(navController.currentDestination?.pane)
-                if (navController.popBackStack().not()) onBackPressedDispatcher.onBackPressed()
+                if (navController.popBackStack().not()) viewModel.onBackPressed()
             }
             NavHost(
                 navController,
