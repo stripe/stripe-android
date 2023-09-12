@@ -13,9 +13,12 @@ import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Launched
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Loaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PrepaneClickContinue
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.AuthSessionOpened
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.AuthSessionRetrieved
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.AuthSessionUrlReceived
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Click
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.PrepaneClickContinue
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
@@ -167,7 +170,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 it.browserReadyUrl()?.let { url ->
                     setState { copy(viewEffect = OpenPartnerAuth(url)) }
                     eventTracker.track(
-                        FinancialConnectionsEvent.AuthSessionOpened(
+                        AuthSessionOpened(
                             id = it.id,
                             pane = PANE,
                             flow = it.flow,
@@ -239,7 +242,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         kotlin.runCatching {
             val authSession = getOrFetchSync().manifest.activeAuthSession
             eventTracker.track(
-                FinancialConnectionsEvent.AuthSessionUrlReceived(
+                AuthSessionUrlReceived(
                     url = url,
                     authSessionId = authSession?.id,
                     status = "failed"
@@ -277,7 +280,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             val manifest = getOrFetchSync().manifest
             val authSession = manifest.activeAuthSession
             eventTracker.track(
-                FinancialConnectionsEvent.AuthSessionUrlReceived(
+                AuthSessionUrlReceived(
                     url = url ?: "none",
                     authSessionId = authSession?.id,
                     status = "cancelled"
@@ -291,7 +294,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 val retrievedAuthSession = retrieveAuthorizationSession(authSession.id)
                 val nextPane = retrievedAuthSession.nextPane
                 eventTracker.track(
-                    FinancialConnectionsEvent.AuthSessionRetrieved(
+                    AuthSessionRetrieved(
                         authSessionId = retrievedAuthSession.id,
                         nextPane = nextPane
                     )
@@ -350,7 +353,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             setState { copy(authenticationStatus = Loading()) }
             val authSession = getOrFetchSync().manifest.activeAuthSession
             eventTracker.track(
-                FinancialConnectionsEvent.AuthSessionUrlReceived(
+                AuthSessionUrlReceived(
                     url = url,
                     authSessionId = authSession?.id,
                     status = "success"
@@ -399,12 +402,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     // if clicked uri contains an eventName query param, track click event.
     fun onClickableTextClick(uri: String) = viewModelScope.launch {
         uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
-            eventTracker.track(
-                FinancialConnectionsEvent.Click(
-                    eventName,
-                    pane = PANE
-                )
-            )
+            eventTracker.track(Click(eventName, pane = PANE))
         }
         if (URLUtil.isNetworkUrl(uri)) {
             setState {

@@ -10,11 +10,11 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.AccountSelected
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLinkAccounts
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAccountsSucceeded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.AccountSelected
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.ClickLearnMoreDataAccess
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.ClickLinkAccounts
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.PollAccountsSucceeded
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
@@ -274,7 +274,7 @@ internal class AccountPickerViewModel @Inject constructor(
     fun onLearnMoreAboutDataAccessClick() {
         viewModelScope.launch {
             eventTracker.track(
-                FinancialConnectionsEvent.ClickLearnMoreDataAccess(Pane.ACCOUNT_PICKER)
+                ClickLearnMoreDataAccess(Pane.ACCOUNT_PICKER)
             )
         }
     }

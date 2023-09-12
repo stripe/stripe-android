@@ -8,8 +8,8 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Error
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
@@ -99,7 +99,7 @@ internal class ManualEntryViewModel @Inject constructor(
             ManualEntryState::linkPaymentAccount,
             onFail = {
                 logger.error("Error linking payment account", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(PANE, it))
+                eventTracker.track(Error(PANE, it))
             },
         )
     }

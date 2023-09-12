@@ -1,5 +1,8 @@
 package com.stripe.android.financialconnections
 
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventListener
+
 object FinancialConnections {
 
     private var eventListener: FinancialConnectionsEventListener? = null
@@ -16,16 +19,7 @@ object FinancialConnections {
         this.eventListener = null
     }
 
-    internal fun emitEvent(event: FinancialConnectionsPublicEvent) {
-        eventListener?.onEvent(event)
+    internal fun emitEvent(event: FinancialConnectionsEvent) {
+        eventListener?.invoke(event)
     }
-
-}
-
-fun interface FinancialConnectionsEventListener {
-    fun onEvent(event: FinancialConnectionsPublicEvent)
-}
-
-sealed class FinancialConnectionsPublicEvent {
-    class Launched(pane: String) : FinancialConnectionsPublicEvent()
 }

@@ -2,13 +2,15 @@ package com.stripe.android.financialconnections.utils
 
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Exposure
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class ExperimentsTest {
 
     private val tracker: FinancialConnectionsAnalyticsTracker = mock()
@@ -45,7 +47,7 @@ internal class ExperimentsTest {
         )
 
         verify(tracker).track(
-            FinancialConnectionsEvent.Exposure(
+            Exposure(
                 experimentName = Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO.key,
                 assignmentEventId = manifest.assignmentEventId!!,
                 accountHolderId = manifest.accountholderToken!!
