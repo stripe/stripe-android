@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.forms.AmazonPayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
 import com.stripe.android.paymentsheet.forms.BlikRequirement
+import com.stripe.android.paymentsheet.forms.BoletoRequirement
 import com.stripe.android.paymentsheet.forms.CardRequirement
 import com.stripe.android.paymentsheet.forms.CashAppPayRequirement
 import com.stripe.android.paymentsheet.forms.EpsRequirement
@@ -552,6 +553,17 @@ class LpmRepository constructor(
             darkThemeIconUrl = null,
             tintIconOnSelection = false,
             requirement = OxxoRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields),
+        )
+        PaymentMethod.Type.Boleto.code -> SupportedPaymentMethod(
+            code = "boleto",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_boleto,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_boleto,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = BoletoRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields),
         )
         else -> null

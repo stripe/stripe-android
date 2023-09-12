@@ -87,25 +87,36 @@ enum class Browser {
 sealed interface AuthorizeAction {
 
     val text: String
+    val requiresBrowser: Boolean
 
     object PollingSucceedsAfterDelay : AuthorizeAction {
         override val text: String = "POLLING SUCCEEDS AFTER DELAY"
+        override val requiresBrowser: Boolean = false
     }
 
     object AuthorizePayment : AuthorizeAction {
         override val text: String = "AUTHORIZE TEST PAYMENT"
+        override val requiresBrowser: Boolean = true
     }
 
     object AuthorizeSetup : AuthorizeAction {
         override val text: String = "AUTHORIZE TEST SETUP"
+        override val requiresBrowser: Boolean = true
+    }
+
+    object DisplayQrCode : AuthorizeAction {
+        override val text: String = "Display QR code"
+        override val requiresBrowser: Boolean = false
     }
 
     data class Fail(val expectedError: String) : AuthorizeAction {
         override val text: String = "FAIL TEST PAYMENT"
+        override val requiresBrowser: Boolean = true
     }
 
     object Cancel : AuthorizeAction {
         override val text: String = ""
+        override val requiresBrowser: Boolean = true
     }
 }
 
@@ -131,6 +142,7 @@ enum class Currency {
     SGD,
     PLN,
     MYR,
+    BRL,
 }
 
 /**

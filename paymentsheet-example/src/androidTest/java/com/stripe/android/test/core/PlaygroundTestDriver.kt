@@ -17,7 +17,10 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.closeSoftKeyboard
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingPolicies
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
@@ -67,8 +70,9 @@ class PlaygroundTestDriver(
 
     fun testLinkCustom(
         testParameters: TestParameters,
+        values: FieldPopulator.Values = FieldPopulator.Values(),
         populateCustomLpmFields: () -> Unit = {},
-        verifyCustomLpmFields: () -> Unit = {}
+        verifyCustomLpmFields: () -> Unit = {},
     ) {
         setup(testParameters)
         launchCustom()
@@ -88,7 +92,8 @@ class PlaygroundTestDriver(
             selectors,
             testParameters,
             populateCustomLpmFields,
-            verifyCustomLpmFields
+            verifyCustomLpmFields,
+            values,
         )
         fieldPopulator.populateFields()
 
@@ -148,8 +153,9 @@ class PlaygroundTestDriver(
 
     fun confirmCustom(
         testParameters: TestParameters,
+        values: FieldPopulator.Values = FieldPopulator.Values(),
         populateCustomLpmFields: () -> Unit = {},
-        verifyCustomLpmFields: () -> Unit = {}
+        verifyCustomLpmFields: () -> Unit = {},
     ) {
         setup(testParameters)
         launchCustom()
@@ -160,7 +166,8 @@ class PlaygroundTestDriver(
             selectors,
             testParameters,
             populateCustomLpmFields,
-            verifyCustomLpmFields
+            verifyCustomLpmFields,
+            values,
         )
         fieldPopulator.populateFields()
 
@@ -197,7 +204,8 @@ class PlaygroundTestDriver(
      */
     fun confirmNewOrGuestComplete(
         testParameters: TestParameters,
-        populateCustomLpmFields: () -> Unit = {}
+        values: FieldPopulator.Values = FieldPopulator.Values(),
+        populateCustomLpmFields: () -> Unit = {},
     ) {
         setup(testParameters)
         launchComplete()
@@ -208,6 +216,7 @@ class PlaygroundTestDriver(
             selectors,
             testParameters,
             populateCustomLpmFields,
+            values = values,
         ).populateFields()
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
@@ -404,7 +413,7 @@ class PlaygroundTestDriver(
     private fun doAuthorization() {
         selectors.apply {
             if (testParameters.authorizationAction != null) {
-                if (testParameters.authorizationAction != AuthorizeAction.PollingSucceedsAfterDelay) {
+                if (testParameters.authorizationAction?.requiresBrowser == true) {
                     // If a specific browser is requested we will use it, otherwise, we will
                     // select the first browser found
                     val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
@@ -437,6 +446,12 @@ class PlaygroundTestDriver(
                 }
 
                 when (val authAction = testParameters.authorizationAction) {
+                    is AuthorizeAction.DisplayQrCode -> {
+                        if (testParameters.intentType != IntentType.Setup) {
+                            closeQrCodeButton.wait(5000)
+                            onView(withText("CLOSE")).perform(click())
+                        }
+                    }
                     is AuthorizeAction.AuthorizePayment -> {}
                     is AuthorizeAction.AuthorizeSetup -> {}
                     is AuthorizeAction.PollingSucceedsAfterDelay -> {
@@ -483,6 +498,7 @@ class PlaygroundTestDriver(
             AuthorizeAction.AuthorizePayment,
             AuthorizeAction.AuthorizeSetup,
             AuthorizeAction.PollingSucceedsAfterDelay,
+            AuthorizeAction.DisplayQrCode,
             null
         )
 

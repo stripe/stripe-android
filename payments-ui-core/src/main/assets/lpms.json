@@ -1011,5 +1011,33 @@
         }
       }
     ]
+  },
+  {
+    "type": "boleto",
+    "async": false,
+    "fields": [
+      {
+        "type": "name",
+        "api_path": {
+          "v1": "billing_details[name]"
+        }
+      },
+      {
+        "type": "email",
+        "api_path": {
+          "v1": "billing_details[email]"
+        }
+      },
+      {
+        "type": "boleto_tax_id",
+        "api_path": {
+          "v1": "boleto[tax_id]"
+        }
+      },
+      {
+        "type": "billing_address",
+        "allowed_country_codes": ["BR"]
+      }
+    ]
   }
 ]

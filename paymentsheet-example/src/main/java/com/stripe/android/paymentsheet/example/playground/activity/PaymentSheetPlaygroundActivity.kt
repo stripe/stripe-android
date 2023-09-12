@@ -647,7 +647,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             viewBinding.shippingAddressCountriesPartialButton.id
         ) {
             builder.allowedCountries(
-                setOf("US", "CA", "AU", "GB", "FR", "JP", "KR")
+                setOf("US", "CA", "AU", "GB", "FR", "JP", "KR", "BR")
             )
         }
         val phone = when (viewBinding.shippingAddressPhoneRadioGroup.checkedRadioButtonId) {
@@ -882,7 +882,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 /**
                  * Modify this list if you want to change the countries displayed in the playground.
                  */
-                country.code.value in setOf("US", "GB", "AU", "FR", "IN", "SG", "MY", "MX")
+                country.code.value in setOf("US", "GB", "AU", "FR", "IN", "SG", "MY", "MX", "BR")
             }.map { country ->
                 /**
                  * Modify this statement to change the default currency associated with each
@@ -913,6 +913,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     "MX" -> {
                         country to "MXN"
                     }
+                    "BR" -> {
+                        country to "BRL"
+                    }
                     else -> {
                         country to "USD"
                     }
@@ -921,6 +924,17 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         // List was created from: https://stripe.com/docs/currencies
         /** Modify this list if you want to change the currencies displayed in the playground **/
-        private val stripeSupportedCurrencies = listOf("AUD", "EUR", "GBP", "USD", "INR", "PLN", "SGD", "MYR", "MXN")
+        private val stripeSupportedCurrencies = listOf(
+            "AUD",
+            "EUR",
+            "GBP",
+            "USD",
+            "INR",
+            "PLN",
+            "SGD",
+            "MYR",
+            "MXN",
+            "BRL",
+        )
     }
 }

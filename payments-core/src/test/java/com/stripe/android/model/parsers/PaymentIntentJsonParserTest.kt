@@ -9,6 +9,7 @@ import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.MicrodepositType
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentIntentFixtures.BOLETO_REQUIRES_ACTION
 import com.stripe.android.model.StripeIntent
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -65,6 +66,17 @@ class PaymentIntentJsonParserTest {
                     expiresAfter = 1617944399,
                     number = "12345678901234657890123456789012",
                     hostedVoucherUrl = "https://payments.stripe.com/oxxo/voucher/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb"
+                )
+            )
+    }
+
+    @Test
+    fun parse_withBoleto_shouldCreateExpectedNextActionData() {
+        val paymentIntent = BOLETO_REQUIRES_ACTION
+        assertThat(paymentIntent.nextActionData)
+            .isEqualTo(
+                StripeIntent.NextActionData.DisplayBoletoDetails(
+                    hostedVoucherUrl = "https://payments.stripe.com/boleto/voucher/test_YWNjdF8xTm5pZllBQVlObzc4dXh0LF9PYk81bUhVTGNSZGNIeHlyckJ4djBFQ3lkNkswS1lt0100qH3SxPW7"
                 )
             )
     }
