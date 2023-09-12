@@ -17,6 +17,7 @@ import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAv
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AlipayRequirement
+import com.stripe.android.paymentsheet.forms.AlmaRequirement
 import com.stripe.android.paymentsheet.forms.AmazonPayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
@@ -399,6 +400,17 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = AmazonPayRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.Alma.code -> SupportedPaymentMethod(
+            code = "alma",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_alma,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_alma,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = AlmaRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.MobilePay.code -> SupportedPaymentMethod(
