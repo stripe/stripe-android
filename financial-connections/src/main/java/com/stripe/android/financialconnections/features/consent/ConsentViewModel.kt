@@ -5,7 +5,9 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ConsentAcquired
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.ConsentAgree
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Error
@@ -62,6 +64,7 @@ internal class ConsentViewModel @Inject constructor(
             onFail = { logger.error("Error retrieving consent content", it) }
         )
         onAsync(ConsentState::acceptConsent, onFail = {
+            FinancialConnections.emitEvent(ConsentAcquired)
             eventTracker.track(Error(Pane.CONSENT, it))
             logger.error("Error accepting consent", it)
         })
