@@ -64,7 +64,6 @@ internal class ConsentViewModel @Inject constructor(
             onFail = { logger.error("Error retrieving consent content", it) }
         )
         onAsync(ConsentState::acceptConsent, onFail = {
-            FinancialConnections.emitEvent(ConsentAcquired)
             eventTracker.track(Error(Pane.CONSENT, it))
             logger.error("Error accepting consent", it)
         })
@@ -73,6 +72,7 @@ internal class ConsentViewModel @Inject constructor(
     fun onContinueClick() {
         suspend {
             eventTracker.track(ConsentAgree)
+            FinancialConnections.emitEvent(ConsentAcquired)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
             navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = Pane.CONSENT))
         }.execute { copy(acceptConsent = it) }
