@@ -2,13 +2,16 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+
+* [ADDED] PaymentSheet now supports the following payment methods for PaymentIntents:
+  * [7281](https://github.com/stripe/stripe-android/pull/7281) OXXO
+
 ## 20.30.0 - 2023-09-11
 
 ### PaymentSheet
-* [ADDED] PaymentSheet now supports the following payment methods for PaymentIntents:
-  * [7274](https://github.com/stripe/stripe-android/pull/7274) Alipay
-  * [7281](https://github.com/stripe/stripe-android/pull/7281) OXXO
 * [ADDED] PaymentSheet now supports the following payment methods for SetupIntents and PaymentIntents with setup for future usage:
+  * [7274](https://github.com/stripe/stripe-android/pull/7274) Alipay
   * [7273](https://github.com/stripe/stripe-android/pull/7273) BECS Direct Debit
   * [7264](https://github.com/stripe/stripe-android/pull/7264) Cash App Pay
   * [7269](https://github.com/stripe/stripe-android/pull/7269) iDEAL
