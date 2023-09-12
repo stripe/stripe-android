@@ -64,7 +64,7 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
 
     fun onContinueClick() = viewModelScope.launch {
         eventTracker.track(Click("click.continue", PANE))
-        navigationManager.tryNavigateTo(Destination.NetworkingLinkVerification())
+        navigationManager.tryNavigateTo(Destination.NetworkingLinkVerification(referrer = PANE))
     }
 
     fun onClickableTextClick(text: String) = when (text) {
@@ -80,7 +80,7 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
                     // skipping disables networking, which means
                     // we don't want the user to navigate back to
                     // the warm-up pane.
-                    it.nextPane.destination(),
+                    it.nextPane.destination(referrer = PANE),
                     popUpToCurrent = true,
                     inclusive = true
                 )

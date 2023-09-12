@@ -24,7 +24,7 @@ import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
 import com.stripe.android.financialconnections.model.TextUpdate
-import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.LinkStepUpVerification
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -116,8 +116,8 @@ class LinkAccountPickerViewModelTest {
         val viewModel = buildViewModel(LinkAccountPickerState())
         viewModel.onNewBankAccountClick()
 
-        val navigation = response.nextPaneOnAddAccount!!.destination
-        navigationManager.assertNavigatedTo(navigation)
+        val destination = response.nextPaneOnAddAccount!!.destination
+        navigationManager.assertNavigatedTo(destination, Pane.LINK_ACCOUNT_PICKER)
     }
 
     @Test
@@ -159,7 +159,7 @@ class LinkAccountPickerViewModelTest {
             assertThat(firstValue(null)).isEqualTo(listOf(selectedAccount))
         }
         val destination = accounts.data.first().nextPaneOnSelection!!.destination
-        navigationManager.assertNavigatedTo(destination)
+        navigationManager.assertNavigatedTo(destination, Pane.LINK_ACCOUNT_PICKER)
     }
 
     @Test
@@ -203,7 +203,7 @@ class LinkAccountPickerViewModelTest {
             }
             verifyNoInteractions(updateLocalManifest)
             verifyNoInteractions(selectNetworkedAccount)
-            navigationManager.assertNavigatedTo(Destination.LinkStepUpVerification)
+            navigationManager.assertNavigatedTo(LinkStepUpVerification, Pane.LINK_ACCOUNT_PICKER)
         }
 
     private fun twoAccounts() = NetworkedAccountsList(

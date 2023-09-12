@@ -88,7 +88,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             onFail = { error ->
                 logger.error("Error fetching payload", error)
                 eventTracker.track(Error(PANE, error))
-                navigationManager.tryNavigateTo(Destination.InstitutionPicker())
+                navigationManager.tryNavigateTo(Destination.InstitutionPicker(referrer = PANE))
             },
         )
         onAsync(
@@ -108,7 +108,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     fun onNewBankAccountClick() = viewModelScope.launch {
         eventTracker.track(Click("click.new_account", PANE))
         val nextPane = awaitState().payload()?.nextPaneOnNewAccount ?: Pane.INSTITUTION_PICKER
-        navigationManager.tryNavigateTo(nextPane.destination())
+        navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
     }
 
     fun onSelectAccountClick() = suspend {
@@ -143,7 +143,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             else -> Unit
         }
         nextPane?.let {
-            navigationManager.tryNavigateTo(it.destination())
+            navigationManager.tryNavigateTo(it.destination(referrer = PANE))
         }
         Unit
     }.execute { copy(selectNetworkedAccountAsync = it) }

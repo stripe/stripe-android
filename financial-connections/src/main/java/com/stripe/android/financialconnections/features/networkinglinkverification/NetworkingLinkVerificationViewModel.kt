@@ -29,6 +29,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -66,7 +67,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
                         verificationType = VerificationType.SMS,
                         onConsumerNotFound = {
                             analyticsTracker.track(VerificationError(PANE, ConsumerNotFoundError))
-                            navigationManager.tryNavigateTo(Destination.InstitutionPicker())
+                            navigationManager.tryNavigateTo(InstitutionPicker(referrer = PANE))
                         },
                         onLookupError = { error ->
                             analyticsTracker.track(VerificationError(PANE, LookupConsumerSession))
@@ -135,7 +136,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         logger.error("Error fetching networked accounts", error)
         analyticsTracker.track(Error(PANE, error))
         analyticsTracker.track(VerificationError(PANE, NetworkedAccountsRetrieveMethodError))
-        navigationManager.tryNavigateTo(updatedManifest.nextPane.destination())
+        navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = PANE))
     }
 
     private suspend fun onNetworkedAccountsSuccess(
@@ -145,11 +146,11 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         if (accounts.data.isEmpty()) {
             // Networked user has no accounts
             analyticsTracker.track(VerificationSuccessNoAccounts(PANE))
-            navigationManager.tryNavigateTo(updatedManifest.nextPane.destination())
+            navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = PANE))
         } else {
             // Networked user has linked accounts
             analyticsTracker.track(VerificationSuccess(PANE))
-            navigationManager.tryNavigateTo(Destination.LinkAccountPicker())
+            navigationManager.tryNavigateTo(Destination.LinkAccountPicker(referrer = PANE))
         }
     }
 

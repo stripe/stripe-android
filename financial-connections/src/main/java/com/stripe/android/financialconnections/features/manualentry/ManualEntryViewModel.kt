@@ -99,7 +99,7 @@ internal class ManualEntryViewModel @Inject constructor(
             ManualEntryState::linkPaymentAccount,
             onFail = {
                 logger.error("Error linking payment account", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(Pane.MANUAL_ENTRY, it))
+                eventTracker.track(FinancialConnectionsEvent.Error(PANE, it))
             },
         )
     }
@@ -140,7 +140,7 @@ internal class ManualEntryViewModel @Inject constructor(
                     last4 = state.account.takeLast(4)
                 )
                 val destination = (it.nextPane ?: Pane.MANUAL_ENTRY_SUCCESS).destination
-                navigationManager.tryNavigateTo(destination(args))
+                navigationManager.tryNavigateTo(destination(PANE, args))
             }
         }.execute { copy(linkPaymentAccount = it) }
     }
@@ -160,6 +160,8 @@ internal class ManualEntryViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        private val PANE = Pane.MANUAL_ENTRY
     }
 }
 

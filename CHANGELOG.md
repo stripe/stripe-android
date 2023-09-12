@@ -7,6 +7,11 @@
 * [ADDED] PaymentSheet now supports the following payment methods for PaymentIntents:
   * [7281](https://github.com/stripe/stripe-android/pull/7281) OXXO
 
+## 20.30.1 - 2023-09-11
+
+### Financial Connections
+* [FIXED][7290](https://github.com/stripe/stripe-android/pull/7290) Fixed an issue where attempting to go back on the first screen caused a crash since there is no other screen in the back stack.
+
 ## 20.30.0 - 2023-09-11
 
 ### PaymentSheet
