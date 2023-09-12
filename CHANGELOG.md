@@ -5,8 +5,7 @@
 ### PaymentSheet
 * [ADDED] PaymentSheet now supports the following payment methods for PaymentIntents:
   * [7281](https://github.com/stripe/stripe-android/pull/7281) OXXO
-* [ADDED] PaymentSheet now supports the following payment methods for SetupIntents and PaymentIntents with setup for future usage:
-  * [7282](https://github.com/stripe/stripe-android/pull/7282) Boleto
+* [ADDED][7282](https://github.com/stripe/stripe-android/pull/7282) PaymentSheet now supports Boleto PaymentIntents, SetupIntents, and PaymentIntents with setup for future usage.
 
 ## 20.30.1 - 2023-09-11
 
