@@ -924,6 +924,17 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         // List was created from: https://stripe.com/docs/currencies
         /** Modify this list if you want to change the currencies displayed in the playground **/
-        private val stripeSupportedCurrencies = listOf("AUD", "EUR", "GBP", "USD", "INR", "PLN", "SGD", "MYR", "MXN", "BRL")
+        private val stripeSupportedCurrencies = listOf(
+            "AUD",
+            "EUR",
+            "GBP",
+            "USD",
+            "INR",
+            "PLN",
+            "SGD",
+            "MYR",
+            "MXN",
+            "BRL",
+        )
     }
 }
