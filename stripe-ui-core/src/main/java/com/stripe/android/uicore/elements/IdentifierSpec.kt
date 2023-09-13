@@ -78,6 +78,7 @@ data class IdentifierSpec(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val BlikCode = IdentifierSpec("blik[code]", apiParameterDestination = ApiParameterDestination.Options)
 
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val KonbiniConfirmationNumber = IdentifierSpec(
             v1 = "konbini[confirmation_number]",
             apiParameterDestination = ApiParameterDestination.Options
