@@ -2,12 +2,13 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [ADDED][7302](https://github.com/stripe/stripe-android/pull/7302) PaymentSheet now supports Alma for PaymentIntents in private beta.
+
 ## 20.30.2 - 2023-09-13
 
 ### PaymentSheet
-* [ADDED] PaymentSheet now supports the following payment methods for PaymentIntents:
-  * [7281](https://github.com/stripe/stripe-android/pull/7281) OXXO
-  * [7302](https://github.com/stripe/stripe-android/pull/7302) Alma
+* [ADDED][7281](https://github.com/stripe/stripe-android/pull/7281) PaymentSheet now supports OXXO for PaymentIntents.
 * [ADDED][7282](https://github.com/stripe/stripe-android/pull/7282) PaymentSheet now supports Boleto for PaymentIntents, SetupIntents, and PaymentIntents with setup for future usage.
 * [FIXED][7303](https://github.com/stripe/stripe-android/pull/7303) Fixed an issue where SEPA mandate texts were being displayed for payment methods when they shouldn't be.
 
