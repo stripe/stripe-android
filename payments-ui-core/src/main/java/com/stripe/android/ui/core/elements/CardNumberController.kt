@@ -17,6 +17,7 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.BuildConfig
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.asIndividualDigits
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.SectionFieldErrorController
@@ -95,7 +96,15 @@ internal class CardNumberEditableController constructor(
 
     override val trailingIcon: Flow<TextFieldIcon?> = _fieldValue.map {
         val cardBrands = CardBrand.getCardBrands(it)
-        if (accountRangeService.accountRange != null) {
+        if (isEligibleForCardBrandChoice && it.isNotEmpty()) {
+            TextFieldIcon.Dropdown(
+                icon = TextFieldIcon.Trailing(
+                    idRes = R.drawable.stripe_ic_unknown,
+                    isTintable = false
+                ),
+                hide = it.length < 8
+            )
+        } else if (accountRangeService.accountRange != null) {
             TextFieldIcon.Trailing(accountRangeService.accountRange!!.brand.icon, isTintable = false)
         } else {
             val staticIcons = cardBrands.map { cardBrand ->

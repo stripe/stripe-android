@@ -3,15 +3,19 @@ package com.stripe.android.uicore.elements
 import android.view.KeyEvent
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
@@ -27,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillNode
@@ -243,6 +248,51 @@ fun TextField(
                                     TrailingIcon(it, loading)
                                 }
                                 AnimatedIcons(icons = it.animatedIcons, loading = loading)
+                            }
+                        }
+                        is TextFieldIcon.Dropdown -> {
+                            var expandable by remember {
+                                mutableStateOf(false)
+                            }
+
+                            val show = !loading && !it.hide
+
+                            Box(
+                                modifier = Modifier.clickable(enabled = show) {
+                                    expandable = true
+                                }
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    TrailingIcon(it.icon, loading)
+                                    AnimatedVisibility(visible = show) {
+                                        Box {
+                                            TrailingIcon(
+                                                trailingIcon = TextFieldIcon.Trailing(
+                                                    R.drawable.stripe_ic_chevron_down,
+                                                    isTintable = false
+                                                ),
+                                                loading = loading
+                                            )
+
+                                            DropdownMenu(
+                                                expanded = expandable,
+                                                onDismissRequest = {
+                                                    expandable = false
+                                                }
+                                            ) {
+                                                DropdownMenuItem(
+                                                    displayValue = "Select card brand (optional)",
+                                                    isSelected = false,
+                                                    currentTextColor = MaterialTheme.colors.onSurface
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

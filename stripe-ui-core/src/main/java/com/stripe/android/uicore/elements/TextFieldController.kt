@@ -93,6 +93,12 @@ sealed class TextFieldIcon {
         val staticIcons: List<Trailing>,
         val animatedIcons: List<Trailing>
     ) : TextFieldIcon()
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    data class Dropdown(
+        val icon: Trailing,
+        val hide: Boolean
+    ) : TextFieldIcon()
 }
 
 /**
