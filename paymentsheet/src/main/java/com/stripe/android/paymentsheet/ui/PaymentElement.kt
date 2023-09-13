@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -90,9 +91,9 @@ internal fun PaymentElement(
             }
         }
 
-        if (showLinkInlineSignup && linkConfigurationCoordinator != null) {
+        AnimatedVisibility(showLinkInlineSignup && linkConfigurationCoordinator != null) {
             LinkInlineSignup(
-                linkConfigurationCoordinator = linkConfigurationCoordinator,
+                linkConfigurationCoordinator = linkConfigurationCoordinator!!,
                 enabled = enabled,
                 onStateChanged = onLinkSignupStateChanged,
                 modifier = Modifier
