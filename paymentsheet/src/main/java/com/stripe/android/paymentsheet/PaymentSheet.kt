@@ -1052,7 +1052,7 @@ class PaymentSheet internal constructor(
      * provided.
      */
     @Parcelize
-    data class GooglePayConfiguration(
+    data class GooglePayConfiguration @JvmOverloads constructor(
         val environment: Environment,
         val countryCode: String,
         val currencyCode: String? = null,
