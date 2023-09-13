@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.30.2 - 2023-09-13
+
 ### PaymentSheet
 * [ADDED] PaymentSheet now supports the following payment methods for PaymentIntents:
   * [7281](https://github.com/stripe/stripe-android/pull/7281) OXXO
