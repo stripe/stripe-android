@@ -78,6 +78,11 @@ data class IdentifierSpec(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val BlikCode = IdentifierSpec("blik[code]", apiParameterDestination = ApiParameterDestination.Options)
 
+        val KonbiniConfirmationNumber = IdentifierSpec(
+            v1 = "konbini[confirmation_number]",
+            apiParameterDestination = ApiParameterDestination.Options
+        )
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {
             CardBrand.v1 -> CardBrand

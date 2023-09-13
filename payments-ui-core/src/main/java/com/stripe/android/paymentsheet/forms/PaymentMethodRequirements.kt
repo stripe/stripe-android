@@ -289,3 +289,9 @@ internal val BoletoRequirement = PaymentMethodRequirements(
     siRequirements = setOf(Delayed),
     confirmPMFromCustomer = true,
 )
+
+internal val KonbiniRequirement = PaymentMethodRequirements(
+    piRequirements = setOf(Delayed),
+    siRequirements = setOf(Delayed),
+    confirmPMFromCustomer = true,
+)

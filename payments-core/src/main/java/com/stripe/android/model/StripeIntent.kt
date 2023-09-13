@@ -96,7 +96,8 @@ sealed interface StripeIntent : StripeModel {
         VerifyWithMicrodeposits("verify_with_microdeposits"),
         UpiAwaitNotification("upi_await_notification"),
         CashAppRedirect("cashapp_handle_redirect_or_display_qr_code"),
-        DisplayBoletoDetails("boleto_display_details");
+        DisplayBoletoDetails("boleto_display_details"),
+        DisplayKonbiniDetails("konbini_display_details");
 
         @Keep
         override fun toString(): String {
@@ -191,6 +192,15 @@ sealed interface StripeIntent : StripeModel {
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class DisplayBoletoDetails(
+            /**
+             * URL of a webpage containing the voucher for this payment.
+             */
+            val hostedVoucherUrl: String? = null,
+        ) : NextActionData()
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayKonbiniDetails(
             /**
              * URL of a webpage containing the voucher for this payment.
              */

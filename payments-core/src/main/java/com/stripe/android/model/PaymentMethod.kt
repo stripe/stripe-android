@@ -390,6 +390,13 @@ constructor(
             isVoucher = true,
             requiresMandate = false,
             hasDelayedSettlement = true,
+        ),
+        Konbini(
+            code = "konbini",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = true,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet

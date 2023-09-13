@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.forms.GiropayRequirement
 import com.stripe.android.paymentsheet.forms.GrabPayRequirement
 import com.stripe.android.paymentsheet.forms.IdealRequirement
 import com.stripe.android.paymentsheet.forms.KlarnaRequirement
+import com.stripe.android.paymentsheet.forms.KonbiniRequirement
 import com.stripe.android.paymentsheet.forms.MobilePayRequirement
 import com.stripe.android.paymentsheet.forms.OxxoRequirement
 import com.stripe.android.paymentsheet.forms.P24Requirement
@@ -576,6 +577,17 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = BoletoRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields),
+        )
+        PaymentMethod.Type.Konbini.code -> SupportedPaymentMethod(
+            code = "konbini",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_konbini,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_konbini,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = KonbiniRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields),
         )
         else -> null

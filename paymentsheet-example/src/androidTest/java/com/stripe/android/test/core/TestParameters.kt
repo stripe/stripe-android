@@ -146,6 +146,7 @@ enum class Currency {
     MYR,
     BRL,
     MXN,
+    JPY,
 }
 
 /**

@@ -40,6 +40,7 @@ class FieldValuesToParamsMapConverter {
         /**
          * This function will convert fieldValuePairs to PaymentMethodOptionsParams.
          */
+        @Suppress("ReturnCount")
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun transformToPaymentMethodOptionsParams(
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
@@ -51,6 +52,11 @@ class FieldValuesToParamsMapConverter {
                     return PaymentMethodOptionsParams.Blik(
                         blikCode
                     )
+                }
+            } else if (code == PaymentMethod.Type.Konbini.code) {
+                val confirmationNumber = fieldValuePairs[IdentifierSpec.KonbiniConfirmationNumber]?.value
+                if (confirmationNumber != null) {
+                    return PaymentMethodOptionsParams.Konbini(confirmationNumber)
                 }
             }
             return null

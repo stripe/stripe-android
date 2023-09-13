@@ -128,6 +128,9 @@ data class SetupIntent internal constructor(
             is StripeIntent.NextActionData.DisplayBoletoDetails -> {
                 StripeIntent.NextActionType.DisplayBoletoDetails
             }
+            is StripeIntent.NextActionData.DisplayKonbiniDetails -> {
+                StripeIntent.NextActionType.DisplayKonbiniDetails
+            }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }
