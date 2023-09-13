@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,33 +23,40 @@ import com.stripe.android.uicore.stripeShapes
 internal fun GooglePayDividerUi(
     text: String = stringResource(R.string.stripe_paymentsheet_or_pay_with_card)
 ) {
-    Box(
-        contentAlignment = Alignment.Center,
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 18.dp)
     ) {
-        GooglePayDividerLine()
+        GooglePayDividerLine(
+            modifier = Modifier.weight(1f),
+        )
+
         Text(
             text = text,
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.stripeColors.subtitle,
-            modifier = Modifier
-                .background(MaterialTheme.colors.surface)
-                .padding(horizontal = 8.dp)
+            modifier = Modifier.padding(horizontal = 8.dp),
+        )
+
+        GooglePayDividerLine(
+            modifier = Modifier.weight(1f),
         )
     }
 }
 
 @Composable
-internal fun GooglePayDividerLine() {
+internal fun GooglePayDividerLine(
+    modifier: Modifier = Modifier,
+) {
     val color = if (MaterialTheme.colors.surface.shouldUseDarkDynamicColor()) {
         Color.Black.copy(alpha = .20f)
     } else {
         Color.White.copy(alpha = .20f)
     }
     Box(
-        Modifier
+        modifier
             .background(color)
             .height(MaterialTheme.stripeShapes.borderStrokeWidth.dp)
             .fillMaxWidth()
