@@ -40,7 +40,6 @@ class PlaceholderHelperTest {
                 EmailSpec(),
                 PhoneSpec(),
                 AddressSpec(),
-                SepaMandateTextSpec(),
             ),
         )
         assertThat(specs).isEmpty()
@@ -109,7 +108,54 @@ class PlaceholderHelperTest {
         )
     }
 
-    @Suppress("LongMethod")
+    @Test
+    fun `Test when requiresMandate is true, SepaMandateSpec is only added when specified`() {
+        val specs = specsForConfiguration(
+            configuration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            placeholderOverrideList = emptyList(),
+            requiresMandate = true,
+            specs = listOf(
+                NameSpec(),
+            ),
+        )
+
+        assertThat(specs).containsExactly(
+            NameSpec(),
+        )
+
+        val specsWithSepa = specsForConfiguration(
+            configuration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            placeholderOverrideList = emptyList(),
+            requiresMandate = true,
+            specs = listOf(
+                NameSpec(),
+                SepaMandateTextSpec()
+            ),
+        )
+
+        assertThat(specsWithSepa).containsExactly(
+            NameSpec(),
+            SepaMandateTextSpec()
+        )
+
+        val specsWithSepaPlaceholder = specsForConfiguration(
+            configuration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            placeholderOverrideList = emptyList(),
+            requiresMandate = true,
+            specs = listOf(
+                NameSpec(),
+                PlaceholderSpec(
+                    field = PlaceholderSpec.PlaceholderField.SepaMandate,
+                )
+            ),
+        )
+
+        assertThat(specsWithSepaPlaceholder).containsExactly(
+            NameSpec(),
+            SepaMandateTextSpec()
+        )
+    }
+
     @Test
     fun `Test correct spec is returned for placeholder fields`() {
         val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -160,6 +206,14 @@ class PlaceholderHelperTest {
                 configuration = billingDetailsCollectionConfiguration,
             )
         ).isEqualTo(AddressSpec(hideCountry = true))
+        assertThat(
+            specForPlaceholderField(
+                field = PlaceholderField.SepaMandate,
+                placeholderOverrideList = emptyList(),
+                requiresMandate = true,
+                configuration = billingDetailsCollectionConfiguration,
+            )
+        ).isEqualTo(SepaMandateTextSpec())
     }
 
     @Test
@@ -222,6 +276,7 @@ class PlaceholderHelperTest {
             PlaceholderField.Email,
             PlaceholderField.Phone,
             PlaceholderField.BillingAddress,
+            PlaceholderField.SepaMandate,
         )
 
         placeholders = basePlaceholders()
@@ -230,6 +285,7 @@ class PlaceholderHelperTest {
             PlaceholderField.Name,
             PlaceholderField.Phone,
             PlaceholderField.BillingAddress,
+            PlaceholderField.SepaMandate,
         )
 
         placeholders = basePlaceholders()
@@ -238,6 +294,7 @@ class PlaceholderHelperTest {
             PlaceholderField.Name,
             PlaceholderField.Email,
             PlaceholderField.BillingAddress,
+            PlaceholderField.SepaMandate,
         )
 
         placeholders = basePlaceholders()
@@ -246,6 +303,16 @@ class PlaceholderHelperTest {
             PlaceholderField.Name,
             PlaceholderField.Email,
             PlaceholderField.Phone,
+            PlaceholderField.SepaMandate,
+        )
+
+        placeholders = basePlaceholders()
+        removeCorrespondingPlaceholder(placeholders, SepaMandateTextSpec())
+        assertThat(placeholders).containsExactly(
+            PlaceholderField.Name,
+            PlaceholderField.Email,
+            PlaceholderField.Phone,
+            PlaceholderField.BillingAddress,
         )
     }
 
@@ -257,6 +324,7 @@ class PlaceholderHelperTest {
             PlaceholderField.Email,
             PlaceholderField.Phone,
             PlaceholderField.BillingAddress,
+            PlaceholderField.SepaMandate,
         )
 
         placeholders = basePlaceholders()
@@ -268,6 +336,7 @@ class PlaceholderHelperTest {
             PlaceholderField.Name,
             PlaceholderField.Phone,
             PlaceholderField.BillingAddress,
+            PlaceholderField.SepaMandate,
         )
 
         placeholders = basePlaceholders()
@@ -279,6 +348,7 @@ class PlaceholderHelperTest {
             PlaceholderField.Name,
             PlaceholderField.Email,
             PlaceholderField.BillingAddress,
+            PlaceholderField.SepaMandate,
         )
 
         placeholders = basePlaceholders()
@@ -290,6 +360,7 @@ class PlaceholderHelperTest {
             PlaceholderField.Name,
             PlaceholderField.Email,
             PlaceholderField.Phone,
+            PlaceholderField.SepaMandate,
         )
 
         placeholders = basePlaceholders()
@@ -301,6 +372,19 @@ class PlaceholderHelperTest {
             PlaceholderField.Name,
             PlaceholderField.Email,
             PlaceholderField.Phone,
+            PlaceholderField.SepaMandate,
+        )
+
+        placeholders = basePlaceholders()
+        removeCorrespondingPlaceholder(
+            placeholders,
+            PlaceholderSpec(field = PlaceholderField.SepaMandate)
+        )
+        assertThat(placeholders).containsExactly(
+            PlaceholderField.Name,
+            PlaceholderField.Email,
+            PlaceholderField.Phone,
+            PlaceholderField.BillingAddress,
         )
     }
 
@@ -383,5 +467,6 @@ class PlaceholderHelperTest {
         PlaceholderField.Email,
         PlaceholderField.Phone,
         PlaceholderField.BillingAddress,
+        PlaceholderField.SepaMandate,
     )
 }
