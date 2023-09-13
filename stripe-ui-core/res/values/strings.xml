@@ -70,6 +70,4 @@
   <string name="stripe_invalid_expiry_month">Your card\'s expiration month is invalid.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Your card\'s expiration year is invalid.</string>
-  <!-- String to describe that a form field is required to be completed. -->
-  <string name="stripe_field_required">This is required</string>
 </resources>
