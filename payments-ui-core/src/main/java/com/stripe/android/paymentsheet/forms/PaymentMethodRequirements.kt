@@ -206,6 +206,12 @@ internal val AmazonPayRequirement = PaymentMethodRequirements(
     confirmPMFromCustomer = null
 )
 
+internal val AlmaRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = null
+)
+
 internal val MobilePayRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
     siRequirements = null,

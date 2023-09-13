@@ -349,6 +349,13 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false
         ),
+        Alma(
+            "alma",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
         MobilePay(
             "mobilepay",
             isReusable = false,
