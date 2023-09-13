@@ -1,6 +1,11 @@
 package com.stripe.android.financialconnections.analytics
 
-sealed class FinancialConnectionsEvent(val name: String) {
+import java.sql.Timestamp
+
+sealed class FinancialConnectionsEvent(
+    val name: String,
+    val timestamp: Timestamp = Timestamp(System.currentTimeMillis())
+) {
 
     /**
      * Event when the modal successfully opens

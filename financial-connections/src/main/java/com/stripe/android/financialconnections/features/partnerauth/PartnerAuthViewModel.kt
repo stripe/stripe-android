@@ -9,10 +9,12 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Launched
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Loaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.InstitutionAuthorized
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.AuthSessionOpened
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.AuthSessionRetrieved
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.AuthSessionUrlReceived
@@ -361,6 +363,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
             requireNotNull(authSession)
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
+            FinancialConnections.emitEvent(InstitutionAuthorized)
             if (authSession.isOAuth) {
                 logger.debug("Web AuthFlow completed! waiting for oauth results")
                 val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
