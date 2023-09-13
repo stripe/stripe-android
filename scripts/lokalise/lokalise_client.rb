@@ -31,6 +31,9 @@ class LokaliseClient
                 {
                     "key_name": {
                         "android": key_object[:key_name],
+                        "ios": key_object[:key_name],
+                        "web": key_object[:key_name],
+                        "other": key_object[:key_name],
                     },
                     "platforms": ["android"],
                     "filenames": {

@@ -177,6 +177,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         currency: String?,
         isDecoupling: Boolean,
+        error: PaymentSheetConfirmationError,
     ) {
         val duration = durationProvider.end(DurationProvider.Key.Checkout)
 
@@ -185,7 +186,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 mode = mode,
                 paymentSelection = paymentSelection,
                 duration = duration,
-                result = PaymentSheetEvent.Payment.Result.Failure,
+                result = PaymentSheetEvent.Payment.Result.Failure(error),
                 currency = currency,
                 isDecoupled = isDecoupling,
                 deferredIntentConfirmationType = null,

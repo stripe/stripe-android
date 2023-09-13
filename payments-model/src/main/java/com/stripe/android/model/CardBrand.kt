@@ -157,9 +157,9 @@ enum class CardBrand(
     ),
 
     CartesBancaires(
-        "cartesbancaire",
+        "cartes_bancaires",
         "Cartes Bancaires",
-        R.drawable.stripe_ic_cartebancaire,
+        R.drawable.stripe_ic_cartes_bancaires,
         pattern = Pattern.compile(
             "(^(4)[0-9]*) |" +
                 "^(2221|2222|2223|2224|2225|2226|2227|2228|2229|222|223|224|225|226|" +

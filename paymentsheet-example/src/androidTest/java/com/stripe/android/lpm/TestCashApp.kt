@@ -4,6 +4,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BaseLpmTest
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Currency
+import com.stripe.android.test.core.IntentType
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -14,7 +15,7 @@ internal class TestCashApp : BaseLpmTest() {
         paymentMethod = lpmRepository.fromCode("cashapp")!!,
         currency = Currency.USD,
         merchantCountryCode = "US",
-        authorizationAction = AuthorizeAction.Authorize,
+        authorizationAction = AuthorizeAction.AuthorizePayment,
         supportedPaymentMethods = listOf("card", "cashapp"),
     )
 
@@ -41,6 +42,25 @@ internal class TestCashApp : BaseLpmTest() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = cashApp.copy(
                 authorizationAction = AuthorizeAction.Cancel,
+            ),
+        )
+    }
+
+    @Test
+    fun testCashAppPayWithSfu() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = cashApp.copy(
+                intentType = IntentType.PayWithSetup,
+                authorizationAction = AuthorizeAction.AuthorizePayment,
+            ),
+        )
+    }
+
+    @Test
+    fun testCashAppPayWithSetupIntent() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = cashApp.copy(
+                intentType = IntentType.Setup,
             ),
         )
     }

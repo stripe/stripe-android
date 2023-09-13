@@ -14,9 +14,10 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_VERIFICATION
 import com.stripe.android.financialconnections.model.NetworkedAccountsList
-import com.stripe.android.financialconnections.navigation.NavigationDirections
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -121,7 +122,10 @@ class NetworkingLinkVerificationViewModelTest {
         onConsumerNotFoundCaptor.firstValue()
 
         assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
-        navigationManager.assertNavigatedTo(NavigationDirections.institutionPicker)
+        navigationManager.assertNavigatedTo(
+            destination = Destination.InstitutionPicker,
+            pane = NETWORKING_LINK_VERIFICATION
+        )
 
         analyticsTracker.assertContainsEvent(
             "linked_accounts.networking.verification.error",
@@ -174,7 +178,11 @@ class NetworkingLinkVerificationViewModelTest {
             }
 
             verify(confirmVerification).sms(any(), eq("111111"))
-            navigationManager.assertNavigatedTo(linkVerifiedManifest.nextPane.toNavigationCommand())
+
+            navigationManager.assertNavigatedTo(
+                destination = linkVerifiedManifest.nextPane.destination,
+                pane = NETWORKING_LINK_VERIFICATION
+            )
         }
 
     @Test
@@ -218,6 +226,9 @@ class NetworkingLinkVerificationViewModelTest {
             }
 
             verify(confirmVerification).sms(any(), eq("111111"))
-            navigationManager.assertNavigatedTo(NavigationDirections.linkAccountPicker)
+            navigationManager.assertNavigatedTo(
+                destination = Destination.LinkAccountPicker,
+                pane = NETWORKING_LINK_VERIFICATION
+            )
         }
 }

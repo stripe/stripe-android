@@ -4,16 +4,22 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[<img/> ile <installment_price/> tutarında faizsiz <num_installments/> taksitle ödeyin]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Geri</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Hesap numaranız eksik.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Fatura adresi</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">BLIK kodu</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Devam ederek %1$s şirketinin bu ödeme ve gelecekteki ödemeler için Cash Uygulaması hesabınızı %2$s şirketinin şartlarına uygun olarak borçlandırmasına izin vermiş olursunuz. Bu durum, izin iptal edilene kadar geçerli olur. İstediğiniz zaman Cash Uygulamasının Ayarlarından bu izni değiştirebilirsiniz.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">İletişim bilgileri</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Devam et</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">EPS Bank</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX bankası</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Girdiğiniz IBAN eksik.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->

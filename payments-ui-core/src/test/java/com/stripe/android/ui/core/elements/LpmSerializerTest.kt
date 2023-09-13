@@ -7,14 +7,10 @@ import com.stripe.android.ui.core.R
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import kotlin.test.fail
 import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 class LpmSerializerTest {
-    private val lpmSerializer = LpmSerializer()
 
     /**
      * Sofort is a little unique as it has a specific list of valid
@@ -29,7 +25,7 @@ class LpmSerializerTest {
             .open("lpms.json")
             .bufferedReader().use { it.readText() }
 
-        val result = lpmSerializer.deserializeList(serializedString)
+        val result = LpmSerializer.deserializeList(serializedString).getOrThrow()
 
         val countrySpec = result.first { it.type == "sofort" }.fields[3] as CountrySpec
 
@@ -66,7 +62,7 @@ class LpmSerializerTest {
             .open("lpms.json")
             .bufferedReader().use { it.readText() }
 
-        val result = lpmSerializer.deserializeList(serializedString)
+        val result = LpmSerializer.deserializeList(serializedString).getOrThrow()
 
         val dropdownSpec = result.first { it.type == "eps" }
             .fields[3] as DropdownSpec
@@ -92,6 +88,7 @@ class LpmSerializerTest {
     @Test
     fun `Verify SimpleTextSpec parses correctly`() {
         val serializedString = """
+            [
               {
                 "type": "new_lpm",
                 "async": true,
@@ -108,25 +105,22 @@ class LpmSerializerTest {
                   }
                 ]
               }
+            ]
         """.trimIndent()
 
-        val result = lpmSerializer.deserialize(serializedString)
-        result.onFailure {
-            println(it.message)
-        }
-        assertThat(result.isSuccess).isTrue()
-        result.onSuccess {
-            val addressSpec = it.fields[0] as SimpleTextSpec
-            assertThat(addressSpec.label).isEqualTo(R.string.stripe_ideal_bank)
-            assertThat(addressSpec.capitalization).isEqualTo(Capitalization.Sentences)
-            assertThat(addressSpec.keyboardType).isEqualTo(KeyboardType.Phone)
-            assertThat(addressSpec.showOptionalLabel).isTrue()
-        }
+        val results = LpmSerializer.deserializeList(serializedString).getOrThrow()
+        val addressSpec = results.first().fields.first() as SimpleTextSpec
+
+        assertThat(addressSpec.label).isEqualTo(R.string.stripe_ideal_bank)
+        assertThat(addressSpec.capitalization).isEqualTo(Capitalization.Sentences)
+        assertThat(addressSpec.keyboardType).isEqualTo(KeyboardType.Phone)
+        assertThat(addressSpec.showOptionalLabel).isTrue()
     }
 
     @Test
     fun `Verify SimpleTextSpec defaults are correct`() {
         val serializedString = """
+            [
               {
                 "type": "new_lpm",
                 "async": true,
@@ -140,25 +134,22 @@ class LpmSerializerTest {
                   }
                 ]
               }
+            ]
         """.trimIndent()
 
-        val result = lpmSerializer.deserialize(serializedString)
-        result.onFailure {
-            println(it.message)
-        }
-        assertThat(result.isSuccess).isTrue()
-        result.onSuccess {
-            val addressSpec = it.fields[0] as SimpleTextSpec
-            assertThat(addressSpec.label).isEqualTo(R.string.stripe_ideal_bank)
-            assertThat(addressSpec.capitalization).isEqualTo(Capitalization.None)
-            assertThat(addressSpec.keyboardType).isEqualTo(KeyboardType.Ascii)
-            assertThat(addressSpec.showOptionalLabel).isFalse()
-        }
+        val results = LpmSerializer.deserializeList(serializedString).getOrThrow()
+        val addressSpec = results.first().fields.first() as SimpleTextSpec
+
+        assertThat(addressSpec.label).isEqualTo(R.string.stripe_ideal_bank)
+        assertThat(addressSpec.capitalization).isEqualTo(Capitalization.None)
+        assertThat(addressSpec.keyboardType).isEqualTo(KeyboardType.Ascii)
+        assertThat(addressSpec.showOptionalLabel).isFalse()
     }
 
     @Test
     fun `Verify DropdownSpec parses correctly`() {
         val serializedString = """
+            [
               {
                 "type": "new_lpm",
                 "async": true,
@@ -180,36 +171,33 @@ class LpmSerializerTest {
                   }
                 ]
               }
+            ]
         """.trimIndent()
 
-        val result = lpmSerializer.deserialize(serializedString)
-        result.onFailure {
-            println(it.message)
-        }
-        assertThat(result.isSuccess).isTrue()
-        result.onSuccess {
-            val dropdownSpec = it.fields[0] as DropdownSpec
-            assertThat(dropdownSpec.apiPath.v1).isEqualTo("something_bogus")
-            assertThat(dropdownSpec.labelTranslationId).isEqualTo(TranslationId.IdealBank)
-            assertThat(dropdownSpec.items.size).isEqualTo(2)
-            assertThat(dropdownSpec.items[0]).isEqualTo(
-                DropdownItemSpec(
-                    "123",
-                    "abc"
-                )
+        val results = LpmSerializer.deserializeList(serializedString).getOrThrow()
+        val dropdownSpec = results.first().fields.first() as DropdownSpec
+
+        assertThat(dropdownSpec.apiPath.v1).isEqualTo("something_bogus")
+        assertThat(dropdownSpec.labelTranslationId).isEqualTo(TranslationId.IdealBank)
+        assertThat(dropdownSpec.items.size).isEqualTo(2)
+        assertThat(dropdownSpec.items[0]).isEqualTo(
+            DropdownItemSpec(
+                "123",
+                "abc"
             )
-            assertThat(dropdownSpec.items[1]).isEqualTo(
-                DropdownItemSpec(
-                    null,
-                    "Other"
-                )
+        )
+        assertThat(dropdownSpec.items[1]).isEqualTo(
+            DropdownItemSpec(
+                null,
+                "Other"
             )
-        }
+        )
     }
 
     @Test
     fun `Verify address spec country codes parsed correctly`() {
         val serializedString = """
+            [
               {
                 "type": "new_lpm",
                 "async": true,
@@ -222,17 +210,13 @@ class LpmSerializerTest {
                   }
                 ]
               }
+            ]
         """.trimIndent()
 
-        val result = lpmSerializer.deserialize(serializedString)
-        result.onFailure {
-            println(it.message)
-        }
-        assertThat(result.isSuccess).isTrue()
-        result.onSuccess {
-            val addressSpec = it.fields[0] as AddressSpec
-            assertThat(addressSpec.allowedCountryCodes).isEqualTo(setOf("AT", "BE"))
-        }
+        val results = LpmSerializer.deserializeList(serializedString).getOrThrow()
+        val addressSpec = results.first().fields.first() as AddressSpec
+
+        assertThat(addressSpec.allowedCountryCodes).isEqualTo(setOf("AT", "BE"))
     }
 
     @Test
@@ -246,30 +230,26 @@ class LpmSerializerTest {
         types.forEach { fieldType ->
             println("field type: $fieldType")
             val serializedString = """
-              {
-                "type": "new_lpm",
-                "async": true,
-                "fields": [
-                  {
-                    "type": "$fieldType",
-                    "api_path": {
-                      "v1": "something_bogus"
-                    },
-                    "stringResId": ${UiCoreR.string.stripe_email}
-                  }
-                ]
-              }
+              [
+                {
+                  "type": "new_lpm",
+                  "async": true,
+                  "fields": [
+                    {
+                      "type": "$fieldType",
+                      "api_path": {
+                        "v1": "something_bogus"
+                      },
+                      "stringResId": ${UiCoreR.string.stripe_email}
+                    }
+                  ]
+                }
+              ]
             """.trimIndent()
 
-            val result = lpmSerializer.deserialize(serializedString)
-            result.onFailure {
-                println(it.message)
-            }
-            assertThat(result.isSuccess).isTrue()
-            result.onSuccess { sharedDataSpec ->
-                val fieldItemSpec = sharedDataSpec.fields[0]
-                assertThat(fieldItemSpec.apiPath.v1).isEqualTo("something_bogus")
-            }
+            val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
+            val fieldItemSpec = result.fields.first()
+            assertThat(fieldItemSpec.apiPath.v1).isEqualTo("something_bogus")
         }
     }
 
@@ -299,24 +279,23 @@ class LpmSerializerTest {
 
             // StringResId added for those types requiring it, expect it to be ignored otherwise
             val serializedString = """
-              {
-                "type": "new_lpm",
-                "async": true,
-                "fields": [
-                  {
-                    "type": "$key",
-                    "stringResId": ${UiCoreR.string.stripe_email}
-                  }
-                ]
-              }
+              [
+                {
+                  "type": "new_lpm",
+                  "async": true,
+                  "fields": [
+                    {
+                      "type": "$key",
+                      "stringResId": ${UiCoreR.string.stripe_email}
+                    }
+                  ]
+                }
+              ]
             """.trimIndent()
 
-            val result = lpmSerializer.deserialize(serializedString)
-            assertThat(result.isSuccess).isTrue()
-            result.onSuccess {
-                val fieldSpec = it.fields[0]
-                assertThat(fieldSpec.apiPath.v1).isEqualTo(value)
-            }
+            val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
+            val fieldSpec = result.fields.first()
+            assertThat(fieldSpec.apiPath.v1).isEqualTo(value)
         }
     }
 
@@ -339,14 +318,16 @@ class LpmSerializerTest {
              ]
             """.trimIndent()
 
-        assertThat(lpmSerializer.deserializeList(serializedString).size).isEqualTo(0)
+        val result = LpmSerializer.deserializeList(serializedString)
+        assertThat(result.isFailure).isTrue()
     }
 
     @Test
     fun `Verify that unknown field in Json spec deserializes - ignoring the field`() {
         val serializedString =
             """
-                {
+                [
+                  {
                     "type": "au_becs_debit",
                     "fields": [
                       {
@@ -357,37 +338,32 @@ class LpmSerializerTest {
                       }
                     ]
                   }
+                ]
             """.trimIndent()
 
-        val result = lpmSerializer.deserialize(serializedString)
-        assertThat(result.isSuccess).isTrue()
-        result.onSuccess {
-            assertThat(it.fields).isEqualTo(
-                listOf(EmptyFormSpec)
-            )
-        }
+        val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
+        assertThat(result.fields).isEqualTo(listOf(EmptyFormSpec))
     }
 
     @Test
     fun `Verify that async defaults to false and fields to empty`() {
         val serializedString =
             """
-                {
+                [
+                  {
                     "type": "unknown_lpm"
-                }
+                  }
+                ]
             """.trimIndent()
 
-        val result = lpmSerializer.deserialize(serializedString)
-        assertThat(result.isSuccess).isTrue()
-        result.onSuccess {
-            assertThat(it.async).isFalse()
-            assertThat(it.fields).isEqualTo(listOf(EmptyFormSpec))
-        }
+        val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
+        assertThat(result.async).isFalse()
+        assertThat(result.fields).isEqualTo(listOf(EmptyFormSpec))
     }
 
     @Test
     fun `Deserialize each field type`() {
-        val lpms = lpmSerializer.deserializeList(JSON_ALL_FIELDS)
+        val lpms = LpmSerializer.deserializeList(JSON_ALL_FIELDS).getOrThrow()
         assertThat(lpms.first().fields.size).isEqualTo(17)
 
         // Empty would mean a field is not recognized/ignored.
@@ -521,6 +497,7 @@ class LpmSerializerTest {
     @Test
     fun `Verify serialize redirect url next action and success-finished pi status`() {
         val serializedString = """
+            [
               {
                 $FormUiSpecJsonString,
                 "next_action_spec": {
@@ -541,38 +518,35 @@ class LpmSerializerTest {
                     }
                 }
               }
+            ]
         """.trimIndent()
 
-        val result = lpmSerializer.deserialize(serializedString)
-        result.onFailure {
-            println(it.message)
-        }
-        assertThat(result.isSuccess).isTrue()
-        result.onSuccess {
-            assertThat(it.nextActionSpec?.confirmResponseStatusSpecs).isEqualTo(
-                ConfirmStatusSpecAssociation(
-                    requiresAction =
-                    ConfirmResponseStatusSpecs.RedirectNextActionSpec(
-                        urlPath = "next_action[redirect_to_url][url]",
-                        returnUrlPath = "next_action[redirect_to_url][return_url]"
-                    )
-                )
-            )
+        val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
 
-            assertThat(it.nextActionSpec?.postConfirmHandlingPiStatusSpecs).isEqualTo(
-                PostConfirmStatusSpecAssociation(
-                    succeeded = PostConfirmHandlingPiStatusSpecs.FinishedSpec,
-                    requiresAction = PostConfirmHandlingPiStatusSpecs.CanceledSpec
+        assertThat(result.nextActionSpec?.confirmResponseStatusSpecs).isEqualTo(
+            ConfirmStatusSpecAssociation(
+                requiresAction =
+                ConfirmResponseStatusSpecs.RedirectNextActionSpec(
+                    urlPath = "next_action[redirect_to_url][url]",
+                    returnUrlPath = "next_action[redirect_to_url][return_url]"
                 )
             )
-        }
+        )
+
+        assertThat(result.nextActionSpec?.postConfirmHandlingPiStatusSpecs).isEqualTo(
+            PostConfirmStatusSpecAssociation(
+                succeeded = PostConfirmHandlingPiStatusSpecs.FinishedSpec,
+                requiresAction = PostConfirmHandlingPiStatusSpecs.CanceledSpec
+            )
+        )
     }
 
     @Test
     fun `Test placeholder parses correctly`() {
         val serializedString =
             """
-            {
+            [
+              {
                 "type": "au_becs_debit",
                 "fields": [
                   {
@@ -580,21 +554,14 @@ class LpmSerializerTest {
                     "for": "name"
                   }
                 ]
-            }
+              }
+            ]
             """.trimIndent()
 
-        val countDownLatch = CountDownLatch(1)
-        val result = lpmSerializer.deserialize(serializedString)
-        result.onFailure {
-            fail("Failed to deserialize payload.", result.exceptionOrNull())
-        }
-        assertThat(result.isSuccess).isTrue()
-        result.onSuccess {
-            countDownLatch.countDown()
-            assertThat(it.fields.first()).isEqualTo(
-                PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name)
-            )
-        }
-        assertThat(countDownLatch.await(2, TimeUnit.SECONDS)).isTrue()
+        val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
+
+        assertThat(result.fields.first()).isEqualTo(
+            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name)
+        )
     }
 }

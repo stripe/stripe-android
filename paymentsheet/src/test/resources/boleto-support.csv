@@ -1,0 +1,49 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+boleto, true, true, off_session, false, card/boleto, true, true, merchantRequiredSave, true
+boleto, true, true, off_session, false, card/eps/boleto, true, true, merchantRequiredSave, true
+boleto, true, false, off_session, false, card/boleto, false, false, not available, false
+boleto, true, false, off_session, false, card/eps/boleto, false, false, not available, false
+boleto, true, true, on_session, false, card/boleto, true, true, merchantRequiredSave, true
+boleto, true, true, on_session, false, card/eps/boleto, true, true, merchantRequiredSave, true
+boleto, true, false, on_session, false, card/boleto, false, false, not available, false
+boleto, true, false, on_session, false, card/eps/boleto, false, false, not available, false
+boleto, true, true, null, false, card/boleto, true, true, userSelectedSave, true
+boleto, true, true, null, false, card/eps/boleto, true, true, userSelectedSave, true
+boleto, true, false, null, false, card/boleto, false, false, not available, false
+boleto, true, false, null, false, card/eps/boleto, false, false, not available, false
+boleto, false, true, off_session, false, card/boleto, true, true, merchantRequiredSave, true
+boleto, false, true, off_session, false, card/eps/boleto, true, true, merchantRequiredSave, true
+boleto, false, false, off_session, false, card/boleto, false, false, not available, false
+boleto, false, false, off_session, false, card/eps/boleto, false, false, not available, false
+boleto, false, true, on_session, false, card/boleto, true, true, merchantRequiredSave, true
+boleto, false, true, on_session, false, card/eps/boleto, true, true, merchantRequiredSave, true
+boleto, false, false, on_session, false, card/boleto, false, false, not available, false
+boleto, false, false, on_session, false, card/eps/boleto, false, false, not available, false
+boleto, false, true, null, false, card/boleto, true, true, oneTime, true
+boleto, false, true, null, false, card/eps/boleto, true, true, oneTime, true
+boleto, false, false, null, false, card/boleto, false, false, not available, false
+boleto, false, false, null, false, card/eps/boleto, false, false, not available, false
+boleto, true, true, off_session, true, card/boleto, true, true, merchantRequiredSave, true
+boleto, true, true, off_session, true, card/eps/boleto, true, true, merchantRequiredSave, true
+boleto, true, false, off_session, true, card/boleto, false, false, not available, false
+boleto, true, false, off_session, true, card/eps/boleto, false, false, not available, false
+boleto, true, true, on_session, true, card/boleto, true, true, merchantRequiredSave, true
+boleto, true, true, on_session, true, card/eps/boleto, true, true, merchantRequiredSave, true
+boleto, true, false, on_session, true, card/boleto, false, false, not available, false
+boleto, true, false, on_session, true, card/eps/boleto, false, false, not available, false
+boleto, true, true, null, true, card/boleto, true, true, userSelectedSave, true
+boleto, true, true, null, true, card/eps/boleto, true, true, userSelectedSave, true
+boleto, true, false, null, true, card/boleto, false, false, not available, false
+boleto, true, false, null, true, card/eps/boleto, false, false, not available, false
+boleto, false, true, off_session, true, card/boleto, true, true, merchantRequiredSave, true
+boleto, false, true, off_session, true, card/eps/boleto, true, true, merchantRequiredSave, true
+boleto, false, false, off_session, true, card/boleto, false, false, not available, false
+boleto, false, false, off_session, true, card/eps/boleto, false, false, not available, false
+boleto, false, true, on_session, true, card/boleto, true, true, merchantRequiredSave, true
+boleto, false, true, on_session, true, card/eps/boleto, true, true, merchantRequiredSave, true
+boleto, false, false, on_session, true, card/boleto, false, false, not available, false
+boleto, false, false, on_session, true, card/eps/boleto, false, false, not available, false
+boleto, false, true, null, true, card/boleto, true, true, oneTime, true
+boleto, false, true, null, true, card/eps/boleto, true, true, oneTime, true
+boleto, false, false, null, true, card/boleto, false, false, not available, false
+boleto, false, false, null, true, card/eps/boleto, false, false, not available, false

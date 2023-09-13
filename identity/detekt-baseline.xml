@@ -8,7 +8,6 @@
     <ID>CyclomaticComplexMethod:IdentityViewModel.kt$IdentityViewModel$fun updateNewScanType(scanType: IdentityScanState.ScanType)</ID>
     <ID>CyclomaticComplexMethod:OTPScreen.kt$@Composable internal fun OTPScreen( navController: NavController, identityViewModel: IdentityViewModel, otpViewModelFactory: ViewModelProvider.Factory = OTPViewModel.Factory( identityRepository = identityViewModel.identityRepository, verificationArgs = identityViewModel.verificationArgs ) )</ID>
     <ID>CyclomaticComplexMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, collectedDataParamType: CollectedDataParam.Type, route: String, @StringRes titleRes: Int, @StringRes contextRes: Int, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, shouldShowTakePhoto: Boolean, shouldShowChoosePhoto: Boolean )</ID>
-    <ID>FunctionOnlyReturningConstant:FaceDetectorTransitioner.kt$FaceDetectorTransitioner$private fun isFaceFocused(): Boolean</ID>
     <ID>LargeClass:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
     <ID>LargeClass:IdentityViewModelTest.kt$IdentityViewModelTest</ID>
     <ID>LongMethod:AddressSection.kt$@Composable internal fun AddressSection( enabled: Boolean, identityViewModel: IdentityViewModel, addressCountries: List&lt;Country>, addressNotListedText: String, navController: NavController, onAddressCollected: (Resource&lt;RequiredInternationalAddress>) -> Unit )</ID>
@@ -67,12 +66,13 @@
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$?:</ID>
     <ID>MaxLineLength:VerificationPage.kt$VerificationPage$* A VerificationPage contains the static content and initial state that is required for Stripe Identity's native mobile SDKs to render the verification flow.</ID>
     <ID>MaxLineLength:VerificationPageData.kt$VerificationPageData$* VerificationPageData contains the state of a verification, including what information needs to be collected to complete the verification flow.</ID>
-    <ID>MaximumLineLength:com.stripe.android.identity.camera.IdentityScanFlow.kt:34</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.camera.IdentityScanFlow.kt:35</ID>
     <ID>ReturnCount:AddressSection.kt$private fun isValidAddress(addressMap: Map&lt;IdentifierSpec, FormFieldEntry>): Boolean</ID>
     <ID>ReturnCount:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$override fun originalToTransformed(offset: Int): Int</ID>
     <ID>ReturnCount:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
     <ID>SwallowedException:IdentityTheme.kt$e: ReflectiveOperationException</ID>
     <ID>ThrowsCount:DefaultIdentityRepository.kt$DefaultIdentityRepository$private suspend fun &lt;Response : StripeModel> executeRequestWithModelJsonParser( request: StripeRequest, responseJsonParser: ModelJsonParser&lt;Response>, onSuccessExecutionTimeBlock: (Long) -> Unit = {} ): Response</ID>
+    <ID>TooGenericExceptionCaught:LaplacianBlurDetector.kt$LaplacianBlurDetector$e: Exception</ID>
     <ID>TooManyFunctions:DefaultIdentityRepository.kt$DefaultIdentityRepository : IdentityRepository</ID>
     <ID>TooManyFunctions:IdentityAnalyticsRequestFactory.kt$IdentityAnalyticsRequestFactory</ID>
     <ID>TooManyFunctions:IdentityRepository.kt$IdentityRepository</ID>

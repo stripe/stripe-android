@@ -81,6 +81,9 @@ public final class com/stripe/android/uicore/elements/AddressTextFieldUIKt {
 public final class com/stripe/android/uicore/elements/CheckboxElementUIKt {
 }
 
+public final class com/stripe/android/uicore/elements/CheckboxFieldUIKt {
+}
+
 public final class com/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -126,6 +129,8 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$$serializer
 
 public final class com/stripe/android/uicore/elements/IdentifierSpec$Companion {
 	public final fun Generic (Ljava/lang/String;)Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getBlik ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getBlikCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getCardBrand ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getCardCvc ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getCardExpMonth ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
@@ -216,9 +221,10 @@ public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Er
 
 public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Error$Invalid : com/stripe/android/uicore/elements/TextFieldStateConstants$Error {
 	public static final field $stable I
-	public fun <init> (I[Ljava/lang/Object;)V
-	public synthetic fun <init> (I[Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (I[Ljava/lang/Object;Z)V
+	public synthetic fun <init> (I[Ljava/lang/Object;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun isBlank ()Z
+	public fun isFull ()Z
 	public fun shouldShowError (Z)Z
 }
 

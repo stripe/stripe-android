@@ -84,6 +84,7 @@ internal abstract class BaseSheetViewModel(
         ?: application.applicationInfo.loadLabel(application.packageManager).toString()
 
     protected var mostRecentError: Throwable? = null
+    protected var isEligibleForCardBrandChoice: Boolean = false
 
     internal val googlePayState: StateFlow<GooglePayState> = savedStateHandle
         .getStateFlow(SAVE_GOOGLE_PAY_STATE, GooglePayState.Indeterminate)
@@ -172,8 +173,6 @@ internal abstract class BaseSheetViewModel(
     ) { isProcessing, isEditing ->
         !isProcessing && !isEditing
     }
-
-    internal var lpmServerSpec: String? = null
 
     private val paymentOptionsStateMapper: PaymentOptionsStateMapper by lazy {
         PaymentOptionsStateMapper(
@@ -474,6 +473,7 @@ internal abstract class BaseSheetViewModel(
         merchantName = merchantName,
         amount = amount.value,
         newLpm = newPaymentSelection,
+        isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
     )
 
     fun handleBackPressed() {

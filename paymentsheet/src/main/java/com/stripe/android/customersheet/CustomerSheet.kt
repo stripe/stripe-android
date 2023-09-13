@@ -14,6 +14,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.AnimationConstants
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
 /**
@@ -79,10 +81,16 @@ class CustomerSheet @Inject internal constructor(
      * Retrieves the customer's saved payment option selection or null if the customer does not have
      * a persisted payment option selection.
      */
-    suspend fun retrievePaymentOptionSelection(): CustomerSheetResult {
+    suspend fun retrievePaymentOptionSelection(): CustomerSheetResult = coroutineScope {
         val adapter = CustomerSessionViewModel.component.customerAdapter
-        val selectedPaymentOption = adapter.retrieveSelectedPaymentOption()
-        val paymentMethods = adapter.retrievePaymentMethods()
+        val selectedPaymentOptionDeferred = async {
+            adapter.retrieveSelectedPaymentOption()
+        }
+        val paymentMethodsDeferred = async {
+            adapter.retrievePaymentMethods()
+        }
+        val selectedPaymentOption = selectedPaymentOptionDeferred.await()
+        val paymentMethods = paymentMethodsDeferred.await()
 
         val selection = selectedPaymentOption.mapCatching { paymentOption ->
             paymentOption?.toPaymentSelection {
@@ -92,7 +100,7 @@ class CustomerSheet @Inject internal constructor(
             }?.toPaymentOptionSelection(paymentOptionFactory)
         }
 
-        return selection.fold(
+        selection.fold(
             onSuccess = {
                 CustomerSheetResult.Selected(it)
             },
@@ -102,9 +110,10 @@ class CustomerSheet @Inject internal constructor(
         )
     }
 
-    private fun onCustomerSheetResult(result: InternalCustomerSheetResult?) {
-        requireNotNull(result)
-        callback.onCustomerSheetResult(result.toPublicResult(paymentOptionFactory))
+    private fun onCustomerSheetResult(result: InternalCustomerSheetResult) {
+        callback.onCustomerSheetResult(
+            result.toPublicResult(paymentOptionFactory)
+        )
     }
 
     /**

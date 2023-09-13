@@ -6,6 +6,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -13,6 +14,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -39,7 +41,9 @@ object CustomerSheetTestHelper {
         )
     ).apply {
         update(
-            PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethodTypes),
+            PaymentIntentFactory.create(
+                paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+            ),
             null
         )
     }
@@ -61,6 +65,10 @@ object CustomerSheetTestHelper {
             googlePayEnabled = true
         ),
         isGooglePayAvailable: Boolean = true,
+        eventReporter: CustomerSheetEventReporter = mock(),
+        intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+            enqueueCompleteStep(true)
+        }
     ): CustomerSheetViewModel {
         val formViewModel = FormViewModel(
             context = application,
@@ -72,7 +80,8 @@ object CustomerSheetTestHelper {
                 merchantName = configuration.merchantDisplayName
                     ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
                 billingDetails = configuration.defaultBillingDetails,
-                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration
+                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+                isEligibleForCardBrandChoice = false,
             ),
             lpmRepository = lpmRepository,
             addressRepository = AddressRepository(
@@ -104,9 +113,7 @@ object CustomerSheetTestHelper {
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
-            intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
-                enqueueCompleteStep(true)
-            },
+            intentConfirmationInterceptor = intentConfirmationInterceptor,
             paymentLauncherFactory = object : StripePaymentLauncherAssistedFactory {
                 override fun create(
                     publishableKey: () -> String,
@@ -123,7 +130,7 @@ object CustomerSheetTestHelper {
                 }
             },
             statusBarColor = { null },
-            eventReporter = mock(),
+            eventReporter = eventReporter,
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
         }

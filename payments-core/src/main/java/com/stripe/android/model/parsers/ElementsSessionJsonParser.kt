@@ -51,6 +51,11 @@ internal class ElementsSessionJsonParser(
         )
 
         val merchantCountry = json.optString(FIELD_MERCHANT_COUNTRY)
+        val isEligibleForCardBrandChoice = if (params is ElementsSessionParams.PaymentIntentType) {
+            parseCardBrandChoiceEligibility(json)
+        } else {
+            false
+        }
 
         return if (stripeIntent != null) {
             ElementsSession(
@@ -60,6 +65,7 @@ internal class ElementsSessionJsonParser(
                 paymentMethodSpecs = paymentMethodSpecs,
                 stripeIntent = stripeIntent,
                 merchantCountry = merchantCountry,
+                isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
             )
         } else {
             null
@@ -125,6 +131,11 @@ internal class ElementsSessionJsonParser(
         }
     }
 
+    private fun parseCardBrandChoiceEligibility(json: JSONObject): Boolean {
+        val cardBrandChoice = json.optJSONObject(FIELD_CARD_BRAND_CHOICE) ?: return false
+        return cardBrandChoice.optBoolean(FIELD_ELIGIBLE, false)
+    }
+
     private companion object {
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ELEMENTS_SESSION_ID = "session_id"
@@ -137,5 +148,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"
         private const val FIELD_PAYMENT_METHOD_SPECS = "payment_method_specs"
+        private const val FIELD_CARD_BRAND_CHOICE = "card_brand_choice"
+        private const val FIELD_ELIGIBLE = "eligible"
     }
 }

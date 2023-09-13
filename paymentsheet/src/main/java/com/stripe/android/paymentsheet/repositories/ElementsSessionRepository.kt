@@ -71,6 +71,7 @@ internal class RealElementsSessionRepository @Inject constructor(
                         paymentMethodSpecs = null,
                         stripeIntent = it,
                         merchantCountry = null,
+                        isEligibleForCardBrandChoice = false,
                     )
                 }
             }
@@ -85,6 +86,7 @@ internal class RealElementsSessionRepository @Inject constructor(
                         paymentMethodSpecs = null,
                         stripeIntent = it,
                         merchantCountry = null,
+                        isEligibleForCardBrandChoice = false,
                     )
                 }
             }

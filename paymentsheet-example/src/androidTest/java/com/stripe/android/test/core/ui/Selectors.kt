@@ -15,6 +15,7 @@ import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.model.PaymentMethod.Type.Blik
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
@@ -36,6 +37,7 @@ import java.util.Locale
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.R as UiCoreR
 
 /**
@@ -138,6 +140,8 @@ class Selectors(
             // We're using a longer timeout for Cash App Pay until we fix an issue where we
             // needlessly poll after a canceled payment attempt.
             15.seconds
+        } else if (testParameters.paymentMethod.code == Blik.code) {
+            30.seconds
         } else {
             5.seconds
         }
@@ -151,11 +155,13 @@ class Selectors(
 
     fun browserWindow(browser: BrowserUI): UiObject? = browserWindow(device, browser)
 
-    fun blockUntilAuthorizationPageLoaded() {
+    val closeQrCodeButton = UiAutomatorText("Close", device = device)
+
+    fun blockUntilAuthorizationPageLoaded(isSetup: Boolean) {
         assertThat(
             device.wait(
                 Until.findObject(
-                    By.textContains("test payment page")
+                    By.textContains("test ${if (isSetup) "setup" else "payment"} page")
                 ),
                 HOOKS_PAGE_LOAD_TIMEOUT * 1000
             )
@@ -180,9 +186,9 @@ class Selectors(
         .getInstalledApplications(PackageManager.GET_META_DATA)
 
     val authorizeAction = when (testParameters.authorizationAction) {
-        is AuthorizeAction.Authorize -> {
+        is AuthorizeAction.AuthorizePayment -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text,
+                label = testParameters.authorizationAction.text(testParameters.intentType),
                 className = "android.widget.Button",
                 device = device
             ) {
@@ -201,7 +207,7 @@ class Selectors(
         }
         is AuthorizeAction.Cancel -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text,
+                label = testParameters.authorizationAction.text(testParameters.intentType),
                 className = "android.widget.Button",
                 device = device
             ) {
@@ -212,7 +218,7 @@ class Selectors(
         }
         is AuthorizeAction.Fail -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text,
+                label = testParameters.authorizationAction.text(testParameters.intentType),
                 className = "android.widget.Button",
                 device = device
             ) {}
@@ -255,12 +261,20 @@ class Selectors(
         getResourceString(CoreR.string.stripe_address_label_zip_code)
     )
 
+    fun getPostalCode() = composeTestRule.onNodeWithText(
+        getResourceString(CoreR.string.stripe_address_label_postal_code)
+    )
+
     fun getAuBsb() = composeTestRule.onNodeWithText(
         getResourceString(StripeR.string.stripe_becs_widget_bsb)
     )
 
     fun getAuAccountNumber() = composeTestRule.onNodeWithText(
         getResourceString(StripeR.string.stripe_becs_widget_account_number)
+    )
+
+    fun getBoletoTaxId() = composeTestRule.onNodeWithText(
+        getResourceString(PaymentsUiCoreR.string.stripe_boleto_tax_id_label)
     )
 
     fun getGoogleDividerText() = composeTestRule.onNodeWithText(

@@ -17,7 +17,7 @@ fun MandateTextUI(
     element: MandateTextElement
 ) {
     Text(
-        text = stringResource(element.stringResId, element.merchantName ?: ""),
+        text = stringResource(element.stringResId, *element.args.toTypedArray()),
         style = MaterialTheme.typography.body2,
         color = MaterialTheme.stripeColors.subtitle,
         modifier = Modifier

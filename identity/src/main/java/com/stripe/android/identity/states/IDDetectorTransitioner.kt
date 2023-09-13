@@ -35,6 +35,7 @@ internal class IDDetectorTransitioner(
     private val timeout: Duration,
     private val iouThreshold: Float = DEFAULT_IOU_THRESHOLD,
     private val timeRequired: Int = DEFAULT_TIME_REQUIRED,
+    private val blurThreshold: Float = DEFAULT_BLUR_THRESHOLD,
     private val allowedUnmatchedFrames: Int = DEFAULT_ALLOWED_UNMATCHED_FRAME,
     private val displaySatisfiedDuration: Int = DEFAULT_DISPLAY_SATISFIED_DURATION,
     private val displayUnsatisfiedDuration: Int = DEFAULT_DISPLAY_UNSATISFIED_DURATION
@@ -110,6 +111,12 @@ internal class IDDetectorTransitioner(
             )
 
             !iOUCheckPass(analyzerOutput.boundingBox) -> {
+                // reset timer of the foundState
+                foundState.reachedStateAt = Clock.markNow()
+                foundState
+            }
+
+            isBlurry(analyzerOutput.blurScore) -> {
                 // reset timer of the foundState
                 foundState.reachedStateAt = Clock.markNow()
                 foundState
@@ -201,6 +208,13 @@ internal class IDDetectorTransitioner(
         }
     }
 
+    /**
+     * Decide if the image is blurry or not
+     */
+    private fun isBlurry(blurScore: Float): Boolean {
+        return blurScore <= blurThreshold
+    }
+
     private fun moreResultsRequired(foundState: Found): Boolean {
         return foundState.reachedStateAt.elapsedSince() < timeRequired.milliseconds
     }
@@ -239,12 +253,13 @@ internal class IDDetectorTransitioner(
         return interArea / (boxAArea + boxBArea - interArea)
     }
 
-    private companion object {
+    internal companion object {
         const val DEFAULT_TIME_REQUIRED = 500
         const val DEFAULT_IOU_THRESHOLD = 0.95f
         const val DEFAULT_ALLOWED_UNMATCHED_FRAME = 1
         const val DEFAULT_DISPLAY_SATISFIED_DURATION = 0
         const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 0
+        const val DEFAULT_BLUR_THRESHOLD = 0f
         val TAG: String = IDDetectorTransitioner::class.java.simpleName
     }
 

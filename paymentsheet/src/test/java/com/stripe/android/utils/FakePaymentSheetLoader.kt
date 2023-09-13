@@ -44,6 +44,7 @@ internal class FakePaymentSheetLoader(
                     isGooglePayReady = isGooglePayAvailable,
                     linkState = linkState,
                     paymentSelection = paymentSelection,
+                    isEligibleForCardBrandChoice = false,
                 )
             )
         }

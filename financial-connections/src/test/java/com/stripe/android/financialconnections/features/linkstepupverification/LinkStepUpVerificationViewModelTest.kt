@@ -18,7 +18,7 @@ import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -125,7 +125,10 @@ class LinkStepUpVerificationViewModelTest {
         onConsumerNotFoundCaptor.firstValue()
 
         assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
-        navigationManager.assertNavigatedTo(NavigationDirections.institutionPicker)
+        navigationManager.assertNavigatedTo(
+            destination = Destination.InstitutionPicker,
+            pane = Pane.LINK_STEP_UP_VERIFICATION
+        )
         eventTracker.assertContainsEvent(
             "linked_accounts.networking.verification.step_up.error",
             mapOf(
@@ -183,7 +186,10 @@ class LinkStepUpVerificationViewModelTest {
                 consumerSession.clientSecret,
                 selectedAccount.id
             )
-            navigationManager.assertNavigatedTo(NavigationDirections.success)
+            navigationManager.assertNavigatedTo(
+                Destination.Success,
+                pane = Pane.LINK_STEP_UP_VERIFICATION
+            )
         }
 
     private suspend fun getManifestReturnsManifestWithEmail(

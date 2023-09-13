@@ -17,6 +17,7 @@ import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.states.LaplacianBlurDetector
 import com.stripe.android.identity.utils.SingleLiveEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +33,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal open class CameraViewModel(
     private val modelPerformanceTracker: ModelPerformanceTracker,
+    private val laplacianBlurDetector: LaplacianBlurDetector,
     @UIContext private val uiContext: CoroutineContext
 ) :
     ViewModel(),
@@ -60,7 +62,8 @@ internal open class CameraViewModel(
             idDetectorModelFile,
             faceDetectorModelFile,
             verificationPage,
-            modelPerformanceTracker
+            modelPerformanceTracker,
+            laplacianBlurDetector
         )
     }
 

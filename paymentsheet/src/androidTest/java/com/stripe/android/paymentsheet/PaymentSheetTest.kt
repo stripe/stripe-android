@@ -4,6 +4,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -32,6 +33,7 @@ internal class PaymentSheetTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
+            host("api.stripe.com"),
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
@@ -85,7 +87,7 @@ internal class PaymentSheetTest {
         }
 
         page.clickPrimaryButton()
-        page.waitForText("Something went wrong")
+        page.waitForText("An error occurred. Check your connection and try again.")
         page.assertNoText("IOException", substring = true)
         testContext.markTestSucceeded()
     }
@@ -218,7 +220,7 @@ internal class PaymentSheetTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent")
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -237,7 +239,7 @@ internal class PaymentSheetTest {
             not(
                 bodyPart(
                     "payment_method_data%5Bpayment_user_agent%5D",
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent")
+                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
                 )
             ),
         ) { response ->
@@ -283,7 +285,7 @@ internal class PaymentSheetTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent")
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -329,7 +331,7 @@ internal class PaymentSheetTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent")
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")

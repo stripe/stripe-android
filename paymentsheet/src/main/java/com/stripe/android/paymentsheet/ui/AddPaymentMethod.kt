@@ -20,11 +20,16 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.uicore.elements.ApiParameterDestination
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,6 +70,7 @@ internal fun AddPaymentMethod(
         showCheckboxFlow.emit(arguments.showCheckbox)
     }
 
+    val stripeIntent = sheetViewModel.stripeIntent.collectAsState()
     val paymentSelection by sheetViewModel.selection.collectAsState()
     val linkInlineSelection by linkHandler.linkInlineSelection.collectAsState()
     var linkSignupState by remember {
@@ -87,6 +93,12 @@ internal fun AddPaymentMethod(
         CompositionLocalProvider(
             LocalAutofillEventReporter provides sheetViewModel::reportAutofillEvent
         ) {
+            val initializationMode = (sheetViewModel as? PaymentSheetViewModel)
+                ?.args
+                ?.initializationMode
+            val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+                ?.intentConfiguration
+                ?.onBehalfOf
             PaymentElement(
                 sheetViewModel = sheetViewModel,
                 enabled = !processing,
@@ -105,6 +117,20 @@ internal fun AddPaymentMethod(
                     linkSignupState = inlineSignupViewState
                 },
                 formArguments = arguments,
+                usBankAccountFormArguments = USBankAccountFormArguments(
+                    onBehalfOf = onBehalfOf,
+                    isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
+                    isPaymentFlow = initializationMode is PaymentSheet.InitializationMode.PaymentIntent,
+                    stripeIntentId = stripeIntent.value?.id,
+                    clientSecret = stripeIntent.value?.clientSecret,
+                    shippingDetails = sheetViewModel.config?.shippingDetails,
+                    draftPaymentSelection = sheetViewModel.newPaymentSelection,
+                    onMandateTextChanged = sheetViewModel::updateBelowButtonText,
+                    onHandleUSBankAccount = sheetViewModel::handleConfirmUSBankAccount,
+                    onUpdatePrimaryButtonUIState = sheetViewModel::updateCustomPrimaryButtonUiState,
+                    onUpdatePrimaryButtonState = sheetViewModel::updatePrimaryButtonState,
+                    onError = sheetViewModel::onError
+                ),
                 onFormFieldValuesChanged = { formValues ->
                     val newSelection = formValues?.transformToPaymentSelection(
                         resources = context.resources,
@@ -147,11 +173,24 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
     paymentMethod: LpmRepository.SupportedPaymentMethod
 ): PaymentMethodCreateParams {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
-        fieldValuePairs = fieldValuePairs.filterNot { entry ->
+        fieldValuePairs = fieldValuePairs.filter { entry ->
+            entry.key.apiParameterDestination == ApiParameterDestination.Params
+        }.filterNot { entry ->
             entry.key == IdentifierSpec.SaveForFutureUse || entry.key == IdentifierSpec.CardBrand
         },
         code = paymentMethod.code,
         requiresMandate = paymentMethod.requiresMandate,
+    )
+}
+
+internal fun FormFieldValues.transformToPaymentMethodOptionsParams(
+    paymentMethod: LpmRepository.SupportedPaymentMethod
+): PaymentMethodOptionsParams? {
+    return FieldValuesToParamsMapConverter.transformToPaymentMethodOptionsParams(
+        fieldValuePairs = fieldValuePairs.filter { entry ->
+            entry.key.apiParameterDestination == ApiParameterDestination.Options
+        },
+        code = paymentMethod.code,
     )
 }
 
@@ -160,9 +199,10 @@ internal fun FormFieldValues.transformToPaymentSelection(
     paymentMethod: LpmRepository.SupportedPaymentMethod
 ): PaymentSelection.New {
     val params = transformToPaymentMethodCreateParams(paymentMethod)
-
+    val options = transformToPaymentMethodOptionsParams(paymentMethod)
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
         PaymentSelection.New.Card(
+            paymentMethodOptionsParams = options,
             paymentMethodCreateParams = params,
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,
@@ -174,6 +214,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
             paymentMethodCreateParams = params,
+            paymentMethodOptionsParams = options,
             customerRequestedSave = userRequestedReuse,
         )
     }

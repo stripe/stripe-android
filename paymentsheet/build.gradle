@@ -1,6 +1,6 @@
 apply from: configs.androidLibrary
 
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'app.cash.paparazzi'
@@ -29,7 +29,7 @@ dependencies {
 
     // DI
     implementation libs.dagger
-    kapt libs.daggerCompiler
+    ksp libs.daggerCompiler
 
     // Compose
     implementation libs.compose.ui

@@ -17,7 +17,10 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.closeSoftKeyboard
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingPolicies
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
@@ -29,6 +32,8 @@ import com.stripe.android.test.core.ui.UiAutomatorText
 import org.junit.Assume
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * This drives the end to end payment sheet flow for any set of
@@ -65,8 +70,9 @@ class PlaygroundTestDriver(
 
     fun testLinkCustom(
         testParameters: TestParameters,
+        values: FieldPopulator.Values = FieldPopulator.Values(),
         populateCustomLpmFields: () -> Unit = {},
-        verifyCustomLpmFields: () -> Unit = {}
+        verifyCustomLpmFields: () -> Unit = {},
     ) {
         setup(testParameters)
         launchCustom()
@@ -86,7 +92,8 @@ class PlaygroundTestDriver(
             selectors,
             testParameters,
             populateCustomLpmFields,
-            verifyCustomLpmFields
+            verifyCustomLpmFields,
+            values,
         )
         fieldPopulator.populateFields()
 
@@ -146,8 +153,9 @@ class PlaygroundTestDriver(
 
     fun confirmCustom(
         testParameters: TestParameters,
+        values: FieldPopulator.Values = FieldPopulator.Values(),
         populateCustomLpmFields: () -> Unit = {},
-        verifyCustomLpmFields: () -> Unit = {}
+        verifyCustomLpmFields: () -> Unit = {},
     ) {
         setup(testParameters)
         launchCustom()
@@ -158,7 +166,8 @@ class PlaygroundTestDriver(
             selectors,
             testParameters,
             populateCustomLpmFields,
-            verifyCustomLpmFields
+            verifyCustomLpmFields,
+            values,
         )
         fieldPopulator.populateFields()
 
@@ -195,7 +204,8 @@ class PlaygroundTestDriver(
      */
     fun confirmNewOrGuestComplete(
         testParameters: TestParameters,
-        populateCustomLpmFields: () -> Unit = {}
+        values: FieldPopulator.Values = FieldPopulator.Values(),
+        populateCustomLpmFields: () -> Unit = {},
     ) {
         setup(testParameters)
         launchComplete()
@@ -206,6 +216,7 @@ class PlaygroundTestDriver(
             selectors,
             testParameters,
             populateCustomLpmFields,
+            values = values,
         ).populateFields()
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
@@ -287,6 +298,28 @@ class PlaygroundTestDriver(
         }
         Espresso.onIdle()
         composeTestRule.waitForIdle()
+    }
+
+    /**
+     * Here we wait for PollingActivity to first come into view then wait for it to go away by checking if the Approve payment text is there
+     */
+    private fun waitForPollingToFinish(timeout: Duration = 30.seconds) {
+        val className = "com.stripe.android.paymentsheet.paymentdatacollection.polling.PollingActivity"
+        while (currentActivity[0]?.componentName?.className != className) {
+            Thread.sleep(10)
+        }
+
+        composeTestRule.waitUntil(timeoutMillis = timeout.inWholeMilliseconds) {
+            try {
+                composeTestRule
+                    .onAllNodesWithText("Approve payment")
+                    .fetchSemanticsNodes()
+                    .isEmpty()
+            } catch (e: IllegalStateException) {
+                // PollingActivity was closed
+                true
+            }
+        }
     }
 
     private fun verifyDeviceSupportsTestAuthorization(
@@ -379,35 +412,52 @@ class PlaygroundTestDriver(
 
     private fun doAuthorization() {
         selectors.apply {
-            if (testParameters.authorizationAction != null && authorizeAction != null) {
-                // If a specific browser is requested we will use it, otherwise, we will
-                // select the first browser found
-                val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
+            if (testParameters.authorizationAction != null) {
+                if (testParameters.authorizationAction?.requiresBrowser == true) {
+                    // If a specific browser is requested we will use it, otherwise, we will
+                    // select the first browser found
+                    val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
 
-                // If there are multiple browser there is a browser selector window
-                selectBrowserPrompt.wait(4000)
-                if (selectBrowserPrompt.exists()) {
-                    browserIconAtPrompt(selectedBrowser).click()
+                    // If there are multiple browser there is a browser selector window
+                    selectBrowserPrompt.wait(4000)
+                    if (selectBrowserPrompt.exists()) {
+                        browserIconAtPrompt(selectedBrowser).click()
+                    }
+
+                    assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
+
+                    blockUntilAuthorizationPageLoaded(
+                        isSetup = testParameters.intentType == IntentType.Setup
+                    )
                 }
 
-                assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
-
-                blockUntilAuthorizationPageLoaded()
-
-                if (authorizeAction.exists()) {
-                    authorizeAction.click()
-                } else if (!authorizeAction.exists()) {
-                // Buttons aren't showing the same way each time in the web page.
-                    object : UiAutomatorText(
-                        label = requireNotNull(testParameters.authorizationAction).text,
-                        className = "android.widget.TextView",
-                        device = device
-                    ) {}.click()
-                    Log.e("Stripe", "Fail authorization was a text view not a button this time")
+                if (authorizeAction != null) {
+                    if (authorizeAction.exists()) {
+                        authorizeAction.click()
+                    } else if (!authorizeAction.exists()) {
+                        // Buttons aren't showing the same way each time in the web page.
+                        object : UiAutomatorText(
+                            label = requireNotNull(testParameters.authorizationAction)
+                                .text(testParameters.intentType),
+                            className = "android.widget.TextView",
+                            device = device
+                        ) {}.click()
+                        Log.e("Stripe", "Fail authorization was a text view not a button this time")
+                    }
                 }
 
                 when (val authAction = testParameters.authorizationAction) {
-                    is AuthorizeAction.Authorize -> {}
+                    is AuthorizeAction.DisplayQrCode -> {
+                        if (testParameters.intentType != IntentType.Setup) {
+                            closeQrCodeButton.wait(5000)
+                            onView(withText("CLOSE")).perform(click())
+                        }
+                    }
+                    is AuthorizeAction.AuthorizePayment -> {}
+                    is AuthorizeAction.PollingSucceedsAfterDelay -> {
+                        waitForPollingToFinish()
+                    }
+
                     is AuthorizeAction.Cancel -> {
                         buyButton.apply {
                             waitProcessingComplete()
@@ -415,6 +465,7 @@ class PlaygroundTestDriver(
                             isDisplayed()
                         }
                     }
+
                     is AuthorizeAction.Fail -> {
                         buyButton.apply {
                             waitProcessingComplete()
@@ -431,6 +482,7 @@ class PlaygroundTestDriver(
                             }.isSuccess
                         }
                     }
+
                     null -> {}
                 }
             } else {
@@ -442,7 +494,12 @@ class PlaygroundTestDriver(
             }
         }
 
-        val isDone = testParameters.authorizationAction in setOf(AuthorizeAction.Authorize, null)
+        val isDone = testParameters.authorizationAction in setOf(
+            AuthorizeAction.AuthorizePayment,
+            AuthorizeAction.PollingSucceedsAfterDelay,
+            AuthorizeAction.DisplayQrCode,
+            null
+        )
 
         if (isDone) {
             waitForPlaygroundActivity()

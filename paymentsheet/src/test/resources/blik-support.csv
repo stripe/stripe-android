@@ -1,0 +1,49 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+blik, true, true, off_session, false, card/blik, false, false, not available, false
+blik, true, true, off_session, false, card/eps/blik, false, false, not available, false
+blik, true, false, off_session, false, card/blik, false, false, not available, false
+blik, true, false, off_session, false, card/eps/blik, false, false, not available, false
+blik, true, true, on_session, false, card/blik, false, false, not available, false
+blik, true, true, on_session, false, card/eps/blik, false, false, not available, false
+blik, true, false, on_session, false, card/blik, false, false, not available, false
+blik, true, false, on_session, false, card/eps/blik, false, false, not available, false
+blik, true, true, null, false, card/blik, false, true, oneTime, true
+blik, true, true, null, false, card/eps/blik, false, true, oneTime, true
+blik, true, false, null, false, card/blik, false, true, oneTime, true
+blik, true, false, null, false, card/eps/blik, false, true, oneTime, true
+blik, false, true, off_session, false, card/blik, false, false, not available, false
+blik, false, true, off_session, false, card/eps/blik, false, false, not available, false
+blik, false, false, off_session, false, card/blik, false, false, not available, false
+blik, false, false, off_session, false, card/eps/blik, false, false, not available, false
+blik, false, true, on_session, false, card/blik, false, false, not available, false
+blik, false, true, on_session, false, card/eps/blik, false, false, not available, false
+blik, false, false, on_session, false, card/blik, false, false, not available, false
+blik, false, false, on_session, false, card/eps/blik, false, false, not available, false
+blik, false, true, null, false, card/blik, false, true, oneTime, true
+blik, false, true, null, false, card/eps/blik, false, true, oneTime, true
+blik, false, false, null, false, card/blik, false, true, oneTime, true
+blik, false, false, null, false, card/eps/blik, false, true, oneTime, true
+blik, true, true, off_session, true, card/blik, false, false, not available, false
+blik, true, true, off_session, true, card/eps/blik, false, false, not available, false
+blik, true, false, off_session, true, card/blik, false, false, not available, false
+blik, true, false, off_session, true, card/eps/blik, false, false, not available, false
+blik, true, true, on_session, true, card/blik, false, false, not available, false
+blik, true, true, on_session, true, card/eps/blik, false, false, not available, false
+blik, true, false, on_session, true, card/blik, false, false, not available, false
+blik, true, false, on_session, true, card/eps/blik, false, false, not available, false
+blik, true, true, null, true, card/blik, false, true, oneTime, true
+blik, true, true, null, true, card/eps/blik, false, true, oneTime, true
+blik, true, false, null, true, card/blik, false, true, oneTime, true
+blik, true, false, null, true, card/eps/blik, false, true, oneTime, true
+blik, false, true, off_session, true, card/blik, false, false, not available, false
+blik, false, true, off_session, true, card/eps/blik, false, false, not available, false
+blik, false, false, off_session, true, card/blik, false, false, not available, false
+blik, false, false, off_session, true, card/eps/blik, false, false, not available, false
+blik, false, true, on_session, true, card/blik, false, false, not available, false
+blik, false, true, on_session, true, card/eps/blik, false, false, not available, false
+blik, false, false, on_session, true, card/blik, false, false, not available, false
+blik, false, false, on_session, true, card/eps/blik, false, false, not available, false
+blik, false, true, null, true, card/blik, false, true, oneTime, true
+blik, false, true, null, true, card/eps/blik, false, true, oneTime, true
+blik, false, false, null, true, card/blik, false, true, oneTime, true
+blik, false, false, null, true, card/eps/blik, false, true, oneTime, true

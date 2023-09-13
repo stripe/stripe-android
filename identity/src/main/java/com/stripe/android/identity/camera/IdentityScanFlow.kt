@@ -17,6 +17,7 @@ import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.states.LaplacianBlurDetector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -35,7 +36,8 @@ internal class IdentityScanFlow(
     private val idDetectorModelFile: File,
     private val faceDetectorModelFile: File?,
     private val verificationPage: VerificationPage,
-    private val modelPerformanceTracker: ModelPerformanceTracker
+    private val modelPerformanceTracker: ModelPerformanceTracker,
+    private val laplacianBlurDetector: LaplacianBlurDetector
 ) : ScanFlow<IdentityScanState.ScanType, CameraPreviewImage<Bitmap>> {
     private var aggregator: IdentityAggregator? = null
 
@@ -103,7 +105,8 @@ internal class IdentityScanFlow(
                         IDDetectorAnalyzer.Factory(
                             idDetectorModelFile,
                             verificationPage.documentCapture.models.idDetectorMinScore,
-                            modelPerformanceTracker
+                            modelPerformanceTracker,
+                            laplacianBlurDetector
                         )
                     }
                 )

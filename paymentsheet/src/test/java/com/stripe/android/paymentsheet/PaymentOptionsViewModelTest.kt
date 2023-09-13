@@ -573,6 +573,7 @@ internal class PaymentOptionsViewModelTest {
                 isGooglePayReady = true,
                 paymentSelection = null,
                 linkState = null,
+                isEligibleForCardBrandChoice = false,
             ),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             enableLogging = false,

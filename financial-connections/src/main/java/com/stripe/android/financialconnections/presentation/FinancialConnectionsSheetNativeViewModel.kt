@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.presentation
 import android.content.Intent
 import android.os.Parcelable
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
@@ -14,10 +15,11 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.AppBackgrounded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickNavBarBack
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickNavBarClose
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLaunched
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
@@ -36,6 +38,9 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.UNEXPECTED_ERROR
+import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.CloseDialog
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
@@ -62,10 +67,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     @Named(APPLICATION_ID) private val applicationId: String,
+    navigationManager: NavigationManager,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
     private val mutex = Mutex()
+    val navigationFlow = navigationManager.navigationFlow
 
     init {
         setState { copy(firstInit = false) }
@@ -193,9 +200,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(closeDialog = CloseDialog(description = description)) }
     }
 
-    fun onBackClick(pane: Pane) {
+    fun onBackClick(pane: Pane?) {
         viewModelScope.launch {
-            eventTracker.track(ClickNavBarBack(pane))
+            pane?.let { eventTracker.track(ClickNavBarBack(pane)) }
         }
     }
 
@@ -296,10 +303,24 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    fun onPaneLaunched(pane: Pane) {
+    fun onPaneLaunched(pane: Pane, referrer: Pane?) {
         viewModelScope.launch {
             eventTracker.track(
-                FinancialConnectionsEvent.PaneLaunched(pane)
+                PaneLaunched(
+                    referrer = referrer,
+                    pane = pane
+                )
+            )
+        }
+    }
+
+    fun onBackgrounded(currentDestination: NavDestination?, backgrounded: Boolean) {
+        viewModelScope.launch {
+            eventTracker.track(
+                AppBackgrounded(
+                    pane = currentDestination?.pane ?: UNEXPECTED_ERROR,
+                    backgrounded = backgrounded
+                )
             )
         }
     }

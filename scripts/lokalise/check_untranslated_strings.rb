@@ -21,7 +21,7 @@ def handle_result(actions)
         actions.each_with_index do |action, index|
             puts "#{index+1}. #{action.description}"
         end
-        puts "👉 Run `scripts/lokalise/update_lokalise_with_new_strings.rb` locally to update Lokalise."
+        puts "👉 Run `cd scripts && ruby lokalise/update_lokalise_with_new_strings.rb` locally to update Lokalise."
         exit 1
     end
 end

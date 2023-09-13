@@ -41,7 +41,8 @@ class FormControllerTest {
         saveForFutureUseInitialValue = false,
         merchantName = "Merchant",
         context = context,
-        shippingValues = null
+        shippingValues = null,
+        isEligibleForCardBrandChoice = false,
     )
 
     @Test

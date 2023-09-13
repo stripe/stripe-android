@@ -23,11 +23,17 @@ internal class CardNumberConfig : CardDetailsTextFieldConfig {
         return if (number.isBlank()) {
             TextFieldStateConstants.Error.Blank
         } else if (brand == CardBrand.Unknown) {
-            TextFieldStateConstants.Error.Invalid(StripeR.string.stripe_invalid_card_number)
+            TextFieldStateConstants.Error.Invalid(
+                errorMessageResId = StripeR.string.stripe_invalid_card_number,
+                preventMoreInput = true,
+            )
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
             TextFieldStateConstants.Error.Incomplete(StripeR.string.stripe_invalid_card_number)
         } else if (!luhnValid) {
-            TextFieldStateConstants.Error.Invalid(StripeR.string.stripe_invalid_card_number)
+            TextFieldStateConstants.Error.Invalid(
+                errorMessageResId = StripeR.string.stripe_invalid_card_number,
+                preventMoreInput = true,
+            )
         } else if (isDigitLimit && number.length == numberAllowedDigits) {
             TextFieldStateConstants.Valid.Full
         } else {

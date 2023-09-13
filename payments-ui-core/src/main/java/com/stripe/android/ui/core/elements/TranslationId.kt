@@ -20,6 +20,9 @@ enum class TranslationId(val resourceId: Int) {
     @SerialName("upe.labels.eps.bank")
     EpsBank(R.string.stripe_eps_bank),
 
+    @SerialName("upe.labels.fpx.bank")
+    FpxBank(R.string.stripe_fpx_bank),
+
     @SerialName("address.label.name")
     AddressName(CoreR.string.stripe_address_label_full_name),
 

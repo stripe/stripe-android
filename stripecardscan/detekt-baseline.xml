@@ -77,7 +77,7 @@
     <ID>TooGenericExceptionCaught:Fetcher.kt$FetchedData.Companion$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:Fetcher.kt$WebFetcher$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:File.kt$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:GetCameraAdapter.kt$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:GetVerifyCameraAdapter.kt$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:Loader.kt$Loader$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:Network.kt$LegacyStripeNetwork$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:Network.kt$et: Throwable</ID>

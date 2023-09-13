@@ -1,6 +1,6 @@
 apply from: configs.androidLibrary
 
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
@@ -19,7 +19,7 @@ dependencies {
     implementation libs.androidx.viewModel
     implementation libs.dagger
     implementation libs.material
-    kapt libs.daggerCompiler
+    ksp libs.daggerCompiler
 
     implementation libs.compose.activity
     implementation libs.compose.foundation

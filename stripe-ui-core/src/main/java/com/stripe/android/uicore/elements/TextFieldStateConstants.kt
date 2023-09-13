@@ -38,10 +38,12 @@ class TextFieldStateConstants {
 
         class Invalid(
             @StringRes override val errorMessageResId: Int,
-            override val formatArgs: Array<out Any>? = null
+            override val formatArgs: Array<out Any>? = null,
+            private val preventMoreInput: Boolean = false,
         ) : Error(errorMessageResId, formatArgs) {
             override fun shouldShowError(hasFocus: Boolean): Boolean = true
             override fun isBlank(): Boolean = false
+            override fun isFull(): Boolean = preventMoreInput
         }
 
         object Blank : Error(R.string.stripe_blank_and_required) {

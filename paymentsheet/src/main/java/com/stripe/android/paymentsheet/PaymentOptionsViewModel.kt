@@ -134,7 +134,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         updateSelection(args.state.paymentSelection)
 
-        lpmServerSpec = lpmRepository.serverSpecLoadingState.serverLpmSpecs
+        isEligibleForCardBrandChoice = args.state.isEligibleForCardBrandChoice
 
         transitionToFirstScreen()
     }

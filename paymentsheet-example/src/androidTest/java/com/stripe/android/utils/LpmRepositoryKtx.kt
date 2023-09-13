@@ -1,6 +1,7 @@
 package com.stripe.android.utils
 
 import android.content.Context
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 
@@ -11,7 +12,7 @@ internal fun initializedLpmRepository(context: Context): LpmRepository {
 
     repository.update(
         stripeIntent = PaymentIntentFactory.create(
-            paymentMethodTypes = repository.supportedPaymentMethodTypes,
+            paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
         ),
         serverLpmSpecs = null,
     )

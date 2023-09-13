@@ -20,6 +20,7 @@ import com.stripe.android.camera.scanui.ScanState
 import com.stripe.android.camera.scanui.SimpleScanStateful
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.R
+import com.stripe.android.stripecardscan.camera.getVerifyCameraAdapter
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidCivException
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidStripePublishableKeyException
 import com.stripe.android.stripecardscan.cardimageverification.exception.StripeNetworkException
@@ -500,6 +501,8 @@ internal open class CardImageVerificationActivity :
             connect(it.id, ConstraintSet.BOTTOM, cardDescriptionTextView.id, ConstraintSet.TOP)
         }
     }
+
+    override val cameraAdapterBuilder = ::getVerifyCameraAdapter
 
     protected open fun setupCannotScanTextViewConstraints() {
         cannotScanTextView.layoutParams = ConstraintLayout.LayoutParams(

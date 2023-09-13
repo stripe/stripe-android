@@ -4,16 +4,22 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[ผ่อนชำระ <num_installments/> งวดแบบปลอดดอกเบี้ย งวดละ <installment_price/> ด้วย <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">ย้อนกลับ</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">หมายเลขบัญชีไม่ครบถ้วน</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">ที่อยู่ในการเรียกเก็บเงิน</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">รหัส BLIK</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">การดำเนินการต่อ หมายความว่าคุณอนุญาตให้ %1$s ฝากเงินเข้าบัญชี Cash App ของคุณสำหรับการชำระเงินรายการนี้ และการชำระเงินในอนาคตโดยสอดคล้องกับข้อกำหนดของ %2$s จนกว่าจะมีการเพิกถอนการอนุญาต คุณสามารถเปลี่ยนแปลงการตั้งค่านี้ได้ทุกเมื่อในการตั้งค่า Cash App</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">ข้อมูลติดต่อ</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">ดำเนินการต่อ</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">EPS Bank</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">IBAN ที่คุณป้อนไม่ครบถ้วน</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->

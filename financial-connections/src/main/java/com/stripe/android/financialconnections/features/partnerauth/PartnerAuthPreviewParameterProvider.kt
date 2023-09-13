@@ -73,7 +73,7 @@ internal class PartnerAuthPreviewParameterProvider :
 
     private fun session() =
         FinancialConnectionsAuthorizationSession(
-            flow = FinancialConnectionsAuthorizationSession.Flow.FINICITY_CONNECT_V2_OAUTH,
+            flow = FinancialConnectionsAuthorizationSession.Flow.FINICITY_CONNECT_V2_OAUTH.name,
             showPartnerDisclosure = true,
             _isOAuth = true,
             nextPane = FinancialConnectionsSessionManifest.Pane.PARTNER_AUTH,

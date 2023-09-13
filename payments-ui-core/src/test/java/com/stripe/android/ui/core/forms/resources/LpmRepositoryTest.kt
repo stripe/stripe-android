@@ -8,12 +8,11 @@ import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.ContactInformationSpec
-import com.stripe.android.ui.core.elements.EmptyFormSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -163,29 +162,6 @@ class LpmRepositoryTest {
         assertThat(lpmRepository.fromCode("afterpay_clearpay")).isNotNull()
         assertThat(lpmRepository.fromCode("affirm")).isNotNull()
     }
-
-    @Test
-    fun `Verify no fields in the default json are ignored the lpms package should be correct`() {
-        lpmRepository.updateFromDisk(PaymentIntentFactory.create())
-        // If this test fails, check to make sure the spec's serializer is added to
-        // FormItemSpecSerializer
-        lpmRepository.supportedPaymentMethodTypes.forEach { code ->
-            if (!hasEmptyForm(code)) {
-                assertThat(
-                    lpmRepository.fromCode(code)!!.formSpec.items
-                        .filter {
-                            it is EmptyFormSpec && !hasEmptyForm(code)
-                        }
-
-                ).isEmpty()
-            }
-        }
-    }
-
-    private fun hasEmptyForm(code: String) =
-        (code == "paypal" || code == "us_bank_account") &&
-            lpmRepository.fromCode(code)!!.formSpec.items.size == 1 &&
-            lpmRepository.fromCode(code)!!.formSpec.items.first() == EmptyFormSpec
 
     @Test
     fun `Verify the repository only shows card if in lpms json`() {
@@ -412,11 +388,11 @@ class LpmRepositoryTest {
             }
          ]
             """.trimIndent(),
-            CardBillingDetailsCollectionConfiguration(
+            BillingDetailsCollectionConfiguration(
                 collectName = true,
                 collectEmail = true,
                 collectPhone = false,
-                address = CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
         )
 
@@ -439,7 +415,7 @@ class LpmRepositoryTest {
 
         val addressSpec = card.formSpec.items[2] as CardBillingSpec
         assertThat(addressSpec.collectionMode)
-            .isEqualTo(CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
+            .isEqualTo(BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
     }
 
     @Test

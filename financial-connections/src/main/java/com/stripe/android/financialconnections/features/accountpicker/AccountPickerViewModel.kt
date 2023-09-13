@@ -25,10 +25,10 @@ import com.stripe.android.financialconnections.features.consent.FinancialConnect
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
+import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -101,7 +101,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 businessName = manifest.businessName,
                 stripeDirect = manifest.isStripeDirect ?: false
             ).also {
-                eventTracker.track(PaneLoaded(Pane.ACCOUNT_PICKER))
+                eventTracker.track(PaneLoaded(PANE))
             }
         }.execute { copy(payload = it) }
     }
@@ -140,7 +140,7 @@ internal class AccountPickerViewModel @Inject constructor(
             onFail = {
                 eventTracker.logError(
                     logger = logger,
-                    pane = Pane.ACCOUNT_PICKER,
+                    pane = PANE,
                     extraMessage = "Error retrieving accounts",
                     error = it
                 )
@@ -151,7 +151,7 @@ internal class AccountPickerViewModel @Inject constructor(
             onFail = {
                 eventTracker.logError(
                     logger = logger,
-                    pane = Pane.ACCOUNT_PICKER,
+                    pane = PANE,
                     extraMessage = "Error selecting accounts",
                     error = it
                 )
@@ -212,7 +212,7 @@ internal class AccountPickerViewModel @Inject constructor(
 
     fun onSubmit() {
         viewModelScope.launch {
-            eventTracker.track(ClickLinkAccounts(Pane.ACCOUNT_PICKER))
+            eventTracker.track(ClickLinkAccounts(PANE))
         }
         withState { state ->
             state.payload()?.let {
@@ -234,9 +234,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 sessionId = requireNotNull(manifest.activeAuthSession).id,
                 updateLocalCache = updateLocalCache
             )
-            navigationManager.navigate(
-                NavigateToRoute(accountsList.nextPane.toNavigationCommand())
-            )
+            navigationManager.tryNavigateTo(accountsList.nextPane.destination(referrer = PANE))
             accountsList
         }.execute {
             copy(selectAccounts = it)
@@ -244,10 +242,10 @@ internal class AccountPickerViewModel @Inject constructor(
     }
 
     fun selectAnotherBank() =
-        navigationManager.navigate(NavigateToRoute(NavigationDirections.reset))
+        navigationManager.tryNavigateTo(Reset(referrer = PANE))
 
     fun onEnterDetailsManually() =
-        navigationManager.navigate(NavigateToRoute(NavigationDirections.manualEntry))
+        navigationManager.tryNavigateTo(ManualEntry(referrer = PANE))
 
     fun onLoadAccountsAgain() {
         setState { copy(canRetry = false) }
@@ -296,6 +294,8 @@ internal class AccountPickerViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        private val PANE = Pane.ACCOUNT_PICKER
     }
 }
 

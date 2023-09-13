@@ -24,10 +24,9 @@ import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
-import com.stripe.android.financialconnections.navigation.NavigationDirections.institutionPicker
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -89,7 +88,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             onFail = { error ->
                 logger.error("Error fetching payload", error)
                 eventTracker.track(Error(PANE, error))
-                navigationManager.navigate(NavigateToRoute(institutionPicker))
+                navigationManager.tryNavigateTo(Destination.InstitutionPicker(referrer = PANE))
             },
         )
         onAsync(
@@ -109,7 +108,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     fun onNewBankAccountClick() = viewModelScope.launch {
         eventTracker.track(Click("click.new_account", PANE))
         val nextPane = awaitState().payload()?.nextPaneOnNewAccount ?: Pane.INSTITUTION_PICKER
-        navigationManager.navigate(NavigateToRoute(nextPane.toNavigationCommand()))
+        navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
     }
 
     fun onSelectAccountClick() = suspend {
@@ -144,7 +143,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             else -> Unit
         }
         nextPane?.let {
-            navigationManager.navigate(NavigateToRoute(it.toNavigationCommand()))
+            navigationManager.tryNavigateTo(it.destination(referrer = PANE))
         }
         Unit
     }.execute { copy(selectNetworkedAccountAsync = it) }

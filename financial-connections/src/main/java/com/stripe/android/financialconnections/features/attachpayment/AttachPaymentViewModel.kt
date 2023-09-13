@@ -18,10 +18,10 @@ import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
+import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -67,7 +67,7 @@ internal class AttachPaymentViewModel @Inject constructor(
                     params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
                 ).also {
                     val nextPane = it.nextPane ?: Pane.SUCCESS
-                    navigationManager.navigate(NavigateToRoute(nextPane.toNavigationCommand()))
+                    navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
                 }
             }
             eventTracker.track(PollAttachPaymentsSucceeded(authSession.id, millis))
@@ -81,13 +81,13 @@ internal class AttachPaymentViewModel @Inject constructor(
             onFail = {
                 eventTracker.logError(
                     logger = logger,
-                    pane = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT,
+                    pane = PANE,
                     extraMessage = "Error retrieving accounts to attach payment",
                     error = it
                 )
             },
             onSuccess = {
-                eventTracker.track(PaneLoaded(Pane.ATTACH_LINKED_PAYMENT_ACCOUNT))
+                eventTracker.track(PaneLoaded(PANE))
             }
         )
         onAsync(
@@ -99,7 +99,7 @@ internal class AttachPaymentViewModel @Inject constructor(
                 runCatching { saveToLinkWithStripeSucceeded.set(false) }
                 eventTracker.logError(
                     logger = logger,
-                    pane = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT,
+                    pane = PANE,
                     extraMessage = "Error Attaching payment account",
                     error = it
                 )
@@ -108,10 +108,10 @@ internal class AttachPaymentViewModel @Inject constructor(
     }
 
     fun onEnterDetailsManually() =
-        navigationManager.navigate(NavigateToRoute(NavigationDirections.manualEntry))
+        navigationManager.tryNavigateTo(ManualEntry(referrer = PANE))
 
     fun onSelectAnotherBank() =
-        navigationManager.navigate(NavigateToRoute(NavigationDirections.reset))
+        navigationManager.tryNavigateTo(Reset(referrer = PANE))
 
     companion object : MavericksViewModelFactory<AttachPaymentViewModel, AttachPaymentState> {
 
@@ -127,6 +127,8 @@ internal class AttachPaymentViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        private val PANE = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT
     }
 }
 

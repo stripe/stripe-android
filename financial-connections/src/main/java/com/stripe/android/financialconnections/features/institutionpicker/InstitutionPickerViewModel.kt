@@ -26,9 +26,9 @@ import com.stripe.android.financialconnections.features.institutionpicker.Instit
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.InstitutionResponse
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
+import com.stripe.android.financialconnections.navigation.Destination.PartnerAuth
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.isCancellationError
@@ -172,9 +172,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 )
             }
             // navigate to next step
-            navigationManager.navigate(
-                NavigationState.NavigateToRoute(NavigationDirections.partnerAuth)
-            )
+            navigationManager.tryNavigateTo(PartnerAuth(referrer = Pane.INSTITUTION_PICKER))
         }.execute { this }
     }
 
@@ -203,9 +201,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     }
 
     fun onManualEntryClick() {
-        navigationManager.navigate(
-            NavigationState.NavigateToRoute(NavigationDirections.manualEntry)
-        )
+        navigationManager.tryNavigateTo(ManualEntry(referrer = Pane.INSTITUTION_PICKER))
     }
 
     fun onScrollChanged() {

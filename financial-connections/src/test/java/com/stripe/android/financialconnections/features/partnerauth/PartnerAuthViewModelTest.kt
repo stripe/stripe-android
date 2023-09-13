@@ -154,7 +154,7 @@ internal class PartnerAuthViewModelTest {
             verifyNoInteractions(cancelAuthorizationSession)
 
             // stays in partner auth pane
-            assertThat(navigationManager.emittedEvents).isEmpty()
+            assertThat(navigationManager.emittedIntents).isEmpty()
         }
 
     @Test
@@ -182,7 +182,7 @@ internal class PartnerAuthViewModelTest {
             verify(cancelAuthorizationSession).invoke(eq(activeAuthSession.id))
 
             // stays in partner auth pane
-            assertThat(navigationManager.emittedEvents).isEmpty()
+            assertThat(navigationManager.emittedIntents).isEmpty()
 
             // creates two sessions (initial and retry)
             verify(createAuthorizationSession, times(2)).invoke(
@@ -219,7 +219,7 @@ internal class PartnerAuthViewModelTest {
             verify(cancelAuthorizationSession).invoke(eq(activeAuthSession.id))
 
             // stays in partner auth pane
-            assertThat(navigationManager.emittedEvents).isEmpty()
+            assertThat(navigationManager.emittedIntents).isEmpty()
 
             // creates two sessions (initial and retry)
             verify(createAuthorizationSession, times(2)).invoke(
@@ -249,6 +249,7 @@ internal class PartnerAuthViewModelTest {
             pollAuthorizationSessionOAuthResults = pollAuthorizationSessionOAuthResults,
             logger = mock(),
             initialState = initialState,
+            browserManager = mock(),
             uriUtils = UriUtils(Logger.noop(), mock()),
             applicationId = applicationId
         )

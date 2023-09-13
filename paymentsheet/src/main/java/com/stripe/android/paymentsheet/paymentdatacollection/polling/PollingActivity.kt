@@ -32,6 +32,7 @@ internal class PollingActivity : AppCompatActivity() {
             timeLimit = args.timeLimitInSeconds.seconds,
             initialDelay = args.initialDelayInSeconds.seconds,
             maxAttempts = args.maxAttempts,
+            ctaText = args.ctaText,
         )
     }
 

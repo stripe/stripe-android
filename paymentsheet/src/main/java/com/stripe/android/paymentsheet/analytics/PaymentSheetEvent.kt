@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.analytics
 
-import androidx.annotation.Keep
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -218,7 +217,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class Payment(
         mode: EventReporter.Mode,
-        result: Result,
+        private val result: Result,
         duration: Duration?,
         private val paymentSelection: PaymentSelection?,
         currency: String?,
@@ -227,13 +226,13 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
 
         override val eventName: String =
-            formatEventName(mode, "payment_${analyticsValue(paymentSelection)}_$result")
+            formatEventName(mode, "payment_${analyticsValue(paymentSelection)}_${result.analyticsValue}")
 
         override val additionalParams: Map<String, Any?> =
             mapOf(
                 FIELD_DURATION to duration?.asSeconds,
                 FIELD_CURRENCY to currency,
-            ) + buildDeferredIntentConfirmationType() + selectedPaymentMethodType()
+            ) + buildDeferredIntentConfirmationType() + selectedPaymentMethodType() + errorMessage()
 
         private fun buildDeferredIntentConfirmationType(): Map<String, String> {
             return deferredIntentConfirmationType?.let {
@@ -255,12 +254,22 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             }.orEmpty()
         }
 
-        enum class Result(private val code: String) {
-            Success("success"),
-            Failure("failure");
+        private fun errorMessage(): Map<String, String> {
+            return when (result) {
+                is Result.Success -> emptyMap()
+                is Result.Failure -> mapOf(FIELD_ERROR_MESSAGE to result.error.analyticsValue)
+            }
+        }
 
-            @Keep
-            override fun toString(): String = code
+        sealed interface Result {
+            object Success : Result
+            data class Failure(val error: PaymentSheetConfirmationError) : Result
+
+            val analyticsValue: String
+                get() = when (this) {
+                    is Success -> "success"
+                    is Failure -> "failure"
+                }
         }
     }
 

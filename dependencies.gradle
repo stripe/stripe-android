@@ -1,7 +1,7 @@
 ext.versions = [
         accompanist                 : '0.30.1',
         alipay                      : '15.8.12',
-        androidGradlePlugin         : '8.0.2',
+        androidGradlePlugin         : '8.1.1',
         androidTest                 : '1.5.0',
         androidTestJunit            : '1.1.5',
         androidTestOrchestrator     : '1.4.2',
@@ -27,7 +27,7 @@ ext.versions = [
         binaryCompatibilityValidator: '0.13.1',
         buildTools                  : "30.0.3",
         cameraX                     : '1.2.3',
-        dagger                      : '2.45',
+        dagger                      : '2.48',
         detekt                      : "1.22.0",
         diskLruCache                : '2.0.2',
         dokka                       : '1.9.0-dev-218',

@@ -1261,7 +1261,9 @@ internal class IdentityViewModel constructor(
                         docBackUploadType = latestState.docBackUploadType,
                         docFrontModelScore = latestState.docFrontModelScore,
                         docBackModelScore = latestState.docBackModelScore,
-                        selfieModelScore = latestState.selfieModelScore
+                        selfieModelScore = latestState.selfieModelScore,
+                        docFrontBlurScore = latestState.docFrontBlurScore,
+                        docBackBlurScore = latestState.docBackBlurScore
                     )
                 )
             }

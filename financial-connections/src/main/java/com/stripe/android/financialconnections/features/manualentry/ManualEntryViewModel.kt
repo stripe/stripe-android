@@ -19,10 +19,9 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.model.PaymentAccountParams
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
@@ -100,7 +99,7 @@ internal class ManualEntryViewModel @Inject constructor(
             ManualEntryState::linkPaymentAccount,
             onFail = {
                 logger.error("Error linking payment account", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(Pane.MANUAL_ENTRY, it))
+                eventTracker.track(FinancialConnectionsEvent.Error(PANE, it))
             },
         )
     }
@@ -136,12 +135,12 @@ internal class ManualEntryViewModel @Inject constructor(
                     accountNumber = requireNotNull(state.account)
                 )
             ).also {
-                val args = NavigationDirections.ManualEntrySuccess.argMap(
+                val args = Destination.ManualEntrySuccess.argMap(
                     microdepositVerificationMethod = it.microdepositVerificationMethod,
                     last4 = state.account.takeLast(4)
                 )
-                val nextPane = (it.nextPane ?: Pane.MANUAL_ENTRY_SUCCESS).toNavigationCommand(args)
-                navigationManager.navigate(NavigationState.NavigateToRoute(nextPane))
+                val destination = (it.nextPane ?: Pane.MANUAL_ENTRY_SUCCESS).destination
+                navigationManager.tryNavigateTo(destination(PANE, args))
             }
         }.execute { copy(linkPaymentAccount = it) }
     }
@@ -161,6 +160,8 @@ internal class ManualEntryViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        private val PANE = Pane.MANUAL_ENTRY
     }
 }
 

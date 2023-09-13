@@ -26,7 +26,9 @@ internal fun ViewModel.buildFormObserver(
         merchantName = configuration.merchantDisplayName
             ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
         billingDetails = configuration.defaultBillingDetails,
-        billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration
+        billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+        // TODO(tillh-stripe) Determine this based on /wallets-config response
+        isEligibleForCardBrandChoice = false,
     )
 
     val formViewModel = formViewModelSubcomponentBuilderProvider.get()

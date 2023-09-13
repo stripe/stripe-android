@@ -324,4 +324,62 @@ class ElementsSessionJsonParserTest {
             )
         )
     }
+
+    @Test
+    fun `Is eligible for CBC if response says so`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret"
+            ),
+            apiKey = "test",
+        )
+
+        val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_CBC_ELIGIBLE
+        val session = parser.parse(intent)
+
+        assertThat(session?.isEligibleForCardBrandChoice).isTrue()
+    }
+
+    @Test
+    fun `Is not eligible for CBC if response says so`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret"
+            ),
+            apiKey = "test",
+        )
+
+        val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_CBC_NOT_ELIGIBLE
+        val session = parser.parse(intent)
+
+        assertThat(session?.isEligibleForCardBrandChoice).isFalse()
+    }
+
+    @Test
+    fun `Is not eligible for CBC if no info in the response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret"
+            ),
+            apiKey = "test",
+        )
+
+        val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
+        val session = parser.parse(intent)
+
+        assertThat(session?.isEligibleForCardBrandChoice).isFalse()
+    }
+
+    @Test
+    fun `Is not eligible for CBC if not client-side payment intent`() {
+        val parser = ElementsSessionJsonParser(
+            params = ElementsSessionParams.SetupIntentType(clientSecret = "secret"),
+            apiKey = "test",
+        )
+
+        val intent = ElementsSessionFixtures.EXPANDED_SETUP_INTENT_JSON_WITH_CBC_ELIGIBLE
+        val session = parser.parse(intent)
+
+        assertThat(session?.isEligibleForCardBrandChoice).isFalse()
+    }
 }

@@ -1248,6 +1248,79 @@ internal object PaymentIntentFixtures {
         requireNotNull(PARSER.parse(OXXO_REQUIRES_ACTION_JSON))
     }
 
+    val BOLETO_REQUIRES_ACTION by lazy {
+        requireNotNull(
+            PARSER.parse(
+                JSONObject(
+                    """
+        {
+            "id": "pi_3NoBHzAAYNo78uxt1Gg1mWUH",
+            "object": "payment_intent",
+            "amount": 5099,
+            "amount_details": {
+                "tip": {}
+            },
+            "automatic_payment_methods": null,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "client_secret": "pi_3NoBHzAAYNo78uxt1Gg1mWUH_secret_Hp6QnPyBIu95tGpRXmpCZXiQT",
+            "confirmation_method": "automatic",
+            "created": 1694204907,
+            "currency": "brl",
+            "description": null,
+            "last_payment_error": null,
+            "livemode": false,
+            "next_action": {
+                "boleto_display_details": {
+                    "expires_at": 1694205186,
+                    "hosted_voucher_url": "https://payments.stripe.com/boleto/voucher/test_YWNjdF8xTm5pZllBQVlObzc4dXh0LF9PYk81bUhVTGNSZGNIeHlyckJ4djBFQ3lkNkswS1lt0100qH3SxPW7",
+                    "number": "01010101010101010101010101010101010101010101010",
+                    "pdf": "https://payments.stripe.com/boleto/voucher/test_YWNjdF8xTm5pZllBQVlObzc4dXh0LF9PYk81bUhVTGNSZGNIeHlyckJ4djBFQ3lkNkswS1lt0100qH3SxPW7/pdf"
+                },
+                "type": "boleto_display_details"
+            },
+            "payment_method": {
+                "id": "pm_1NoBJaAAYNo78uxtjHwdrfvg",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": "go",
+                        "country": "BR",
+                        "line1": "153",
+                        "line2": "",
+                        "postal_code": "76600-000",
+                        "state": "go"
+                    },
+                    "email": "hi@gmail.com",
+                    "name": "hi mom",
+                    "phone": null
+                },
+                "boleto": {
+                    "fingerprint": "dXONEmJnaLq73tXw",
+                    "tax_id": "00000000000"
+                },
+                "created": 1694205006,
+                "customer": null,
+                "livemode": false,
+                "type": "boleto"
+            },
+            "payment_method_types": [
+                "card",
+                "boleto"],
+            "processing": null,
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": null,
+            "source": null,
+            "status": "requires_action"
+        }
+                    """.trimIndent()
+                )
+            )
+        )
+    }
+
     private val CASH_APP_PAY_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
             """

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -84,6 +85,7 @@ private fun PollingScreen(
                 remainingDuration = uiState.durationRemaining,
                 onCancel = onCancel,
                 modifier = modifier,
+                ctaText = uiState.ctaText,
             )
         }
         PollingState.Failed -> {
@@ -100,6 +102,7 @@ private fun ActivePolling(
     remainingDuration: Duration,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier,
+    @StringRes ctaText: Int,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -124,7 +127,7 @@ private fun ActivePolling(
         )
 
         Text(
-            text = rememberActivePollingMessage(remainingDuration),
+            text = rememberActivePollingMessage(remainingDuration, ctaText),
             textAlign = TextAlign.Center,
             lineHeight = MaterialTheme.typography.body1.fontSize * Spacing.lineHeightMultiplier,
             modifier = Modifier.padding(bottom = Spacing.normal),
@@ -203,6 +206,7 @@ private fun FailedPolling(
 @Composable
 private fun rememberActivePollingMessage(
     remainingDuration: Duration,
+    @StringRes ctaText: Int
 ): String {
     val context = LocalContext.current
 
@@ -211,7 +215,7 @@ private fun rememberActivePollingMessage(
             val paddedSeconds = seconds.toString().padStart(length = 2, padChar = '0')
             "$minutes:$paddedSeconds"
         }
-        context.getString(R.string.stripe_upi_polling_message, remainingTime)
+        context.getString(ctaText, remainingTime)
     }
 }
 
@@ -237,6 +241,7 @@ private fun ActivePollingScreenPreview() {
             PollingScreen(
                 uiState = PollingUiState(
                     durationRemaining = 83.seconds,
+                    ctaText = R.string.stripe_upi_polling_message,
                     pollingState = PollingState.Active,
                 ),
                 onCancel = {},
@@ -253,6 +258,7 @@ private fun FailedPollingScreenPreview() {
             PollingScreen(
                 uiState = PollingUiState(
                     durationRemaining = 83.seconds,
+                    ctaText = R.string.stripe_upi_polling_message,
                     pollingState = PollingState.Failed,
                 ),
                 onCancel = {},

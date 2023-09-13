@@ -24,8 +24,8 @@ import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
 import com.stripe.android.financialconnections.model.TextUpdate
-import com.stripe.android.financialconnections.navigation.NavigationDirections
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.navigation.Destination.LinkStepUpVerification
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -116,8 +116,8 @@ class LinkAccountPickerViewModelTest {
         val viewModel = buildViewModel(LinkAccountPickerState())
         viewModel.onNewBankAccountClick()
 
-        val navigation = response.nextPaneOnAddAccount!!.toNavigationCommand()
-        navigationManager.assertNavigatedTo(navigation)
+        val destination = response.nextPaneOnAddAccount!!.destination
+        navigationManager.assertNavigatedTo(destination, Pane.LINK_ACCOUNT_PICKER)
     }
 
     @Test
@@ -158,8 +158,8 @@ class LinkAccountPickerViewModelTest {
             verify(updateCachedAccounts).invoke(capture())
             assertThat(firstValue(null)).isEqualTo(listOf(selectedAccount))
         }
-        val destination = accounts.data.first().nextPaneOnSelection!!.toNavigationCommand()
-        navigationManager.assertNavigatedTo(destination)
+        val destination = accounts.data.first().nextPaneOnSelection!!.destination
+        navigationManager.assertNavigatedTo(destination, Pane.LINK_ACCOUNT_PICKER)
     }
 
     @Test
@@ -203,7 +203,7 @@ class LinkAccountPickerViewModelTest {
             }
             verifyNoInteractions(updateLocalManifest)
             verifyNoInteractions(selectNetworkedAccount)
-            navigationManager.assertNavigatedTo(NavigationDirections.linkStepUpVerification)
+            navigationManager.assertNavigatedTo(LinkStepUpVerification, Pane.LINK_ACCOUNT_PICKER)
         }
 
     private fun twoAccounts() = NetworkedAccountsList(

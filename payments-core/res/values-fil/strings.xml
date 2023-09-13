@@ -80,8 +80,8 @@
   <string name="stripe_becs_mandate_acceptance">\n    Sa pagbibigay ng mga detalye ng iyong account sa bangko at pagkumpirma sa pagbabayad na ito, sumasang-ayon ka sa \n    kasunduan sa serbisyo ng Direct Debit Request at Direct Debit Request, at pinahihintulutan ang\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156\n    (“Stripe”) na magbawas sa iyong account gamit ang Bulk Electronic Clearing System (BECS)\n    sa ngalan ng %1$s (the \"Merchant\") para sa anumang mga halaga na hiwalay na ipinaalam sa iyo\n    ng Merchant. Pinatutunayan mo na ikaw ay alinman sa may-ari ng account o isang pinahihintulutan \n    na pumirma sa account na nakalista sa itaas.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Numero ng account</string>
-  <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="stripe_becs_widget_account_number_incomplete">Ang numero ng iyong account ay di kumpleto.</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">Ang numero ng account na inilagay mo ay kulang.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="stripe_becs_widget_account_number_required">Kailangan ang numero ng iyong account.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->

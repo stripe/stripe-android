@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountForm
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -39,6 +40,7 @@ internal fun PaymentElement(
     onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit,
     onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
     formArguments: FormArguments,
+    usBankAccountFormArguments: USBankAccountFormArguments,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
 ) {
     val context = LocalContext.current
@@ -68,7 +70,7 @@ internal fun PaymentElement(
             if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
                 USBankAccountForm(
                     formArgs = formArguments,
-                    sheetViewModel = sheetViewModel,
+                    usBankAccountFormArgs = usBankAccountFormArguments,
                     isProcessing = primaryButtonState.value?.isProcessing == true,
                     modifier = Modifier.padding(horizontal = horizontalPadding),
                 )

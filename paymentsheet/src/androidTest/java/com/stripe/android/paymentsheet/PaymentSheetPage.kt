@@ -33,6 +33,12 @@ internal class PaymentSheetPage(
             .performClick()
     }
 
+    fun clickViewWithText(text: String) {
+        composeTestRule.onNode(hasText(text))
+            .performScrollTo()
+            .performClick()
+    }
+
     fun waitForText(text: String, substring: Boolean = false) {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
