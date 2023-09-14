@@ -12,16 +12,10 @@
 # This script can be run with no arguments:
 #  ./localize.sh
 
-ENGLISH_ONLY=false
-
-for ARGUMENT in "$@"
-do
-    if [ "$ARGUMENT" = "ENGLISH_ONLY" ]; then
-        echo "Only updating English translations due to ENGLISH_ONLY flag"
-        ENGLISH_ONLY=true
-        break
-    fi
-done
+FETCH_ALL_LANGUAGES=true
+if [ $# -ne 0 ] && [ $1 = "ENGLISH_ONLY" ]; then
+    FETCH_ALL_LANGUAGES=false
+fi
 
 API_TOKEN=$LOKALISE_API_TOKEN
 if [ -z "$API_TOKEN" ]; then
@@ -48,12 +42,18 @@ FINAL_STATUS_ID=587
 
 rm -rf android/*
 
+if [ "$FETCH_ALL_LANGUAGES" = true ]; then
+    echo "Fetching translations for all languages…"
+else
+    echo "Fetching translations for English only…"
+fi
+
 for MODULE in ${MODULES[@]}
 do
     echo ""
     echo "Downloading strings for $MODULE/strings.xml"
 
-    if [ "$ENGLISH_ONLY" = "false" ]; then
+    if [ "$FETCH_ALL_LANGUAGES" = true ]; then
         lokalise2 --token $API_TOKEN \
                   --project-id $PROJECT_ID \
                   file download \
@@ -81,7 +81,7 @@ do
           --bundle-structure "android/$MODULE/values-%LANG_ISO%/strings.xml"
 
     #There is a command line switch that might be better than this, see: --language-mapping
-    if [ "$ENGLISH_ONLY" = "false" ]; then
+    if [ "$FETCH_ALL_LANGUAGES" = true ]; then
         mv android/$MODULE/values-es-r419 android/$MODULE/values-b+es+419
         mv android/$MODULE/values-zh-rHant android/$MODULE/values-zh-rTW
         mv android/$MODULE/values-zh-rHans android/$MODULE/values-zh
@@ -89,12 +89,12 @@ do
     fi
 
     # This is used by the untranslated_project_keys.sh script
-    if [ "$ENGLISH_ONLY" = "false" ]; then
+    if [ "$FETCH_ALL_LANGUAGES" = true ]; then
         cp android/$MODULE/values-en-rGB/strings.xml android/$MODULE-lokalize-strings.xml
     fi
 
     # Remove the existing strings files
-    if [ "$ENGLISH_ONLY" = "false" ]; then
+    if [ "$FETCH_ALL_LANGUAGES" = true ]; then
         find ../$MODULE/res -type f -name strings.xml | xargs rm
     fi
 
