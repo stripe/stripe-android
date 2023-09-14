@@ -20,12 +20,10 @@ internal object PaymentSheetFixtures {
     internal const val MERCHANT_DISPLAY_NAME = "Merchant, Inc."
     internal const val CLIENT_SECRET = "pi_1234_secret_1234"
     internal const val DIFFERENT_CLIENT_SECRET = "pi_4321_secret_4321"
+    internal const val SETUP_CLIENT_SECRET = "seti_1234_secret_4321"
 
-    internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(
-        CLIENT_SECRET
-    )
-
-    internal val SETUP_INTENT_CLIENT_SECRET = PaymentIntentClientSecret("seti_1234_secret_4321")
+    internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(CLIENT_SECRET)
+    internal val SETUP_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(SETUP_CLIENT_SECRET)
 
     internal val CONFIG_MINIMUM = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME

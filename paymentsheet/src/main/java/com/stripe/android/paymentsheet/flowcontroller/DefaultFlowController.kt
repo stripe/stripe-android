@@ -551,7 +551,8 @@ internal class DefaultFlowController @Inject internal constructor(
             currencyCode = (state.stripeIntent as? PaymentIntent)?.currency
                 ?: googlePayConfig.currencyCode.orEmpty(),
             amount = (state.stripeIntent as? PaymentIntent)?.amount ?: 0L,
-            transactionId = state.stripeIntent.id
+            transactionId = state.stripeIntent.id,
+            label = googlePayConfig.label,
         )
     }
 

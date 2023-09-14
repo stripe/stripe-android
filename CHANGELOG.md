@@ -4,6 +4,11 @@
 
 ### PaymentSheet
 * [ADDED][7302](https://github.com/stripe/stripe-android/pull/7302) PaymentSheet now supports Alma for PaymentIntents in private beta.
+* [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `PaymentSheet.GooglePayConfiguration` now takes an optional `amount` and `label`. The `amount` will be displayed in Google Pay for SetupIntents, while `label` will be displayed for both PaymentIntents and SetupIntents.
+
+### Payments
+* [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `GooglePayLauncher` now takes an optional `label` when presenting Google Pay for PaymentIntents, and an optional `amount` and `label` when presenting for SetupIntents.
+* [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `GooglePayPaymentMethodLauncher` now takes an optional `label` when presenting Google Pay.
 
 ## 20.30.2 - 2023-09-13
 
