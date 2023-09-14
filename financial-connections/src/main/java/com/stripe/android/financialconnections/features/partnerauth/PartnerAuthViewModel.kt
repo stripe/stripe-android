@@ -14,7 +14,7 @@ import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Launched
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Loaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.InstitutionAuthorized
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.AuthSessionOpened
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.AuthSessionRetrieved
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.AuthSessionUrlReceived
@@ -363,7 +363,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
             requireNotNull(authSession)
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
-            FinancialConnections.emitEvent(InstitutionAuthorized)
+            FinancialConnections.emitEvent(Name.INSTITUTION_AUTHORIZED)
             if (authSession.isOAuth) {
                 logger.debug("Web AuthFlow completed! waiting for oauth results")
                 val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)

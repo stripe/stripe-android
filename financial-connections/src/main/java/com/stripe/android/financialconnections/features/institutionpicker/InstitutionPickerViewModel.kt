@@ -12,7 +12,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.SearchInitiated
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.FeaturedInstitutionsLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.InstitutionSelected
@@ -144,7 +144,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                         resultCount = result.data.count()
                     )
                 )
-                FinancialConnections.emitEvent(SearchInitiated)
+                FinancialConnections.emitEvent(Name.SEARCH_INITIATED)
                 result
             } else {
                 InstitutionResponse(

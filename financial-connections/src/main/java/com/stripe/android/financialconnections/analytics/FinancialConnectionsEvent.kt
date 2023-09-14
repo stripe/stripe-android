@@ -1,76 +1,100 @@
 package com.stripe.android.financialconnections.analytics
 
-import java.sql.Timestamp
-
-sealed class FinancialConnectionsEvent(
-    val name: String,
-    val timestamp: Timestamp = Timestamp(System.currentTimeMillis())
+data class FinancialConnectionsEvent(
+    val name: Name,
+    val metadata: Metadata
 ) {
 
     /**
-     * Event when the modal successfully opens
+     * Metadata for the event
      */
-    object Open : FinancialConnectionsEvent("open")
+    data class Metadata(
+        val institutionName: String? = null,
+        val manualEntry: Boolean? = null,
+        val errorCode: ErrorCode? = null
+    ) {
 
-    /**
-     * Event when manual entry flow is initiated
-     */
-    object ManualEntryInitiated : FinancialConnectionsEvent("manual_entry_initiated")
-
-    /**
-     * Event when bank account data is manually entered and “continue” is successfully clicked
-     */
-    object MicrodepositsInitiated : FinancialConnectionsEvent("microdeposits_initiated")
-
-    /**
-     * Event when “Agree and continue” is selected on consent pane
-     */
-    object ConsentAcquired : FinancialConnectionsEvent("consent_acquired")
-
-    /**
-     * Event when the search bar is selected, the user types some search terms and gets an API response
-     */
-    object SearchInitiated : FinancialConnectionsEvent("search_initiated")
-
-    /**
-     * Event when an institution is selected, either from featured institutions or search results
-     */
-    data class InstitutionSelected(val institutionName: String) : FinancialConnectionsEvent("institution_selected")
-
-    /**
-     * Event when successful authorization is completed
-     */
-    object InstitutionAuthorized : FinancialConnectionsEvent("institution_authorized")
-
-    /**
-     * Event when accounts are selected and “confirm” is selected
-     */
-    object AccountsSelected : FinancialConnectionsEvent("accounts_selected")
-
-    /**
-     * Event when the flow is completed and selected accounts are correctly attached to the payment instrument
-     */
-    data class Success(val manualEntry: Boolean? = null) : FinancialConnectionsEvent("success")
-
-    /**
-     * Event when an error is encountered; see error codes for more
-     */
-    data class Error(val errorCode: ErrorCode) : FinancialConnectionsEvent("error") {
-        enum class ErrorCode {
-            INSTITUTION_UNAVAILABLE_PLANNED,
-            INSTITUTION_UNAVAILABLE_UNPLANNED,
-            INSTITUTION_TIMEOUT,
-            ACCOUNTS_UNAVAILABLE,
-            NO_DEBITABLE_ACCOUNT,
-            AUTHORIZATION_FAILED,
-            UNEXPECTED_ERROR,
-            SESSION_EXPIRED,
-            FAILED_BOT_DETECTION
-        }
+        fun toMap(): Map<String, Any?> = mapOf(
+            "institution_name" to institutionName,
+            "error_code" to errorCode?.value,
+            "manual_entry" to manualEntry
+        )
     }
 
     /**
-     * Event when the modal is closed by the user, either by clicking the "X" or clicking outside the modal
+     * Enum representing the name of the event
      */
-    object Cancel : FinancialConnectionsEvent("cancel")
+    enum class Name(val value: String) {
+        /**
+         * Event when the modal successfully opens
+         */
+        OPEN("open"),
+
+        /**
+         * Event when the modal is launched on an external browser. After receiving this event,
+         * no other events will be sent until the browser session is completed with
+         * either a [SUCCESS], [CANCEL] or [ERROR].
+         */
+        FLOW_LAUNCHED_IN_BROWSER("flow_launched_in_browser"),
+
+        /**
+         * Event when manual entry flow is initiated
+         */
+        MANUAL_ENTRY_INITIATED("manual_entry_initiated"),
+
+        /**
+         * Event when “Agree and continue” is selected on consent pane
+         */
+        CONSENT_ACQUIRED("consent_acquired"),
+
+        /**
+         * Event when the search bar is selected, the user types some search terms and gets an API response
+         */
+        SEARCH_INITIATED("search_initiated"),
+
+        /**
+         * Event when an institution is selected, either from featured institutions or search results
+         */
+        INSTITUTION_SELECTED("institution_selected"),
+
+        /**
+         * Event when successful authorization is completed
+         */
+        INSTITUTION_AUTHORIZED("institution_authorized"),
+
+        /**
+         * Event when accounts are selected and “confirm” is selected
+         */
+        ACCOUNTS_SELECTED("accounts_selected"),
+
+        /**
+         * Event when the flow is completed and selected accounts are correctly attached to the payment instrument
+         */
+        SUCCESS("success"),
+
+        /**
+         * Event when an error is encountered; see error codes for more
+         */
+        ERROR("error"),
+
+        /**
+         * Event when the modal is closed by the user, either by clicking the "X" or clicking outside the modal
+         */
+        CANCEL("cancel")
+    }
+
+    /**
+     * Enum representing the error code when an error event is encountered
+     */
+    enum class ErrorCode(val value: String) {
+        INSTITUTION_UNAVAILABLE_PLANNED("institution_unavailable_planned"),
+        INSTITUTION_UNAVAILABLE_UNPLANNED("institution_unavailable_unplanned"),
+        INSTITUTION_TIMEOUT("institution_timeout"),
+        ACCOUNTS_UNAVAILABLE("accounts_unavailable"),
+        NO_DEBITABLE_ACCOUNT("no_debitable_account"),
+        AUTHORIZATION_FAILED("authorization_failed"),
+        UNEXPECTED_ERROR("unexpected_error"),
+        SESSION_EXPIRED("session_expired"),
+        FAILED_BOT_DETECTION("failed_bot_detection"),
+    }
 }

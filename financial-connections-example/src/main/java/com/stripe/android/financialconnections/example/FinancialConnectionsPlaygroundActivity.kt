@@ -73,7 +73,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FinancialConnections.setEventListener { event: FinancialConnectionsEvent ->
-            Log.d("EVENT", "Received event: ${event.name}")
+            Log.d("EVENT", "Received event: ${event.name}, ${event.metadata}")
         }
         collectBankAccountLauncher = CollectBankAccountLauncher.create(
             this,
