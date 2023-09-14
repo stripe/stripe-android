@@ -10,10 +10,10 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Click
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.NetworkingNewConsumer
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.NetworkingReturningConsumer
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupAccount
@@ -97,8 +97,12 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 }
             },
             onFail = { error ->
-                logger.error("Error fetching payload", error)
-                eventTracker.track(Error(PANE, error))
+                eventTracker.logError(
+                    extraMessage = "Error fetching payload",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
             },
         )
         onAsync(
@@ -108,8 +112,12 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             },
             onFail = { error ->
                 saveToLinkWithStripeSucceeded.set(false)
-                logger.error("Error saving account to Link", error)
-                eventTracker.track(Error(PANE, error))
+                eventTracker.logError(
+                    extraMessage = "Error saving account to Link",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
                 navigationManager.tryNavigateTo(Success(referrer = PANE))
             },
         )
@@ -124,8 +132,12 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 }
             },
             onFail = { error ->
-                logger.error("Error looking up account", error)
-                eventTracker.track(Error(PANE, error))
+                eventTracker.logError(
+                    extraMessage = "Error looking up account",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
             },
         )
     }
@@ -190,9 +202,12 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         if (URLUtil.isNetworkUrl(uri)) {
             setState { copy(viewEffect = OpenUrl(uri, date.time)) }
         } else {
-            val errorMessage = "Unrecognized clickable text: $uri"
-            logger.error(errorMessage)
-            eventTracker.track(Error(PANE, InvalidParameterException(errorMessage)))
+            eventTracker.logError(
+                extraMessage = "Error clicking text",
+                logger = logger,
+                pane = PANE,
+                error = InvalidParameterException("Unrecognized clickable text: $uri")
+            )
         }
     }
 

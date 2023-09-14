@@ -74,6 +74,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         FinancialConnections.setEventListener { event: FinancialConnectionsEvent ->
             Log.d("EVENT", "Received event: ${event.name}, ${event.metadata}")
+            if (event.name == FinancialConnectionsEvent.Name.CONSENT_ACQUIRED) {
+                Log.d("EVENT", "Consent Acquired!")
+            }
         }
         collectBankAccountLauncher = CollectBankAccountLauncher.create(
             this,
@@ -374,5 +377,10 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             ),
             onButtonClick = { _, _, _, _ -> }
         )
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        FinancialConnections.clearEventListener()
     }
 }

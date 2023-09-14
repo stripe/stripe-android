@@ -91,6 +91,8 @@ data class FinancialConnectionsEvent(
         INSTITUTION_UNAVAILABLE_UNPLANNED("institution_unavailable_unplanned"),
         INSTITUTION_TIMEOUT("institution_timeout"),
         ACCOUNTS_UNAVAILABLE("accounts_unavailable"),
+        ACCOUNT_NUMBERS_UNAVAILABLE("account_numbers_unavailable"),
+        WEB_BROWSER_UNAVAILABLE("web_browser_unavailable"),
         NO_DEBITABLE_ACCOUNT("no_debitable_account"),
         AUTHORIZATION_FAILED("authorization_failed"),
         UNEXPECTED_ERROR("unexpected_error"),

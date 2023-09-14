@@ -10,8 +10,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
@@ -101,8 +101,12 @@ internal class ManualEntryViewModel @Inject constructor(
         onAsync(
             ManualEntryState::linkPaymentAccount,
             onFail = {
-                logger.error("Error linking payment account", it)
-                eventTracker.track(Error(PANE, it))
+                eventTracker.logError(
+                    extraMessage = "Error linking payment account",
+                    error = it,
+                    logger = logger,
+                    pane = PANE
+                )
             },
         )
     }

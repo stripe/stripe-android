@@ -8,8 +8,10 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name.ACCOUNTS_SELECTED
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.AccountSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.ClickLinkAccounts
@@ -213,6 +215,7 @@ internal class AccountPickerViewModel @Inject constructor(
     fun onSubmit() {
         viewModelScope.launch {
             eventTracker.track(ClickLinkAccounts(PANE))
+            FinancialConnections.emitEvent(ACCOUNTS_SELECTED)
         }
         withState { state ->
             state.payload()?.let {

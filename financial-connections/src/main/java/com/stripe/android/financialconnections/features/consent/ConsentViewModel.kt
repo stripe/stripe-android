@@ -10,8 +10,8 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.ConsentAgree
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.features.consent.ConsentState.BottomSheetContent
@@ -64,8 +64,12 @@ internal class ConsentViewModel @Inject constructor(
             onFail = { logger.error("Error retrieving consent content", it) }
         )
         onAsync(ConsentState::acceptConsent, onFail = {
-            eventTracker.track(Error(Pane.CONSENT, it))
-            logger.error("Error accepting consent", it)
+            eventTracker.logError(
+                extraMessage = "Error accepting consent",
+                error = it,
+                logger = logger,
+                pane = Pane.CONSENT
+            )
         })
     }
 

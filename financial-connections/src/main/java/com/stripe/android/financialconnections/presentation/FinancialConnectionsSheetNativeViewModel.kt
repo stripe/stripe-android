@@ -12,11 +12,9 @@ import com.airbnb.mvrx.PersistState
 import com.airbnb.mvrx.ViewModelContext
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.AppBackgrounded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.ClickNavBarBack
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.ClickNavBarClose
@@ -77,9 +75,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     val navigationFlow = navigationManager.navigationFlow
 
     init {
-        withState {
-            if (it.firstInit) FinancialConnections.emitEvent(Name.OPEN)
-        }
         setState { copy(firstInit = false) }
         viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->

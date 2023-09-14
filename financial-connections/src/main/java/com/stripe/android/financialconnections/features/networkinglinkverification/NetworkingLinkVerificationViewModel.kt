@@ -11,7 +11,6 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.VerificationError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.VerificationError.Error.ConsumerNotFoundError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.VerificationError.Error.LookupConsumerSession
@@ -19,6 +18,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsInt
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.VerificationError.Error.StartVerificationSessionError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.VerificationSuccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.VerificationSuccessNoAccounts
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -109,8 +109,12 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
                 }
             },
             onFail = { error ->
-                logger.error("Error starting verification", error)
-                analyticsTracker.track(Error(PANE, error))
+                analyticsTracker.logError(
+                    extraMessage = "Error starting verification",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
             },
         )
     }
@@ -133,8 +137,12 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         error: Throwable,
         updatedManifest: FinancialConnectionsSessionManifest
     ) {
-        logger.error("Error fetching networked accounts", error)
-        analyticsTracker.track(Error(PANE, error))
+        analyticsTracker.logError(
+            extraMessage = "Error fetching networked accounts",
+            error = error,
+            logger = logger,
+            pane = PANE
+        )
         analyticsTracker.track(VerificationError(PANE, NetworkedAccountsRetrieveMethodError))
         navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = PANE))
     }

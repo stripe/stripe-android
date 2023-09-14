@@ -12,8 +12,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.FeaturedInstitutionsLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.InstitutionSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.PaneLoaded
@@ -66,8 +66,12 @@ internal class InstitutionPickerViewModel @Inject constructor(
                         ).data
                     }
                 }.onFailure {
-                    logger.error("Error fetching featured institutions", it)
-                    eventTracker.track(Error(Pane.INSTITUTION_PICKER, it))
+                    eventTracker.logError(
+                        extraMessage = "Error fetching featured institutions",
+                        error = it,
+                        pane = Pane.INSTITUTION_PICKER,
+                        logger = logger
+                    )
                 }
 
             val (institutions, duration) = result.getOrNull() ?: Pair(emptyList(), 0L)
@@ -166,6 +170,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
                     fromFeatured = fromFeatured,
                     institutionId = institution.id
                 )
+            )
+            FinancialConnections.emitEvent(
+                Name.INSTITUTION_SELECTED,
+                FinancialConnectionsEvent.Metadata(institutionName = institution.name)
             )
             // updates local manifest with active institution and cleans auth session if present.
             updateLocalManifest {
