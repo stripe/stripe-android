@@ -18,8 +18,6 @@
   <string name="stripe_blik_code">BLIK code</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
-  <!-- Label for Konbini Confirmation Number -->
-  <string name="stripe_konbini_confirmation_number_label">Phone</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">By continuing, you authorize %1$s to debit your Cash App account for this payment and future payments in accordance with %2$s\'s terms, until this authorization is revoked. You can change this anytime in your Cash App Settings.</string>
   <!-- Title for the contact information section -->
@@ -79,4 +77,8 @@
   <string name="stripe_setup_button_label">Set up</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">UPI ID</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
+  <!-- Label for Konbini Confirmation Number -->
+  <string name="stripe_konbini_confirmation_number_label">Phone</string>
 </resources>
