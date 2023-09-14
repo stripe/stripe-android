@@ -3,6 +3,7 @@
 ## XX.XX.XX - 2023-XX-XX
 
 ### PaymentSheet
+* [ADDED][7314](https://github.com/stripe/stripe-android/pull/7314) PaymentSheet now supports Revolut Pay for SetupIntents, and PaymentIntents with setup for future usage.
 * [ADDED][7302](https://github.com/stripe/stripe-android/pull/7302) PaymentSheet now supports Alma for PaymentIntents in private beta.
 * [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `PaymentSheet.GooglePayConfiguration` now takes an optional `amount` and `label`. The `amount` will be displayed in Google Pay for SetupIntents, while `label` will be displayed for both PaymentIntents and SetupIntents.
 * [ADDED][7308](https://github.com/stripe/stripe-android/pull/7308) PaymentSheet now supports Konbini for PaymentIntents.

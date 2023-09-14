@@ -196,8 +196,8 @@ internal val AffirmRequirement = PaymentMethodRequirements(
 
 internal val RevolutPayRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
-    siRequirements = null,
-    confirmPMFromCustomer = null
+    siRequirements = emptySet(),
+    confirmPMFromCustomer = true
 )
 
 internal val AmazonPayRequirement = PaymentMethodRequirements(
