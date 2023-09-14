@@ -16,7 +16,6 @@ ENGLISH_ONLY=false
 
 for ARGUMENT in "$@"
 do
-    puts "$ARGUMENT"
     if [ "$ARGUMENT" = "ENGLISH_ONLY" ]; then
         echo "Only updating English translations due to ENGLISH_ONLY flag"
         ENGLISH_ONLY=true
