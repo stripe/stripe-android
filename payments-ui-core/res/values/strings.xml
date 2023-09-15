@@ -67,6 +67,8 @@
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">By confirming your payment with PayPal, you allow %s to charge your PayPal account for future payments in accordance with their terms.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">By confirming your payment with RevolutPay, you allow %s to charge your RevolutPay account for future payments in accordance with their terms.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Save for future %s payments</string>
   <!-- Button title to open camera to scan credit/debit card -->

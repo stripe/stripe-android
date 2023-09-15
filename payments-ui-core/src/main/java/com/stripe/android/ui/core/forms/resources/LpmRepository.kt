@@ -381,17 +381,27 @@ class LpmRepository constructor(
             requirement = AffirmRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
-        PaymentMethod.Type.RevolutPay.code -> SupportedPaymentMethod(
-            code = "revolut_pay",
-            requiresMandate = false,
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_revolut_pay,
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_revolut_pay,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-            tintIconOnSelection = false,
-            requirement = RevolutPayRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields)
-        )
+        PaymentMethod.Type.RevolutPay.code -> {
+            val requiresMandate = stripeIntent.requiresMandate()
+
+            val localLayoutSpecs: List<FormItemSpec> = if (stripeIntent.requiresMandate()) {
+                listOf(MandateTextSpec(stringResId = R.string.stripe_revolut_mandate))
+            } else {
+                emptyList()
+            }
+
+            SupportedPaymentMethod(
+                code = "revolut_pay",
+                requiresMandate = requiresMandate,
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_revolut_pay,
+                iconResource = R.drawable.stripe_ic_paymentsheet_pm_revolut_pay,
+                lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+                darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+                tintIconOnSelection = false,
+                requirement = RevolutPayRequirement,
+                formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs)
+            )
+        }
         PaymentMethod.Type.AmazonPay.code -> SupportedPaymentMethod(
             code = "amazon_pay",
             requiresMandate = false,
