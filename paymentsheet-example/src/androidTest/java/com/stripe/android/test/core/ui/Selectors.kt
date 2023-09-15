@@ -78,6 +78,7 @@ class Selectors(
         IntentType.PayWithSetup -> EspressoLabelIdButton(R.string.payment_with_setup)
         IntentType.Setup -> EspressoLabelIdButton(R.string.setup)
     }
+
     val billing = when (testParameters.billing) {
         Billing.Off -> EspressoIdButton(R.id.default_billing_off_button)
         Billing.On -> EspressoIdButton(R.id.default_billing_on_button)

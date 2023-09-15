@@ -30,7 +30,7 @@ data class TestParameters(
     val merchantCountryCode: String,
     val supportedPaymentMethods: List<PaymentMethodCode> = listOf(),
     val customPrimaryButtonLabel: String? = null,
-    val attachDefaults: Boolean = false,
+    val attachDefaults: Boolean = true,
     val collectName: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
     val collectEmail: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
     val collectPhone: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
