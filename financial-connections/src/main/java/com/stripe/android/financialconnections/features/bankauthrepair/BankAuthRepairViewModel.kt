@@ -1,13 +1,10 @@
 package com.stripe.android.financialconnections.features.bankauthrepair
 
 import android.webkit.URLUtil
-import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
@@ -18,7 +15,6 @@ import com.stripe.android.financialconnections.domain.CreateRepairSession
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
-import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ClickableText
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
@@ -28,8 +24,9 @@ import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthS
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationRepairSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.repository.PartnerToCoreAuthsRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -71,8 +68,8 @@ internal class BankAuthRepairViewModel @Inject constructor(
         }
     }
 
-    private fun FinancialConnectionsAuthorizationRepairSession.toAuthSession(): FinancialConnectionsAuthorizationSession {
-        return FinancialConnectionsAuthorizationSession(
+    private fun FinancialConnectionsAuthorizationRepairSession.toAuthSession() =
+        FinancialConnectionsAuthorizationSession(
             id = this.id,
             url = this.url,
             flow = this.flow,
@@ -80,8 +77,6 @@ internal class BankAuthRepairViewModel @Inject constructor(
             nextPane = Pane.SUCCESS,
             display = this.display,
         )
-    }
-
 
     private fun observePayload() {
         onAsync(
@@ -125,50 +120,64 @@ internal class BankAuthRepairViewModel @Inject constructor(
     }
 
     fun onSelectAnotherBank() {
-        navigationManager.navigate(NavigationDirections.reset)
+        navigationManager.tryNavigateTo(Destination.Reset(referrer = Pane.BANK_AUTH_REPAIR))
     }
 
     fun onWebAuthFlowFinished(
-        webStatus: Async<String>
+        webStatus: WebAuthFlowState
     ) {
         logger.debug("Web AuthFlow status received $webStatus")
         viewModelScope.launch {
             when (webStatus) {
-                is Uninitialized -> {}
-                is Loading -> setState { copy(authenticationStatus = Loading()) }
-                is Success -> completeAuthorizationSession()
-                is Fail -> {
-                    when (val error = webStatus.error) {
-                        is WebAuthFlowCancelledException -> onAuthCancelled()
-                        else -> onAuthFailed(error)
-                    }
+                is WebAuthFlowState.Canceled -> {
+                    onAuthCancelled(webStatus.url)
                 }
+
+                is WebAuthFlowState.Failed -> {
+                    onAuthFailed(
+                        url = webStatus.url,
+                        message = webStatus.message,
+                        reason = webStatus.reason
+                    )
+                }
+
+                WebAuthFlowState.InProgress -> {
+                    setState { copy(authenticationStatus = Loading()) }
+                }
+
+                is WebAuthFlowState.Success -> {
+                    completeAuthorizationSession(webStatus.url)
+                }
+
+                WebAuthFlowState.Uninitialized -> {}
             }
         }
     }
 
     private fun onAuthFailed(
-        error: Throwable
+        url: String,
+        message: String,
+        reason: String?
     ) {
         // TODO handle auth failures
-        logger.debug("Auth failed " + error.stackTraceToString())
+        logger.debug("Auth failed $message")
     }
 
-    private fun onAuthCancelled() {
+    private fun onAuthCancelled(url: String?) {
         // TODO handle auth cancellations
         logger.debug("Auth cancelled")
     }
 
-    private fun completeAuthorizationSession() {
+    private fun completeAuthorizationSession(url: String) {
         // TODO handle auth succeeding.
         logger.debug("Auth succeeded!")
     }
 
     fun onEnterDetailsManuallyClick() {
-        navigationManager.navigate(NavigationDirections.manualEntry)
+        navigationManager.tryNavigateTo(Destination.ManualEntry(referrer = Pane.BANK_AUTH_REPAIR))
     }
 
-    fun onClickableTextClick(uri: String) {
+    fun onClickableTextClick(uri: String) = viewModelScope.launch {
         // if clicked uri contains an eventName query param, track click event.
         viewModelScope.launch {
             uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->

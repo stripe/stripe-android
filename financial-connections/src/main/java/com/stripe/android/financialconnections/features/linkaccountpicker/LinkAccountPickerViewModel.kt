@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.linkaccountpicker
 
-import androidx.annotation.StringRes
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
@@ -8,7 +7,6 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLearnMoreDataAccess
@@ -27,10 +25,9 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.BankAuthRepair
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.navigation.NavigationDirections.bankAuthRepair
-import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.PartnerToCoreAuthsRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
@@ -41,7 +38,6 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val fetchNetworkedAccounts: FetchNetworkedAccounts,
-    private val navigationManager: NavigationManager,
     private val selectNetworkedAccount: SelectNetworkedAccount,
     private val updateLocalManifest: UpdateLocalManifest,
     private val updateCachedAccounts: UpdateCachedAccounts,
@@ -76,13 +72,6 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                     }
             }
 
-            /**
-             *                 .map { account ->
-             *                     val broken = account.status != Status.ACTIVE
-             *                     val repairEnabled = accountsResponse.repairAuthorizationEnabled == true
-             *                     account.copy(_allowSelection = !broken || repairEnabled)
-             *                 }
-             */
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
                 partnerToCoreAuths = accountsResponse.partnerToCoreAuths,
@@ -166,7 +155,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
 
     private suspend fun repairAccount() {
         eventTracker.track(Click("click.repair_accounts", PANE))
-        navigationManager.navigate(bankAuthRepair)
+        navigationManager.tryNavigateTo(BankAuthRepair(referrer = PANE))
     }
 
     fun onAccountClick(partnerAccount: PartnerAccount) {

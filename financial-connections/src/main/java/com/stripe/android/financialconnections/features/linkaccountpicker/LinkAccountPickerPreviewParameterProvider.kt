@@ -7,10 +7,10 @@ import com.airbnb.mvrx.Success
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.NetworkedAccount
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
 
@@ -19,7 +19,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
     override val values = sequenceOf(
         canonical(),
         accountSelected(),
-        repairableAccountSelected(),
+//        repairableAccountSelected(),
     )
 
     override val count: Int
@@ -56,20 +56,20 @@ internal class LinkAccountPickerPreviewParameterProvider :
         ),
     )
 
-    private fun repairableAccountSelected() = LinkAccountPickerState(
-        selectedAccountId = partnerAccountList()
-            .first { it.status != Status.ACTIVE && it.allowSelection }.id,
-        payload = Success(
-            LinkAccountPickerState.Payload(
-                accounts = partnerAccountList(),
-                accessibleData = accessibleCallout(),
-                businessName = "Random business",
-                consumerSessionClientSecret = "secret",
-                stepUpAuthenticationRequired = false,
-                partnerToCoreAuths = emptyMap(),
-            )
-        ),
-    )
+//    private fun repairableAccountSelected() = LinkAccountPickerState(
+//        selectedAccountId = partnerAccountList()
+//            .first { it.status != Status.ACTIVE && it.allowSelection }.id,
+//        payload = Success(
+//            LinkAccountPickerState.Payload(
+//                accounts = partnerAccountList(),
+//                accessibleData = accessibleCallout(),
+//                businessName = "Random business",
+//                consumerSessionClientSecret = "secret",
+//                stepUpAuthenticationRequired = false,
+//                partnerToCoreAuths = emptyMap(),
+//            )
+//        ),
+//    )
 
     private fun partnerAccountList() = listOf(
         PartnerAccount(

@@ -5,7 +5,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAuthori
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import javax.inject.Inject
 
-
 internal class CreateRepairSession @Inject constructor(
     val repository: FinancialConnectionsManifestRepository,
     val configuration: FinancialConnectionsSheet.Configuration

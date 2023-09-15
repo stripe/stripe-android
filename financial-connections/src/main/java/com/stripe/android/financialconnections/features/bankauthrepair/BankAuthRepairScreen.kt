@@ -73,4 +73,3 @@ internal fun BankAuthRepairScreen() {
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
-

@@ -37,11 +37,11 @@ import com.airbnb.mvrx.Uninitialized
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.domain.Entry
-import com.stripe.android.financialconnections.domain.OauthPrepane
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState
+import com.stripe.android.financialconnections.model.Entry
+import com.stripe.android.financialconnections.model.OauthPrepane
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
@@ -171,7 +171,7 @@ private fun LoadedContent(
         is Uninitialized -> when (payload.authSession.isOAuth) {
             true -> InstitutionalPrePaneContent(
                 onContinueClick = onContinueClick,
-                content = payload.authSession.display!!.text.oauthPrepane,
+                content = payload.authSession.display!!.text!!.oauthPrepane!!,
                 onClickableTextClick = onClickableTextClick,
             )
 
@@ -344,7 +344,6 @@ private fun GifWebView(
         state = state
     )
 }
-
 
 private const val PHONE_BACKGROUND_WIDTH_DP = 272
 private const val PHONE_BACKGROUND_HEIGHT_DP = 264

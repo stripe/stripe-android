@@ -176,7 +176,6 @@ internal interface FinancialConnectionsManifestRepository {
         clientSecret: String,
     ): FinancialConnectionsSessionManifest
 
-
     suspend fun repairSessionGenerateUrl(
         clientSecret: String,
         coreAuthorization: String,

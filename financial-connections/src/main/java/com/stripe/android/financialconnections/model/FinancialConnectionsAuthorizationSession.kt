@@ -44,7 +44,6 @@ internal data class FinancialConnectionsAuthorizationSession(
 
     val isOAuth: Boolean
         get() = _isOAuth ?: false
-
 }
 
 @Serializable
@@ -56,7 +55,7 @@ internal data class FinancialConnectionsAuthorizationRepairSession(
     val id: String,
 
     @SerialName(value = "flow")
-    val flow: Flow? = null,
+    val flow: String? = null,
 
     @SerialName(value = "is_oauth")
     val isOAuth: Boolean? = false,
@@ -70,7 +69,6 @@ internal data class FinancialConnectionsAuthorizationRepairSession(
     @SerialName(value = "display")
     val display: Display? = null
 ) : Parcelable
-
 
 @Serializable(with = Flow.Serializer::class)
 enum class Flow(val value: String) {

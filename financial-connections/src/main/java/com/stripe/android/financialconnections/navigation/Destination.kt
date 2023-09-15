@@ -158,6 +158,11 @@ internal sealed class Destination(
         composable = { ResetScreen() }
     )
 
+    object BankAuthRepair : NoArgumentsDestination(
+        route = Pane.BANK_AUTH_REPAIR.value,
+        composable = { ResetScreen() }
+    )
+
     object ManualEntrySuccess : Destination(
         route = Pane.MANUAL_ENTRY_SUCCESS.value,
         paramKeys = listOf(KEY_REFERRER, KEY_MICRODEPOSITS, KEY_LAST4),
