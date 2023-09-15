@@ -8,9 +8,12 @@ import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
+import com.stripe.android.ui.core.elements.BlikSpec
+import com.stripe.android.ui.core.elements.BoletoTaxIdSpec
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
+import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.ContactInformationSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownSpec
@@ -53,6 +56,7 @@ class TransformSpecToElements(
     private val saveForFutureUseInitialValue: Boolean,
     private val merchantName: String,
     private val context: Context,
+    private val isEligibleForCardBrandChoice: Boolean,
     private val viewOnlyFields: Set<IdentifierSpec> = emptySet(),
 ) {
     fun transform(list: List<FormItemSpec>): List<FormElement> =
@@ -68,7 +72,12 @@ class TransformSpecToElements(
                 is EmptyFormSpec -> EmptyFormElement()
                 is MandateTextSpec -> it.transform(merchantName)
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
-                is CardDetailsSectionSpec -> it.transform(context, initialValues, viewOnlyFields)
+                is CardDetailsSectionSpec -> it.transform(
+                    context = context,
+                    isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+                    initialValues = initialValues,
+                    viewOnlyFields = viewOnlyFields,
+                )
                 is BsbSpec -> it.transform(initialValues)
                 is OTPSpec -> it.transform()
                 is NameSpec -> it.transform(initialValues)
@@ -91,11 +100,13 @@ class TransformSpecToElements(
                     addressRepository,
                     shippingValues,
                 )
+                is BoletoTaxIdSpec -> it.transform(initialValues)
                 is SepaMandateTextSpec -> it.transform(merchantName)
                 is UpiSpec -> it.transform()
+                is BlikSpec -> it.transform()
                 is ContactInformationSpec -> it.transform(initialValues)
-                is PlaceholderSpec ->
-                    error("Placeholders should be processed before calling transform.")
+                is PlaceholderSpec -> error("Placeholders should be processed before calling transform.")
+                is CashAppPayMandateTextSpec -> it.transform(merchantName)
             }
         }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
 }

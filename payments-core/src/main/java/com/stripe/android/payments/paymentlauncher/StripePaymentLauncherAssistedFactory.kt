@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 
@@ -20,6 +21,7 @@ interface StripePaymentLauncherAssistedFactory {
     fun create(
         @Assisted(PUBLISHABLE_KEY) publishableKey: () -> String,
         @Assisted(STRIPE_ACCOUNT_ID) stripeAccountId: () -> String?,
+        @Assisted(STATUS_BAR_COLOR) statusBarColor: Int?,
         hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
     ): StripePaymentLauncher
 }

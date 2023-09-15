@@ -2,7 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -20,15 +20,15 @@ data class CardBillingSpec(
     @SerialName("allowed_country_codes")
     val allowedCountryCodes: Set<String> = CountryUtils.supportedBillingCountries,
     @SerialName("collection_mode")
-    val collectionMode: CardBillingDetailsCollectionConfiguration.AddressCollectionMode =
-        CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+    val collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode =
+        BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
         addressRepository: AddressRepository,
         shippingValues: Map<IdentifierSpec, String?>?,
     ): SectionElement? {
-        if (collectionMode == CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Never) {
+        if (collectionMode == BillingDetailsCollectionConfiguration.AddressCollectionMode.Never) {
             return null
         }
 

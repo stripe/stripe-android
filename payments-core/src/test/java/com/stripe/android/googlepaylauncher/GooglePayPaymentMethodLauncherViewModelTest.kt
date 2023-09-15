@@ -29,7 +29,7 @@ import com.stripe.android.model.GooglePayFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.networking.AbsFakeStripeRepository
+import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.fakeCreationExtras
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -163,12 +163,12 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             WeakMapInjectorRegistry.register(injector, injectorKey)
 
             val factory = GooglePayPaymentMethodLauncherViewModel.Factory(
-                GooglePayPaymentMethodLauncherContract.Args(
+                GooglePayPaymentMethodLauncherContractV2.Args(
                     mock(),
                     "usd",
                     1099,
                     null,
-                    GooglePayPaymentMethodLauncherContract.Args.InjectionParams(
+                    GooglePayPaymentMethodLauncherContractV2.Args.InjectionParams(
                         injectorKey,
                         emptySet(),
                         false,
@@ -200,7 +200,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             PaymentConfiguration.init(application, publishableKey)
 
             val factory = GooglePayPaymentMethodLauncherViewModel.Factory(
-                GooglePayPaymentMethodLauncherContract.Args(
+                GooglePayPaymentMethodLauncherContractV2.Args(
                     GooglePayPaymentMethodLauncher.Config(
                         GooglePayEnvironment.Test,
                         "US",
@@ -209,7 +209,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     "usd",
                     1099,
                     null,
-                    GooglePayPaymentMethodLauncherContract.Args.InjectionParams(
+                    GooglePayPaymentMethodLauncherContractV2.Args.InjectionParams(
                         DUMMY_INJECTOR_KEY,
                         productUsage,
                         false,
@@ -242,8 +242,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options
-        ): PaymentMethod {
-            return PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        ): Result<PaymentMethod> {
+            return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
     }
 
@@ -256,7 +256,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     private companion object {
-        val ARGS = GooglePayPaymentMethodLauncherContract.Args(
+        val ARGS = GooglePayPaymentMethodLauncherContractV2.Args(
             GooglePayPaymentMethodLauncher.Config(
                 GooglePayEnvironment.Test,
                 merchantCountryCode = "us",

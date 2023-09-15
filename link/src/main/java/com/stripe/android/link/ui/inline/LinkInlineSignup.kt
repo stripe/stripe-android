@@ -1,3 +1,5 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.link.ui.inline
 
 import androidx.annotation.RestrictTo
@@ -10,6 +12,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -23,10 +27,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -40,15 +46,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
-import com.stripe.android.link.ui.signup.EmailCollectionSection
+import com.stripe.android.link.ui.progressIndicatorTestTag
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.EmailConfig
@@ -60,6 +66,7 @@ import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.elements.menu.Checkbox
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeShapes
 
 @Preview
 @Composable
@@ -82,18 +89,17 @@ private fun Preview() {
     }
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LinkInlineSignup(
-    linkPaymentLauncher: LinkPaymentLauncher,
+    linkConfigurationCoordinator: LinkConfigurationCoordinator,
     enabled: Boolean,
-    onStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit,
+    onStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    linkPaymentLauncher.component?.let { component ->
+    linkConfigurationCoordinator.component?.let { component ->
         val viewModel: InlineSignupViewModel = viewModel(
-            factory = InlineSignupViewModel.Factory(component.injector)
+            factory = InlineSignupViewModel.Factory(component)
         )
 
         val viewState by viewModel.viewState.collectAsState()
@@ -158,47 +164,48 @@ internal fun LinkInlineSignup(
                 modifier = modifier
                     .border(
                         border = MaterialTheme.getBorderStroke(isSelected = false),
-                        shape = MaterialTheme.linkShapes.small
+                        shape = MaterialTheme.stripeShapes.roundedCornerShape,
                     )
                     .background(
                         color = MaterialTheme.stripeColors.component,
-                        shape = MaterialTheme.linkShapes.small
+                        shape = MaterialTheme.stripeShapes.roundedCornerShape,
                     )
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(MaterialTheme.linkShapes.small)
-                        .clickable {
-                            toggleExpanded()
-                        }
+                        .clip(MaterialTheme.stripeShapes.roundedCornerShape)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(16.dp)
+                    Column(
+                        modifier = Modifier.clickable { toggleExpanded() },
                     ) {
-                        Checkbox(
-                            checked = expanded,
-                            onCheckedChange = null, // needs to be null for accessibility on row click to work
-                            modifier = Modifier.padding(end = 8.dp),
-                            enabled = enabled
-                        )
-                        Column {
-                            Text(
-                                text = stringResource(id = R.string.stripe_inline_sign_up_header),
-                                style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colors.onSurface
-                                    .copy(alpha = LocalContentAlpha.current)
+                        Row(
+                            modifier = Modifier
+                                .padding(16.dp)
+                        ) {
+                            Checkbox(
+                                checked = expanded,
+                                onCheckedChange = null, // needs to be null for accessibility on row click to work
+                                modifier = Modifier.padding(end = 8.dp),
+                                enabled = enabled
                             )
-                            Text(
-                                text = stringResource(R.string.stripe_sign_up_message, merchantName),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 4.dp),
-                                style = MaterialTheme.typography.body1,
-                                color = MaterialTheme.colors.onSurface
-                                    .copy(alpha = LocalContentAlpha.current)
-                            )
+                            Column {
+                                Text(
+                                    text = stringResource(id = R.string.stripe_inline_sign_up_header),
+                                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colors.onSurface
+                                        .copy(alpha = LocalContentAlpha.current)
+                                )
+                                Text(
+                                    text = stringResource(R.string.stripe_sign_up_message, merchantName),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 4.dp),
+                                    style = MaterialTheme.typography.body1,
+                                    color = MaterialTheme.colors.onSurface
+                                        .copy(alpha = LocalContentAlpha.current)
+                                )
+                            }
                         }
                     }
 
@@ -293,6 +300,50 @@ internal fun LinkInlineSignup(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+internal fun EmailCollectionSection(
+    enabled: Boolean,
+    emailController: TextFieldController,
+    signUpState: SignUpState,
+    focusRequester: FocusRequester = remember { FocusRequester() }
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(0.dp),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        TextFieldSection(
+            textFieldController = emailController,
+            imeAction = if (signUpState == SignUpState.InputtingPhoneOrName) {
+                ImeAction.Next
+            } else {
+                ImeAction.Done
+            },
+            enabled = enabled && signUpState != SignUpState.VerifyingEmail,
+            modifier = Modifier
+                .focusRequester(focusRequester)
+        )
+        if (signUpState == SignUpState.VerifyingEmail) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(32.dp)
+                    .padding(
+                        start = 0.dp,
+                        top = 8.dp,
+                        end = 16.dp,
+                        bottom = 8.dp
+                    )
+                    .semantics {
+                        testTag = progressIndicatorTestTag
+                    },
+                color = MaterialTheme.linkColors.progressIndicator,
+                strokeWidth = 2.dp
+            )
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.features.common
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -21,36 +19,45 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat.getLocales
-import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.ui.LocalImageLoader
+import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.format.CurrencyFormatter
+import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.text.MiddleEllipsisText
 import java.util.Locale
 
 /**
- * A single account item in the list of accounts.
+ * A single account item in an account picker list.
  *
  * @param selected whether this account is selected
  * @param onAccountClicked callback when this account is clicked
- * @param account the account to display
+ * @param account the account info to display
+ * @param networkedAccount For networked accounts, extra info to display
  * @param selectorContent content to display on the left side of the account item
  */
 @Composable
-@Suppress("MagicNumber")
+@Suppress("LongMethod")
 internal fun AccountItem(
     selected: Boolean,
     onAccountClicked: (PartnerAccount) -> Unit,
     account: PartnerAccount,
+    networkedAccount: NetworkedAccount? = null,
     selectorContent: @Composable RowScope.() -> Unit
 ) {
-    val verticalPadding =
-        remember(account) { if (account.displayableAccountNumbers != null) 10.dp else 12.dp }
+    // networked account's allowSelection takes precedence over the account's.
+    val selectable = networkedAccount?.allowSelection ?: account.allowSelection
+    val (title, subtitle) = getAccountTexts(
+        account = account,
+        networkedAccount = networkedAccount,
+        allowSelection = selectable
+    )
+    val verticalPadding = remember(account) { if (subtitle != null) 10.dp else 12.dp }
     val shape = remember { RoundedCornerShape(8.dp) }
     Box(
         modifier = Modifier
@@ -64,7 +71,7 @@ internal fun AccountItem(
                 },
                 shape = shape
             )
-            .clickable(enabled = account.allowSelection) { onAccountClicked(account) }
+            .clickableSingle(enabled = selectable) { onAccountClicked(account) }
             .padding(vertical = verticalPadding, horizontal = 16.dp)
     ) {
         Row(
@@ -73,15 +80,14 @@ internal fun AccountItem(
         ) {
             selectorContent()
             Spacer(modifier = Modifier.size(16.dp))
-            val (title, subtitle) = getAccountTexts(account = account)
             Column(
-                Modifier.weight(0.7f)
+                Modifier.weight(ACCOUNT_COLUMN_WEIGHT)
             ) {
                 Text(
                     text = title,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
-                    color = if (account.allowSelection) {
+                    color = if (selectable) {
                         FinancialConnectionsTheme.colors.textPrimary
                     } else {
                         FinancialConnectionsTheme.colors.textDisabled
@@ -97,12 +103,13 @@ internal fun AccountItem(
                     )
                 }
             }
-            if (account.broken) {
-                Icon(
-                    modifier = Modifier.size(16.dp),
-                    tint = FinancialConnectionsTheme.colors.textAttention,
-                    painter = painterResource(R.drawable.stripe_ic_warning),
-                    contentDescription = "Repairable account icon"
+            networkedAccount?.icon?.default?.let {
+                StripeImage(
+                    url = it,
+                    imageLoader = LocalImageLoader.current,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(16.dp)
                 )
             }
         }
@@ -111,22 +118,32 @@ internal fun AccountItem(
 
 @Composable
 private fun getAccountTexts(
+    allowSelection: Boolean,
     account: PartnerAccount,
+    networkedAccount: NetworkedAccount?,
 ): Pair<String, String?> {
     val formattedBalance = account.getFormattedBalance()
+
+    val subtitle = when {
+        networkedAccount?.caption != null -> networkedAccount.caption
+        allowSelection.not() && account.allowSelectionMessage?.isNotBlank() == true ->
+            account.allowSelectionMessage
+
+        formattedBalance != null -> formattedBalance
+        account.redactedAccountNumbers != null -> account.redactedAccountNumbers
+        else -> null
+    }
+
+    // just show redacted account numbers in the title if they're not in the subtitle.
     val title = when {
-        account.allowSelection.not() || account.broken || formattedBalance != null ->
-            "${account.name} ${account.encryptedNumbers}"
+        subtitle != account.redactedAccountNumbers -> listOfNotNull(
+            account.name,
+            account.redactedAccountNumbers
+        ).joinToString(" ")
 
         else -> account.name
     }
-    val subtitle = when {
-        account.broken -> stringResource(id = R.string.stripe_link_account_picker_disconnected)
-        account.allowSelection.not() -> account.allowSelectionMessage
-        formattedBalance != null -> formattedBalance
-        account.encryptedNumbers.isNotEmpty() -> account.encryptedNumbers
-        else -> null
-    }
+
     return title to subtitle
 }
 
@@ -144,3 +161,5 @@ private fun PartnerAccount.getFormattedBalance(): String? {
         )
     }
 }
+
+private const val ACCOUNT_COLUMN_WEIGHT = 0.7f

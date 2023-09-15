@@ -1,27 +1,27 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import android.app.Application
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
-import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration
+import com.stripe.android.utils.AnimationConstants
 import kotlinx.parcelize.Parcelize
 
 /**
  * A drop-in class that presents a bottom sheet to collect a customer's address.
  */
 class AddressLauncher internal constructor(
+    private val application: Application,
     private val activityResultLauncher: ActivityResultLauncher<AddressElementActivityContract.Args>
 ) {
-    @InjectorKey
-    private val injectorKey: String =
-        WeakMapInjectorRegistry.nextKey(requireNotNull(AddressLauncher::class.simpleName))
-
     /**
      * Constructor to be used when launching the address element from an Activity.
      *
@@ -32,11 +32,12 @@ class AddressLauncher internal constructor(
         activity: ComponentActivity,
         callback: AddressLauncherResultCallback
     ) : this(
-        activity.registerForActivityResult(
+        application = activity.application,
+        activityResultLauncher = activity.registerForActivityResult(
             AddressElementActivityContract()
         ) {
             callback.onAddressLauncherResult(it)
-        }
+        },
     )
 
     /**
@@ -49,11 +50,12 @@ class AddressLauncher internal constructor(
         fragment: Fragment,
         callback: AddressLauncherResultCallback
     ) : this(
-        fragment.registerForActivityResult(
+        application = fragment.requireActivity().application,
+        activityResultLauncher = fragment.registerForActivityResult(
             AddressElementActivityContract()
         ) {
             callback.onAddressLauncherResult(it)
-        }
+        },
     )
 
     @JvmOverloads
@@ -61,13 +63,18 @@ class AddressLauncher internal constructor(
         publishableKey: String,
         configuration: Configuration = Configuration()
     ) {
-        activityResultLauncher.launch(
-            AddressElementActivityContract.Args(
-                publishableKey,
-                configuration,
-                injectorKey
-            )
+        val args = AddressElementActivityContract.Args(
+            publishableKey,
+            configuration,
         )
+
+        val options = ActivityOptionsCompat.makeCustomAnimation(
+            application.applicationContext,
+            AnimationConstants.FADE_IN,
+            AnimationConstants.FADE_OUT,
+        )
+
+        activityResultLauncher.launch(args, options)
     }
 
     /** Configuration for [AddressLauncher] **/
@@ -214,7 +221,12 @@ fun rememberAddressLauncher(
         onResult = callback::onAddressLauncherResult
     )
 
+    val context = LocalContext.current
+
     return remember {
-        AddressLauncher(activityResultLauncher)
+        AddressLauncher(
+            application = context.applicationContext as Application,
+            activityResultLauncher = activityResultLauncher,
+        )
     }
 }

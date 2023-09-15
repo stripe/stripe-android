@@ -12,14 +12,3 @@ internal class AccountNoneEligibleForPaymentMethodError(
     name = "AccountNoneEligibleForPaymentMethodError",
     stripeException = stripeException
 )
-
-internal abstract class FinancialConnectionsError(
-    val name: String,
-    stripeException: StripeException,
-) : StripeException(
-    stripeException.stripeError,
-    stripeException.requestId,
-    stripeException.statusCode,
-    stripeException.cause,
-    stripeException.message
-)

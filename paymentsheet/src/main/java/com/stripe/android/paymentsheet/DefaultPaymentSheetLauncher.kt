@@ -1,20 +1,15 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Activity
 import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
+import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.IntentConfirmationInterceptor
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.core.injection.NonFallbackInjector
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
-import com.stripe.android.paymentsheet.injection.PaymentSheetLauncherComponent
+import com.stripe.android.utils.AnimationConstants
 import org.jetbrains.annotations.TestOnly
 
 /**
@@ -23,23 +18,11 @@ import org.jetbrains.annotations.TestOnly
  */
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContractV2.Args>,
+    private val activity: Activity,
     lifecycleOwner: LifecycleOwner,
-    application: Application,
+    private val application: Application,
 ) : PaymentSheetLauncher {
-    @InjectorKey
-    private val injectorKey: String =
-        WeakMapInjectorRegistry.nextKey(requireNotNull(PaymentSheetLauncher::class.simpleName))
-
-    private val paymentSheetLauncherComponent: PaymentSheetLauncherComponent =
-        DaggerPaymentSheetLauncherComponent
-            .builder()
-            .application(application)
-            .injectorKey(injectorKey)
-            .build()
-
     init {
-        WeakMapInjectorRegistry.register(Injector(paymentSheetLauncherComponent), injectorKey)
-
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
@@ -59,6 +42,7 @@ internal class DefaultPaymentSheetLauncher(
         ) {
             callback.onPaymentSheetResult(it)
         },
+        activity = activity,
         lifecycleOwner = activity,
         application = activity.application,
     )
@@ -72,6 +56,7 @@ internal class DefaultPaymentSheetLauncher(
         ) {
             callback.onPaymentSheetResult(it)
         },
+        activity = fragment.requireActivity(),
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
     )
@@ -88,6 +73,7 @@ internal class DefaultPaymentSheetLauncher(
         ) {
             callback.onPaymentSheetResult(it)
         },
+        activity = fragment.requireActivity(),
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
     )
@@ -99,26 +85,15 @@ internal class DefaultPaymentSheetLauncher(
         val args = PaymentSheetContractV2.Args(
             initializationMode = mode,
             config = configuration,
-            injectorKey = injectorKey,
+            statusBarColor = activity.window?.statusBarColor,
         )
-        activityResultLauncher.launch(args)
-    }
 
-    private class Injector(
-        private val paymentSheetLauncherComponent: PaymentSheetLauncherComponent,
-    ) : NonFallbackInjector {
-        override fun inject(injectable: Injectable<*>) {
-            when (injectable) {
-                is PaymentSheetViewModel.Factory -> {
-                    paymentSheetLauncherComponent.inject(injectable)
-                }
-                is FormViewModel.Factory -> {
-                    paymentSheetLauncherComponent.inject(injectable)
-                }
-                else -> {
-                    throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
-                }
-            }
-        }
+        val options = ActivityOptionsCompat.makeCustomAnimation(
+            application.applicationContext,
+            AnimationConstants.FADE_IN,
+            AnimationConstants.FADE_OUT,
+        )
+
+        activityResultLauncher.launch(args, options)
     }
 }

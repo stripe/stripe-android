@@ -4,22 +4,34 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[用 <img/> 分 <num_installments/> 支付，无利息，每期 <installment_price/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">返回</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">您的账号不完整。</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">账单地址</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">BLIK 代码</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">继续操作，即表示您授权 %1$s 按照 %2$s 的条款从您的 Cash App 账户中扣取该款项及未来的款项，直至撤销授权。您可以随时在 Cash App 设置中进行修改。</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">联系信息</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">继续</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">EPS 银行</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX 银行</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">您输入的 IBAN 不完整。</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="stripe_iban_invalid_country">您输入的 IBAN 无效，\"%s\" 是不支持的国家代码。</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
-  <string name="stripe_iban_invalid_start">您的 IBAN 应以一个两字母国家代码开头。</string>
+  <string name="stripe_iban_invalid_start">您的 IBAN 应以两个字母的国家代码开头。</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">iDEAL 银行</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">您的 BLIK 代码不完整。</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">您的 BLIK 代码无效。</string>
   <string name="stripe_invalid_email_address">邮箱地址无效：%s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">UPI ID 无效</string>
@@ -28,7 +40,7 @@
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">用 Klarna 延后支付。</string>
   <!-- Label for name on card field -->
-  <string name="stripe_name_on_card">卡上的姓名</string>
+  <string name="stripe_name_on_card">持卡人姓名</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 银行</string>
   <!-- Label of a button that initiates payment when tapped -->

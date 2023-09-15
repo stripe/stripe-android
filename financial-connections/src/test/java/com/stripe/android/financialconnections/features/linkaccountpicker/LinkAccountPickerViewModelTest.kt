@@ -6,20 +6,27 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
-import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
-import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
+import com.stripe.android.financialconnections.model.AddNewAccount
+import com.stripe.android.financialconnections.model.Display
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.InstitutionResponse
+import com.stripe.android.financialconnections.model.NetworkedAccount
+import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
+import com.stripe.android.financialconnections.model.TextUpdate
+import com.stripe.android.financialconnections.navigation.Destination.LinkStepUpVerification
+import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -39,10 +46,9 @@ class LinkAccountPickerViewModelTest {
     val mavericksTestRule = MavericksTestRule()
 
     private val getManifest = mock<GetManifest>()
-    private val goNext = mock<GoNext>()
-    private val navigationManager = mock<NavigationManager>()
+    private val navigationManager = TestNavigationManager()
     private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
-    private val pollNetworkedAccounts = mock<PollNetworkedAccounts>()
+    private val fetchNetworkedAccounts = mock<FetchNetworkedAccounts>()
     private val updateLocalManifest = mock<UpdateLocalManifest>()
     private val updateCachedAccounts = mock<UpdateCachedAccounts>()
     private val selectNetworkedAccount = mock<SelectNetworkedAccount>()
@@ -51,12 +57,12 @@ class LinkAccountPickerViewModelTest {
     private fun buildViewModel(
         state: LinkAccountPickerState
     ) = LinkAccountPickerViewModel(
-        goNext = goNext,
+        navigationManager = navigationManager,
         getManifest = getManifest,
         logger = Logger.noop(),
         eventTracker = eventTracker,
         getCachedConsumerSession = getCachedConsumerSession,
-        pollNetworkedAccounts = pollNetworkedAccounts,
+        fetchNetworkedAccounts = fetchNetworkedAccounts,
         selectNetworkedAccount = selectNetworkedAccount,
         updateLocalManifest = updateLocalManifest,
         updateCachedAccounts = updateCachedAccounts,
@@ -75,6 +81,42 @@ class LinkAccountPickerViewModelTest {
 
         assertThat(viewModel.awaitState().payload()!!.accounts)
             .isEqualTo(accounts.data)
+    }
+
+    @Test
+    fun `init - non active accounts are rendered as disabled`() = runTest {
+        whenever(getManifest()).thenReturn(sessionManifest())
+        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+        whenever(fetchNetworkedAccounts(any())).thenReturn(
+            NetworkedAccountsList(
+                data = listOf(
+                    partnerAccount().copy(id = "id1", _allowSelection = null),
+                    partnerAccount().copy(id = "id2", _allowSelection = null),
+                    partnerAccount().copy(id = "id3", _allowSelection = null)
+                ),
+                display = display(
+                    listOf(
+                        NetworkedAccount(id = "id1", allowSelection = true),
+                        NetworkedAccount(id = "id2", allowSelection = false),
+                        NetworkedAccount(id = "id3", allowSelection = false),
+                    )
+                )
+            )
+        )
+
+        val viewModel = buildViewModel(LinkAccountPickerState())
+
+        assertThat(viewModel.awaitState().payload()!!.accounts)
+            .isEqualTo(
+                listOf(
+                    partnerAccount().copy(id = "id1", _allowSelection = null) to
+                        NetworkedAccount(id = "id1", allowSelection = true),
+                    partnerAccount().copy(id = "id2", _allowSelection = null) to
+                        NetworkedAccount(id = "id2", allowSelection = false),
+                    partnerAccount().copy(id = "id3", _allowSelection = null) to
+                        NetworkedAccount(id = "id3", allowSelection = false)
+                )
+            )
     }
 
     @Test
@@ -108,25 +150,43 @@ class LinkAccountPickerViewModelTest {
     }
 
     @Test
-    fun `onNewBankAccountClick - navigates to Institution picker`() = runTest {
-        val accounts = twoAccounts()
+    fun `onNewBankAccountClick - navigates to AddNewAccount#NextPane`() = runTest {
+        val response = twoAccounts().copy(
+            nextPaneOnAddAccount = Pane.INSTITUTION_PICKER
+        )
         whenever(getManifest()).thenReturn(sessionManifest())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
-        whenever(pollNetworkedAccounts(any())).thenReturn(accounts)
+        whenever(fetchNetworkedAccounts(any())).thenReturn(response)
 
         val viewModel = buildViewModel(LinkAccountPickerState())
         viewModel.onNewBankAccountClick()
 
-        verify(goNext).invoke(Pane.INSTITUTION_PICKER)
+        val destination = response.nextPaneOnAddAccount!!.destination
+        navigationManager.assertNavigatedTo(destination, Pane.LINK_ACCOUNT_PICKER)
     }
 
     @Test
     fun `onSelectAccountClick - if valid account updates local accounts and navigates`() = runTest {
-        val accounts = twoAccounts()
+        val accounts = NetworkedAccountsList(
+            data = listOf(
+                partnerAccount().copy(
+                    id = "id1",
+                    nextPaneOnSelection = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT
+                )
+            ),
+            display = display(
+                listOf(
+                    NetworkedAccount(
+                        id = "id1",
+                        allowSelection = true
+                    ),
+                )
+            )
+        )
         val selectedAccount = accounts.data.first()
         whenever(getManifest()).thenReturn(sessionManifest())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
-        whenever(pollNetworkedAccounts(any())).thenReturn(accounts)
+        whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
         whenever(
             selectNetworkedAccount(
                 consumerSessionClientSecret = any(),
@@ -143,36 +203,91 @@ class LinkAccountPickerViewModelTest {
             verify(updateCachedAccounts).invoke(capture())
             assertThat(firstValue(null)).isEqualTo(listOf(selectedAccount))
         }
-        verify(goNext).invoke(Pane.SUCCESS)
+        val destination = accounts.data.first().nextPaneOnSelection!!.destination
+        navigationManager.assertNavigatedTo(destination, Pane.LINK_ACCOUNT_PICKER)
     }
 
     @Test
-    fun `onSelectAccountClick - if step up required, navigates to it`() = runTest {
-        val accounts = twoAccounts()
-        val selectedAccount = accounts.data.first()
-        whenever(getManifest()).thenReturn(sessionManifest().copy(stepUpAuthenticationRequired = true))
-        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
-        whenever(pollNetworkedAccounts(any())).thenReturn(accounts)
-        whenever(
-            selectNetworkedAccount(
-                consumerSessionClientSecret = any(),
-                selectedAccountId = any()
+    fun `onSelectAccountClick - if next pane is step up, caches accounts and navigates`() =
+        runTest {
+            val accounts = NetworkedAccountsList(
+                data = listOf(
+                    partnerAccount().copy(
+                        id = "id1",
+                        nextPaneOnSelection = Pane.LINK_STEP_UP_VERIFICATION
+                    )
+                ),
+                display = display(
+                    listOf(
+                        NetworkedAccount(
+                            id = "id1",
+                            allowSelection = true
+                        ),
+                    )
+                )
             )
-        ).thenReturn(InstitutionResponse(showManualEntry = false, listOf(institution())))
+            val selectedAccount = accounts.data.first()
+            whenever(getManifest()).thenReturn(sessionManifest())
+            whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+            whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
+            whenever(
+                selectNetworkedAccount(
+                    consumerSessionClientSecret = any(),
+                    selectedAccountId = any()
+                )
+            ).thenReturn(InstitutionResponse(showManualEntry = false, listOf(institution())))
 
-        val viewModel = buildViewModel(LinkAccountPickerState())
+            val viewModel = buildViewModel(LinkAccountPickerState())
 
-        viewModel.onAccountClick(selectedAccount)
-        viewModel.onSelectAccountClick()
+            viewModel.onAccountClick(selectedAccount)
+            viewModel.onSelectAccountClick()
 
-        verifyNoInteractions(updateCachedAccounts)
-        verifyNoInteractions(updateLocalManifest)
-        verifyNoInteractions(selectNetworkedAccount)
-        verify(goNext).invoke(Pane.LINK_STEP_UP_VERIFICATION)
-    }
+            with(argumentCaptor<(List<PartnerAccount>?) -> List<PartnerAccount>?>()) {
+                verify(updateCachedAccounts).invoke(capture())
+                assertThat(firstValue(null)).isEqualTo(listOf(selectedAccount))
+            }
+            verifyNoInteractions(updateLocalManifest)
+            verifyNoInteractions(selectNetworkedAccount)
+            navigationManager.assertNavigatedTo(LinkStepUpVerification, Pane.LINK_ACCOUNT_PICKER)
+        }
 
-    private fun twoAccounts() = partnerAccountList().copy(
-        count = 2,
-        data = listOf(partnerAccount(), partnerAccount())
+    private fun twoAccounts() = NetworkedAccountsList(
+        nextPaneOnAddAccount = null,
+        data = listOf(
+            partnerAccount().copy(
+                id = "id1",
+            ),
+            partnerAccount().copy(
+                id = "id2"
+            )
+        ),
+        display = display(
+            listOf(
+                NetworkedAccount(
+                    id = "id1",
+                    allowSelection = true,
+                ),
+                NetworkedAccount(
+                    id = "id2",
+                    allowSelection = true,
+                )
+            )
+        )
+    )
+
+    private fun display(networkedAccounts: List<NetworkedAccount> = emptyList()) = Display(
+        text = TextUpdate(
+            returningNetworkingUserAccountPicker = ReturningNetworkingUserAccountPicker(
+                title = "Select account",
+                defaultCta = "Connect account",
+                accounts = networkedAccounts,
+                addNewAccount = AddNewAccount(
+                    body = "New bank account",
+                    icon = Image(
+                        default = "https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--add-purple-3x.png"
+                    ),
+                )
+            )
+        )
     )
 }

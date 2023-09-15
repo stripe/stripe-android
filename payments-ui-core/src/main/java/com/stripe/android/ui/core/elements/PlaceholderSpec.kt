@@ -31,6 +31,9 @@ data class PlaceholderSpec(
         @SerialName("billing_address_without_country")
         BillingAddressWithoutCountry,
 
+        @SerialName("sepa_mandate")
+        SepaMandate,
+
         @SerialName("unknown")
         Unknown,
     }

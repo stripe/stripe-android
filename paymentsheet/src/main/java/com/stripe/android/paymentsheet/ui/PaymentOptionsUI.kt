@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,8 +10,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -20,41 +19,24 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionUi
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.key
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.toPaymentSelection
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.R as StripeR
 
-@Composable
-internal fun PaymentOptions(
-    viewModel: BaseSheetViewModel,
-    modifier: Modifier = Modifier,
-) {
-    val state by viewModel.paymentOptionsState.collectAsState()
-    val isEditing by viewModel.editing.collectAsState()
-    val isProcessing by viewModel.processing.collectAsState()
-
-    PaymentOptions(
-        state = state,
-        isEditing = isEditing,
-        isProcessing = isProcessing,
-        onAddCardPressed = viewModel::transitionToAddPaymentScreen,
-        onItemSelected = viewModel::handlePaymentMethodSelected,
-        onItemRemoved = viewModel::removePaymentMethod,
-        modifier = modifier,
-    )
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun PaymentOptions(
     state: PaymentOptionsState,
@@ -74,7 +56,10 @@ internal fun PaymentOptions(
             userScrollEnabled = !isProcessing,
             contentPadding = PaddingValues(horizontal = 17.dp),
         ) {
-            items(state.items) { item ->
+            items(
+                items = state.items,
+                key = { it.key },
+            ) { item ->
                 val isEnabled = !isProcessing && (!isEditing || item.isEnabledDuringEditing)
                 val isSelected = item == state.selectedItem && !isEditing
 
@@ -90,9 +75,46 @@ internal fun PaymentOptions(
                     modifier = Modifier
                         .semantics { testTagsAsResourceId = true }
                         .testTag(item.viewType.name)
+                        .animateItemPlacement(),
                 )
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun PaymentOptionsPreview() {
+    DefaultStripeTheme {
+        PaymentOptions(
+            state = PaymentOptionsState(
+                items = listOf(
+                    PaymentOptionsItem.AddCard,
+                    PaymentOptionsItem.Link,
+                    PaymentOptionsItem.GooglePay,
+                    PaymentOptionsItem.SavedPaymentMethod(
+                        displayName = "4242",
+                        paymentMethod = PaymentMethod(
+                            id = "id",
+                            created = null,
+                            liveMode = false,
+                            code = PaymentMethod.Type.Card.code,
+                            type = PaymentMethod.Type.Card,
+                            card = PaymentMethod.Card(
+                                brand = CardBrand.Visa,
+                                last4 = "4242",
+                            )
+                        )
+                    ),
+                ),
+                selectedIndex = 1
+            ),
+            isEditing = false,
+            isProcessing = false,
+            onAddCardPressed = { },
+            onItemSelected = { },
+            onItemRemoved = { },
+        )
     }
 }
 

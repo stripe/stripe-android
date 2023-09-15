@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import android.content.Context
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.autofill.AutofillType
@@ -15,6 +16,8 @@ import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
+import com.stripe.android.ui.core.BuildConfig
+import com.stripe.android.ui.core.asIndividualDigits
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.TextFieldController
@@ -50,18 +53,21 @@ internal class CardNumberEditableController constructor(
     workContext: CoroutineContext,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     initialValue: String?,
-    override val showOptionalLabel: Boolean = false
+    override val showOptionalLabel: Boolean = false,
+    private val isEligibleForCardBrandChoice: Boolean = false,
 ) : CardNumberController() {
 
     constructor(
         cardTextFieldConfig: CardNumberConfig,
         context: Context,
-        initialValue: String?
+        initialValue: String?,
+        isEligibleForCardBrandChoice: Boolean,
     ) : this(
         cardTextFieldConfig,
         DefaultCardAccountRangeRepositoryFactory(context).create(),
         Dispatchers.IO,
-        initialValue = initialValue
+        initialValue = initialValue,
+        isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
     )
 
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
@@ -77,7 +83,8 @@ internal class CardNumberEditableController constructor(
     override val rawFieldValue: Flow<String> =
         _fieldValue.map { cardTextFieldConfig.convertToRaw(it) }
 
-    override val contentDescription: Flow<String> = _fieldValue
+    // This makes the screen reader read out numbers digit by digit
+    override val contentDescription: Flow<String> = _fieldValue.map { it.asIndividualDigits() }
 
     override val cardBrandFlow = _fieldValue.map {
         accountRangeService.accountRange?.brand ?: CardBrand.getCardBrands(it).firstOrNull()
@@ -158,6 +165,11 @@ internal class CardNumberEditableController constructor(
 
     init {
         onRawValueChange(initialValue ?: "")
+
+        // TODO(tillh-stripe)
+        if (BuildConfig.DEBUG) {
+            Log.d("CardNumberController", "Is eligible for CBC: $isEligibleForCardBrandChoice")
+        }
     }
 
     /**

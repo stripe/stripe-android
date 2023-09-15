@@ -46,7 +46,11 @@ class FinancialConnectionsPlaygroundViewModel(
         when (flow) {
             Flow.Data -> startForData(merchant, keys, email.takeIf { it.isNotEmpty() })
             Flow.Token -> startForToken(merchant, keys, email.takeIf { it.isNotEmpty() })
-            Flow.PaymentIntent -> startWithPaymentIntent(merchant, keys, email.takeIf { it.isNotEmpty() })
+            Flow.PaymentIntent -> startWithPaymentIntent(
+                merchant,
+                keys,
+                email.takeIf { it.isNotEmpty() }
+            )
         }
     }
 
@@ -198,26 +202,54 @@ class FinancialConnectionsPlaygroundViewModel(
         _state.update { it.copy(loading = false, status = it.status + statusText) }
     }
 
-    fun onCollectBankAccountLauncherResult(result: CollectBankAccountResult) {
-        _state.update { it.copy(status = it.status + "Session attached! Confirming Intent") }
-        viewModelScope.launch {
-            val statusText = when (result) {
-                is CollectBankAccountResult.Completed -> {
-                    val confirmedIntent = stripe(
-                        _state.value.publishableKey!!
-                    ).confirmPaymentIntent(
-                        ConfirmPaymentIntentParams.create(
-                            clientSecret = requireNotNull(result.response.intent.clientSecret),
-                            paymentMethodType = PaymentMethod.Type.USBankAccount
+    fun onCollectBankAccountLauncherResult(
+        result: CollectBankAccountResult
+    ) = viewModelScope.launch {
+        when (result) {
+            is CollectBankAccountResult.Completed -> runCatching {
+                _state.update {
+                    val session = result.response.financialConnectionsSession
+                    val account = session.accounts.data.first()
+                    it.copy(
+                        status = it.status + listOf(
+                            "Session Completed! ${session.id} (account: ${account.id})",
+                            "Confirming Intent: ${result.response.intent.id}",
                         )
                     )
-                    "Intent Confirmed!: $confirmedIntent"
                 }
-
-                is CollectBankAccountResult.Failed -> "Failed! ${result.error}"
-                is CollectBankAccountResult.Cancelled -> "Cancelled!"
+                val params = ConfirmPaymentIntentParams.create(
+                    clientSecret = requireNotNull(result.response.intent.clientSecret),
+                    paymentMethodType = PaymentMethod.Type.USBankAccount
+                )
+                stripe(_state.value.publishableKey!!).confirmPaymentIntent(params)
+            }.onSuccess {
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        status = it.status + "Intent Confirmed!"
+                    )
+                }
+            }.onFailure {
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        status = it.status + "Confirming intent Failed!: $it"
+                    )
+                }
             }
-            _state.update { it.copy(loading = false, status = it.status + statusText) }
+
+            is CollectBankAccountResult.Failed -> {
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        status = it.status + "Failed! ${result.error}"
+                    )
+                }
+            }
+
+            is CollectBankAccountResult.Cancelled -> {
+                _state.update { it.copy(loading = false, status = it.status + "Cancelled!") }
+            }
         }
     }
 
@@ -232,7 +264,10 @@ class FinancialConnectionsPlaygroundViewModel(
 
 enum class Merchant(val flow: String) {
     Test("testmode"),
-    Live("mx"),
+    PartnerM("partner_m"),
+    PartnerF("partner_f"),
+    PartnerD("partner_d"),
+    PlatformC("strash"),
     App2App("app2app"),
     Networking("networking"),
     NetworkingTestMode("networking_testmode"),

@@ -21,14 +21,14 @@ import kotlinx.parcelize.Parcelize
 class PaymentAuthConfig private constructor(
     internal val stripe3ds2Config: Stripe3ds2Config
 ) {
-    class Builder : ObjectBuilder<PaymentAuthConfig> {
+    class Builder {
         private var stripe3ds2Config: Stripe3ds2Config? = null
 
         fun set3ds2Config(stripe3ds2Config: Stripe3ds2Config): Builder = apply {
             this.stripe3ds2Config = stripe3ds2Config
         }
 
-        override fun build(): PaymentAuthConfig {
+        fun build(): PaymentAuthConfig {
             return PaymentAuthConfig(requireNotNull(stripe3ds2Config))
         }
     }
@@ -48,7 +48,7 @@ class PaymentAuthConfig private constructor(
             }
         }
 
-        class Builder : ObjectBuilder<Stripe3ds2Config> {
+        class Builder {
             private var timeout = DEFAULT_TIMEOUT
             private var uiCustomization =
                 Stripe3ds2UiCustomization.Builder().build()
@@ -70,7 +70,7 @@ class PaymentAuthConfig private constructor(
                 this.uiCustomization = uiCustomization
             }
 
-            override fun build(): Stripe3ds2Config {
+            fun build(): Stripe3ds2Config {
                 return Stripe3ds2Config(
                     timeout = timeout,
                     uiCustomization = uiCustomization
@@ -90,7 +90,7 @@ class PaymentAuthConfig private constructor(
         internal val buttonCustomization: ButtonCustomization
     ) {
 
-        class Builder : ObjectBuilder<Stripe3ds2ButtonCustomization> {
+        class Builder {
             private val buttonCustomization: ButtonCustomization = StripeButtonCustomization()
 
             /**
@@ -153,7 +153,7 @@ class PaymentAuthConfig private constructor(
              *
              * @return The built button customization
              */
-            override fun build(): Stripe3ds2ButtonCustomization {
+            fun build(): Stripe3ds2ButtonCustomization {
                 return Stripe3ds2ButtonCustomization(buttonCustomization)
             }
         }
@@ -165,7 +165,7 @@ class PaymentAuthConfig private constructor(
     data class Stripe3ds2LabelCustomization internal constructor(
         internal val labelCustomization: LabelCustomization
     ) {
-        class Builder : ObjectBuilder<Stripe3ds2LabelCustomization> {
+        class Builder {
             private val labelCustomization: LabelCustomization = StripeLabelCustomization()
 
             /**
@@ -239,7 +239,7 @@ class PaymentAuthConfig private constructor(
              *
              * @return The built label customization
              */
-            override fun build(): Stripe3ds2LabelCustomization {
+            fun build(): Stripe3ds2LabelCustomization {
                 return Stripe3ds2LabelCustomization(labelCustomization)
             }
         }
@@ -251,7 +251,7 @@ class PaymentAuthConfig private constructor(
     data class Stripe3ds2TextBoxCustomization internal constructor(
         internal val textBoxCustomization: TextBoxCustomization
     ) {
-        class Builder : ObjectBuilder<Stripe3ds2TextBoxCustomization> {
+        class Builder {
             private val textBoxCustomization: TextBoxCustomization = StripeTextBoxCustomization()
 
             /**
@@ -325,7 +325,7 @@ class PaymentAuthConfig private constructor(
              *
              * @return The text box customization
              */
-            override fun build(): Stripe3ds2TextBoxCustomization {
+            fun build(): Stripe3ds2TextBoxCustomization {
                 return Stripe3ds2TextBoxCustomization(textBoxCustomization)
             }
         }
@@ -337,7 +337,7 @@ class PaymentAuthConfig private constructor(
     data class Stripe3ds2ToolbarCustomization internal constructor(
         internal val toolbarCustomization: ToolbarCustomization
     ) {
-        class Builder : ObjectBuilder<Stripe3ds2ToolbarCustomization> {
+        class Builder {
             private val toolbarCustomization: ToolbarCustomization = StripeToolbarCustomization()
 
             /**
@@ -423,7 +423,7 @@ class PaymentAuthConfig private constructor(
              *
              * @return The built toolbar customization
              */
-            override fun build(): Stripe3ds2ToolbarCustomization {
+            fun build(): Stripe3ds2ToolbarCustomization {
                 return Stripe3ds2ToolbarCustomization(toolbarCustomization)
             }
         }
@@ -450,7 +450,7 @@ class PaymentAuthConfig private constructor(
 
         class Builder private constructor(
             private val uiCustomization: StripeUiCustomization
-        ) : ObjectBuilder<Stripe3ds2UiCustomization> {
+        ) {
 
             constructor() : this(StripeUiCustomization())
 
@@ -551,7 +551,7 @@ class PaymentAuthConfig private constructor(
              *
              * @return the built UI customization
              */
-            override fun build(): Stripe3ds2UiCustomization {
+            fun build(): Stripe3ds2UiCustomization {
                 return Stripe3ds2UiCustomization(uiCustomization)
             }
 

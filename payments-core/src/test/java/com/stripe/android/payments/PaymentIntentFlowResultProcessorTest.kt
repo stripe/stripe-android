@@ -6,12 +6,14 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.MaxRetryReachedException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -44,16 +46,16 @@ internal class PaymentIntentFlowResultProcessorTest {
     fun `processPaymentIntent() when shouldCancelSource=true should return canceled PaymentIntent`() =
         runTest {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                PaymentIntentFixtures.PI_REQUIRES_REDIRECT
+                Result.success(PaymentIntentFixtures.PI_REQUIRES_REDIRECT)
             )
             whenever(
                 mockStripeRepository.cancelPaymentIntentSource(
-                    any(),
-                    any(),
-                    any()
+                    paymentIntentId = any(),
+                    sourceId = any(),
+                    options = any(),
                 )
             ).thenReturn(
-                PaymentIntentFixtures.CANCELLED
+                Result.success(PaymentIntentFixtures.CANCELLED)
             )
 
             val paymentIntentResult = processor.processResult(
@@ -77,9 +79,9 @@ internal class PaymentIntentFlowResultProcessorTest {
     fun `when 3DS2 data contains intentId and publishableKey then they are used on source cancel`() =
         runTest {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any()))
-                .thenReturn(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2)
+                .thenReturn(Result.success(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2))
             whenever(mockStripeRepository.cancelPaymentIntentSource(any(), any(), any()))
-                .thenReturn(PaymentIntentFixtures.PAYMENT_INTENT_WITH_CANCELED_3DS2_SOURCE)
+                .thenReturn(Result.success(PaymentIntentFixtures.PAYMENT_INTENT_WITH_CANCELED_3DS2_SOURCE))
 
             processor.processResult(
                 PaymentFlowResult.Unvalidated(
@@ -101,10 +103,10 @@ internal class PaymentIntentFlowResultProcessorTest {
     fun `no refresh when user cancels the payment`() =
         runTest {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
+                Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
             )
             whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
-                PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS
+                Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS)
             )
 
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
@@ -143,10 +145,10 @@ internal class PaymentIntentFlowResultProcessorTest {
     fun `refresh succeeds when user confirms the payment`() =
         runTest {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
+                Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
             )
             whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
-                PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS
+                Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS)
             )
 
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
@@ -183,10 +185,10 @@ internal class PaymentIntentFlowResultProcessorTest {
     fun `refresh reaches max retry user confirms the payment`() =
         runTest(testDispatcher) {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
+                Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
             )
             whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
-                PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE
+                Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE)
             )
 
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
@@ -263,7 +265,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                 status = StripeIntent.Status.RequiresAction
             )
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                intent
+                Result.success(intent)
             )
 
             val clientSecret = requireNotNull(
@@ -306,10 +308,10 @@ internal class PaymentIntentFlowResultProcessorTest {
         val succeededIntent = processingIntent.copy(status = StripeIntent.Status.Succeeded)
 
         whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-            processingIntent,
-            null,
-            null,
-            succeededIntent,
+            Result.success(processingIntent),
+            Result.failure(APIConnectionException()),
+            Result.failure(APIConnectionException()),
+            Result.success(succeededIntent),
         )
 
         val clientSecret = requireNotNull(processingIntent.clientSecret)
@@ -340,14 +342,49 @@ internal class PaymentIntentFlowResultProcessorTest {
         assertThat(result).isEqualTo(expectedResult)
     }
 
+    @Test
+    fun `Keeps refreshing when encountering a CashAppPay payment that still requires action`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.cashAppPay(),
+                paymentMethodTypes = listOf("card", "cashapp"),
+            )
+
+            val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.success(requiresActionIntent),
+                Result.success(succeededIntent),
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            val expectedResult = PaymentIntentResult(
+                intent = succeededIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED,
+                failureMessage = null,
+            )
+
+            assertThat(result).isEqualTo(expectedResult)
+        }
+
     private suspend fun runCanceledFlow(
         initialIntent: PaymentIntent,
         refreshedIntent: PaymentIntent = initialIntent,
         expectedIntent: PaymentIntent = refreshedIntent
     ) {
         whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-            initialIntent,
-            refreshedIntent
+            Result.success(initialIntent),
+            Result.success(refreshedIntent),
         )
 
         val clientSecret = requireNotNull(initialIntent.clientSecret)

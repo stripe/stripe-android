@@ -16,6 +16,12 @@ import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as ApiResult
 
 @Serializable
+data class ExamplePublishableKeyResponse(
+    @SerialName("publishable_key")
+    val publishableKey: String,
+)
+
+@Serializable
 data class ExampleCheckoutRequest(
     @SerialName("hot_dog_count")
     val hotDogCount: Int,
@@ -153,6 +159,58 @@ data class ExampleCreateAndConfirmErrorResponse(
         }
     }
 }
+
+@Serializable
+data class ExampleCustomerSheetRequest(
+    @SerialName("customer_type")
+    val customerType: String
+)
+
+@Serializable
+data class ExampleCustomerSheetResponse(
+    @SerialName("publishableKey")
+    val publishableKey: String,
+    @SerialName("customerEphemeralKeySecret")
+    val customerEphemeralKeySecret: String,
+    @SerialName("customerId")
+    val customerId: String
+)
+
+@Serializable
+data class PlaygroundCustomerSheetRequest(
+    @SerialName("customer")
+    val customerId: String,
+    @SerialName("mode")
+    val mode: String,
+)
+
+@Serializable
+data class PlaygroundCustomerSheetResponse(
+    @SerialName("customerId")
+    val customerId: String,
+    @SerialName("intentClientSecret")
+    val clientSecret: String,
+    @SerialName("publishableKey")
+    val publishableKey: String,
+    @SerialName("customerEphemeralKeySecret")
+    val customerEphemeralKeySecret: String,
+    @SerialName("amount")
+    val amount: String,
+    @SerialName("paymentMethodTypes")
+    val paymentMethodTypes: String,
+)
+
+@Serializable
+data class ExampleCreateSetupIntentRequest(
+    @SerialName("customer_id")
+    val customerId: String,
+)
+
+@Serializable
+data class ExampleCreateSetupIntentResponse(
+    @SerialName("client_secret")
+    val clientSecret: String,
+)
 
 /**
  * Awaits the [ApiResult] and deserializes it into the desired type [T].

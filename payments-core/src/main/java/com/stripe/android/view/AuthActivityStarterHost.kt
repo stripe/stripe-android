@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -24,11 +25,15 @@ sealed class AuthActivityStarterHost {
 
     abstract val statusBarColor: Int?
     abstract val lifecycleOwner: LifecycleOwner
+    abstract val application: Application
 
     internal class ActivityHost(
         val activity: ComponentActivity,
         override val statusBarColor: Int?
     ) : AuthActivityStarterHost() {
+
+        override val application: Application
+            get() = activity.application
 
         override val lifecycleOwner: LifecycleOwner = activity
 
@@ -48,6 +53,9 @@ sealed class AuthActivityStarterHost {
         val fragment: Fragment,
         override val statusBarColor: Int?
     ) : AuthActivityStarterHost() {
+
+        override val application: Application
+            get() = fragment.requireActivity().application
 
         override val lifecycleOwner: LifecycleOwner = fragment
 
@@ -78,11 +86,12 @@ sealed class AuthActivityStarterHost {
 
         @JvmSynthetic
         internal fun create(
-            activity: ComponentActivity
+            activity: ComponentActivity,
+            statusBarColor: Int? = activity.window?.statusBarColor,
         ): AuthActivityStarterHost {
             return ActivityHost(
                 activity = activity,
-                statusBarColor = activity.window?.statusBarColor
+                statusBarColor = statusBarColor,
             )
         }
     }

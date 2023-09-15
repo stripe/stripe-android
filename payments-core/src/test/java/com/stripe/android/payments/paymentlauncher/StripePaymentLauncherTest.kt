@@ -1,5 +1,6 @@
 package com.stripe.android.payments.paymentlauncher
 
+import android.graphics.Color
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -22,9 +23,9 @@ class StripePaymentLauncherTest {
         enableLogging = false,
         ioContext = mock(),
         uiContext = mock(),
-        stripeRepository = mock(),
         paymentAnalyticsRequestFactory = mock(),
-        productUsage = mock()
+        productUsage = mock(),
+        statusBarColor = Color.RED,
     )
 
     @Test

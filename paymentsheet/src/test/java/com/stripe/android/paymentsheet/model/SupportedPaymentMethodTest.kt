@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_CUSTOMER
@@ -23,18 +24,7 @@ import java.io.File
 
 @RunWith(AndroidJUnit4::class)
 class SupportedPaymentMethodTest {
-    private val lpmRepository = LpmRepository(
-        arguments = LpmRepository.LpmRepositoryArguments(
-            resources = ApplicationProvider.getApplicationContext<Application>().resources,
-        )
-    ).apply {
-        this.update(
-            PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethodTypes),
-            null
-        )
-    }
     private val card = LpmRepository.HardcodedCard
-    private val eps = lpmRepository.fromCode("eps")!!
 
     @Test
     fun `If the intent has SFU set on top level or on LPM`() {
@@ -53,6 +43,19 @@ class SupportedPaymentMethodTest {
      */
     @Test
     fun `Test supported payment method baseline`() {
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+        ).apply {
+            this.update(
+                PaymentIntentFactory.create(
+                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                ),
+                null
+            )
+        }
         for (lpm in lpmRepository.values()) {
             val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.code}-support.csv").file)
             val baseline = resource.readText()
@@ -98,6 +101,19 @@ class SupportedPaymentMethodTest {
 
     @Test
     fun `Test supported payment method doesn't filter with empty unactivated list in test mode`() {
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+        ).apply {
+            this.update(
+                PaymentIntentFactory.create(
+                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                ),
+                null
+            )
+        }
         val mockIntent = mock<PaymentIntent>()
         whenever(mockIntent.paymentMethodTypes).thenReturn(listOf("card"))
         whenever(mockIntent.isLiveMode).thenReturn(false)
@@ -110,6 +126,19 @@ class SupportedPaymentMethodTest {
 
     @Test
     fun `Test supported payment method doesn't filter with empty unactivated list in live mode`() {
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+        ).apply {
+            this.update(
+                PaymentIntentFactory.create(
+                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                ),
+                null
+            )
+        }
         val mockIntent = mock<PaymentIntent>()
         whenever(mockIntent.paymentMethodTypes).thenReturn(listOf("card"))
         whenever(mockIntent.isLiveMode).thenReturn(true)
@@ -122,6 +151,19 @@ class SupportedPaymentMethodTest {
 
     @Test
     fun `Test supported payment method does filter with unactivated list in live mode`() {
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+        ).apply {
+            this.update(
+                PaymentIntentFactory.create(
+                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                ),
+                null
+            )
+        }
         val mockIntent = mock<PaymentIntent>()
         whenever(mockIntent.paymentMethodTypes).thenReturn(listOf("card"))
         whenever(mockIntent.isLiveMode).thenReturn(true)
@@ -134,6 +176,19 @@ class SupportedPaymentMethodTest {
 
     @Test
     fun `Test supported payment method doesn't filter with unactivated list in test mode`() {
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+        ).apply {
+            this.update(
+                PaymentIntentFactory.create(
+                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                ),
+                null
+            )
+        }
         val mockIntent = mock<PaymentIntent>()
         whenever(mockIntent.paymentMethodTypes).thenReturn(listOf("card"))
         whenever(mockIntent.isLiveMode).thenReturn(false)
@@ -170,8 +225,8 @@ class SupportedPaymentMethodTest {
                                 PaymentIntentTestInput(
                                     hasCustomer = customer,
                                     intentPMs = setOf(
-                                        card.code,
-                                        eps.code
+                                        "card",
+                                        "eps"
                                     ),
                                     intentSetupFutureUsage = usage,
                                     intentHasShipping = hasShipping,

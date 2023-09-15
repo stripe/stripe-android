@@ -7,8 +7,8 @@ import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.Source
-import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.testing.AbsFakeStripeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -45,7 +45,6 @@ internal class CustomerSessionOperationExecutorTest {
             object : AbsFakeStripeRepository() {
                 override suspend fun attachPaymentMethod(
                     customerId: String,
-                    publishableKey: String,
                     productUsageTokens: Set<String>,
                     paymentMethodId: String,
                     requestOptions: ApiRequest.Options
@@ -79,7 +78,6 @@ internal class CustomerSessionOperationExecutorTest {
             object : AbsFakeStripeRepository() {
                 override suspend fun attachPaymentMethod(
                     customerId: String,
-                    publishableKey: String,
                     productUsageTokens: Set<String>,
                     paymentMethodId: String,
                     requestOptions: ApiRequest.Options

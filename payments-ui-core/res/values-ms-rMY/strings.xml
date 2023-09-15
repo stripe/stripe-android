@@ -4,14 +4,22 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Bayar dalam <num_installments/> kali pembayaran tanpa faedah sebanyak <installment_price/> dengan <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Undur</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Nombor akaun anda tidak lengkap.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Alamat pengebilan</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">Kod BLIK</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Dengan meneruskan langkah, anda mengizinkan %1$s untuk mendebitkan akaun Cash App anda bagi pembayaran ini dan pembayaran masa hadapan menurut terma %2$s, sehinggalah keizinan ini dibatalkan. Anda boleh mengubah keizinan ini pada bila-bila masa dalam Tetapan Cash App anda.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Maklumat hubungan</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Teruskan</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">Bank EPS</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">Bank FPX</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">IBAN yang anda masukkan tidak lengkap.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -20,6 +28,10 @@
   <string name="stripe_iban_invalid_start">IBAN anda harus bermula dengan kod negara dua huruf.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">Bank iDEAL</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Kod BLIK anda tidak lengkap.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Kod BLIK anda tidak sah.</string>
   <string name="stripe_invalid_email_address">Alamat e-mel tidak sah: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">ID UPI tidak sah</string>

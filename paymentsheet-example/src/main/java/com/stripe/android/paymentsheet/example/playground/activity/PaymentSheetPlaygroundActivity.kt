@@ -20,7 +20,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.snackbar.Snackbar
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
@@ -186,7 +185,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private lateinit var addressLauncher: AddressLauncher
     private var shippingAddress: AddressDetails? = null
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         val shouldUseDarkMode = intent.extras?.get(FORCE_DARK_MODE_EXTRA) as Boolean?
         if (shouldUseDarkMode != null) {
@@ -203,9 +201,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         paymentSheet = PaymentSheet(
             activity = this,
-            createIntentCallback = { paymentMethodId ->
-                viewModel.createIntent(
-                    paymentMethodId = paymentMethodId,
+            createIntentCallback = { paymentMethod, shouldSavePaymentMethod ->
+                viewModel.createAndConfirmIntent(
+                    paymentMethodId = paymentMethod.id!!,
+                    shouldSavePaymentMethod = shouldSavePaymentMethod,
                     merchantCountryCode = merchantCountryCode.value,
                     mode = mode.value,
                     returnUrl = returnUrl,
@@ -218,9 +217,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         flowController = PaymentSheet.FlowController.create(
             activity = this,
             paymentOptionCallback = ::onPaymentOption,
-            createIntentCallbackForServerSideConfirmation = { paymentMethodId, shouldSavePaymentMethod ->
+            createIntentCallback = { paymentMethod, shouldSavePaymentMethod ->
                 viewModel.createAndConfirmIntent(
-                    paymentMethodId = paymentMethodId,
+                    paymentMethodId = paymentMethod.id!!,
                     shouldSavePaymentMethod = shouldSavePaymentMethod,
                     merchantCountryCode = merchantCountryCode.value,
                     mode = mode.value,
@@ -233,13 +232,27 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         addressLauncher = AddressLauncher(this, ::onAddressLauncherResult)
 
-        viewBinding.initializationRadioGroup.setOnCheckedChangeListener { _, checkedId ->
-            val type = when (checkedId) {
-                R.id.normal_initialization_button -> InitializationType.Normal
-                R.id.deferred_initialization_button -> InitializationType.Deferred
-                else -> error("🤔")
+        val initializationTypes = InitializationType.values().map { it.value }
+        viewBinding.initializationTypeSpinner.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            initializationTypes,
+        )
+
+        viewBinding.initializationTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                val type = InitializationType.values()[position]
+                viewModel.initializationType.value = type
             }
-            viewModel.initializationType.value = type
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Nothing to do here
+            }
         }
 
         viewBinding.modeRadioGroup.setOnCheckedChangeListener { _, checkedId ->
@@ -292,11 +305,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         viewBinding.reloadButton.setOnClickListener {
-            val initializationType = viewModel.initializationType.value
-
             lifecycleScope.launch {
                 viewModel.storeToggleState(
-                    initializationType = initializationType.value,
                     customer = customer.value,
                     link = linkEnabled,
                     googlePay = googlePayConfig != null,
@@ -315,7 +325,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 )
 
                 viewModel.prepareCheckout(
-                    initializationType = initializationType,
                     customer = customer,
                     currency = currency,
                     merchantCountry = merchantCountryCode,
@@ -441,14 +450,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         collectPhone: String,
         collectAddress: String,
     ) {
-        when (initialization) {
-            InitializationType.Normal.value -> {
-                viewBinding.initializationRadioGroup.check(R.id.normal_initialization_button)
-            }
-            InitializationType.Deferred.value -> {
-                viewBinding.initializationRadioGroup.check(R.id.deferred_initialization_button)
-            }
-        }
+        val initializationTypes = InitializationType.values().map { it.value }
+        viewBinding.initializationTypeSpinner.setSelection(
+            initializationTypes.indexOf(initialization)
+        )
 
         when (customer) {
             CheckoutCustomer.Guest.value -> viewBinding.customerRadioGroup.check(R.id.guest_customer_button)
@@ -564,7 +569,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewBinding.paymentMethod.isClickable = false
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     private fun startCompleteCheckout() {
         if (viewModel.initializationType.value == InitializationType.Normal) {
             val clientSecret = viewModel.clientSecret.value ?: return
@@ -643,7 +647,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             viewBinding.shippingAddressCountriesPartialButton.id
         ) {
             builder.allowedCountries(
-                setOf("US", "CA", "AU", "GB", "FR", "JP", "KR")
+                setOf("US", "CA", "AU", "GB", "FR", "JP", "KR", "BR")
             )
         }
         val phone = when (viewBinding.shippingAddressPhoneRadioGroup.checkedRadioButtonId) {
@@ -683,7 +687,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         )
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     private fun configureCustomCheckout() {
         if (viewModel.initializationType.value == InitializationType.Normal) {
             val clientSecret = viewModel.clientSecret.value ?: return
@@ -742,12 +745,12 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private fun makeConfiguration(): PaymentSheet.Configuration {
         val defaultBilling = PaymentSheet.BillingDetails(
             address = PaymentSheet.Address(
-                line1 = "123 Main Street",
+                line1 = "354 Oyster Point Blvd",
                 line2 = null,
-                city = "Blackrock",
-                state = "Co. Dublin",
-                postalCode = "T37 F8HK",
-                country = "IE",
+                city = "South San Francisco",
+                state = "CA",
+                postalCode = "94080",
+                country = "US",
             ),
             email = "email@email.com",
             name = "Jenny Rosen",
@@ -879,7 +882,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 /**
                  * Modify this list if you want to change the countries displayed in the playground.
                  */
-                country.code.value in setOf("US", "GB", "AU", "FR", "IN")
+                country.code.value in setOf("US", "GB", "AU", "FR", "IN", "SG", "MY", "MX", "BR")
             }.map { country ->
                 /**
                  * Modify this statement to change the default currency associated with each
@@ -901,6 +904,18 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     "IN" -> {
                         country to "INR"
                     }
+                    "SG" -> {
+                        country to "SGD"
+                    }
+                    "MY" -> {
+                        country to "MYR"
+                    }
+                    "MX" -> {
+                        country to "MXN"
+                    }
+                    "BR" -> {
+                        country to "BRL"
+                    }
                     else -> {
                         country to "USD"
                     }
@@ -909,18 +924,17 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         // List was created from: https://stripe.com/docs/currencies
         /** Modify this list if you want to change the currencies displayed in the playground **/
-        private val stripeSupportedCurrencies = listOf("AUD", "EUR", "GBP", "USD", "INR")
-//            "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS",  "AWG", "AZN", "BAM",
-//            "BBD", "BDT", "BGN", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BWP", "BYN", "BZD",
-//            "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CVE", "CZK", "DJF", "DKK", "DOP",
-//            "DZD", "EGP", "ETB", "FJD", "FKP", "GEL", "GIP", "GMD", "GNF", "GTQ",
-//            "GYD", "HKD", "HNL", "HRK", "HTG", "HUF", "IDR", "ILS", "ISK", "JMD", "JPY",
-//            "KES", "KGS", "KHR", "KMF", "KRW", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL",
-//            "MAD", "MDL", "MGA", "MKD", "MMK", "MNT", "MOP", "MRO", "MUR", "MVR", "MWK", "MXN",
-//            "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "PAB", "PEN", "PGK", "PHP",
-//            "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SBD", "SCR", "SEK",
-//            "SGD", "SHP", "SLL", "SOS", "SRD", "STD", "SZL", "THB", "TJS", "TOP", "TRY", "TTD",
-//            "TWD", "TZS", "UAH", "UGX", "UYU", "UZS", "VND", "VUV", "WST", "XAF", "XCD", "XOF",
-//            "XPF", "YER", "ZAR", "ZMW"
+        private val stripeSupportedCurrencies = listOf(
+            "AUD",
+            "EUR",
+            "GBP",
+            "USD",
+            "INR",
+            "PLN",
+            "SGD",
+            "MYR",
+            "MXN",
+            "BRL",
+        )
     }
 }

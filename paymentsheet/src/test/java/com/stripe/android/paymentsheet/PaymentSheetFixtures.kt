@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.content.res.ColorStateList
 import android.graphics.Color
 import androidx.core.graphics.toColorInt
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -25,6 +24,8 @@ internal object PaymentSheetFixtures {
     internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(
         CLIENT_SECRET
     )
+
+    internal val SETUP_INTENT_CLIENT_SECRET = PaymentIntentClientSecret("seti_1234_secret_4321")
 
     internal val CONFIG_MINIMUM = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME
@@ -110,9 +111,9 @@ internal object PaymentSheetFixtures {
             isGooglePayReady = false,
             paymentSelection = null,
             linkState = null,
+            isEligibleForCardBrandChoice = false,
         ),
         statusBarColor = STATUS_BAR_COLOR,
-        injectorKey = DUMMY_INJECTOR_KEY,
         enableLogging = false,
         productUsage = mock()
     )
@@ -196,6 +197,7 @@ internal object PaymentSheetFixtures {
                 email = "email",
                 name = "Jenny Rosen",
                 phone = "+18008675309"
-            )
+            ),
+            isEligibleForCardBrandChoice = false,
         )
 }

@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.analytics
 
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.exception.FinancialConnectionsError
+import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 
@@ -18,8 +19,20 @@ internal sealed class FinancialConnectionsEvent(
 
     class PaneLaunched(
         pane: Pane,
+        referrer: Pane?
     ) : FinancialConnectionsEvent(
         "pane.launched",
+        mapOf(
+            "referrer_pane" to referrer?.value,
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class AppBackgrounded(
+        pane: Pane,
+        backgrounded: Boolean,
+    ) : FinancialConnectionsEvent(
+        if (backgrounded) "mobile.app_entered_background" else "mobile.app_entered_foreground",
         mapOf(
             "pane" to pane.value,
         ).filterNotNullValues()
@@ -54,6 +67,7 @@ internal sealed class FinancialConnectionsEvent(
 
     class Complete(
         exception: Throwable?,
+        exceptionExtraMessage: String?,
         connectedAccounts: Int?
     ) : FinancialConnectionsEvent(
         name = "complete",
@@ -61,7 +75,7 @@ internal sealed class FinancialConnectionsEvent(
             "num_linked_accounts" to connectedAccounts?.toString(),
             "type" to if (exception == null) "object" else "error"
         )
-            .plus(exception?.toEventParams() ?: emptyMap())
+            .plus(exception?.toEventParams(exceptionExtraMessage) ?: emptyMap())
             .filterNotNullValues()
     )
 
@@ -91,6 +105,41 @@ internal sealed class FinancialConnectionsEvent(
         mapOf(
             "pane" to pane.value,
         ).filterNotNullValues()
+    )
+
+    class FeaturedInstitutionsLoaded(
+        institutionIds: Set<String>,
+        duration: Long,
+        pane: Pane
+    ) : FinancialConnectionsEvent(
+        name = "search.feature_institutions_loaded",
+        params = (
+            institutionIds
+                .mapIndexed { index, id -> "institutions[$index]" to id }
+                .toMap()
+                .plus(
+                    mapOf(
+                        "pane" to pane.value,
+                        "result_count" to institutionIds.size.toString(),
+                        "duration" to duration.toString(),
+                    )
+                )
+            ).filterNotNullValues()
+    )
+
+    class SearchScroll(
+        institutionIds: Set<String>,
+        pane: Pane
+    ) : FinancialConnectionsEvent(
+        name = "search.scroll",
+        params = (
+            institutionIds
+                .mapIndexed { index, id -> "institution_ids[$index]" to id }
+                .toMap()
+                .plus(
+                    mapOf("pane" to pane.value)
+                )
+            ).filterNotNullValues()
     )
 
     class InstitutionSelected(
@@ -131,6 +180,22 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
+    class AccountSelected(
+        selected: Boolean,
+        isSingleAccount: Boolean,
+        accountId: String,
+    ) : FinancialConnectionsEvent(
+        name = if (selected) {
+            "click.account_picker.account_selected"
+        } else {
+            "click.account_picker.account_unselected"
+        },
+        mapOf(
+            "is_single_account" to isSingleAccount.toString(),
+            "account" to accountId,
+        ).filterNotNullValues()
+    )
+
     class PollAttachPaymentsSucceeded(
         authSessionId: String,
         duration: Long
@@ -146,15 +211,6 @@ internal sealed class FinancialConnectionsEvent(
         pane: Pane,
     ) : FinancialConnectionsEvent(
         name = "click.link_accounts",
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
-
-    class ClickLinkAnotherAccount(
-        pane: Pane,
-    ) : FinancialConnectionsEvent(
-        name = "click.link_another_account",
         mapOf(
             "pane" to pane.value,
         ).filterNotNullValues()
@@ -253,16 +309,19 @@ internal sealed class FinancialConnectionsEvent(
 
     class Error(
         pane: Pane,
-        exception: Throwable
+        exception: Throwable,
+        extraMessage: String? = null,
     ) : FinancialConnectionsEvent(
         name = when (exception) {
             is FinancialConnectionsError,
+            is WebAuthFlowFailedException,
             is OTPError -> "error.expected"
+
             else -> "error.unexpected"
         },
         params = (
             mapOf("pane" to pane.value)
-                .plus(exception.toEventParams())
+                .plus(exception.toEventParams(extraMessage))
                 .filterNotNullValues()
             )
     )
@@ -281,9 +340,50 @@ internal sealed class FinancialConnectionsEvent(
         includePrefix = false,
     )
 
+    class AuthSessionUrlReceived(url: String, status: String, authSessionId: String?) :
+        FinancialConnectionsEvent(
+            name = "auth_session.url_received",
+            params = mapOf(
+                "status" to status,
+                "url" to url,
+                "auth_session_id" to (authSessionId ?: "")
+            ).filterNotNullValues(),
+        )
+
+    class AuthSessionRetrieved(nextPane: Pane, authSessionId: String) :
+        FinancialConnectionsEvent(
+            name = "auth_session.retrieved",
+            params = mapOf(
+                "next_pane" to nextPane.value,
+                "auth_session_id" to authSessionId,
+            ).filterNotNullValues(),
+        )
+
     object ConsentAgree : FinancialConnectionsEvent(
         name = "click.agree",
         mapOf("pane" to Pane.CONSENT.value)
+    )
+
+    class PrepaneClickContinue(
+        pane: Pane
+    ) : FinancialConnectionsEvent(
+        name = "click.prepane.continue",
+        mapOf("pane" to pane.value)
+    )
+
+    class AuthSessionOpened(
+        pane: Pane,
+        flow: String?,
+        defaultBrowser: String?,
+        id: String
+    ) : FinancialConnectionsEvent(
+        "auth_session.opened",
+        mapOf(
+            "auth_session_id" to id,
+            "pane" to pane.value,
+            "flow" to (flow ?: "unknown"),
+            "browser" to (defaultBrowser ?: "unknown")
+        ).filterNotNullValues()
     )
 
     override fun toString(): String {

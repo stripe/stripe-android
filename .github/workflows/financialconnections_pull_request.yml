@@ -11,7 +11,7 @@ jobs:
   apk-size-analysis:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
       - name: Generate Android release bundle
         run: ./gradlew :financial-connections-example:bundleRelease

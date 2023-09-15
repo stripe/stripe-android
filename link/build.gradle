@@ -1,6 +1,6 @@
 apply from: configs.androidLibrary
 
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
@@ -11,16 +11,15 @@ dependencies {
     implementation project(':financial-connections')
     implementation project(':stripe-ui-core')
 
-    implementation platform(boms.androidx.compose)
-
     implementation libs.androidx.appCompat
+    implementation libs.androidx.browser
     implementation libs.androidx.constraintLayout
     implementation libs.androidx.liveDataKtx
     implementation libs.androidx.security
     implementation libs.androidx.viewModel
     implementation libs.dagger
     implementation libs.material
-    kapt libs.daggerCompiler
+    ksp libs.daggerCompiler
 
     implementation libs.compose.activity
     implementation libs.compose.foundation
@@ -31,6 +30,8 @@ dependencies {
     implementation libs.compose.liveData
     implementation libs.accompanist.flowLayout
     implementation libs.compose.uiToolingPreview
+
+    implementation libs.kotlin.serialization
 
     debugImplementation libs.compose.uiTooling
     debugImplementation libs.compose.uiTestManifest
@@ -48,6 +49,7 @@ dependencies {
     testImplementation testLibs.androidx.core
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.turbine
+    testImplementation testLibs.espresso.intents
 
     androidTestImplementation testLibs.truth
     androidTestImplementation testLibs.androidx.junit

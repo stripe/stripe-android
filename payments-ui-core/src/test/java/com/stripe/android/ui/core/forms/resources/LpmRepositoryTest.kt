@@ -5,14 +5,14 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.ContactInformationSpec
-import com.stripe.android.ui.core.elements.EmptyFormSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -26,7 +26,6 @@ class LpmRepositoryTest {
         LpmRepository.LpmRepositoryArguments(
             resources = ApplicationProvider.getApplicationContext<Application>().resources,
             isFinancialConnectionsAvailable = { true },
-            enableACHV2InDeferredFlow = true
         )
     )
 
@@ -165,29 +164,6 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify no fields in the default json are ignored the lpms package should be correct`() {
-        lpmRepository.updateFromDisk(PaymentIntentFactory.create())
-        // If this test fails, check to make sure the spec's serializer is added to
-        // FormItemSpecSerializer
-        lpmRepository.supportedPaymentMethodTypes.forEach { code ->
-            if (!hasEmptyForm(code)) {
-                assertThat(
-                    lpmRepository.fromCode(code)!!.formSpec.items
-                        .filter {
-                            it is EmptyFormSpec && !hasEmptyForm(code)
-                        }
-
-                ).isEmpty()
-            }
-        }
-    }
-
-    private fun hasEmptyForm(code: String) =
-        (code == "paypal" || code == "us_bank_account") &&
-            lpmRepository.fromCode(code)!!.formSpec.items.size == 1 &&
-            lpmRepository.fromCode(code)!!.formSpec.items.first() == EmptyFormSpec
-
-    @Test
     fun `Verify the repository only shows card if in lpms json`() {
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
@@ -275,7 +251,15 @@ class LpmRepositoryTest {
     @Test
     fun `Verify that us_bank_account is supported when financial connections sdk available`() {
         lpmRepository.update(
-            PaymentIntentFactory.create(paymentMethodTypes = emptyList()),
+            PaymentIntentFactory.create(paymentMethodTypes = emptyList()).copy(
+                paymentMethodOptionsJsonString = """
+                    {
+                        "us_bank_account": {
+                            "verification_method": "automatic"
+                        }
+                    }
+                """.trimIndent()
+            ),
             """
               [
                 {
@@ -331,12 +315,11 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify LpmRepository filters out USBankAccount if flag is disabled`() = runTest {
+    fun `Verify LpmRepository filters out USBankAccount if verification method is unsupported`() = runTest {
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
-                enableACHV2InDeferredFlow = false
             ),
         )
 
@@ -344,6 +327,13 @@ class LpmRepositoryTest {
             paymentMethodTypes = listOf("card", "us_bank_account", "cashapp"),
         ).copy(
             clientSecret = null,
+            paymentMethodOptionsJsonString = """
+                {
+                    "us_bank_account": {
+                        "verification_method": "microdeposit"
+                    }
+                }
+            """.trimIndent()
         )
 
         lpmRepository.update(
@@ -353,6 +343,36 @@ class LpmRepositoryTest {
 
         val supportedPaymentMethods = lpmRepository.values().map { it.code }
         assertThat(supportedPaymentMethods).containsExactly(Card.code, CashAppPay.code)
+    }
+
+    @Test
+    fun `Verify LpmRepository does not filter out USBankAccount if verification method is supported`() = runTest {
+        val lpmRepository = LpmRepository(
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+        )
+
+        val deferredPaymentIntent = PaymentIntentFactory.create(
+            paymentMethodTypes = listOf("card", "us_bank_account", "cashapp"),
+        ).copy(
+            paymentMethodOptionsJsonString = """
+                {
+                    "us_bank_account": {
+                        "verification_method": "automatic"
+                    }
+                }
+            """.trimIndent()
+        )
+
+        lpmRepository.update(
+            stripeIntent = deferredPaymentIntent,
+            serverLpmSpecs = null,
+        )
+
+        val supportedPaymentMethods = lpmRepository.values().map { it.code }
+        assertThat(supportedPaymentMethods).containsExactly(Card.code, USBankAccount.code, CashAppPay.code)
     }
 
     @Test
@@ -368,11 +388,11 @@ class LpmRepositoryTest {
             }
          ]
             """.trimIndent(),
-            CardBillingDetailsCollectionConfiguration(
+            BillingDetailsCollectionConfiguration(
                 collectName = true,
                 collectEmail = true,
                 collectPhone = false,
-                address = CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
         )
 
@@ -395,6 +415,21 @@ class LpmRepositoryTest {
 
         val addressSpec = card.formSpec.items[2] as CardBillingSpec
         assertThat(addressSpec.collectionMode)
-            .isEqualTo(CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
+            .isEqualTo(BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
+    }
+
+    @Test
+    fun `LpmRepository#initializeWithCardSpec initializes the LpmRepository with hard coded card spec`() {
+        val lpmRepository = LpmRepository(
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+        )
+
+        assertThat(lpmRepository.values()).isEmpty()
+        lpmRepository.initializeWithCardSpec()
+        val card = lpmRepository.fromCode("card")
+        assertThat(card).isNotNull()
     }
 }

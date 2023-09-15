@@ -12,14 +12,14 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.features.consent.ConsentState.BottomSheetContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -32,7 +32,6 @@ import javax.inject.Inject
 internal class ConsentViewModel @Inject constructor(
     initialState: ConsentState,
     private val acceptConsent: AcceptConsent,
-    private val goNext: GoNext,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
@@ -72,8 +71,7 @@ internal class ConsentViewModel @Inject constructor(
         suspend {
             eventTracker.track(ConsentAgree)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
-            goNext(updatedManifest.nextPane)
-            Unit
+            navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = Pane.CONSENT))
         }.execute { copy(acceptConsent = it) }
     }
 
@@ -83,37 +81,37 @@ internal class ConsentViewModel @Inject constructor(
             uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
                 eventTracker.track(Click(eventName, pane = Pane.CONSENT))
             }
-        }
-        val date = Date()
-        if (URLUtil.isNetworkUrl(uri)) {
-            setState { copy(viewEffect = OpenUrl(uri, date.time)) }
-        } else {
-            val managedUri = ConsentClickableText.values()
-                .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
-            when (managedUri) {
-                ConsentClickableText.DATA -> {
-                    setState {
-                        copy(
-                            currentBottomSheet = BottomSheetContent.DATA,
-                            viewEffect = ViewEffect.OpenBottomSheet(date.time)
-                        )
+            val date = Date()
+            if (URLUtil.isNetworkUrl(uri)) {
+                setState { copy(viewEffect = OpenUrl(uri, date.time)) }
+            } else {
+                val managedUri = ConsentClickableText.values()
+                    .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
+                when (managedUri) {
+                    ConsentClickableText.DATA -> {
+                        setState {
+                            copy(
+                                currentBottomSheet = BottomSheetContent.DATA,
+                                viewEffect = ViewEffect.OpenBottomSheet(date.time)
+                            )
+                        }
                     }
-                }
 
-                ConsentClickableText.MANUAL_ENTRY -> {
-                    navigationManager.navigate(NavigationDirections.manualEntry)
-                }
-
-                ConsentClickableText.LEGAL_DETAILS -> {
-                    setState {
-                        copy(
-                            currentBottomSheet = BottomSheetContent.LEGAL,
-                            viewEffect = ViewEffect.OpenBottomSheet(date.time)
-                        )
+                    ConsentClickableText.MANUAL_ENTRY -> {
+                        navigationManager.tryNavigateTo(ManualEntry(referrer = Pane.CONSENT))
                     }
-                }
 
-                null -> logger.error("Unrecognized clickable text: $uri")
+                    ConsentClickableText.LEGAL_DETAILS -> {
+                        setState {
+                            copy(
+                                currentBottomSheet = BottomSheetContent.LEGAL,
+                                viewEffect = ViewEffect.OpenBottomSheet(date.time)
+                            )
+                        }
+                    }
+
+                    null -> logger.error("Unrecognized clickable text: $uri")
+                }
             }
         }
     }

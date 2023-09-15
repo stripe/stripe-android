@@ -16,41 +16,36 @@ data class CardParams internal constructor(
     private val loggingTokens: Set<String> = emptySet(),
 
     /**
-     * [card.number](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-number)
-     *
-     * Required
-     *
      * The card number, as a string without any separators.
+     *
+     * [card.number](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-number)
      */
-    internal var number: String,
+    @property:DelicateCardDetailsApi
+    val number: String,
 
     /**
-     * [card.exp_month](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_month)
-     *
-     * Required
-     *
      * Two-digit number representing the card's expiration month.
+     *
+     * [card.exp_month](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_month)
      */
-    internal var expMonth: Int,
+    @property:DelicateCardDetailsApi
+    val expMonth: Int,
 
     /**
-     * [card.exp_year](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_year)
-     *
-     * Required
-     *
      * Two- or four-digit number representing the card's expiration year.
+     *
+     * [card.exp_year](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_year)
      */
-    internal var expYear: Int,
+    @property:DelicateCardDetailsApi
+    val expYear: Int,
 
     /**
+     * Card security code.
+     *
      * [card.cvc](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-cvc)
-     *
-     * Usually required
-     *
-     * Card security code. Highly recommended to always include this value, but it's required only
-     * for accounts based in European countries.
      */
-    internal var cvc: String? = null,
+    @property:DelicateCardDetailsApi
+    val cvc: String? = null,
 
     /**
      * [card.name](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-name)
@@ -85,7 +80,10 @@ data class CardParams internal constructor(
      */
     var metadata: Map<String, String>? = null
 ) : TokenParams(Token.Type.Card, loggingTokens) {
-    val last4: String get() = number.takeLast(4)
+
+    val last4: String
+        @OptIn(DelicateCardDetailsApi::class)
+        get() = number.takeLast(4)
 
     @JvmOverloads
     constructor(
@@ -172,6 +170,7 @@ data class CardParams internal constructor(
     )
 
     override val typeDataParams: Map<String, Any>
+        @OptIn(DelicateCardDetailsApi::class)
         get() = listOf(
             PARAM_NUMBER to number,
             PARAM_EXP_MONTH to expMonth,

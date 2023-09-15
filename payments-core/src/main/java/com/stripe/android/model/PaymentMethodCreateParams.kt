@@ -3,7 +3,6 @@ package com.stripe.android.model
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.CardUtils
-import com.stripe.android.ObjectBuilder
 import com.stripe.android.Stripe
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
@@ -94,7 +93,8 @@ data class PaymentMethodCreateParams internal constructor(
     val typeCode: String
         get() = code
 
-    internal val attribution: Set<String>
+    val attribution: Set<String>
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @JvmSynthetic
         get() {
             return when (code) {
@@ -299,7 +299,7 @@ data class PaymentMethodCreateParams internal constructor(
          * Used to create a [Card] object with the user's card details. To create a
          * [Card] with a Stripe token (e.g. for Google Pay), use [Card.create].
          */
-        class Builder : ObjectBuilder<Card> {
+        class Builder {
             private var number: String? = null
             private var expiryMonth: Int? = null
             private var expiryYear: Int? = null
@@ -321,7 +321,7 @@ data class PaymentMethodCreateParams internal constructor(
                 this.cvc = cvc
             }
 
-            override fun build(): Card {
+            fun build(): Card {
                 return Card(
                     number = number,
                     expiryMonth = expiryMonth,
@@ -586,6 +586,7 @@ data class PaymentMethodCreateParams internal constructor(
         fun createCard(
             cardParams: CardParams
         ): PaymentMethodCreateParams {
+            @OptIn(DelicateCardDetailsApi::class)
             return create(
                 card = Card(
                     number = cardParams.number,

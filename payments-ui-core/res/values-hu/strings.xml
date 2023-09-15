@@ -4,14 +4,22 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Fizetés <num_installments/>, egyenként <installment_price/> összegű kamatmentes részletben <img/> használatával]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Vissza</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">A számlaszáma hiányos.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Számlázási cím</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">BLIK kód</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Ha folytatja, azzal engedélyezi, hogy a(z) %1$s megterhelje a Cash App számláját ezzel a fizetéssel, és jövőbeli fizetésekkel a(z) %2$s feltételeinek megfelelően, ameddig az engedélyt vissza nem vonja. Ezt bármikor megváltoztathatja a Cash App beállításaiban.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kapcsolattartási adatok</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Folytatás</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">EPS Bank</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">A beírt IBAN-szám hiányos.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -20,6 +28,10 @@
   <string name="stripe_iban_invalid_start">Az IBAN-számának egy kétbetűs országkóddal kell kezdődnie.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">iDEAL bank</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">BLIK kódja hiányos.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">BLIK kódja érvénytelen.</string>
   <string name="stripe_invalid_email_address">Érvénytelen e-mail-cím: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Érvénytelen UPI-azonosító</string>

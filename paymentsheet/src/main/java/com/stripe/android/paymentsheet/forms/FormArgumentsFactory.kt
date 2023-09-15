@@ -17,7 +17,7 @@ internal object FormArgumentsFactory {
         merchantName: String,
         amount: Amount? = null,
         newLpm: PaymentSelection.New?,
-        isShowingLinkInlineSignup: Boolean = false,
+        isEligibleForCardBrandChoice: Boolean,
     ): FormArguments {
         val layoutFormDescriptor = paymentMethod.getPMAddForm(stripeIntent, config)
 
@@ -45,7 +45,7 @@ internal object FormArgumentsFactory {
 
         return FormArguments(
             paymentMethodCode = paymentMethod.code,
-            showCheckbox = layoutFormDescriptor.showCheckbox && !isShowingLinkInlineSignup,
+            showCheckbox = layoutFormDescriptor.showCheckbox,
             showCheckboxControlledFields = showCheckboxControlledFields,
             merchantName = merchantName,
             amount = amount,
@@ -53,7 +53,10 @@ internal object FormArgumentsFactory {
             shippingDetails = config?.shippingDetails,
             initialPaymentMethodCreateParams = initialParams,
             billingDetailsCollectionConfiguration = config?.billingDetailsCollectionConfiguration
-                ?: PaymentSheet.BillingDetailsCollectionConfiguration()
+                ?: PaymentSheet.BillingDetailsCollectionConfiguration(),
+            isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+            requiresMandate = paymentMethod.requiresMandate,
+            requiredFields = paymentMethod.placeholderOverrideList,
         )
     }
 }

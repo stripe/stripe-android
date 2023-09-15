@@ -42,6 +42,7 @@ object FormItemSpecSerializer :
             "au_becs_bsb_number" -> BsbSpec.serializer()
             "au_becs_account_number" -> AuBankAccountNumberSpec.serializer()
             "au_becs_mandate" -> AuBecsDebitMandateTextSpec.serializer()
+            "boleto_tax_id" -> BoletoTaxIdSpec.serializer()
             "country" -> CountrySpec.serializer()
             "selector" -> DropdownSpec.serializer()
             "email" -> EmailSpec.serializer()
@@ -56,6 +57,7 @@ object FormItemSpecSerializer :
             "card_details" -> CardDetailsSectionSpec.serializer()
             "card_billing" -> CardBillingSpec.serializer()
             "upi" -> UpiSpec.serializer()
+            "blik" -> BlikSpec.serializer()
             "placeholder" -> PlaceholderSpec.serializer()
             else -> EmptyFormSpec.serializer()
         }

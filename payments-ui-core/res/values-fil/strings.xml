@@ -4,14 +4,22 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Magbayad ng <num_installments/> na walang interes na pagbabayad ng <installment_price/> gamit ang <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Bumalik</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Ang numero ng iyong account ay di kumpleto.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Adres para sa billing</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">BLIK code</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Sa pagpapatuloy, binibigyan mo ng awtorisasyon ang %1$s na i-debit ang iyong Cash App account para sa pagbabayad na ito at sa mga pagbabayad sa hinaharap alinsunod sa mga tuntunin ng  %2$s, hanggang bawiin mo ang awtorisasyong ito. Maaari mong palitan ito sa anumang oras sa iyong Cash App Settings.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Impormasyon sa pakikipag-ugnayan</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Magpatuloy</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">EPS Bank</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Ang IBAN na iniligay mo ay di kumpleto.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -20,6 +28,10 @@
   <string name="stripe_iban_invalid_start">Ang iyong IBAN ay dapat magsimula sa dalawang letra na code ng bansa.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">iDEAL Bank</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Ang iyong BLIK code ay kulang.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Ang iyong BLIK code ay hindi valid.</string>
   <string name="stripe_invalid_email_address">Hindi valid na email address: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Di valid na UPI ID</string>

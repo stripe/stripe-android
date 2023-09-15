@@ -117,6 +117,11 @@ internal interface FinancialConnectionsManifestRepository {
         sessionId: String
     ): FinancialConnectionsAuthorizationSession
 
+    suspend fun retrieveAuthorizationSession(
+        clientSecret: String,
+        sessionId: String
+    ): FinancialConnectionsAuthorizationSession
+
     /**
      * Save the authorized bank accounts to Link.
      *
@@ -345,6 +350,23 @@ private class FinancialConnectionsManifestRepositoryImpl(
         }
     }
 
+    override suspend fun retrieveAuthorizationSession(
+        clientSecret: String,
+        sessionId: String
+    ): FinancialConnectionsAuthorizationSession = requestExecutor.execute(
+        request = apiRequestFactory.createPost(
+            url = retrieveAuthSessionUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_ID to sessionId,
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
+            )
+        ),
+        FinancialConnectionsAuthorizationSession.serializer()
+    ).also {
+        updateCachedActiveAuthSession("retrieveAuthorizationSession", it)
+    }
+
     override suspend fun completeAuthorizationSession(
         clientSecret: String,
         sessionId: String,
@@ -544,34 +566,37 @@ private class FinancialConnectionsManifestRepositoryImpl(
         internal const val PARAMS_FULLSCREEN = "fullscreen"
         internal const val PARAMS_HIDE_CLOSE_BUTTON = "hide_close_button"
 
-        internal val synchronizeSessionUrl: String =
+        internal const val synchronizeSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
 
-        internal val cancelAuthSessionUrl: String =
+        internal const val cancelAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/cancel"
 
-        internal val eventsAuthSessionUrl: String =
+        internal const val retrieveAuthSessionUrl: String =
+            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/retrieve"
+
+        internal const val eventsAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/events"
 
-        internal val consentAcquiredUrl: String =
+        internal const val consentAcquiredUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/consent_acquired"
 
-        internal val linkMoreAccountsUrl: String =
+        internal const val linkMoreAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_more_accounts"
 
-        internal val saveAccountToLinkUrl: String =
+        internal const val saveAccountToLinkUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/save_accounts_to_link"
 
-        internal val linkVerifiedUrl: String =
+        internal const val linkVerifiedUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_verified"
 
-        internal val linkStepUpVerifiedUrl: String =
+        internal const val linkStepUpVerifiedUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_step_up_authentication_verified"
 
-        internal val repairSessionGenerateUrl: String =
+        internal const val repairSessionGenerateUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/repair_sessions/generate_url"
 
-        internal val disableNetworking: String =
+        internal const val disableNetworking: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/disable_networking"
     }
 }

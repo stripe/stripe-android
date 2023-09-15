@@ -4,14 +4,22 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Πληρώστε σε <num_installments/> άτοκες δόσεις των <installment_price/> με <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Πίσω</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Ο αριθμός λογαριασμού σας είναι ελλιπής.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Διεύθυνση χρέωσης</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">Κωδικός BLIK</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Συνεχίζοντας, εξουσιοδοτείτε την %1$s να χρεώσει τον λογαριασμό σας Cash App για αυτήν την πληρωμή και μελλοντικές πληρωμές σύμφωνα με τους όρους της %2$s, μέχρι να ανακληθεί αυτή η εξουσιοδότηση. Μπορείτε να αλλάξετε αυτήν την επιλογή οποιαδήποτε στιγμή στις ρυθμίσεις Cash App.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Στοιχεία επικοινωνίας</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Συνέχεια</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">Τράπεζα με EPS</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Ο κωδικός IBAN που εισαγάγατε είναι ελλιπής.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -20,6 +28,10 @@
   <string name="stripe_iban_invalid_start">Ο κωδικός IBAN σας πρέπει να αρχίζει με έναν διψήφιο κωδικό χώρας.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">iDEAL Bank</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Ο κωδικός σας BLIK είναι ελλιπής.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Ο κωδικός σας BLIK δεν είναι έγκυρος.</string>
   <string name="stripe_invalid_email_address">Μη έγκυρη διεύθυνση email: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Μη έγκυρο αναγνωριστικό UPI</string>

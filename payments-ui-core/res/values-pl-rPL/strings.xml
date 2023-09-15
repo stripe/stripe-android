@@ -4,14 +4,22 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Zapłacić w <num_installments/> nieoprocentowanych ratach <installment_price/> z <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Wstecz</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Numer konta jest niekompletny.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Adres rozliczeniowy</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">Kod BLIK</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Kontynuując, wyrażasz zgodę na obciążenie przez %1$s Twojego konta Cash App kwotą tej płatności oraz przyszłych płatności zgodnie z warunkami %2$s do momentu wycofania zgody. To ustawienie można zmienić w dowolnym momencie w ustawieniach Cash App.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Dane kontaktowe</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Kontynuuj</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">Bank EPS</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Podany IBAN jest niepełny.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -20,6 +28,10 @@
   <string name="stripe_iban_invalid_start">IBAN powinien się zaczynać od dwuliterowego kodu kraju.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">iDEAL Bank</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Kod BLIK jest niekompletny.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Nieprawidłowy kod BLIK.</string>
   <string name="stripe_invalid_email_address">Nieprawidłowy adres e-mail: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Nieprawidłowy UPI ID</string>

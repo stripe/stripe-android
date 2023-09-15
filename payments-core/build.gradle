@@ -1,6 +1,6 @@
 apply from: configs.androidLibrary
 
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
@@ -8,8 +8,6 @@ dependencies {
     api project(":stripe-core")
     api project(":payments-model")
     compileOnly project(':financial-connections')
-
-    implementation platform(boms.androidx.compose)
 
     implementation libs.androidx.activity
     implementation libs.androidx.annotation
@@ -32,7 +30,7 @@ dependencies {
     // https://github.com/stripe/stripe-android/issues/3173#issuecomment-785176608
     implementation libs.stripe3ds2
 
-    kapt libs.daggerCompiler
+    ksp libs.daggerCompiler
 
     javadocDeps libs.androidx.annotation
     javadocDeps libs.androidx.appCompat
@@ -44,7 +42,9 @@ dependencies {
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.fragment
+    testImplementation testLibs.androidx.junit
     testImplementation testLibs.androidx.lifecycle
+    testImplementation testLibs.espresso.intents
     testImplementation testLibs.json
     testImplementation testLibs.junit
     testImplementation testLibs.kotlin.annotations

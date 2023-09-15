@@ -1,6 +1,5 @@
 apply from: configs.androidLibrary
 
-apply plugin: 'kotlin-kapt'
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'kotlinx-serialization'
@@ -20,12 +19,9 @@ android {
 }
 
 dependencies {
-
     api project(":stripe-core")
     api project(":stripe-ui-core")
     api project(":payments-model")
-
-    implementation platform(boms.androidx.compose)
 
     implementation libs.accompanist.webView
     implementation libs.androidx.activity
@@ -53,7 +49,7 @@ dependencies {
     debugImplementation libs.compose.uiTooling
     debugImplementation libs.showkase
 
-    kapt libs.daggerCompiler
+    ksp libs.daggerCompiler
 
     kspDebug libs.showkaseProcessor
 
@@ -82,7 +78,7 @@ dependencies {
     androidTestImplementation testLibs.espresso.intents
     androidTestImplementation testLibs.truth
 
-    kaptAndroidTest libs.showkaseProcessor
+    kspAndroidTest libs.showkaseProcessor
 
     androidTestUtil testLibs.testOrchestrator
 }

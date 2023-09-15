@@ -4,14 +4,16 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
+import com.stripe.android.financialconnections.utils.PollTimingOptions
 import com.stripe.android.financialconnections.utils.retryOnException
 import com.stripe.android.financialconnections.utils.shouldRetry
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Polls OAuth results from backend after user finishes authorization on web browser.
  *
- * Will retry upon 202 backend responses every [POLLING_TIME_MS] up to [MAX_TRIES]
+ * Will retry upon 202 backend responses.
  */
 internal class PollAuthorizationSessionOAuthResults @Inject constructor(
     private val repository: FinancialConnectionsRepository,
@@ -22,8 +24,11 @@ internal class PollAuthorizationSessionOAuthResults @Inject constructor(
         session: FinancialConnectionsAuthorizationSession
     ): MixedOAuthParams {
         return retryOnException(
-            times = MAX_TRIES,
-            delayMilliseconds = POLLING_TIME_MS,
+            PollTimingOptions(
+                initialDelayMs = 0,
+                maxNumberOfRetries = 300, // Stripe.js has 600 second timeout, 600 / 2 = 300 retries
+                retryInterval = 2.seconds.inWholeMilliseconds
+            ),
             retryCondition = { exception -> exception.shouldRetry }
         ) {
             repository.postAuthorizationSessionOAuthResults(
@@ -31,10 +36,5 @@ internal class PollAuthorizationSessionOAuthResults @Inject constructor(
                 sessionId = session.id
             )
         }
-    }
-
-    private companion object {
-        private const val POLLING_TIME_MS = 2000L
-        private const val MAX_TRIES = 300
     }
 }

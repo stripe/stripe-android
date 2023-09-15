@@ -5,9 +5,6 @@ import androidx.annotation.RestrictTo
 import org.json.JSONObject
 
 sealed class LuxePostConfirmActionCreator {
-    internal fun create(stripeIntentJsonString: String) =
-        create(JSONObject(stripeIntentJsonString))
-
     internal abstract fun create(stripeIntentJson: JSONObject): LuxePostConfirmActionRepository.Result
 
     data class RedirectActionCreator

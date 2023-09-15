@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.core.os.LocaleListCompat
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.model.ElementsSession
@@ -40,6 +39,8 @@ internal class ElementsSessionRepositoryTest {
                     linkSettings = null,
                     paymentMethodSpecs = null,
                     stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                    merchantCountry = null,
+                    isEligibleForCardBrandChoice = false,
                 )
             )
         )
@@ -69,7 +70,7 @@ internal class ElementsSessionRepositoryTest {
             ).thenReturn(Result.failure(APIException()))
 
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
-                .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
+                .thenReturn(Result.success(PaymentIntentFixtures.PI_WITH_SHIPPING))
 
             val session = withLocale(Locale.ITALY) {
                 createRepository().get(
@@ -92,7 +93,7 @@ internal class ElementsSessionRepositoryTest {
             ).thenReturn(Result.failure(RuntimeException()))
 
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
-                .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
+                .thenReturn(Result.success(PaymentIntentFixtures.PI_WITH_SHIPPING))
 
             val session = withLocale(Locale.ITALY) {
                 createRepository().get(
@@ -117,11 +118,13 @@ internal class ElementsSessionRepositoryTest {
                     linkSettings = null,
                     paymentMethodSpecs = null,
                     stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                    merchantCountry = null,
+                    isEligibleForCardBrandChoice = false,
                 )
             )
         )
 
-        val session = ElementsSessionRepository.Api(
+        val session = RealElementsSessionRepository(
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
@@ -141,7 +144,6 @@ internal class ElementsSessionRepositoryTest {
         assertThat(argumentCaptor.firstValue.locale).isEqualTo(defaultLocale)
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Returns the Elements Session endpoint's exception if there's no fallback`() = runTest {
         val endpointException = APIException(message = "this didn't work")
@@ -151,7 +153,7 @@ internal class ElementsSessionRepositoryTest {
             Result.failure(endpointException)
         )
 
-        val session = ElementsSessionRepository.Api(
+        val session = RealElementsSessionRepository(
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
@@ -170,7 +172,7 @@ internal class ElementsSessionRepositoryTest {
         assertThat(session.exceptionOrNull()).isEqualTo(endpointException)
     }
 
-    private fun createRepository() = ElementsSessionRepository.Api(
+    private fun createRepository() = RealElementsSessionRepository(
         stripeRepository,
         { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
         testDispatcher,

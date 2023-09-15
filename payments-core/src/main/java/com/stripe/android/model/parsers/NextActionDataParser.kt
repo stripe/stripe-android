@@ -18,6 +18,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         )
         val parser = when (nextActionType) {
             StripeIntent.NextActionType.DisplayOxxoDetails -> DisplayOxxoDetailsJsonParser()
+            StripeIntent.NextActionType.DisplayBoletoDetails -> DisplayBoletoDetailsJsonParser()
             StripeIntent.NextActionType.RedirectToUrl -> RedirectToUrlParser()
             StripeIntent.NextActionType.UseStripeSdk -> SdkDataJsonParser()
             StripeIntent.NextActionType.AlipayRedirect -> AlipayRedirectParser()
@@ -46,6 +47,21 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         private companion object {
             private const val FIELD_EXPIRES_AFTER = "expires_after"
             private const val FIELD_NUMBER = "number"
+            private const val FIELD_HOSTED_VOUCHER_URL = "hosted_voucher_url"
+        }
+    }
+
+    private class DisplayBoletoDetailsJsonParser :
+        ModelJsonParser<StripeIntent.NextActionData.DisplayBoletoDetails> {
+        override fun parse(
+            json: JSONObject
+        ): StripeIntent.NextActionData.DisplayBoletoDetails {
+            return StripeIntent.NextActionData.DisplayBoletoDetails(
+                hostedVoucherUrl = optString(json, FIELD_HOSTED_VOUCHER_URL)
+            )
+        }
+
+        private companion object {
             private const val FIELD_HOSTED_VOUCHER_URL = "hosted_voucher_url"
         }
     }

@@ -11,7 +11,6 @@ import javax.inject.Singleton
  */
 @Module(
     subcomponents = [
-        SignedInViewModelSubcomponent::class,
         FormControllerSubcomponent::class
     ]
 )

@@ -54,15 +54,13 @@ class DefaultIntentStatusPoller @Inject constructor(
 
     private suspend fun fetchIntentStatus(): StripeIntent.Status? {
         val paymentConfig = paymentConfigProvider.get()
-        val paymentIntent = runCatching {
-            stripeRepository.retrievePaymentIntent(
-                clientSecret = config.clientSecret,
-                options = ApiRequest.Options(
-                    publishableKeyProvider = { paymentConfig.publishableKey },
-                    stripeAccountIdProvider = { paymentConfig.stripeAccountId },
-                ),
-            )
-        }
+        val paymentIntent = stripeRepository.retrievePaymentIntent(
+            clientSecret = config.clientSecret,
+            options = ApiRequest.Options(
+                publishableKeyProvider = { paymentConfig.publishableKey },
+                stripeAccountIdProvider = { paymentConfig.stripeAccountId },
+            ),
+        )
         return paymentIntent.getOrNull()?.status
     }
 

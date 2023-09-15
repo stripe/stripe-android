@@ -9,8 +9,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
@@ -77,12 +76,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         setContent {
             FinancialConnectionsScreen()
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        // prevent playground configuration from leaking to example apps.
-        connectionsDebugSharedPrefs.edit { clear() }
     }
 
     @Composable
@@ -179,9 +172,13 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
-                    Divider(Modifier.padding(vertical = 16.dp))
+                    Divider(Modifier.padding(vertical = 8.dp))
                     Text(
-                        text = "Backend url: ${state.backendUrl}",
+                        text = "backend: ${state.backendUrl}",
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = "env: ${BuildConfig.TEST_ENVIRONMENT}",
                         color = Color.Gray
                     )
                     Button(
@@ -198,7 +195,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     }
                     LazyColumn {
                         items(state.status) { item ->
-                            Row(Modifier.padding(8.dp), verticalAlignment = Alignment.Top) {
+                            Row(Modifier.padding(4.dp), verticalAlignment = Alignment.Top) {
                                 Canvas(
                                     modifier = Modifier
                                         .padding(end = 8.dp, top = 6.dp)
@@ -206,7 +203,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                                 ) {
                                     drawCircle(Color.Black)
                                 }
-                                Text(text = item, fontSize = 12.sp)
+                                SelectionContainer {
+                                    Text(text = item, fontSize = 12.sp)
+                                }
                             }
                         }
                     }
@@ -221,7 +220,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         onEmailChange: (String) -> Unit
     ) {
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .semantics { testTagsAsResourceId = true }
                 .testTag("email_input"),
             value = email,
@@ -238,8 +238,15 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             connectionsDebugSharedPrefs.edit {
                 when (selectedOption) {
                     NativeOverride.None -> clear()
-                    NativeOverride.Native -> putBoolean("override_native", true)
-                    NativeOverride.Web -> putBoolean("override_native", false)
+                    NativeOverride.Native -> putBoolean(
+                        "financial_connections_override_native",
+                        true
+                    )
+
+                    NativeOverride.Web -> putBoolean(
+                        "financial_connections_override_native",
+                        false
+                    )
                 }
             }
         }
@@ -321,7 +328,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         }
     }
 
-    @OptIn(ExperimentalLayoutApi::class)
     @Composable
     private fun FlowSection(
         selectedOption: Flow,
@@ -331,7 +337,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             text = "Flow",
             style = MaterialTheme.typography.h6.merge(),
         )
-        FlowRow(
+        Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Flow.values().forEach { text ->

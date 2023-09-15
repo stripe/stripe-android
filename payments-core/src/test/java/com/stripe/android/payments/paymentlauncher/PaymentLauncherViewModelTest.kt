@@ -1,12 +1,14 @@
 package com.stripe.android.payments.paymentlauncher
 
 import android.app.Application
+import android.graphics.Color
 import androidx.activity.result.ActivityResultCaller
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -14,12 +16,13 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -75,10 +78,11 @@ class PaymentLauncherViewModelTest {
     private val paymentIntentFlowResultProcessor = mock<PaymentIntentFlowResultProcessor>()
     private val setupIntentFlowResultProcessor = mock<SetupIntentFlowResultProcessor>()
 
-    private val analyticsRequestExecutor = mock<DefaultAnalyticsRequestExecutor>()
+    private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val analyticsRequestFactory = mock<PaymentAnalyticsRequestFactory>()
     private val uiContext = UnconfinedTestDispatcher()
     private val activityResultCaller = mock<ActivityResultCaller>()
+    private val lifecycleOwner = TestLifecycleOwner()
     private val savedStateHandle = mock<SavedStateHandle>()
 
     private val confirmPaymentIntentParams = ConfirmPaymentIntentParams(
@@ -127,9 +131,7 @@ class PaymentLauncherViewModelTest {
             savedStateHandle,
             isInstantApp
         ).apply {
-            register(
-                caller = activityResultCaller
-            )
+            register(activityResultCaller, lifecycleOwner)
         }
 
     @Before
@@ -139,11 +141,11 @@ class PaymentLauncherViewModelTest {
 
         whenever(
             stripeApiRepository.confirmPaymentIntent(any(), any(), any())
-        ).thenReturn(paymentIntent)
+        ).thenReturn(Result.success(paymentIntent))
 
         whenever(
             stripeApiRepository.confirmSetupIntent(any(), any(), any())
-        ).thenReturn(setupIntent)
+        ).thenReturn(Result.success(setupIntent))
 
         whenever(authenticatorRegistry.getAuthenticator(eq(paymentIntent)))
             .thenReturn(piAuthenticator)
@@ -153,12 +155,11 @@ class PaymentLauncherViewModelTest {
 
         whenever(
             stripeApiRepository.retrieveStripeIntent(
-                eq(CLIENT_SECRET),
-                eq(apiRequestOptions),
-                any()
+                clientSecret = eq(CLIENT_SECRET),
+                options = eq(apiRequestOptions),
+                expandFields = any(),
             )
-        )
-            .thenReturn(stripeIntent)
+        ).thenReturn(Result.success(stripeIntent))
 
         whenever(authenticatorRegistry.getAuthenticator(eq(stripeIntent)))
             .thenReturn(stripeIntentAuthenticator)
@@ -343,7 +344,7 @@ class PaymentLauncherViewModelTest {
     fun `verify when stripeApiRepository fails then confirmPaymentIntent will post Failed result`() =
         runTest {
             whenever(stripeApiRepository.confirmPaymentIntent(any(), any(), any()))
-                .thenReturn(null)
+                .thenReturn(Result.failure(APIConnectionException()))
             val viewModel = createViewModel()
             viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
@@ -355,7 +356,7 @@ class PaymentLauncherViewModelTest {
     fun `verify when stripeApiRepository fails then confirmSetupIntent will post Failed result`() =
         runTest {
             whenever(stripeApiRepository.confirmSetupIntent(any(), any(), any()))
-                .thenReturn(null)
+                .thenReturn(Result.failure(APIConnectionException()))
 
             val viewModel = createViewModel()
             viewModel.confirmStripeIntent(confirmSetupIntentParams, authHost)
@@ -386,7 +387,7 @@ class PaymentLauncherViewModelTest {
                     eq(apiRequestOptions),
                     any()
                 )
-            ).thenReturn(null)
+            ).thenReturn(Result.failure(APIConnectionException()))
 
             val viewModel = createViewModel()
             viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
@@ -492,6 +493,13 @@ class PaymentLauncherViewModelTest {
         }
 
     @Test
+    fun `Invalidates launcher when lifecycle owner is destroyed`() = runTest {
+        createViewModel()
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        verify(authenticatorRegistry).onLauncherInvalidated()
+    }
+
+    @Test
     fun `Factory gets initialized by Injector when Injector is available`() {
         val mockBuilder = mock<PaymentLauncherViewModelSubcomponent.Builder>()
         val mockSubComponent = mock<PaymentLauncherViewModelSubcomponent>()
@@ -519,7 +527,8 @@ class PaymentLauncherViewModelTest {
                 TEST_STRIPE_ACCOUNT_ID,
                 false,
                 PRODUCT_USAGE,
-                mock<ConfirmPaymentIntentParams>()
+                mock<ConfirmPaymentIntentParams>(),
+                statusBarColor = Color.RED,
             )
         }
 
@@ -551,7 +560,8 @@ class PaymentLauncherViewModelTest {
                 TEST_STRIPE_ACCOUNT_ID,
                 false,
                 PRODUCT_USAGE,
-                mock<ConfirmPaymentIntentParams>()
+                mock<ConfirmPaymentIntentParams>(),
+                statusBarColor = Color.RED,
             )
         }
 

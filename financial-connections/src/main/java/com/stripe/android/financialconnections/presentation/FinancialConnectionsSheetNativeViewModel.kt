@@ -1,27 +1,25 @@
 package com.stripe.android.financialconnections.presentation
 
 import android.content.Intent
+import android.os.Parcelable
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.PersistState
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.AppBackgrounded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickNavBarBack
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickNavBarClose
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLaunched
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
@@ -31,8 +29,6 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
-import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
-import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
@@ -42,12 +38,18 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.UNEXPECTED_ERROR
+import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.CloseDialog
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -65,8 +67,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     @Named(APPLICATION_ID) private val applicationId: String,
+    navigationManager: NavigationManager,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
+
+    private val mutex = Mutex()
+    val navigationFlow = navigationManager.navigationFlow
 
     init {
         setState { copy(firstInit = false) }
@@ -78,7 +84,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     }
 
                     Message.ClearPartnerWebAuth -> {
-                        setState { copy(webAuthFlow = Uninitialized) }
+                        setState { copy(webAuthFlow = WebAuthFlowState.Uninitialized) }
                     }
 
                     is Terminate -> closeAuthFlow(
@@ -96,65 +102,54 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      *
      * @param intent the new intent with the redirect URL in the intent data
      */
-    fun handleOnNewIntent(intent: Intent?) {
-        viewModelScope.launch {
+    fun handleOnNewIntent(intent: Intent?) = viewModelScope.launch {
+        mutex.withLock {
             val receivedUrl: String = intent?.data?.toString() ?: ""
             when {
-                receivedUrl.contains("authentication_return", true) -> {
-                    setState {
-                        copy(webAuthFlow = Success(receivedUrl))
-                    }
-                }
+                // App2App: status comes as a query parameter in the fragment section of the url.
+                receivedUrl.contains("authentication_return", true) -> onUrlReceived(
+                    receivedUrl = receivedUrl,
+                    status = uriUtils.getQueryParameterFromFragment(receivedUrl, PARAM_CODE)
+                )
 
+                // Regular return url: status comes as a query parameter.
                 uriUtils.compareSchemeAuthorityAndPath(
                     receivedUrl,
                     baseUrl(applicationId)
-                ) -> when (uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)) {
-                    STATUS_SUCCESS -> setState {
-                        copy(webAuthFlow = Success(receivedUrl))
-                    }
-
-                    STATUS_CANCEL -> setState {
-                        copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
-                    }
-
-                    STATUS_FAILURE -> setState {
-                        copy(
-                            webAuthFlow = Fail(
-                                WebAuthFlowFailedException(
-                                    message = "Received return_url with failed status: $receivedUrl",
-                                    reason = uriUtils.getQueryParameter(
-                                        receivedUrl,
-                                        PARAM_ERROR_REASON
-                                    )
-                                )
-                            )
-                        )
-                    }
-
-                    // received unknown / non-handleable [PARAM_STATUS]
-                    else -> setState {
-                        copy(
-                            webAuthFlow = Fail(
-                                WebAuthFlowFailedException(
-                                    message = "Received return_url with unknown status: $receivedUrl",
-                                    reason = null
-                                )
-                            )
-                        )
-                    }
-                }
+                ) -> onUrlReceived(
+                    receivedUrl = receivedUrl,
+                    status = uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)
+                )
                 // received unknown / non-handleable return url.
                 else -> setState {
+                    copy(webAuthFlow = WebAuthFlowState.Canceled(receivedUrl))
+                }
+            }
+        }
+    }
+
+    private suspend fun onUrlReceived(receivedUrl: String, status: String?) {
+        when (status) {
+            STATUS_SUCCESS -> setState {
+                copy(webAuthFlow = WebAuthFlowState.Success(receivedUrl))
+            }
+
+            STATUS_FAILURE -> {
+                val reason = uriUtils.getQueryParameter(receivedUrl, PARAM_ERROR_REASON)
+                setState {
                     copy(
-                        webAuthFlow = Fail(
-                            WebAuthFlowFailedException(
-                                message = "Received unknown return_url: $receivedUrl",
-                                reason = null
-                            )
+                        webAuthFlow = WebAuthFlowState.Failed(
+                            url = receivedUrl,
+                            message = "Received return_url with failed status: $receivedUrl",
+                            reason = reason
                         )
                     )
                 }
+            }
+
+            // received cancel / unknown / non-handleable [PARAM_STATUS]
+            else -> setState {
+                copy(webAuthFlow = WebAuthFlowState.Canceled(receivedUrl))
             }
         }
     }
@@ -164,12 +159,11 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      *  then the user hit the back button or closed the custom tabs UI, so return result as
      *  canceled.
      */
-    fun onResume() {
-        setState {
-            if (webAuthFlow is Loading) {
-                copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
-            } else {
-                this
+    fun onResume() = viewModelScope.launch {
+        mutex.withLock {
+            val state = awaitState()
+            if (state.webAuthFlow is WebAuthFlowState.InProgress) {
+                setState { copy(webAuthFlow = WebAuthFlowState.Canceled(url = null)) }
             }
         }
     }
@@ -177,7 +171,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     fun openPartnerAuthFlowInBrowser(url: String) {
         setState {
             copy(
-                webAuthFlow = Loading(),
+                webAuthFlow = WebAuthFlowState.InProgress,
                 viewEffect = OpenUrl(url)
             )
         }
@@ -197,6 +191,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 value = R.string.stripe_close_dialog_networking_desc,
                 args = listOf(businessName)
             )
+
             else -> TextResource.StringId(
                 value = R.string.stripe_close_dialog_desc
             )
@@ -205,9 +200,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(closeDialog = CloseDialog(description = description)) }
     }
 
-    fun onBackClick(pane: Pane) {
+    fun onBackClick(pane: Pane?) {
         viewModelScope.launch {
-            eventTracker.track(ClickNavBarBack(pane))
+            pane?.let { eventTracker.track(ClickNavBarBack(pane)) }
         }
     }
 
@@ -258,6 +253,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     eventTracker.track(
                         Complete(
                             exception = null,
+                            exceptionExtraMessage = null,
                             connectedAccounts = session.accounts.data.count()
                         )
                     )
@@ -287,10 +283,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     }
                 }
                 .onFailure { completeSessionError ->
-                    logger.error("Error completing session before closing", completeSessionError)
+                    val errorMessage = "Error completing session before closing"
+                    logger.error(errorMessage, completeSessionError)
                     eventTracker.track(
                         Complete(
                             exception = completeSessionError,
+                            exceptionExtraMessage = errorMessage,
                             connectedAccounts = null
                         )
                     )
@@ -305,10 +303,24 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    fun onPaneLaunched(pane: Pane) {
+    fun onPaneLaunched(pane: Pane, referrer: Pane?) {
         viewModelScope.launch {
             eventTracker.track(
-                FinancialConnectionsEvent.PaneLaunched(pane)
+                PaneLaunched(
+                    referrer = referrer,
+                    pane = pane
+                )
+            )
+        }
+    }
+
+    fun onBackgrounded(currentDestination: NavDestination?, backgrounded: Boolean) {
+        viewModelScope.launch {
+            eventTracker.track(
+                AppBackgrounded(
+                    pane = currentDestination?.pane ?: UNEXPECTED_ERROR,
+                    backgrounded = backgrounded
+                )
             )
         }
     }
@@ -320,9 +332,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             "stripe://auth-redirect/$applicationId"
 
         private const val PARAM_STATUS = "status"
+        private const val PARAM_CODE = "code"
         private const val PARAM_ERROR_REASON = "error_reason"
         private const val STATUS_SUCCESS = "success"
-        private const val STATUS_CANCEL = "cancel"
         private const val STATUS_FAILURE = "failure"
 
         override fun create(
@@ -343,7 +355,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 }
 
 internal data class FinancialConnectionsSheetNativeState(
-    val webAuthFlow: Async<String>,
+    @PersistState
+    val webAuthFlow: WebAuthFlowState,
     /**
      * Tracks whether this state was recreated from a process kill.
      */
@@ -369,7 +382,7 @@ internal data class FinancialConnectionsSheetNativeState(
      */
     @Suppress("Unused")
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
-        webAuthFlow = Uninitialized,
+        webAuthFlow = WebAuthFlowState.Uninitialized,
         reducedBranding = args.initialSyncResponse.visual.reducedBranding,
         firstInit = true,
         initialPane = args.initialSyncResponse.manifest.nextPane,
@@ -377,6 +390,53 @@ internal data class FinancialConnectionsSheetNativeState(
         closeDialog = null,
         viewEffect = null
     )
+}
+
+/**
+ * Authentication with an institution opens on an external browser.
+ *
+ * This state tracks the status of the authentication flow in the browser.
+ */
+internal sealed class WebAuthFlowState : Parcelable {
+    /**
+     * The web browser has not been opened yet.
+     */
+    @Parcelize
+    object Uninitialized : WebAuthFlowState()
+
+    /**
+     * The web browser has been opened and the authentication flow is in progress.
+     */
+    @Parcelize
+    object InProgress : WebAuthFlowState()
+
+    /**
+     * The web browser has been closed and triggered a deeplink with a success result.
+     */
+    @Parcelize
+    data class Success(
+        val url: String
+    ) : WebAuthFlowState()
+
+    /**
+     * The web browser has been closed with no deeplink,
+     * and the authentication flow is considered as canceled.
+     */
+    @Parcelize
+    data class Canceled(
+        val url: String?
+    ) : WebAuthFlowState()
+
+    /**
+     * The web browser has been closed and triggered a deeplink with a failure result,
+     * or something else went wrong (unreadable / unknown structure of the received deeplink)
+     */
+    @Parcelize
+    data class Failed(
+        val url: String,
+        val message: String,
+        val reason: String?
+    ) : WebAuthFlowState()
 }
 
 @Composable

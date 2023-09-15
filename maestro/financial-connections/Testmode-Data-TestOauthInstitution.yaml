@@ -1,6 +1,7 @@
 appId: com.stripe.android.financialconnections.example
 ---
 - launchApp
+- startRecording: /tmp/test_results/testmode-data-testoauthinstitution
 # Android specific: Navigate to example
 - tapOn: "Playground"
 - tapOn:
@@ -41,7 +42,8 @@ appId: com.stripe.android.financialconnections.example
     text: "Link accounts"
     retryTapIfNoChange: false
 # CONFIRM AND COMPLETE
-- assertVisible: "Link another account"
+- assertVisible: ".*Success.*"
 - tapOn: "Done"
 - assertVisible: ".*Completed!.*"
 - assertVisible: ".*StripeBank.*"
+- stopRecording

@@ -1,9 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
-import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.core.injection.UIContext
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -86,31 +84,29 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             return
         }
 
-        when (val result = paymentSheetLoader.load(initializationMode, configuration)) {
-            is PaymentSheetLoader.Result.Success -> {
+        AnalyticsRequestFactory.regenerateSessionId()
+
+        paymentSheetLoader.load(initializationMode, configuration).fold(
+            onSuccess = { state ->
                 viewModel.previousConfigureRequest = configureRequest
-                onInitSuccess(result.state, configureRequest)
+                onInitSuccess(state, configureRequest)
                 onConfigured()
+            },
+            onFailure = { error ->
+                onConfigured(error = error)
             }
-            is PaymentSheetLoader.Result.Failure -> {
-                onConfigured(error = result.throwable)
-            }
-        }
+        )
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     private fun onInitSuccess(
         state: PaymentSheetState.Full,
         configureRequest: ConfigureRequest,
     ) {
         val isDecoupling = configureRequest.initializationMode is DeferredIntent
-        val isServerSideConfirmation = isDecoupling &&
-            IntentConfirmationInterceptor.createIntentCallback is CreateIntentCallbackForServerSideConfirmation
 
         eventReporter.onInit(
             configuration = state.config,
             isDecoupling = isDecoupling,
-            isServerSideConfirmation = isServerSideConfirmation,
         )
 
         viewModel.paymentSelection = paymentSelectionUpdater(

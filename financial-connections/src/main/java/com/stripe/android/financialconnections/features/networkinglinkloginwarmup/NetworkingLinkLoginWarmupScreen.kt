@@ -5,7 +5,6 @@ package com.stripe.android.financialconnections.features.networkinglinkloginwarm
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -50,6 +49,7 @@ import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
+import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
@@ -210,7 +210,7 @@ internal fun ExistingEmailSection(
             .fillMaxWidth()
             .semantics { testTagsAsResourceId = true }
             .testTag("existing_email-button")
-            .clickable { onContinueClick() }
+            .clickableSingle { onContinueClick() }
             .clip(RoundedCornerShape(8.dp))
             .border(
                 width = 1.dp,

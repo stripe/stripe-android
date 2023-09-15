@@ -22,6 +22,7 @@ stages:
       - check: { }
       - test: { }
       - run-instrumentation-tests: { }
+      - run-paymentsheet-end-to-end-tests: { }
 
 workflows:
   check:
@@ -31,90 +32,145 @@ workflows:
       - conclude_all
     steps:
       - script@1:
+          timeout: 1200
           inputs:
             - content: ./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources
   test:
+    envs:
+      - opts:
+          is_expand: false
+        NEEDS_ROBOLECTRIC: true
     before_run:
       - prepare_all
     after_run:
       - conclude_all
     steps:
       - script@1:
-          title: Restore gradle.properties
-          inputs:
-            - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
-      - script@1:
+          timeout: 1200
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
   maestro-financial-connections:
     before_run:
+      - start_emulator
       - prepare_all
     after_run:
       - conclude_all
     steps:
-      - avd-manager@1:
+      - wait-for-android-emulator@1:
           inputs:
-            - profile: "pixel_3a"
-      - wait-for-android-emulator@1: { }
-      - script-runner@0:
+            - boot_timeout: 600
+      - android-build@1:
+          inputs:
+            - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
+            - module: financial-connections-example
+            - variant: release
+            - build_type: apk
+            - cache_level: all
+      - script@1:
           title: Execute Maestro tests
           inputs:
-            - file_path: ./scripts/execute_maestro_tests.sh
+            - content: |-
+                #!/usr/bin/env bash
+                bash ./scripts/execute_maestro_tests.sh
       - slack@3:
           is_always_run: true
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
             - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-      - script@1:
-          title: Notify failure endpoint
-          inputs:
-            - content: |
-                #!/usr/bin/env bash
-                set -e
-                set -o pipefail
-                set -x
-                
-                ruby ./scripts/notify_failure_endpoint.rb \
-                $SDK_FAILURE_NOTIFICATION_ENDPOINT \
-                $SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY \
-                $BITRISE_BUILD_URL \
-                RUN_BANKCON_MOBILE
-          is_always_run: true
-          run_if: ".IsBuildFailed"
       - pagerduty@0:
           inputs:
             - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
             - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
           is_always_run: true
           run_if: .IsBuildFailed
-      - custom-test-results-export@0:
+      - custom-test-results-export@1:
+          inputs:
+            - search_pattern: '*/maestroReport.xml'
+            - test_name: Maestro tests
+      - deploy-to-bitrise-io@2: { }
+  maestro-edge-financial-connections:
+    before_run:
+      - start_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - android-build@1:
+          inputs:
+            - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
+            - module: financial-connections-example
+            - variant: debug
+            - build_type: apk
+            - cache_level: all
+      - script@1:
+          title: Execute Maestro tests
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                bash ./scripts/execute_maestro_tests.sh
+      - slack@3:
+          is_always_run: true
+          inputs:
+            - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+            - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+      - custom-test-results-export@1:
           inputs:
             - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests
       - deploy-to-bitrise-io@2: { }
   maestro-paymentsheet:
     before_run:
+      - start_emulator
       - prepare_all
     after_run:
       - conclude_all
     steps:
-      - avd-manager@1:
+      - wait-for-android-emulator@1:
           inputs:
-            - profile: "pixel_3a"
-            - api_level: 30
-            - tag: "google_apis_playstore"
-      - wait-for-android-emulator@1: { }
-      - script-runner@0:
+            - boot_timeout: 600
+      - script@1:
           title: Execute Maestro tests
           inputs:
-            - file_path: ./scripts/execute_maestro_paymentsheet_tests.sh
+            - content: |-
+                #!/usr/bin/env bash
+                bash ./scripts/execute_maestro_elements_tests.sh paymentsheet
       - slack@3:
           is_always_run: true
           run_if: .IsBuildFailed
           inputs:
             - webhook_url: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
             - webhook_url_on_error: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
-      - custom-test-results-export@0:
+      - custom-test-results-export@1:
+          inputs:
+            - search_pattern: '*/maestroReport.xml'
+            - test_name: Maestro tests
+      - deploy-to-bitrise-io@2: { }
+  maestro-customersheet:
+    before_run:
+      - start_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - script@1:
+          title: Execute Maestro tests
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                bash ./scripts/execute_maestro_elements_tests.sh customersheet
+      - slack@3:
+          is_always_run: true
+          run_if: .IsBuildFailed
+          inputs:
+            - webhook_url: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
+            - webhook_url_on_error: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
+      - custom-test-results-export@1:
           inputs:
             - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests
@@ -126,17 +182,59 @@ workflows:
       - conclude_all
     steps:
       - avd-manager@1: { }
-      - wait-for-android-emulator@1: { }
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
       - script-runner@0:
           title: Execute instrumentation tests
+          timeout: 1200
           inputs:
             - file_path: ./scripts/execute_instrumentation_tests.sh
+  run-paymentsheet-end-to-end-tests:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          inputs:
+            - content: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug
+      - script@1:
+          inputs:
+            - content: pip3 install requests_toolbelt requests
+      - script@1:
+          inputs:
+            - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk
+  start_emulator:
+    steps:
+      - avd-manager@1:
+          inputs:
+            - profile: "pixel_3a"
+            - abi: "x86_64"
+            - api_level: 32
+            - tag: "google_apis"
+            - start_command_flags: >
+               -camera-back none
+               -camera-front none
+               -netdelay none
+               -netspeed full
+               -memory 2048
+               -no-snapshot
+               -no-audio
+               -no-window
   prepare_all:
     steps:
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
       - git-clone@8: { }
       - cache-pull@2: { }
+      - restore-gradle-cache@1: { }
+      - script-runner@0:
+          # Maven doesn't like java 17, so running it before.
+          run_if: '{{getenv "NEEDS_ROBOLECTRIC" | ne ""}}'
+          title: Download robolectric dependencies
+          inputs:
+            - file_path: ./scripts/download_robolectric.sh
       - set-java-version@1:
           inputs:
             - set_java_version: 17
@@ -161,6 +259,7 @@ workflows:
             - is_enable_public_page: "false"
           title: Deploy test results artifacts
       - cache-push@2: { }
+      - save-gradle-cache@1: { }
 meta:
   bitrise.io:
     stack: linux-docker-android-20.04

@@ -1,18 +1,16 @@
 apply from: configs.androidLibrary
 
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'app.cash.paparazzi'
 
 dependencies {
     implementation project(":link")
-    implementation project(":payments-core")
+    api project(":payments-core")
     implementation project(':payments-ui-core')
     implementation project(':stripe-ui-core')
     compileOnly project(':financial-connections')
-
-    implementation platform(boms.androidx.compose)
 
     // Kotlin
     implementation libs.kotlin.coroutines
@@ -31,7 +29,7 @@ dependencies {
 
     // DI
     implementation libs.dagger
-    kapt libs.daggerCompiler
+    ksp libs.daggerCompiler
 
     // Compose
     implementation libs.compose.ui
@@ -42,6 +40,8 @@ dependencies {
     implementation libs.compose.activity
     implementation libs.compose.navigation
     implementation libs.accompanist.navigationAnimation
+    implementation libs.accompanist.navigationMaterial
+    implementation libs.accompanist.systemUiController
 
     // Other
     implementation libs.playServicesWallet
@@ -79,6 +79,7 @@ dependencies {
     testImplementation testLibs.espresso.core
 
     androidTestImplementation project(':network-testing')
+    androidTestImplementation project(':payments-core-testing')
 
     androidTestImplementation libs.places
     androidTestImplementation testLibs.androidx.composeUi
@@ -93,6 +94,9 @@ dependencies {
     androidTestImplementation (testLibs.espresso.contrib) {
         exclude group: 'org.checkerframework', module: 'checker'
     }
+    androidTestImplementation testLibs.mockito.core
+    androidTestImplementation testLibs.mockito.inline
+    androidTestImplementation testLibs.mockito.kotlin
     androidTestImplementation testLibs.truth
 
     androidTestUtil testLibs.testOrchestrator
@@ -125,12 +129,12 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
-    lint {
-        disable 'UnrememberedMutableState'
-    }
 
     kotlinOptions {
-        freeCompilerArgs += ["-opt-in=kotlinx.coroutines.FlowPreview"]
+        freeCompilerArgs += [
+                "-opt-in=kotlinx.coroutines.FlowPreview",
+                "-Xcontext-receivers",
+        ]
         if (gradle.ext.isCi) {
             kotlinOptions.allWarningsAsErrors = true
         }

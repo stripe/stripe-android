@@ -6,8 +6,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 enum class InitializationType(val value: String) {
-    Normal("normal"),
-    Deferred("deferred"),
+    Normal("Normal"),
+    DeferredClientSideConfirmation("Deferred CSC"),
+    DeferredServerSideConfirmation("Deferred SSC"),
+    DeferredManualConfirmation("Deferred SSC + MC"),
+    DeferredMultiprocessor("Deferred SSC + MP"),
 }
 
 enum class CheckoutMode(val value: String) {
@@ -48,6 +51,7 @@ data class CheckoutCurrency(val value: String) {
         val EUR = CheckoutCurrency("eur")
         val AUD = CheckoutCurrency("aud")
         val GBP = CheckoutCurrency("gbp")
+        val PLN = CheckoutCurrency("pln")
     }
 }
 

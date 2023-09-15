@@ -10,8 +10,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
-import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate.EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY
@@ -20,7 +19,9 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.model.PaymentAccountParams
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
@@ -30,8 +31,8 @@ internal class ManualEntryViewModel @Inject constructor(
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val getManifest: GetManifest,
-    private val goNext: GoNext,
+    private val getOrFetchSync: GetOrFetchSync,
+    private val navigationManager: NavigationManager,
     private val logger: Logger
 ) : MavericksViewModel<ManualEntryState>(initialState) {
 
@@ -39,7 +40,8 @@ internal class ManualEntryViewModel @Inject constructor(
         observeAsyncs()
         observeInputs()
         suspend {
-            val manifest = getManifest()
+            val sync = getOrFetchSync()
+            val manifest = requireNotNull(sync.manifest)
             eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY))
             ManualEntryState.Payload(
                 verifyWithMicrodeposits = manifest.manualEntryUsesMicrodeposits,
@@ -97,7 +99,7 @@ internal class ManualEntryViewModel @Inject constructor(
             ManualEntryState::linkPaymentAccount,
             onFail = {
                 logger.error("Error linking payment account", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(Pane.MANUAL_ENTRY, it))
+                eventTracker.track(FinancialConnectionsEvent.Error(PANE, it))
             },
         )
     }
@@ -123,9 +125,9 @@ internal class ManualEntryViewModel @Inject constructor(
     fun onSubmit() {
         suspend {
             val state = awaitState()
-            val manifest = getManifest()
+            val sync = getOrFetchSync()
             pollAttachPaymentAccount(
-                allowManualEntry = manifest.allowManualEntry,
+                sync = sync,
                 activeInstitution = null,
                 consumerSessionClientSecret = null,
                 params = PaymentAccountParams.BankAccount(
@@ -133,13 +135,12 @@ internal class ManualEntryViewModel @Inject constructor(
                     accountNumber = requireNotNull(state.account)
                 )
             ).also {
-                goNext(
-                    it.nextPane ?: Pane.MANUAL_ENTRY_SUCCESS,
-                    args = NavigationDirections.ManualEntrySuccess.argMap(
-                        microdepositVerificationMethod = it.microdepositVerificationMethod,
-                        last4 = state.account.takeLast(4)
-                    )
+                val args = Destination.ManualEntrySuccess.argMap(
+                    microdepositVerificationMethod = it.microdepositVerificationMethod,
+                    last4 = state.account.takeLast(4)
                 )
+                val destination = (it.nextPane ?: Pane.MANUAL_ENTRY_SUCCESS).destination
+                navigationManager.tryNavigateTo(destination(PANE, args))
             }
         }.execute { copy(linkPaymentAccount = it) }
     }
@@ -159,6 +160,8 @@ internal class ManualEntryViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        private val PANE = Pane.MANUAL_ENTRY
     }
 }
 

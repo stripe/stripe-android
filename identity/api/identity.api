@@ -182,6 +182,14 @@ public final class com/stripe/android/identity/networking/models/NameParam$Creat
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/identity/networking/models/PhoneParam$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/PhoneParam;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/PhoneParam;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/identity/networking/models/RequiredInternationalAddress$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/RequiredInternationalAddress;
@@ -259,6 +267,14 @@ public final class com/stripe/android/identity/networking/models/VerificationPag
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentIndividualWelcomePage;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentIndividualWelcomePage;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/identity/networking/models/VerificationPageStaticContentOTPPage$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentOTPPage;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentOTPPage;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

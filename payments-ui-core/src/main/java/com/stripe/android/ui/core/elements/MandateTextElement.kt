@@ -12,9 +12,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 data class MandateTextElement(
     override val identifier: IdentifierSpec,
     val stringResId: Int,
-    val merchantName: String?,
+    val args: List<String>,
     override val controller: InputController? = null
 ) : FormElement {
+
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         MutableStateFlow(emptyList())
 }

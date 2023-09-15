@@ -7,7 +7,6 @@ import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.BuildConfig
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.Dispatchers
 
 /**
@@ -18,29 +17,32 @@ import kotlinx.coroutines.Dispatchers
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentLauncherFactory(
     private val context: Context,
-    private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
+    private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>,
+    private val statusBarColor: Int?,
 ) {
 
     constructor(
         activity: ComponentActivity,
         callback: PaymentLauncher.PaymentResultCallback
     ) : this(
-        activity.applicationContext,
-        activity.registerForActivityResult(
+        context = activity.applicationContext,
+        hostActivityLauncher = activity.registerForActivityResult(
             PaymentLauncherContract(),
             callback::onPaymentResult
-        )
+        ),
+        statusBarColor = activity.window?.statusBarColor,
     )
 
     constructor(
         fragment: Fragment,
         callback: PaymentLauncher.PaymentResultCallback
     ) : this(
-        fragment.requireActivity().applicationContext,
-        fragment.registerForActivityResult(
+        context = fragment.requireActivity().applicationContext,
+        hostActivityLauncher = fragment.registerForActivityResult(
             PaymentLauncherContract(),
             callback::onPaymentResult
-        )
+        ),
+        statusBarColor = fragment.requireActivity().window?.statusBarColor,
     )
 
     fun create(
@@ -54,20 +56,16 @@ class PaymentLauncherFactory(
             productUsage
         )
         return StripePaymentLauncher(
-            { publishableKey },
-            { stripeAccountId },
-            hostActivityLauncher,
-            context,
-            BuildConfig.DEBUG,
-            Dispatchers.IO,
-            Dispatchers.Main,
-            StripeApiRepository(
-                context,
-                { publishableKey },
-                paymentAnalyticsRequestFactory = analyticsRequestFactory
-            ),
-            analyticsRequestFactory,
-            productUsage = productUsage
+            publishableKeyProvider = { publishableKey },
+            stripeAccountIdProvider = { stripeAccountId },
+            hostActivityLauncher = hostActivityLauncher,
+            statusBarColor = statusBarColor,
+            context = context,
+            enableLogging = BuildConfig.DEBUG,
+            ioContext = Dispatchers.IO,
+            uiContext = Dispatchers.Main,
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            productUsage = productUsage,
         )
     }
 }

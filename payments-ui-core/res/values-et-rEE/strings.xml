@@ -4,14 +4,22 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Makske <num_installments/> <installment_price/> suuruse intressivaba osamaksega <img/> abil]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Tagasi</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Teie kontonumber on puudulik.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Arveldusaadress</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">BLIK-kood</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Jätkamisel volitate %1$s debiteerima teie Cash Appi kontot selle makse ja tulevaste maksete eest vastavalt ettevõtte %2$s tingimustele, kuni see volitus tühistatakse. Saate seda igal ajal oma Cash rakenduse seadetes muuta.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kontaktandmed</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Jätka</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">EPS Bank</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Sisestatud IBAN on puudulik.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -20,6 +28,10 @@
   <string name="stripe_iban_invalid_start">Teie IBAN peab algama kahetähelise riigikoodiga.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">iDEALi pank</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Teie BLIK-kood on puudulik.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Teie BLIK-kood on kehtetu.</string>
   <string name="stripe_invalid_email_address">Kehtetu e-posti address: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Kehtetu UPI ID</string>

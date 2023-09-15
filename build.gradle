@@ -102,6 +102,5 @@ apiValidation {
             "stripecardscan-example",
     ]
     nonPublicMarkers.add("androidx.annotation.RestrictTo")
-    nonPublicMarkers.add("com.stripe.android.ExperimentalPaymentSheetDecouplingApi")
     nonPublicMarkers.add("dagger.internal.DaggerGenerated")
 }

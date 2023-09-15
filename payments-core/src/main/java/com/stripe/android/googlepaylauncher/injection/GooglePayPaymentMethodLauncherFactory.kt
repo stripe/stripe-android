@@ -3,7 +3,7 @@ package com.stripe.android.googlepaylauncher.injection
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import dagger.assisted.AssistedFactory
 import kotlinx.coroutines.CoroutineScope
 
@@ -14,7 +14,7 @@ interface GooglePayPaymentMethodLauncherFactory {
         lifecycleScope: CoroutineScope,
         config: GooglePayPaymentMethodLauncher.Config,
         readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
-        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         skipReadyCheck: Boolean = false
     ): GooglePayPaymentMethodLauncher
 }

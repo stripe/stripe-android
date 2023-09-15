@@ -4,14 +4,22 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Zaplaťte v <num_installments/>bezúročných splátkach čiastku <installment_price/> pomocou <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Späť</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Číslo vášho účtu je neúplné.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Fakturačná adresa</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">Kód BLIK</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Pokračovaním oprávňujete spoločnosť %1$s, aby zaúčtovala túto platbu a budúce platby na debet vášho účtu Cash App v súlade s podmienkami spoločnosti %2$s, až do odvolania tohto oprávnenia. Toto oprávnenie môžete kedykoľvek zmeniť v nastaveniach aplikácie Cash App.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kontaktné informácie</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Pokračovať</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">EPS banka</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Zadaný IBAN je neúplný.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -20,6 +28,10 @@
   <string name="stripe_iban_invalid_start">Váš IBAN by mal začínať dvojpísmenovým kódom krajiny.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">iDEAL banka</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Váš kód BLIK je neúplný.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Váš kód BLIK je neplatný.</string>
   <string name="stripe_invalid_email_address">Neplatná e-mailová adresa: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Neplatné identifikačné číslo UPI</string>

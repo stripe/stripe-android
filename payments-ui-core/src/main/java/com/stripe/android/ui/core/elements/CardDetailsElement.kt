@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import android.content.Context
-import androidx.annotation.RestrictTo
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.SectionMultiFieldElement
@@ -21,12 +20,14 @@ internal class CardDetailsElement(
     context: Context,
     initialValues: Map<IdentifierSpec, String?>,
     viewOnlyFields: Set<IdentifierSpec> = emptySet(),
-    private val collectName: Boolean = false,
+    collectName: Boolean = false,
+    private val isEligibleForCardBrandChoice: Boolean = false,
     val controller: CardDetailsController = CardDetailsController(
         context,
         initialValues,
         viewOnlyFields.contains(IdentifierSpec.CardNumber),
         collectName,
+        isEligibleForCardBrandChoice,
     )
 ) : SectionMultiFieldElement(identifier) {
     val isCardScanEnabled = controller.numberElement.controller.cardScanEnabled
@@ -85,16 +86,6 @@ internal class CardDetailsElement(
         }
         return combine(flows) { it.toList() }
     }
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun createExpiryDateFormFieldValues(
-    entry: FormFieldEntry
-): Map<IdentifierSpec, FormFieldEntry> {
-    return mapOf(
-        IdentifierSpec.CardExpMonth to getExpiryMonthFormFieldEntry(entry),
-        IdentifierSpec.CardExpYear to getExpiryYearFormFieldEntry(entry),
-    )
 }
 
 private fun getExpiryMonthFormFieldEntry(entry: FormFieldEntry): FormFieldEntry {

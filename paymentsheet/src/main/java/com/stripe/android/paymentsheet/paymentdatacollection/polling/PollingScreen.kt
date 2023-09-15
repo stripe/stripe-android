@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.stripeColors
@@ -84,6 +85,7 @@ private fun PollingScreen(
                 remainingDuration = uiState.durationRemaining,
                 onCancel = onCancel,
                 modifier = modifier,
+                ctaText = uiState.ctaText,
             )
         }
         PollingState.Failed -> {
@@ -100,6 +102,7 @@ private fun ActivePolling(
     remainingDuration: Duration,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier,
+    @StringRes ctaText: Int,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -111,7 +114,7 @@ private fun ActivePolling(
                 horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
             ),
     ) {
-        CircularProgressIndicator(
+        LoadingIndicator(
             modifier = Modifier.padding(bottom = Spacing.extended),
             color = MaterialTheme.stripeColors.appBarIcon,
         )
@@ -124,7 +127,7 @@ private fun ActivePolling(
         )
 
         Text(
-            text = rememberActivePollingMessage(remainingDuration),
+            text = rememberActivePollingMessage(remainingDuration, ctaText),
             textAlign = TextAlign.Center,
             lineHeight = MaterialTheme.typography.body1.fontSize * Spacing.lineHeightMultiplier,
             modifier = Modifier.padding(bottom = Spacing.normal),
@@ -160,7 +163,8 @@ private fun FailedPolling(
         modifier = modifier,
     ) { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .padding(paddingValues),
         ) {
             Spacer(modifier = Modifier.weight(1f))
@@ -202,6 +206,7 @@ private fun FailedPolling(
 @Composable
 private fun rememberActivePollingMessage(
     remainingDuration: Duration,
+    @StringRes ctaText: Int
 ): String {
     val context = LocalContext.current
 
@@ -210,7 +215,7 @@ private fun rememberActivePollingMessage(
             val paddedSeconds = seconds.toString().padStart(length = 2, padChar = '0')
             "$minutes:$paddedSeconds"
         }
-        context.getString(R.string.stripe_upi_polling_message, remainingTime)
+        context.getString(ctaText, remainingTime)
     }
 }
 
@@ -236,6 +241,7 @@ private fun ActivePollingScreenPreview() {
             PollingScreen(
                 uiState = PollingUiState(
                     durationRemaining = 83.seconds,
+                    ctaText = R.string.stripe_upi_polling_message,
                     pollingState = PollingState.Active,
                 ),
                 onCancel = {},
@@ -252,6 +258,7 @@ private fun FailedPollingScreenPreview() {
             PollingScreen(
                 uiState = PollingUiState(
                     durationRemaining = 83.seconds,
+                    ctaText = R.string.stripe_upi_polling_message,
                     pollingState = PollingState.Failed,
                 ),
                 onCancel = {},

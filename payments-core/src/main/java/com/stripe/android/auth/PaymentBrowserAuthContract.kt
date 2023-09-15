@@ -1,6 +1,5 @@
 package com.stripe.android.auth
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Parcel
@@ -28,14 +27,7 @@ internal class PaymentBrowserAuthContract :
         val shouldUseBrowser =
             input.hasDefaultReturnUrl(defaultReturnUrl) || input.isInstantApp
 
-        val statusBarColor = when (context) {
-            is Activity -> context.window?.statusBarColor
-            else -> null
-        }
-
-        val extras = input
-            .copy(statusBarColor = statusBarColor)
-            .toBundle()
+        val extras = input.toBundle()
 
         return Intent(
             context,
@@ -81,7 +73,7 @@ internal class PaymentBrowserAuthContract :
          */
         val shouldCancelIntentOnUserNavigation: Boolean = true,
 
-        val statusBarColor: Int? = null,
+        val statusBarColor: Int?,
         val publishableKey: String,
         val isInstantApp: Boolean
     ) : Parcelable {

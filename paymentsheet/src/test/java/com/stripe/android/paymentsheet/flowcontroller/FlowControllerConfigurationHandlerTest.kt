@@ -7,21 +7,20 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.CreateIntentCallback
-import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
-import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
-import com.stripe.android.testing.IntentConfirmationInterceptorTestRule
-import com.stripe.android.utils.DelayingPaymentSheetLoader
 import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
+import com.stripe.android.utils.RelayingPaymentSheetLoader
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -81,6 +80,7 @@ class FlowControllerConfigurationHandlerTest {
         val configureErrors = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
+        val beforeSessionId = AnalyticsRequestFactory.sessionId
         configurationHandler.configure(
             scope = this,
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
@@ -99,8 +99,9 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupling = false,
-            isServerSideConfirmation = false,
         )
+        // Configure should regenerate the analytics sessionId.
+        assertThat(beforeSessionId).isNotEqualTo(AnalyticsRequestFactory.sessionId)
     }
 
     @Test
@@ -118,6 +119,7 @@ class FlowControllerConfigurationHandlerTest {
         viewModel.previousConfigureRequest = configureRequest
         viewModel.paymentSelection = PaymentSelection.GooglePay
 
+        val beforeSessionId = AnalyticsRequestFactory.sessionId
         configurationHandler.configure(
             scope = this,
             initializationMode = initializationMode,
@@ -135,8 +137,10 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter, never()).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupling = false,
-            isServerSideConfirmation = false,
         )
+
+        // Configure should not regenerate the analytics sessionId when using the same configuration.
+        assertThat(beforeSessionId).isEqualTo(AnalyticsRequestFactory.sessionId)
     }
 
     @Test
@@ -173,7 +177,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupling = false,
-            isServerSideConfirmation = false,
         )
     }
 
@@ -212,7 +215,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupling = false,
-            isServerSideConfirmation = false,
         )
     }
 
@@ -329,10 +331,9 @@ class FlowControllerConfigurationHandlerTest {
             assertThat(onInitCallbacks).isEqualTo(0)
         }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Cancels current configure job if new call to configure comes in`() = runTest {
-        val loader = DelayingPaymentSheetLoader()
+        val loader = RelayingPaymentSheetLoader()
         val configurationHandler = createConfigurationHandler(paymentSheetLoader = loader)
 
         val amounts = (0 until 10).map { index ->
@@ -369,7 +370,7 @@ class FlowControllerConfigurationHandlerTest {
 
     @Test
     fun `Cancels current configure job if coroutine scope is canceled`() = runTest {
-        val loader = DelayingPaymentSheetLoader()
+        val loader = RelayingPaymentSheetLoader()
         val configurationHandler = createConfigurationHandler(paymentSheetLoader = loader)
 
         val resultTurbine = Turbine<Unit>()
@@ -430,17 +431,15 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = isNull(),
             isDecoupling = eq(false),
-            isServerSideConfirmation = eq(false),
         )
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _ ->
+        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
             throw AssertionError("Not expected to be called")
         }
 
@@ -464,18 +463,16 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = isNull(),
             isDecoupling = eq(true),
-            isServerSideConfirmation = eq(false),
         )
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
         IntentConfirmationInterceptor.createIntentCallback =
-            CreateIntentCallbackForServerSideConfirmation { _, _ ->
+            CreateIntentCallback { _, _ ->
                 throw AssertionError("Not expected to be called")
             }
 
@@ -499,7 +496,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = isNull(),
             isDecoupling = eq(true),
-            isServerSideConfirmation = eq(true),
         )
     }
 

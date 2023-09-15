@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -41,10 +42,10 @@ internal class SetupIntentFlowResultProcessorTest {
     fun `processResult() when shouldCancelSource=true should return canceled SetupIntent`() =
         runTest {
             whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
-                SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
+                Result.success(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
             )
             whenever(mockStripeRepository.cancelSetupIntentSource(any(), any(), any())).thenReturn(
-                SetupIntentFixtures.CANCELLED
+                Result.success(SetupIntentFixtures.CANCELLED)
             )
 
             val setupIntentResult = processor.processResult(
@@ -68,8 +69,8 @@ internal class SetupIntentFlowResultProcessorTest {
     fun `3ds2 canceled with processing intent should succeed`() =
         runTest {
             whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
-                SetupIntentFixtures.SI_3DS2_PROCESSING,
-                SetupIntentFixtures.SI_3DS2_SUCCEEDED
+                Result.success(SetupIntentFixtures.SI_3DS2_PROCESSING),
+                Result.success(SetupIntentFixtures.SI_3DS2_SUCCEEDED),
             )
 
             val clientSecret = "pi_3L8WOsLu5o3P18Zp191FpRSy_secret_5JIwIT1ooCwRm28AwreUAc6N4"
@@ -105,7 +106,7 @@ internal class SetupIntentFlowResultProcessorTest {
     fun `3ds2 canceled with succeeded intent should succeed`() =
         runTest {
             whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
-                SetupIntentFixtures.SI_3DS2_SUCCEEDED
+                Result.success(SetupIntentFixtures.SI_3DS2_SUCCEEDED)
             )
 
             val clientSecret = "pi_3L8WOsLu5o3P18Zp191FpRSy_secret_5JIwIT1ooCwRm28AwreUAc6N4"
@@ -141,7 +142,7 @@ internal class SetupIntentFlowResultProcessorTest {
                 status = StripeIntent.Status.RequiresAction
             )
             whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
-                intent
+                Result.success(intent)
             )
 
             val clientSecret = requireNotNull(
@@ -173,5 +174,40 @@ internal class SetupIntentFlowResultProcessorTest {
                         null
                     )
                 )
+        }
+
+    @Test
+    fun `Keeps refreshing when encountering a CashAppPay setup that still requires action`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = SetupIntentFixtures.SI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.cashAppPay(),
+                paymentMethodTypes = listOf("card", "cashapp"),
+            )
+
+            val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
+
+            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.success(requiresActionIntent),
+                Result.success(succeededIntent),
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            val expectedResult = SetupIntentResult(
+                intent = succeededIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED,
+                failureMessage = null,
+            )
+
+            assertThat(result).isEqualTo(expectedResult)
         }
 }

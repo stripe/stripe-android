@@ -11,8 +11,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -20,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -30,7 +29,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.stripeColors
@@ -38,30 +36,20 @@ import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
+internal const val SHEET_NAVIGATION_BUTTON_TAG = "SHEET_NAVIGATION_BUTTON_TAG"
+
 @Composable
 internal fun PaymentSheetTopBar(
-    viewModel: BaseSheetViewModel,
+    state: PaymentSheetTopBarState,
+    handleBackPressed: () -> Unit,
+    toggleEditing: () -> Unit,
     elevation: Dp = 0.dp,
 ) {
-    val screen by viewModel.currentScreen.collectAsState()
-    val stripeIntent by viewModel.stripeIntent.collectAsState()
-    val isProcessing by viewModel.processing.collectAsState()
-    val isEditing by viewModel.editing.collectAsState()
-    val paymentMethods by viewModel.paymentMethods.collectAsState()
-
-    val state = rememberPaymentSheetTopBarState(
-        screen = screen,
-        paymentMethods = paymentMethods,
-        isLiveMode = stripeIntent?.isLiveMode ?: true,
-        isProcessing = isProcessing,
-        isEditing = isEditing,
-    )
-
     PaymentSheetTopBar(
         state = state,
         elevation = elevation,
-        onNavigationIconPressed = viewModel::handleBackPressed,
-        onEditIconPressed = viewModel::toggleEditing,
+        onNavigationIconPressed = handleBackPressed,
+        onEditIconPressed = toggleEditing,
     )
 }
 
@@ -89,6 +77,7 @@ internal fun PaymentSheetTopBar(
                     keyboardController?.hide()
                     onNavigationIconPressed()
                 },
+                modifier = Modifier.testTag(SHEET_NAVIGATION_BUTTON_TAG)
             ) {
                 Icon(
                     painter = painterResource(state.icon),

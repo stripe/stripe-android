@@ -35,7 +35,7 @@
   <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
   <string name="stripe_verification_not_email">不是 %s？</string>
   <!-- Label for a button that re-sends the a login code when tapped -->
-  <string name="stripe_verification_resend">重新發送驗證碼</string>
+  <string name="stripe_verification_resend">重新傳送驗證碼</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[點擊「繼續」，即表示您同意按照這些<terms>條款</terms>授權付款。]]></string>
   <!-- Label for a section displaying payment details. -->
@@ -47,7 +47,7 @@
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">用另一方式支付</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
-  <string name="stripe_wallet_recollect_cvc_error">出於安全原因，請重新輸入您金融卡的安全碼。</string>
+  <string name="stripe_wallet_recollect_cvc_error">出於安全原因，請重新輸入您的金融卡的安全碼。</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">您確定要移除這個關聯的帳戶嗎？</string>
   <!-- Title for a button that when tapped removes a saved card. -->

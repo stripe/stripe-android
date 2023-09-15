@@ -96,6 +96,7 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
             }
             StripeIntent.NextActionType.BlikAuthorize,
             StripeIntent.NextActionType.DisplayOxxoDetails,
+            StripeIntent.NextActionType.DisplayBoletoDetails,
             StripeIntent.NextActionType.UpiAwaitNotification,
             StripeIntent.NextActionType.VerifyWithMicrodeposits -> {
                 true

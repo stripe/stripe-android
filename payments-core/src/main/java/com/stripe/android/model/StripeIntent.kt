@@ -70,9 +70,18 @@ sealed interface StripeIntent : StripeModel {
      */
     val linkFundingSources: List<String>
 
+    /**
+     * Country code of the user.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val countryCode: String?
+
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun getPaymentMethodOptions(): Map<String, Any?>
 
     /**
      * Type of the next action to perform.
@@ -86,7 +95,8 @@ sealed interface StripeIntent : StripeModel {
         WeChatPayRedirect("wechat_pay_redirect_to_android_app"),
         VerifyWithMicrodeposits("verify_with_microdeposits"),
         UpiAwaitNotification("upi_await_notification"),
-        CashAppRedirect("cashapp_handle_redirect_or_display_qr_code");
+        CashAppRedirect("cashapp_handle_redirect_or_display_qr_code"),
+        DisplayBoletoDetails("boleto_display_details");
 
         @Keep
         override fun toString(): String {
@@ -176,6 +186,15 @@ sealed interface StripeIntent : StripeModel {
              * URL of a webpage containing the voucher for this OXXO payment.
              */
             val hostedVoucherUrl: String? = null
+        ) : NextActionData()
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayBoletoDetails(
+            /**
+             * URL of a webpage containing the voucher for this payment.
+             */
+            val hostedVoucherUrl: String? = null,
         ) : NextActionData()
 
         /**

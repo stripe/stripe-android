@@ -10,6 +10,7 @@ import com.stripe.android.core.injection.UIContext
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
 import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.states.LaplacianBlurDetector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import java.lang.ref.WeakReference
@@ -19,9 +20,10 @@ import kotlin.coroutines.CoroutineContext
 internal class IdentityScanViewModel(
     private val context: WeakReference<Context>,
     modelPerformanceTracker: ModelPerformanceTracker,
+    laplacianBlurDetector: LaplacianBlurDetector,
     @UIContext private val uiContext: CoroutineContext
 ) :
-    CameraViewModel(modelPerformanceTracker, uiContext) {
+    CameraViewModel(modelPerformanceTracker, laplacianBlurDetector, uiContext) {
 
     /**
      * StateFlow to keep track of current target scan type.
@@ -61,6 +63,7 @@ internal class IdentityScanViewModel(
     internal class IdentityScanViewModelFactory @Inject constructor(
         private val context: Context,
         private val modelPerformanceTracker: ModelPerformanceTracker,
+        private val laplacianBlurDetector: LaplacianBlurDetector,
         @UIContext private val uiContext: CoroutineContext,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
@@ -68,6 +71,7 @@ internal class IdentityScanViewModel(
             return IdentityScanViewModel(
                 WeakReference(context),
                 modelPerformanceTracker,
+                laplacianBlurDetector,
                 uiContext
             ) as T
         }

@@ -7,7 +7,6 @@ import androidx.annotation.LayoutRes
 import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import com.stripe.android.ObjectBuilder
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.AddPaymentMethodActivityStarter.Args
@@ -46,7 +45,7 @@ class AddPaymentMethodActivityStarter : ActivityStarter<AddPaymentMethodActivity
         internal val windowFlags: Int? = null
     ) : ActivityStarter.Args {
 
-        class Builder : ObjectBuilder<Args> {
+        class Builder {
             private var billingAddressFields: BillingAddressFields = BillingAddressFields.PostalCode
             private var shouldAttachToCustomer: Boolean = false
             private var isPaymentSessionActive = false
@@ -118,7 +117,7 @@ class AddPaymentMethodActivityStarter : ActivityStarter<AddPaymentMethodActivity
                 this.paymentConfiguration = paymentConfiguration
             }
 
-            override fun build(): Args {
+            fun build(): Args {
                 return Args(
                     billingAddressFields = billingAddressFields,
                     shouldAttachToCustomer = shouldAttachToCustomer,

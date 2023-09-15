@@ -4,14 +4,22 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Maksāt ar <num_installments/> bezprocentu maksājumiem <installment_price/> ar <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Atpakaļ</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Konta numurs nav pilnīgs.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Norēķinu adrese</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">BLIK kods</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Turpinot, jūs atļaujat %1$s iekasēt no jūsu Cash App konta par šo un turpmākiem maksājumiem saskaņā ar %2$s noteikumiem, līdz šī atļauja netiek atsaukta. To varat mainīt jebkurā laikā Cash App iestatījumos.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kontaktinformācija</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Turpināt</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">Elektronisko maksājumu pakalpojumu banka</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX banka</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Ievadītais IBAN nav pilnīgs.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -20,6 +28,10 @@
   <string name="stripe_iban_invalid_start">IBAN sākumā jābūt divu burtu valsts kodam.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">iDEAL banka</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Jūsu BLIK kods nav pilnīgs.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Jūsu BLIK kods nav derīgs.</string>
   <string name="stripe_invalid_email_address">Nederīga e-pasta adrese: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Nederīgs UPI ID</string>

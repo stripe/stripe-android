@@ -1,38 +1,35 @@
 #!/usr/bin/env bash
 set -o pipefail
 set -x
+set -e
 
-now=$(date +%F_%H-%M-%S)
-echo $now
+export MAESTRO_VERSION=1.31.0
 
-# Install Maestro
-export MAESTRO_VERSION=1.21.3; curl -Ls "https://get.maestro.mobile.dev" | bash
-export PATH="$PATH":"$HOME/.maestro/bin"
-maestro -v
+# Retry mechanism for Maestro installation
+MAX_RETRIES=3
+RETRY_COUNT=0
 
-# Compile and install APK.
-./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL :financial-connections-example:installDebug
+while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
+    curl -Ls "https://get.maestro.mobile.dev" | bash &&
+    export PATH="$PATH:$HOME/.maestro/bin" &&
+    maestro -v &&
+    break
 
-# Start screen record (adb screenrecord has a 3 min limit).
-adb shell "screenrecord /sdcard/$now-1.mp4" &
+    let RETRY_COUNT=RETRY_COUNT+1
+    echo "Attempt $RETRY_COUNT failed. Retrying..."
+    sleep 5
+done
 
-# Store the process ID
-childpid=$!
+if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
+    echo "Installation failed after $MAX_RETRIES attempts."
+    exit 1
+fi
+
+# Create test results folder.
+mkdir -p /tmp/test_results
+
+# install APK.
+adb install $BITRISE_APK_PATH
 
 # Clear and start collecting logs
 maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml maestro/financial-connections/
-result=$?
-
-# Wait for the recording process to finish
-kill -2 "$childpid"
-wait "$childpid"
-
-# Sleep for a short duration to allow the process to finalize the video file
-sleep 3
-
-# Pull the video file from the device
-mkdir -p /tmp/test_results
-cd /tmp/test_results
-adb pull "/sdcard/$now-1.mp4" || true
-
-exit "$result"

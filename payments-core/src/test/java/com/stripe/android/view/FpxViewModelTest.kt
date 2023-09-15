@@ -5,7 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.BankStatuses
-import com.stripe.android.networking.AbsFakeStripeRepository
+import com.stripe.android.testing.AbsFakeStripeRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -31,6 +31,8 @@ class FpxViewModelTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
-        override suspend fun getFpxBankStatus(options: ApiRequest.Options) = BankStatuses()
+        override suspend fun getFpxBankStatus(options: ApiRequest.Options): Result<BankStatuses> {
+            return Result.success(BankStatuses())
+        }
     }
 }

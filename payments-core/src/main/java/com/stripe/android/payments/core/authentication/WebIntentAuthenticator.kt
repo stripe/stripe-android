@@ -84,6 +84,13 @@ internal class WebIntentAuthenticator @Inject constructor(
                 returnUrl = null
                 shouldCancelIntentOnUserNavigation = false
             }
+            is StripeIntent.NextActionData.DisplayBoletoDetails -> {
+                // nextActionData.hostedVoucherUrl will never be null as AuthenticatorRegistry won't direct it here
+                authUrl = nextActionData.hostedVoucherUrl.takeIf { it!!.isNotEmpty() }
+                    ?: throw IllegalArgumentException("null hostedVoucherUrl for DisplayBoletoDetails")
+                returnUrl = null
+                shouldCancelIntentOnUserNavigation = false
+            }
             is StripeIntent.NextActionData.CashAppRedirect -> {
                 authUrl = nextActionData.mobileAuthUrl
                 returnUrl = defaultReturnUrl.value
@@ -129,6 +136,7 @@ internal class WebIntentAuthenticator @Inject constructor(
                 stripeAccountId = stripeAccount,
                 shouldCancelSource = shouldCancelSource,
                 shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation,
+                statusBarColor = host.statusBarColor,
                 publishableKey = publishableKeyProvider(),
                 isInstantApp = isInstantApp
             )

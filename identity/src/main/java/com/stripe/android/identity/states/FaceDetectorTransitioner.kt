@@ -1,6 +1,7 @@
 package com.stripe.android.identity.states
 
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.camera.framework.time.milliseconds
@@ -30,23 +31,34 @@ import kotlin.math.sqrt
  *
  * To transition from [Found] state -
  * * Check if it's timeout since the start of the scan.
- * * Wait for an internal between two Found state, if the interval is not reached, keep waiting.
+ * * Wait for an interval between two Found state, if the interval is not reached, keep waiting.
  * * Check if a valid face is present, save the frame and check if enough frames have been collected
- *  * If so, transition to Satisfied
- *  * Otherwise stay in [Found]
+ *  * If so, transition to [Satisfied]
+ *  * Otherwise check how long it's been since the last transition to [Found]
+ *  *   If it's within [stayInFoundDuration], stay in [Found]
+ *  *   Otherwise transition to [Unsatisfied]
  *
  * To transition from [Satisfied] state -
  * * Directly transitions to [Finished]
  *
- * Note FaceDetector doesn't have a [Unsatisfied] state.
- *
+ * To transition from [Unsatisfied] state -
+ * * Directly transitions to [Initial]
  */
 internal class FaceDetectorTransitioner(
     private val selfieCapturePage: VerificationPageStaticContentSelfieCapturePage,
-    internal val timeoutAt: ClockMark =
-        Clock.markNow() + selfieCapturePage.autoCaptureTimeout.milliseconds,
-    internal val selfieFrameSaver: SelfieFrameSaver = SelfieFrameSaver()
+    internal val selfieFrameSaver: SelfieFrameSaver = SelfieFrameSaver(),
+    private val stayInFoundDuration: Int = DEFAULT_STAY_IN_FOUND_DURATION
 ) : IdentityScanStateTransitioner {
+    @VisibleForTesting
+    var timeoutAt: ClockMark =
+        Clock.markNow() + selfieCapturePage.autoCaptureTimeout.milliseconds
+
+    @VisibleForTesting
+    fun resetAndReturn(): FaceDetectorTransitioner {
+        timeoutAt = Clock.markNow() + selfieCapturePage.autoCaptureTimeout.milliseconds
+        return this
+    }
+
     internal val filteredFrames: List<Pair<AnalyzerInput, FaceDetectorOutput>>
         get() {
             val savedFrames = requireNotNull(selfieFrameSaver.getSavedFrames()[SELFIES]) {
@@ -122,6 +134,7 @@ internal class FaceDetectorTransitioner(
                 Log.d(TAG, "Timeout in Initial state: $initialState")
                 IdentityScanState.TimeOut(initialState.type, this)
             }
+
             isFaceValid(analyzerOutput) -> {
                 Log.d(TAG, "Valid face found, transition to Found")
                 selfieFrameSaver.saveFrame(
@@ -130,6 +143,7 @@ internal class FaceDetectorTransitioner(
                 )
                 Found(initialState.type, this)
             }
+
             else -> {
                 Log.d(TAG, "Valid face not found, stay in Initial")
                 initialState
@@ -142,14 +156,13 @@ internal class FaceDetectorTransitioner(
         analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
-        require(analyzerOutput is FaceDetectorOutput) {
-            "Unexpected output type: $analyzerOutput"
-        }
+        require(analyzerOutput is FaceDetectorOutput) { "Unexpected output type: $analyzerOutput" }
         return when {
             timeoutAt.hasPassed() -> {
                 Log.d(TAG, "Timeout in Found state: $foundState")
                 IdentityScanState.TimeOut(foundState.type, this)
             }
+
             foundState.reachedStateAt.elapsedSince() < selfieCapturePage.sampleInterval.milliseconds -> {
                 Log.d(
                     TAG,
@@ -158,11 +171,9 @@ internal class FaceDetectorTransitioner(
                 )
                 foundState
             }
+
             isFaceValid(analyzerOutput) -> {
-                selfieFrameSaver.saveFrame(
-                    (analyzerInput to analyzerOutput),
-                    analyzerOutput
-                )
+                selfieFrameSaver.saveFrame((analyzerInput to analyzerOutput), analyzerOutput)
                 if (selfieFrameSaver.selfieCollected() >= selfieCapturePage.numSamples) {
                     Log.d(
                         TAG,
@@ -179,13 +190,29 @@ internal class FaceDetectorTransitioner(
                     Found(foundState.type, this)
                 }
             }
+
+            foundState.reachedStateAt.elapsedSince() < stayInFoundDuration.milliseconds -> {
+                Log.d(
+                    TAG,
+                    "Get an invalid selfie in Found state, but not enough time " +
+                        "passed(${foundState.reachedStateAt.elapsedSince()}), stays in Found. " +
+                        "Current selfieCollected: ${selfieFrameSaver.selfieCollected()}"
+                )
+                foundState
+            }
+
             else -> {
                 Log.d(
                     TAG,
-                    "Get an invalid selfie in Found state, stays in Found. " +
-                        "Current selfieCollected: ${selfieFrameSaver.selfieCollected()}"
+                    "Didn't get a valid selfie in Found state after $stayInFoundDuration " +
+                        "milliseconds, transition to Unsatisfied"
                 )
-                return Found(foundState.type, this)
+                return Unsatisfied(
+                    "Didn't get a valid selfie in Found state after " +
+                        "$stayInFoundDuration milliseconds",
+                    foundState.type,
+                    foundState.transitioner
+                )
             }
         }
     }
@@ -203,12 +230,11 @@ internal class FaceDetectorTransitioner(
         analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
-        throw IllegalStateException("Unsatisfied state not allowed for FaceDetector.")
+        return Initial(unsatisfiedState.type, this.resetAndReturn())
     }
 
     private fun isFaceValid(analyzerOutput: FaceDetectorOutput) =
         isFaceCentered(analyzerOutput.boundingBox) &&
-            isFaceFocused() &&
             isFaceAwayFromEdges(analyzerOutput.boundingBox) &&
             isFaceCoverageOK(analyzerOutput.boundingBox) &&
             isFaceScoreOverThreshold(analyzerOutput.resultScore)
@@ -218,15 +244,10 @@ internal class FaceDetectorTransitioner(
      * within corresponding threshold of center of image in both dimensions.
      */
     private fun isFaceCentered(boundingBox: BoundingBox): Boolean {
-        return abs(1 - (boundingBox.top + boundingBox.top + boundingBox.height)) < selfieCapturePage.maxCenteredThresholdY &&
-            abs(1 - (boundingBox.left + boundingBox.left + boundingBox.width)) < selfieCapturePage.maxCenteredThresholdX
-    }
-
-    /**
-     * TODO(ccen) Decide blur detection algorithm
-     */
-    private fun isFaceFocused(): Boolean {
-        return true
+        return abs(1 - (boundingBox.top + boundingBox.top + boundingBox.height)) <
+            selfieCapturePage.maxCenteredThresholdY &&
+            abs(1 - (boundingBox.left + boundingBox.left + boundingBox.width)) <
+                selfieCapturePage.maxCenteredThresholdX
     }
 
     private fun isFaceAwayFromEdges(boundingBox: BoundingBox): Boolean {
@@ -266,5 +287,6 @@ internal class FaceDetectorTransitioner(
         const val VALUE_FIRST = "first"
         const val VALUE_LAST = "last"
         const val VALUE_BEST = "best"
+        const val DEFAULT_STAY_IN_FOUND_DURATION = 2000
     }
 }

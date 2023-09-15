@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,9 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
-import com.stripe.android.link.ui.inline.LinkInlineSignedIn
 import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentMethodsUI
@@ -20,6 +22,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountForm
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -32,11 +35,12 @@ internal fun PaymentElement(
     supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
     selectedItem: LpmRepository.SupportedPaymentMethod,
     showLinkInlineSignup: Boolean,
-    linkPaymentLauncher: LinkPaymentLauncher,
+    linkConfigurationCoordinator: LinkConfigurationCoordinator,
     showCheckboxFlow: Flow<Boolean>,
     onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit,
-    onLinkSignupStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit,
+    onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
     formArguments: FormArguments,
+    usBankAccountFormArguments: USBankAccountFormArguments,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
 ) {
     val context = LocalContext.current
@@ -47,6 +51,8 @@ internal fun PaymentElement(
     val horizontalPadding = dimensionResource(
         id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
     )
+
+    val primaryButtonState = sheetViewModel.primaryButtonState.collectAsState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
         if (supportedPaymentMethods.size > 1) {
@@ -60,46 +66,35 @@ internal fun PaymentElement(
             )
         }
 
-        if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
-            USBankAccountForm(
-                formArgs = formArguments,
-                sheetViewModel = sheetViewModel,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
-            )
-        } else {
-            PaymentMethodForm(
-                args = formArguments,
-                enabled = enabled,
-                onFormFieldValuesChanged = onFormFieldValuesChanged,
-                showCheckboxFlow = showCheckboxFlow,
-                injector = sheetViewModel.injector,
-                modifier = Modifier.padding(horizontal = horizontalPadding)
-            )
-        }
-
-        val linkInlineSelection = sheetViewModel.linkHandler.linkInlineSelection.collectAsState()
-
-        if (showLinkInlineSignup) {
-            if (linkInlineSelection.value != null) {
-                LinkInlineSignedIn(
-                    linkPaymentLauncher = linkPaymentLauncher,
-                    onLogout = {
-                        sheetViewModel.linkHandler.linkInlineSelection.value = null
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = horizontalPadding, vertical = 6.dp)
-                        .fillMaxWidth()
+        Box(modifier = Modifier.animateContentSize()) {
+            if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
+                USBankAccountForm(
+                    formArgs = formArguments,
+                    usBankAccountFormArgs = usBankAccountFormArguments,
+                    isProcessing = primaryButtonState.value?.isProcessing == true,
+                    modifier = Modifier.padding(horizontal = horizontalPadding),
                 )
             } else {
-                LinkInlineSignup(
-                    linkPaymentLauncher = linkPaymentLauncher,
+                PaymentMethodForm(
+                    args = formArguments,
                     enabled = enabled,
-                    onStateChanged = onLinkSignupStateChanged,
-                    modifier = Modifier
-                        .padding(horizontal = horizontalPadding, vertical = 6.dp)
-                        .fillMaxWidth()
+                    onFormFieldValuesChanged = onFormFieldValuesChanged,
+                    showCheckboxFlow = showCheckboxFlow,
+                    formViewModelSubComponentBuilderProvider = sheetViewModel.formViewModelSubComponentBuilderProvider,
+                    modifier = Modifier.padding(horizontal = horizontalPadding)
                 )
             }
+        }
+
+        if (showLinkInlineSignup) {
+            LinkInlineSignup(
+                linkConfigurationCoordinator = linkConfigurationCoordinator,
+                enabled = enabled,
+                onStateChanged = onLinkSignupStateChanged,
+                modifier = Modifier
+                    .padding(horizontal = horizontalPadding, vertical = 6.dp)
+                    .fillMaxWidth()
+            )
         }
     }
 }

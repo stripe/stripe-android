@@ -28,6 +28,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.TextStyle
@@ -60,7 +61,11 @@ data class StripeShapes(
     val cornerRadius: Float,
     val borderStrokeWidth: Float,
     val borderStrokeWidthSelected: Float
-)
+) {
+
+    val roundedCornerShape: Shape
+        get() = RoundedCornerShape(size = cornerRadius.dp)
+}
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class StripeTypography(
@@ -359,16 +364,19 @@ fun DefaultStripeTheme(
     }
 }
 
+@Suppress("UnusedReceiverParameter")
 val MaterialTheme.stripeColors: StripeColors
     @Composable
     @ReadOnlyComposable
     get() = LocalColors.current
 
+@Suppress("UnusedReceiverParameter")
 val MaterialTheme.stripeShapes: StripeShapes
     @Composable
     @ReadOnlyComposable
     get() = LocalShapes.current
 
+@Suppress("UnusedReceiverParameter")
 val MaterialTheme.stripeTypography: StripeTypography
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Composable

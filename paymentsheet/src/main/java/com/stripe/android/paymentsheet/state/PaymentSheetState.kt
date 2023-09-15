@@ -19,6 +19,7 @@ internal sealed interface PaymentSheetState : Parcelable {
         val customerPaymentMethods: List<PaymentMethod>,
         val isGooglePayReady: Boolean,
         val linkState: LinkState?,
+        val isEligibleForCardBrandChoice: Boolean,
         val paymentSelection: PaymentSelection?,
     ) : PaymentSheetState {
 

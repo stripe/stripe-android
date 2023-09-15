@@ -4,8 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.testharness.TestEphemeralKeyProvider
+import com.stripe.android.testing.AbsFakeStripeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -52,7 +52,7 @@ class IssuingCardPinServiceTest {
 
     @Test
     fun `retrievePin() should call onIssuingCardPinRetrieved() on listener when successful`() {
-        stripeRepository.retrievedPin = { PIN }
+        stripeRepository.retrievedPin = { Result.success(PIN) }
 
         service.retrievePin(
             "ic_abcdef",
@@ -85,11 +85,13 @@ class IssuingCardPinServiceTest {
     @Test
     fun `retrievePin() should call onError() on listener when there is an error`() {
         stripeRepository.retrievedPin = {
-            throw InvalidRequestException(
-                stripeError = StripeError(
-                    code = "incorrect_code",
-                    message = "Verification failed",
-                    type = "invalid_request_error"
+            Result.failure(
+                InvalidRequestException(
+                    stripeError = StripeError(
+                        code = "incorrect_code",
+                        message = "Verification failed",
+                        type = "invalid_request_error",
+                    ),
                 )
             )
         }
@@ -109,7 +111,7 @@ class IssuingCardPinServiceTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
-        var retrievedPin: () -> String? = { null }
+        var retrievedPin: () -> Result<String> = { Result.failure(NotImplementedError()) }
         var updatePinCalls = 0
 
         override suspend fun retrieveIssuingCardPin(
@@ -117,7 +119,7 @@ class IssuingCardPinServiceTest {
             verificationId: String,
             userOneTimeCode: String,
             requestOptions: ApiRequest.Options
-        ): String? = retrievedPin()
+        ): Result<String> = retrievedPin()
 
         override suspend fun updateIssuingCardPin(
             cardId: String,
@@ -125,8 +127,9 @@ class IssuingCardPinServiceTest {
             verificationId: String,
             userOneTimeCode: String,
             requestOptions: ApiRequest.Options
-        ) {
+        ): Throwable? {
             updatePinCalls++
+            return null
         }
     }
 

@@ -2,6 +2,7 @@ package com.stripe.android.test.core
 
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.playground.model.InitializationType
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 
 /**
@@ -35,14 +36,6 @@ data class TestParameters(
     val collectPhone: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
     val collectAddress: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
 )
-
-/**
- * Indicates if we use the normal or deferred payment sheet initialization
- */
-enum class InitializationType {
-    Normal,
-    Deferred,
-}
 
 /**
  * Indicates if automatic payment methods are used on the payment intent
@@ -93,18 +86,37 @@ enum class Browser {
  */
 sealed interface AuthorizeAction {
 
-    abstract val text: String
+    val text: String
+    val requiresBrowser: Boolean
 
-    object Authorize : AuthorizeAction {
+    object PollingSucceedsAfterDelay : AuthorizeAction {
+        override val text: String = "POLLING SUCCEEDS AFTER DELAY"
+        override val requiresBrowser: Boolean = false
+    }
+
+    object AuthorizePayment : AuthorizeAction {
         override val text: String = "AUTHORIZE TEST PAYMENT"
+        override val requiresBrowser: Boolean = true
+    }
+
+    object AuthorizeSetup : AuthorizeAction {
+        override val text: String = "AUTHORIZE TEST SETUP"
+        override val requiresBrowser: Boolean = true
+    }
+
+    object DisplayQrCode : AuthorizeAction {
+        override val text: String = "Display QR code"
+        override val requiresBrowser: Boolean = false
     }
 
     data class Fail(val expectedError: String) : AuthorizeAction {
         override val text: String = "FAIL TEST PAYMENT"
+        override val requiresBrowser: Boolean = true
     }
 
     object Cancel : AuthorizeAction {
         override val text: String = ""
+        override val requiresBrowser: Boolean = true
     }
 }
 
@@ -127,6 +139,11 @@ enum class Currency {
     AUD,
     GBP,
     INR,
+    SGD,
+    PLN,
+    MYR,
+    BRL,
+    MXN,
 }
 
 /**

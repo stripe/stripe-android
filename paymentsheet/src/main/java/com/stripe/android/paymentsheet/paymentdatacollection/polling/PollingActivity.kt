@@ -2,11 +2,23 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentResultListener
-import com.stripe.android.link.R as LinkR
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.core.view.WindowCompat
+import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.common.ui.BottomSheet
+import com.stripe.android.common.ui.rememberBottomSheetState
+import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.utils.AnimationConstants
+import kotlin.time.Duration.Companion.seconds
 
 internal class PollingActivity : AppCompatActivity() {
 
@@ -14,39 +26,61 @@ internal class PollingActivity : AppCompatActivity() {
         requireNotNull(PollingContract.Args.fromIntent(intent))
     }
 
-    private val listener = FragmentResultListener { _, result ->
-        handleResult(result)
+    internal var viewModelFactory: ViewModelProvider.Factory = PollingViewModel.Factory {
+        PollingViewModel.Args(
+            clientSecret = args.clientSecret,
+            timeLimit = args.timeLimitInSeconds.seconds,
+            initialDelay = args.initialDelayInSeconds.seconds,
+            maxAttempts = args.maxAttempts,
+            ctaText = args.ctaText,
+        )
     }
 
+    private val viewModel by viewModels<PollingViewModel> { viewModelFactory }
+
+    @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        supportFragmentManager.setFragmentResultListener(
-            PollingFragment.KEY_FRAGMENT_RESULT,
-            this,
-            listener
-        )
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        args.statusBarColor?.let { color ->
-            window.statusBarColor = color
-        }
+        setContent {
+            StripeTheme {
+                val state = rememberBottomSheetState(confirmValueChange = { false })
+                val uiState by viewModel.uiState.collectAsState()
 
-        if (savedInstanceState == null) {
-            val fragment = PollingFragment.newInstance(args)
-            fragment.isCancelable = false
-            fragment.show(supportFragmentManager, fragment.tag)
+                BackHandler(enabled = true) {
+                    if (uiState.pollingState == PollingState.Failed) {
+                        viewModel.handleCancel()
+                    } else {
+                        // Ignore back presses while polling for the result
+                    }
+                }
+
+                LaunchedEffect(uiState.pollingState) {
+                    val result = uiState.pollingState.toFlowResult(args)
+                    if (result != null) {
+                        state.hide()
+                        finishWithResult(result)
+                    }
+                }
+
+                BottomSheet(
+                    state = state,
+                    onDismissed = { /* Not applicable here */ },
+                ) {
+                    PollingScreen(viewModel)
+                }
+            }
         }
     }
 
-    private fun handleResult(result: Bundle) {
-        // Prevent a colored status bar from moving across the screen
-        window.statusBarColor = Color.TRANSPARENT
-
+    private fun finishWithResult(result: PaymentFlowResult.Unvalidated) {
         setResult(
             Activity.RESULT_OK,
-            Intent().putExtras(result)
+            Intent().putExtras(result.toBundle())
         )
         finish()
-        overridePendingTransition(0, LinkR.anim.stripe_slide_down)
+        overridePendingTransition(0, AnimationConstants.FADE_OUT)
     }
 }

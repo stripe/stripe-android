@@ -41,6 +41,7 @@ object FormControllerModule {
         saveForFutureUseInitialValue = false,
         merchantName = merchantName,
         context = context,
-        viewOnlyFields = viewOnlyFields
+        viewOnlyFields = viewOnlyFields,
+        isEligibleForCardBrandChoice = false,
     )
 }

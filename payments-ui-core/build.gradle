@@ -1,6 +1,6 @@
 apply from: configs.androidLibrary
 
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
@@ -11,8 +11,6 @@ dependencies {
     compileOnly project(":stripecardscan")
     compileOnly libs.places
 
-    implementation platform(boms.androidx.compose)
-
     implementation libs.androidx.constraintLayout
     implementation libs.androidx.coreKtx
     implementation libs.androidx.annotation
@@ -20,7 +18,7 @@ dependencies {
     implementation libs.androidx.liveDataKtx
     implementation libs.material
     implementation libs.dagger
-    kapt libs.daggerCompiler
+    ksp libs.daggerCompiler
 
     implementation libs.compose.ui
     implementation libs.compose.foundation
@@ -77,9 +75,6 @@ android {
 
     composeOptions {
         kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
-    }
-    lint {
-        disable 'UnrememberedMutableState'
     }
 
     kotlinOptions {

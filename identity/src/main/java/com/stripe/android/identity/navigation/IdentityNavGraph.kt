@@ -44,7 +44,9 @@ import com.stripe.android.identity.ui.IdentityTopBarState
 import com.stripe.android.identity.ui.IndividualScreen
 import com.stripe.android.identity.ui.IndividualWelcomeScreen
 import com.stripe.android.identity.ui.InitialLoadingScreen
+import com.stripe.android.identity.ui.OTPScreen
 import com.stripe.android.identity.ui.SelfieScanScreen
+import com.stripe.android.identity.ui.SelfieWarmupScreen
 import com.stripe.android.identity.ui.UploadScreen
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -155,6 +157,12 @@ internal fun IdentityNavGraph(
                     route = PassportScanDestination.ROUTE.route
                 )
             }
+            screen(SelfieWarmupDestination.ROUTE) {
+                SelfieWarmupScreen(
+                    navController = navController,
+                    identityViewModel = identityViewModel
+                )
+            }
             screen(SelfieDestination.ROUTE) {
                 val identityScanViewModel: IdentityScanViewModel =
                     viewModel(factory = identityScanViewModelFactory)
@@ -232,6 +240,9 @@ internal fun IdentityNavGraph(
                     verificationFlowFinishable = verificationFlowFinishable
                 )
             }
+            screen(OTPDestination.ROUTE) {
+                OTPScreen(navController = navController, identityViewModel = identityViewModel)
+            }
             screen(CameraPermissionDeniedDestination.ROUTE) {
                 val collectedDataParamType =
                     CameraPermissionDeniedDestination.collectedDataParamType(it)
@@ -295,7 +306,7 @@ internal fun IdentityNavGraph(
                         null
                     } else {
                         ErrorScreenButton(
-                            buttonText = stringResource(id = R.string.stripe_file_upload),
+                            buttonText = stringResource(id = R.string.stripe_upload_a_photo),
                         ) {
                             identityViewModel.screenTracker.screenTransitionStart(
                                 IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR

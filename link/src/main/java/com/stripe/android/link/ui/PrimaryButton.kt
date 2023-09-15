@@ -1,7 +1,10 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.link.ui
 
 import android.content.res.Resources
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -70,6 +73,7 @@ internal fun completePaymentButtonLabel(
         requireNotNull(stripeIntent.amount),
         requireNotNull(stripeIntent.currency)
     ).buildPayButtonLabel(resources)
+
     is SetupIntent -> resources.getString(StripeUiCoreR.string.stripe_setup_button_label)
 }
 
@@ -122,6 +126,7 @@ internal fun PrimaryButton(
                         color = MaterialTheme.linkColors.buttonLabel,
                         strokeWidth = 2.dp
                     )
+
                     PrimaryButtonState.Completed -> Icon(
                         painter = painterResource(id = R.drawable.stripe_link_complete),
                         contentDescription = null,
@@ -132,6 +137,7 @@ internal fun PrimaryButton(
                             },
                         tint = MaterialTheme.linkColors.buttonLabel
                     )
+
                     else -> Row(
                         Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically

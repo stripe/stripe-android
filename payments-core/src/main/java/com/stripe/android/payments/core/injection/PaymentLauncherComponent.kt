@@ -8,7 +8,6 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModel
 import dagger.BindsInstance
@@ -21,7 +20,8 @@ import kotlin.coroutines.CoroutineContext
 @Component(
     modules = [
         PaymentLauncherModule::class,
-        CoreCommonModule::class
+        CoreCommonModule::class,
+        StripeRepositoryModule::class,
     ]
 )
 internal interface PaymentLauncherComponent {
@@ -43,9 +43,6 @@ internal interface PaymentLauncherComponent {
 
         @BindsInstance
         fun uiContext(@UIContext uiContext: CoroutineContext): Builder
-
-        @BindsInstance
-        fun stripeRepository(stripeRepository: StripeRepository): Builder
 
         @BindsInstance
         fun analyticsRequestFactory(paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory): Builder

@@ -51,8 +51,14 @@ android {
 
     lint {
         enable 'Interoperability'
-        disable 'CoroutineCreationDuringComposition'
         lintConfig file('../settings/lint.xml')
+    }
+
+    lintOptions {
+        // Our workflow is to add a new string first and then have it translated in Lokalise. As a
+        // result, we will have a certain timespan during which there are no translations for the
+        // string yet.
+        disable 'MissingTranslation'
     }
 
     dokkaHtml {

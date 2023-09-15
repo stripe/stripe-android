@@ -5,7 +5,8 @@ import androidx.annotation.WorkerThread
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
-internal class LpmSerializer {
+internal object LpmSerializer {
+
     private val format = Json {
         ignoreUnknownKeys = true
         classDiscriminator = "#class"
@@ -14,26 +15,16 @@ internal class LpmSerializer {
         coerceInputValues = true
     }
 
-    fun serialize(data: SharedDataSpec) =
-        format.encodeToJsonElement(serializer(), data)
-
-    fun deserialize(str: String) = runCatching {
-        format.decodeFromString<SharedDataSpec>(serializer(), str)
-    }.onFailure { }
-
     /**
      * Any error in parsing an LPM (say a missing required field) will result in none of the
      * LPMs being read.
      */
     @WorkerThread
-    fun deserializeList(str: String) = if (str.isEmpty()) {
-        emptyList()
-    } else {
-        try {
-            format.decodeFromString<ArrayList<SharedDataSpec>>(serializer(), str)
-        } catch (e: Exception) {
-            Log.w("STRIPE", "Error parsing LPMs", e)
-            emptyList()
+    fun deserializeList(str: String): Result<List<SharedDataSpec>> {
+        return runCatching<LpmSerializer, List<SharedDataSpec>> {
+            format.decodeFromString(serializer(), str)
+        }.onFailure { error ->
+            Log.w("STRIPE", "Error parsing LPMs", error)
         }
     }
 }

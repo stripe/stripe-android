@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
@@ -77,6 +78,7 @@ import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
+import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.theme.Brand100
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.image.StripeImage
@@ -96,7 +98,7 @@ internal fun InstitutionPickerScreen() {
 
     InstitutionPickerContent(
         payload = state.payload,
-        institutionsProvider = { state.searchInstitutions },
+        institutions = state.searchInstitutions,
         searchMode = state.searchMode,
         // This is just used to provide a text in Compose previews
         previewText = state.previewText,
@@ -106,13 +108,14 @@ internal fun InstitutionPickerScreen() {
         onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.INSTITUTION_PICKER) },
         onSearchFocused = viewModel::onSearchFocused,
         onManualEntryClick = viewModel::onManualEntryClick,
+        onScrollChanged = viewModel::onScrollChanged
     )
 }
 
 @Composable
 private fun InstitutionPickerContent(
     payload: Async<Payload>,
-    institutionsProvider: () -> Async<InstitutionResponse>,
+    institutions: Async<InstitutionResponse>,
     searchMode: Boolean,
     previewText: String?,
     onQueryChanged: (String) -> Unit,
@@ -120,7 +123,8 @@ private fun InstitutionPickerContent(
     onCancelSearchClick: () -> Unit,
     onCloseClick: () -> Unit,
     onSearchFocused: () -> Unit,
-    onManualEntryClick: () -> Unit
+    onManualEntryClick: () -> Unit,
+    onScrollChanged: () -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
@@ -132,15 +136,16 @@ private fun InstitutionPickerContent(
         }
     ) {
         LoadedContent(
-            previewText = previewText,
             searchMode = searchMode,
+            previewText = previewText,
             onQueryChanged = onQueryChanged,
             onSearchFocused = onSearchFocused,
             onCancelSearchClick = onCancelSearchClick,
-            institutionsProvider = institutionsProvider,
+            institutions = institutions,
             onInstitutionSelected = onInstitutionSelected,
             payload = payload,
-            onManualEntryClick = onManualEntryClick
+            onManualEntryClick = onManualEntryClick,
+            onScrollChanged = onScrollChanged
         )
     }
 }
@@ -152,10 +157,11 @@ private fun LoadedContent(
     onQueryChanged: (String) -> Unit,
     onSearchFocused: () -> Unit,
     onCancelSearchClick: () -> Unit,
-    institutionsProvider: () -> Async<InstitutionResponse>,
+    institutions: Async<InstitutionResponse>,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     payload: Async<Payload>,
     onManualEntryClick: () -> Unit,
+    onScrollChanged: () -> Unit,
 ) {
     var input by remember { mutableStateOf(TextFieldValue(previewText ?: "")) }
     LaunchedEffect(searchMode) { if (!searchMode) input = TextFieldValue() }
@@ -185,9 +191,10 @@ private fun LoadedContent(
         }
         if (input.text.isNotBlank()) {
             SearchInstitutionsList(
-                institutionsProvider = institutionsProvider,
+                institutions = institutions,
                 onInstitutionSelected = onInstitutionSelected,
                 onManualEntryClick = onManualEntryClick,
+                onScrollChanged = onScrollChanged,
                 allowManualEntry = payload()?.allowManualEntry ?: false
             )
         } else {
@@ -257,16 +264,34 @@ private fun FinancialConnectionsSearchRow(
 
 @Composable
 private fun SearchInstitutionsList(
-    institutionsProvider: () -> Async<InstitutionResponse>,
+    institutions: Async<InstitutionResponse>,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     onManualEntryClick: () -> Unit,
+    onScrollChanged: () -> Unit,
     allowManualEntry: Boolean
 ) {
+    val listState = rememberLazyListState()
+    val shouldEmitScrollEvent = remember { mutableStateOf(true) }
+
+    // Scroll event should be emitted just once per search
+    LaunchedEffect(institutions) { shouldEmitScrollEvent.value = true }
+    // Trigger onScrollChanged with the list of institutions when scrolling stops (true -> false)
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (institutions()?.data?.isNotEmpty() == true &&
+            !listState.isScrollInProgress &&
+            shouldEmitScrollEvent.value
+        ) {
+            onScrollChanged()
+            shouldEmitScrollEvent.value = false
+        }
+    }
+
     LazyColumn(
+        state = listState,
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(top = 16.dp),
         content = {
-            when (val institutions: Async<InstitutionResponse> = institutionsProvider()) {
+            when (institutions) {
                 Uninitialized,
                 is Fail -> item {
                     if (allowManualEntry) {
@@ -397,7 +422,7 @@ private fun InstitutionResultTile(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxSize()
-            .clickable { onInstitutionSelected(institution) }
+            .clickableSingle { onInstitutionSelected(institution) }
             .padding(
                 vertical = 8.dp,
                 horizontal = 24.dp
@@ -472,7 +497,7 @@ private fun FeaturedInstitutionsGrid(
                                 color = FinancialConnectionsTheme.colors.borderDefault,
                                 shape = RoundedCornerShape(6.dp)
                             )
-                            .clickable(
+                            .clickableSingle(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = rememberRipple(
                                     color = FinancialConnectionsTheme.colors.textSecondary
@@ -535,15 +560,17 @@ internal fun InstitutionPickerPreview(
 ) {
     FinancialConnectionsPreview {
         InstitutionPickerContent(
-            previewText = state.previewText,
             payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
+            institutions = state.searchInstitutions,
             searchMode = state.searchMode,
+            previewText = state.previewText,
             onQueryChanged = {},
             onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
             onCloseClick = {},
-            onSearchFocused = {}
-        ) {}
+            onSearchFocused = {},
+            onManualEntryClick = {},
+            onScrollChanged = {},
+        )
     }
 }

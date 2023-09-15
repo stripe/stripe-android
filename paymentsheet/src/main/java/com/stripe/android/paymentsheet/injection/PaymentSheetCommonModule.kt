@@ -2,16 +2,20 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
-import com.stripe.android.DefaultIntentConfirmationInterceptor
-import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.utils.DefaultDurationProvider
+import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
+import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -21,10 +25,13 @@ import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
+import com.stripe.android.paymentsheet.state.CbcEnabledProvider
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentSheetLoader
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.RealCbcEnabledProvider
 import dagger.Binds
 import dagger.Lazy
 import dagger.Module
@@ -34,7 +41,12 @@ import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-@Module
+@Module(
+    subcomponents = [
+        LinkAnalyticsComponent::class,
+        LinkComponent::class,
+    ],
+)
 internal abstract class PaymentSheetCommonModule {
 
     @Binds
@@ -45,7 +57,7 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsStripeIntentRepository(
-        repository: ElementsSessionRepository.Api
+        impl: RealElementsSessionRepository,
     ): ElementsSessionRepository
 
     @Binds
@@ -55,6 +67,9 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsLinkAccountStatusProvider(
         impl: DefaultLinkAccountStatusProvider,
     ): LinkAccountStatusProvider
+
+    @Binds
+    abstract fun bindsCbcEnabledProvider(impl: RealCbcEnabledProvider): CbcEnabledProvider
 
     @Binds
     abstract fun bindsIntentConfirmationInterceptor(
@@ -118,6 +133,12 @@ internal abstract class PaymentSheetCommonModule {
         ): String {
             val application = appContext as Application
             return application.applicationInfo.loadLabel(application.packageManager).toString()
+        }
+
+        @Provides
+        @Singleton
+        fun provideDurationProvider(): DurationProvider {
+            return DefaultDurationProvider.instance
         }
     }
 }
