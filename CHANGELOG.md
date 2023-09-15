@@ -9,6 +9,7 @@
 * [FIXED][7316](https://github.com/stripe/stripe-android/pull/7316) Fixed an issue where amounts in Serbian Dinar were displayed incorrectly.
 
 ### Payments
+* [ADDED][7315](https://github.com/stripe/stripe-android/pull/7314) Added support for Revolut Pay.
 * [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `GooglePayLauncher` now takes an optional `label` when presenting Google Pay for PaymentIntents, and an optional `amount` and `label` when presenting for SetupIntents.
 * [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `GooglePayPaymentMethodLauncher` now takes an optional `label` when presenting Google Pay.
 
