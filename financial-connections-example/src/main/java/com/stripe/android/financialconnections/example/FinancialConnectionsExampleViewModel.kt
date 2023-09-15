@@ -31,7 +31,6 @@ class FinancialConnectionsExampleViewModel(application: Application) : AndroidVi
     val stateLiveData = state.asLiveData()
     val viewEffectLiveData = viewEffect.asLiveData()
 
-
     fun startFinancialConnectionsSessionForData() {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
