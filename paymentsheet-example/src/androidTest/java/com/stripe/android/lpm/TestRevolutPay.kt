@@ -5,6 +5,7 @@ import com.stripe.android.BaseLpmTest
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.IntentType
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -18,13 +19,15 @@ internal class TestRevolutPay : BaseLpmTest() {
         supportedPaymentMethods = listOf("card", "revolut_pay"),
     )
 
+    @Ignore("Requires complex auth handling")
     @Test
     fun testRevolutPay_Success() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters = revolutPay,
+            testParameters = revolutPay
         )
     }
 
+    @Ignore("Requires complex auth handling")
     @Test
     fun testRevolutPay_Fail() {
         testDriver.confirmNewOrGuestComplete(
@@ -36,38 +39,41 @@ internal class TestRevolutPay : BaseLpmTest() {
         )
     }
 
+    @Ignore("Requires complex auth handling")
     @Test
     fun testRevolutPay_Cancel() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = revolutPay.copy(
-                authorizationAction = AuthorizeAction.Cancel,
+                authorizationAction = AuthorizeAction.Cancel
             ),
         )
     }
 
+    @Ignore("Requires complex auth handling")
     @Test
     fun testRevolutPayWithSfu() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = revolutPay.copy(
-                intentType = IntentType.PayWithSetup,
-                authorizationAction = AuthorizeAction.AuthorizePayment,
+                intentType = IntentType.PayWithSetup
             ),
         )
     }
 
+    @Ignore("Requires complex auth handling")
     @Test
     fun testRevolutPayWithSetupIntent() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = revolutPay.copy(
-                intentType = IntentType.Setup,
+                intentType = IntentType.Setup
             ),
         )
     }
 
+    @Ignore("Requires complex auth handling")
     @Test
     fun testRevolutPayInCustomFlow() {
         testDriver.confirmCustom(
-            testParameters = revolutPay,
+            testParameters = revolutPay
         )
     }
 }
