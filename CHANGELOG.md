@@ -6,6 +6,7 @@
 * [ADDED][7302](https://github.com/stripe/stripe-android/pull/7302) PaymentSheet now supports Alma for PaymentIntents in private beta.
 * [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `PaymentSheet.GooglePayConfiguration` now takes an optional `amount` and `label`. The `amount` will be displayed in Google Pay for SetupIntents, while `label` will be displayed for both PaymentIntents and SetupIntents.
 * [ADDED][7308](https://github.com/stripe/stripe-android/pull/7308) PaymentSheet now supports Konbini for PaymentIntents.
+* [FIXED][7316](https://github.com/stripe/stripe-android/pull/7316) Fixed an issue where amounts in Serbian Dinar were displayed incorrectly.
 
 ### Payments
 * [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `GooglePayLauncher` now takes an optional `label` when presenting Google Pay for PaymentIntents, and an optional `amount` and `label` when presenting for SetupIntents.
