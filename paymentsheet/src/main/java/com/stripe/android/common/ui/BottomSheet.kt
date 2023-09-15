@@ -1,5 +1,6 @@
 package com.stripe.android.common.ui
 
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -60,11 +61,14 @@ internal class BottomSheetState(
     suspend fun hide() {
         dismissalType = DismissalType.Programmatically
 
+        Log.d("TILL123", "Hiding bottom sheet")
+
         // We dismiss the keyboard before we dismiss the sheet. This looks cleaner and prevents
         // a CancellationException.
         keyboardHandler.dismiss()
 
         if (modalBottomSheetState.isVisible) {
+            Log.d("TILL123", "Bottom sheet is visible. Hiding it now!")
             repeatUntilSucceededOrLimit(10) {
                 // Hiding the bottom sheet can be interrupted.
                 // We keep trying until it's fully hidden.
@@ -182,12 +186,17 @@ private suspend fun repeatUntilSucceededOrLimit(
     block: suspend () -> Unit
 ) {
     var counter = 0
+    var success = false
     while (counter < limit) {
         try {
             block()
+            success = true
             break
         } catch (ignored: CancellationException) {
+            Log.d("TILL123", "CancellationException")
             counter += 1
         }
     }
+
+    Log.d("TILL123", "repeatUntilSucceededOrLimit successful? $success")
 }

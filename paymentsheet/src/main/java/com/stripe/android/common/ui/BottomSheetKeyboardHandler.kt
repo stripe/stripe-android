@@ -1,5 +1,6 @@
 package com.stripe.android.common.ui
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
@@ -22,8 +23,12 @@ internal class BottomSheetKeyboardHandler(
 
     suspend fun dismiss() {
         if (isKeyboardVisible.value) {
+            Log.d("TILL123", "Hiding keyboard…")
             keyboardController?.hide()
             awaitKeyboardDismissed()
+            Log.d("TILL123", "Keyboard hidden!")
+        } else {
+            Log.d("TILL123", "Keyboard already hidden!")
         }
     }
 
@@ -40,7 +45,9 @@ internal fun rememberBottomSheetKeyboardHandler(): BottomSheetKeyboardHandler {
 
     DisposableEffect(view) {
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
-            isImeVisible.value = insets.isVisible(WindowInsetsCompat.Type.ime())
+            val isVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            isImeVisible.value = isVisible
+            Log.d("TILL123", "Is IME visible: $isVisible")
             insets
         }
 
