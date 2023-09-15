@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.analytics
 
-data class FinancialConnectionsEvent(
+class FinancialConnectionsEvent internal constructor(
     val name: Name,
     val metadata: Metadata
 ) {
