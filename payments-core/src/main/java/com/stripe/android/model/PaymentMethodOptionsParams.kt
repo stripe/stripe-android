@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 sealed class PaymentMethodOptionsParams(
@@ -70,6 +71,22 @@ sealed class PaymentMethodOptionsParams(
 
         internal companion object {
             const val PARAM_CODE = "code"
+        }
+    }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Konbini(
+        private val confirmationNumber: String
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.Konbini) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_CONFIRMATION_NUMBER to confirmationNumber
+            )
+        }
+
+        internal companion object {
+            const val PARAM_CONFIRMATION_NUMBER = "confirmation_number"
         }
     }
 

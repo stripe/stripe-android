@@ -8,6 +8,7 @@ import com.stripe.android.model.StripeIntent.NextActionData
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.core.authentication.BoletoAuthenticator
 import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
+import com.stripe.android.payments.core.authentication.KonbiniAuthenticator
 import com.stripe.android.payments.core.authentication.OxxoAuthenticator
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.payments.core.authentication.WebIntentAuthenticator
@@ -55,6 +56,14 @@ internal abstract class AuthenticationModule {
     @IntentAuthenticatorKey(NextActionData.DisplayOxxoDetails::class)
     abstract fun bindsOxxoAuthenticator(
         oxxoAuthenticator: OxxoAuthenticator
+    ): PaymentAuthenticator<StripeIntent>
+
+    @IntentAuthenticatorMap
+    @Binds
+    @IntoMap
+    @IntentAuthenticatorKey(NextActionData.DisplayKonbiniDetails::class)
+    abstract fun bindsKonbiniAuthenticator(
+        konbiniAuthenticator: KonbiniAuthenticator
     ): PaymentAuthenticator<StripeIntent>
 
     @IntentAuthenticatorMap

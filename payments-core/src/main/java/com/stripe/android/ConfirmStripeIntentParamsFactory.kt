@@ -102,6 +102,9 @@ internal class ConfirmPaymentIntentParamsFactory(
                 PaymentMethod.Type.Blik.code -> {
                     optionsParams
                 }
+                PaymentMethod.Type.Konbini.code -> {
+                    optionsParams
+                }
                 PaymentMethod.Type.Link.code -> {
                     null
                 }

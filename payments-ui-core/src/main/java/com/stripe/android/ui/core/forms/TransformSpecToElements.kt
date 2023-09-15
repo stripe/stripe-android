@@ -24,6 +24,7 @@ import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
 import com.stripe.android.ui.core.elements.KlarnaHeaderStaticTextSpec
+import com.stripe.android.ui.core.elements.KonbiniConfirmationNumberSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
@@ -101,6 +102,7 @@ class TransformSpecToElements(
                     shippingValues,
                 )
                 is BoletoTaxIdSpec -> it.transform(initialValues)
+                is KonbiniConfirmationNumberSpec -> it.transform(initialValues)
                 is SepaMandateTextSpec -> it.transform(merchantName)
                 is UpiSpec -> it.transform()
                 is BlikSpec -> it.transform()

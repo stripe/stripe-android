@@ -8,12 +8,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * [PaymentAuthenticator] for [NextActionData.DisplayBoletoDetails], redirects to
+ * [PaymentAuthenticator] for [NextActionData.DisplayKonbiniDetails], redirects to
  * [WebIntentAuthenticator] or [NoOpIntentAuthenticator] based on whether if there is a
  * hostedVoucherUrl set.
  */
 @Singleton
-internal class BoletoAuthenticator @Inject constructor(
+internal class KonbiniAuthenticator @Inject constructor(
     private val webIntentAuthenticator: WebIntentAuthenticator,
     private val noOpIntentAuthenticator: NoOpIntentAuthenticator
 ) : PaymentAuthenticator<StripeIntent>() {
@@ -22,7 +22,7 @@ internal class BoletoAuthenticator @Inject constructor(
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        (authenticatable.nextActionData as NextActionData.DisplayBoletoDetails).let { detailsData ->
+        (authenticatable.nextActionData as NextActionData.DisplayKonbiniDetails).let { detailsData ->
             if (detailsData.hostedVoucherUrl == null) {
                 noOpIntentAuthenticator.authenticate(
                     host,
