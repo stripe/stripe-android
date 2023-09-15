@@ -753,7 +753,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             email = "email@email.com",
             name = "Jenny Rosen",
             phone = "+18008675309"
-        ).takeIf { viewBinding.defaultBillingOnButton.isChecked }
+        ).takeIf { viewBinding.attachDefaultsOnButton.isChecked }
 
         val appearance = intent.extras?.getParcelable(APPEARANCE_EXTRA) ?: AppearanceStore.state
 
