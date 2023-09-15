@@ -173,6 +173,10 @@ class LauncherActivity : AppCompatActivity() {
                 "BLIK",
                 BlikPaymentMethodActivity::class.java
             ),
+            Item(
+                activity.getString(R.string.revolut_pay_example),
+                RevolutPayActivity::class.java
+            ),
             // This is for internal use so as not to confuse the user.
             Item(
                 "StripeImage Example",
