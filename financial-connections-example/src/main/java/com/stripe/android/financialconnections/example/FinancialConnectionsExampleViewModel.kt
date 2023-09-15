@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.example
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
@@ -25,6 +26,11 @@ class FinancialConnectionsExampleViewModel(application: Application) : AndroidVi
 
     private val _viewEffect = MutableSharedFlow<FinancialConnectionsExampleViewEffect>()
     val viewEffect: SharedFlow<FinancialConnectionsExampleViewEffect> = _viewEffect
+
+    // For Java
+    val stateLiveData = state.asLiveData()
+    val viewEffectLiveData = viewEffect.asLiveData()
+
 
     fun startFinancialConnectionsSessionForData() {
         viewModelScope.launch {

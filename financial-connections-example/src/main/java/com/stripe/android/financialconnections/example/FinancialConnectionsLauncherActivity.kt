@@ -50,13 +50,17 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
         connectionsDebugSharedPrefs.edit { clear() }
     }
 
-    private class ExamplesAdapter constructor(
+    private class ExamplesAdapter(
         private val activity: Activity
     ) : RecyclerView.Adapter<ExamplesAdapter.ExamplesViewHolder>() {
         private val items = listOf(
             Item(
                 activity.getString(R.string.collect_bank_account_for_data),
                 FinancialConnectionsDataExampleActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.collect_bank_account_for_data_java),
+                FinancialConnectionsDataExampleActivityJava::class.java
             ),
             Item(
                 activity.getString(R.string.collect_bank_account_for_bank_account_token),
