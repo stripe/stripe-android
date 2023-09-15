@@ -46,16 +46,22 @@ internal class CompleteFormFieldValueFilter(
     ): FormFieldValues? {
         // This will run twice in a row when the save for future use state changes: once for the
         // saveController changing and once for the the hidden fields changing
-        var processedFieldsMap = idFieldSnapshotMap.filter {
-            !hiddenIdentifiers.contains(it.key)
+        val processedFieldsMap = idFieldSnapshotMap.filter {
+            it.key !in hiddenIdentifiers
         }.toMutableMap()
 
         // Apply defaults for fields with no value.
-        // Default values are added even if the field is hidden.
-        for (entry in defaultValues) {
-            val formValue = processedFieldsMap[entry.key]
-            if (formValue?.value.isNullOrBlank() && !entry.value.isNullOrBlank()) {
-                processedFieldsMap[entry.key] = FormFieldEntry(entry.value, true)
+        // Default values are added only if the field is hidden.
+        for (defaultValue in defaultValues) {
+            val key = defaultValue.key
+            val formValue = processedFieldsMap[key]
+
+            val hasNoValueInForm = formValue?.value.isNullOrBlank()
+            val hasDefaultValue = defaultValue.value.isNotBlank()
+            val isNotDisplayed = key in hiddenIdentifiers
+
+            if (hasNoValueInForm && hasDefaultValue && isNotDisplayed) {
+                processedFieldsMap[defaultValue.key] = FormFieldEntry(defaultValue.value, true)
             }
         }
 
