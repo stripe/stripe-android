@@ -9,6 +9,7 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.domain.CreateRepairSession
@@ -160,17 +161,17 @@ internal class BankAuthRepairViewModel @Inject constructor(
         reason: String?
     ) {
         // TODO handle auth failures
-        logger.debug("Auth failed $message")
+        logger.debug("Auth failed $message $url $reason")
     }
 
     private fun onAuthCancelled(url: String?) {
         // TODO handle auth cancellations
-        logger.debug("Auth cancelled")
+        logger.debug("Auth cancelled $url")
     }
 
     private fun completeAuthorizationSession(url: String) {
         // TODO handle auth succeeding.
-        logger.debug("Auth succeeded!")
+        logger.debug("Auth succeeded! $url")
     }
 
     fun onEnterDetailsManuallyClick() {
@@ -181,21 +182,13 @@ internal class BankAuthRepairViewModel @Inject constructor(
         // if clicked uri contains an eventName query param, track click event.
         viewModelScope.launch {
             uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
-                eventTracker.track(
-                    FinancialConnectionsEvent.Click(
-                        eventName,
-                        pane = Pane.BANK_AUTH_REPAIR
-                    )
-                )
+                eventTracker.track(Click(eventName, pane = PANE))
             }
         }
         if (URLUtil.isNetworkUrl(uri)) {
             setState {
                 copy(
-                    viewEffect = OpenUrl(
-                        uri,
-                        Date().time
-                    )
+                    viewEffect = OpenUrl(uri, Date().time)
                 )
             }
         } else {
@@ -221,7 +214,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
         }
     }
 
-    companion object : MavericksViewModelFactory<BankAuthRepairViewModel, PartnerAuthState> {
+    internal companion object : MavericksViewModelFactory<BankAuthRepairViewModel, PartnerAuthState> {
 
         override fun create(
             viewModelContext: ViewModelContext,
@@ -235,5 +228,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        val PANE = Pane.BANK_AUTH_REPAIR
     }
 }

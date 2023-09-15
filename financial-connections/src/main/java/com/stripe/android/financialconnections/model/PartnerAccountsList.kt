@@ -94,7 +94,4 @@ internal data class PartnerAccount(
         get() = _allowSelection ?: true
 
     internal val redactedAccountNumbers: String? get() = displayableAccountNumbers?.let { "••••$it" }
-    internal val encryptedNumbers get() = displayableAccountNumbers?.let { "••••$it" } ?: ""
-    internal val broken get() = status != null && status != FinancialConnectionsAccount.Status.ACTIVE
-    internal val fullName get() = "${this.name} $encryptedNumbers"
 }

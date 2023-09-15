@@ -13,6 +13,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
+import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairScreen
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerScreen
@@ -160,7 +161,7 @@ internal sealed class Destination(
 
     object BankAuthRepair : NoArgumentsDestination(
         route = Pane.BANK_AUTH_REPAIR.value,
-        composable = { ResetScreen() }
+        composable = { BankAuthRepairScreen() }
     )
 
     object ManualEntrySuccess : Destination(
