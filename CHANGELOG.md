@@ -2,6 +2,10 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+Dependencies updated:
+* [7297](https://github.com/stripe/stripe-android/pull/7297) Bumped Compose Foundation, Compose Material, Compose Runtime, and Compose UI from 1.4.3 to 1.5.1.
+* [7328](https://github.com/stripe/stripe-android/pull/7328) Bumped Compose Navigation from 2.5.3 to 2.7.2.
+
 ## 20.31.0 - 2023-09-18
 
 ### PaymentSheet
@@ -15,9 +19,6 @@
 * [ADDED][7315](https://github.com/stripe/stripe-android/pull/7315) Added support for Revolut Pay.
 * [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `GooglePayLauncher` now takes an optional `label` when presenting Google Pay for PaymentIntents, and an optional `amount` and `label` when presenting for SetupIntents.
 * [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `GooglePayPaymentMethodLauncher` now takes an optional `label` when presenting Google Pay.
-
-Dependencies updated:
-* [7297](https://github.com/stripe/stripe-android/pull/7297) Bumped Compose Foundation, Compose Material, Compose Runtime, and Compose UI from 1.4.3 to 1.5.1.
 
 ## 20.30.2 - 2023-09-13
 
