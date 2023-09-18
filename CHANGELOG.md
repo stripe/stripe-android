@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.31.0 - 2023-09-18
+
 ### PaymentSheet
 * [ADDED][7314](https://github.com/stripe/stripe-android/pull/7314) PaymentSheet now supports Revolut Pay for SetupIntents, and PaymentIntents with setup for future usage.
 * [ADDED][7302](https://github.com/stripe/stripe-android/pull/7302) PaymentSheet now supports Alma for PaymentIntents in private beta.
