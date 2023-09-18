@@ -13,6 +13,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.BuildConfig.DEBUG
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,13 +24,14 @@ import kotlin.time.Duration.Companion.seconds
 
 internal class CardWidgetViewModel(
     private val cbcEnabled: CbcEnabledProvider,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
 
     private val _isCbcEligible = MutableStateFlow(false)
     val isCbcEligible: StateFlow<Boolean> = _isCbcEligible
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             _isCbcEligible.value = cbcEnabled() && determineCbcEligibility()
         }
     }
