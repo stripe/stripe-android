@@ -18,6 +18,7 @@ private val paneToDestination = mapOf(
     Pane.LINK_ACCOUNT_PICKER to Destination.LinkAccountPicker,
     Pane.LINK_STEP_UP_VERIFICATION to Destination.LinkStepUpVerification,
     Pane.RESET to Destination.Reset,
+    Pane.BANK_AUTH_REPAIR to Destination.BankAuthRepair,
     Pane.MANUAL_ENTRY_SUCCESS to Destination.ManualEntrySuccess,
 )
 
