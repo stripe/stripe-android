@@ -70,8 +70,7 @@ internal class CompleteFormFieldValueFilter(
             showingMandate,
             userRequestedReuse
         ).takeIf {
-            processedFieldsMap.values.map { it.isComplete }
-                .none { complete -> !complete }
+            processedFieldsMap.values.all { it.isComplete }
         }
     }
 }
