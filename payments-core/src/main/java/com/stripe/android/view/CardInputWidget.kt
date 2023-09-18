@@ -42,6 +42,8 @@ import com.stripe.android.model.DelicateCardDetailsApi
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.utils.doWithViewModel
+import com.stripe.android.utils.launchAndCollect
 import kotlin.properties.Delegates
 
 /**
@@ -363,8 +365,6 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
-    private val viewModel: CardWidgetViewModel by cardWidgetViewModel()
-
     init {
         // This ensures that onRestoreInstanceState is called
         // during rotations.
@@ -386,8 +386,8 @@ class CardInputWidget @JvmOverloads constructor(
 
         initView(attrs)
 
-        doWithLifecycleOwner { owner ->
-            viewModel.isCbcEligible.launchAndCollectIn(owner) { isCbcEligible ->
+        doWithViewModel<CardWidgetViewModel> { viewModel ->
+            viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 if (BuildConfig.DEBUG) {
                     Log.d("CardInputWidget", "Is CBC eligible: $isCbcEligible")
                 }
