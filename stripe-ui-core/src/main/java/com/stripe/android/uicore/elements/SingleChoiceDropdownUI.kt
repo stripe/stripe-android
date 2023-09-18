@@ -1,5 +1,7 @@
-package com.stripe.android.view
+package com.stripe.android.uicore.elements
 
+import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,20 +23,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.stripe.android.R
-import com.stripe.android.model.CardBrand
 import com.stripe.android.uicore.stripeColors
-import com.stripe.payments.model.R as PaymentsModelR
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface DropdownChoice {
+    val label: String
+    @get:DrawableRes
+    val icon: Int?
+}
 
 @Composable
-internal fun CardBrandChoiceDropdown(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun <TDropdownChoice : DropdownChoice> SingleChoiceDropdown(
     expanded: Boolean,
-    currentBrand: CardBrand?,
-    possibleBrands: List<CardBrand>,
-    onBrandSelected: (CardBrand?) -> Unit,
+    title: String,
+    currentChoice: TDropdownChoice?,
+    choices: List<TDropdownChoice>,
+    onChoiceSelected: (TDropdownChoice) -> Unit,
     onDismiss: () -> Unit,
 ) {
     DropdownMenu(
@@ -42,28 +49,19 @@ internal fun CardBrandChoiceDropdown(
         onDismissRequest = onDismiss,
     ) {
         Text(
-            text = stringResource(R.string.stripe_card_brand_choice_selection_header),
+            text = title,
+            color = MaterialTheme.stripeColors.subtitle,
             modifier = Modifier.padding(vertical = 5.dp, horizontal = 13.dp),
         )
 
-        CardBrandChoiceItem(
-            icon = PaymentsModelR.drawable.stripe_ic_unknown,
-            displayValue = stringResource(R.string.stripe_card_brand_choice_no_selection),
-            isSelected = currentBrand == CardBrand.Unknown,
-            currentTextColor = MaterialTheme.stripeColors.onComponent,
-            onClick = {
-                onBrandSelected(null)
-            }
-        )
-
-        possibleBrands.forEach { brand ->
-            CardBrandChoiceItem(
-                icon = brand.icon,
-                displayValue = brand.displayName,
-                isSelected = brand == currentBrand,
+        choices.forEach { choice ->
+            Choice(
+                label = choice.label,
+                icon = choice.icon,
+                isSelected = choice == currentChoice,
                 currentTextColor = MaterialTheme.stripeColors.onComponent,
                 onClick = {
-                    onBrandSelected(brand)
+                    onChoiceSelected(choice)
                 }
             )
         }
@@ -71,9 +69,9 @@ internal fun CardBrandChoiceDropdown(
 }
 
 @Composable
-private fun CardBrandChoiceItem(
-    icon: Int,
-    displayValue: String,
+private fun Choice(
+    label: String,
+    icon: Int?,
     isSelected: Boolean,
     currentTextColor: Color,
     onClick: () -> Unit = {}
@@ -86,14 +84,16 @@ private fun CardBrandChoiceItem(
             .requiredSizeIn(minHeight = 48.dp)
             .clickable { onClick() }
     ) {
-        Image(
-            painter = painterResource(id = icon),
-            contentDescription = null,
-            modifier = Modifier.padding(start = 13.dp),
-        )
+        icon?.let { icon ->
+            Image(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                modifier = Modifier.padding(start = 13.dp),
+            )
+        }
 
         Text(
-            text = displayValue,
+            text = label,
             modifier = Modifier.padding(start = 16.dp),
             color = if (isSelected) {
                 MaterialTheme.colors.primary
@@ -121,4 +121,3 @@ private fun CardBrandChoiceItem(
         )
     }
 }
-

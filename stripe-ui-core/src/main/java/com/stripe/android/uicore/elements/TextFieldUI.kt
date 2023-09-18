@@ -257,42 +257,49 @@ fun TextField(
 
                             val show = !loading && !it.hide
 
-                            Box(
-                                modifier = Modifier.clickable(enabled = show) {
-                                    expandable = true
-                                }
-                            ) {
+                            Box {
                                 Row(
-                                    modifier = Modifier.padding(10.dp),
+                                    modifier = Modifier
+                                        .padding(10.dp)
+                                        .clickable(enabled = true) {
+                                            expandable = true
+                                        },
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
-                                    TrailingIcon(it.icon, loading)
-                                    AnimatedVisibility(visible = show) {
-                                        Box {
-                                            TrailingIcon(
-                                                trailingIcon = TextFieldIcon.Trailing(
-                                                    R.drawable.stripe_ic_chevron_down,
-                                                    isTintable = false
-                                                ),
-                                                loading = loading
-                                            )
+                                    TrailingIcon(
+                                        TextFieldIcon.Trailing(
+                                            it.currentItem.icon,
+                                            isTintable = false
+                                        ),
+                                        loading
+                                    )
 
-                                            DropdownMenu(
-                                                expanded = expandable,
-                                                onDismissRequest = {
-                                                    expandable = false
-                                                }
-                                            ) {
-                                                DropdownMenuItem(
-                                                    displayValue = "Select card brand (optional)",
-                                                    isSelected = false,
-                                                    currentTextColor = MaterialTheme.colors.onSurface
-                                                )
-                                            }
-                                        }
+                                    if (show) {
+                                        TrailingIcon(
+                                            trailingIcon = TextFieldIcon.Trailing(
+                                                R.drawable.stripe_ic_chevron_down,
+                                                isTintable = false
+                                            ),
+                                            loading = false
+                                        )
                                     }
                                 }
+
+                                SingleChoiceDropdown(
+                                    expanded = expandable,
+                                    title = it.title,
+                                    currentChoice = it.currentItem,
+                                    choices = it.items,
+                                    onChoiceSelected = { item ->
+                                        it.onItemClick?.invoke(item)
+
+                                        expandable = false
+                                    },
+                                    onDismiss = {
+                                        expandable = false
+                                    }
+                                )
                             }
                         }
                     }

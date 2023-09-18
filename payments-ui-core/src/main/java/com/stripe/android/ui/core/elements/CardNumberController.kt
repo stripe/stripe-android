@@ -31,6 +31,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
+import com.stripe.android.R as PaymentsCoreR
+import com.stripe.payments.model.R as PaymentsModelR
+import com.stripe.payments.model.R as PaymentModelR
 
 internal sealed class CardNumberController : TextFieldController, SectionFieldErrorController {
     abstract val cardBrandFlow: Flow<CardBrand>
@@ -50,6 +53,7 @@ internal sealed class CardNumberController : TextFieldController, SectionFieldEr
 
 internal class CardNumberEditableController constructor(
     private val cardTextFieldConfig: CardNumberConfig,
+    context: Context,
     cardAccountRangeRepository: CardAccountRangeRepository,
     workContext: CoroutineContext,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
@@ -65,6 +69,7 @@ internal class CardNumberEditableController constructor(
         isEligibleForCardBrandChoice: Boolean,
     ) : this(
         cardTextFieldConfig,
+        context,
         DefaultCardAccountRangeRepositoryFactory(context).create(),
         Dispatchers.IO,
         initialValue = initialValue,
@@ -97,11 +102,20 @@ internal class CardNumberEditableController constructor(
     override val trailingIcon: Flow<TextFieldIcon?> = _fieldValue.map {
         val cardBrands = CardBrand.getCardBrands(it)
         if (isEligibleForCardBrandChoice && it.isNotEmpty()) {
+            val selected = TextFieldIcon.Dropdown.Item(
+                label = context.getString(PaymentsCoreR.string.stripe_card_brand_choice_no_selection),
+                icon = PaymentModelR.drawable.stripe_ic_unknown
+            )
+
             TextFieldIcon.Dropdown(
-                icon = TextFieldIcon.Trailing(
-                    idRes = R.drawable.stripe_ic_unknown,
-                    isTintable = false
-                ),
+                title = context.getString(PaymentsCoreR.string.stripe_card_brand_choice_selection_header),
+                currentItem = selected,
+                items = listOf(selected) + cardBrands.map { brand ->
+                    TextFieldIcon.Dropdown.Item(
+                        label = brand.displayName,
+                        icon = brand.icon
+                    )
+                },
                 hide = it.length < 8
             )
         } else if (accountRangeService.accountRange != null) {

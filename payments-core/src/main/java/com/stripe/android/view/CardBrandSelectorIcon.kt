@@ -18,8 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.R
 import com.stripe.android.model.CardBrand
+import com.stripe.android.uicore.elements.SingleChoiceDropdown
 
 @Composable
 internal fun CardBrandSelectorIcon(
@@ -79,16 +82,43 @@ internal fun CardBrandSelectorIcon(
         }
 
         if (showDropdown) {
-            CardBrandChoiceDropdown(
+            val noSelection = CardBrandChoice(
+                label = stringResource(id = R.string.stripe_card_brand_choice_no_selection),
+                icon = CardBrand.Unknown.icon
+            )
+
+            val brands = listOf(CardBrand.Unknown) + possibleBrands
+            val choices = brands.map { brand ->
+                brand.toChoice(noSelection)
+            }
+
+            SingleChoiceDropdown(
+                title = stringResource(id = R.string.stripe_card_brand_choice_selection_header),
                 expanded = expanded,
-                currentBrand = currentBrand,
-                possibleBrands = possibleBrands,
-                onBrandSelected = {
-                    onBrandSelected(it)
+                currentChoice = currentBrand.toChoice(noSelection),
+                choices = choices,
+                onChoiceSelected = { choice ->
+                    when (val choiceIndex = choices.indexOf(choice)) {
+                        -1 -> Unit
+                        0 -> onBrandSelected(null)
+                        else -> onBrandSelected(possibleBrands[choiceIndex - 1])
+                    }
+
                     expanded = false
                 },
                 onDismiss = { expanded = false },
             )
         }
+    }
+}
+
+private fun CardBrand.toChoice(unknownBrand: CardBrandChoice): CardBrandChoice {
+    return if (this == CardBrand.Unknown) {
+        unknownBrand
+    } else {
+        CardBrandChoice(
+            label = displayName,
+            icon = icon
+        )
     }
 }

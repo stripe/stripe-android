@@ -96,9 +96,18 @@ sealed class TextFieldIcon {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     data class Dropdown(
-        val icon: Trailing,
-        val hide: Boolean
-    ) : TextFieldIcon()
+        val title: String,
+        val hide: Boolean,
+        val currentItem: Item,
+        val items: List<Item>,
+        val onItemClick: ((item: Item) -> Unit)? = null
+    ) : TextFieldIcon() {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+        data class Item(
+            override val label: String,
+            override val icon: Int
+        ) : DropdownChoice
+    }
 }
 
 /**

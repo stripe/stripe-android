@@ -7,6 +7,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 dependencies {
     api project(":stripe-core")
     api project(":payments-model")
+    implementation project(":stripe-ui-core")
     compileOnly project(':financial-connections')
 
     implementation libs.androidx.activity
