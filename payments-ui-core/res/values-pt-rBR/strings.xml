@@ -39,6 +39,8 @@
   <string name="stripe_klarna_buy_now_pay_later">Compre agora ou pague depois com Klarna.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Pagar depois com Klarna.</string>
+  <!-- Caption for Phone field on address form -->
+  <string name="stripe_konbini_confirmation_number_label">Telefone</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Nome no cartão</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
