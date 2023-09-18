@@ -363,8 +363,6 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
-    private val viewModel: CardWidgetViewModel by cardWidgetViewModel()
-
     init {
         // This ensures that onRestoreInstanceState is called
         // during rotations.
@@ -386,8 +384,8 @@ class CardInputWidget @JvmOverloads constructor(
 
         initView(attrs)
 
-        doWithLifecycleOwner { owner ->
-            viewModel.isCbcEligible.launchAndCollectIn(owner) { isCbcEligible ->
+        doWithCardWidgetViewModel { viewModel ->
+            viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 if (BuildConfig.DEBUG) {
                     Log.d("CardInputWidget", "Is CBC eligible: $isCbcEligible")
                 }

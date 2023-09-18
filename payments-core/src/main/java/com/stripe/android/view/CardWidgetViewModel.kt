@@ -52,36 +52,47 @@ internal class CardWidgetViewModel(
     }
 }
 
-internal fun View.cardWidgetViewModel(): Lazy<CardWidgetViewModel> {
-    return lazy {
-        val storeOwner = findViewTreeViewModelStoreOwner()!!
+internal fun View.doWithCardWidgetViewModel(
+    action: LifecycleOwner.(CardWidgetViewModel) -> Unit,
+) {
+    doOnAttach {
+        val lifecycleOwner = findViewTreeLifecycleOwner()
+        val viewModelStoreOwner = findViewTreeViewModelStoreOwner()
+
+        if (lifecycleOwner == null || viewModelStoreOwner == null) {
+            if (DEBUG) {
+                if (lifecycleOwner == null) {
+                    error("Couldn't find a LifecycleOwner for view")
+                } else {
+                    error("Couldn't find a ViewModelStoreOwner for view")
+                }
+            }
+            return@doOnAttach
+        }
+
         val factory = CardWidgetViewModel.Factory(
             cbcEnabledProvider = RealCbcEnabledProvider(),
         )
-        ViewModelProvider(storeOwner, factory)[CardWidgetViewModel::class.java]
+
+        val viewModel = ViewModelProvider(
+            owner = viewModelStoreOwner,
+            factory = factory,
+        )[CardWidgetViewModel::class.java]
+
+        lifecycleOwner.action(viewModel)
     }
 }
 
-internal inline fun <T> Flow<T>.launchAndCollectIn(
-    owner: LifecycleOwner,
+context(LifecycleOwner)
+internal inline fun <T> Flow<T>.launchAndCollect(
     minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
     crossinline action: (T) -> Unit
 ) {
-    owner.lifecycleScope.launch {
-        owner.repeatOnLifecycle(minActiveState) {
+    lifecycleScope.launch {
+        repeatOnLifecycle(minActiveState) {
             collect {
                 action(it)
             }
         }
-    }
-}
-
-internal fun View.doWithLifecycleOwner(action: (LifecycleOwner) -> Unit) {
-    doOnAttach {
-        val owner = findViewTreeLifecycleOwner()
-        if (DEBUG && owner == null) {
-            error("Couldn't find a LifecycleOwner for view")
-        }
-        owner?.let(action)
     }
 }
