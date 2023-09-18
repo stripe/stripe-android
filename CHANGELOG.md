@@ -16,6 +16,9 @@
 * [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `GooglePayLauncher` now takes an optional `label` when presenting Google Pay for PaymentIntents, and an optional `amount` and `label` when presenting for SetupIntents.
 * [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `GooglePayPaymentMethodLauncher` now takes an optional `label` when presenting Google Pay.
 
+Dependencies updated:
+* [7297](https://github.com/stripe/stripe-android/pull/7297) Bumped Compose Foundation, Compose Material, Compose Runtime, and Compose UI from 1.4.3 to 1.5.1.
+
 ## 20.30.2 - 2023-09-13
 
 ### PaymentSheet
