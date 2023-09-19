@@ -312,7 +312,7 @@ class Selectors(
 
     fun setCurrency(currency: Currency) {
         EspressoIdButton(R.id.currency_spinner).click()
-        EspressoText(currency.name).click()
+        onData(allOf(isValue(currency.name))).perform(ViewActions.click())
     }
 
     fun setMerchantCountry(merchantCountryCode: String) {
