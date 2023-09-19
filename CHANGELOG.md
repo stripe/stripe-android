@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### Financial Connections
+* [FIXED][7331](https://github.com/stripe/stripe-android/pull/7331) When cancelling out of a auth session, going back to the consent screen requires two back taps.
+
 Dependencies updated:
 * [7297](https://github.com/stripe/stripe-android/pull/7297) Bumped Compose Foundation, Compose Material, Compose Runtime, and Compose UI from 1.4.3 to 1.5.1.
 
