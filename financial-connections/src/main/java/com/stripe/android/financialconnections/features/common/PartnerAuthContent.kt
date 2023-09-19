@@ -168,10 +168,10 @@ private fun LoadedContent(
     onClickableTextClick: (String) -> Unit
 ) {
     when (authenticationStatus) {
-        is Uninitialized -> when (payload.authSession.isOAuth) {
+        is Uninitialized -> when (payload.isOAuth) {
             true -> InstitutionalPrePaneContent(
                 onContinueClick = onContinueClick,
-                content = payload.authSession.display!!.text!!.oauthPrepane!!,
+                content = payload.oauthPrepane!!,
                 onClickableTextClick = onClickableTextClick,
             )
 

@@ -89,7 +89,11 @@ internal class PartnerAuthViewModel @Inject constructor(
                 sync = sync
             )
             Payload(
-                authSession = authSession,
+                authSessionId = authSession.id,
+                authSessionUrl = requireNotNull(authSession.browserReadyUrl(applicationId)),
+                oauthPrepane = authSession.display?.text?.oauthPrepane,
+                isOAuth = authSession.isOAuth,
+                flow = authSession.flow,
                 institution = requireNotNull(manifest.activeInstitution),
                 isStripeDirect = manifest.isStripeDirect ?: false
             )
@@ -107,7 +111,11 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
             logger.debug("Created auth session ${authSession.id}")
             Payload(
-                authSession = authSession,
+                authSessionId = authSession.id,
+                authSessionUrl = requireNotNull(authSession.browserReadyUrl(applicationId)),
+                oauthPrepane = authSession.display?.text?.oauthPrepane,
+                isOAuth = authSession.isOAuth,
+                flow = authSession.flow,
                 institution = requireNotNull(manifest.activeInstitution),
                 isStripeDirect = manifest.isStripeDirect ?: false
             ).also {
@@ -121,7 +129,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         }.execute {
             copy(
                 payload = it,
-                activeAuthSession = it()?.authSession?.id
+                activeAuthSession = it()?.authSessionId
             )
         }
     }
@@ -131,7 +139,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             asyncProp = PartnerAuthState::payload,
             onSuccess = {
                 // launch auth for non-OAuth (skip pre-pane).
-                if (!it.authSession.isOAuth) launchAuthInBrowser()
+                if (!it.isOAuth) launchAuthInBrowser()
             }
         )
     }
@@ -153,47 +161,29 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     fun onLaunchAuthClick() {
         viewModelScope.launch {
-            awaitState().payload()?.authSession?.let {
-                postAuthSessionEvent(it.id, AuthSessionEvent.OAuthLaunched(Date()))
+            awaitState().payload()?.let {
+                postAuthSessionEvent(it.authSessionId, AuthSessionEvent.OAuthLaunched(Date()))
                 eventTracker.track(PrepaneClickContinue(PANE))
+                launchAuthInBrowser()
             }
-            launchAuthInBrowser()
         }
     }
 
     private suspend fun launchAuthInBrowser() {
-        kotlin.runCatching { requireNotNull(getOrFetchSync().manifest.activeAuthSession) }
-            .onSuccess {
-                it.browserReadyUrl()?.let { url ->
-                    setState { copy(viewEffect = OpenPartnerAuth(url)) }
-                    eventTracker.track(
-                        FinancialConnectionsEvent.AuthSessionOpened(
-                            id = it.id,
-                            pane = PANE,
-                            flow = it.flow,
-                            defaultBrowser = browserManager.getPackageToHandleUri(
-                                uri = url.toUri()
-                            )
-                        )
+        requireNotNull(awaitState().payload()).let {
+            setState { copy(viewEffect = OpenPartnerAuth(it.authSessionUrl)) }
+            eventTracker.track(
+                FinancialConnectionsEvent.AuthSessionOpened(
+                    id = it.authSessionId,
+                    pane = PANE,
+                    flow = it.flow,
+                    defaultBrowser = browserManager.getPackageToHandleUri(
+                        uri = it.authSessionUrl.toUri()
                     )
-                }
-            }
-            .onFailure {
-                eventTracker.logError(
-                    extraMessage = "failed retrieving active session from cache",
-                    error = it,
-                    logger = logger,
-                    pane = PANE
                 )
-                setState { copy(authenticationStatus = Fail(it)) }
-            }
+            )
+        }
     }
-
-    /**
-     * Auth Session url after clearing the deep link prefix (required for non-native app2app flows).
-     */
-    private fun FinancialConnectionsAuthorizationSession.browserReadyUrl(): String? =
-        url?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
 
     fun onSelectAnotherBank() {
         navigationManager.tryNavigateTo(

@@ -8,16 +8,12 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.model.Body
 import com.stripe.android.financialconnections.model.Cta
-import com.stripe.android.financialconnections.model.Display
 import com.stripe.android.financialconnections.model.Entry
-import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.Flow
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.OauthPrepane
 import com.stripe.android.financialconnections.model.PartnerNotice
-import com.stripe.android.financialconnections.model.TextUpdate
 
 internal class PartnerAuthPreviewParameterProvider :
     PreviewParameterProvider<PartnerAuthState> {
@@ -42,8 +38,12 @@ internal class PartnerAuthPreviewParameterProvider :
                     featuredOrder = null,
                     mobileHandoffCapable = false
                 ),
-                authSession = session(),
-                isStripeDirect = false
+                authSessionId = "1234",
+                authSessionUrl = "https://stripe.com",
+                flow = Flow.FINICITY_CONNECT_V2_OAUTH.name,
+                oauthPrepane = oauthPrepane(),
+                isOAuth = true,
+                isStripeDirect = false,
             )
         ),
         authenticationStatus = Uninitialized,
@@ -63,7 +63,11 @@ internal class PartnerAuthPreviewParameterProvider :
                     featuredOrder = null,
                     mobileHandoffCapable = false
                 ),
-                authSession = session(),
+                authSessionId = "1234",
+                authSessionUrl = "https://stripe.com",
+                flow = Flow.FINICITY_CONNECT_V2_OAUTH.name,
+                oauthPrepane = oauthPrepane(),
+                isOAuth = true,
                 isStripeDirect = false
             )
         ),
@@ -71,20 +75,6 @@ internal class PartnerAuthPreviewParameterProvider :
         authenticationStatus = Loading(),
         viewEffect = null
     )
-
-    private fun session() =
-        FinancialConnectionsAuthorizationSession(
-            flow = Flow.FINICITY_CONNECT_V2_OAUTH.name,
-            showPartnerDisclosure = true,
-            _isOAuth = true,
-            nextPane = FinancialConnectionsSessionManifest.Pane.PARTNER_AUTH,
-            id = "1234",
-            display = Display(
-                TextUpdate(
-                    oauthPrepane = oauthPrepane()
-                )
-            )
-        )
 
     private fun oauthPrepane(): OauthPrepane {
         val sampleImage =

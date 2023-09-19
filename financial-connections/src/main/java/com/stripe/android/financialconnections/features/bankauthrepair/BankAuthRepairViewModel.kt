@@ -22,8 +22,6 @@ import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthS
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationRepairSession
-import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -60,7 +58,11 @@ internal class BankAuthRepairViewModel @Inject constructor(
             val repairSession = createRepairSession(coreAuthorization)
             updateLocalManifest { it.copy(activeInstitution = repairSession.institution) }
             Payload(
-                authSession = repairSession.toAuthSession(),
+                authSessionId = repairSession.id,
+                authSessionUrl = requireNotNull(repairSession.browserReadyUrl(applicationId)),
+                flow = repairSession.flow,
+                oauthPrepane = repairSession.display?.text?.oauthPrepane,
+                isOAuth = requireNotNull(repairSession.isOAuth),
                 institution = requireNotNull(repairSession.institution),
                 isStripeDirect = getManifest().isStripeDirect ?: false
             )
@@ -69,22 +71,12 @@ internal class BankAuthRepairViewModel @Inject constructor(
         }
     }
 
-    private fun FinancialConnectionsAuthorizationRepairSession.toAuthSession() =
-        FinancialConnectionsAuthorizationSession(
-            id = this.id,
-            url = this.url,
-            flow = this.flow,
-            _isOAuth = this.isOAuth,
-            nextPane = Pane.SUCCESS,
-            display = this.display,
-        )
-
     private fun observePayload() {
         onAsync(
             asyncProp = PartnerAuthState::payload,
             onSuccess = {
                 // launch auth for non-OAuth (skip pre-pane).
-                if (!it.authSession.isOAuth) launchAuthInBrowser()
+                if (!it.isOAuth) launchAuthInBrowser()
             }
         )
     }
@@ -107,11 +99,10 @@ internal class BankAuthRepairViewModel @Inject constructor(
     }
 
     private suspend fun launchAuthInBrowser() {
-        kotlin.runCatching { requireNotNull(awaitState().payload()?.authSession) }
+        kotlin.runCatching { requireNotNull(awaitState().payload()) }
             .onSuccess {
-                it.url
-                    ?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
-                    ?.let { setState { copy(viewEffect = OpenPartnerAuth(it)) } }
+                it.authSessionUrl
+                    .let { setState { copy(viewEffect = OpenPartnerAuth(it)) } }
             }
             .onFailure {
                 eventTracker.track(FinancialConnectionsEvent.Error(Pane.BANK_AUTH_REPAIR, it))
@@ -214,7 +205,8 @@ internal class BankAuthRepairViewModel @Inject constructor(
         }
     }
 
-    internal companion object : MavericksViewModelFactory<BankAuthRepairViewModel, PartnerAuthState> {
+    internal companion object :
+        MavericksViewModelFactory<BankAuthRepairViewModel, PartnerAuthState> {
 
         override fun create(
             viewModelContext: ViewModelContext,
