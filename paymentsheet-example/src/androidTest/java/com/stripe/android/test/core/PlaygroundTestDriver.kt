@@ -326,7 +326,7 @@ class PlaygroundTestDriver(
         authorizeAction: AuthorizeAction?,
         requestedBrowser: Browser?
     ) {
-        authorizeAction?.let {
+        if (authorizeAction?.requiresBrowser == true) {
             requestedBrowser?.let {
                 val browserUI = BrowserUI.convert(it)
                 Assume.assumeTrue(getBrowser(browserUI) == browserUI)
@@ -427,7 +427,7 @@ class PlaygroundTestDriver(
                     assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
 
                     blockUntilAuthorizationPageLoaded(
-                        isSetup = testParameters.authorizationAction is AuthorizeAction.AuthorizeSetup
+                        isSetup = testParameters.intentType == IntentType.Setup
                     )
                 }
 
@@ -437,7 +437,8 @@ class PlaygroundTestDriver(
                     } else if (!authorizeAction.exists()) {
                         // Buttons aren't showing the same way each time in the web page.
                         object : UiAutomatorText(
-                            label = requireNotNull(testParameters.authorizationAction).text,
+                            label = requireNotNull(testParameters.authorizationAction)
+                                .text(testParameters.intentType),
                             className = "android.widget.TextView",
                             device = device
                         ) {}.click()
@@ -453,7 +454,6 @@ class PlaygroundTestDriver(
                         }
                     }
                     is AuthorizeAction.AuthorizePayment -> {}
-                    is AuthorizeAction.AuthorizeSetup -> {}
                     is AuthorizeAction.PollingSucceedsAfterDelay -> {
                         waitForPollingToFinish()
                     }
@@ -496,7 +496,6 @@ class PlaygroundTestDriver(
 
         val isDone = testParameters.authorizationAction in setOf(
             AuthorizeAction.AuthorizePayment,
-            AuthorizeAction.AuthorizeSetup,
             AuthorizeAction.PollingSucceedsAfterDelay,
             AuthorizeAction.DisplayQrCode,
             null

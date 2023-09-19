@@ -374,8 +374,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 googlePayPaymentMethodLauncher?.present(
                     currencyCode = (stripeIntent as? PaymentIntent)?.currency
                         ?: args.googlePayConfig?.currencyCode.orEmpty(),
-                    amount = (stripeIntent as? PaymentIntent)?.amount ?: 0L,
-                    transactionId = stripeIntent.id
+                    amount = when (stripeIntent) {
+                        is PaymentIntent -> stripeIntent.amount ?: 0L
+                        is SetupIntent -> args.googlePayConfig?.amount ?: 0L
+                    },
+                    transactionId = stripeIntent.id,
+                    label = args.googlePayConfig?.label,
                 )
             }
         } else {

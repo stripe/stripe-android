@@ -16,6 +16,7 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.Address
@@ -130,6 +131,10 @@ internal class PaymentSheetViewModelTest {
     }
     private val paymentLauncherFactory = mock<StripePaymentLauncherAssistedFactory> {
         on { create(any(), any(), anyOrNull(), any()) } doReturn paymentLauncher
+    }
+    private val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
+    private val googlePayLauncherFactory = mock<GooglePayPaymentMethodLauncherFactory> {
+        on { create(any(), any(), any(), any(), any()) } doReturn googlePayLauncher
     }
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 
@@ -1537,6 +1542,81 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
+    @Test
+    fun `Launches Google Pay with custom label if provided for payment intent`() {
+        val expectedLabel = "My custom label"
+        val expectedAmount = 1099L
+
+        val args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "CA",
+                    currencyCode = "CAD",
+                    amount = 12345,
+                    label = expectedLabel,
+                )
+            )
+        )
+
+        val viewModel = createViewModel(
+            args = args,
+            isGooglePayReady = true,
+        )
+
+        viewModel.setupGooglePay(
+            lifecycleScope = mock(),
+            activityResultLauncher = mock(),
+        )
+
+        viewModel.checkoutWithGooglePay()
+
+        verify(googlePayLauncher).present(
+            currencyCode = any(),
+            amount = eq(expectedAmount),
+            transactionId = anyOrNull(),
+            label = eq(expectedLabel),
+        )
+    }
+
+    @Test
+    fun `Launches Google Pay with custom label and amount if provided for setup intent`() {
+        val expectedLabel = "My custom label"
+        val expectedAmount = 1234L
+
+        val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config?.copy(
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "CA",
+                    currencyCode = "CAD",
+                    amount = expectedAmount,
+                    label = expectedLabel,
+                )
+            )
+        )
+
+        val viewModel = createViewModel(
+            args = args,
+            isGooglePayReady = true,
+            stripeIntent = SETUP_INTENT,
+        )
+
+        viewModel.setupGooglePay(
+            lifecycleScope = mock(),
+            activityResultLauncher = mock(),
+        )
+
+        viewModel.checkoutWithGooglePay()
+
+        verify(googlePayLauncher).present(
+            currencyCode = any(),
+            amount = eq(expectedAmount),
+            transactionId = anyOrNull(),
+            label = eq(expectedLabel),
+        )
+    }
+
     private fun createViewModel(
         args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
@@ -1553,11 +1633,11 @@ internal class PaymentSheetViewModelTest {
             linkConfigurationCoordinator = linkConfigurationCoordinator,
         ) { linkHandler, linkInteractor, savedStateHandle ->
             PaymentSheetViewModel(
-                application,
-                args,
-                eventReporter,
-                { paymentConfiguration },
-                FakePaymentSheetLoader(
+                application = application,
+                args = args,
+                eventReporter = eventReporter,
+                lazyPaymentConfig = { paymentConfiguration },
+                paymentSheetLoader = FakePaymentSheetLoader(
                     stripeIntent = stripeIntent,
                     shouldFail = shouldFailLoad,
                     linkState = linkState,
@@ -1565,13 +1645,13 @@ internal class PaymentSheetViewModelTest {
                     delay = delay,
                     isGooglePayAvailable = isGooglePayReady,
                 ),
-                customerRepository,
-                prefsRepository,
-                lpmRepository,
+                customerRepository = customerRepository,
+                prefsRepository = prefsRepository,
+                lpmRepository = lpmRepository,
                 paymentLauncherFactory = paymentLauncherFactory,
-                mock(),
-                Logger.noop(),
-                testDispatcher,
+                googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
+                logger = Logger.noop(),
+                workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
@@ -1606,5 +1686,6 @@ internal class PaymentSheetViewModelTest {
         private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        val SETUP_INTENT = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
     }
 }

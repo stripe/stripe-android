@@ -196,11 +196,17 @@ internal val AffirmRequirement = PaymentMethodRequirements(
 
 internal val RevolutPayRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
+    siRequirements = emptySet(),
+    confirmPMFromCustomer = true
+)
+
+internal val AmazonPayRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
     siRequirements = null,
     confirmPMFromCustomer = null
 )
 
-internal val AmazonPayRequirement = PaymentMethodRequirements(
+internal val AlmaRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
     siRequirements = null,
     confirmPMFromCustomer = null
@@ -282,4 +288,10 @@ internal val BoletoRequirement = PaymentMethodRequirements(
     piRequirements = setOf(Delayed),
     siRequirements = setOf(Delayed),
     confirmPMFromCustomer = true,
+)
+
+internal val KonbiniRequirement = PaymentMethodRequirements(
+    piRequirements = setOf(Delayed),
+    siRequirements = null,
+    confirmPMFromCustomer = null,
 )

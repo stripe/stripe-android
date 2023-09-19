@@ -86,36 +86,38 @@ enum class Browser {
  */
 sealed interface AuthorizeAction {
 
-    val text: String
+    fun text(intentType: IntentType): String
+
     val requiresBrowser: Boolean
 
     object PollingSucceedsAfterDelay : AuthorizeAction {
-        override val text: String = "POLLING SUCCEEDS AFTER DELAY"
+        override fun text(intentType: IntentType): String = "POLLING SUCCEEDS AFTER DELAY"
         override val requiresBrowser: Boolean = false
     }
 
     object AuthorizePayment : AuthorizeAction {
-        override val text: String = "AUTHORIZE TEST PAYMENT"
-        override val requiresBrowser: Boolean = true
-    }
-
-    object AuthorizeSetup : AuthorizeAction {
-        override val text: String = "AUTHORIZE TEST SETUP"
+        override fun text(intentType: IntentType): String {
+            return if (intentType == IntentType.Setup) {
+                "AUTHORIZE TEST SETUP"
+            } else {
+                "AUTHORIZE TEST PAYMENT"
+            }
+        }
         override val requiresBrowser: Boolean = true
     }
 
     object DisplayQrCode : AuthorizeAction {
-        override val text: String = "Display QR code"
+        override fun text(intentType: IntentType): String = "Display QR code"
         override val requiresBrowser: Boolean = false
     }
 
     data class Fail(val expectedError: String) : AuthorizeAction {
-        override val text: String = "FAIL TEST PAYMENT"
+        override fun text(intentType: IntentType): String = "FAIL TEST PAYMENT"
         override val requiresBrowser: Boolean = true
     }
 
     object Cancel : AuthorizeAction {
-        override val text: String = ""
+        override fun text(intentType: IntentType): String = ""
         override val requiresBrowser: Boolean = true
     }
 }
@@ -144,6 +146,7 @@ enum class Currency {
     MYR,
     BRL,
     MXN,
+    JPY,
 }
 
 /**

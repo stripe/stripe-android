@@ -61,7 +61,6 @@ internal class TestCashApp : BaseLpmTest() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = cashApp.copy(
                 intentType = IntentType.Setup,
-                authorizationAction = AuthorizeAction.AuthorizeSetup,
             ),
         )
     }

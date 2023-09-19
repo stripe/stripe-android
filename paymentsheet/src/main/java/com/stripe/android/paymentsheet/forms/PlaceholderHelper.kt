@@ -39,7 +39,6 @@ internal object PlaceholderHelper {
             PlaceholderField.Email,
             PlaceholderField.Phone,
             PlaceholderField.BillingAddress,
-            PlaceholderField.SepaMandate,
         )
 
         val modifiedSpecs = specs.mapNotNull {
@@ -59,10 +58,6 @@ internal object PlaceholderHelper {
 
                 is AddressSpec -> it.takeUnless {
                     configuration.address == AddressCollectionMode.Never
-                }
-
-                is SepaMandateTextSpec -> it.takeIf {
-                    requiresMandate
                 }
 
                 is PlaceholderSpec -> specForPlaceholderField(

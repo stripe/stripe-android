@@ -39,6 +39,8 @@
   <string name="stripe_klarna_buy_now_pay_later">用 Klarna 先買後付。</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">用 Klarna 延後支付。</string>
+  <!-- Caption for Phone field on address form -->
+  <string name="stripe_konbini_confirmation_number_label">電話</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">持卡人姓名</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->

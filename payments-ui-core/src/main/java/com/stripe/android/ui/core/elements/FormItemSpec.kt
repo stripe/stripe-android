@@ -43,6 +43,7 @@ object FormItemSpecSerializer :
             "au_becs_account_number" -> AuBankAccountNumberSpec.serializer()
             "au_becs_mandate" -> AuBecsDebitMandateTextSpec.serializer()
             "boleto_tax_id" -> BoletoTaxIdSpec.serializer()
+            "konbini_confirmation_number" -> KonbiniConfirmationNumberSpec.serializer()
             "country" -> CountrySpec.serializer()
             "selector" -> DropdownSpec.serializer()
             "email" -> EmailSpec.serializer()

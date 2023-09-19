@@ -35,19 +35,22 @@ class GooglePayLauncherContract :
      * Args for launching [GooglePayLauncherContract] to confirm a [PaymentIntent].
      */
     @Parcelize
-    data class PaymentIntentArgs(
+    data class PaymentIntentArgs @JvmOverloads constructor(
         override val clientSecret: String,
-        override val config: GooglePayLauncher.Config
+        override val config: GooglePayLauncher.Config,
+        internal val label: String? = null,
     ) : Args()
 
     /**
      * Args for launching [GooglePayLauncherContract] to confirm a [SetupIntent].
      */
     @Parcelize
-    data class SetupIntentArgs(
+    data class SetupIntentArgs @JvmOverloads constructor(
         override val clientSecret: String,
         override val config: GooglePayLauncher.Config,
-        internal val currencyCode: String
+        internal val currencyCode: String,
+        internal val amount: Long? = null,
+        internal val label: String? = null,
     ) : Args()
 
     sealed class Args : Parcelable {

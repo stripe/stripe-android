@@ -349,6 +349,13 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false
         ),
+        Alma(
+            "alma",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
         MobilePay(
             "mobilepay",
             isReusable = false,
@@ -379,6 +386,13 @@ constructor(
         ),
         Boleto(
             code = "boleto",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = true,
+        ),
+        Konbini(
+            code = "konbini",
             isReusable = false,
             isVoucher = true,
             requiresMandate = false,
