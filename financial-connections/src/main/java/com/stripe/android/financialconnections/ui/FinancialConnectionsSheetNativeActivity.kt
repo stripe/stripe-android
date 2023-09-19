@@ -220,14 +220,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     return@onEach
                 }
                 when (intent) {
-                    is NavigationIntent.NavigateBack -> {
-                        if (intent.route != null) {
-                            navHostController.popBackStack(intent.route, intent.inclusive)
-                        } else {
-                            navHostController.popBackStack()
-                        }
-                    }
-
                     is NavigationIntent.NavigateTo -> {
                         val from: String? = navHostController.currentDestination?.route
                         val destination: String = intent.route

@@ -46,16 +46,26 @@ class GooglePayPaymentMethodLauncherContractV2 :
         internal val config: GooglePayPaymentMethodLauncher.Config,
         internal val currencyCode: String,
         internal val amount: Long,
+        internal val label: String? = null,
         internal val transactionId: String? = null,
-        internal val injectionParams: InjectionParams? = null
+        internal val injectionParams: InjectionParams? = null,
     ) : Parcelable {
+
         @JvmOverloads
         constructor(
             config: GooglePayPaymentMethodLauncher.Config,
             currencyCode: String,
             amount: Long,
-            transactionId: String? = null
-        ) : this(config, currencyCode, amount, transactionId, null)
+            transactionId: String? = null,
+            label: String? = null,
+        ) : this(
+            config = config,
+            currencyCode = currencyCode,
+            amount = amount,
+            label = label,
+            transactionId = transactionId,
+            injectionParams = null,
+        )
 
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

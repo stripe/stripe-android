@@ -57,12 +57,7 @@ internal class AddressElementActivity : ComponentActivity() {
             val navController = rememberAnimatedNavController()
             viewModel.navigator.navigationController = navController
 
-            val bottomSheetState = rememberBottomSheetState(
-                confirmValueChange = {
-                    val route = navController.currentDestination?.route
-                    route != AddressElementScreen.Autocomplete.route
-                },
-            )
+            val bottomSheetState = rememberBottomSheetState()
 
             BackHandler {
                 viewModel.navigator.onBack()

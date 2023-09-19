@@ -12,21 +12,16 @@ internal interface NavigationManager {
         route: String,
         popUpToCurrent: Boolean = false,
         inclusive: Boolean = false,
-        isSingleTop: Boolean = false,
+        isSingleTop: Boolean = true,
     )
 }
 
 internal sealed class NavigationIntent {
-    data class NavigateBack(
-        val route: String? = null,
-        val inclusive: Boolean = false,
-    ) : NavigationIntent()
-
     data class NavigateTo(
         val route: String,
-        val popUpToCurrent: Boolean = false,
-        val inclusive: Boolean = false,
-        val isSingleTop: Boolean = true,
+        val popUpToCurrent: Boolean,
+        val inclusive: Boolean,
+        val isSingleTop: Boolean,
     ) : NavigationIntent()
 }
 

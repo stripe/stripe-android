@@ -646,9 +646,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         if (viewBinding.shippingAddressCountriesGroup.checkedRadioButtonId ==
             viewBinding.shippingAddressCountriesPartialButton.id
         ) {
-            builder.allowedCountries(
-                setOf("US", "CA", "AU", "GB", "FR", "JP", "KR", "BR")
-            )
+            builder.allowedCountries(stripeSupportedCurrencies.toSet())
         }
         val phone = when (viewBinding.shippingAddressPhoneRadioGroup.checkedRadioButtonId) {
             viewBinding.shippingAddressPhoneRequiredButton.id -> {
@@ -882,7 +880,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 /**
                  * Modify this list if you want to change the countries displayed in the playground.
                  */
-                country.code.value in setOf("US", "GB", "AU", "FR", "IN", "SG", "MY", "MX", "BR")
+                country.code.value in setOf("US", "GB", "AU", "FR", "IN", "SG", "MY", "MX", "BR", "JP")
             }.map { country ->
                 /**
                  * Modify this statement to change the default currency associated with each
@@ -916,6 +914,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     "BR" -> {
                         country to "BRL"
                     }
+                    "JP" -> {
+                        country to "JPY"
+                    }
                     else -> {
                         country to "USD"
                     }
@@ -935,6 +936,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             "MYR",
             "MXN",
             "BRL",
+            "JPY"
         )
     }
 }

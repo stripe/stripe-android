@@ -50,7 +50,9 @@ open class EspressoIdButton(@IntegerRes val id: Int) {
         val resources = ApplicationProvider.getApplicationContext<Context>().resources
         val resourceIdName = resources.getResourceEntryName(id)
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-        val selector = UiSelector().resourceIdMatches(".*/$resourceIdName").enabled(true)
+        val selector = UiSelector().resourceIdMatches(".*/$resourceIdName")
+            .enabled(true)
+            .clickable(true)
         assertThat(device.findObject(selector).waitForExists(10_000)).isTrue()
     }
 

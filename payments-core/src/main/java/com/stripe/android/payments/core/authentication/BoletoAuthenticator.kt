@@ -8,7 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * [PaymentAuthenticator] for [NextActionData.DisplayOxxoDetails], redirects to
+ * [PaymentAuthenticator] for [NextActionData.DisplayBoletoDetails], redirects to
  * [WebIntentAuthenticator] or [NoOpIntentAuthenticator] based on whether if there is a
  * hostedVoucherUrl set.
  */

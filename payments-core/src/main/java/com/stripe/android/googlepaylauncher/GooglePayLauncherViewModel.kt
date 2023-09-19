@@ -84,6 +84,7 @@ internal class GooglePayLauncherViewModel(
                     createTransactionInfo(
                         stripeIntent = intent,
                         currencyCode = intent.currency.orEmpty(),
+                        label = args.label,
                     )
                 }
             }
@@ -95,6 +96,8 @@ internal class GooglePayLauncherViewModel(
                     createTransactionInfo(
                         stripeIntent = intent,
                         currencyCode = args.currencyCode,
+                        amount = args.amount,
+                        label = args.label,
                     )
                 }
             }
@@ -123,7 +126,9 @@ internal class GooglePayLauncherViewModel(
     @VisibleForTesting
     internal fun createTransactionInfo(
         stripeIntent: StripeIntent,
-        currencyCode: String
+        currencyCode: String,
+        amount: Long? = null,
+        label: String? = null,
     ): GooglePayJsonFactory.TransactionInfo {
         return when (stripeIntent) {
             is PaymentIntent -> {
@@ -134,7 +139,7 @@ internal class GooglePayLauncherViewModel(
                     transactionId = stripeIntent.id,
                     totalPrice = stripeIntent.amount,
                     totalPriceLabel = null,
-                    checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.CompleteImmediatePurchase
+                    checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.CompleteImmediatePurchase,
                 )
             }
             is SetupIntent -> {
@@ -143,9 +148,9 @@ internal class GooglePayLauncherViewModel(
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
                     countryCode = args.config.merchantCountryCode,
                     transactionId = stripeIntent.id,
-                    totalPrice = 0L,
-                    totalPriceLabel = null,
-                    checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                    totalPrice = amount ?: 0L,
+                    totalPriceLabel = label,
+                    checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default,
                 )
             }
         }

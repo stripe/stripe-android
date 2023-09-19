@@ -2,17 +2,43 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### Financial Connections
+* [FIXED][7331](https://github.com/stripe/stripe-android/pull/7331) When cancelling out of a auth session, going back to the consent screen required two back taps.
+
+Dependencies updated:
+* [7297](https://github.com/stripe/stripe-android/pull/7297) Bumped Compose Foundation, Compose Material, Compose Runtime, and Compose UI from 1.4.3 to 1.5.1.
+
+## 20.31.0 - 2023-09-18
+
 ### PaymentSheet
-* [ADDED] PaymentSheet now supports the following payment methods for PaymentIntents:
-  * [7281](https://github.com/stripe/stripe-android/pull/7281) OXXO
+* [ADDED][7314](https://github.com/stripe/stripe-android/pull/7314) PaymentSheet now supports Revolut Pay for SetupIntents, and PaymentIntents with setup for future usage.
+* [ADDED][7308](https://github.com/stripe/stripe-android/pull/7308) PaymentSheet now supports Konbini for PaymentIntents.
+* [ADDED][7302](https://github.com/stripe/stripe-android/pull/7302) PaymentSheet now supports Alma for PaymentIntents in private beta.
+* [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `PaymentSheet.GooglePayConfiguration` now takes an optional `amount` and `label`. The `amount` will be displayed in Google Pay for SetupIntents, while `label` will be displayed for both PaymentIntents and SetupIntents.
+* [FIXED][7316](https://github.com/stripe/stripe-android/pull/7316) Fixed an issue where amounts in Serbian Dinar were displayed incorrectly.
+
+### Payments
+* [ADDED][7315](https://github.com/stripe/stripe-android/pull/7315) Added support for Revolut Pay.
+* [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `GooglePayLauncher` now takes an optional `label` when presenting Google Pay for PaymentIntents, and an optional `amount` and `label` when presenting for SetupIntents.
+* [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `GooglePayPaymentMethodLauncher` now takes an optional `label` when presenting Google Pay.
+
+## 20.30.2 - 2023-09-13
+
+### PaymentSheet
+* [ADDED][7281](https://github.com/stripe/stripe-android/pull/7281) PaymentSheet now supports OXXO for PaymentIntents.
 * [ADDED][7282](https://github.com/stripe/stripe-android/pull/7282) PaymentSheet now supports Boleto for PaymentIntents, SetupIntents, and PaymentIntents with setup for future usage.
+* [FIXED][7303](https://github.com/stripe/stripe-android/pull/7303) Fixed an issue where SEPA mandate texts were being displayed for payment methods when they shouldn't be.
 
 ## 20.30.1 - 2023-09-11
+
+⚠️ Note: This release contains a bug where SEPA mandate texts were being displayed for payment methods when they shouldn't be. Please use version 20.30.2 or newer instead.
 
 ### Financial Connections
 * [FIXED][7290](https://github.com/stripe/stripe-android/pull/7290) Fixed an issue where attempting to go back on the first screen caused a crash since there is no other screen in the back stack.
 
 ## 20.30.0 - 2023-09-11
+
+⚠️ Note: This release contains a bug where SEPA mandate texts were being displayed for payment methods when they shouldn't be. Please use version 20.30.2 or newer instead.
 
 ### PaymentSheet
 * [ADDED] PaymentSheet now supports the following payment methods for SetupIntents and PaymentIntents with setup for future usage:
@@ -37,6 +63,8 @@
 * [ADDED][7062](https://github.com/stripe/stripe-android/pull/7062) PaymentSheet now supports BLIK for PaymentIntents.
 
 ## 20.29.0 - 2023-08-28
+
+⚠️ Note: This release contains a bug on devices running API 29 and below where PaymentSheet doesn't dismiss. Customers can't cancel out of PaymentSheet and it doesn't dismiss when payment completes. Please use version 20.29.1 or newer instead.
 
 ### PaymentSheet
 * [ADDED][7198](https://github.com/stripe/stripe-android/pull/7198) PaymentSheet now supports GrabPay for PaymentIntents.

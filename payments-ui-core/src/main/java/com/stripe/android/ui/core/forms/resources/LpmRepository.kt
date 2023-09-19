@@ -17,6 +17,7 @@ import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAv
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AlipayRequirement
+import com.stripe.android.paymentsheet.forms.AlmaRequirement
 import com.stripe.android.paymentsheet.forms.AmazonPayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
@@ -30,6 +31,7 @@ import com.stripe.android.paymentsheet.forms.GiropayRequirement
 import com.stripe.android.paymentsheet.forms.GrabPayRequirement
 import com.stripe.android.paymentsheet.forms.IdealRequirement
 import com.stripe.android.paymentsheet.forms.KlarnaRequirement
+import com.stripe.android.paymentsheet.forms.KonbiniRequirement
 import com.stripe.android.paymentsheet.forms.MobilePayRequirement
 import com.stripe.android.paymentsheet.forms.OxxoRequirement
 import com.stripe.android.paymentsheet.forms.P24Requirement
@@ -379,17 +381,27 @@ class LpmRepository constructor(
             requirement = AffirmRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
-        PaymentMethod.Type.RevolutPay.code -> SupportedPaymentMethod(
-            code = "revolut_pay",
-            requiresMandate = false,
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_revolut_pay,
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_revolut_pay,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-            tintIconOnSelection = false,
-            requirement = RevolutPayRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields)
-        )
+        PaymentMethod.Type.RevolutPay.code -> {
+            val requiresMandate = stripeIntent.requiresMandate()
+
+            val localLayoutSpecs: List<FormItemSpec> = if (stripeIntent.requiresMandate()) {
+                listOf(MandateTextSpec(stringResId = R.string.stripe_revolut_mandate))
+            } else {
+                emptyList()
+            }
+
+            SupportedPaymentMethod(
+                code = "revolut_pay",
+                requiresMandate = requiresMandate,
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_revolut_pay,
+                iconResource = R.drawable.stripe_ic_paymentsheet_pm_revolut_pay,
+                lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+                darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+                tintIconOnSelection = false,
+                requirement = RevolutPayRequirement,
+                formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs)
+            )
+        }
         PaymentMethod.Type.AmazonPay.code -> SupportedPaymentMethod(
             code = "amazon_pay",
             requiresMandate = false,
@@ -399,6 +411,17 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = AmazonPayRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.Alma.code -> SupportedPaymentMethod(
+            code = "alma",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_alma,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_alma,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = AlmaRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.MobilePay.code -> SupportedPaymentMethod(
@@ -564,6 +587,17 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = BoletoRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields),
+        )
+        PaymentMethod.Type.Konbini.code -> SupportedPaymentMethod(
+            code = "konbini",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_konbini,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_konbini,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = KonbiniRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields),
         )
         else -> null

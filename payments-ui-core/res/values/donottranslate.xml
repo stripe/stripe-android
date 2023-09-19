@@ -21,6 +21,7 @@
     <string name="stripe_paymentsheet_payment_method_affirm">Affirm</string>
     <string name="stripe_paymentsheet_payment_method_revolut_pay">Revolut Pay</string>
     <string name="stripe_paymentsheet_payment_method_amazon_pay">Amazon Pay</string>
+    <string name="stripe_paymentsheet_payment_method_alma">Alma</string>
     <string name="stripe_paymentsheet_payment_method_mobile_pay">MobilePay</string>
     <string name="stripe_paymentsheet_payment_method_zip">Zip</string>
     <string name="stripe_paymentsheet_payment_method_blik">BLIK</string>

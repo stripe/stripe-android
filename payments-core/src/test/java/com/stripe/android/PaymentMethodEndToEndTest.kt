@@ -447,4 +447,13 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod = stripe.createPaymentMethodSynchronous(params)
         assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.CashAppPay)
     }
+
+    @Test
+    fun createPaymentMethod_withRevolutPay_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.REVOLUT_PAY
+        val stripe = Stripe(context, ApiKeyFixtures.REVOLUT_PAY_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.RevolutPay)
+    }
 }

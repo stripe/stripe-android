@@ -1337,6 +1337,76 @@ internal class DefaultFlowControllerTest {
         )
     }
 
+    @Test
+    fun `Launches Google Pay with custom label if provided for payment intent`() = runTest {
+        val expectedLabel = "My custom label"
+        val expectedAmount = 1099L
+
+        val flowController = createFlowController()
+
+        flowController.configureExpectingSuccess(
+            clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = "My merchant",
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "CA",
+                    currencyCode = "CAD",
+                    amount = 1234L,
+                    label = expectedLabel,
+                )
+            )
+        )
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
+        )
+
+        flowController.confirm()
+
+        verify(googlePayPaymentMethodLauncher).present(
+            currencyCode = any(),
+            amount = eq(expectedAmount),
+            transactionId = anyOrNull(),
+            label = eq(expectedLabel),
+        )
+    }
+
+    @Test
+    fun `Launches Google Pay with custom label and amount if provided for setup intent`() = runTest {
+        val expectedLabel = "My custom label"
+        val expectedAmount = 1099L
+
+        val flowController = createFlowController()
+
+        flowController.configureExpectingSuccess(
+            clientSecret = PaymentSheetFixtures.SETUP_CLIENT_SECRET,
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = "My merchant",
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "CA",
+                    currencyCode = "CAD",
+                    amount = expectedAmount,
+                    label = expectedLabel,
+                )
+            )
+        )
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
+        )
+
+        flowController.confirm()
+
+        verify(googlePayPaymentMethodLauncher).present(
+            currencyCode = any(),
+            amount = eq(expectedAmount),
+            transactionId = anyOrNull(),
+            label = eq(expectedLabel),
+        )
+    }
+
     private fun createAndConfigureFlowControllerForDeferredIntent(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
     ): DefaultFlowController {

@@ -1037,33 +1037,32 @@ class PaymentSheet internal constructor(
         val ephemeralKeySecret: String
     ) : Parcelable
 
+    /**
+     * @param environment The Google Pay environment to use. See
+     * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
+     * for more information.
+     * @param countryCode The two-letter ISO 3166 code of the country of your business, e.g. "US".
+     * See your account's country value [here](https://dashboard.stripe.com/settings/account).
+     * @param currencyCode The three-letter ISO 4217 alphabetic currency code, e.g. "USD" or "EUR".
+     * Required in order to support Google Pay when processing a Setup Intent.
+     * @param amount An optional amount to display for setup intents. Google Pay may or may not
+     * display this amount depending on its own internal logic. Defaults to 0 if none is provided.
+     * @param label An optional label to display with the amount. Google Pay may or may not display
+     * this label depending on its own internal logic. Defaults to a generic label if none is
+     * provided.
+     */
     @Parcelize
-    data class GooglePayConfiguration(
-        /**
-         * The Google Pay environment to use.
-         *
-         * See [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment) for more information.
-         */
+    data class GooglePayConfiguration @JvmOverloads constructor(
         val environment: Environment,
-        /**
-         * The two-letter ISO 3166 code of the country of your business, e.g. "US".
-         * See your account's country value [here](https://dashboard.stripe.com/settings/account).
-         */
         val countryCode: String,
-        /**
-         * The three-letter ISO 4217 alphabetic currency code, e.g. "USD" or "EUR".
-         * Required in order to support Google Pay when processing a Setup Intent.
-         */
-        val currencyCode: String? = null
+        val currencyCode: String? = null,
+        val amount: Long? = null,
+        val label: String? = null,
     ) : Parcelable {
-        constructor(
-            environment: Environment,
-            countryCode: String
-        ) : this(environment, countryCode, null)
 
         enum class Environment {
             Production,
-            Test
+            Test,
         }
     }
 
