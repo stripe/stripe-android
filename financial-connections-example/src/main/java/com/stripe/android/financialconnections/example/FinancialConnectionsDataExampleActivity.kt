@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenFinancialConnectionsSheetExample
@@ -24,7 +25,7 @@ class FinancialConnectionsDataExampleActivity : AppCompatActivity() {
     }
 
     private fun setupViews() {
-        findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar).let {
+        findViewById<Toolbar>(R.id.toolbar).let {
             it.title = getString(R.string.collect_bank_account_for_data_title)
             setSupportActionBar(it)
         }
