@@ -34,6 +34,15 @@ internal data class PartnerAuthState(
         val isOAuth: Boolean,
         val isStripeDirect: Boolean,
         val institution: FinancialConnectionsInstitution,
+        /**
+         * Just for repair flows, null otherwise.
+         */
+        val repairPayload: RepairPayload? = null
+    )
+
+    data class RepairPayload(
+        val consumerSession: String,
+        val selectedAccountId: String
     )
 
     val canNavigateBack: Boolean

@@ -88,15 +88,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 institution = requireNotNull(manifest.activeInstitution),
                 sync = sync
             )
-            Payload(
-                authSessionId = authSession.id,
-                authSessionUrl = requireNotNull(authSession.browserReadyUrl(applicationId)),
-                oauthPrepane = authSession.display?.text?.oauthPrepane,
-                isOAuth = authSession.isOAuth,
-                flow = authSession.flow,
-                institution = requireNotNull(manifest.activeInstitution),
-                isStripeDirect = manifest.isStripeDirect ?: false
-            )
+            buildPayload(authSession, manifest)
         }.execute { copy(payload = it) }
     }
 
@@ -110,15 +102,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 sync = sync
             )
             logger.debug("Created auth session ${authSession.id}")
-            Payload(
-                authSessionId = authSession.id,
-                authSessionUrl = requireNotNull(authSession.browserReadyUrl(applicationId)),
-                oauthPrepane = authSession.display?.text?.oauthPrepane,
-                isOAuth = authSession.isOAuth,
-                flow = authSession.flow,
-                institution = requireNotNull(manifest.activeInstitution),
-                isStripeDirect = manifest.isStripeDirect ?: false
-            ).also {
+            buildPayload(authSession, manifest).also {
                 // just send loaded event on OAuth flows (prepane). Non-OAuth handled by shim.
                 val loadedEvent: Loaded? = Loaded(Date()).takeIf { authSession.isOAuth }
                 postAuthSessionEvent(
@@ -133,6 +117,20 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
         }
     }
+
+    private fun buildPayload(
+        authSession: FinancialConnectionsAuthorizationSession,
+        manifest: FinancialConnectionsSessionManifest
+    ) = Payload(
+        authSessionId = authSession.id,
+        authSessionUrl = requireNotNull(authSession.browserReadyUrl(applicationId)),
+        oauthPrepane = authSession.display?.text?.oauthPrepane,
+        isOAuth = authSession.isOAuth,
+        flow = authSession.flow,
+        institution = requireNotNull(manifest.activeInstitution),
+        isStripeDirect = manifest.isStripeDirect ?: false,
+        repairPayload = null
+    )
 
     private fun launchBrowserIfNonOauth() {
         onAsync(
