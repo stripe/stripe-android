@@ -6,6 +6,7 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkScope
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
 import com.stripe.android.model.ConsumerSession
@@ -81,7 +82,8 @@ internal class LinkApiRepository @Inject constructor(
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
+        consumerPublishableKey: String?,
+        active: Boolean,
     ): Result<LinkPaymentDetails.New> = withContext(workContext) {
         stripeRepository.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
@@ -89,6 +91,7 @@ internal class LinkApiRepository @Inject constructor(
                 cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap(),
                 email = userEmail,
             ),
+            active = active,
             requestOptions = consumerPublishableKey?.let {
                 ApiRequest.Options(it)
             } ?: ApiRequest.Options(
@@ -109,6 +112,33 @@ internal class LinkApiRepository @Inject constructor(
                 paymentDetails = paymentDetails,
                 paymentMethodCreateParams = createParams,
                 originalParams = paymentMethodCreateParams,
+            )
+        }
+    }
+
+    override suspend fun shareCardPaymentDetails(
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        id: String,
+        last4: String,
+        consumerSessionClientSecret: String,
+    ): Result<LinkPaymentDetails> = withContext(workContext) {
+        stripeRepository.sharePaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            id = id,
+            requestOptions = ApiRequest.Options(
+                apiKey = publishableKeyProvider(),
+                stripeAccount = stripeAccountIdProvider(),
+            ),
+        ).mapCatching { passthroughModePaymentMethodId ->
+            LinkPaymentDetails.Saved(
+                paymentDetails = ConsumerPaymentDetails.Passthrough(
+                    id = passthroughModePaymentMethodId,
+                    last4 = last4,
+                ),
+                paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
+                    paymentDetailsId = passthroughModePaymentMethodId,
+                    consumerSessionClientSecret = consumerSessionClientSecret,
+                ),
             )
         }
     }

@@ -76,6 +76,7 @@ import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
+import com.stripe.android.model.parsers.ConsumerPaymentDetailsShareJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
@@ -1025,7 +1026,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        active: Boolean,
     ): Result<ConsumerPaymentDetails> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
@@ -1036,13 +1038,35 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
-                    "active" to false
+                    "active" to active,
                 ).plus(
                     paymentDetailsCreateParams.toParamMap()
                 )
             ),
             jsonParser = ConsumerPaymentDetailsJsonParser(),
         )
+    }
+
+    override suspend fun sharePaymentDetails(
+        consumerSessionClientSecret: String,
+        id: String,
+        requestOptions: ApiRequest.Options
+    ): Result<String> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = sharePaymentDetailsUrl,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to "android_payment_element",
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "id" to id,
+                    PAYMENT_USER_AGENT to buildPaymentUserAgentPair()
+                )
+            ),
+            jsonParser = ConsumerPaymentDetailsShareJsonParser,
+        ).map { it.id }
     }
 
     override suspend fun createFinancialConnectionsSessionForDeferredPayments(
@@ -1693,6 +1717,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val listConsumerPaymentDetailsUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/payment_details/list")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/payment_details/share`
+         */
+        internal val sharePaymentDetailsUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/payment_details/share")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/link_account_sessions`

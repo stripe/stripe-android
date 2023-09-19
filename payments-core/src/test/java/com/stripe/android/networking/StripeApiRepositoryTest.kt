@@ -1703,7 +1703,8 @@ internal class StripeApiRepositoryTest {
             create().createPaymentDetails(
                 clientSecret,
                 paymentDetailsCreateParams,
-                DEFAULT_OPTIONS
+                DEFAULT_OPTIONS,
+                false,
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())

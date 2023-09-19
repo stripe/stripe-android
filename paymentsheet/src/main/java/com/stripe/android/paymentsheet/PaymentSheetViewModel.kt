@@ -261,9 +261,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 startProcessing(CheckoutIdentifier.SheetBottomBuy)
             }
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
-                processingState.details?.let {
+                processingState.paymentSelection?.let {
                     // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-                    updateSelection(PaymentSelection.New.LinkInline(it))
+                    updateSelection(it)
                     checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
                 } ?: run {
                     // Link PaymentDetails creating failed, fallback to regular checkout.

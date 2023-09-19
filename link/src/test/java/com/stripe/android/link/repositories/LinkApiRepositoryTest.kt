@@ -192,7 +192,8 @@ class LinkApiRepositoryTest {
             userEmail = email,
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = secret,
-            consumerPublishableKey = consumerKey
+            consumerPublishableKey = consumerKey,
+            active = false,
         )
 
         verify(stripeRepository).createPaymentDetails(
@@ -212,7 +213,8 @@ class LinkApiRepositoryTest {
                     )
                 )
             },
-            eq(ApiRequest.Options(consumerKey))
+            eq(ApiRequest.Options(consumerKey)),
+            eq(false),
         )
     }
 
@@ -227,7 +229,8 @@ class LinkApiRepositoryTest {
                 userEmail = email,
                 stripeIntent = paymentIntent,
                 consumerSessionClientSecret = secret,
-                consumerPublishableKey = null
+                consumerPublishableKey = null,
+                active = false,
             )
 
             verify(stripeRepository).createPaymentDetails(
@@ -247,7 +250,8 @@ class LinkApiRepositoryTest {
                         )
                     )
                 },
-                eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+                eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+                eq(false),
             )
         }
 
@@ -261,6 +265,7 @@ class LinkApiRepositoryTest {
                 consumerSessionClientSecret = any(),
                 paymentDetailsCreateParams = any(),
                 requestOptions = any(),
+                active = any(),
             )
         ).thenReturn(Result.success(paymentDetails))
 
@@ -269,7 +274,8 @@ class LinkApiRepositoryTest {
             userEmail = email,
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = consumerSessionSecret,
-            consumerPublishableKey = null
+            consumerPublishableKey = null,
+            active = false,
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -306,6 +312,7 @@ class LinkApiRepositoryTest {
                 consumerSessionClientSecret = any(),
                 paymentDetailsCreateParams = any(),
                 requestOptions = any(),
+                active = any(),
             )
         ).thenReturn(Result.failure(RuntimeException("error")))
 
@@ -314,7 +321,8 @@ class LinkApiRepositoryTest {
             userEmail = "email@stripe.com",
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = "secret",
-            consumerPublishableKey = null
+            consumerPublishableKey = null,
+            active = false,
         )
 
         assertThat(result.isFailure).isTrue()

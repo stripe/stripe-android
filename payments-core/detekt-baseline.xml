@@ -72,6 +72,7 @@
     <ID>MagicNumber:FraudDetectionDataRequestParamsFactory.kt$FraudDetectionDataRequestParamsFactory.Companion$60</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$5</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$99</ID>
+    <ID>MagicNumber:PaymentMethodCreateParams.kt$PaymentMethodCreateParams$4</ID>
     <ID>MagicNumber:StripeApiRepository.kt$StripeApiRepository$10</ID>
     <ID>MagicNumber:StripeApiRepository.kt$StripeApiRepository$1024</ID>
     <ID>MagicNumber:StripeColorUtils.kt$StripeColorUtils.Companion$0.114</ID>

@@ -198,7 +198,8 @@ class LinkAccountManagerTest {
                     anyOrNull(),
                     anyOrNull(),
                     anyOrNull(),
-                    anyOrNull()
+                    anyOrNull(),
+                    anyOrNull(),
                 )
             ).thenReturn(
                 Result.failure(AuthenticationException(StripeError())),
@@ -213,7 +214,8 @@ class LinkAccountManagerTest {
                     anyOrNull(),
                     anyOrNull(),
                     anyOrNull(),
-                    anyOrNull()
+                    anyOrNull(),
+                    anyOrNull(),
                 )
             verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
         }
