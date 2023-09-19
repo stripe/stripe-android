@@ -326,7 +326,7 @@ class PlaygroundTestDriver(
         authorizeAction: AuthorizeAction?,
         requestedBrowser: Browser?
     ) {
-        authorizeAction?.let {
+        if (authorizeAction?.requiresBrowser == true) {
             requestedBrowser?.let {
                 val browserUI = BrowserUI.convert(it)
                 Assume.assumeTrue(getBrowser(browserUI) == browserUI)
