@@ -178,6 +178,7 @@ internal interface FinancialConnectionsManifestRepository {
 
     suspend fun repairSessionGenerateUrl(
         clientSecret: String,
+        applicationId: String,
         coreAuthorization: String,
     ): FinancialConnectionsAuthorizationRepairSession
 
@@ -500,6 +501,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
     override suspend fun repairSessionGenerateUrl(
         clientSecret: String,
+        applicationId: String,
         coreAuthorization: String
     ): FinancialConnectionsAuthorizationRepairSession {
         val request = apiRequestFactory.createPost(
@@ -508,6 +510,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "core_authorization" to coreAuthorization,
+                "return_url" to "auth-redirect/$applicationId",
                 "expand" to listOf("institution"),
             )
         )
