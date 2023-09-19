@@ -6,6 +6,8 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.espresso.Espresso.onData
+import androidx.test.espresso.action.ViewActions
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -33,12 +35,14 @@ import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
+import org.hamcrest.Matchers.allOf
 import java.util.Locale
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.R as UiCoreR
+import org.hamcrest.Matchers.`is` as isValue
 
 /**
  * This contains the Android specific code such as for accessing UI elements, detecting
@@ -313,9 +317,13 @@ class Selectors(
 
     fun setMerchantCountry(merchantCountryCode: String) {
         EspressoIdButton(R.id.merchant_country_spinner).click()
-        EspressoText(
-            CountryUtils.getDisplayCountry(CountryCode(merchantCountryCode), Locale.getDefault())
-        ).click()
+
+        val country = CountryUtils.getCountryByCode(
+            countryCode = CountryCode(merchantCountryCode),
+            currentLocale = Locale.getDefault(),
+        )
+
+        onData(allOf(isValue(country))).perform(ViewActions.click())
     }
 
     fun enterCustomPrimaryButtonLabel(text: String) {
