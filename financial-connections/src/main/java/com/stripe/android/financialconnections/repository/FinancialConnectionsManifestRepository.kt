@@ -516,7 +516,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "core_authorization" to coreAuthorization,
-                "auth_repair_session" to "auth-redirect/$applicationId",
+                "return_url" to "auth-redirect/$applicationId",
                 "expand" to listOf("institution"),
             )
         )
