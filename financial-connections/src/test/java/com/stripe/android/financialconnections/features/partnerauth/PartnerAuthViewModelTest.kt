@@ -18,6 +18,7 @@ import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSessi
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
+import com.stripe.android.financialconnections.presentation.WebAuthFlowState.Canceled
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -121,7 +122,7 @@ internal class PartnerAuthViewModelTest {
             whenever(retrieveAuthorizationSession.invoke(any()))
                 .thenReturn(activeAuthSession.copy(nextPane = Pane.PARTNER_AUTH))
 
-            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled(activeAuthSession.url))
+            viewModel.onWebAuthFlowFinished(Canceled("return_url"))
 
             verify(cancelAuthorizationSession).invoke(
                 eq(activeAuthSession.id),
@@ -149,7 +150,9 @@ internal class PartnerAuthViewModelTest {
                 .thenReturn(activeAuthSession.copy(nextPane = Pane.ACCOUNT_PICKER))
 
             val viewModel = createViewModel()
-            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled(activeAuthSession.url))
+            viewModel.onWebAuthFlowFinished(
+                Canceled("return_url")
+            )
 
             verifyNoInteractions(cancelAuthorizationSession)
 
@@ -177,7 +180,7 @@ internal class PartnerAuthViewModelTest {
                 .thenReturn(activeAuthSession.copy(nextPane = Pane.ACCOUNT_PICKER))
 
             val viewModel = createViewModel()
-            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled(activeAuthSession.url))
+            viewModel.onWebAuthFlowFinished(Canceled("return_url"))
 
             verify(cancelAuthorizationSession).invoke(eq(activeAuthSession.id))
 
@@ -214,7 +217,7 @@ internal class PartnerAuthViewModelTest {
                 .thenReturn(activeAuthSession.copy(nextPane = Pane.PARTNER_AUTH))
 
             val viewModel = createViewModel()
-            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled(activeAuthSession.url))
+            viewModel.onWebAuthFlowFinished(Canceled("return_url"))
 
             verify(cancelAuthorizationSession).invoke(eq(activeAuthSession.id))
 

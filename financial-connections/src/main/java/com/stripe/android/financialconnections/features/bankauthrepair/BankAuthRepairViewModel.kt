@@ -23,6 +23,8 @@ import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthS
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationRepairSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
@@ -64,11 +66,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
             val repairSession = createRepairSession(coreAuthorization)
             updateLocalManifest { it.copy(activeInstitution = repairSession.institution) }
             PartnerAuthState.Payload(
-                authSessionId = repairSession.id,
-                authSessionUrl = requireNotNull(repairSession.browserReadyUrl(applicationId)),
-                flow = repairSession.flow,
-                oauthPrepane = repairSession.display?.text?.oauthPrepane,
-                isOAuth = requireNotNull(repairSession.isOAuth),
+                authSession = repairSession.toAuthSession(),
                 institution = requireNotNull(repairSession.institution),
                 isStripeDirect = getManifest().isStripeDirect ?: false,
                 repairPayload = PartnerAuthState.RepairPayload(
@@ -81,13 +79,27 @@ internal class BankAuthRepairViewModel @Inject constructor(
         }
     }
 
+    fun FinancialConnectionsAuthorizationRepairSession.toAuthSession() =
+        FinancialConnectionsAuthorizationSession(
+            id = id,
+            nextPane = Pane.SUCCESS,
+            flow = flow,
+            institutionSkipAccountSelection = null,
+            showPartnerDisclosure = null,
+            skipAccountSelection = null,
+            url = url,
+            urlQrCode = null,
+            _isOAuth = isOAuth,
+            display = display
+        )
+
     private fun observePayload() {
         onAsync(
             asyncProp = PartnerAuthState::payload,
             onSuccess = {
                 // launch auth for non-OAuth (skip pre-pane).
                 eventTracker.track(PaneLoaded(Pane.BANK_AUTH_REPAIR))
-                if (!it.isOAuth) launchAuthInBrowser()
+                if (!it.authSession.isOAuth) launchAuthInBrowser()
             },
             onFail = {
                 eventTracker.logError(
@@ -106,21 +118,18 @@ internal class BankAuthRepairViewModel @Inject constructor(
         }
     }
 
-    private suspend fun launchAuthInBrowser() {
-        kotlin.runCatching { requireNotNull(awaitState().payload()) }
-            .onSuccess {
-                it.authSessionUrl
-                    .let { setState { copy(viewEffect = OpenPartnerAuth(it)) } }
-            }
-            .onFailure {
-                eventTracker.logError(
-                    extraMessage = "failed retrieving auth session url from cache",
-                    error = it,
-                    logger = logger,
-                    pane = PANE
-                )
-                setState { copy(authenticationStatus = Fail(it)) }
-            }
+    private suspend fun launchAuthInBrowser() = kotlin.runCatching {
+        val authSession = requireNotNull(awaitState().payload()).authSession
+        val url = requireNotNull(authSession.browserReadyUrl(applicationId))
+        setState { copy(viewEffect = OpenPartnerAuth(url)) }
+    }.onFailure {
+        eventTracker.logError(
+            extraMessage = "failed retrieving auth session url from cache",
+            error = it,
+            logger = logger,
+            pane = PANE
+        )
+        setState { copy(authenticationStatus = Fail(it)) }
     }
 
     fun onSelectAnotherBank() {

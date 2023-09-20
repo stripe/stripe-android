@@ -113,7 +113,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         }.execute {
             copy(
                 payload = it,
-                activeAuthSession = it()?.authSessionId
+                activeAuthSession = it()?.authSession?.id
             )
         }
     }
@@ -122,11 +122,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         authSession: FinancialConnectionsAuthorizationSession,
         manifest: FinancialConnectionsSessionManifest
     ) = Payload(
-        authSessionId = authSession.id,
-        authSessionUrl = requireNotNull(authSession.browserReadyUrl(applicationId)),
-        oauthPrepane = authSession.display?.text?.oauthPrepane,
-        isOAuth = authSession.isOAuth,
-        flow = authSession.flow,
+        authSession = authSession,
         institution = requireNotNull(manifest.activeInstitution),
         isStripeDirect = manifest.isStripeDirect ?: false,
         repairPayload = null
@@ -137,7 +133,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             asyncProp = PartnerAuthState::payload,
             onSuccess = {
                 // launch auth for non-OAuth (skip pre-pane).
-                if (!it.isOAuth) launchAuthInBrowser()
+                if (!it.authSession.isOAuth) launchAuthInBrowser()
             }
         )
     }
@@ -160,27 +156,27 @@ internal class PartnerAuthViewModel @Inject constructor(
     fun onLaunchAuthClick() {
         viewModelScope.launch {
             awaitState().payload()?.let {
-                postAuthSessionEvent(it.authSessionId, AuthSessionEvent.OAuthLaunched(Date()))
+                postAuthSessionEvent(it.authSession.id, AuthSessionEvent.OAuthLaunched(Date()))
                 eventTracker.track(PrepaneClickContinue(PANE))
                 launchAuthInBrowser()
             }
         }
     }
 
-    private suspend fun launchAuthInBrowser() {
-        requireNotNull(awaitState().payload()).let {
-            setState { copy(viewEffect = OpenPartnerAuth(it.authSessionUrl)) }
-            eventTracker.track(
-                FinancialConnectionsEvent.AuthSessionOpened(
-                    id = it.authSessionId,
-                    pane = PANE,
-                    flow = it.flow,
-                    defaultBrowser = browserManager.getPackageToHandleUri(
-                        uri = it.authSessionUrl.toUri()
-                    )
+    private suspend fun launchAuthInBrowser() = runCatching {
+        val authSession = requireNotNull(awaitState().payload()).authSession
+        val url = requireNotNull(authSession.browserReadyUrl(applicationId))
+        setState { copy(viewEffect = OpenPartnerAuth(url)) }
+        eventTracker.track(
+            FinancialConnectionsEvent.AuthSessionOpened(
+                id = authSession.id,
+                pane = PANE,
+                flow = authSession.flow,
+                defaultBrowser = browserManager.getPackageToHandleUri(
+                    uri = url.toUri()
                 )
             )
-        }
+        )
     }
 
     fun onSelectAnotherBank() {

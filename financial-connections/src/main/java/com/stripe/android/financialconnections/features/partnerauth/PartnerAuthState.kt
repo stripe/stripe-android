@@ -8,8 +8,8 @@ import com.airbnb.mvrx.PersistState
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.model.DataAccessNotice
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.OauthPrepane
 
 internal data class PartnerAuthState(
     /**
@@ -24,14 +24,10 @@ internal data class PartnerAuthState(
 ) : MavericksState {
 
     val dataAccess: DataAccessNotice?
-        get() = payload()?.oauthPrepane?.dataAccessNotice
+        get() = payload()?.authSession?.display?.text?.oauthPrepane?.dataAccessNotice
 
     data class Payload(
-        val authSessionId: String,
-        val flow: String?,
-        val authSessionUrl: String,
-        val oauthPrepane: OauthPrepane?,
-        val isOAuth: Boolean,
+        val authSession: FinancialConnectionsAuthorizationSession,
         val isStripeDirect: Boolean,
         val institution: FinancialConnectionsInstitution,
         /**

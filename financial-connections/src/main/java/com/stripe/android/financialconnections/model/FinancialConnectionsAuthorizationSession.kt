@@ -30,7 +30,7 @@ internal data class FinancialConnectionsAuthorizationSession(
     val skipAccountSelection: Boolean? = null,
 
     @SerialName(value = "url")
-    val url: String? = null,
+    private val url: String? = null,
 
     @SerialName(value = "url_qr_code")
     val urlQrCode: String? = null,
@@ -45,8 +45,11 @@ internal data class FinancialConnectionsAuthorizationSession(
     val isOAuth: Boolean
         get() = _isOAuth ?: false
 
-    fun browserReadyUrl(applicationId: String): String? = url?.browserReadyUrl(applicationId)
-
+    /**
+     * Auth Session url after clearing the deep link prefix (required for non-native app2app flows).
+     */
+    fun browserReadyUrl(applicationId: String): String? =
+        url?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
 }
 
 @Serializable
@@ -67,14 +70,11 @@ internal data class FinancialConnectionsAuthorizationRepairSession(
     val institution: FinancialConnectionsInstitution? = null,
 
     @SerialName(value = "url")
-    private val url: String? = null,
+    val url: String? = null,
 
     @SerialName(value = "display")
     val display: Display? = null
-) : Parcelable {
-
-    fun browserReadyUrl(applicationId: String): String? = url?.browserReadyUrl(applicationId)
-}
+) : Parcelable
 
 @Serializable(with = Flow.Serializer::class)
 enum class Flow(val value: String) {
@@ -144,13 +144,6 @@ enum class Flow(val value: String) {
     internal object Serializer :
         EnumIgnoreUnknownSerializer<Flow>(Flow.values(), UNKNOWN)
 }
-
-
-/**
- * Auth Session url after clearing the deep link prefix (required for non-native app2app flows).
- */
-private fun String.browserReadyUrl(applicationId: String): String? =
-    this.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
 
 @Parcelize
 @Serializable
