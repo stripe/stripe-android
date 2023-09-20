@@ -182,6 +182,12 @@ internal interface FinancialConnectionsManifestRepository {
         coreAuthorization: String,
     ): FinancialConnectionsAuthorizationRepairSession
 
+    suspend fun completeRepairSession(
+        clientSecret: String,
+        authRepairSessionId: String,
+        coreAuthorization: String,
+    ): FinancialConnectionsAuthorizationRepairSession
+
     fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
     )
@@ -502,7 +508,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     override suspend fun repairSessionGenerateUrl(
         clientSecret: String,
         applicationId: String,
-        coreAuthorization: String
+        coreAuthorization: String,
     ): FinancialConnectionsAuthorizationRepairSession {
         val request = apiRequestFactory.createPost(
             url = repairSessionGenerateUrl,
@@ -510,7 +516,28 @@ private class FinancialConnectionsManifestRepositoryImpl(
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "core_authorization" to coreAuthorization,
-                "return_url" to "auth-redirect/$applicationId",
+                "auth_repair_session" to "auth-redirect/$applicationId",
+                "expand" to listOf("institution"),
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsAuthorizationRepairSession.serializer()
+        )
+    }
+
+    override suspend fun completeRepairSession(
+        clientSecret: String,
+        authRepairSessionId: String,
+        coreAuthorization: String
+    ): FinancialConnectionsAuthorizationRepairSession {
+        val request = apiRequestFactory.createPost(
+            url = completeRepairSessionUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "core_authorization" to coreAuthorization,
+                "auth_repair_session" to authRepairSessionId,
                 "expand" to listOf("institution"),
             )
         )
@@ -600,5 +627,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
         internal const val disableNetworking: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/disable_networking"
+
+        internal const val completeRepairSessionUrl: String =
+            "${ApiRequest.API_HOST}/v1/connections/repair_sessions/complete"
     }
 }

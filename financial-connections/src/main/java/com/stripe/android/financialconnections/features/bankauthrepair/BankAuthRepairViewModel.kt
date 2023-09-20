@@ -12,6 +12,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.APPLICATION_ID
+import com.stripe.android.financialconnections.domain.CompleteRepairSession
 import com.stripe.android.financialconnections.domain.CreateRepairSession
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
@@ -50,6 +51,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val partnerToCoreAuthsRepository: PartnerToCoreAuthsRepository,
     private val selectNetworkedAccount: SelectNetworkedAccount,
+    private val completeRepairSession: CompleteRepairSession,
     private val getManifest: GetManifest,
     private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
     private val getCachedAccounts: GetCachedAccounts,
@@ -71,6 +73,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
                 isStripeDirect = getManifest().isStripeDirect ?: false,
                 repairPayload = PartnerAuthState.RepairPayload(
                     consumerSession = requireNotNull(getCachedConsumerSession()).clientSecret,
+                    coreAuthorization = coreAuthorization,
                     selectedAccountId = selectedAccount.id,
                 )
             )
@@ -142,26 +145,16 @@ internal class BankAuthRepairViewModel @Inject constructor(
         logger.debug("Web AuthFlow status received $webStatus")
         viewModelScope.launch {
             when (webStatus) {
-                is WebAuthFlowState.Canceled -> {
-                    onAuthCancelled(webStatus.url)
-                }
+                is WebAuthFlowState.Canceled -> onAuthCancelled(webStatus.url)
 
-                is WebAuthFlowState.Failed -> {
-                    onAuthFailed(
-                        url = webStatus.url,
-                        message = webStatus.message,
-                        reason = webStatus.reason
-                    )
-                }
+                is WebAuthFlowState.Failed -> onAuthFailed(
+                    url = webStatus.url,
+                    message = webStatus.message,
+                    reason = webStatus.reason
+                )
 
-                WebAuthFlowState.InProgress -> {
-                    setState { copy(authenticationStatus = Loading()) }
-                }
-
-                is WebAuthFlowState.Success -> {
-                    completeAuthorizationSession(webStatus.url)
-                }
-
+                WebAuthFlowState.InProgress -> setState { copy(authenticationStatus = Loading()) }
+                is WebAuthFlowState.Success -> completeRepairSession(webStatus.url)
                 WebAuthFlowState.Uninitialized -> {}
             }
         }
@@ -181,11 +174,17 @@ internal class BankAuthRepairViewModel @Inject constructor(
         logger.debug("Auth cancelled $url")
     }
 
-    private suspend fun completeAuthorizationSession(url: String) = runCatching {
-        val payload = requireNotNull(awaitState().payload()?.repairPayload)
+    private suspend fun completeRepairSession(url: String) = runCatching {
+        val repairPayload = requireNotNull(awaitState().payload()?.repairPayload)
+        val repairSession = requireNotNull(awaitState().payload()?.authSession)
+        completeRepairSession(
+            authRepairSessionId = repairSession.id,
+            coreAuthorization = repairPayload.coreAuthorization
+        )
+
         val activeInstitution = selectNetworkedAccount(
-            consumerSessionClientSecret = payload.consumerSession,
-            selectedAccountId = payload.selectedAccountId,
+            consumerSessionClientSecret = repairPayload.consumerSession,
+            selectedAccountId = repairPayload.selectedAccountId,
         )
         // Updates manifest active institution after account networked.
         updateLocalManifest { it.copy(activeInstitution = activeInstitution.data.firstOrNull()) }

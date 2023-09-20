@@ -38,7 +38,8 @@ internal data class PartnerAuthState(
 
     data class RepairPayload(
         val consumerSession: String,
-        val selectedAccountId: String
+        val selectedAccountId: String,
+        val coreAuthorization: String
     )
 
     val canNavigateBack: Boolean
