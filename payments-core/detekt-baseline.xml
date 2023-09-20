@@ -7,6 +7,7 @@
     <ID>ComplexCondition:ExpiryDateEditText.kt$ExpiryDateEditText.&lt;no name provided>$expirationDate.month.length == 2 &amp;&amp; latestInsertionSize > 0 &amp;&amp; !inErrorState || rawNumericInput.length > 2</ID>
     <ID>ConstructorParameterNaming:Source.kt$Source$private val _klarna: Klarna? = null</ID>
     <ID>ConstructorParameterNaming:Source.kt$Source$private val _weChat: WeChat? = null</ID>
+    <ID>CyclomaticComplexMethod:NextActionDataParser.kt$NextActionDataParser$override fun parse( json: JSONObject ): StripeIntent.NextActionData?</ID>
     <ID>CyclomaticComplexMethod:PaymentMethodJsonParser.kt$PaymentMethodJsonParser$override fun parse(json: JSONObject): PaymentMethod</ID>
     <ID>CyclomaticComplexMethod:Source.kt$Source.Companion$@SourceType @JvmStatic fun asSourceType(sourceType: String?): String</ID>
     <ID>CyclomaticComplexMethod:SourceJsonParser.kt$SourceJsonParser.Companion$@Source.SourceType private fun asSourceType(sourceType: String?): String</ID>
