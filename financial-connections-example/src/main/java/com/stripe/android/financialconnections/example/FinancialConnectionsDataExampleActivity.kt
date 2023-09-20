@@ -1,9 +1,9 @@
 package com.stripe.android.financialconnections.example
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.TextView
-import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
