@@ -1,15 +1,17 @@
 package com.stripe.android.financialconnections.example
 
 import android.os.Bundle
+import android.view.View
+import android.widget.TextView
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenFinancialConnectionsSheetExample
-import com.stripe.android.financialconnections.example.databinding.ActivityFinancialconnectionsExampleBinding
 
 class FinancialConnectionsDataExampleActivity : AppCompatActivity() {
 
@@ -19,18 +21,10 @@ class FinancialConnectionsDataExampleActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        with(ActivityFinancialconnectionsExampleBinding.inflate(layoutInflater)) {
-            setContentView(root)
-            setupViews()
-            observeViews()
-            observeState()
-        }
-    }
-
-    private fun ActivityFinancialconnectionsExampleBinding.setupViews() {
-        toolbar.setTitle(R.string.collect_bank_account_for_data_title)
-        setSupportActionBar(toolbar)
-
+        setContentView(R.layout.activity_financialconnections_example)
+        setupViews()
+        observeViews()
+        observeState()
         FinancialConnections.setEventListener { event: FinancialConnectionsEvent ->
             Log.d("FinancialConnections", "Event: $event")
         }
@@ -40,20 +34,28 @@ class FinancialConnectionsDataExampleActivity : AppCompatActivity() {
         )
     }
 
-    private fun ActivityFinancialconnectionsExampleBinding.observeViews() {
-        launchConnectionsSheet.setOnClickListener { viewModel.startFinancialConnectionsSessionForData() }
+    private fun setupViews() {
+        findViewById<Toolbar>(R.id.toolbar).let {
+            it.title = getString(R.string.collect_bank_account_for_data_title)
+            setSupportActionBar(it)
+        }
+
     }
 
-    private fun ActivityFinancialconnectionsExampleBinding.observeState() {
+    private fun observeViews() {
+        findViewById<View>(R.id.launch_connections_sheet)
+            .setOnClickListener { viewModel.startFinancialConnectionsSessionForData() }
+    }
+
+    private fun observeState() {
         lifecycleScope.launchWhenStarted {
-            viewModel.state.collect {
-                bindState(it, this@observeState)
-            }
+            viewModel.state.collect { bindState(it) }
         }
         lifecycleScope.launchWhenStarted {
             viewModel.viewEffect.collect {
                 when (it) {
-                    is OpenFinancialConnectionsSheetExample -> financialConnectionsSheet.present(it.configuration)
+                    is OpenFinancialConnectionsSheetExample ->
+                        financialConnectionsSheet.present(it.configuration)
                 }
             }
         }
@@ -61,10 +63,9 @@ class FinancialConnectionsDataExampleActivity : AppCompatActivity() {
 
     private fun bindState(
         financialConnectionsExampleState: FinancialConnectionsExampleState,
-        viewBinding: ActivityFinancialconnectionsExampleBinding
     ) {
-        viewBinding.status.text = financialConnectionsExampleState.status
-        viewBinding.launchConnectionsSheet.isEnabled =
+        findViewById<TextView>(R.id.status).text = financialConnectionsExampleState.status
+        findViewById<View>(R.id.launch_connections_sheet).isEnabled =
             financialConnectionsExampleState.loading.not()
     }
 }
