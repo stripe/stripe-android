@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,8 +47,17 @@ internal class PollingActivity : AppCompatActivity() {
 
         setContent {
             StripeTheme {
-                val state = rememberBottomSheetState(confirmValueChange = { false })
                 val uiState by viewModel.uiState.collectAsState()
+
+                val state = rememberBottomSheetState(
+                    confirmValueChange = { proposedValue ->
+                        if (proposedValue == ModalBottomSheetValue.Hidden) {
+                            uiState.pollingState != PollingState.Active
+                        } else {
+                            true
+                        }
+                    }
+                )
 
                 BackHandler(enabled = true) {
                     if (uiState.pollingState == PollingState.Failed) {

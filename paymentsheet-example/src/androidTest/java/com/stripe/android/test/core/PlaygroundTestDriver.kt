@@ -3,6 +3,7 @@ package com.stripe.android.test.core
 import android.app.Activity
 import android.app.Application
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.ui.test.assertIsDisplayed
@@ -326,11 +327,15 @@ class PlaygroundTestDriver(
         authorizeAction: AuthorizeAction?,
         requestedBrowser: Browser?
     ) {
-        authorizeAction?.let {
+        if (authorizeAction?.requiresBrowser == true) {
             requestedBrowser?.let {
                 val browserUI = BrowserUI.convert(it)
                 Assume.assumeTrue(getBrowser(browserUI) == browserUI)
             } ?: Assume.assumeTrue(selectors.getInstalledBrowsers().isNotEmpty())
+        }
+        if (authorizeAction == AuthorizeAction.DisplayQrCode) {
+            // Browserstack tests fail on pixel 2 API 26.
+            Assume.assumeFalse("walleye + 26" == "${Build.DEVICE} + ${Build.VERSION.SDK_INT}")
         }
     }
 

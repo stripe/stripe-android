@@ -958,6 +958,19 @@ data class PaymentMethodCreateParams internal constructor(
             return PaymentMethodCreateParams(CashAppPay(), billingDetails, metadata)
         }
 
+        @JvmStatic
+        @JvmOverloads
+        fun createRevolutPay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.RevolutPay,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createLink(
             paymentDetailsId: String,

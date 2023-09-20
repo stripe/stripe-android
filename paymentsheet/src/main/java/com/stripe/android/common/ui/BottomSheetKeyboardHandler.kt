@@ -1,17 +1,15 @@
 package com.stripe.android.common.ui
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.SoftwareKeyboardController
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -35,20 +33,8 @@ internal class BottomSheetKeyboardHandler(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun rememberBottomSheetKeyboardHandler(): BottomSheetKeyboardHandler {
-    val view = LocalView.current
-    val isImeVisible = remember { mutableStateOf(false) }
-
-    DisposableEffect(view) {
-        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
-            isImeVisible.value = insets.isVisible(WindowInsetsCompat.Type.ime())
-            insets
-        }
-
-        onDispose {
-            ViewCompat.setOnApplyWindowInsetsListener(view, null)
-        }
-    }
-
+    val imeHeight = WindowInsets.ime.getBottom(LocalDensity.current)
+    val isImeVisibleState = rememberUpdatedState(newValue = imeHeight > 0)
     val keyboardController = LocalSoftwareKeyboardController.current
-    return BottomSheetKeyboardHandler(keyboardController, isImeVisible)
+    return BottomSheetKeyboardHandler(keyboardController, isImeVisibleState)
 }

@@ -1,49 +1,49 @@
 lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
-revolut_pay, true, true, off_session, false, card/revolut_pay, false, false, not available, false
-revolut_pay, true, true, off_session, false, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, true, false, off_session, false, card/revolut_pay, false, false, not available, false
-revolut_pay, true, false, off_session, false, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, true, true, on_session, false, card/revolut_pay, false, false, not available, false
-revolut_pay, true, true, on_session, false, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, true, false, on_session, false, card/revolut_pay, false, false, not available, false
-revolut_pay, true, false, on_session, false, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, true, true, null, false, card/revolut_pay, false, true, oneTime, true
-revolut_pay, true, true, null, false, card/eps/revolut_pay, false, true, oneTime, true
-revolut_pay, true, false, null, false, card/revolut_pay, false, true, oneTime, true
-revolut_pay, true, false, null, false, card/eps/revolut_pay, false, true, oneTime, true
-revolut_pay, false, true, off_session, false, card/revolut_pay, false, false, not available, false
-revolut_pay, false, true, off_session, false, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, false, false, off_session, false, card/revolut_pay, false, false, not available, false
-revolut_pay, false, false, off_session, false, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, false, true, on_session, false, card/revolut_pay, false, false, not available, false
-revolut_pay, false, true, on_session, false, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, false, false, on_session, false, card/revolut_pay, false, false, not available, false
-revolut_pay, false, false, on_session, false, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, false, true, null, false, card/revolut_pay, false, true, oneTime, true
-revolut_pay, false, true, null, false, card/eps/revolut_pay, false, true, oneTime, true
-revolut_pay, false, false, null, false, card/revolut_pay, false, true, oneTime, true
-revolut_pay, false, false, null, false, card/eps/revolut_pay, false, true, oneTime, true
-revolut_pay, true, true, off_session, true, card/revolut_pay, false, false, not available, false
-revolut_pay, true, true, off_session, true, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, true, false, off_session, true, card/revolut_pay, false, false, not available, false
-revolut_pay, true, false, off_session, true, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, true, true, on_session, true, card/revolut_pay, false, false, not available, false
-revolut_pay, true, true, on_session, true, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, true, false, on_session, true, card/revolut_pay, false, false, not available, false
-revolut_pay, true, false, on_session, true, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, true, true, null, true, card/revolut_pay, false, true, oneTime, true
-revolut_pay, true, true, null, true, card/eps/revolut_pay, false, true, oneTime, true
-revolut_pay, true, false, null, true, card/revolut_pay, false, true, oneTime, true
-revolut_pay, true, false, null, true, card/eps/revolut_pay, false, true, oneTime, true
-revolut_pay, false, true, off_session, true, card/revolut_pay, false, false, not available, false
-revolut_pay, false, true, off_session, true, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, false, false, off_session, true, card/revolut_pay, false, false, not available, false
-revolut_pay, false, false, off_session, true, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, false, true, on_session, true, card/revolut_pay, false, false, not available, false
-revolut_pay, false, true, on_session, true, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, false, false, on_session, true, card/revolut_pay, false, false, not available, false
-revolut_pay, false, false, on_session, true, card/eps/revolut_pay, false, false, not available, false
-revolut_pay, false, true, null, true, card/revolut_pay, false, true, oneTime, true
-revolut_pay, false, true, null, true, card/eps/revolut_pay, false, true, oneTime, true
-revolut_pay, false, false, null, true, card/revolut_pay, false, true, oneTime, true
-revolut_pay, false, false, null, true, card/eps/revolut_pay, false, true, oneTime, true
+revolut_pay, true, true, off_session, false, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, true, off_session, false, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, false, off_session, false, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, false, off_session, false, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, true, on_session, false, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, true, on_session, false, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, false, on_session, false, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, false, on_session, false, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, true, null, false, card/revolut_pay, true, true, userSelectedSave, true
+revolut_pay, true, true, null, false, card/eps/revolut_pay, true, true, userSelectedSave, true
+revolut_pay, true, false, null, false, card/revolut_pay, true, true, userSelectedSave, true
+revolut_pay, true, false, null, false, card/eps/revolut_pay, true, true, userSelectedSave, true
+revolut_pay, false, true, off_session, false, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, true, off_session, false, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, false, off_session, false, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, false, off_session, false, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, true, on_session, false, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, true, on_session, false, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, false, on_session, false, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, false, on_session, false, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, true, null, false, card/revolut_pay, true, true, oneTime, true
+revolut_pay, false, true, null, false, card/eps/revolut_pay, true, true, oneTime, true
+revolut_pay, false, false, null, false, card/revolut_pay, true, true, oneTime, true
+revolut_pay, false, false, null, false, card/eps/revolut_pay, true, true, oneTime, true
+revolut_pay, true, true, off_session, true, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, true, off_session, true, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, false, off_session, true, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, false, off_session, true, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, true, on_session, true, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, true, on_session, true, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, false, on_session, true, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, false, on_session, true, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, true, true, null, true, card/revolut_pay, true, true, userSelectedSave, true
+revolut_pay, true, true, null, true, card/eps/revolut_pay, true, true, userSelectedSave, true
+revolut_pay, true, false, null, true, card/revolut_pay, true, true, userSelectedSave, true
+revolut_pay, true, false, null, true, card/eps/revolut_pay, true, true, userSelectedSave, true
+revolut_pay, false, true, off_session, true, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, true, off_session, true, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, false, off_session, true, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, false, off_session, true, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, true, on_session, true, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, true, on_session, true, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, false, on_session, true, card/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, false, on_session, true, card/eps/revolut_pay, true, true, merchantRequiredSave, true
+revolut_pay, false, true, null, true, card/revolut_pay, true, true, oneTime, true
+revolut_pay, false, true, null, true, card/eps/revolut_pay, true, true, oneTime, true
+revolut_pay, false, false, null, true, card/revolut_pay, true, true, oneTime, true
+revolut_pay, false, false, null, true, card/eps/revolut_pay, true, true, oneTime, true

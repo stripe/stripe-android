@@ -26,16 +26,25 @@ def handle_result(client, actions)
         puts "Continue? (y/n)"
 
         answer = gets.chomp
-        if answer == "y"
-            outcomes = actions.each_with_index.map { |action, index| action.perform(client) }
-
-            outcomes.each_with_index do |outcome, index|
-                puts "#{index+1}. #{outcome}"
-            end
-        else
+        if answer != "y" && answer != "Y"
             abort("🤷 You aborted the automated script. Please create/update the keys manually… somehow…")
         end
+
+        outcomes = actions.each_with_index.map { |action, index| action.perform(client) }
+
+        outcomes.each_with_index do |outcome, index|
+            puts "#{index+1}. #{outcome}"
+        end
+
+        fetch_updated_translations
     end
+end
+
+def fetch_updated_translations
+    puts "Fetching updated translation from Lokalise…"
+    command = "./localize.sh ENGLISH_ONLY"
+    system(command) or raise "Failed to execute #{command}"
+    puts "✅ Fetched updated translations"
 end
 
 # ---------------- Start of script ----------------

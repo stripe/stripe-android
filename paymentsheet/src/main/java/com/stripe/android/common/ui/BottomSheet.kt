@@ -39,6 +39,7 @@ internal const val BottomSheetContentTestTag = "BottomSheetContentTestTag"
 internal class BottomSheetState(
     val modalBottomSheetState: ModalBottomSheetState,
     val keyboardHandler: BottomSheetKeyboardHandler,
+    val sheetGesturesEnabled: Boolean,
 ) {
 
     private var dismissalType: DismissalType? = null
@@ -101,6 +102,7 @@ internal fun rememberBottomSheetState(
         BottomSheetState(
             modalBottomSheetState = modalBottomSheetState,
             keyboardHandler = keyboardHandler,
+            sheetGesturesEnabled = false,
         )
     }
 }
@@ -172,6 +174,7 @@ internal fun BottomSheet(
             topStart = MaterialTheme.stripeShapes.cornerRadius.dp,
             topEnd = MaterialTheme.stripeShapes.cornerRadius.dp,
         ),
+        sheetGesturesEnabled = state.sheetGesturesEnabled,
         sheetContent = {
             Box(modifier = Modifier.testTag(BottomSheetContentTestTag)) {
                 sheetContent()

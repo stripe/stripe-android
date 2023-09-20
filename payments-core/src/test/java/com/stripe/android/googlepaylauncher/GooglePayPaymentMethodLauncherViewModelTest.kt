@@ -164,11 +164,12 @@ class GooglePayPaymentMethodLauncherViewModelTest {
 
             val factory = GooglePayPaymentMethodLauncherViewModel.Factory(
                 GooglePayPaymentMethodLauncherContractV2.Args(
-                    mock(),
-                    "usd",
-                    1099,
-                    null,
-                    GooglePayPaymentMethodLauncherContractV2.Args.InjectionParams(
+                    config = mock(),
+                    currencyCode = "usd",
+                    amount = 1099,
+                    label = null,
+                    transactionId = null,
+                    injectionParams = GooglePayPaymentMethodLauncherContractV2.Args.InjectionParams(
                         injectorKey,
                         emptySet(),
                         false,
@@ -201,15 +202,16 @@ class GooglePayPaymentMethodLauncherViewModelTest {
 
             val factory = GooglePayPaymentMethodLauncherViewModel.Factory(
                 GooglePayPaymentMethodLauncherContractV2.Args(
-                    GooglePayPaymentMethodLauncher.Config(
+                    config = GooglePayPaymentMethodLauncher.Config(
                         GooglePayEnvironment.Test,
                         "US",
                         "merchant"
                     ),
-                    "usd",
-                    1099,
-                    null,
-                    GooglePayPaymentMethodLauncherContractV2.Args.InjectionParams(
+                    currencyCode = "usd",
+                    amount = 1099,
+                    label = null,
+                    transactionId = null,
+                    injectionParams = GooglePayPaymentMethodLauncherContractV2.Args.InjectionParams(
                         DUMMY_INJECTOR_KEY,
                         productUsage,
                         false,

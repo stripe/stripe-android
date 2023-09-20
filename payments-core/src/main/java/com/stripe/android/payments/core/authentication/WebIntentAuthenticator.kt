@@ -91,6 +91,13 @@ internal class WebIntentAuthenticator @Inject constructor(
                 returnUrl = null
                 shouldCancelIntentOnUserNavigation = false
             }
+            is StripeIntent.NextActionData.DisplayKonbiniDetails -> {
+                // nextActionData.hostedVoucherUrl will never be null as AuthenticatorRegistry won't direct it here
+                authUrl = nextActionData.hostedVoucherUrl.takeIf { it!!.isNotEmpty() }
+                    ?: throw IllegalArgumentException("null hostedVoucherUrl for DisplayKonbiniDetails")
+                returnUrl = null
+                shouldCancelIntentOnUserNavigation = false
+            }
             is StripeIntent.NextActionData.CashAppRedirect -> {
                 authUrl = nextActionData.mobileAuthUrl
                 returnUrl = defaultReturnUrl.value
