@@ -24,7 +24,7 @@ class BacsDebitBankAccountSpec : FormItemSpec() {
                 )
             ),
             SimpleTextElement(
-                IdentifierSpec.Generic("bacs_debit[account_number"),
+                IdentifierSpec.Generic("bacs_debit[account_number]"),
                 SimpleTextFieldController(
                     BacsDebitAccountNumberConfig(),
                     initialValue = initialValues[this.apiPath]
