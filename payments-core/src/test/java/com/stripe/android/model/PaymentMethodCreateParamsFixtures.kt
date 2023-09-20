@@ -121,6 +121,10 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS,
     )
 
+    internal val SWISH = PaymentMethodCreateParams.createSwish(
+        billingDetails = BILLING_DETAILS,
+    )
+
     @JvmStatic
     fun createWith(metadata: Map<String, String>): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(
