@@ -3,7 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import org.junit.Test
 
@@ -12,54 +12,54 @@ class BacsDebitAccountNumberConfigTest {
 
     @Test
     fun `verify config uses proper visual transformation, keyboard capitalization, and keyboard type`() {
-        Truth.assertThat(
+        assertThat(
             bacsDebitAccountNumberConfig.visualTransformation
         ).isEqualTo(VisualTransformation.None)
 
-        Truth.assertThat(
+        assertThat(
             bacsDebitAccountNumberConfig.capitalization
         ).isEqualTo(KeyboardCapitalization.None)
 
-        Truth.assertThat(
+        assertThat(
             bacsDebitAccountNumberConfig.keyboard
         ).isEqualTo(KeyboardType.NumberPassword)
     }
 
     @Test
     fun `verify only numbers are allowed in the field`() {
-        Truth.assertThat(
+        assertThat(
             bacsDebitAccountNumberConfig.filter("12345ewgh6789")
         ).isEqualTo("12345678")
     }
 
     @Test
     fun `verify limits input to accepted length`() {
-        Truth.assertThat(
+        assertThat(
             bacsDebitAccountNumberConfig.filter("1234567899999")
         ).isEqualTo("12345678")
     }
 
     @Test
     fun `verify blank account number returns blank state`() {
-        Truth.assertThat(
+        assertThat(
             bacsDebitAccountNumberConfig.determineState("")
         ).isEqualTo(TextFieldStateConstants.Error.Blank)
     }
 
     @Test
     fun `verify incomplete account number is in incomplete state`() {
-        Truth.assertThat(
+        assertThat(
             bacsDebitAccountNumberConfig.determineState("123")
         ).isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
 
-        Truth.assertThat(
+        assertThat(
             bacsDebitAccountNumberConfig.determineState("123456")
         ).isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
     }
 
     @Test
     fun `verify valid account number is in valid state`() {
-        Truth.assertThat(
+        assertThat(
             bacsDebitAccountNumberConfig.determineState("65398764")
         ).isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
     }

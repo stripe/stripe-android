@@ -6,7 +6,7 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 
 internal object BacsDebitSortCodeVisualTransformation : VisualTransformation {
-    private const val SEPARATOR = '-'
+    private const val SEPARATOR = "-"
 
     override fun filter(text: AnnotatedString): TransformedText {
         val internalText = text.text
@@ -19,17 +19,7 @@ internal object BacsDebitSortCodeVisualTransformation : VisualTransformation {
     }
 
     private fun format(text: String): String {
-        val split = text.chunked(size = 2)
-
-        return buildString {
-            split.forEachIndexed { index, splitText ->
-                append(splitText)
-
-                if (index != split.size - 1) {
-                    append(SEPARATOR)
-                }
-            }
-        }
+        return text.chunked(size = 2).joinToString(separator = SEPARATOR)
     }
 
     private object SortCodeOffsetMapping : OffsetMapping {
