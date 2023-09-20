@@ -144,7 +144,7 @@ internal class StripeBrowserLauncherViewModel(
                 intentChooserTitle = application.getString(R.string.stripe_verify_your_payment),
                 resolveErrorMessage = application.getString(R.string.stripe_failure_reason_authentication),
                 savedStateHandle = savedStateHandle,
-                intentResolver = {  it.resolveActivity(application.packageManager) != null },
+                intentResolver = { it.resolveActivity(application.packageManager) != null },
             ) as T
         }
     }
