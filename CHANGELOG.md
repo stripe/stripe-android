@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [ADDED][7337](https://github.com/stripe/stripe-android/pull/7337) PaymentSheet now supports Swish for PaymentIntents in private beta.
+
 ### Financial Connections
 * [FIXED][7331](https://github.com/stripe/stripe-android/pull/7331) When cancelling out of a auth session, going back to the consent screen required two back taps.
 
