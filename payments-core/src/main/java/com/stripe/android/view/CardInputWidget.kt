@@ -839,7 +839,7 @@ class CardInputWidget @JvmOverloads constructor(
 
         hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
 
-        // We need to use known card brand to set the correct expected CVC length. Since both
+        // We need to use a known card brand to set the correct expected CVC length. Since both
         // brands of a co-branded card have the same CVC length, we can just choose the first one.
         val brandForCvcLength = brands.firstOrNull() ?: CardBrand.Unknown
         updateCvc(brand = brandForCvcLength)

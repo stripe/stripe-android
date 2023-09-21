@@ -84,11 +84,6 @@ class CardAccountRangeServiceTest {
     }
 
     @Test
-    fun `test card metadata service pan length`() = runTest {
-        verifyRemotePanLength("6500079999999999999", 16)
-    }
-
-    @Test
     fun `If CBC is disabled, return the matched brand as soon as there is input`() = runTest {
         val expectedAccountRange = AccountRange(
             binRange = BinRange(
@@ -198,6 +193,11 @@ class CardAccountRangeServiceTest {
             staticSource = StaticCardAccountRangeSource(),
             store = store
         )
+    }
+
+    @Test
+    fun `test card metadata service pan length`() = runTest {
+        verifyRemotePanLength("6500079999999999999", 16)
     }
 
     private fun verifyRemotePanLength(cardNumberString: String, expectedPanLength: Int) {

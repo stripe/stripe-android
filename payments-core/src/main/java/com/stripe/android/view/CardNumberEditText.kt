@@ -7,6 +7,7 @@ import android.text.InputFilter
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -45,7 +46,8 @@ class CardNumberEditText internal constructor(
     private val cardAccountRangeRepository: CardAccountRangeRepository,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    viewModelStoreOwner: ViewModelStoreOwner? = null,
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads
@@ -102,7 +104,7 @@ class CardNumberEditText internal constructor(
             callback(cardBrand)
         }
 
-    private var possibleCardBrands: List<CardBrand> = emptyList()
+    internal var possibleCardBrands: List<CardBrand> = emptyList()
         set(value) {
             val prevBrands = field
             field = value
@@ -191,16 +193,19 @@ class CardNumberEditText internal constructor(
 
         this.layoutDirection = LAYOUT_DIRECTION_LTR
 
-        doWithCardWidgetViewModel { viewModel ->
+        doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 this@CardNumberEditText.isCbcEligible = isCbcEligible
+
+                if (isCbcEligible) {
+                    possibleCardBrands = accountRangeService.accountRanges.map { it.brand }.distinct()
+                }
             }
         }
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-
         loadingJob = CoroutineScope(workContext).launch {
             cardAccountRangeRepository.loading.collect {
                 withContext(Dispatchers.Main) {
