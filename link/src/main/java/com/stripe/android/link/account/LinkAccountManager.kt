@@ -138,10 +138,10 @@ internal class LinkAccountManager @Inject constructor(
                 config.stripeIntent
             ).mapCatching {
                 if (config.passthroughModeEnabled) {
-                    shareCardPaymentDetails(
+                    linkRepository.shareCardPaymentDetails(
                         id = it.paymentDetails.id,
                         last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
-                        clientSecret = account.clientSecret,
+                        consumerSessionClientSecret = account.clientSecret,
                         paymentMethodCreateParams = paymentMethodCreateParams,
                     ).getOrThrow()
                 } else {
@@ -171,20 +171,6 @@ internal class LinkAccountManager @Inject constructor(
     } ?: Result.failure(
         IllegalStateException("User not signed in")
     )
-
-    private suspend fun shareCardPaymentDetails(
-        paymentMethodCreateParams: PaymentMethodCreateParams,
-        id: String,
-        last4: String,
-        clientSecret: String
-    ): Result<LinkPaymentDetails> {
-        return linkRepository.shareCardPaymentDetails(
-            paymentMethodCreateParams = paymentMethodCreateParams,
-            id = id,
-            last4 = last4,
-            consumerSessionClientSecret = clientSecret,
-        )
-    }
 
     private fun setAccount(consumerSession: ConsumerSession): LinkAccount {
         maybeUpdateConsumerPublishableKey(consumerSession)

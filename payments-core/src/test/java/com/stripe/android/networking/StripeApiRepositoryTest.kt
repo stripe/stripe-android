@@ -1731,6 +1731,37 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
+    fun `sharePaymentDetails() sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                ConsumerFixtures.PAYMENT_DETAILS_SHARE_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "secret"
+            val id = "csmrpd*AYq4D_sXdAAAAOQ0"
+            create().sharePaymentDetails(
+                consumerSessionClientSecret = clientSecret,
+                id = id,
+                requestOptions = DEFAULT_OPTIONS,
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+
+            with(params) {
+                assertEquals(this["request_surface"], "android_payment_element")
+                withNestedParams("credentials") {
+                    assertEquals(this["consumer_session_client_secret"], clientSecret)
+                }
+                assertEquals(this["id"], id)
+            }
+        }
+
+    @Test
     fun `attachLinkAccountSessionToPaymentIntent attaches LAS to PI`() =
         runTest {
             val stripeResponse = StripeResponse(

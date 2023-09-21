@@ -2,7 +2,9 @@ package com.stripe.android.link.repositories
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.PaymentDetailsFixtures
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
@@ -326,6 +328,40 @@ class LinkApiRepositoryTest {
         )
 
         assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `shareCardPaymentDetails returns LinkPaymentDetails_Saved`() = runTest {
+        val consumerSessionSecret = "consumer_session_secret"
+
+        whenever(
+            stripeRepository.sharePaymentDetails(
+                consumerSessionClientSecret = any(),
+                id = any(),
+                requestOptions = any(),
+            )
+        ).thenReturn(Result.success("pm_123"))
+
+        val result = linkRepository.shareCardPaymentDetails(
+            paymentMethodCreateParams = cardPaymentMethodCreateParams,
+            consumerSessionClientSecret = consumerSessionSecret,
+            id = "csmrpd*AYq4D_sXdAAAAOQ0",
+            last4 = "4242",
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        val savedLinkPaymentDetails = result.getOrThrow() as LinkPaymentDetails.Saved
+
+        assertThat(savedLinkPaymentDetails.paymentDetails)
+            .isEqualTo(ConsumerPaymentDetails.Passthrough(id = "pm_123", last4 = "4242"))
+        assertThat(savedLinkPaymentDetails.paymentMethodCreateParams)
+            .isEqualTo(
+                PaymentMethodCreateParams.createLink(
+                    "pm_123",
+                    consumerSessionSecret,
+                    null
+                )
+            )
     }
 
     private val cardPaymentMethodCreateParams =
