@@ -25,10 +25,9 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.Destination.BankAuthRepair
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.repository.PartnerToCoreAuthsRepository
+import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -41,7 +40,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val selectNetworkedAccount: SelectNetworkedAccount,
     private val updateLocalManifest: UpdateLocalManifest,
     private val updateCachedAccounts: UpdateCachedAccounts,
-    private val partnerToCoreAuthsRepository: PartnerToCoreAuthsRepository,
+    private val coreAuthorizationPendingNetworkingRepair: CoreAuthorizationPendingNetworkingRepairRepository,
     private val getManifest: GetManifest,
     private val navigationManager: NavigationManager,
     private val logger: Logger
@@ -137,8 +136,8 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             }
 
             Pane.BANK_AUTH_REPAIR -> {
-                partnerToCoreAuthsRepository.set(requireNotNull(payload.partnerToCoreAuths))
-                repairAccount()
+                coreAuthorizationPendingNetworkingRepair.set(account.authorization)
+                eventTracker.track(Click("click.repair_accounts", PANE))
             }
 
             Pane.PARTNER_AUTH -> {
@@ -152,11 +151,6 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         }
         Unit
     }.execute { copy(selectNetworkedAccountAsync = it) }
-
-    private suspend fun repairAccount() {
-        eventTracker.track(Click("click.repair_accounts", PANE))
-        navigationManager.tryNavigateTo(BankAuthRepair(referrer = PANE))
-    }
 
     fun onAccountClick(partnerAccount: PartnerAccount) {
         setState { copy(selectedAccountId = partnerAccount.id) }

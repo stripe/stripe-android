@@ -6,6 +6,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
@@ -18,11 +19,11 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
+import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
-import com.stripe.android.financialconnections.repository.PartnerToCoreAuthsRepository
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.repository.ConsumersApiService
@@ -149,8 +150,13 @@ internal interface FinancialConnectionsSheetNativeModule {
 
         @Singleton
         @Provides
-        fun providesPartnerToCoreAuthsRepository() = PartnerToCoreAuthsRepository(
-            CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        fun providesPartnerToCoreAuthsRepository(
+            logger: Logger,
+            analyticsTracker: FinancialConnectionsAnalyticsTracker
+        ) = CoreAuthorizationPendingNetworkingRepairRepository(
+            coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+            logger = logger,
+            analyticsTracker = analyticsTracker
         )
 
         @Provides

@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
+import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ClickableText
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenBottomSheet
@@ -28,11 +29,12 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAuthori
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.LinkAccountPicker
 import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
-import com.stripe.android.financialconnections.repository.PartnerToCoreAuthsRepository
+import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -49,7 +51,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
     private val createRepairSession: CreateRepairSession,
     private val updateLocalManifest: UpdateLocalManifest,
     private val getCachedConsumerSession: GetCachedConsumerSession,
-    private val partnerToCoreAuthsRepository: PartnerToCoreAuthsRepository,
+    private val coreAuthorizationPendingNetworkingRepair: CoreAuthorizationPendingNetworkingRepairRepository,
     private val selectNetworkedAccount: SelectNetworkedAccount,
     private val completeRepairSession: CompleteRepairSession,
     private val getManifest: GetManifest,
@@ -63,8 +65,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
         observePayload()
         suspend {
             val selectedAccount = getCachedAccounts().first()
-            val coreAuthorization = requireNotNull(partnerToCoreAuthsRepository.get())
-                .getValue(selectedAccount.authorization)
+            val coreAuthorization = requireNotNull(coreAuthorizationPendingNetworkingRepair.get())
             val repairSession = createRepairSession(coreAuthorization)
             updateLocalManifest { it.copy(activeInstitution = repairSession.institution) }
             PartnerAuthState.Payload(
@@ -146,7 +147,6 @@ internal class BankAuthRepairViewModel @Inject constructor(
         viewModelScope.launch {
             when (webStatus) {
                 is WebAuthFlowState.Canceled -> onAuthCancelled(webStatus.url)
-
                 is WebAuthFlowState.Failed -> onAuthFailed(
                     url = webStatus.url,
                     message = webStatus.message,
@@ -160,13 +160,19 @@ internal class BankAuthRepairViewModel @Inject constructor(
         }
     }
 
-    private fun onAuthFailed(
+    private suspend fun onAuthFailed(
         url: String,
         message: String,
         reason: String?
     ) {
         // TODO handle auth failures
-        logger.error("Auth failed $message $url $reason")
+        eventTracker.logError(
+            extraMessage = "Repair auth session failed. url: $url",
+            error = WebAuthFlowFailedException(message, reason),
+            logger = logger,
+            pane = PANE
+        )
+        navigationManager.tryNavigateTo(LinkAccountPicker(referrer = PANE))
     }
 
     private fun onAuthCancelled(url: String?) {

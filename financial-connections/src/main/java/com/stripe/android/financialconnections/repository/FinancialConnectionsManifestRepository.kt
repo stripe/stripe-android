@@ -538,7 +538,6 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "core_authorization" to coreAuthorization,
                 "auth_repair_session" to authRepairSessionId,
-                "expand" to listOf("institution"),
             )
         )
         return requestExecutor.execute(

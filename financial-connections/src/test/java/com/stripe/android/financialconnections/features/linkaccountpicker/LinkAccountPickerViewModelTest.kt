@@ -65,7 +65,7 @@ class LinkAccountPickerViewModelTest {
         selectNetworkedAccount = selectNetworkedAccount,
         updateLocalManifest = updateLocalManifest,
         updateCachedAccounts = updateCachedAccounts,
-        partnerToCoreAuthsRepository = mock(),
+        coreAuthorizationPendingNetworkingRepair = mock(),
         initialState = state
     )
 
