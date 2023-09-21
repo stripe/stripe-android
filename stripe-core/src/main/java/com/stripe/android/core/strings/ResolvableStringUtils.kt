@@ -14,18 +14,6 @@ internal fun resolveArgs(context: Context, args: List<Any?>): Array<Any?> {
 }
 
 /**
- * Creates a [ResolvableString] from an identifier.
- *
- * @param id a string resource identifier
- *
- * @return a [ResolvableString] instance when resolved returns the string that matches the identifier.
- */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun resolvableString(@StringRes id: Int): ResolvableString {
-    return IdentifierResolvableString(id, listOf())
-}
-
-/**
  * Creates a [ResolvableString] from a given identifier.
  *
  * @param id a string resource identifier
@@ -34,20 +22,12 @@ fun resolvableString(@StringRes id: Int): ResolvableString {
  * @return a [ResolvableString] instance when resolved returns the string that matches the identifier.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun resolvableString(@StringRes id: Int, vararg formatArgs: Any?): ResolvableString {
-    return IdentifierResolvableString(id, formatArgs.toList())
-}
-
-/**
- * Creates a [ResolvableString] from a given string value.
- *
- * @param value a string value
- *
- * @return a [ResolvableString] instance when resolved returns the string value.
- */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun resolvableString(value: String): ResolvableString {
-    return StaticResolvableString(value, listOf())
+fun resolvableString(
+    @StringRes id: Int,
+    vararg formatArgs: Any?,
+    transform: (value: String) -> String = { it }
+): ResolvableString {
+    return IdentifierResolvableString(id, formatArgs.toList(), transform)
 }
 
 /**
