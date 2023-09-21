@@ -165,7 +165,6 @@ internal class BankAuthRepairViewModel @Inject constructor(
         message: String,
         reason: String?
     ) {
-        // TODO handle auth failures
         eventTracker.logError(
             extraMessage = "Repair auth session failed. url: $url",
             error = WebAuthFlowFailedException(message, reason),
@@ -176,8 +175,8 @@ internal class BankAuthRepairViewModel @Inject constructor(
     }
 
     private fun onAuthCancelled(url: String?) {
-        // TODO handle auth cancellations
         logger.debug("Auth cancelled $url")
+        navigationManager.tryNavigateTo(LinkAccountPicker(referrer = PANE))
     }
 
     private suspend fun completeRepairSession(url: String) = runCatching {
