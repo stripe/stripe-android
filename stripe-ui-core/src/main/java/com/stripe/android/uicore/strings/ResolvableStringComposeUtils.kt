@@ -9,6 +9,6 @@ import com.stripe.android.core.strings.ResolvableString
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 @ReadOnlyComposable
-fun resolvableStringResource(resolvableString: ResolvableString): String {
-    return resolvableString.resolve(LocalContext.current)
+fun ResolvableString.resolve(): String {
+    return resolve(LocalContext.current)
 }

@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 
-internal fun resolveArgs(context: Context, args: Array<out Any?>): Array<Any?> {
+internal fun resolveArgs(context: Context, args: List<Any?>): Array<Any?> {
     return args.map { arg ->
         when (arg) {
             is ResolvableString -> arg.resolve(context)
@@ -22,7 +22,7 @@ internal fun resolveArgs(context: Context, args: Array<out Any?>): Array<Any?> {
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun resolvableString(@StringRes id: Int): ResolvableString {
-    return IdentifierResolvableString(id, arrayOf())
+    return IdentifierResolvableString(id, listOf())
 }
 
 /**
@@ -35,7 +35,7 @@ fun resolvableString(@StringRes id: Int): ResolvableString {
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun resolvableString(@StringRes id: Int, vararg formatArgs: Any?): ResolvableString {
-    return IdentifierResolvableString(id, formatArgs)
+    return IdentifierResolvableString(id, formatArgs.toList())
 }
 
 /**
@@ -47,7 +47,7 @@ fun resolvableString(@StringRes id: Int, vararg formatArgs: Any?): ResolvableStr
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun resolvableString(value: String): ResolvableString {
-    return StaticResolvableString(value, arrayOf())
+    return StaticResolvableString(value, listOf())
 }
 
 /**
@@ -60,5 +60,5 @@ fun resolvableString(value: String): ResolvableString {
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun resolvableString(value: String, vararg formatArgs: Any?): ResolvableString {
-    return StaticResolvableString(value, formatArgs)
+    return StaticResolvableString(value, formatArgs.toList())
 }

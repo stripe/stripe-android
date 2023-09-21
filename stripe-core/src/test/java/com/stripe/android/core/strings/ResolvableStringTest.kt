@@ -67,8 +67,6 @@ class ResolvableStringTest {
 
     @Test
     fun `resolvable strings with the same values & arguments should produce the same 'toString' value`() {
-        println(resolvableString(id = 1453235, resolvableString(value = "1453235"), "argTwo").toString())
-
         assertEquals(
             resolvableString(id = 1453235, resolvableString(value = "1453235"), "argTwo").toString(),
             resolvableString(id = 1453235, resolvableString(value = "1453235"), "argTwo").toString()
