@@ -83,7 +83,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
         }
     }
 
-    fun FinancialConnectionsAuthorizationRepairSession.toAuthSession() =
+    private fun FinancialConnectionsAuthorizationRepairSession.toAuthSession() =
         FinancialConnectionsAuthorizationSession(
             id = id,
             nextPane = Pane.SUCCESS,

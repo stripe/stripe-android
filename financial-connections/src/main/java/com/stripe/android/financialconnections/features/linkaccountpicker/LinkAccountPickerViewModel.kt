@@ -136,7 +136,9 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             }
 
             Pane.BANK_AUTH_REPAIR -> {
-                coreAuthorizationPendingNetworkingRepair.set(account.authorization)
+                coreAuthorizationPendingNetworkingRepair.set(
+                    requireNotNull(payload.partnerToCoreAuths).getValue(account.authorization)
+                )
                 eventTracker.track(Click("click.repair_accounts", PANE))
             }
 
