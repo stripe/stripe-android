@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.stripe.android.databinding.StripeCardBrandViewBinding
 import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -97,22 +98,24 @@ internal class CardBrandView @JvmOverloads constructor(
         isFocusable = false
 
         iconView.setContent {
-            val isLoading by isLoadingFlow.collectAsState()
-            val currentBrand by brandFlow.collectAsState()
-            val possibleBrands by possibleBrandsFlow.collectAsState()
-            val shouldShowCvc by shouldShowCvcFlow.collectAsState()
-            val shouldShowErrorIcon by shouldShowErrorIconFlow.collectAsState()
+            MdcTheme {
+                val isLoading by isLoadingFlow.collectAsState()
+                val currentBrand by brandFlow.collectAsState()
+                val possibleBrands by possibleBrandsFlow.collectAsState()
+                val shouldShowCvc by shouldShowCvcFlow.collectAsState()
+                val shouldShowErrorIcon by shouldShowErrorIconFlow.collectAsState()
 
-            CardBrand(
-                isLoading = isLoading,
-                currentBrand = currentBrand,
-                possibleBrands = possibleBrands,
-                shouldShowCvc = shouldShowCvc,
-                shouldShowErrorIcon = shouldShowErrorIcon,
-                tintColorInt = tintColorInt,
-                isCbcEligible = isCbcEligible,
-                onBrandSelected = this::handleBrandSelected,
-            )
+                CardBrand(
+                    isLoading = isLoading,
+                    currentBrand = currentBrand,
+                    possibleBrands = possibleBrands,
+                    shouldShowCvc = shouldShowCvc,
+                    shouldShowErrorIcon = shouldShowErrorIcon,
+                    tintColorInt = tintColorInt,
+                    isCbcEligible = isCbcEligible,
+                    onBrandSelected = this::handleBrandSelected,
+                )
+            }
         }
     }
 

@@ -9,6 +9,7 @@ dependencies {
     api project(":payments-model")
     compileOnly project(':financial-connections')
 
+    implementation libs.accompanist.themeAdapter
     implementation libs.androidx.activity
     implementation libs.androidx.annotation
     implementation libs.androidx.appCompat
