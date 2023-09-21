@@ -6,6 +6,11 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.core.strings.ResolvableString
 
+/**
+ * Resolves a string value from a [ResolvableString] instance.
+ *
+ * @return a string value
+ */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 @ReadOnlyComposable

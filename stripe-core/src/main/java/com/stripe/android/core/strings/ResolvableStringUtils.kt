@@ -14,11 +14,11 @@ internal fun resolveArgs(context: Context, args: List<Any?>): Array<Any?> {
 }
 
 /**
- * Creates a `ResolvableString` from an identifier.
+ * Creates a [ResolvableString] from an identifier.
  *
  * @param id a string resource identifier
  *
- * @return a `ResolvableString` instance when resolved returns the string that matches the identifier.
+ * @return a [ResolvableString] instance when resolved returns the string that matches the identifier.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun resolvableString(@StringRes id: Int): ResolvableString {
@@ -26,12 +26,12 @@ fun resolvableString(@StringRes id: Int): ResolvableString {
 }
 
 /**
- * Creates a `ResolvableString` from a given identifier.
+ * Creates a [ResolvableString] from a given identifier.
  *
  * @param id a string resource identifier
  * @param formatArgs a variable amount of arguments to format the string with.
  *
- * @return a `ResolvableString` instance when resolved returns the string that matches the identifier.
+ * @return a [ResolvableString] instance when resolved returns the string that matches the identifier.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun resolvableString(@StringRes id: Int, vararg formatArgs: Any?): ResolvableString {
@@ -39,11 +39,11 @@ fun resolvableString(@StringRes id: Int, vararg formatArgs: Any?): ResolvableStr
 }
 
 /**
- * Creates a `ResolvableString` from a given string value.
+ * Creates a [ResolvableString] from a given string value.
  *
  * @param value a string value
  *
- * @return a `ResolvableString` instance when resolved returns the string value.
+ * @return a [ResolvableString] instance when resolved returns the string value.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun resolvableString(value: String): ResolvableString {
@@ -51,12 +51,12 @@ fun resolvableString(value: String): ResolvableString {
 }
 
 /**
- * Creates a `ResolvableString` from a given string value.
+ * Creates a [ResolvableString] from a given string value.
  *
  * @param value a string value
  * @param formatArgs a variable amount of arguments to format the string with.
  *
- * @return a `ResolvableString` instance when resolved returns the string value.
+ * @return a [ResolvableString] instance when resolved returns the string value.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun resolvableString(value: String, vararg formatArgs: Any?): ResolvableString {
