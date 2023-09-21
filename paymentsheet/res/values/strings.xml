@@ -8,6 +8,24 @@
   <string name="stripe_blik_confirm_payment">Confirm the payment in your bank\'s app within %s to complete the purchase.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">An error occurred. Check your connection and try again.</string>
+  <!-- Text for alert message when user needs to confirm payment in their banking app -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">Confirm your Direct Debit details</string>
+  <!-- Text for alert message when user needs to confirm payment in their banking app -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_email_label">Email</string>
+  <!-- Text for alert message when user needs to confirm payment in their banking app -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_name_label">Name on account</string>
+  <!-- Text for alert message when user needs to confirm payment in their banking app -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_sort_code_label">Sort code</string>
+  <!-- Text for alert message when user needs to confirm payment in their banking app -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_account_number_label">Account number</string>
+  <!-- Text for alert message when user needs to confirm payment in their banking app -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">An email will be sent to %s within three business days to confirm the setup of this debit instruction.</string>
+  <!-- Text for alert message when user needs to confirm payment in their banking app -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Additionally, you will receive two days advance notice via email of any amount to be debited under this instruction. Payments will show as \'%s\' on your bank statement.</string>
+  <!-- Text for alert message when user needs to confirm payment in their banking app -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Your payments are protected by the %s.</string>
+  <!-- Text for alert message when user needs to confirm payment in their banking app -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">Modify details</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[By continuing, you agree to authorize payments pursuant to <terms>these terms</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
