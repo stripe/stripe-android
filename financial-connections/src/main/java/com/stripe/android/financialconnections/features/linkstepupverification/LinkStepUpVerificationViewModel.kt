@@ -11,13 +11,13 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationStepUpError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationStepUpError.Error.ConsumerNotFoundError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationStepUpError.Error.LookupConsumerSession
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationStepUpError.Error.MarkLinkVerifiedError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationStepUpError.Error.StartVerificationError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationStepUpSuccess
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.VerificationStepUpError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.VerificationStepUpError.Error.ConsumerNotFoundError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.VerificationStepUpError.Error.LookupConsumerSession
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.VerificationStepUpError.Error.MarkLinkVerifiedError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.VerificationStepUpError.Error.StartVerificationError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.VerificationStepUpSuccess
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -110,8 +110,12 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
                 }
             },
             onFail = { error ->
-                logger.error("Error fetching payload", error)
-                eventTracker.track(Error(PANE, error))
+                eventTracker.logError(
+                    extraMessage = "Error fetching payload",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
             },
         )
     }

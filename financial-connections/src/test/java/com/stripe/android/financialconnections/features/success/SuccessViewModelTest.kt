@@ -7,7 +7,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Complete
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -77,7 +78,7 @@ internal class SuccessViewModelTest {
             buildViewModel(SuccessState())
             // Just emits the complete event, no page loaded events.
             assertThat(eventTracker.sentEvents).containsExactly(
-                FinancialConnectionsEvent.Complete(
+                Complete(
                     connectedAccounts = session.accounts.count,
                     exceptionExtraMessage = null,
                     exception = null
@@ -105,7 +106,7 @@ internal class SuccessViewModelTest {
         nativeAuthFlowCoordinator().test {
             buildViewModel(SuccessState())
             assertThat(eventTracker.sentEvents).containsExactly(
-                FinancialConnectionsEvent.PaneLoaded(
+                PaneLoaded(
                     pane = FinancialConnectionsSessionManifest.Pane.SUCCESS,
                 )
             )

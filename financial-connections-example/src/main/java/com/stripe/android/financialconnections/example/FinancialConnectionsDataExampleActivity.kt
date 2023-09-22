@@ -1,13 +1,16 @@
 package com.stripe.android.financialconnections.example
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenFinancialConnectionsSheetExample
 
 class FinancialConnectionsDataExampleActivity : AppCompatActivity() {
@@ -22,6 +25,13 @@ class FinancialConnectionsDataExampleActivity : AppCompatActivity() {
         setupViews()
         observeViews()
         observeState()
+        FinancialConnections.setEventListener { event: FinancialConnectionsEvent ->
+            Log.d("FinancialConnections", "Event: $event")
+        }
+        financialConnectionsSheet = FinancialConnectionsSheet.create(
+            activity = this@FinancialConnectionsDataExampleActivity,
+            callback = viewModel::onFinancialConnectionsSheetResult
+        )
     }
 
     private fun setupViews() {
@@ -29,10 +39,6 @@ class FinancialConnectionsDataExampleActivity : AppCompatActivity() {
             it.title = getString(R.string.collect_bank_account_for_data_title)
             setSupportActionBar(it)
         }
-        financialConnectionsSheet = FinancialConnectionsSheet.create(
-            activity = this@FinancialConnectionsDataExampleActivity,
-            callback = viewModel::onFinancialConnectionsSheetResult
-        )
     }
 
     private fun observeViews() {

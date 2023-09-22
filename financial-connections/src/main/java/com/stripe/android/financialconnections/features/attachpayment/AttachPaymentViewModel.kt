@@ -8,8 +8,8 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAttachPaymentsSucceeded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.PollAttachPaymentsSucceeded
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
@@ -70,7 +70,12 @@ internal class AttachPaymentViewModel @Inject constructor(
                     navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
                 }
             }
-            eventTracker.track(PollAttachPaymentsSucceeded(authSession.id, millis))
+            eventTracker.track(
+                PollAttachPaymentsSucceeded(
+                    authSessionId = authSession.id,
+                    duration = millis
+                )
+            )
             result
         }.execute { copy(linkPaymentAccount = it) }
     }
@@ -87,7 +92,7 @@ internal class AttachPaymentViewModel @Inject constructor(
                 )
             },
             onSuccess = {
-                eventTracker.track(PaneLoaded(PANE))
+                eventTracker.track(FinancialConnectionsInternalEvent.PaneLoaded(PANE))
             }
         )
         onAsync(

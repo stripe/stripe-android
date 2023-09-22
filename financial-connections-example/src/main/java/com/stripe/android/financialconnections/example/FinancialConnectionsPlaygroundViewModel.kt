@@ -209,10 +209,10 @@ class FinancialConnectionsPlaygroundViewModel(
             is CollectBankAccountResult.Completed -> runCatching {
                 _state.update {
                     val session = result.response.financialConnectionsSession
-                    val account = session.accounts.data.first()
+                    val account = session.accounts.data.firstOrNull()
                     it.copy(
                         status = it.status + listOf(
-                            "Session Completed! ${session.id} (account: ${account.id})",
+                            "Session Completed! ${session.id} (account: ${account?.id})",
                             "Confirming Intent: ${result.response.intent.id}",
                         )
                     )
@@ -229,11 +229,11 @@ class FinancialConnectionsPlaygroundViewModel(
                         status = it.status + "Intent Confirmed!"
                     )
                 }
-            }.onFailure {
+            }.onFailure { error ->
                 _state.update {
                     it.copy(
                         loading = false,
-                        status = it.status + "Confirming intent Failed!: $it"
+                        status = it.status + "Confirming intent Failed!: $error"
                     )
                 }
             }

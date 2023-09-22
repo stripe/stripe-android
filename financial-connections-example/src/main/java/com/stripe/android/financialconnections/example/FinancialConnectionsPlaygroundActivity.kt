@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.example
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -51,6 +52,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.edit
+import com.stripe.android.financialconnections.FinancialConnections
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheet
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheetForToken
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
@@ -69,6 +72,12 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FinancialConnections.setEventListener { event: FinancialConnectionsEvent ->
+            Log.d("EVENT", "Received event: ${event.name}, ${event.metadata}")
+            if (event.name == FinancialConnectionsEvent.Name.CONSENT_ACQUIRED) {
+                Log.d("EVENT", "Consent Acquired!")
+            }
+        }
         collectBankAccountLauncher = CollectBankAccountLauncher.create(
             this,
             viewModel::onCollectBankAccountLauncherResult
