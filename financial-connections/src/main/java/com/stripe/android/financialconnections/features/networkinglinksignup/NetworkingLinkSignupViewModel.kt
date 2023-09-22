@@ -64,7 +64,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private var searchJob = ConflatedJob()
 
     init {
-        logErrors()
+        observeAsyncs()
         suspend {
             val manifest = getManifest()
             val content = requireNotNull(sync().text?.networkingLinkSignupPane)
@@ -80,7 +80,54 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         }.execute { copy(payload = it) }
     }
 
-    private fun logErrors() {
+    private fun observeAsyncs() {
+        observePayloadResult()
+        observeSaveAccountResult()
+        observeLookupAccountResult()
+    }
+
+    private fun observeLookupAccountResult() {
+        onAsync(
+            NetworkingLinkSignupState::lookupAccount,
+            onSuccess = { consumerSession ->
+                if (consumerSession.exists) {
+                    eventTracker.track(NetworkingReturningConsumer(PANE))
+                    navigationManager.tryNavigateTo(NetworkingSaveToLinkVerification(referrer = PANE))
+                } else {
+                    eventTracker.track(NetworkingNewConsumer(PANE))
+                }
+            },
+            onFail = { error ->
+                eventTracker.logError(
+                    extraMessage = "Error looking up account",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
+            },
+        )
+    }
+
+    private fun observeSaveAccountResult() {
+        onAsync(
+            NetworkingLinkSignupState::saveAccountToLink,
+            onSuccess = {
+                saveToLinkWithStripeSucceeded.set(true)
+            },
+            onFail = { error ->
+                saveToLinkWithStripeSucceeded.set(false)
+                eventTracker.logError(
+                    extraMessage = "Error saving account to Link",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
+                navigationManager.tryNavigateTo(Success(referrer = PANE))
+            },
+        )
+    }
+
+    private fun observePayloadResult() {
         onAsync(
             NetworkingLinkSignupState::payload,
             onSuccess = { payload ->
@@ -99,41 +146,6 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             onFail = { error ->
                 eventTracker.logError(
                     extraMessage = "Error fetching payload",
-                    error = error,
-                    logger = logger,
-                    pane = PANE
-                )
-            },
-        )
-        onAsync(
-            NetworkingLinkSignupState::saveAccountToLink,
-            onSuccess = {
-                saveToLinkWithStripeSucceeded.set(true)
-            },
-            onFail = { error ->
-                saveToLinkWithStripeSucceeded.set(false)
-                eventTracker.logError(
-                    extraMessage = "Error saving account to Link",
-                    error = error,
-                    logger = logger,
-                    pane = PANE
-                )
-                navigationManager.tryNavigateTo(Success(referrer = PANE))
-            },
-        )
-        onAsync(
-            NetworkingLinkSignupState::lookupAccount,
-            onSuccess = { consumerSession ->
-                if (consumerSession.exists) {
-                    eventTracker.track(NetworkingReturningConsumer(PANE))
-                    navigationManager.tryNavigateTo(NetworkingSaveToLinkVerification(referrer = PANE))
-                } else {
-                    eventTracker.track(NetworkingNewConsumer(PANE))
-                }
-            },
-            onFail = { error ->
-                eventTracker.logError(
-                    extraMessage = "Error looking up account",
                     error = error,
                     logger = logger,
                     pane = PANE
