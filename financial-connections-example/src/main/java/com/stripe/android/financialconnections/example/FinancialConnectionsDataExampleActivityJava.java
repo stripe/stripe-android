@@ -34,7 +34,7 @@ public class FinancialConnectionsDataExampleActivityJava extends AppCompatActivi
         observeState();
         FinancialConnections.setEventListener(
                 event -> {
-                    Log.d("FinancialConnections", "Event: " + event);
+                    Log.d("FinancialConnections", "Event: " + event.getName());
                     return Unit.INSTANCE;
                 }
         );

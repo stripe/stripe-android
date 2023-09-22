@@ -26,7 +26,7 @@ class FinancialConnectionsDataExampleActivity : AppCompatActivity() {
         observeViews()
         observeState()
         FinancialConnections.setEventListener { event: FinancialConnectionsEvent ->
-            Log.d("FinancialConnections", "Event: $event")
+            Log.d("FinancialConnections", "Event: ${event.name}")
         }
         financialConnectionsSheet = FinancialConnectionsSheet.create(
             activity = this@FinancialConnectionsDataExampleActivity,
