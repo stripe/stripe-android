@@ -5,9 +5,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Stripe
 import com.stripe.android.confirmPaymentIntent
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -34,6 +36,17 @@ class FinancialConnectionsPlaygroundViewModel(
 
     init {
         _state.update { it.copy(backendUrl = settings.backendUrl) }
+        FinancialConnections.setEventListener { event: FinancialConnectionsEvent ->
+            _state.update { state ->
+                state.copy(
+                    emittedEvents = state.emittedEvents + buildString {
+                        append(event.name)
+                        append(", ")
+                        append(event.metadata.toMap().filterValues { it != null })
+                    }
+                )
+            }
+        }
     }
 
     fun startFinancialConnectionsSession(
@@ -42,7 +55,12 @@ class FinancialConnectionsPlaygroundViewModel(
         keys: Pair<String, String>,
         email: String
     ) {
-        _state.update { it.copy(status = emptyList()) }
+        _state.update {
+            it.copy(
+                status = emptyList(),
+                emittedEvents = emptyList()
+            )
+        }
         when (flow) {
             Flow.Data -> startForData(merchant, keys, email.takeIf { it.isNotEmpty() })
             Flow.Token -> startForToken(merchant, keys, email.takeIf { it.isNotEmpty() })
@@ -301,5 +319,6 @@ data class FinancialConnectionsPlaygroundState(
     val backendUrl: String = "",
     val loading: Boolean = false,
     val publishableKey: String? = null,
-    val status: List<String> = emptyList()
+    val status: List<String> = emptyList(),
+    val emittedEvents: List<String> = emptyList()
 )

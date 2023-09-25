@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.example
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +9,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,11 +19,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
@@ -34,6 +36,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,8 +55,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.edit
-import com.stripe.android.financialconnections.FinancialConnections
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheet
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheetForToken
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
@@ -73,12 +74,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        FinancialConnections.setEventListener { event: FinancialConnectionsEvent ->
-            Log.d("EVENT", "Received event: ${event.name}, ${event.metadata}")
-            if (event.name == FinancialConnectionsEvent.Name.CONSENT_ACQUIRED) {
-                Log.d("EVENT", "Consent Acquired!")
-            }
-        }
         collectBankAccountLauncher = CollectBankAccountLauncher.create(
             this,
             viewModel::onCollectBankAccountLauncherResult
@@ -140,85 +135,152 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         state: FinancialConnectionsPlaygroundState,
         onButtonClick: (Merchant, Flow, Pair<String, String>, String) -> Unit
     ) {
+        val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
+
+        if (showDialog) {
+            EventsDialog(setShowDialog, state)
+        }
+
+        Scaffold(
+            topBar = { PlaygroundTopBar(setShowDialog) },
+            content = {
+                PlaygroundContent(
+                    padding = it,
+                    state = state,
+                    onButtonClick = onButtonClick
+                )
+            }
+        )
+    }
+
+    @Composable
+    private fun PlaygroundContent(
+        padding: PaddingValues,
+        state: FinancialConnectionsPlaygroundState,
+        onButtonClick: (Merchant, Flow, Pair<String, String>, String) -> Unit
+    ) {
         val (selectedMode, onModeSelected) = remember { mutableStateOf(Merchant.values()[0]) }
         val (selectedFlow, onFlowSelected) = remember { mutableStateOf(Flow.values()[0]) }
         val (publicKey, onPublicKeyChanged) = remember { mutableStateOf("") }
         val (secretKey, onSecretKeyChanged) = remember { mutableStateOf("") }
         val (email, onEmailChange) = remember { mutableStateOf("") }
-
-        Scaffold(
-            topBar = { TopAppBar(title = { Text("Connections Playground") }) },
-            content = {
-                Column(
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .padding(16.dp)
+        ) {
+            NativeOverrideSection()
+            MerchantSection(selectedMode, onModeSelected)
+            if (selectedMode == Merchant.Other) {
+                OutlinedTextField(
+                    value = publicKey,
+                    onValueChange = onPublicKeyChanged,
+                    placeholder = { Text("pk_...") },
+                    label = { Text("Public key") },
                     modifier = Modifier
-                        .padding(it)
-                        .padding(16.dp)
-                ) {
-                    NativeOverrideSection()
-                    MerchantSection(selectedMode, onModeSelected)
-                    if (selectedMode == Merchant.Other) {
-                        OutlinedTextField(
-                            value = publicKey,
-                            onValueChange = onPublicKeyChanged,
-                            placeholder = { Text("pk_...") },
-                            label = { Text("Public key") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        )
-                        OutlinedTextField(
-                            value = secretKey,
-                            onValueChange = onSecretKeyChanged,
-                            placeholder = { Text("sk_...") },
-                            label = { Text("Secret key") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    FlowSection(selectedFlow, onFlowSelected)
-                    EmailInputSection(email, onEmailChange)
-                    if (state.loading) {
-                        LinearProgressIndicator(
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                    Divider(Modifier.padding(vertical = 8.dp))
-                    Text(
-                        text = "backend: ${state.backendUrl}",
-                        color = Color.Gray
+                        .fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = secretKey,
+                    onValueChange = onSecretKeyChanged,
+                    placeholder = { Text("sk_...") },
+                    label = { Text("Secret key") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            FlowSection(selectedFlow, onFlowSelected)
+            EmailInputSection(email, onEmailChange)
+            if (state.loading) {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            Divider(Modifier.padding(vertical = 8.dp))
+            Text(
+                text = "backend: ${state.backendUrl}",
+                color = Color.Gray
+            )
+            Text(
+                text = "env: ${BuildConfig.TEST_ENVIRONMENT}",
+                color = Color.Gray
+            )
+            Button(
+                onClick = {
+                    onButtonClick(
+                        selectedMode,
+                        selectedFlow,
+                        publicKey to secretKey,
+                        email
                     )
-                    Text(
-                        text = "env: ${BuildConfig.TEST_ENVIRONMENT}",
-                        color = Color.Gray
-                    )
-                    Button(
-                        onClick = {
-                            onButtonClick(
-                                selectedMode,
-                                selectedFlow,
-                                publicKey to secretKey,
-                                email
-                            )
-                        },
-                    ) {
-                        Text("Connect Accounts!")
-                    }
-                    LazyColumn {
-                        items(state.status) { item ->
-                            Row(Modifier.padding(4.dp), verticalAlignment = Alignment.Top) {
-                                Canvas(
-                                    modifier = Modifier
-                                        .padding(end = 8.dp, top = 6.dp)
-                                        .size(6.dp)
-                                ) {
-                                    drawCircle(Color.Black)
-                                }
-                                SelectionContainer {
-                                    Text(text = item, fontSize = 12.sp)
-                                }
-                            }
+                },
+            ) {
+                Text("Connect Accounts!")
+            }
+            LazyColumn {
+                items(state.status) { item ->
+                    Row(Modifier.padding(4.dp), verticalAlignment = Alignment.Top) {
+                        Canvas(
+                            modifier = Modifier
+                                .padding(end = 8.dp, top = 6.dp)
+                                .size(6.dp)
+                        ) {
+                            drawCircle(Color.Black)
+                        }
+                        SelectionContainer {
+                            Text(text = item, fontSize = 12.sp)
                         }
                     }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun PlaygroundTopBar(
+        setShowDialog: (Boolean) -> Unit,
+    ) {
+        val (showMenu, setShowMenu) = remember { mutableStateOf(false) }
+        TopAppBar(
+            title = { Text("Connections Playground") },
+            actions = {
+                IconButton(onClick = { setShowMenu(true) }) {
+                    Icon(Icons.Default.MoreVert, contentDescription = "More")
+                }
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { setShowMenu(false) }
+                ) {
+                    DropdownMenuItem(onClick = {
+                        setShowMenu(false)
+                        setShowDialog(true)
+                    }) {
+                        Text("See live events")
+                    }
+                }
+            }
+        )
+    }
+
+    @Composable
+    private fun EventsDialog(
+        setShowDialog: (Boolean) -> Unit,
+        state: FinancialConnectionsPlaygroundState
+    ) {
+        AlertDialog(
+            onDismissRequest = { setShowDialog(false) },
+            title = { Text(text = "Emitted events") },
+            text = {
+                LazyColumn {
+                    items(state.emittedEvents) { item ->
+                        Text(text = "- $item")
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = { setShowDialog(false) }) {
+                    Text("Close")
                 }
             }
         )
