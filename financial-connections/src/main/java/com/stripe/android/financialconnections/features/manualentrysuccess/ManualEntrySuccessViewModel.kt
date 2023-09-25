@@ -7,10 +7,10 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDone
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Complete
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickDone
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Finish

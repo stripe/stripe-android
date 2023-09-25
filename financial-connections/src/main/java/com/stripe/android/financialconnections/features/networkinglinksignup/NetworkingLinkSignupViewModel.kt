@@ -8,12 +8,12 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.NetworkingNewConsumer
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.NetworkingReturningConsumer
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Click
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.NetworkingNewConsumer
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.NetworkingReturningConsumer
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupAccount
@@ -64,7 +64,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private var searchJob = ConflatedJob()
 
     init {
-        logErrors()
+        observeAsyncs()
         suspend {
             val manifest = getManifest()
             val content = requireNotNull(sync().text?.networkingLinkSignupPane)
@@ -80,7 +80,54 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         }.execute { copy(payload = it) }
     }
 
-    private fun logErrors() {
+    private fun observeAsyncs() {
+        observePayloadResult()
+        observeSaveAccountResult()
+        observeLookupAccountResult()
+    }
+
+    private fun observeLookupAccountResult() {
+        onAsync(
+            NetworkingLinkSignupState::lookupAccount,
+            onSuccess = { consumerSession ->
+                if (consumerSession.exists) {
+                    eventTracker.track(NetworkingReturningConsumer(PANE))
+                    navigationManager.tryNavigateTo(NetworkingSaveToLinkVerification(referrer = PANE))
+                } else {
+                    eventTracker.track(NetworkingNewConsumer(PANE))
+                }
+            },
+            onFail = { error ->
+                eventTracker.logError(
+                    extraMessage = "Error looking up account",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
+            },
+        )
+    }
+
+    private fun observeSaveAccountResult() {
+        onAsync(
+            NetworkingLinkSignupState::saveAccountToLink,
+            onSuccess = {
+                saveToLinkWithStripeSucceeded.set(true)
+            },
+            onFail = { error ->
+                saveToLinkWithStripeSucceeded.set(false)
+                eventTracker.logError(
+                    extraMessage = "Error saving account to Link",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
+                navigationManager.tryNavigateTo(Success(referrer = PANE))
+            },
+        )
+    }
+
+    private fun observePayloadResult() {
         onAsync(
             NetworkingLinkSignupState::payload,
             onSuccess = { payload ->
@@ -97,35 +144,12 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 }
             },
             onFail = { error ->
-                logger.error("Error fetching payload", error)
-                eventTracker.track(Error(PANE, error))
-            },
-        )
-        onAsync(
-            NetworkingLinkSignupState::saveAccountToLink,
-            onSuccess = {
-                saveToLinkWithStripeSucceeded.set(true)
-            },
-            onFail = { error ->
-                saveToLinkWithStripeSucceeded.set(false)
-                logger.error("Error saving account to Link", error)
-                eventTracker.track(Error(PANE, error))
-                navigationManager.tryNavigateTo(Success(referrer = PANE))
-            },
-        )
-        onAsync(
-            NetworkingLinkSignupState::lookupAccount,
-            onSuccess = { consumerSession ->
-                if (consumerSession.exists) {
-                    eventTracker.track(NetworkingReturningConsumer(PANE))
-                    navigationManager.tryNavigateTo(NetworkingSaveToLinkVerification(referrer = PANE))
-                } else {
-                    eventTracker.track(NetworkingNewConsumer(PANE))
-                }
-            },
-            onFail = { error ->
-                logger.error("Error looking up account", error)
-                eventTracker.track(Error(PANE, error))
+                eventTracker.logError(
+                    extraMessage = "Error fetching payload",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
             },
         )
     }
@@ -190,9 +214,12 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         if (URLUtil.isNetworkUrl(uri)) {
             setState { copy(viewEffect = OpenUrl(uri, date.time)) }
         } else {
-            val errorMessage = "Unrecognized clickable text: $uri"
-            logger.error(errorMessage)
-            eventTracker.track(Error(PANE, InvalidParameterException(errorMessage)))
+            eventTracker.logError(
+                extraMessage = "Error clicking text",
+                logger = logger,
+                pane = PANE,
+                error = InvalidParameterException("Unrecognized clickable text: $uri")
+            )
         }
     }
 
