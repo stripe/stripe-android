@@ -1092,6 +1092,12 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
+    override fun onDetachedFromWindow() {
+        dropdownAnimator?.cancel()
+        dropdownAnimator = null
+        super.onDetachedFromWindow()
+    }
+
     private var hiddenCardText: String = createHiddenCardText(cardNumberEditText.panLength)
 
     private val cvcPlaceHolder: String
