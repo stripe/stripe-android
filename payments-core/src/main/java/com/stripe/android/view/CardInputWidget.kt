@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
@@ -8,6 +9,8 @@ import android.text.Layout
 import android.text.TextPaint
 import android.text.TextWatcher
 import android.util.AttributeSet
+import android.util.TypedValue
+import android.util.TypedValue.applyDimension
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -40,6 +43,7 @@ import com.stripe.android.model.DelicateCardDetailsApi
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
 /**
@@ -339,6 +343,19 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
         updatePostalRequired()
+    }
+
+    private var dropdownAnimator: ValueAnimator? = null
+
+    private val cardBrandIconWidth: Float by lazy {
+        resources.getDimension(R.dimen.stripe_card_brand_view_width)
+    }
+
+    private val cardBrandChoiceDropdownWidth: Float by lazy {
+        val displayMetrics = context.resources.displayMetrics
+        val spacing = applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, displayMetrics)
+        val icon = applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, displayMetrics)
+        spacing + icon
     }
 
     private fun updatePostalRequired() {
@@ -845,9 +862,32 @@ class CardInputWidget @JvmOverloads constructor(
         updateCvc(brand = brandForCvcLength)
 
         if (shouldShowDropdown != didShowDropdown) {
+            animateCardBrandChoiceDropdown(isVisible = shouldShowDropdown)
+        }
+    }
+
+    private fun animateCardBrandChoiceDropdown(isVisible: Boolean) {
+        dropdownAnimator?.cancel()
+
+        val desiredWidth = if (isVisible) {
+            cardBrandIconWidth + cardBrandChoiceDropdownWidth
+        } else {
+            cardBrandIconWidth
+        }
+
+        val newAnimator = ValueAnimator.ofFloat(cardBrandView.width.toFloat(), desiredWidth)
+
+        newAnimator.addUpdateListener { currentAnimator ->
+            val animatedWidth = currentAnimator.animatedValue as Float
+            cardBrandView.updateLayoutParams<LayoutParams> {
+                width = animatedWidth.roundToInt()
+            }
             isViewInitialized = false
             requestLayout()
         }
+
+        dropdownAnimator = newAnimator
+        newAnimator.start()
     }
 
     /**
