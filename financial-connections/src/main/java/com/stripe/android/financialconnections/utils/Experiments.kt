@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.utils
 
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Exposure
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Exposure
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 
 internal fun FinancialConnectionsSessionManifest.experimentPresent(

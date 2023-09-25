@@ -1,8 +1,8 @@
 package com.stripe.android.financialconnections.utils
 
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Exposure
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Exposure
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

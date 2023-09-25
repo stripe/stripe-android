@@ -5,7 +5,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsInternalEvent.Error
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Error
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import java.util.Locale
@@ -15,7 +15,7 @@ import java.util.Locale
  */
 internal interface FinancialConnectionsAnalyticsTracker {
 
-    suspend fun track(event: FinancialConnectionsInternalEvent): Result<Unit>
+    suspend fun track(event: FinancialConnectionsAnalyticsEvent): Result<Unit>
 }
 
 internal suspend fun FinancialConnectionsAnalyticsTracker.logError(
@@ -51,7 +51,7 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
         origin = ORIGIN
     )
 
-    override suspend fun track(event: FinancialConnectionsInternalEvent): Result<Unit> {
+    override suspend fun track(event: FinancialConnectionsAnalyticsEvent): Result<Unit> {
         return runCatching {
             val eventParams: Map<out String, Any?> = event.params ?: emptyMap()
             val commonParams = commonParams()
