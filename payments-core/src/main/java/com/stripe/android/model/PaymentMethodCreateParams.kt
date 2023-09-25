@@ -34,6 +34,7 @@ data class PaymentMethodCreateParams internal constructor(
     private val usBankAccount: USBankAccount? = null,
     private val link: Link? = null,
     private val cashAppPay: CashAppPay? = null,
+    private val swish: Swish? = null,
     val billingDetails: PaymentMethod.BillingDetails? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
@@ -65,6 +66,7 @@ data class PaymentMethodCreateParams internal constructor(
         usBankAccount: USBankAccount? = null,
         link: Link? = null,
         cashAppPay: CashAppPay? = null,
+        swish: Swish? = null,
         billingDetails: PaymentMethod.BillingDetails? = null,
         metadata: Map<String, String>? = null,
         productUsage: Set<String> = emptySet(),
@@ -84,6 +86,7 @@ data class PaymentMethodCreateParams internal constructor(
         usBankAccount,
         link,
         cashAppPay,
+        swish,
         billingDetails,
         metadata,
         productUsage,
@@ -220,6 +223,17 @@ data class PaymentMethodCreateParams internal constructor(
     ) : this(
         type = PaymentMethod.Type.CashAppPay,
         cashAppPay = cashAppPay,
+        billingDetails = billingDetails,
+        metadata = metadata,
+    )
+
+    private constructor(
+        swish: Swish,
+        billingDetails: PaymentMethod.BillingDetails?,
+        metadata: Map<String, String>?,
+    ) : this(
+        type = PaymentMethod.Type.Swish,
+        swish = swish,
         billingDetails = billingDetails,
         metadata = metadata,
     )
@@ -490,6 +504,14 @@ data class PaymentMethodCreateParams internal constructor(
      */
     @Parcelize
     class CashAppPay : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> = emptyMap()
+    }
+
+    /**
+     * Encapsulates parameters used to create [PaymentMethodCreateParams] when using Swish.
+     */
+    @Parcelize
+    class Swish : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> = emptyMap()
     }
 
@@ -956,6 +978,19 @@ data class PaymentMethodCreateParams internal constructor(
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(CashAppPay(), billingDetails, metadata)
+        }
+
+        /**
+         * Helper method to create [PaymentMethodCreateParams] with [Swish] as the payment
+         * method type.
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun createSwish(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(Swish(), billingDetails, metadata)
         }
 
         @JvmStatic

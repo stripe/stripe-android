@@ -456,4 +456,13 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod = stripe.createPaymentMethodSynchronous(params)
         assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.RevolutPay)
     }
+
+    @Test
+    fun createPaymentMethod_withSwish_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.SWISH
+        val stripe = Stripe(context, ApiKeyFixtures.SWISH_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Swish)
+    }
 }

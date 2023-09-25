@@ -1086,5 +1086,10 @@
         "type": "konbini_confirmation_number"
       }
     ]
+  },
+  {
+    "type": "swish",
+    "async": false,
+    "fields": []
   }
 ]

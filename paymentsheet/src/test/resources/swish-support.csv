@@ -1,0 +1,49 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+swish, true, true, off_session, false, card/swish, false, false, not available, false
+swish, true, true, off_session, false, card/eps/swish, false, false, not available, false
+swish, true, false, off_session, false, card/swish, false, false, not available, false
+swish, true, false, off_session, false, card/eps/swish, false, false, not available, false
+swish, true, true, on_session, false, card/swish, false, false, not available, false
+swish, true, true, on_session, false, card/eps/swish, false, false, not available, false
+swish, true, false, on_session, false, card/swish, false, false, not available, false
+swish, true, false, on_session, false, card/eps/swish, false, false, not available, false
+swish, true, true, null, false, card/swish, false, true, oneTime, true
+swish, true, true, null, false, card/eps/swish, false, true, oneTime, true
+swish, true, false, null, false, card/swish, false, true, oneTime, true
+swish, true, false, null, false, card/eps/swish, false, true, oneTime, true
+swish, false, true, off_session, false, card/swish, false, false, not available, false
+swish, false, true, off_session, false, card/eps/swish, false, false, not available, false
+swish, false, false, off_session, false, card/swish, false, false, not available, false
+swish, false, false, off_session, false, card/eps/swish, false, false, not available, false
+swish, false, true, on_session, false, card/swish, false, false, not available, false
+swish, false, true, on_session, false, card/eps/swish, false, false, not available, false
+swish, false, false, on_session, false, card/swish, false, false, not available, false
+swish, false, false, on_session, false, card/eps/swish, false, false, not available, false
+swish, false, true, null, false, card/swish, false, true, oneTime, true
+swish, false, true, null, false, card/eps/swish, false, true, oneTime, true
+swish, false, false, null, false, card/swish, false, true, oneTime, true
+swish, false, false, null, false, card/eps/swish, false, true, oneTime, true
+swish, true, true, off_session, true, card/swish, false, false, not available, false
+swish, true, true, off_session, true, card/eps/swish, false, false, not available, false
+swish, true, false, off_session, true, card/swish, false, false, not available, false
+swish, true, false, off_session, true, card/eps/swish, false, false, not available, false
+swish, true, true, on_session, true, card/swish, false, false, not available, false
+swish, true, true, on_session, true, card/eps/swish, false, false, not available, false
+swish, true, false, on_session, true, card/swish, false, false, not available, false
+swish, true, false, on_session, true, card/eps/swish, false, false, not available, false
+swish, true, true, null, true, card/swish, false, true, oneTime, true
+swish, true, true, null, true, card/eps/swish, false, true, oneTime, true
+swish, true, false, null, true, card/swish, false, true, oneTime, true
+swish, true, false, null, true, card/eps/swish, false, true, oneTime, true
+swish, false, true, off_session, true, card/swish, false, false, not available, false
+swish, false, true, off_session, true, card/eps/swish, false, false, not available, false
+swish, false, false, off_session, true, card/swish, false, false, not available, false
+swish, false, false, off_session, true, card/eps/swish, false, false, not available, false
+swish, false, true, on_session, true, card/swish, false, false, not available, false
+swish, false, true, on_session, true, card/eps/swish, false, false, not available, false
+swish, false, false, on_session, true, card/swish, false, false, not available, false
+swish, false, false, on_session, true, card/eps/swish, false, false, not available, false
+swish, false, true, null, true, card/swish, false, true, oneTime, true
+swish, false, true, null, true, card/eps/swish, false, true, oneTime, true
+swish, false, false, null, true, card/swish, false, true, oneTime, true
+swish, false, false, null, true, card/eps/swish, false, true, oneTime, true

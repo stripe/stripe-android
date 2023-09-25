@@ -97,7 +97,8 @@ sealed interface StripeIntent : StripeModel {
         UpiAwaitNotification("upi_await_notification"),
         CashAppRedirect("cashapp_handle_redirect_or_display_qr_code"),
         DisplayBoletoDetails("boleto_display_details"),
-        DisplayKonbiniDetails("konbini_display_details");
+        DisplayKonbiniDetails("konbini_display_details"),
+        SwishRedirect("swish_handle_redirect_or_display_qr_code");
 
         @Keep
         override fun toString(): String {
@@ -331,6 +332,14 @@ sealed interface StripeIntent : StripeModel {
          */
         @Parcelize
         data class CashAppRedirect(
+            val mobileAuthUrl: String,
+        ) : NextActionData()
+
+        /**
+         * Contains the authentication URL for redirecting your customer to Swish.
+         */
+        @Parcelize
+        data class SwishRedirect(
             val mobileAuthUrl: String,
         ) : NextActionData()
     }

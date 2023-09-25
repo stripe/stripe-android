@@ -6,6 +6,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
@@ -37,6 +38,8 @@ internal class CardWidgetViewModel(
     }
 
     private suspend fun determineCbcEligibility(): Boolean {
+        // TODO(tillh-stripe) Query /wallets-config here
+        // TODO(tillh-stripe) Make sure we don't use an outdated PaymentConfiguration
         delay(1.seconds)
         return DEBUG
     }
@@ -53,13 +56,14 @@ internal class CardWidgetViewModel(
 }
 
 internal fun View.doWithCardWidgetViewModel(
+    viewModelStoreOwner: ViewModelStoreOwner? = null,
     action: LifecycleOwner.(CardWidgetViewModel) -> Unit,
 ) {
     doOnAttach {
         val lifecycleOwner = findViewTreeLifecycleOwner()
-        val viewModelStoreOwner = findViewTreeViewModelStoreOwner()
+        val storeOwner = viewModelStoreOwner ?: findViewTreeViewModelStoreOwner()
 
-        if (lifecycleOwner == null || viewModelStoreOwner == null) {
+        if (lifecycleOwner == null || storeOwner == null) {
             if (DEBUG) {
                 if (lifecycleOwner == null) {
                     error("Couldn't find a LifecycleOwner for view")
@@ -75,7 +79,7 @@ internal fun View.doWithCardWidgetViewModel(
         )
 
         val viewModel = ViewModelProvider(
-            owner = viewModelStoreOwner,
+            owner = storeOwner,
             factory = factory,
         )[CardWidgetViewModel::class.java]
 

@@ -82,6 +82,14 @@ internal abstract class AuthenticationModule {
         webIntentAuthenticator: WebIntentAuthenticator
     ): PaymentAuthenticator<StripeIntent>
 
+    @IntentAuthenticatorMap
+    @Binds
+    @IntoMap
+    @IntentAuthenticatorKey(NextActionData.SwishRedirect::class)
+    abstract fun bindsSwishRedirectAuthenticator(
+        webIntentAuthenticator: WebIntentAuthenticator
+    ): PaymentAuthenticator<StripeIntent>
+
     companion object {
         @Provides
         @Singleton
