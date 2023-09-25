@@ -936,7 +936,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             "MYR",
             "MXN",
             "BRL",
-            "JPY"
+            "JPY",
+            "SEK",
         )
     }
 }
