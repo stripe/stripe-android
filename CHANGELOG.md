@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.32.0 - 2023-09-25
+
 ### PaymentSheet
 * [ADDED][7337](https://github.com/stripe/stripe-android/pull/7337) PaymentSheet now supports Swish for PaymentIntents in private beta.
 
