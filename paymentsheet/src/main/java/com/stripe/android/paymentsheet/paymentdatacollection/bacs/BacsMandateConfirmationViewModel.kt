@@ -1,10 +1,11 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -14,9 +15,9 @@ import kotlinx.coroutines.launch
 internal class BacsMandateConfirmationViewModel constructor(
     private val args: Args
 ) : ViewModel() {
-    private val _effect = MutableSharedFlow<BacsMandateConfirmationEffect>()
-    val effect: SharedFlow<BacsMandateConfirmationEffect>
-        get() = _effect
+    private val _result = MutableSharedFlow<BacsMandateConfirmationResult>()
+    val result: SharedFlow<BacsMandateConfirmationResult>
+        get() = _result
 
     private val _viewState = MutableStateFlow(
         BacsMandateConfirmationViewState(
@@ -40,13 +41,13 @@ internal class BacsMandateConfirmationViewModel constructor(
 
     private fun onConfirmPress() {
         viewModelScope.launch {
-            _effect.emit(BacsMandateConfirmationEffect.CloseWithResult(BacsMandateConfirmationResult.Confirmed))
+            _result.emit(BacsMandateConfirmationResult.Confirmed)
         }
     }
 
     private fun onCancelPress() {
         viewModelScope.launch {
-            _effect.emit(BacsMandateConfirmationEffect.CloseWithResult(BacsMandateConfirmationResult.Cancelled))
+            _result.emit(BacsMandateConfirmationResult.Cancelled)
         }
     }
 
@@ -93,13 +94,10 @@ internal class BacsMandateConfirmationViewModel constructor(
         )
     }
 
-    class Factory(
-        private val application: Application,
-        private val args: BacsMandateConfirmationContract.Args
-    ) : ViewModelProvider.Factory {
+    class Factory(private val args: BacsMandateConfirmationContract.Args) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            val context = application.applicationContext
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            val context = extras.requireApplication().applicationContext
 
             return BacsMandateConfirmationViewModel(
                 Args(

@@ -7,10 +7,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -20,7 +20,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -29,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.common.util.VisibleForTesting
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
 
@@ -50,6 +50,7 @@ internal fun BacsMandateConfirmationFormView(
 ) {
     return Column(
         modifier = modifier
+            .verticalScroll(rememberScrollState())
             .background(MaterialTheme.colors.background)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -96,11 +97,7 @@ internal fun BacsMandateConfirmationFormView(
                 }
             )
         }
-        Spacer(
-            modifier = Modifier.requiredHeight(
-                height = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
-            )
-        )
+        PaymentSheetContentPadding()
     }
 }
 
@@ -149,7 +146,7 @@ private fun DetailsRow(
     value: String,
     modifier: Modifier = Modifier
 ) {
-    Row(modifier = modifier) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Text(
             modifier = Modifier.weight(WEIGHT_40_PERCENT),
             style = MaterialTheme.typography.subtitle2,

@@ -12,25 +12,6 @@ import org.junit.Before
 import org.junit.Test
 
 class BacsMandateConfirmationViewModelTest {
-    private val viewModel = BacsMandateConfirmationViewModel(
-        args = BacsMandateConfirmationViewModel.Args(
-            accountNumber = "00012345",
-            sortCode = "108800",
-            email = "email@email.com",
-            nameOnAccount = "John Doe",
-            guarantee = BacsMandateConfirmationViewModel.Args.Guarantee(
-                name = "Direct Debit Guarantee",
-                url = "https://stripe.com/legal/bacs-direct-debit-guarantee"
-            ),
-            defaultAddress = BacsMandateConfirmationViewModel.Args.DefaultAddress(
-                lineOne = "Stripe, 7th Floor The Bower Warehouse",
-                lineTwo = "207–211 Old St, London EC1V 9NR",
-                supportEmail = "support@stripe.com"
-            ),
-            defaultPayer = "Stripe"
-        )
-    )
-
     @Before
     fun setup() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
@@ -43,6 +24,8 @@ class BacsMandateConfirmationViewModelTest {
 
     @Test
     fun `on init, view model state should be initialized properly`() {
+        val viewModel = createViewModel()
+
         assertThat(viewModel.viewState.value).isEqualTo(
             BacsMandateConfirmationViewState(
                 accountNumber = "00012345",
@@ -60,27 +43,44 @@ class BacsMandateConfirmationViewModelTest {
 
     @Test
     fun `on confirm pressed, should emit confirmed result`() = runTest {
-        viewModel.effect.test {
+        val viewModel = createViewModel()
+
+        viewModel.result.test {
             viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnConfirmPressed)
 
-            assertThat(awaitItem()).isEqualTo(
-                BacsMandateConfirmationEffect.CloseWithResult(
-                    result = BacsMandateConfirmationResult.Confirmed
-                )
-            )
+            assertThat(awaitItem()).isEqualTo( BacsMandateConfirmationResult.Confirmed)
         }
     }
 
     @Test
     fun `on cancel pressed, should emit cancelled result`() = runTest {
-        viewModel.effect.test {
+        val viewModel = createViewModel()
+
+        viewModel.result.test {
             viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnCancelPressed)
 
-            assertThat(awaitItem()).isEqualTo(
-                BacsMandateConfirmationEffect.CloseWithResult(
-                    result = BacsMandateConfirmationResult.Cancelled
-                )
-            )
+            assertThat(awaitItem()).isEqualTo(BacsMandateConfirmationResult.Cancelled)
         }
+    }
+
+    private fun createViewModel(): BacsMandateConfirmationViewModel {
+        return BacsMandateConfirmationViewModel(
+            args = BacsMandateConfirmationViewModel.Args(
+                accountNumber = "00012345",
+                sortCode = "108800",
+                email = "email@email.com",
+                nameOnAccount = "John Doe",
+                guarantee = BacsMandateConfirmationViewModel.Args.Guarantee(
+                    name = "Direct Debit Guarantee",
+                    url = "https://stripe.com/legal/bacs-direct-debit-guarantee"
+                ),
+                defaultAddress = BacsMandateConfirmationViewModel.Args.DefaultAddress(
+                    lineOne = "Stripe, 7th Floor The Bower Warehouse",
+                    lineTwo = "207–211 Old St, London EC1V 9NR",
+                    supportEmail = "support@stripe.com"
+                ),
+                defaultPayer = "Stripe"
+            )
+        )
     }
 }

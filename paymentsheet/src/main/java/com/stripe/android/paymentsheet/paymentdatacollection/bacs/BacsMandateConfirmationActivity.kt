@@ -24,10 +24,10 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<BacsMandateConfirmationViewModel> {
         val args = starterArgs ?: throw IllegalStateException(
-            "Cannot start Bacs mandate confirmation flow with arguments"
+            "Cannot start Bacs mandate confirmation flow without arguments"
         )
 
-        BacsMandateConfirmationViewModel.Factory(application, args)
+        BacsMandateConfirmationViewModel.Factory(args)
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -52,17 +52,13 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
                 val bottomSheetState = rememberBottomSheetState()
 
                 LaunchedEffect(bottomSheetState) {
-                    viewModel.effect.collectLatest { effect ->
-                        when (effect) {
-                            is BacsMandateConfirmationEffect.CloseWithResult -> {
-                                setResult(
-                                    Activity.RESULT_OK,
-                                    BacsMandateConfirmationResult.toIntent(intent, effect.result)
-                                )
-                                bottomSheetState.hide()
-                                finish()
-                            }
-                        }
+                    viewModel.result.collectLatest { result ->
+                        setResult(
+                            Activity.RESULT_OK,
+                            BacsMandateConfirmationResult.toIntent(intent, result)
+                        )
+                        bottomSheetState.hide()
+                        finish()
                     }
                 }
 
