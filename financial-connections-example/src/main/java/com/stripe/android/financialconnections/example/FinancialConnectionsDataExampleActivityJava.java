@@ -13,8 +13,6 @@ import com.stripe.android.financialconnections.FinancialConnections;
 import com.stripe.android.financialconnections.FinancialConnectionsSheet;
 import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenFinancialConnectionsSheetExample;
 
-import kotlin.Unit;
-
 public class FinancialConnectionsDataExampleActivityJava extends AppCompatActivity {
 
     private FinancialConnectionsExampleViewModel viewModel;
@@ -33,10 +31,7 @@ public class FinancialConnectionsDataExampleActivityJava extends AppCompatActivi
         observeViews();
         observeState();
         FinancialConnections.setEventListener(
-                event -> {
-                    Log.d("FinancialConnections", "Event: " + event.getName());
-                    return Unit.INSTANCE;
-                }
+                event -> Log.d("FinancialConnections", "Event: " + event.getName())
         );
         financialConnectionsSheet = FinancialConnectionsSheet.create(
                 this,

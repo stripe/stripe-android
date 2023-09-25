@@ -32,7 +32,7 @@ object FinancialConnections {
         name: Name,
         metadata: Metadata = Metadata()
     ) {
-        eventListener?.invoke(
+        eventListener?.onEvent(
             FinancialConnectionsEvent(
                 name = name,
                 metadata = metadata
