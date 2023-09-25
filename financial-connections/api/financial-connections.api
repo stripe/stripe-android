@@ -16,7 +16,7 @@ public final class com/stripe/android/financialconnections/FinancialConnections 
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/FinancialConnections;
 	public static final fun clearEventListener ()V
-	public static final fun setEventListener (Lkotlin/jvm/functions/Function1;)V
+	public static final fun setEventListener (Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEventListener;)V
 }
 
 public final class com/stripe/android/financialconnections/FinancialConnectionsSheet {
@@ -243,6 +243,10 @@ public final class com/stripe/android/financialconnections/analytics/FinancialCo
 	public final fun getValue ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
 	public static fun values ()[Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+}
+
+public abstract interface class com/stripe/android/financialconnections/analytics/FinancialConnectionsEventListener {
+	public abstract fun onEvent (Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent;)V
 }
 
 public final class com/stripe/android/financialconnections/exception/AppInitializationError : com/stripe/android/core/exception/StripeException {
