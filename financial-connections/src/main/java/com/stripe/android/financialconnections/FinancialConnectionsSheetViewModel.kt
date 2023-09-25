@@ -14,8 +14,11 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.analytics.toErrorCode
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
@@ -113,6 +116,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 )
             }
         } else {
+            FinancialConnections.emitEvent(name = Name.OPEN)
             if (nativeAuthFlowEnabled) {
                 setState {
                     copy(
@@ -122,6 +126,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     )
                 }
             } else {
+                FinancialConnections.emitEvent(name = Name.FLOW_LAUNCHED_IN_BROWSER)
                 setState {
                     copy(
                         manifest = sync.manifest,
@@ -446,6 +451,14 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         @StringRes finishMessage: Int? = null,
     ) {
         eventReporter.onResult(state.initialArgs.configuration, result)
+        when (result) {
+            is Completed -> FinancialConnections.emitEvent(Name.SUCCESS)
+            is Canceled -> FinancialConnections.emitEvent(Name.CANCEL)
+            is Failed -> FinancialConnections.emitEvent(
+                name = Name.ERROR,
+                metadata = Metadata(errorCode = result.error.toErrorCode())
+            )
+        }
         setState { copy(viewEffect = FinishWithResult(result, finishMessage)) }
     }
 

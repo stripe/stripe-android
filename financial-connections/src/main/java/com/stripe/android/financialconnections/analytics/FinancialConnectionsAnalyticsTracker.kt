@@ -4,9 +4,16 @@ import android.content.Context
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Error
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
+import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
+import com.stripe.android.financialconnections.exception.AppInitializationError
+import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
+import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import java.util.Locale
 
@@ -26,7 +33,7 @@ internal suspend fun FinancialConnectionsAnalyticsTracker.logError(
 ) {
     // log error to analytics.
     track(
-        Error(
+        FinancialConnectionsAnalyticsEvent.Error(
             extraMessage = extraMessage,
             pane = pane,
             exception = error
@@ -34,6 +41,24 @@ internal suspend fun FinancialConnectionsAnalyticsTracker.logError(
     )
     // log error locally.
     logger.error(extraMessage, error)
+
+    // log error to live events listener
+    FinancialConnections.emitEvent(
+        Name.ERROR,
+        FinancialConnectionsEvent.Metadata(
+            errorCode = error.toErrorCode()
+        )
+    )
+}
+
+// TODO finish mapping.
+internal fun Throwable.toErrorCode(): ErrorCode = when (this) {
+    is AppInitializationError -> ErrorCode.WEB_BROWSER_UNAVAILABLE
+    is AccountNumberRetrievalError -> ErrorCode.ACCOUNT_NUMBERS_UNAVAILABLE
+    is AccountNoneEligibleForPaymentMethodError -> ErrorCode.NO_DEBITABLE_ACCOUNT
+    is InstitutionPlannedDowntimeError -> ErrorCode.INSTITUTION_UNAVAILABLE_PLANNED
+    is InstitutionUnplannedDowntimeError -> ErrorCode.INSTITUTION_UNAVAILABLE_UNPLANNED
+    else -> ErrorCode.UNEXPECTED_ERROR
 }
 
 internal class FinancialConnectionsAnalyticsTrackerImpl(
