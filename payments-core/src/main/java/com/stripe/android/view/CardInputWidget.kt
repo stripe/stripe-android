@@ -9,7 +9,7 @@ import android.text.Layout
 import android.text.TextPaint
 import android.text.TextWatcher
 import android.util.AttributeSet
-import android.util.TypedValue
+import android.util.TypedValue.COMPLEX_UNIT_DIP
 import android.util.TypedValue.applyDimension
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -353,8 +353,8 @@ class CardInputWidget @JvmOverloads constructor(
 
     private val cardBrandChoiceDropdownWidth: Float by lazy {
         val displayMetrics = context.resources.displayMetrics
-        val spacing = applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, displayMetrics)
-        val icon = applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, displayMetrics)
+        val spacing = applyDimension(COMPLEX_UNIT_DIP, CBC_DROPDOWN_SPACING_DP, displayMetrics)
+        val icon = applyDimension(COMPLEX_UNIT_DIP, CBC_DROPDOWN_ICON_WIDTH_DP, displayMetrics)
         spacing + icon
     }
 
@@ -876,6 +876,7 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
         val newAnimator = ValueAnimator.ofFloat(cardBrandView.width.toFloat(), desiredWidth)
+        newAnimator.duration = CBC_DROPDOWN_ICON_ANIMATION_DURATION
 
         newAnimator.addUpdateListener { currentAnimator ->
             val animatedWidth = currentAnimator.animatedValue as Float
@@ -1311,6 +1312,10 @@ class CardInputWidget @JvmOverloads constructor(
         private const val STATE_CARD_VIEWED = "state_card_viewed"
         private const val STATE_SUPER_STATE = "state_super_state"
         private const val STATE_POSTAL_CODE_ENABLED = "state_postal_code_enabled"
+
+        private const val CBC_DROPDOWN_ICON_WIDTH_DP = 16f
+        private const val CBC_DROPDOWN_SPACING_DP = 4f
+        private const val CBC_DROPDOWN_ICON_ANIMATION_DURATION = 200L
 
         // This value is used to ensure that onSaveInstanceState is called
         // in the event that the user doesn't give this control an ID.
