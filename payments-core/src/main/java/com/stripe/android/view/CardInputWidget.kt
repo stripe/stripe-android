@@ -8,7 +8,6 @@ import android.text.Layout
 import android.text.TextPaint
 import android.text.TextWatcher
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -29,7 +28,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
-import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
@@ -75,7 +73,7 @@ class CardInputWidget @JvmOverloads constructor(
     private val cardNumberTextInputLayout = viewBinding.cardNumberTextInputLayout
     private val expiryDateTextInputLayout = viewBinding.expiryDateTextInputLayout
     private val cvcNumberTextInputLayout = viewBinding.cvcTextInputLayout
-    internal val postalCodeTextInputLayout = viewBinding.postalCodeTextInputLayout
+    private val postalCodeTextInputLayout = viewBinding.postalCodeTextInputLayout
 
     @JvmSynthetic
     internal val cardNumberEditText = viewBinding.cardNumberEditText
@@ -386,9 +384,7 @@ class CardInputWidget @JvmOverloads constructor(
 
         doWithCardWidgetViewModel { viewModel ->
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
-                if (BuildConfig.DEBUG) {
-                    Log.d("CardInputWidget", "Is CBC eligible: $isCbcEligible")
-                }
+                cardBrandView.isCbcEligible = isCbcEligible
             }
         }
     }
@@ -786,6 +782,8 @@ class CardInputWidget @JvmOverloads constructor(
             updateCvc()
         }
 
+        cardNumberEditText.possibleCardBrandsCallback = this::handlePossibleCardBrandsChanged
+
         expiryDateEditText.completionCallback = {
             cvcEditText.requestFocus()
             cardInputListener?.onExpirationComplete()
@@ -820,11 +818,36 @@ class CardInputWidget @JvmOverloads constructor(
         updateCvc()
     }
 
-    private fun updateCvc() {
+    private fun updateCvc(brand: CardBrand = cardBrandView.brand) {
         cvcEditText.updateBrand(
-            cardBrandView.brand,
+            brand,
             customCvcLabel
         )
+    }
+
+    private fun handlePossibleCardBrandsChanged(brands: List<CardBrand>) {
+        val didShowDropdown = cardBrandView.possibleBrands.size > 1
+        val shouldShowDropdown = brands.size > 1
+
+        val currentBrand = cardBrandView.brand
+        cardBrandView.possibleBrands = brands
+
+        if (currentBrand !in brands) {
+            // The brand is no longer available, so we reset to an unknown brand
+            cardBrandView.brand = CardBrand.Unknown
+        }
+
+        hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
+
+        // We need to use a known card brand to set the correct expected CVC length. Since both
+        // brands of a co-branded card have the same CVC length, we can just choose the first one.
+        val brandForCvcLength = brands.firstOrNull() ?: CardBrand.Unknown
+        updateCvc(brand = brandForCvcLength)
+
+        if (shouldShowDropdown != didShowDropdown) {
+            isViewInitialized = false
+            requestLayout()
+        }
     }
 
     /**

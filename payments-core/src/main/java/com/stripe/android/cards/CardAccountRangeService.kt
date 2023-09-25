@@ -12,37 +12,56 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
+private const val MIN_CARD_NUMBER_LENGTH = 8
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardAccountRangeService constructor(
     private val cardAccountRangeRepository: CardAccountRangeRepository,
     private val workContext: CoroutineContext,
     val staticCardAccountRanges: StaticCardAccountRanges,
-    private val accountRangeResultListener: AccountRangeResultListener
+    private val accountRangeResultListener: AccountRangeResultListener,
+    private val isCbcEligible: () -> Boolean,
 ) {
 
     val isLoading: Flow<Boolean> = cardAccountRangeRepository.loading
 
-    var accountRange: AccountRange? = null
+    var accountRanges: List<AccountRange> = emptyList()
         private set
+
+    val accountRange: AccountRange?
+        get() = accountRanges.firstOrNull()
 
     @VisibleForTesting
     var accountRangeRepositoryJob: Job? = null
 
     fun onCardNumberChanged(cardNumber: CardNumber.Unvalidated) {
-        val staticAccountRange = staticCardAccountRanges.filter(cardNumber)
-            .let { accountRanges ->
-                if (accountRanges.size == 1) {
-                    accountRanges.first()
-                } else {
-                    null
-                }
-            }
-        if (staticAccountRange == null || shouldQueryRepository(staticAccountRange)) {
+        val isCbcEligible = isCbcEligible()
+
+        val shouldQuery = !isCbcEligible || cardNumber.length >= MIN_CARD_NUMBER_LENGTH
+        if (!shouldQuery) {
+            updateAccountRangesResult(emptyList())
+            return
+        }
+
+        val testAccountRanges = if (isCbcEligible()) {
+            CbcTestCardDelegate.onCardNumberChanged(cardNumber)
+        } else {
+            emptyList()
+        }
+
+        if (testAccountRanges.isNotEmpty()) {
+            updateAccountRangesResult(testAccountRanges)
+            return
+        }
+
+        val staticAccountRanges = staticCardAccountRanges.filter(cardNumber)
+
+        if (staticAccountRanges.isEmpty() || shouldQueryRepository(staticAccountRanges)) {
             // query for AccountRange data
             queryAccountRangeRepository(cardNumber)
         } else {
             // use static AccountRange data
-            updateAccountRangeResult(staticAccountRange)
+            updateAccountRangesResult(staticAccountRanges)
         }
     }
 
@@ -53,18 +72,19 @@ class CardAccountRangeService constructor(
             cancelAccountRangeRepositoryJob()
 
             // invalidate accountRange before fetching
-            accountRange = null
+            accountRanges = emptyList()
 
             accountRangeRepositoryJob = CoroutineScope(workContext).launch {
                 val bin = cardNumber.bin
-                val accountRange = if (bin != null) {
-                    cardAccountRangeRepository.getAccountRange(cardNumber)
+
+                val accountRanges = if (bin != null) {
+                    cardAccountRangeRepository.getAccountRanges(cardNumber)
                 } else {
                     null
                 }
 
                 withContext(Dispatchers.Main) {
-                    updateAccountRangeResult(accountRange)
+                    updateAccountRangesResult(accountRanges.orEmpty())
                 }
             }
         }
@@ -75,17 +95,14 @@ class CardAccountRangeService constructor(
         accountRangeRepositoryJob = null
     }
 
-    @JvmSynthetic
-    fun updateAccountRangeResult(
-        newAccountRange: AccountRange?
-    ) {
-        accountRange = newAccountRange
-        accountRangeResultListener.onAccountRangeResult(accountRange)
+    fun updateAccountRangesResult(accountRanges: List<AccountRange>) {
+        this.accountRanges = accountRanges
+        accountRangeResultListener.onAccountRangesResult(accountRanges)
     }
 
     private fun shouldQueryRepository(
-        accountRange: AccountRange
-    ) = when (accountRange.brand) {
+        accountRanges: List<AccountRange>
+    ) = when (accountRanges.firstOrNull()?.brand) {
         CardBrand.Unknown,
         CardBrand.UnionPay -> true
         else -> false
@@ -98,6 +115,6 @@ class CardAccountRangeService constructor(
     }
 
     interface AccountRangeResultListener {
-        fun onAccountRangeResult(newAccountRange: AccountRange?)
+        fun onAccountRangesResult(accountRanges: List<AccountRange>)
     }
 }

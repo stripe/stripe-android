@@ -11,9 +11,11 @@ import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.UNIONPA
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.AccountRange
+import com.stripe.android.model.BinRange
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.utils.TestUtils
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -63,9 +65,10 @@ class CardAccountRangeServiceTest {
             testDispatcher,
             DefaultStaticCardAccountRanges(),
             object : CardAccountRangeService.AccountRangeResultListener {
-                override fun onAccountRangeResult(newAccountRange: AccountRange?) {
+                override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
                 }
-            }
+            },
+            isCbcEligible = { false },
         )
 
         val cardNumber = CardNumber.Unvalidated(cardNumberString)
@@ -77,7 +80,107 @@ class CardAccountRangeServiceTest {
             } else {
                 never()
             }
-        ).getAccountRange(cardNumber)
+        ).getAccountRanges(cardNumber)
+    }
+
+    @Test
+    fun `If CBC is disabled, return the matched brand as soon as there is input`() = runTest {
+        val expectedAccountRange = AccountRange(
+            binRange = BinRange(
+                low = "4000000000000000",
+                high = "4999999999999999",
+            ),
+            panLength = 16,
+            brandInfo = AccountRange.BrandInfo.Visa,
+        )
+
+        val accountRanges = testBehavior(
+            cardNumber = "4",
+            isCbcEligible = false,
+        )
+
+        assertThat(accountRanges).containsExactly(expectedAccountRange)
+    }
+
+    @Test
+    fun `If CBC is enabled, don't return a matched brand until 8 characters are entered`() = runTest {
+        val accountRanges = testBehavior(
+            cardNumber = "4",
+            isCbcEligible = true,
+        )
+
+        assertThat(accountRanges).isEmpty()
+    }
+
+    @Test
+    fun `If CBC is enabled, return a matched brand once 8 characters are entered`() = runTest {
+        val expectedAccountRange = AccountRange(
+            binRange = BinRange(
+                low = "4000000000000000",
+                high = "4999999999999999",
+            ),
+            panLength = 16,
+            brandInfo = AccountRange.BrandInfo.Visa,
+        )
+
+        val accountRanges = testBehavior(
+            cardNumber = "4000 0000",
+            isCbcEligible = true,
+        )
+
+        assertThat(accountRanges).containsExactly(expectedAccountRange)
+    }
+
+    @Test
+    fun `If CBC is enabled, return all matched brands once 8 characters are entered`() = runTest {
+        val expectedAccountRanges = listOf(
+            AccountRange(
+                binRange = BinRange(
+                    low = "4000000000000000",
+                    high = "4999999999999999",
+                ),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.CartesBancaires,
+            ),
+            AccountRange(
+                binRange = BinRange(
+                    low = "4000000000000000",
+                    high = "4999999999999999",
+                ),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.Visa,
+            ),
+        )
+
+        val accountRanges = testBehavior(
+            cardNumber = "4000 0025",
+            isCbcEligible = true,
+        )
+
+        assertThat(accountRanges).containsExactlyElementsIn(expectedAccountRanges).inOrder()
+    }
+
+    private suspend fun testBehavior(
+        cardNumber: String,
+        isCbcEligible: Boolean,
+    ): List<AccountRange> {
+        val completable = CompletableDeferred<List<AccountRange>>()
+
+        val service = CardAccountRangeService(
+            cardAccountRangeRepository = createDefaultCardAccountRangeRepository(),
+            workContext = testDispatcher,
+            staticCardAccountRanges = DefaultStaticCardAccountRanges(),
+            accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
+                override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
+                    completable.complete(accountRanges)
+                }
+            },
+            isCbcEligible = { isCbcEligible },
+        )
+
+        service.onCardNumberChanged(CardNumber.Unvalidated(cardNumber))
+
+        return completable.await()
     }
 
     private fun createMockRemoteDefaultCardAccountRangeRepository(
@@ -105,11 +208,13 @@ class CardAccountRangeServiceTest {
             testDispatcher,
             DefaultStaticCardAccountRanges(),
             object : CardAccountRangeService.AccountRangeResultListener {
-                override fun onAccountRangeResult(newAccountRange: AccountRange?) {
+                override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
+                    val newAccountRange = accountRanges.firstOrNull()
                     panLength = newAccountRange?.panLength
                     latch.countDown()
                 }
-            }
+            },
+            isCbcEligible = { false },
         )
 
         val cardNumber = CardNumber.Unvalidated(cardNumberString)

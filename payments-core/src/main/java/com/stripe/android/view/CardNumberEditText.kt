@@ -7,6 +7,7 @@ import android.text.InputFilter
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -43,9 +44,10 @@ class CardNumberEditText internal constructor(
     var workContext: CoroutineContext,
 
     private val cardAccountRangeRepository: CardAccountRangeRepository,
-    private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
+    staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    viewModelStoreOwner: ViewModelStoreOwner? = null,
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads
@@ -102,6 +104,23 @@ class CardNumberEditText internal constructor(
             callback(cardBrand)
         }
 
+    internal var possibleCardBrands: List<CardBrand> = emptyList()
+        set(value) {
+            val prevBrands = field
+            field = value
+            if (value != prevBrands) {
+                possibleCardBrandsCallback(value)
+                updateLengthFilter()
+            }
+        }
+
+    @JvmSynthetic
+    internal var possibleCardBrandsCallback: (List<CardBrand>) -> Unit = {}
+        set(callback) {
+            field = callback
+            callback(possibleCardBrands)
+        }
+
     // invoked when a valid card has been entered
     @JvmSynthetic
     internal var completionCallback: () -> Unit = {}
@@ -129,15 +148,22 @@ class CardNumberEditText internal constructor(
     private val isValid: Boolean
         get() = validatedCardNumber != null
 
+    private var isCbcEligible = false
+
     @VisibleForTesting
     val accountRangeService = CardAccountRangeService(
-        cardAccountRangeRepository,
-        workContext,
-        staticCardAccountRanges,
-        object : CardAccountRangeService.AccountRangeResultListener {
-            override fun onAccountRangeResult(newAccountRange: AccountRange?) {
+        cardAccountRangeRepository = cardAccountRangeRepository,
+        workContext = workContext,
+        staticCardAccountRanges = staticCardAccountRanges,
+        isCbcEligible = { isCbcEligible },
+        accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
+            override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
                 updateLengthFilter()
-                cardBrand = newAccountRange?.brand ?: CardBrand.Unknown
+                cardBrand = accountRanges.singleOrNull()?.brand ?: CardBrand.Unknown
+
+                if (isCbcEligible) {
+                    possibleCardBrands = accountRanges.map { it.brand }.distinct()
+                }
             }
         }
     )
@@ -166,6 +192,16 @@ class CardNumberEditText internal constructor(
         updateLengthFilter()
 
         this.layoutDirection = LAYOUT_DIRECTION_LTR
+
+        doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+            viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
+                this@CardNumberEditText.isCbcEligible = isCbcEligible
+
+                if (isCbcEligible) {
+                    possibleCardBrands = accountRangeService.accountRanges.map { it.brand }.distinct()
+                }
+            }
+        }
     }
 
     override fun onAttachedToWindow() {
