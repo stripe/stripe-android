@@ -5,7 +5,7 @@
   <!-- Text for back button -->
   <string name="stripe_back">Back</string>
   <!-- Label for Bacs account number field -->
-  <string name="stripe_bacs_account_number">Account numberr</string>
+  <string name="stripe_bacs_account_number">Account number</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">Your account number is incomplete.</string>
   <!-- Label for Bacs sort code field -->
