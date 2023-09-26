@@ -28,9 +28,13 @@ import com.stripe.net.RequestOptions
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.external.callable.ConnectionTokenCallback
 import com.stripe.stripeterminal.external.callable.ConnectionTokenProvider
+import com.stripe.stripeterminal.external.callable.DiscoveryListener
 import com.stripe.stripeterminal.external.callable.TerminalListener
 import com.stripe.stripeterminal.external.models.ConnectionTokenException
+import com.stripe.stripeterminal.external.models.DiscoveryConfiguration
+import com.stripe.stripeterminal.external.models.DiscoveryMethod
 import com.stripe.stripeterminal.external.models.Reader
+import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.flow.filterNotNull
 import okhttp3.OkHttpClient
 import retrofit2.Call
@@ -93,7 +97,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         try {
             Terminal.initTerminal(
                 context = this,
-                tokenProvider = TokenProvider(),
+                tokenProvider = TokenProvider(viewModel = viewModel),
                 listener = TerminalEventListener()
             )
         } catch (e: IllegalStateException) {
@@ -118,6 +122,28 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 GooglePayPaymentMethodLauncherContractV2(),
                 viewModel::onGooglePayResult
             )
+        )
+
+        Terminal.getInstance().discoverReaders(
+            DiscoveryConfiguration(
+                discoveryMethod = DiscoveryMethod.INTERNET,
+            ),
+            object : DiscoveryListener {
+                override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
+                    TODO("Not yet implemented")
+                }
+
+            },
+            object : com.stripe.stripeterminal.external.callable.Callback {
+                override fun onFailure(e: TerminalException) {
+                    e.printStackTrace()
+                }
+
+                override fun onSuccess() {
+                    println("Finished discovering readers")
+                }
+
+            }
         )
 
         setContent {
@@ -183,11 +209,14 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         return IllegalArgumentException("PaymentSheet started without arguments.")
     }
 
-    class TokenProvider : ConnectionTokenProvider {
+    class TokenProvider(
+        val viewModel: PaymentSheetViewModel,
+    ) : ConnectionTokenProvider {
 
         override fun fetchConnectionToken(callback: ConnectionTokenCallback) {
             try {
                 val token = ApiClient.createConnectionToken()
+                viewModel.connectionToken = token
                 callback.onSuccess(token)
             } catch (e: ConnectionTokenException) {
                 callback.onFailure(e)

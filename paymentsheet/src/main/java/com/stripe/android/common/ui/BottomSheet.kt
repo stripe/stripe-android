@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.uicore.stripeShapes
+import com.stripe.stripeterminal.external.models.Reader
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 
@@ -123,6 +124,7 @@ internal fun BottomSheet(
     modifier: Modifier = Modifier,
     onDismissed: () -> Unit,
     onShow: () -> Unit = {},
+    discoverReaders: () -> List<Reader> = { emptyList() },
     sheetContent: @Composable () -> Unit,
 ) {
     val systemUiController = rememberSystemUiController()

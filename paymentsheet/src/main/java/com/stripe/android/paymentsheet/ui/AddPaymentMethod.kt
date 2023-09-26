@@ -32,6 +32,12 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.elements.ApiParameterDestination
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
+import com.stripe.stripeterminal.Terminal
+import com.stripe.stripeterminal.external.callable.DiscoveryListener
+import com.stripe.stripeterminal.external.models.DiscoveryConfiguration
+import com.stripe.stripeterminal.external.models.DiscoveryMethod
+import com.stripe.stripeterminal.external.models.Reader
+import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -87,6 +93,32 @@ internal fun AddPaymentMethod(
         } else if (isUsingLinkInline) {
             sheetViewModel.updatePrimaryButtonForLinkInline()
         }
+    }
+
+    LaunchedEffect(key1 = sheetViewModel.connectionToken) {
+        println("asdf launched reader discovery")
+        Terminal.getInstance().discoverReaders(
+            DiscoveryConfiguration(
+                discoveryMethod = DiscoveryMethod.INTERNET,
+            ),
+            object : DiscoveryListener {
+                override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
+                    sheetViewModel.readers.value = readers
+                    println("asdf readers $readers")
+                }
+
+            },
+            object : com.stripe.stripeterminal.external.callable.Callback {
+                override fun onFailure(e: TerminalException) {
+                    e.printStackTrace()
+                }
+
+                override fun onSuccess() {
+                    println("Finished discovering readers")
+                }
+
+            }
+        )
     }
 
     Column(modifier = modifier.fillMaxWidth()) {

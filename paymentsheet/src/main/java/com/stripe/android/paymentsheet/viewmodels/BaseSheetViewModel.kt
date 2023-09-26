@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.stripeterminal.external.models.Reader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -91,6 +92,11 @@ internal abstract class BaseSheetViewModel(
 
     private val _stripeIntent = MutableStateFlow<StripeIntent?>(null)
     internal val stripeIntent: StateFlow<StripeIntent?> = _stripeIntent
+
+    val readers: MutableStateFlow<List<Reader>> = MutableStateFlow(emptyList())
+//    val readers: StateFlow<List<Reader>> = _readers
+
+    var connectionToken: String = ""
 
     internal var supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod> = emptyList()
         set(value) {
