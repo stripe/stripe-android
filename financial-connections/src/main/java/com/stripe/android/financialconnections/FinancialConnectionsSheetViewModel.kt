@@ -242,9 +242,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         val result: FinancialConnectionsSheetActivityResult? = activityResult.data
             ?.parcelable(FinancialConnectionsSheetNativeActivity.EXTRA_RESULT)
         if (activityResult.resultCode == Activity.RESULT_OK && result != null) {
-            withState { finishWithResult(it, result) }
+            withState { finishWithResult(it, result, fromNative = true) }
         } else {
-            withState { finishWithResult(it, Canceled) }
+            withState { finishWithResult(it, Canceled, fromNative = true) }
         }
     }
 
@@ -448,13 +448,15 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun finishWithResult(
         state: FinancialConnectionsSheetState,
         result: FinancialConnectionsSheetActivityResult,
+        fromNative: Boolean = false,
         @StringRes finishMessage: Int? = null,
     ) {
         eventReporter.onResult(state.initialArgs.configuration, result)
         when (result) {
             is Completed -> FinancialConnections.emitEvent(Name.SUCCESS)
             is Canceled -> FinancialConnections.emitEvent(Name.CANCEL)
-            is Failed -> FinancialConnections.emitEvent(
+            // Native emits its own errors before finishing.
+            is Failed -> if (fromNative.not()) FinancialConnections.emitEvent(
                 name = Name.ERROR,
                 metadata = Metadata(errorCode = result.error.toErrorCode())
             )

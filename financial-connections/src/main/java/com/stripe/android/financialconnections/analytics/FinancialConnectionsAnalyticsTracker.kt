@@ -63,7 +63,7 @@ internal fun Throwable.toErrorCode(): ErrorCode = when (this) {
     is InstitutionPlannedDowntimeError -> ErrorCode.INSTITUTION_UNAVAILABLE_PLANNED
     is InstitutionUnplannedDowntimeError -> ErrorCode.INSTITUTION_UNAVAILABLE_UNPLANNED
     is WebAuthFlowFailedException -> ErrorCode.AUTHORIZATION_FAILED
-    is StripeException -> when(this.stripeError?.code) {
+    is StripeException -> when (this.stripeError?.code) {
         "bank_connections_link_account_session_client_secret_expired" -> ErrorCode.SESSION_EXPIRED
         else -> ErrorCode.UNEXPECTED_ERROR
     }

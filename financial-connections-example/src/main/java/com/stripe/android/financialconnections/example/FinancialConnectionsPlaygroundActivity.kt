@@ -130,7 +130,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     }
 
     @Composable
-    @Suppress("LongMethod")
     private fun FinancialConnectionsContent(
         state: FinancialConnectionsPlaygroundState,
         onButtonClick: (Merchant, Flow, Pair<String, String>, String) -> Unit
@@ -154,6 +153,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     }
 
     @Composable
+    @Suppress("LongMethod")
     private fun PlaygroundContent(
         padding: PaddingValues,
         state: FinancialConnectionsPlaygroundState,
