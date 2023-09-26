@@ -58,11 +58,14 @@ internal fun BacsMandateConfirmationFormView(
         Text(
             text = stringResource(id = R.string.stripe_paymentsheet_bacs_mandate_title),
             style = MaterialTheme.typography.h4.copy(fontWeight = FontWeight.Medium),
-            color = MaterialTheme.colors.onSecondary
+            color = MaterialTheme.colors.onBackground
         )
         Details(state)
         MandateItem(stringResource(R.string.stripe_paymentsheet_bacs_email_mandate, state.email))
-        MandateItem(stringResource(R.string.stripe_paymentsheet_bacs_notice_mandate, "Stripe"))
+        MandateItem(stringResource(
+            R.string.stripe_paymentsheet_bacs_notice_mandate,
+            stringResource(R.string.stripe_paymentsheet_bacs_notice_default_payer)
+        ))
         Row {
             MandateItem(
                 stringResource(R.string.stripe_paymentsheet_bacs_protection_mandate, state.debitGuaranteeAsHtml),
@@ -109,11 +112,11 @@ private fun Details(state: BacsMandateConfirmationViewState) {
             .border(
                 border = BorderStroke(
                     width = 1.dp,
-                    color = MaterialTheme.colors.secondaryVariant,
+                    color = MaterialTheme.stripeColors.componentBorder,
                 ),
                 shape = MaterialTheme.shapes.small
             )
-            .background(MaterialTheme.colors.surface)
+            .background(MaterialTheme.stripeColors.component)
             .padding(12.dp)
             .fillMaxWidth()
     ) {
@@ -150,13 +153,13 @@ private fun DetailsRow(
         Text(
             modifier = Modifier.weight(WEIGHT_40_PERCENT),
             style = MaterialTheme.typography.subtitle2,
-            color = MaterialTheme.colors.onSurface,
+            color = MaterialTheme.stripeColors.onComponent,
             text = label
         )
         Text(
             modifier = Modifier.weight(WEIGHT_60_PERCENT),
             style = MaterialTheme.typography.body1,
-            color = MaterialTheme.colors.onSurface,
+            color = MaterialTheme.stripeColors.onComponent,
             text = value
         )
     }
@@ -173,7 +176,7 @@ private fun MandateItem(
             modifier = modifier,
             html = text,
             style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
-            color = MaterialTheme.colors.onBackground,
+            color = MaterialTheme.stripeColors.subtitle,
             urlSpanStyle = SpanStyle(
                 color = MaterialTheme.colors.primary
             )
@@ -182,7 +185,7 @@ private fun MandateItem(
             modifier = modifier,
             text = text,
             style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
-            color = MaterialTheme.colors.onBackground
+            color = MaterialTheme.stripeColors.subtitle
         )
     }
 }

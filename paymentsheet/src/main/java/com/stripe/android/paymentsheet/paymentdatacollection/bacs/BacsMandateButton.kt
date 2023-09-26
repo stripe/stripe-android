@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.ButtonDefaults
@@ -13,6 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
+import com.stripe.android.uicore.LocalColors
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.stripeColors
 
 @Composable
 internal fun BacsMandateButton(type: BacsMandateButtonType, label: String, onClick: () -> Unit) {
@@ -22,8 +26,8 @@ internal fun BacsMandateButton(type: BacsMandateButtonType, label: String, onCli
             contentColor = MaterialTheme.colors.onPrimary
         )
         BacsMandateButtonType.Secondary -> ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.secondary,
-            contentColor = MaterialTheme.colors.onSecondary
+            backgroundColor = MaterialTheme.stripeColors.component,
+            contentColor = MaterialTheme.stripeColors.onComponent
         )
     }
 
@@ -34,7 +38,7 @@ internal fun BacsMandateButton(type: BacsMandateButtonType, label: String, onCli
             .addButtonBorder(
                 type,
                 MaterialTheme.shapes.small,
-                MaterialTheme.colors.secondaryVariant
+                MaterialTheme.stripeColors.componentBorder
             ),
         shape = MaterialTheme.shapes.small,
         colors = colors,

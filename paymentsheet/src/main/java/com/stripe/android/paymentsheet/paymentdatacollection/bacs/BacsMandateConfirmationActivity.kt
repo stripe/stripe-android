@@ -14,20 +14,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.core.view.WindowCompat
 import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
+import com.stripe.android.paymentsheet.parseAppearance
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.utils.AnimationConstants
 import kotlinx.coroutines.flow.collectLatest
 
 internal class BacsMandateConfirmationActivity : AppCompatActivity() {
-    private val starterArgs: BacsMandateConfirmationContract.Args? by lazy {
-        BacsMandateConfirmationContract.Args.fromIntent(intent)
+    private val starterArgs: BacsMandateConfirmationContract.Args by lazy {
+        BacsMandateConfirmationContract.Args.fromIntent(intent) ?: throw IllegalStateException(
+            "Cannot start Bacs mandate confirmation flow without arguments"
+        )
     }
 
     private val viewModel by viewModels<BacsMandateConfirmationViewModel> {
-        val args = starterArgs ?: throw IllegalStateException(
-            "Cannot start Bacs mandate confirmation flow without arguments"
-        )
-
-        BacsMandateConfirmationViewModel.Factory(args)
+        BacsMandateConfirmationViewModel.Factory(starterArgs)
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -47,8 +48,10 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
             viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnCancelPressed)
         }
 
+        starterArgs.appearance.parseAppearance()
+
         setContent {
-            BacsMandateConfirmationTheme {
+            StripeTheme {
                 val bottomSheetState = rememberBottomSheetState()
 
                 LaunchedEffect(bottomSheetState) {
