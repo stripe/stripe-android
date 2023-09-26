@@ -12,6 +12,12 @@ dependencies {
     implementation project(':stripe-ui-core')
     compileOnly project(':financial-connections')
 
+    implementation libs.stripeterminal
+    implementation libs.okhttp
+    implementation libs.retrofit
+    implementation libs.retrofitGsonConverter
+    implementation libs.stripeJava
+
     // Kotlin
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
