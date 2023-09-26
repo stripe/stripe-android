@@ -1,4 +1,5 @@
 @file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.core.strings
 
 import android.content.Context
