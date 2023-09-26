@@ -1,3 +1,4 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 package com.stripe.android.uicore.strings
 
 import androidx.annotation.RestrictTo

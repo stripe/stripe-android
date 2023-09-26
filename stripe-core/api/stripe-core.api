@@ -316,9 +316,6 @@ public final class com/stripe/android/core/networking/StripeRequest$MimeType : j
 	public static fun values ()[Lcom/stripe/android/core/networking/StripeRequest$MimeType;
 }
 
-public final class com/stripe/android/core/strings/ResolvableStringUtilsKt {
-}
-
 public final class com/stripe/android/core/utils/EncodeKt {
 }
 

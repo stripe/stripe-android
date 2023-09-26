@@ -279,9 +279,6 @@ public final class com/stripe/android/uicore/image/StripeImageKt {
 public final class com/stripe/android/uicore/image/UiUtilsKt {
 }
 
-public final class com/stripe/android/uicore/strings/ResolvableStringComposeUtilsKt {
-}
-
 public final class com/stripe/android/uicore/text/DimentionResourceSpKt {
 }
 
