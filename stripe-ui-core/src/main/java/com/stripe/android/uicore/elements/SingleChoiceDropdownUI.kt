@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.stripeColors
 
 @Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun <TDropdownChoice : SingleChoiceDropdownItem> SingleChoiceDropdown(
     expanded: Boolean,
     title: String,

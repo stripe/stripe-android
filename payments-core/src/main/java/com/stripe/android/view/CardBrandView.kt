@@ -214,7 +214,7 @@ private fun CardBrandChoiceDropdown(
     )
 
     val allPossibleBrands = listOf(CardBrand.Unknown) + brands
-    val choices = brands.map { brand ->
+    val choices = allPossibleBrands.map { brand ->
         brand.toChoice(noSelection)
     }
 
@@ -227,16 +227,16 @@ private fun CardBrandChoiceDropdown(
             when (val choiceIndex = choices.indexOf(choice)) {
                 -1 -> Unit
                 0 -> onBrandSelected(null)
-                else -> onBrandSelected(allPossibleBrands[choiceIndex - 1])
+                else -> onBrandSelected(allPossibleBrands[choiceIndex])
             }
         },
         onDismiss = onDismiss,
     )
 }
 
-private fun CardBrand.toChoice(unknownBrand: CardBrandChoice): CardBrandChoice {
+private fun CardBrand.toChoice(noSelection: CardBrandChoice): CardBrandChoice {
     return if (this == CardBrand.Unknown) {
-        unknownBrand
+        noSelection
     } else {
         CardBrandChoice(
             label = displayName,
