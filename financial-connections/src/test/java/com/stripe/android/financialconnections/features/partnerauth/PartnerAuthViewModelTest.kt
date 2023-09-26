@@ -1,13 +1,17 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
 import com.airbnb.mvrx.test.MavericksTestRule
+import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
@@ -15,6 +19,7 @@ import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOA
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSession
+import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
@@ -30,6 +35,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyBlocking
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
@@ -44,11 +50,42 @@ internal class PartnerAuthViewModelTest {
     private val getSync = mock<GetOrFetchSync>()
     private val postAuthSessionEvent = mock<PostAuthSessionEvent>()
     private val retrieveAuthorizationSession = mock<RetrieveAuthorizationSession>()
+    private val eventTracker = mock<FinancialConnectionsAnalyticsTracker>()
     private val pollAuthorizationSessionOAuthResults = mock<PollAuthorizationSessionOAuthResults>()
     private val completeAuthorizationSession = mock<CompleteAuthorizationSession>()
     private val cancelAuthorizationSession = mock<CancelAuthorizationSession>()
     private val navigationManager = TestNavigationManager()
     private val createAuthorizationSession = mock<PostAuthorizationSession>()
+    private val logger = mock<Logger>()
+
+    @Test
+    fun `init - when creating auth session returns unplanned downtime, error is logged`() =
+        runTest {
+            val unplannedDowntimeError = InstitutionUnplannedDowntimeError(
+                institution = institution(),
+                showManualEntry = false,
+                stripeException = APIException()
+            )
+            whenever(getSync()).thenReturn(
+                syncResponse(sessionManifest().copy(activeInstitution = institution()))
+            )
+            whenever(createAuthorizationSession(any(), any())).thenAnswer {
+                throw unplannedDowntimeError
+            }
+
+            val viewModel = createViewModel()
+
+            withState(viewModel) {
+                verifyBlocking(eventTracker) {
+                    logError(
+                        extraMessage = "Error fetching payload / posting AuthSession",
+                        error = unplannedDowntimeError,
+                        logger = logger,
+                        pane = Pane.PARTNER_AUTH
+                    )
+                }
+            }
+        }
 
     @Test
     fun `onWebAuthFlowFinished - when webStatus Success, polls accounts and authorizes with token`() =
@@ -243,11 +280,11 @@ internal class PartnerAuthViewModelTest {
             createAuthorizationSession = createAuthorizationSession,
             cancelAuthorizationSession = cancelAuthorizationSession,
             retrieveAuthorizationSession = retrieveAuthorizationSession,
-            eventTracker = mock(),
+            eventTracker = eventTracker,
             postAuthSessionEvent = postAuthSessionEvent,
             getOrFetchSync = getSync,
             pollAuthorizationSessionOAuthResults = pollAuthorizationSessionOAuthResults,
-            logger = mock(),
+            logger = logger,
             initialState = initialState,
             browserManager = mock(),
             uriUtils = UriUtils(Logger.noop(), mock()),

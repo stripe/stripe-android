@@ -453,13 +453,15 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     ) {
         eventReporter.onResult(state.initialArgs.configuration, result)
         // Native emits its own events before finishing.
-        if (fromNative.not()) when (result) {
-            is Completed -> FinancialConnections.emitEvent(Name.SUCCESS)
-            is Canceled -> FinancialConnections.emitEvent(Name.CANCEL)
-            is Failed ->  FinancialConnections.emitEvent(
-                name = Name.ERROR,
-                metadata = Metadata(errorCode = result.error.toErrorCode())
-            )
+        if (fromNative.not()) {
+            when (result) {
+                is Completed -> FinancialConnections.emitEvent(Name.SUCCESS)
+                is Canceled -> FinancialConnections.emitEvent(Name.CANCEL)
+                is Failed -> FinancialConnections.emitEvent(
+                    name = Name.ERROR,
+                    metadata = Metadata(errorCode = result.error.toErrorCode())
+                )
+            }
         }
         setState { copy(viewEffect = FinishWithResult(result, finishMessage)) }
     }

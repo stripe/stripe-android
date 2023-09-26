@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.analytics
 
-class FinancialConnectionsEvent internal constructor(
+data class FinancialConnectionsEvent internal constructor(
     val name: Name,
     val metadata: Metadata
 ) {
@@ -8,7 +8,7 @@ class FinancialConnectionsEvent internal constructor(
     /**
      * Metadata for the event
      */
-    class Metadata internal constructor(
+    data class Metadata internal constructor(
         val institutionName: String? = null,
         val manualEntry: Boolean? = null,
         val errorCode: ErrorCode? = null
@@ -141,6 +141,5 @@ class FinancialConnectionsEvent internal constructor(
          * No web browser is installed on the user's device, so the Auth Flow cannot be initiated.
          */
         WEB_BROWSER_UNAVAILABLE("web_browser_unavailable"),
-
     }
 }

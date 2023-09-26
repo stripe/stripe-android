@@ -110,7 +110,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             }
         }
 
-
     @Test
     fun `handleOnNewIntent - when deeplink with success code received, webAuthFlow async succeeds`() {
         whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
