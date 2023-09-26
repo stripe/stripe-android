@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.analytics
 
 import android.content.Context
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.financialconnections.FinancialConnections
@@ -9,11 +10,13 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
+import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import java.util.Locale
 
@@ -55,9 +58,15 @@ internal suspend fun FinancialConnectionsAnalyticsTracker.logError(
 internal fun Throwable.toErrorCode(): ErrorCode = when (this) {
     is AppInitializationError -> ErrorCode.WEB_BROWSER_UNAVAILABLE
     is AccountNumberRetrievalError -> ErrorCode.ACCOUNT_NUMBERS_UNAVAILABLE
+    is AccountLoadError -> ErrorCode.ACCOUNTS_UNAVAILABLE
     is AccountNoneEligibleForPaymentMethodError -> ErrorCode.NO_DEBITABLE_ACCOUNT
     is InstitutionPlannedDowntimeError -> ErrorCode.INSTITUTION_UNAVAILABLE_PLANNED
     is InstitutionUnplannedDowntimeError -> ErrorCode.INSTITUTION_UNAVAILABLE_UNPLANNED
+    is WebAuthFlowFailedException -> ErrorCode.AUTHORIZATION_FAILED
+    is StripeException -> when(this.stripeError?.code) {
+        "bank_connections_link_account_session_client_secret_expired" -> ErrorCode.SESSION_EXPIRED
+        else -> ErrorCode.UNEXPECTED_ERROR
+    }
     else -> ErrorCode.UNEXPECTED_ERROR
 }
 
