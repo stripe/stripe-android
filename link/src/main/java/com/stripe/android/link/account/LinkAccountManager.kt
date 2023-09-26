@@ -110,7 +110,7 @@ internal class LinkAccountManager @Inject constructor(
     /**
      * Registers the user for a new Link account.
      */
-    suspend fun signUp(
+    private suspend fun signUp(
         email: String,
         phone: String,
         country: String,
@@ -130,13 +130,24 @@ internal class LinkAccountManager @Inject constructor(
      */
     suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails.New> =
+    ): Result<LinkPaymentDetails> =
         linkAccount.value?.let { account ->
             createCardPaymentDetails(
                 paymentMethodCreateParams,
                 account.email,
                 config.stripeIntent
-            )
+            ).mapCatching {
+                if (config.passthroughModeEnabled) {
+                    linkRepository.shareCardPaymentDetails(
+                        id = it.paymentDetails.id,
+                        last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
+                        consumerSessionClientSecret = account.clientSecret,
+                        paymentMethodCreateParams = paymentMethodCreateParams,
+                    ).getOrThrow()
+                } else {
+                    it
+                }
+            }
         } ?: Result.failure(
             IllegalStateException("A non-null Link account is needed to create payment details")
         )
@@ -150,11 +161,12 @@ internal class LinkAccountManager @Inject constructor(
         stripeIntent: StripeIntent
     ): Result<LinkPaymentDetails.New> = linkAccount.value?.let { account ->
         linkRepository.createCardPaymentDetails(
-            paymentMethodCreateParams,
-            userEmail,
-            stripeIntent,
-            account.clientSecret,
-            consumerPublishableKey
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            userEmail = userEmail,
+            stripeIntent = stripeIntent,
+            consumerSessionClientSecret = account.clientSecret,
+            consumerPublishableKey = if (config.passthroughModeEnabled) null else consumerPublishableKey,
+            active = config.passthroughModeEnabled,
         )
     } ?: Result.failure(
         IllegalStateException("User not signed in")

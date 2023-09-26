@@ -114,11 +114,7 @@ internal sealed class PaymentSelection : Parcelable {
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         ) : New() {
             @IgnoredOnParcel
-            val last4: String = (
-                (paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>)!!
-                ["number"] as String
-                )
-                .takeLast(4)
+            val last4: String = paymentMethodCreateParams.cardLast4().orEmpty()
         }
 
         @Parcelize
@@ -143,7 +139,7 @@ internal sealed class PaymentSelection : Parcelable {
         }
 
         @Parcelize
-        data class LinkInline(val linkPaymentDetails: LinkPaymentDetails.New) : New() {
+        data class LinkInline(val linkPaymentDetails: LinkPaymentDetails) : New() {
             @IgnoredOnParcel
             override val customerRequestedSave = CustomerRequestedSave.NoRequest
 
@@ -165,6 +161,8 @@ internal sealed class PaymentSelection : Parcelable {
                 is ConsumerPaymentDetails.Card ->
                     "····${paymentDetails.last4}"
                 is ConsumerPaymentDetails.BankAccount ->
+                    "····${paymentDetails.last4}"
+                is ConsumerPaymentDetails.Passthrough ->
                     "····${paymentDetails.last4}"
             }
         }

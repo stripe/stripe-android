@@ -278,6 +278,11 @@ data class PaymentMethodCreateParams internal constructor(
             }.orEmpty()
         }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun cardLast4(): String? {
+        return ((toParamMap()["card"] as? Map<*, *>?)?.get("number") as? String)?.takeLast(4)
+    }
+
     @Parcelize
     data class Card
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
