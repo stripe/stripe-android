@@ -87,16 +87,60 @@ class FinancialConnectionsEvent internal constructor(
      * Enum representing the error code when an error event is encountered
      */
     enum class ErrorCode(val value: String) {
-        INSTITUTION_UNAVAILABLE_PLANNED("institution_unavailable_planned"),
-        INSTITUTION_UNAVAILABLE_UNPLANNED("institution_unavailable_unplanned"),
-        INSTITUTION_TIMEOUT("institution_timeout"),
-        ACCOUNTS_UNAVAILABLE("accounts_unavailable"),
+        /**
+         * Error when account numbers cannot be retrieved for selected accounts.
+         */
         ACCOUNT_NUMBERS_UNAVAILABLE("account_numbers_unavailable"),
-        WEB_BROWSER_UNAVAILABLE("web_browser_unavailable"),
+
+        /**
+         * Error when accounts cannot be retrieved for the selected institution.
+         */
+        ACCOUNTS_UNAVAILABLE("accounts_unavailable"),
+
+        /**
+         * Error when no debitable account is available at the selected institution for payments flows.
+         */
         NO_DEBITABLE_ACCOUNT("no_debitable_account"),
+
+        /**
+         * Error when authorizing with the selected institution failed.
+         */
         AUTHORIZATION_FAILED("authorization_failed"),
+
+        /**
+         * Error when the institution the user selects is down for expected maintenance.
+         */
+        INSTITUTION_UNAVAILABLE_PLANNED("institution_unavailable_planned"),
+
+        /**
+         * Error when the institution the user selects is unexpectedly down.
+         */
+        INSTITUTION_UNAVAILABLE_UNPLANNED("institution_unavailable_unplanned"),
+
+        /**
+         * Error when there's a timeout while communication with downstream institution.
+         */
+        INSTITUTION_TIMEOUT("institution_timeout"),
+
+        /**
+         * Error when unexpected issues occur, either in an API call or on the client side.
+         */
         UNEXPECTED_ERROR("unexpected_error"),
+
+        /**
+         * Error when client secret powering the session has expired.
+         */
         SESSION_EXPIRED("session_expired"),
+
+        /**
+         * Error when hCaptcha challenge is not passed successfully.
+         */
         FAILED_BOT_DETECTION("failed_bot_detection"),
+
+        /**
+         * No web browser is installed on the user's device, so the Auth Flow cannot be initiated.
+         */
+        WEB_BROWSER_UNAVAILABLE("web_browser_unavailable"),
+
     }
 }

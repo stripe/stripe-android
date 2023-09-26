@@ -31,7 +31,7 @@ object FinancialConnections {
     internal fun emitEvent(
         name: Name,
         metadata: Metadata = Metadata()
-    ) {
+    ) = runCatching {
         eventListener?.onEvent(
             FinancialConnectionsEvent(
                 name = name,
