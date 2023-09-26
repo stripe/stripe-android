@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 internal class FakeElementsSessionRepository(
     private val stripeIntent: StripeIntent,
     private val error: Throwable?,
+    private val linkSettings: ElementsSession.LinkSettings?,
 ) : ElementsSessionRepository {
 
     override suspend fun get(
@@ -18,7 +19,7 @@ internal class FakeElementsSessionRepository(
         } else {
             Result.success(
                 ElementsSession(
-                    linkSettings = null,
+                    linkSettings = linkSettings,
                     paymentMethodSpecs = null,
                     stripeIntent = stripeIntent,
                     merchantCountry = null,

@@ -8,6 +8,7 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -424,6 +425,7 @@ internal class DefaultPaymentSheetLoaderTest {
             customerPhone = null,
             customerBillingCountryCode = "CA",
             shippingValues = null,
+            passthroughModeEnabled = false,
         )
 
         assertThat(result.linkState?.configuration).isEqualTo(expectedLinkConfig)
@@ -447,6 +449,24 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState?.configuration?.shippingValues).isNotNull()
+    }
+
+    @Test
+    fun `Populates Link configuration with passthrough mode`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            linkSettings = ElementsSession.LinkSettings(
+                linkFundingSources = emptyList(),
+                linkPassthroughModeEnabled = true,
+            )
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+        ).getOrThrow()
+
+        assertThat(result.linkState?.configuration?.passthroughModeEnabled).isTrue()
     }
 
     @Test
@@ -675,6 +695,7 @@ internal class DefaultPaymentSheetLoaderTest {
         linkAccountState: AccountStatus = AccountStatus.Verified,
         error: Throwable? = null,
         isCbcEnabled: Boolean = false,
+        linkSettings: ElementsSession.LinkSettings? = null,
     ): PaymentSheetLoader {
         return DefaultPaymentSheetLoader(
             appName = "App Name",
@@ -685,6 +706,7 @@ internal class DefaultPaymentSheetLoaderTest {
             elementsSessionRepository = FakeElementsSessionRepository(
                 stripeIntent = stripeIntent,
                 error = error,
+                linkSettings,
             ),
             customerRepository = customerRepo,
             lpmRepository = lpmRepository,

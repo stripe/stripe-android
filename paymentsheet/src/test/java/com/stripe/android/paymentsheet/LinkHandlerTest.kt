@@ -373,6 +373,7 @@ private fun runLinkTest(
         customerPhone = "1234567890",
         customerBillingCountryCode = "US",
         shippingValues = null,
+        passthroughModeEnabled = false,
     )
 
     whenever(linkConfigurationCoordinator.getAccountStatusFlow(eq(configuration))).thenReturn(accountStatusFlow)

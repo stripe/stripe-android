@@ -16,5 +16,6 @@ data class LinkConfiguration(
     val customerEmail: String?,
     val customerPhone: String?,
     val customerBillingCountryCode: String?,
-    val shippingValues: Map<IdentifierSpec, String?>?
+    val shippingValues: Map<IdentifierSpec, String?>?,
+    val passthroughModeEnabled: Boolean,
 ) : Parcelable

@@ -254,6 +254,7 @@ class LinkAccountManagerTest {
             merchantName = "Merchant",
             merchantCountryCode = "US",
             shippingValues = null,
+            passthroughModeEnabled = false,
         ),
         linkRepository,
         linkEventsReporter,

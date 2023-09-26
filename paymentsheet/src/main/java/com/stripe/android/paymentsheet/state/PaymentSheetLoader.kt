@@ -114,8 +114,11 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val stripeIntent = elementsSession.stripeIntent
         val merchantCountry = elementsSession.merchantCountry
 
-        val isLinkAvailable = stripeIntent.paymentMethodTypes.contains(Link.code) &&
-            stripeIntent.linkFundingSources.intersect(supportedFundingSources).isNotEmpty()
+        val linkPassthroughModeEnabled = elementsSession.linkSettings?.linkPassthroughModeEnabled ?: false
+        val isLinkAvailable = (
+            stripeIntent.paymentMethodTypes.contains(Link.code) &&
+                stripeIntent.linkFundingSources.intersect(supportedFundingSources).isNotEmpty()
+            ) || linkPassthroughModeEnabled
 
         val savedSelection = async {
             prefsRepository.getSavedSelection(
@@ -163,7 +166,12 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val linkState = async {
             if (isLinkAvailable) {
-                loadLinkState(config, stripeIntent, merchantCountry)
+                loadLinkState(
+                    config = config,
+                    stripeIntent = stripeIntent,
+                    merchantCountry = merchantCountry,
+                    passthroughModeEnabled = linkPassthroughModeEnabled,
+                )
             } else {
                 null
             }
@@ -250,8 +258,14 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         config: PaymentSheet.Configuration?,
         stripeIntent: StripeIntent,
         merchantCountry: String?,
+        passthroughModeEnabled: Boolean,
     ): LinkState {
-        val linkConfig = createLinkConfiguration(config, stripeIntent, merchantCountry)
+        val linkConfig = createLinkConfiguration(
+            config = config,
+            stripeIntent = stripeIntent,
+            merchantCountry = merchantCountry,
+            passthroughModeEnabled = passthroughModeEnabled,
+        )
 
         val loginState = when (accountStatusProvider(linkConfig)) {
             AccountStatus.Verified -> LinkState.LoginState.LoggedIn
@@ -271,6 +285,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         config: PaymentSheet.Configuration?,
         stripeIntent: StripeIntent,
         merchantCountry: String?,
+        passthroughModeEnabled: Boolean,
     ): LinkConfiguration {
         val shippingDetails: AddressDetails? = config?.shippingDetails
 
@@ -303,7 +318,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             customerPhone = customerPhone,
             customerName = config?.defaultBillingDetails?.name,
             customerBillingCountryCode = config?.defaultBillingDetails?.address?.country,
-            shippingValues = shippingAddress
+            shippingValues = shippingAddress,
+            passthroughModeEnabled = passthroughModeEnabled,
         )
     }
 

@@ -3,15 +3,12 @@ package com.stripe.android.test.core.ui
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-import com.stripe.android.ui.core.R as StripeUiCoreR
 
 class BuyButton(
     private val composeTestRule: ComposeTestRule,
@@ -40,13 +37,11 @@ class BuyButton(
     }
 
     fun waitProcessingComplete() {
-        val expectedText = InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            StripeUiCoreR.string.stripe_pay_button_amount
-        ).replace("%s", "")
         composeTestRule.waitUntil(timeoutMillis = processingCompleteTimeout.inWholeMilliseconds) {
             runCatching {
-                composeTestRule.onNode(hasText(text = expectedText, substring = true))
-                    .assertIsDisplayed()
+                composeTestRule.onNode(
+                    hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                ).assertIsDisplayed()
             }.isSuccess && checkEnabled()
         }
     }
