@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -38,6 +39,7 @@ import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
+import com.stripe.stripeterminal.external.models.Reader
 
 private object Spacing {
     val cardLeadingInnerPadding = 12.dp
@@ -56,6 +58,7 @@ internal fun PaymentMethodsUI(
     isEnabled: Boolean,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
+    readers: List<Reader>,
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
 ) {
@@ -80,6 +83,38 @@ internal fun PaymentMethodsUI(
             paymentMethods.size
         )
 
+//        LazyRow(
+//            state = state,
+//            contentPadding = PaddingValues(horizontal = Spacing.carouselOuterPadding),
+//            horizontalArrangement = Arrangement.spacedBy(Spacing.carouselInnerPadding),
+//            userScrollEnabled = isEnabled,
+//            modifier = Modifier.testTag(TEST_TAG_LIST)
+//        ) {
+//            itemsIndexed(items = paymentMethods) { index, item ->
+//                val iconUrl = if (isSystemInDarkTheme() && item.darkThemeIconUrl != null) {
+//                    item.darkThemeIconUrl
+//                } else {
+//                    item.lightThemeIconUrl
+//                }
+//                PaymentMethodUI(
+//                    modifier = Modifier.testTag(
+//                        TEST_TAG_LIST + stringResource(item.displayNameResource)
+//                    ),
+//                    minViewWidth = viewWidth,
+//                    iconRes = item.iconResource,
+//                    iconUrl = iconUrl,
+//                    imageLoader = imageLoader,
+//                    title = stringResource(item.displayNameResource),
+//                    isSelected = index == selectedIndex,
+//                    isEnabled = isEnabled,
+//                    tintOnSelected = item.tintIconOnSelection,
+//                    itemIndex = index,
+//                    onItemSelectedListener = {
+//                        onItemSelectedListener(paymentMethods[it])
+//                    }
+//                )
+//            }
+//        }
         LazyRow(
             state = state,
             contentPadding = PaddingValues(horizontal = Spacing.carouselOuterPadding),
@@ -87,24 +122,14 @@ internal fun PaymentMethodsUI(
             userScrollEnabled = isEnabled,
             modifier = Modifier.testTag(TEST_TAG_LIST)
         ) {
-            itemsIndexed(items = paymentMethods) { index, item ->
-                val iconUrl = if (isSystemInDarkTheme() && item.darkThemeIconUrl != null) {
-                    item.darkThemeIconUrl
-                } else {
-                    item.lightThemeIconUrl
-                }
-                PaymentMethodUI(
-                    modifier = Modifier.testTag(
-                        TEST_TAG_LIST + stringResource(item.displayNameResource)
-                    ),
+            itemsIndexed(items = readers) { index, item ->
+                ReaderUI(
                     minViewWidth = viewWidth,
-                    iconRes = item.iconResource,
-                    iconUrl = iconUrl,
-                    imageLoader = imageLoader,
-                    title = stringResource(item.displayNameResource),
+                    title = item.id ?: "no id",
+                    type = item.deviceType.deviceName,
                     isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
-                    tintOnSelected = item.tintIconOnSelection,
+//                    tintOnSelected = item.tintIconOnSelection,
                     itemIndex = index,
                     onItemSelectedListener = {
                         onItemSelectedListener(paymentMethods[it])
@@ -236,6 +261,53 @@ internal fun PaymentMethodUI(
                     end = Spacing.cardLeadingInnerPadding,
                 )
             )
+        }
+    }
+}
+
+@Composable
+internal fun ReaderUI(
+    minViewWidth: Dp,
+//    iconRes: Int,
+//    iconUrl: String?,
+//    imageLoader: StripeImageLoader,
+    title: String,
+    type: String,
+    isSelected: Boolean,
+    isEnabled: Boolean,
+//    tintOnSelected: Boolean,
+    itemIndex: Int,
+    modifier: Modifier = Modifier,
+    onItemSelectedListener: (Int) -> Unit
+) {
+    val color = if (isSelected) {
+        MaterialTheme.colors.primary
+    } else {
+        MaterialTheme.stripeColors.onComponent
+    }
+
+    Card(
+        modifier = modifier
+            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
+            .height(60.dp)
+            .widthIn(min = minViewWidth),
+        shape = MaterialTheme.shapes.medium,
+        backgroundColor = MaterialTheme.stripeColors.component,
+        border = MaterialTheme.getBorderStroke(isSelected),
+        elevation = if (isSelected) 1.5.dp else 0.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .selectable(
+                    selected = isSelected,
+                    enabled = isEnabled,
+                    onClick = {
+                        onItemSelectedListener(itemIndex)
+                    }
+                )
+        ) {
+            Text(text = title)
+            Text(text = type)
         }
     }
 }

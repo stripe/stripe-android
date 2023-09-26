@@ -39,6 +39,7 @@ import com.stripe.stripeterminal.external.models.DiscoveryMethod
 import com.stripe.stripeterminal.external.models.Reader
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
 
 @Composable
 internal fun AddPaymentMethod(
@@ -103,8 +104,16 @@ internal fun AddPaymentMethod(
             ),
             object : DiscoveryListener {
                 override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
-                    sheetViewModel.readers.value = readers
-                    println("asdf readers $readers")
+                    sheetViewModel.readers.getAndUpdate { current ->
+                        val online = readers.filterNot { it.networkStatus == Reader.NetworkStatus.OFFLINE }
+                        val new = online.filter { it.serialNumber !in current.map { it.serialNumber } }
+
+                        // Remove readers no longer in list and append new readers at the
+                        // *end* of the list in order to minimize order shuffling.
+                        current.filter { it.serialNumber in online.map { it.serialNumber } }.plus(new)
+                    }
+//                    sheetViewModel.readers.value = readers
+                    println("asdf readers ${sheetViewModel.readers.value}")
                 }
 
             },

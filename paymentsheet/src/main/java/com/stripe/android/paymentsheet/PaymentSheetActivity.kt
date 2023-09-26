@@ -124,27 +124,27 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             )
         )
 
-        Terminal.getInstance().discoverReaders(
-            DiscoveryConfiguration(
-                discoveryMethod = DiscoveryMethod.INTERNET,
-            ),
-            object : DiscoveryListener {
-                override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
-                    TODO("Not yet implemented")
-                }
-
-            },
-            object : com.stripe.stripeterminal.external.callable.Callback {
-                override fun onFailure(e: TerminalException) {
-                    e.printStackTrace()
-                }
-
-                override fun onSuccess() {
-                    println("Finished discovering readers")
-                }
-
-            }
-        )
+//        Terminal.getInstance().discoverReaders(
+//            DiscoveryConfiguration(
+//                discoveryMethod = DiscoveryMethod.INTERNET,
+//            ),
+//            object : DiscoveryListener {
+//                override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
+//                    TODO("Not yet implemented")
+//                }
+//
+//            },
+//            object : com.stripe.stripeterminal.external.callable.Callback {
+//                override fun onFailure(e: TerminalException) {
+//                    e.printStackTrace()
+//                }
+//
+//                override fun onSuccess() {
+//                    println("Finished discovering readers")
+//                }
+//
+//            }
+//        )
 
         setContent {
             StripeTheme {
