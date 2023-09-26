@@ -5,6 +5,7 @@ package com.stripe.android.core.strings
 import android.content.Context
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import com.stripe.android.core.strings.transformations.TransformOperation
 
 internal fun resolveArgs(context: Context, args: List<Any?>): Array<Any?> {
     return args.map { arg ->
@@ -27,9 +28,9 @@ internal fun resolveArgs(context: Context, args: List<Any?>): Array<Any?> {
 fun resolvableString(
     @StringRes id: Int,
     vararg formatArgs: Any?,
-    transform: (value: String) -> String = { it }
+    transformations: List<TransformOperation> = listOf()
 ): ResolvableString {
-    return IdentifierResolvableString(id, formatArgs.toList(), transform)
+    return IdentifierResolvableString(id, formatArgs.toList(), transformations)
 }
 
 /**

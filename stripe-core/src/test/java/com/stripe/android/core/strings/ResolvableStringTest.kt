@@ -1,5 +1,6 @@
 package com.stripe.android.core.strings
 
+import com.stripe.android.core.strings.transformations.Replace
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -49,6 +50,24 @@ class ResolvableStringTest {
         assertEquals(
             resolvableString(id = 1453235, resolvableString(id = 52523525), "argTwo"),
             resolvableString(id = 1453235, resolvableString(id = 52523525), "argTwo")
+        )
+    }
+
+    @Test
+    fun `identifier resolvable strings with comparable 'TransformOperation' objects should be equal`() {
+        assertEquals(
+            resolvableString(
+                id = 1453235,
+                resolvableString(value = "1453235"),
+                "argTwo",
+                transformations = listOf(Replace("one", "two"))
+            ).toString(),
+            resolvableString(
+                id = 1453235,
+                resolvableString(value = "1453235"),
+                "argTwo",
+                transformations = listOf(Replace("one", "two"))
+            ).toString()
         )
     }
 
