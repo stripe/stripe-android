@@ -303,6 +303,7 @@ internal fun ReaderUI(
                     enabled = isEnabled,
                     onClick = {
                         onItemSelectedListener(itemIndex)
+
                     }
                 )
         ) {

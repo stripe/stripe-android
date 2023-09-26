@@ -63,32 +63,38 @@ internal fun PaymentElement(
                 selectedIndex = supportedPaymentMethods.indexOf(selectedItem),
                 isEnabled = enabled,
                 paymentMethods = supportedPaymentMethods,
-                onItemSelectedListener = onItemSelectedListener,
+                onItemSelectedListener = {
+                    sheetViewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
+                    sheetViewModel.customPrimaryButtonUiState.value = sheetViewModel.primaryButtonUiState.value?.copy(
+                        enabled = true
+                    )
+//                    onItemSelectedListener(it)
+                },
                 imageLoader = imageLoader,
                 readers = readers,
                 modifier = Modifier.padding(top = 26.dp, bottom = 12.dp),
             )
         }
 
-        Box(modifier = Modifier.animateContentSize()) {
-            if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
-                USBankAccountForm(
-                    formArgs = formArguments,
-                    usBankAccountFormArgs = usBankAccountFormArguments,
-                    isProcessing = primaryButtonState.value?.isProcessing == true,
-                    modifier = Modifier.padding(horizontal = horizontalPadding),
-                )
-            } else {
-                PaymentMethodForm(
-                    args = formArguments,
-                    enabled = enabled,
-                    onFormFieldValuesChanged = onFormFieldValuesChanged,
-                    showCheckboxFlow = showCheckboxFlow,
-                    formViewModelSubComponentBuilderProvider = sheetViewModel.formViewModelSubComponentBuilderProvider,
-                    modifier = Modifier.padding(horizontal = horizontalPadding)
-                )
-            }
-        }
+//        Box(modifier = Modifier.animateContentSize()) {
+//            if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
+//                USBankAccountForm(
+//                    formArgs = formArguments,
+//                    usBankAccountFormArgs = usBankAccountFormArguments,
+//                    isProcessing = primaryButtonState.value?.isProcessing == true,
+//                    modifier = Modifier.padding(horizontal = horizontalPadding),
+//                )
+//            } else {
+//                PaymentMethodForm(
+//                    args = formArguments,
+//                    enabled = enabled,
+//                    onFormFieldValuesChanged = onFormFieldValuesChanged,
+//                    showCheckboxFlow = showCheckboxFlow,
+//                    formViewModelSubComponentBuilderProvider = sheetViewModel.formViewModelSubComponentBuilderProvider,
+//                    modifier = Modifier.padding(horizontal = horizontalPadding)
+//                )
+//            }
+//        }
 
         if (showLinkInlineSignup) {
             LinkInlineSignup(

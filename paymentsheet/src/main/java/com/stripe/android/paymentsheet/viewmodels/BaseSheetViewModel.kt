@@ -155,7 +155,7 @@ internal abstract class BaseSheetViewModel(
     private val _primaryButtonState = MutableStateFlow<PrimaryButton.State?>(null)
     val primaryButtonState: StateFlow<PrimaryButton.State?> = _primaryButtonState
 
-    protected val customPrimaryButtonUiState = MutableStateFlow<PrimaryButton.UIState?>(null)
+    public val customPrimaryButtonUiState = MutableStateFlow<PrimaryButton.UIState?>(null)
 
     abstract val primaryButtonUiState: StateFlow<PrimaryButton.UIState?>
 

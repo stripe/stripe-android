@@ -96,13 +96,13 @@ internal fun PaymentSheetScreenContent(
             )
         }
 
-        walletsState?.let { state ->
-            Wallet(
-                state = state,
-                onGooglePayPressed = viewModel::checkoutWithGooglePay,
-                onLinkPressed = viewModel::handleLinkPressed,
-            )
-        }
+//        walletsState?.let { state ->
+//            Wallet(
+//                state = state,
+//                onGooglePayPressed = viewModel::checkoutWithGooglePay,
+//                onLinkPressed = viewModel::handleLinkPressed,
+//            )
+//        }
 
         currentScreen.Content(
             viewModel = viewModel,

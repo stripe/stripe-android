@@ -149,10 +149,10 @@ internal fun AddPaymentMethod(
                 linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
                 showCheckboxFlow = showCheckboxFlow,
                 onItemSelectedListener = { selectedLpm ->
-                    if (selectedItem != selectedLpm) {
-                        selectedPaymentMethodCode = selectedLpm.code
-                        sheetViewModel.reportPaymentMethodTypeSelected(selectedLpm.code)
-                    }
+//                    if (selectedItem != selectedLpm) {
+//                        selectedPaymentMethodCode = selectedLpm.code
+//                        sheetViewModel.reportPaymentMethodTypeSelected(selectedLpm.code)
+//                    }
                 },
                 onLinkSignupStateChanged = { _, inlineSignupViewState ->
                     linkSignupState = inlineSignupViewState
