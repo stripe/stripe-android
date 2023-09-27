@@ -123,7 +123,7 @@ class CheckoutRequest private constructor(
     @SerialName("supported_payment_methods")
     val supported_payment_methods: List<String>?,
 ) {
-    class Builder() {
+    class Builder {
         private var initialization: String? = null
         private var customer: String? = null
         private var currency: String? = null
@@ -134,49 +134,40 @@ class CheckoutRequest private constructor(
         private var merchant_country_code: String? = null
         private var supported_payment_methods: List<String>? = null
 
-        fun initialization(initialization: String?): Builder {
+        fun initialization(initialization: String?) = apply {
             this.initialization = initialization
-            return this
         }
 
-        fun customer(customer: String?): Builder {
+        fun customer(customer: String?) = apply {
             this.customer = customer
-            return this
         }
 
-        fun currency(currency: String?): Builder {
+        fun currency(currency: String?) = apply {
             this.currency = currency
-            return this
         }
 
-        fun mode(mode: String?): Builder {
+        fun mode(mode: String?) = apply {
             this.mode = mode
-            return this
         }
 
-        fun setShippingAddress(setShippingAddress: Boolean?): Builder {
+        fun setShippingAddress(setShippingAddress: Boolean?) = apply {
             this.set_shipping_address = setShippingAddress
-            return this
         }
 
-        fun automaticPaymentMethods(automaticPaymentMethods: Boolean?): Builder {
+        fun automaticPaymentMethods(automaticPaymentMethods: Boolean?) = apply {
             this.automatic_payment_methods = automaticPaymentMethods
-            return this
         }
 
-        fun useLink(useLink: Boolean?): Builder {
+        fun useLink(useLink: Boolean?) = apply {
             this.use_link = useLink
-            return this
         }
 
-        fun merchantCountryCode(merchantCountryCode: String?): Builder {
+        fun merchantCountryCode(merchantCountryCode: String?) = apply {
             this.merchant_country_code = merchantCountryCode
-            return this
         }
 
-        fun supportedPaymentMethods(supportedPaymentMethods: List<String>?): Builder {
+        fun supportedPaymentMethods(supportedPaymentMethods: List<String>?) = apply {
             this.supported_payment_methods = supportedPaymentMethods
-            return this
         }
 
         fun build(): CheckoutRequest {
