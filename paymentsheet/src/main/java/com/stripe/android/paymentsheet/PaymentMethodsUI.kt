@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -22,6 +23,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
@@ -39,6 +41,7 @@ import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
+import com.stripe.stripeterminal.external.models.DeviceType
 import com.stripe.stripeterminal.external.models.Reader
 
 private object Spacing {
@@ -125,8 +128,8 @@ internal fun PaymentMethodsUI(
             itemsIndexed(items = readers) { index, item ->
                 ReaderUI(
                     minViewWidth = viewWidth,
-                    title = item.id ?: "no id",
-                    type = item.deviceType.deviceName,
+                    title = item.label ?: item.id ?: "no id",
+                    type = item.deviceType,
                     isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
 //                    tintOnSelected = item.tintIconOnSelection,
@@ -272,7 +275,7 @@ internal fun ReaderUI(
 //    iconUrl: String?,
 //    imageLoader: StripeImageLoader,
     title: String,
-    type: String,
+    type: DeviceType,
     isSelected: Boolean,
     isEnabled: Boolean,
 //    tintOnSelected: Boolean,
@@ -289,27 +292,43 @@ internal fun ReaderUI(
     Card(
         modifier = modifier
             .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
-            .height(60.dp)
+            .height(80.dp)
             .widthIn(min = minViewWidth),
         shape = MaterialTheme.shapes.medium,
         backgroundColor = MaterialTheme.stripeColors.component,
         border = MaterialTheme.getBorderStroke(isSelected),
         elevation = if (isSelected) 1.5.dp else 0.dp
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .selectable(
-                    selected = isSelected,
-                    enabled = isEnabled,
-                    onClick = {
-                        onItemSelectedListener(itemIndex)
-
-                    }
+                .height(Spacing.iconSize)
+                .padding(
+                    start = Spacing.cardLeadingInnerPadding,
+                    top = Spacing.cardLeadingInnerPadding,
+                    bottom = Spacing.cardLeadingInnerPadding,
                 )
         ) {
-            Text(text = title)
-            Text(text = type)
+            Column(
+                modifier = Modifier
+                    .selectable(
+                        selected = isSelected,
+                        enabled = isEnabled,
+                        onClick = {
+                            onItemSelectedListener(itemIndex)
+
+                        }
+                    )
+            ) {
+                Text(text = title)
+//            Text(text = type.deviceName)
+                Image(
+                    painter = painterResource(type.readerIcon),
+                    contentDescription = "reader",
+                    alignment = Alignment.BottomCenter
+                )
+            }
         }
+
     }
 }
 
@@ -344,3 +363,18 @@ private fun PaymentMethodIconUi(
         )
     }
 }
+
+val DeviceType.readerIcon: Int
+    @DrawableRes get() = when (this) {
+        DeviceType.CHIPPER_1X -> R.drawable.chipper_1x
+        DeviceType.CHIPPER_2X -> R.drawable.chipper_2x
+        DeviceType.STRIPE_M2 -> R.drawable.m2
+        DeviceType.VERIFONE_P400 -> R.drawable.p400
+        DeviceType.WISECUBE -> R.drawable.wisecube
+        DeviceType.WISEPAD_3, DeviceType.WISEPAD_3S -> R.drawable.wp3
+        DeviceType.WISEPOS_E, DeviceType.WISEPOS_E_DEVKIT -> R.drawable.wpe
+        DeviceType.STRIPE_S700, DeviceType.STRIPE_S700_DEVKIT -> R.drawable.s700
+        DeviceType.COTS_DEVICE,
+        DeviceType.ETNA,
+        DeviceType.UNKNOWN -> R.drawable.genericreader
+    }

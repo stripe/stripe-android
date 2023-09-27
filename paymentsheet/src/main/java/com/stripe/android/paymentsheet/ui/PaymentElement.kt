@@ -63,13 +63,13 @@ internal fun PaymentElement(
                 selectedIndex = supportedPaymentMethods.indexOf(selectedItem),
                 isEnabled = enabled,
                 paymentMethods = supportedPaymentMethods,
-                onItemSelectedListener = { _, index ->
+                onItemSelectedListener = { it, index ->
                     sheetViewModel.readerSelection = index
                     sheetViewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
                     sheetViewModel.customPrimaryButtonUiState.value = sheetViewModel.primaryButtonUiState.value?.copy(
                         enabled = true
                     )
-//                    onItemSelectedListener(it)
+                    onItemSelectedListener(it)
                 },
                 imageLoader = imageLoader,
                 readers = readers,
