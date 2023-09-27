@@ -41,6 +41,10 @@ class LauncherActivity : AppCompatActivity() {
                 PaymentAuthActivity::class.java
             ),
             Item(
+                activity.getString(R.string.card_brand_choice),
+                CardBrandChoiceExampleActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.create_card_token),
                 CreateCardTokenActivity::class.java
             ),
