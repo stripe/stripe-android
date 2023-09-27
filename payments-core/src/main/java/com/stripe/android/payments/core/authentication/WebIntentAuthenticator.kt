@@ -103,8 +103,14 @@ internal class WebIntentAuthenticator @Inject constructor(
                 returnUrl = defaultReturnUrl.value
                 shouldCancelIntentOnUserNavigation = false
             }
-            else ->
+            is StripeIntent.NextActionData.SwishRedirect -> {
+                authUrl = nextActionData.mobileAuthUrl
+                returnUrl = defaultReturnUrl.value
+                shouldCancelIntentOnUserNavigation = false
+            }
+            else -> {
                 throw IllegalArgumentException("WebAuthenticator can't process nextActionData: $nextActionData")
+            }
         }
 
         beginWebAuth(

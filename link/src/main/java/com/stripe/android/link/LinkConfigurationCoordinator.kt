@@ -61,7 +61,7 @@ class LinkConfigurationCoordinator @Inject internal constructor(
     suspend fun attachNewCardToAccount(
         configuration: LinkConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails.New> =
+    ): Result<LinkPaymentDetails> =
         getLinkPaymentLauncherComponent(configuration)
             .linkAccountManager
             .createCardPaymentDetails(paymentMethodCreateParams)

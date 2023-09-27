@@ -243,7 +243,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     private class FakeStripeRepository : AbsFakeStripeRepository() {
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
-            options: ApiRequest.Options
+            options: ApiRequest.Options,
         ): Result<PaymentMethod> {
             return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }

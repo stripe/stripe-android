@@ -32,7 +32,6 @@ class ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails>
 
                     ConsumerPaymentDetails.Card(
                         json.getString(FIELD_ID),
-                        json.getBoolean(FIELD_IS_DEFAULT),
                         cardDetails.getInt(FIELD_CARD_EXPIRY_YEAR),
                         cardDetails.getInt(FIELD_CARD_EXPIRY_MONTH),
                         CardBrand.fromCode(cardBrandFix(cardDetails.getString(FIELD_CARD_BRAND))),
@@ -45,7 +44,6 @@ class ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails>
                     val bankAccountDetails = json.getJSONObject(FIELD_BANK_ACCOUNT_DETAILS)
                     ConsumerPaymentDetails.BankAccount(
                         json.getString(FIELD_ID),
-                        json.getBoolean(FIELD_IS_DEFAULT),
                         optString(bankAccountDetails, FIELD_BANK_ACCOUNT_BANK_ICON_CODE),
                         bankAccountDetails.getString(FIELD_BANK_ACCOUNT_BANK_NAME),
                         bankAccountDetails.getString(FIELD_BANK_ACCOUNT_LAST_4)
@@ -79,7 +77,6 @@ class ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails>
 
         private const val FIELD_TYPE = "type"
         private const val FIELD_ID = "id"
-        private const val FIELD_IS_DEFAULT = "is_default"
 
         private const val FIELD_BILLING_ADDRESS = "billing_address"
         private const val FIELD_ADDRESS_COUNTRY_CODE = "country_code"

@@ -53,6 +53,7 @@
         <activity android:name=".activity.GooglePayPaymentMethodLauncherIntegrationActivity" />
         <activity android:name=".activity.GooglePayPaymentMethodLauncherComposeActivity" />
         <activity android:name=".activity.PaymentAuthActivity" />
+        <activity android:name=".activity.CardBrandChoiceExampleActivity" />
         <activity android:name=".activity.FragmentExamplesActivity" />
         <activity android:name=".activity.ConfirmSepaDebitActivity" />
         <activity android:name=".activity.FpxPaymentActivity" />
@@ -79,6 +80,7 @@
         <activity android:name=".activity.CashAppPayActivity"/>
         <activity android:name=".activity.BlikPaymentMethodActivity"/>
         <activity android:name=".activity.RevolutPayActivity"/>
+        <activity android:name=".activity.SwishExampleActivity"/>
     </application>
 
 </manifest>

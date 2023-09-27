@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import org.json.JSONObject
 
+@Suppress("LargeClass")
 internal object ElementsSessionFixtures {
     val EXPANDED_PAYMENT_INTENT_JSON = JSONObject(
         """
@@ -319,7 +320,8 @@ internal object ElementsSessionFixtures {
               "CARD", "BANK_ACCOUNT"
             ],
             "link_local_storage_login_enabled": true,
-            "link_only_for_payment_method_types_enabled": false
+            "link_only_for_payment_method_types_enabled": false,
+            "link_passthrough_mode_enabled": true
           },
           "merchant_country": "US",
           "payment_method_preference": {
@@ -394,7 +396,8 @@ internal object ElementsSessionFixtures {
               "CARD", "BANK_ACCOUNT"
             ],
             "link_local_storage_login_enabled": true,
-            "link_only_for_payment_method_types_enabled": false
+            "link_only_for_payment_method_types_enabled": false,
+            "link_passthrough_mode_enabled": false
           },
           "merchant_country": "US",
           "payment_method_preference": {

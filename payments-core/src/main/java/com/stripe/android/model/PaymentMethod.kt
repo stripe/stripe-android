@@ -397,6 +397,13 @@ constructor(
             isVoucher = true,
             requiresMandate = false,
             hasDelayedSettlement = true,
+        ),
+        Swish(
+            code = "swish",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet

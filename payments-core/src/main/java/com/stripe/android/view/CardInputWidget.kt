@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
@@ -8,7 +9,8 @@ import android.text.Layout
 import android.text.TextPaint
 import android.text.TextWatcher
 import android.util.AttributeSet
-import android.util.Log
+import android.util.TypedValue.COMPLEX_UNIT_DIP
+import android.util.TypedValue.applyDimension
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -29,7 +31,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
-import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
@@ -42,6 +43,7 @@ import com.stripe.android.model.DelicateCardDetailsApi
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
 /**
@@ -75,7 +77,7 @@ class CardInputWidget @JvmOverloads constructor(
     private val cardNumberTextInputLayout = viewBinding.cardNumberTextInputLayout
     private val expiryDateTextInputLayout = viewBinding.expiryDateTextInputLayout
     private val cvcNumberTextInputLayout = viewBinding.cvcTextInputLayout
-    internal val postalCodeTextInputLayout = viewBinding.postalCodeTextInputLayout
+    private val postalCodeTextInputLayout = viewBinding.postalCodeTextInputLayout
 
     @JvmSynthetic
     internal val cardNumberEditText = viewBinding.cardNumberEditText
@@ -343,6 +345,19 @@ class CardInputWidget @JvmOverloads constructor(
         updatePostalRequired()
     }
 
+    private var dropdownAnimator: ValueAnimator? = null
+
+    private val cardBrandIconWidth: Float by lazy {
+        resources.getDimension(R.dimen.stripe_card_brand_view_width)
+    }
+
+    private val cardBrandChoiceDropdownWidth: Float by lazy {
+        val displayMetrics = context.resources.displayMetrics
+        val spacing = applyDimension(COMPLEX_UNIT_DIP, CBC_DROPDOWN_SPACING_DP, displayMetrics)
+        val icon = applyDimension(COMPLEX_UNIT_DIP, CBC_DROPDOWN_ICON_WIDTH_DP, displayMetrics)
+        spacing + icon
+    }
+
     private fun updatePostalRequired() {
         if (isPostalRequired()) {
             requiredFields.add(postalCodeEditText)
@@ -386,9 +401,7 @@ class CardInputWidget @JvmOverloads constructor(
 
         doWithCardWidgetViewModel { viewModel ->
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
-                if (BuildConfig.DEBUG) {
-                    Log.d("CardInputWidget", "Is CBC eligible: $isCbcEligible")
-                }
+                cardBrandView.isCbcEligible = isCbcEligible
             }
         }
     }
@@ -786,6 +799,8 @@ class CardInputWidget @JvmOverloads constructor(
             updateCvc()
         }
 
+        cardNumberEditText.possibleCardBrandsCallback = this::handlePossibleCardBrandsChanged
+
         expiryDateEditText.completionCallback = {
             cvcEditText.requestFocus()
             cardInputListener?.onExpirationComplete()
@@ -820,11 +835,60 @@ class CardInputWidget @JvmOverloads constructor(
         updateCvc()
     }
 
-    private fun updateCvc() {
+    private fun updateCvc(brand: CardBrand = cardBrandView.brand) {
         cvcEditText.updateBrand(
-            cardBrandView.brand,
+            brand,
             customCvcLabel
         )
+    }
+
+    private fun handlePossibleCardBrandsChanged(brands: List<CardBrand>) {
+        val didShowDropdown = cardBrandView.possibleBrands.size > 1
+        val shouldShowDropdown = brands.size > 1
+
+        val currentBrand = cardBrandView.brand
+        cardBrandView.possibleBrands = brands
+
+        if (currentBrand !in brands) {
+            // The brand is no longer available, so we reset to an unknown brand
+            cardBrandView.brand = CardBrand.Unknown
+        }
+
+        hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
+
+        // We need to use a known card brand to set the correct expected CVC length. Since both
+        // brands of a co-branded card have the same CVC length, we can just choose the first one.
+        val brandForCvcLength = brands.firstOrNull() ?: CardBrand.Unknown
+        updateCvc(brand = brandForCvcLength)
+
+        if (shouldShowDropdown != didShowDropdown) {
+            animateCardBrandChoiceDropdown(isVisible = shouldShowDropdown)
+        }
+    }
+
+    private fun animateCardBrandChoiceDropdown(isVisible: Boolean) {
+        dropdownAnimator?.cancel()
+
+        val desiredWidth = if (isVisible) {
+            cardBrandIconWidth + cardBrandChoiceDropdownWidth
+        } else {
+            cardBrandIconWidth
+        }
+
+        val newAnimator = ValueAnimator.ofFloat(cardBrandView.width.toFloat(), desiredWidth)
+        newAnimator.duration = CBC_DROPDOWN_ICON_ANIMATION_DURATION
+
+        newAnimator.addUpdateListener { currentAnimator ->
+            val animatedWidth = currentAnimator.animatedValue as Float
+            cardBrandView.updateLayoutParams<LayoutParams> {
+                width = animatedWidth.roundToInt()
+            }
+            isViewInitialized = false
+            requestLayout()
+        }
+
+        dropdownAnimator = newAnimator
+        newAnimator.start()
     }
 
     /**
@@ -1026,6 +1090,12 @@ class CardInputWidget @JvmOverloads constructor(
                 newMarginStart = placement.getPostalCodeStartMargin(isShowingFullCard)
             )
         }
+    }
+
+    override fun onDetachedFromWindow() {
+        dropdownAnimator?.cancel()
+        dropdownAnimator = null
+        super.onDetachedFromWindow()
     }
 
     private var hiddenCardText: String = createHiddenCardText(cardNumberEditText.panLength)
@@ -1248,6 +1318,10 @@ class CardInputWidget @JvmOverloads constructor(
         private const val STATE_CARD_VIEWED = "state_card_viewed"
         private const val STATE_SUPER_STATE = "state_super_state"
         private const val STATE_POSTAL_CODE_ENABLED = "state_postal_code_enabled"
+
+        private const val CBC_DROPDOWN_ICON_WIDTH_DP = 16f
+        private const val CBC_DROPDOWN_SPACING_DP = 4f
+        private const val CBC_DROPDOWN_ICON_ANIMATION_DURATION = 200L
 
         // This value is used to ensure that onSaveInstanceState is called
         // in the event that the user doesn't give this control an ID.

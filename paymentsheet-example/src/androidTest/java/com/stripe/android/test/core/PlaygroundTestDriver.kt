@@ -3,8 +3,10 @@ package com.stripe.android.test.core
 import android.app.Activity
 import android.app.Application
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -83,7 +85,7 @@ class PlaygroundTestDriver(
             selectors.addPaymentMethodButton.isDisplayed()
         }
 
-        composeTestRule.onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_+ Add").apply {
+        addPaymentMethodNode().apply {
             assertExists()
             performClick()
         }
@@ -160,6 +162,11 @@ class PlaygroundTestDriver(
         setup(testParameters)
         launchCustom()
 
+        if (isSelectPaymentMethodScreen()) {
+            // When Link is enabled we get the select screen, but we want to go to the add screen
+            // and click the payment method.
+            addPaymentMethodNode().performClick()
+        }
         selectors.paymentSelection.click()
 
         val fieldPopulator = FieldPopulator(
@@ -331,6 +338,10 @@ class PlaygroundTestDriver(
                 val browserUI = BrowserUI.convert(it)
                 Assume.assumeTrue(getBrowser(browserUI) == browserUI)
             } ?: Assume.assumeTrue(selectors.getInstalledBrowsers().isNotEmpty())
+        }
+        if (authorizeAction == AuthorizeAction.DisplayQrCode) {
+            // Browserstack tests fail on pixel 2 API 26.
+            Assume.assumeFalse("walleye + 26" == "${Build.DEVICE} + ${Build.VERSION.SDK_INT}")
         }
     }
 
@@ -562,5 +573,15 @@ class PlaygroundTestDriver(
 
     internal fun teardown() {
         application?.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
+    }
+
+    private fun isSelectPaymentMethodScreen(): Boolean {
+        return runCatching {
+            composeTestRule.onNodeWithText("Select your payment method").assertIsDisplayed()
+        }.isSuccess
+    }
+
+    private fun addPaymentMethodNode(): SemanticsNodeInteraction {
+        return composeTestRule.onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_+ Add")
     }
 }

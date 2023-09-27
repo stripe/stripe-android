@@ -219,17 +219,17 @@ class PaymentSheetPlaygroundViewModel(
 
         val initializationType = initializationType.value
 
-        val requestBody = CheckoutRequest(
-            initialization = initializationType.value,
-            customer = customer.value,
-            currency = currency.value.lowercase(),
-            mode = mode.value,
-            set_shipping_address = setShippingAddress,
-            automatic_payment_methods = setAutomaticPaymentMethod,
-            use_link = linkEnabled,
-            merchant_country_code = merchantCountry.value,
-            supported_payment_methods = supportedPaymentMethods
-        )
+        val requestBody = CheckoutRequest.Builder()
+            .initialization(initializationType.value)
+            .customer(customer.value)
+            .currency(currency.value.lowercase())
+            .mode(mode.value)
+            .setShippingAddress(setShippingAddress)
+            .automaticPaymentMethods(setAutomaticPaymentMethod)
+            .useLink(linkEnabled)
+            .merchantCountryCode(merchantCountry.value)
+            .supportedPaymentMethods(supportedPaymentMethods)
+            .build()
 
         Fuel.post(backendUrl + "checkout")
             .jsonBody(Json.encodeToString(CheckoutRequest.serializer(), requestBody))

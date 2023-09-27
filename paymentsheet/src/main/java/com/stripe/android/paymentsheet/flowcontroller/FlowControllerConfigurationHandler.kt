@@ -98,7 +98,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         )
     }
 
-    private fun onInitSuccess(
+    private suspend fun onInitSuccess(
         state: PaymentSheetState.Full,
         configureRequest: ConfigureRequest,
     ) {
@@ -115,7 +115,9 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             newState = state,
         )
 
-        viewModel.state = state
+        withContext(uiContext) {
+            viewModel.state = state
+        }
     }
 
     private fun resetJob() {
