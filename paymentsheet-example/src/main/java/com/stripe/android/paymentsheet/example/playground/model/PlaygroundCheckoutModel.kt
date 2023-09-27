@@ -113,26 +113,26 @@ class CheckoutRequest private constructor(
     @SerialName("mode")
     val mode: String?,
     @SerialName("set_shipping_address")
-    val set_shipping_address: Boolean?,
+    val setShippingAddress: Boolean?,
     @SerialName("automatic_payment_methods")
-    val automatic_payment_methods: Boolean?,
+    val automaticPaymentMethods: Boolean?,
     @SerialName("use_link")
-    val use_link: Boolean?,
+    val useLink: Boolean?,
     @SerialName("merchant_country_code")
-    val merchant_country_code: String?,
+    val merchantCountryCode: String?,
     @SerialName("supported_payment_methods")
-    val supported_payment_methods: List<String>?,
+    val supportedPaymentMethods: List<String>?,
 ) {
     class Builder {
         private var initialization: String? = null
         private var customer: String? = null
         private var currency: String? = null
         private var mode: String? = null
-        private var set_shipping_address: Boolean? = null
-        private var automatic_payment_methods: Boolean? = null
-        private var use_link: Boolean? = null
-        private var merchant_country_code: String? = null
-        private var supported_payment_methods: List<String>? = null
+        private var setShippingAddress: Boolean? = null
+        private var automaticPaymentMethods: Boolean? = null
+        private var useLink: Boolean? = null
+        private var merchantCountryCode: String? = null
+        private var supportedPaymentMethods: List<String>? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -151,23 +151,23 @@ class CheckoutRequest private constructor(
         }
 
         fun setShippingAddress(setShippingAddress: Boolean?) = apply {
-            this.set_shipping_address = setShippingAddress
+            this.setShippingAddress = setShippingAddress
         }
 
         fun automaticPaymentMethods(automaticPaymentMethods: Boolean?) = apply {
-            this.automatic_payment_methods = automaticPaymentMethods
+            this.automaticPaymentMethods = automaticPaymentMethods
         }
 
         fun useLink(useLink: Boolean?) = apply {
-            this.use_link = useLink
+            this.useLink = useLink
         }
 
         fun merchantCountryCode(merchantCountryCode: String?) = apply {
-            this.merchant_country_code = merchantCountryCode
+            this.merchantCountryCode = merchantCountryCode
         }
 
         fun supportedPaymentMethods(supportedPaymentMethods: List<String>?) = apply {
-            this.supported_payment_methods = supportedPaymentMethods
+            this.supportedPaymentMethods = supportedPaymentMethods
         }
 
         fun build(): CheckoutRequest {
@@ -176,11 +176,11 @@ class CheckoutRequest private constructor(
                 customer = customer,
                 currency = currency,
                 mode = mode,
-                set_shipping_address = set_shipping_address,
-                automatic_payment_methods = automatic_payment_methods,
-                use_link = use_link,
-                merchant_country_code = merchant_country_code,
-                supported_payment_methods = supported_payment_methods,
+                setShippingAddress = setShippingAddress,
+                automaticPaymentMethods = automaticPaymentMethods,
+                useLink = useLink,
+                merchantCountryCode = merchantCountryCode,
+                supportedPaymentMethods = supportedPaymentMethods,
             )
         }
     }

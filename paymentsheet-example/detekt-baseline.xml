@@ -2,11 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>ConstructorParameterNaming:PlaygroundCheckoutModel.kt$CheckoutRequest$@SerialName("automatic_payment_methods") val automatic_payment_methods: Boolean?</ID>
-    <ID>ConstructorParameterNaming:PlaygroundCheckoutModel.kt$CheckoutRequest$@SerialName("merchant_country_code") val merchant_country_code: String?</ID>
-    <ID>ConstructorParameterNaming:PlaygroundCheckoutModel.kt$CheckoutRequest$@SerialName("set_shipping_address") val set_shipping_address: Boolean?</ID>
-    <ID>ConstructorParameterNaming:PlaygroundCheckoutModel.kt$CheckoutRequest$@SerialName("supported_payment_methods") val supported_payment_methods: List&lt;String>?</ID>
-    <ID>ConstructorParameterNaming:PlaygroundCheckoutModel.kt$CheckoutRequest$@SerialName("use_link") val use_link: Boolean?</ID>
     <ID>CyclomaticComplexMethod:PaymentSheetPlaygroundActivity.kt$PaymentSheetPlaygroundActivity$private fun setToggles( initialization: String?, customer: String?, link: Boolean, googlePay: Boolean, currency: String?, merchantCountryCode: String, mode: String?, shippingAddress: String, setDefaultBillingAddress: Boolean, setAutomaticPaymentMethods: Boolean, setDelayedPaymentMethods: Boolean, attachDefaultBillingAddress: Boolean, collectName: String, collectEmail: String, collectPhone: String, collectAddress: String, )</ID>
     <ID>EmptyFunctionBlock:DrawablePainter.kt$EmptyPainter${}</ID>
     <ID>EmptyFunctionBlock:PaymentSheetPlaygroundActivity.kt$PaymentSheetPlaygroundActivity.&lt;no name provided>${}</ID>
@@ -39,10 +34,5 @@
     <ID>PackageNaming:ServerSideConfirmationCustomFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow</ID>
     <ID>PackageNaming:ServerSideConfirmationCustomFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow</ID>
     <ID>PackageNaming:ServerSideConfirmationCustomFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow</ID>
-    <ID>VariableNaming:PlaygroundCheckoutModel.kt$CheckoutRequest.Builder$private var automatic_payment_methods: Boolean? = null</ID>
-    <ID>VariableNaming:PlaygroundCheckoutModel.kt$CheckoutRequest.Builder$private var merchant_country_code: String? = null</ID>
-    <ID>VariableNaming:PlaygroundCheckoutModel.kt$CheckoutRequest.Builder$private var set_shipping_address: Boolean? = null</ID>
-    <ID>VariableNaming:PlaygroundCheckoutModel.kt$CheckoutRequest.Builder$private var supported_payment_methods: List&lt;String>? = null</ID>
-    <ID>VariableNaming:PlaygroundCheckoutModel.kt$CheckoutRequest.Builder$private var use_link: Boolean? = null</ID>
   </CurrentIssues>
 </SmellBaseline>
