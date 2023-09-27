@@ -467,7 +467,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         Terminal.getInstance()
             .connectInternetReader(
-                readers.value[readerSelection],
+                readers.value[readerSelection.value],
                 ConnectionConfiguration.InternetConnectionConfiguration(),
                 connectCallback,
             )

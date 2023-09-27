@@ -96,7 +96,7 @@ internal abstract class BaseSheetViewModel(
     val readers: MutableStateFlow<List<Reader>> = MutableStateFlow(emptyList())
 //    val readers: StateFlow<List<Reader>> = _readers
 
-    var readerSelection = 0
+    var readerSelection: MutableStateFlow<Int> = MutableStateFlow(0)
 
     var connectionToken: String = ""
 

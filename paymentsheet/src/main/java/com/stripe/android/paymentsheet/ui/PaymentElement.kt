@@ -57,14 +57,17 @@ internal fun PaymentElement(
 
     val readers by sheetViewModel.readers.collectAsState()
 
+    val selectedReaderIndex by sheetViewModel.readerSelection.collectAsState()
+
     Column(modifier = Modifier.fillMaxWidth()) {
         if (supportedPaymentMethods.size > 1) {
             PaymentMethodsUI(
-                selectedIndex = supportedPaymentMethods.indexOf(selectedItem),
+//                selectedIndex = supportedPaymentMethods.indexOf(selectedItem),
+                selectedIndex = selectedReaderIndex,
                 isEnabled = enabled,
                 paymentMethods = supportedPaymentMethods,
                 onItemSelectedListener = { it, index ->
-                    sheetViewModel.readerSelection = index
+                    sheetViewModel.readerSelection.value = index
                     sheetViewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
                     sheetViewModel.customPrimaryButtonUiState.value = sheetViewModel.primaryButtonUiState.value?.copy(
                         enabled = true
