@@ -103,26 +103,97 @@ sealed class CheckoutCustomer(val value: String) {
 }
 
 @Serializable
-data class CheckoutRequest(
+class CheckoutRequest private constructor(
     @SerialName("initialization")
-    val initialization: String,
+    val initialization: String?,
     @SerialName("customer")
-    val customer: String,
+    val customer: String?,
     @SerialName("currency")
-    val currency: String,
+    val currency: String?,
     @SerialName("mode")
-    val mode: String,
+    val mode: String?,
     @SerialName("set_shipping_address")
-    val set_shipping_address: Boolean,
+    val set_shipping_address: Boolean?,
     @SerialName("automatic_payment_methods")
-    val automatic_payment_methods: Boolean,
+    val automatic_payment_methods: Boolean?,
     @SerialName("use_link")
-    val use_link: Boolean,
+    val use_link: Boolean?,
     @SerialName("merchant_country_code")
-    val merchant_country_code: String,
+    val merchant_country_code: String?,
     @SerialName("supported_payment_methods")
-    val supported_payment_methods: List<String>? = null,
-)
+    val supported_payment_methods: List<String>?,
+) {
+    class Builder() {
+        private var initialization: String? = null
+        private var customer: String? = null
+        private var currency: String? = null
+        private var mode: String? = null
+        private var set_shipping_address: Boolean? = null
+        private var automatic_payment_methods: Boolean? = null
+        private var use_link: Boolean? = null
+        private var merchant_country_code: String? = null
+        private var supported_payment_methods: List<String>? = null
+
+        fun initialization(initialization: String?): Builder {
+            this.initialization = initialization
+            return this
+        }
+
+        fun customer(customer: String?): Builder {
+            this.customer = customer
+            return this
+        }
+
+        fun currency(currency: String?): Builder {
+            this.currency = currency
+            return this
+        }
+
+        fun mode(mode: String?): Builder {
+            this.mode = mode
+            return this
+        }
+
+        fun setShippingAddress(setShippingAddress: Boolean?): Builder {
+            this.set_shipping_address = setShippingAddress
+            return this
+        }
+
+        fun automaticPaymentMethods(automaticPaymentMethods: Boolean?): Builder {
+            this.automatic_payment_methods = automaticPaymentMethods
+            return this
+        }
+
+        fun useLink(useLink: Boolean?): Builder {
+            this.use_link = useLink
+            return this
+        }
+
+        fun merchantCountryCode(merchantCountryCode: String?): Builder {
+            this.merchant_country_code = merchantCountryCode
+            return this
+        }
+
+        fun supportedPaymentMethods(supportedPaymentMethods: List<String>?): Builder {
+            this.supported_payment_methods = supportedPaymentMethods
+            return this
+        }
+
+        fun build(): CheckoutRequest {
+            return CheckoutRequest(
+                initialization = initialization,
+                customer = customer,
+                currency = currency,
+                mode = mode,
+                set_shipping_address = set_shipping_address,
+                automatic_payment_methods = automatic_payment_methods,
+                use_link = use_link,
+                merchant_country_code = merchant_country_code,
+                supported_payment_methods = supported_payment_methods,
+            )
+        }
+    }
+}
 
 @Serializable
 data class CheckoutResponse(
