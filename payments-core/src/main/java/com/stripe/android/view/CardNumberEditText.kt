@@ -159,10 +159,11 @@ class CardNumberEditText internal constructor(
         accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
             override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
                 updateLengthFilter()
-                cardBrand = accountRanges.singleOrNull()?.brand ?: CardBrand.Unknown
 
                 if (isCbcEligible) {
                     possibleCardBrands = accountRanges.map { it.brand }.distinct()
+                } else {
+                    cardBrand = accountRanges.singleOrNull()?.brand ?: CardBrand.Unknown
                 }
             }
         }

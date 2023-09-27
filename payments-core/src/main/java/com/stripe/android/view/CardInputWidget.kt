@@ -186,13 +186,22 @@ class CardInputWidget @JvmOverloads constructor(
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
         @OptIn(DelicateCardDetailsApi::class)
         get() {
-            return cardParams?.let {
+            return cardParams?.let { params ->
+                val networks = if (cardBrandView.isCbcEligible) {
+                    PaymentMethodCreateParams.Card.Networks(
+                        preferred = cardBrandView.brand.takeIf { it != CardBrand.Unknown }?.code,
+                    )
+                } else {
+                    null
+                }
+
                 PaymentMethodCreateParams.Card(
-                    number = it.number,
-                    cvc = it.cvc,
-                    expiryMonth = it.expMonth,
-                    expiryYear = it.expYear,
-                    attribution = it.attribution
+                    number = params.number,
+                    cvc = params.cvc,
+                    expiryMonth = params.expMonth,
+                    expiryYear = params.expYear,
+                    attribution = params.attribution,
+                    networks = networks,
                 )
             }
         }
