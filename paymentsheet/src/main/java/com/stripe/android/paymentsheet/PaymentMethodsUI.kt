@@ -118,6 +118,24 @@ internal fun PaymentMethodsUI(
 //                )
 //            }
 //        }
+
+        val readersWithFakes = listOf(
+            ReaderCardInfo(
+                "cashier 1 POS",
+                "123",
+                DeviceType.WISEPOS_E,
+            ),
+            ReaderCardInfo(
+                "waiter 1 POS",
+                "234",
+                DeviceType.STRIPE_S700,
+            ),
+            ReaderCardInfo(
+                "cashier 2 POS",
+                "234",
+                DeviceType.STRIPE_S700,
+            ),
+        )
         LazyRow(
             state = state,
             contentPadding = PaddingValues(horizontal = Spacing.carouselOuterPadding),
@@ -125,20 +143,32 @@ internal fun PaymentMethodsUI(
             userScrollEnabled = isEnabled,
             modifier = Modifier.testTag(TEST_TAG_LIST)
         ) {
-            itemsIndexed(items = readers) { index, item ->
-                ReaderUI(
-                    minViewWidth = viewWidth,
-                    title = item.label ?: item.id ?: "no id",
-                    type = item.deviceType,
-                    isSelected = index == selectedIndex,
-                    isEnabled = isEnabled,
-//                    tintOnSelected = item.tintIconOnSelection,
-                    itemIndex = index,
-                    onItemSelectedListener = {
-                        onItemSelectedListener(paymentMethods[it], it)
-                    }
+            (readers.map {
+                ReaderCardInfo(
+                    it.label,
+                    it.id,
+                    it.deviceType
                 )
-            }
+            }+ readersWithFakes)
+//                .apply {
+//                    this + readersWithFakes
+//                }
+                .run {
+                    itemsIndexed(items = this) { index, item ->
+                        ReaderUI(
+                            minViewWidth = viewWidth,
+                            title = item.label ?: item.id ?: "no id",
+                            type = item.type,
+                            isSelected = index == selectedIndex,
+                            isEnabled = isEnabled,
+//                    tintOnSelected = item.tintIconOnSelection,
+                            itemIndex = index,
+                            onItemSelectedListener = {
+                                onItemSelectedListener(paymentMethods[it], it)
+                            }
+                        )
+                    }
+                }
         }
     }
 }
@@ -378,3 +408,9 @@ val DeviceType.readerIcon: Int
         DeviceType.ETNA,
         DeviceType.UNKNOWN -> R.drawable.genericreader
     }
+
+data class ReaderCardInfo(
+    val label: String?,
+    val id: String?,
+    val type: DeviceType,
+)
