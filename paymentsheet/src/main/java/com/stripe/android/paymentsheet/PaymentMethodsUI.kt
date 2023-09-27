@@ -3,12 +3,14 @@ package com.stripe.android.paymentsheet
 import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -327,7 +329,7 @@ internal fun ReaderUI(
         shape = MaterialTheme.shapes.medium,
         backgroundColor = MaterialTheme.stripeColors.component,
         border = MaterialTheme.getBorderStroke(isSelected),
-        elevation = if (isSelected) 1.5.dp else 0.dp
+        elevation = if (isSelected) 1.5.dp else 0.dp,
     ) {
         Box(
             modifier = Modifier
@@ -345,9 +347,9 @@ internal fun ReaderUI(
                         enabled = isEnabled,
                         onClick = {
                             onItemSelectedListener(itemIndex)
-
                         }
                     )
+                    .widthIn(min = minViewWidth),
             ) {
                 Text(text = title)
 //            Text(text = type.deviceName)
