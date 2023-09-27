@@ -96,7 +96,8 @@ internal fun AddPaymentMethod(
         }
     }
 
-    LaunchedEffect(key1 = sheetViewModel.connectionToken) {
+//    LaunchedEffect(key1 = sheetViewModel.connectionToken) {
+    LaunchedEffect(key1 = "Fwe") {
         println("asdf launched reader discovery")
         Terminal.getInstance().discoverReaders(
             DiscoveryConfiguration(

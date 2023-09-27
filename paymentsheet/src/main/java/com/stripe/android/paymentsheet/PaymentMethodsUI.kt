@@ -56,7 +56,7 @@ internal fun PaymentMethodsUI(
     paymentMethods: List<SupportedPaymentMethod>,
     selectedIndex: Int,
     isEnabled: Boolean,
-    onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
+    onItemSelectedListener: (SupportedPaymentMethod, Int) -> Unit,
     imageLoader: StripeImageLoader,
     readers: List<Reader>,
     modifier: Modifier = Modifier,
@@ -132,7 +132,7 @@ internal fun PaymentMethodsUI(
 //                    tintOnSelected = item.tintIconOnSelection,
                     itemIndex = index,
                     onItemSelectedListener = {
-                        onItemSelectedListener(paymentMethods[it])
+                        onItemSelectedListener(paymentMethods[it], it)
                     }
                 )
             }

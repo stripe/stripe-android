@@ -57,6 +57,14 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.requireApplication
+import com.stripe.stripeterminal.Terminal
+import com.stripe.stripeterminal.external.callable.PaymentIntentCallback
+import com.stripe.stripeterminal.external.callable.ReaderCallback
+import com.stripe.stripeterminal.external.models.CaptureMethod
+import com.stripe.stripeterminal.external.models.ConnectionConfiguration
+import com.stripe.stripeterminal.external.models.PaymentIntentParameters
+import com.stripe.stripeterminal.external.models.Reader
+import com.stripe.stripeterminal.external.models.TerminalException
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -369,22 +377,100 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     ) {
         startProcessing(identifier)
 
-        if (paymentSelection is PaymentSelection.GooglePay) {
-            stripeIntent.value?.let { stripeIntent ->
-                googlePayPaymentMethodLauncher?.present(
-                    currencyCode = (stripeIntent as? PaymentIntent)?.currency
-                        ?: args.googlePayConfig?.currencyCode.orEmpty(),
-                    amount = when (stripeIntent) {
-                        is PaymentIntent -> stripeIntent.amount ?: 0L
-                        is SetupIntent -> args.googlePayConfig?.amount ?: 0L
-                    },
-                    transactionId = stripeIntent.id,
-                    label = args.googlePayConfig?.label,
-                )
+//        if (paymentSelection is PaymentSelection.GooglePay) {
+//            stripeIntent.value?.let { stripeIntent ->
+//                googlePayPaymentMethodLauncher?.present(
+//                    currencyCode = (stripeIntent as? PaymentIntent)?.currency
+//                        ?: args.googlePayConfig?.currencyCode.orEmpty(),
+//                    amount = when (stripeIntent) {
+//                        is PaymentIntent -> stripeIntent.amount ?: 0L
+//                        is SetupIntent -> args.googlePayConfig?.amount ?: 0L
+//                    },
+//                    transactionId = stripeIntent.id,
+//                    label = args.googlePayConfig?.label,
+//                )
+//            }
+//        } else {
+//            confirmPaymentSelection(paymentSelection)
+//        }
+
+        val processCallback = object : PaymentIntentCallback {
+            override fun onFailure(e: TerminalException) {
+                println("asdf failed process $e")
+                onPaymentResult(PaymentResult.Failed(e))
             }
-        } else {
-            confirmPaymentSelection(paymentSelection)
+
+            override fun onSuccess(paymentIntent: com.stripe.stripeterminal.external.models.PaymentIntent) {
+                onPaymentResult(PaymentResult.Completed)
+            }
+
         }
+
+        val collectCallback = object : PaymentIntentCallback {
+            override fun onFailure(e: TerminalException) {
+                println("asdf failed collect $e")
+                onPaymentResult(PaymentResult.Failed(e))
+            }
+
+            override fun onSuccess(paymentIntent: com.stripe.stripeterminal.external.models.PaymentIntent) {
+                Terminal.getInstance()
+                    .processPayment(
+                        paymentIntent,
+                        processCallback,
+                    )
+            }
+
+        }
+
+        val piCreateCallback = object : PaymentIntentCallback {
+            override fun onFailure(e: TerminalException) {
+                println("asdf failed PI create: $e")
+                onPaymentResult(PaymentResult.Failed(e))
+            }
+
+            override fun onSuccess(paymentIntent: com.stripe.stripeterminal.external.models.PaymentIntent) {
+                println("asdf created pi: ${paymentIntent.id}")
+
+                Terminal.getInstance()
+                    .collectPaymentMethod(
+                        paymentIntent,
+                        collectCallback,
+                    )
+            }
+        }
+
+        val connectCallback = object : ReaderCallback {
+            override fun onFailure(e: TerminalException) {
+                println("asdf failed connect reader $e")
+                onPaymentResult(PaymentResult.Failed(e))
+            }
+
+            override fun onSuccess(reader: Reader) {
+//                stripeIntent.value?.clientSecret?.let {
+//                    Terminal.getInstance()
+//                        .retrievePaymentIntent(
+//                            it,
+//                            piCreateCallback,
+//                        )
+//                }
+                Terminal.getInstance()
+                    .createPaymentIntent(
+                        PaymentIntentParameters.Builder()
+                            .setAmount(973)
+                            .setCurrency("usd")
+                            .setCaptureMethod(CaptureMethod.Automatic)
+                            .build(),
+                        piCreateCallback,
+                    )
+            }
+        }
+
+        Terminal.getInstance()
+            .connectInternetReader(
+                readers.value[readerSelection],
+                ConnectionConfiguration.InternetConnectionConfiguration(),
+                connectCallback,
+            )
     }
 
     fun confirmStripeIntent(confirmStripeIntentParams: ConfirmStripeIntentParams) {

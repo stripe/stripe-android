@@ -94,15 +94,18 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 //                requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
 
-        try {
+        if (!Terminal.isInitialized()) {
             Terminal.initTerminal(
                 context = this,
                 tokenProvider = TokenProvider(viewModel = viewModel),
                 listener = TerminalEventListener()
             )
-        } catch (e: IllegalStateException) {
-            println("caught init duplicate call")
         }
+//        try {
+//
+//        } catch (e: IllegalStateException) {
+//            println("caught init duplicate call")
+//        }
 
 
         val validatedArgs = validationResult.getOrNull()
