@@ -2,9 +2,11 @@ package com.stripe.android.ui.core.elements
 
 import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.StaticCardAccountRangeSource
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.uicore.elements.FieldError
@@ -21,6 +23,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.R as StripeR
+import com.stripe.payments.model.R as PaymentModelR
 
 @RunWith(RobolectricTestRunner::class)
 internal class CardNumberControllerTest {
@@ -198,6 +201,107 @@ internal class CardNumberControllerTest {
             )
         assertThat(trailingIcons[2])
             .isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
+    }
+
+    @Test
+    fun `trailingIcon should be dropdown if card brand choice eligible`() {
+        val cardNumberController = CardNumberEditableController(
+            CardNumberConfig(),
+            FakeCardAccountRangeRepository(),
+            testDispatcher,
+            initialValue = null,
+            cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(initialBrand = null)
+        )
+
+        val trailingIcons = mutableListOf<TextFieldIcon?>()
+        cardNumberController.trailingIcon.asLiveData().observeForever {
+            trailingIcons.add(it)
+        }
+        cardNumberController.onValueChange("40000025")
+        idleLooper()
+        assertThat(trailingIcons.last() as TextFieldIcon.Dropdown)
+            .isEqualTo(
+                TextFieldIcon.Dropdown(
+                    title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
+                    currentItem = TextFieldIcon.Dropdown.Item(
+                        id = CardBrand.Unknown.code,
+                        label = resolvableString(R.string.stripe_card_brand_choice_no_selection),
+                        icon = PaymentModelR.drawable.stripe_ic_unknown
+                    ),
+                    items = listOf(
+                        TextFieldIcon.Dropdown.Item(
+                            id = CardBrand.Unknown.code,
+                            label = resolvableString(R.string.stripe_card_brand_choice_no_selection),
+                            icon = PaymentModelR.drawable.stripe_ic_unknown
+                        ),
+                        TextFieldIcon.Dropdown.Item(
+                            id = CardBrand.CartesBancaires.code,
+                            label = resolvableString("Cartes Bancaires"),
+                            icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+                        ),
+                        TextFieldIcon.Dropdown.Item(
+                            id = CardBrand.Visa.code,
+                            label = resolvableString("Visa"),
+                            icon = PaymentModelR.drawable.stripe_ic_visa
+                        ),
+                    ),
+                    hide = false
+                )
+            )
+    }
+
+    @Test
+    fun `on dropdown item click, card brand should have been changed`() {
+        val cardNumberController = CardNumberEditableController(
+            CardNumberConfig(),
+            FakeCardAccountRangeRepository(),
+            testDispatcher,
+            initialValue = null,
+            cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(initialBrand = null)
+        )
+
+        val trailingIcons = mutableListOf<TextFieldIcon?>()
+        cardNumberController.trailingIcon.asLiveData().observeForever {
+            trailingIcons.add(it)
+        }
+        cardNumberController.onValueChange("40000025")
+        cardNumberController.onDropdownItemClicked(
+            TextFieldIcon.Dropdown.Item(
+                id = CardBrand.CartesBancaires.code,
+                label = resolvableString("Cartes Bancaires"),
+                icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+            )
+        )
+        idleLooper()
+        assertThat(trailingIcons.last() as TextFieldIcon.Dropdown)
+            .isEqualTo(
+                TextFieldIcon.Dropdown(
+                    title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
+                    currentItem = TextFieldIcon.Dropdown.Item(
+                        id = CardBrand.CartesBancaires.code,
+                        label = resolvableString("Cartes Bancaires"),
+                        icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+                    ),
+                    items = listOf(
+                        TextFieldIcon.Dropdown.Item(
+                            id = CardBrand.Unknown.code,
+                            label = resolvableString(R.string.stripe_card_brand_choice_no_selection),
+                            icon = PaymentModelR.drawable.stripe_ic_unknown
+                        ),
+                        TextFieldIcon.Dropdown.Item(
+                            id = CardBrand.CartesBancaires.code,
+                            label = resolvableString("Cartes Bancaires"),
+                            icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+                        ),
+                        TextFieldIcon.Dropdown.Item(
+                            id = CardBrand.Visa.code,
+                            label = resolvableString("Visa"),
+                            icon = PaymentModelR.drawable.stripe_ic_visa
+                        ),
+                    ),
+                    hide = false
+                )
+            )
     }
 
     private class FakeCardAccountRangeRepository : CardAccountRangeRepository {

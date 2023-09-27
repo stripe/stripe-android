@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import android.content.Context
+import com.stripe.android.model.CardBrand
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.SectionMultiFieldElement
@@ -73,6 +74,19 @@ internal class CardDetailsElement(
                     IdentifierSpec.CardBrand to FormFieldEntry(it.code, true)
                 }
             )
+            if (isEligibleForCardBrandChoice) {
+                add(
+                    controller.numberElement.controller.cardBrandFlow.map { brand ->
+                        IdentifierSpec.PreferredCardBrand to FormFieldEntry(
+                            value = when (brand) {
+                                CardBrand.Unknown -> null
+                                else -> brand.code
+                            },
+                            isComplete = true
+                        )
+                    }
+                )
+            }
             add(
                 controller.expirationDateElement.controller.formFieldValue.map {
                     IdentifierSpec.CardExpMonth to getExpiryMonthFormFieldEntry(it)

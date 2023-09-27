@@ -35,6 +35,8 @@ data class IdentifierSpec(
 
         val CardBrand = IdentifierSpec("card[brand]")
 
+        val PreferredCardBrand = IdentifierSpec("card[networks][preferred]")
+
         val CardNumber = IdentifierSpec("card[number]")
 
         val CardCvc = IdentifierSpec("card[cvc]")

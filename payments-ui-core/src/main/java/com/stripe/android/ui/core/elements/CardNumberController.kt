@@ -13,6 +13,7 @@ import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
@@ -30,6 +31,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
+import com.stripe.android.R as PaymentsCoreR
+import com.stripe.payments.model.R as PaymentModelR
 
 internal sealed class CardNumberController : TextFieldController, SectionFieldErrorController {
     abstract val cardBrandFlow: Flow<CardBrand>
@@ -54,20 +57,20 @@ internal class CardNumberEditableController constructor(
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     initialValue: String?,
     override val showOptionalLabel: Boolean = false,
-    private val isEligibleForCardBrandChoice: Boolean = false,
+    private val cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
 ) : CardNumberController() {
 
     constructor(
         cardTextFieldConfig: CardNumberConfig,
         context: Context,
         initialValue: String?,
-        isEligibleForCardBrandChoice: Boolean,
+        cardBrandChoiceConfig: CardBrandChoiceConfig,
     ) : this(
         cardTextFieldConfig,
         DefaultCardAccountRangeRepositoryFactory(context).create(),
         Dispatchers.IO,
         initialValue = initialValue,
-        isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+        cardBrandChoiceConfig = cardBrandChoiceConfig,
     )
 
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
@@ -86,18 +89,108 @@ internal class CardNumberEditableController constructor(
     // This makes the screen reader read out numbers digit by digit
     override val contentDescription: Flow<String> = _fieldValue.map { it.asIndividualDigits() }
 
-    override val cardBrandFlow = _fieldValue.map {
-        accountRangeService.accountRange?.brand ?: CardBrand.getCardBrands(it).firstOrNull()
+    private val isEligibleForCardBrandChoice = cardBrandChoiceConfig is CardBrandChoiceConfig.Eligible
+    private val brandChoices = MutableStateFlow<List<CardBrand>>(listOf())
+    private val chosenBrand = MutableStateFlow(
+        when (cardBrandChoiceConfig) {
+            is CardBrandChoiceConfig.Eligible -> {
+                when (val initialBrand = cardBrandChoiceConfig.initialBrand) {
+                    CardBrand.Unknown -> null
+                    else -> initialBrand
+                }
+            }
+            is CardBrandChoiceConfig.Ineligible -> null
+        }
+    )
+
+    /*
+     * In state validation, we check that the card number itself is valid and do not care about
+     * the card's co-brands. If a session is card brand choice eligible however, there is now the
+     * option  of not determining the card brand unless the user selects one. We use an implied
+     * card brand (VISA, Mastercard) internally to pass state validation.
+     */
+    private val impliedCardBrand = _fieldValue.map {
+        accountRangeService.accountRange?.brand
+            ?: CardBrand.getCardBrands(it).firstOrNull()
             ?: CardBrand.Unknown
+    }
+
+    override val cardBrandFlow = impliedCardBrand.combine(
+        chosenBrand
+    ) { impliedBrand, chosenBrand ->
+        if (isEligibleForCardBrandChoice) {
+            chosenBrand ?: CardBrand.Unknown
+        } else {
+            impliedBrand
+        }
     }
 
     override val cardScanEnabled = true
 
-    override val trailingIcon: Flow<TextFieldIcon?> = _fieldValue.map {
-        val cardBrands = CardBrand.getCardBrands(it)
-        if (accountRangeService.accountRange != null) {
+    @VisibleForTesting
+    val accountRangeService = CardAccountRangeService(
+        cardAccountRangeRepository,
+        workContext,
+        staticCardAccountRanges,
+        object : CardAccountRangeService.AccountRangeResultListener {
+            override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
+                val newAccountRange = accountRanges.firstOrNull()
+                newAccountRange?.panLength?.let { panLength ->
+                    (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan =
+                        panLength
+                }
+
+                val newBrandChoices = accountRanges.map { it.brand }.distinct()
+
+                brandChoices.value = newBrandChoices
+
+                if (newBrandChoices.none { option -> option == chosenBrand.value }) {
+                    chosenBrand.value = null
+                }
+            }
+        },
+        isCbcEligible = { isEligibleForCardBrandChoice },
+    )
+
+    override val trailingIcon: Flow<TextFieldIcon?> = combine(
+        _fieldValue,
+        brandChoices,
+        chosenBrand
+    ) { number, brands, chosen ->
+        if (isEligibleForCardBrandChoice && number.isNotEmpty()) {
+            val noSelection = TextFieldIcon.Dropdown.Item(
+                id = CardBrand.Unknown.code,
+                label = resolvableString(PaymentsCoreR.string.stripe_card_brand_choice_no_selection),
+                icon = PaymentModelR.drawable.stripe_ic_unknown
+            )
+
+            val selected = chosen?.let { brand ->
+                TextFieldIcon.Dropdown.Item(
+                    id = brand.code,
+                    label = resolvableString(brand.displayName),
+                    icon = brand.icon
+                )
+            } ?: noSelection
+
+            val associatedRanges = brands.associateBy { brand ->
+                TextFieldIcon.Dropdown.Item(
+                    id = brand.code,
+                    label = resolvableString(brand.displayName),
+                    icon = brand.icon
+                )
+            }
+
+            TextFieldIcon.Dropdown(
+                title = resolvableString(PaymentsCoreR.string.stripe_card_brand_choice_selection_header),
+                currentItem = selected,
+                items = listOf(noSelection) + associatedRanges.keys.toList(),
+                hide = brands.size < 2
+            )
+        } else if (accountRangeService.accountRange != null) {
             TextFieldIcon.Trailing(accountRangeService.accountRange!!.brand.icon, isTintable = false)
         } else {
+            val cardBrands = CardBrand.getCardBrands(number)
+
             val staticIcons = cardBrands.map { cardBrand ->
                 TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)
             }.filterIndexed { index, _ -> index < 3 }
@@ -113,7 +206,7 @@ internal class CardNumberEditableController constructor(
         }
     }
 
-    private val _fieldState = combine(cardBrandFlow, _fieldValue) { brand, fieldValue ->
+    private val _fieldState = combine(impliedCardBrand, _fieldValue) { brand, fieldValue ->
         cardTextFieldConfig.determineState(
             brand,
             fieldValue,
@@ -125,23 +218,6 @@ internal class CardNumberEditableController constructor(
     override val fieldState: Flow<TextFieldState> = _fieldState
 
     private val _hasFocus = MutableStateFlow(false)
-
-    @VisibleForTesting
-    val accountRangeService = CardAccountRangeService(
-        cardAccountRangeRepository,
-        workContext,
-        staticCardAccountRanges,
-        object : CardAccountRangeService.AccountRangeResultListener {
-            override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
-                val newAccountRange = accountRanges.firstOrNull()
-                newAccountRange?.panLength?.let { panLength ->
-                    (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan =
-                        panLength
-                }
-            }
-        },
-        isCbcEligible = { isEligibleForCardBrandChoice },
-    )
 
     override val loading: Flow<Boolean> = accountRangeService.isLoading
 
@@ -194,5 +270,12 @@ internal class CardNumberEditableController constructor(
 
     override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
+    }
+
+    override fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {
+        chosenBrand.value = when (val brand = CardBrand.fromCode(item.id)) {
+            CardBrand.Unknown -> null
+            else -> brand
+        }
     }
 }

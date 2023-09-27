@@ -12,6 +12,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.map
 interface TextFieldController : InputController, SectionFieldComposable {
     fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
+    fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {}
 
     val autofillType: AutofillType?
     val debugLabel: String
@@ -93,6 +95,21 @@ sealed class TextFieldIcon {
         val staticIcons: List<Trailing>,
         val animatedIcons: List<Trailing>
     ) : TextFieldIcon()
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    data class Dropdown(
+        val title: ResolvableString,
+        val hide: Boolean,
+        val currentItem: Item,
+        val items: List<Item>
+    ) : TextFieldIcon() {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+        data class Item(
+            val id: String,
+            val label: ResolvableString,
+            val icon: Int
+        )
+    }
 }
 
 /**
