@@ -7,6 +7,7 @@ import com.airbnb.mvrx.Success
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.NetworkedAccount
@@ -17,7 +18,8 @@ internal class LinkAccountPickerPreviewParameterProvider :
     PreviewParameterProvider<LinkAccountPickerState> {
     override val values = sequenceOf(
         canonical(),
-        accountSelected()
+        accountSelected(),
+//        repairableAccountSelected(),
     )
 
     override val count: Int
@@ -33,6 +35,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
+                partnerToCoreAuths = emptyMap(),
             )
         ),
     )
@@ -48,6 +51,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
+                partnerToCoreAuths = emptyMap(),
             )
         ),
     )
@@ -59,7 +63,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             id = "id0",
             name = "Repairable Account",
             balanceAmount = 1000,
-            status = FinancialConnectionsAccount.Status.ACTIVE,
+            status = Status.ACTIVE,
             displayableAccountNumbers = "1234",
             currency = "USD",
             _allowSelection = true,
@@ -82,7 +86,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             id = "id1",
             name = "With balance",
             balanceAmount = 1000,
-            status = FinancialConnectionsAccount.Status.ACTIVE,
+            status = Status.ACTIVE,
             displayableAccountNumbers = "1234",
             currency = "USD",
             _allowSelection = true,
