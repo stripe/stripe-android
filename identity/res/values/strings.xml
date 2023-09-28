@@ -145,4 +145,24 @@
   <string name="stripe_upload_dialog_title_passport">Upload passport</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Alternatively, you may manually upload a photo of your %1$s</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">camera icon</string>
+  <!-- Title for phone number -->
+  <string name="stripe_phone_number">Phone Number</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">You\'re currently in testmode</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">This page is only shown in testmode.</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Complete with test data</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Save time by choosing a desired result and completing instantly with that outcome. The mobile SDK flow will return with result Completed.</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Upload a photo</string>
+  <!-- Description to upload a photo ID -->
+  <string name="stripe_upload_your_photo_id">Upload your photo ID</string>
+  <!-- Title for selfie warmup screen -->
+  <string name="stripe_selfie_warmup_title">Get ready to take a selfie</string>
+  <!-- Body for selfie warmup screen -->
+  <string name="stripe_selfie_warmup_body">A few photos will be taken automatically on the next step to verify it\'s you</string>
 </resources>
