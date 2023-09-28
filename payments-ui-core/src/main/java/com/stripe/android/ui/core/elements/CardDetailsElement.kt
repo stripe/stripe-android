@@ -78,10 +78,7 @@ internal class CardDetailsElement(
                 add(
                     controller.numberElement.controller.cardBrandFlow.map { brand ->
                         IdentifierSpec.PreferredCardBrand to FormFieldEntry(
-                            value = when (brand) {
-                                CardBrand.Unknown -> null
-                                else -> brand.code
-                            },
+                            value = brand.code.takeUnless { brand == CardBrand.Unknown },
                             isComplete = true
                         )
                     }

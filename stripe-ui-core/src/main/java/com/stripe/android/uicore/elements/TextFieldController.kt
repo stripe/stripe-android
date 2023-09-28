@@ -106,9 +106,9 @@ sealed class TextFieldIcon {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         data class Item(
             val id: String,
-            val label: ResolvableString,
-            val icon: Int
-        )
+            override val label: ResolvableString,
+            override val icon: Int
+        ) : SingleChoiceDropdownItem
     }
 }
 

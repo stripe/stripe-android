@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
 import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.R
-import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -250,7 +249,7 @@ fun TextField(
                             }
                         }
                         is TextFieldIcon.Dropdown -> {
-                            var expandable by remember {
+                            var expanded by remember {
                                 mutableStateOf(false)
                             }
 
@@ -261,7 +260,7 @@ fun TextField(
                                     modifier = Modifier
                                         .padding(10.dp)
                                         .clickable(enabled = show) {
-                                            expandable = true
+                                            expanded = true
                                         },
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -286,19 +285,17 @@ fun TextField(
                                 }
 
                                 SingleChoiceDropdown(
-                                    expanded = expandable,
-                                    title = it.title.resolve(),
-                                    currentChoice = TextFieldDropdownUiItem.create(item = it.currentItem),
-                                    choices = it.items.map { item ->
-                                        TextFieldDropdownUiItem.create(item = item)
-                                    },
-                                    onChoiceSelected = { uiItem ->
-                                        textFieldController.onDropdownItemClicked(uiItem.item)
+                                    expanded = expanded,
+                                    title = it.title,
+                                    currentChoice = it.currentItem,
+                                    choices = it.items,
+                                    onChoiceSelected = { item ->
+                                        textFieldController.onDropdownItemClicked(item)
 
-                                        expandable = false
+                                        expanded = false
                                     },
                                     onDismiss = {
-                                        expandable = false
+                                        expanded = false
                                     }
                                 )
                             }

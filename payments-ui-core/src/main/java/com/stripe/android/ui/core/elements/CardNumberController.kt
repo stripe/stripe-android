@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
-import com.stripe.payments.model.R as PaymentModelR
 
 internal sealed class CardNumberController : TextFieldController, SectionFieldErrorController {
     abstract val cardBrandFlow: Flow<CardBrand>
@@ -140,11 +139,12 @@ internal class CardNumberEditableController constructor(
                         panLength
                 }
 
+                val currentValue = chosenBrand.value
                 val newBrandChoices = accountRanges.map { it.brand }.distinct()
 
                 brandChoices.value = newBrandChoices
 
-                if (newBrandChoices.none { option -> option == chosenBrand.value }) {
+                if (currentValue !in newBrandChoices) {
                     chosenBrand.value = null
                 }
             }
@@ -161,18 +161,28 @@ internal class CardNumberEditableController constructor(
             val noSelection = TextFieldIcon.Dropdown.Item(
                 id = CardBrand.Unknown.code,
                 label = resolvableString(PaymentsCoreR.string.stripe_card_brand_choice_no_selection),
-                icon = PaymentModelR.drawable.stripe_ic_unknown
+                icon = CardBrand.Unknown.icon
             )
 
-            val selected = chosen?.let { brand ->
-                TextFieldIcon.Dropdown.Item(
-                    id = brand.code,
-                    label = resolvableString(brand.displayName),
-                    icon = brand.icon
-                )
-            } ?: noSelection
+            val selected = if (brands.size == 1) {
+                val onlyAvailableBrand = brands[0]
 
-            val associatedRanges = brands.associateBy { brand ->
+                TextFieldIcon.Dropdown.Item(
+                    id = onlyAvailableBrand.code,
+                    label = resolvableString(onlyAvailableBrand.displayName),
+                    icon = onlyAvailableBrand.icon
+                )
+            } else {
+                chosen?.let { brand ->
+                    TextFieldIcon.Dropdown.Item(
+                        id = brand.code,
+                        label = resolvableString(brand.displayName),
+                        icon = brand.icon
+                    )
+                } ?: noSelection
+            }
+
+            val items = brands.map { brand ->
                 TextFieldIcon.Dropdown.Item(
                     id = brand.code,
                     label = resolvableString(brand.displayName),
@@ -183,7 +193,7 @@ internal class CardNumberEditableController constructor(
             TextFieldIcon.Dropdown(
                 title = resolvableString(PaymentsCoreR.string.stripe_card_brand_choice_selection_header),
                 currentItem = selected,
-                items = listOf(noSelection) + associatedRanges.keys.toList(),
+                items = listOf(noSelection) + items,
                 hide = brands.size < 2
             )
         } else if (accountRangeService.accountRange != null) {

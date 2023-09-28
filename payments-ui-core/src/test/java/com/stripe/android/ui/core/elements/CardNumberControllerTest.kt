@@ -226,23 +226,23 @@ internal class CardNumberControllerTest {
                     currentItem = TextFieldIcon.Dropdown.Item(
                         id = CardBrand.Unknown.code,
                         label = resolvableString(R.string.stripe_card_brand_choice_no_selection),
-                        icon = PaymentModelR.drawable.stripe_ic_unknown
+                        icon = CardBrand.Unknown.icon
                     ),
                     items = listOf(
                         TextFieldIcon.Dropdown.Item(
                             id = CardBrand.Unknown.code,
                             label = resolvableString(R.string.stripe_card_brand_choice_no_selection),
-                            icon = PaymentModelR.drawable.stripe_ic_unknown
+                            icon = CardBrand.Unknown.icon
                         ),
                         TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = resolvableString("Cartes Bancaires"),
-                            icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+                            icon = CardBrand.CartesBancaires.icon
                         ),
                         TextFieldIcon.Dropdown.Item(
                             id = CardBrand.Visa.code,
                             label = resolvableString("Visa"),
-                            icon = PaymentModelR.drawable.stripe_ic_visa
+                            icon = CardBrand.Visa.icon
                         ),
                     ),
                     hide = false
@@ -280,23 +280,23 @@ internal class CardNumberControllerTest {
                     currentItem = TextFieldIcon.Dropdown.Item(
                         id = CardBrand.CartesBancaires.code,
                         label = resolvableString("Cartes Bancaires"),
-                        icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+                        icon = CardBrand.CartesBancaires.icon
                     ),
                     items = listOf(
                         TextFieldIcon.Dropdown.Item(
                             id = CardBrand.Unknown.code,
                             label = resolvableString(R.string.stripe_card_brand_choice_no_selection),
-                            icon = PaymentModelR.drawable.stripe_ic_unknown
+                            icon = CardBrand.Unknown.icon
                         ),
                         TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = resolvableString("Cartes Bancaires"),
-                            icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+                            icon = CardBrand.CartesBancaires.icon
                         ),
                         TextFieldIcon.Dropdown.Item(
                             id = CardBrand.Visa.code,
                             label = resolvableString("Visa"),
-                            icon = PaymentModelR.drawable.stripe_ic_visa
+                            icon = CardBrand.Visa.icon
                         ),
                     ),
                     hide = false

@@ -26,13 +26,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun <TDropdownChoice : SingleChoiceDropdownItem> SingleChoiceDropdown(
     expanded: Boolean,
-    title: String,
+    title: ResolvableString,
     currentChoice: TDropdownChoice?,
     choices: List<TDropdownChoice>,
     onChoiceSelected: (TDropdownChoice) -> Unit,
@@ -43,14 +45,14 @@ fun <TDropdownChoice : SingleChoiceDropdownItem> SingleChoiceDropdown(
         onDismissRequest = onDismiss,
     ) {
         Text(
-            text = title,
+            text = title.resolve(),
             color = MaterialTheme.stripeColors.subtitle,
             modifier = Modifier.padding(vertical = 5.dp, horizontal = 13.dp),
         )
 
         choices.forEach { choice ->
             Choice(
-                label = choice.label,
+                label = choice.label.resolve(),
                 icon = choice.icon,
                 isSelected = choice == currentChoice,
                 currentTextColor = MaterialTheme.stripeColors.onComponent,
