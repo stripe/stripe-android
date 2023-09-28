@@ -9,6 +9,10 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository.State
 import kotlinx.coroutines.CoroutineScope
 
+/**
+ * Repository for storing the core authorization pending repair.
+ *
+ */
 internal class CoreAuthorizationPendingNetworkingRepairRepository(
     coroutineScope: CoroutineScope,
     private val logger: Logger,
