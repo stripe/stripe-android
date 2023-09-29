@@ -179,19 +179,24 @@ workflows:
       - deploy-to-bitrise-io@2: { }
   run-instrumentation-tests:
     before_run:
+      - start_emulator
       - prepare_all
     after_run:
       - conclude_all
     steps:
-      - avd-manager@1: { }
+      - script@1:
+          title: Assemble Instrumentation tests
+          timeout: 600
+          inputs:
+            - content: ./gradlew assembleAndroidTest -x :paymentsheet-example:assembleAndroidTest -x :paymentsheet:assembleAndroidTest -x :example:assembleAndroidTest
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
-      - script-runner@0:
+      - script@1:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - file_path: ./scripts/execute_instrumentation_tests.sh
+            - content: ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest -x :example:connectedAndroidTest
   run-paymentsheet-instrumentation-tests:
     before_run:
       - start_emulator
