@@ -23,13 +23,16 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
+import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
@@ -47,6 +50,13 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultPaymentSheetLoaderTest {
+
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.cardBrandChoice,
+        isEnabled = false,
+    )
+
     private val testDispatcher = UnconfinedTestDispatcher()
     private val eventReporter = mock<EventReporter>()
 
@@ -664,7 +674,7 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @Test
     fun `Doesn't include card brand choice state if feature is disabled`() = runTest {
-        val loader = createPaymentSheetLoader(isCbcEnabled = false)
+        val loader = createPaymentSheetLoader()
 
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
@@ -677,7 +687,9 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @Test
     fun `Includes card brand choice state if feature is enabled`() = runTest {
-        val loader = createPaymentSheetLoader(isCbcEnabled = true)
+        featureFlagTestRule.setEnabled(true)
+
+        val loader = createPaymentSheetLoader()
 
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
@@ -694,7 +706,6 @@ internal class DefaultPaymentSheetLoaderTest {
         customerRepo: CustomerRepository = customerRepository,
         linkAccountState: AccountStatus = AccountStatus.Verified,
         error: Throwable? = null,
-        isCbcEnabled: Boolean = false,
         linkSettings: ElementsSession.LinkSettings? = null,
     ): PaymentSheetLoader {
         return DefaultPaymentSheetLoader(
@@ -714,7 +725,6 @@ internal class DefaultPaymentSheetLoaderTest {
             eventReporter = eventReporter,
             workContext = testDispatcher,
             accountStatusProvider = { linkAccountState },
-            cbcEnabled = { isCbcEnabled },
         )
     }
 

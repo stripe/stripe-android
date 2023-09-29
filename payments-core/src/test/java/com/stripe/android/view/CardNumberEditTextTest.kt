@@ -1061,7 +1061,7 @@ internal class CardNumberEditTextTest {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
         val cardWidgetViewModel = CardWidgetViewModel(
-            cbcEnabled = { isCbcEligible },
+            cbcEligible = { isCbcEligible },
             dispatcher = dispatcher,
         )
 

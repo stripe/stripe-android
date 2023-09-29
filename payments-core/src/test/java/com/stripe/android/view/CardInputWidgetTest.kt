@@ -48,26 +48,7 @@ internal class CardInputWidgetTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
 
-    private val cardInputWidget: CardInputWidget by lazy {
-        activityScenarioFactory.createView {
-            createCardInputWidget(it)
-        }
-    }
-    private val cardNumberEditText: CardNumberEditText by lazy {
-        cardInputWidget.cardNumberEditText
-    }
-    private val expiryEditText: StripeEditText by lazy {
-        cardInputWidget.expiryDateEditText
-    }
-    private val cvcEditText: CvcEditText by lazy {
-        cardInputWidget.cvcEditText
-    }
-    private val postalCodeEditText: PostalCodeEditText by lazy {
-        cardInputWidget.postalCodeEditText
-    }
-
     private val cardInputListener = FakeCardInputListener()
-
     private val accountRangeStore = DefaultCardAccountRangeStore(context)
 
     @BeforeTest
@@ -91,8 +72,6 @@ internal class CardInputWidgetTest {
             BinFixtures.DINERSCLUB14,
             listOf(AccountRangeFixtures.DINERSCLUB14)
         )
-
-        cardInputWidget.setCardInputListener(cardInputListener)
     }
 
     @AfterTest
@@ -100,118 +79,99 @@ internal class CardInputWidgetTest {
         Dispatchers.resetMain()
     }
 
-    private fun createCardInputWidget(activity: Activity): CardInputWidget {
-        return CardInputWidget(activity).also {
-            it.layoutWidthCalculator = CardInputWidget.LayoutWidthCalculator { text, _ ->
-                text.length * 10
-            }
-
-            it.frameWidthSupplier = {
-                SCREEN_WIDTH // That's a pretty small screen, but one that we theoretically support.
-            }
-
-            // Set the width of the icon and its margin so that test calculations have
-            // an expected value that is repeatable on all systems.
-            it.cardBrandView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                width = 48
-                marginEnd = 12
-            }
-
-            it.cardNumberEditText.workContext = testDispatcher
-        }
-    }
-
     @Test
-    fun getCard_whenInputIsValidVisa_withPostalCodeDisabled_returnsCardObjectWithLoggingToken() {
-        cardInputWidget.postalCodeEnabled = false
+    fun getCard_whenInputIsValidVisa_withPostalCodeDisabled_returnsCardObjectWithLoggingToken() =
+        runCardInputWidgetTest {
+            postalCodeEnabled = false
 
-        updateCardNumberAndIdle(VISA_WITH_SPACES)
-        expiryEditText.append("12")
-        expiryEditText.append("50")
-        cvcEditText.append(CVC_VALUE_COMMON)
+            updateCardNumberAndIdle(VISA_WITH_SPACES)
+            expiryDateEditText.append("12")
+            expiryDateEditText.append("50")
+            cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(cardInputWidget.cardParams)
-            .isEqualTo(
-                CardParams(
-                    brand = CardBrand.Visa,
-                    loggingTokens = ATTRIBUTION,
-                    number = VISA_NO_SPACES,
-                    expMonth = 12,
-                    expYear = 2050,
-                    cvc = CVC_VALUE_COMMON,
-                    address = Address.Builder()
-                        .build()
-                )
-            )
-
-        assertThat(cardInputWidget.paymentMethodCreateParams)
-            .isEqualTo(
-                PaymentMethodCreateParams.create(
-                    card = PaymentMethodCreateParams.Card(
+            assertThat(cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.Visa,
+                        loggingTokens = ATTRIBUTION,
                         number = VISA_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2050,
                         cvc = CVC_VALUE_COMMON,
-                        expiryMonth = 12,
-                        expiryYear = 2050,
-                        attribution = ATTRIBUTION
+                        address = Address.Builder()
+                            .build()
                     )
                 )
-            )
-    }
 
-    @Test
-    fun getCard_whenInputIsValidVisa_withPostalCodeEnabled_returnsCardObjectWithLoggingToken() {
-        cardInputWidget.postalCodeEnabled = true
-
-        updateCardNumberAndIdle(VISA_WITH_SPACES)
-        expiryEditText.append("12")
-        expiryEditText.append("50")
-        cvcEditText.append(CVC_VALUE_COMMON)
-        postalCodeEditText.setText(POSTAL_CODE_VALUE)
-
-        assertThat(cardInputWidget.cardParams)
-            .isEqualTo(
-                CardParams(
-                    brand = CardBrand.Visa,
-                    loggingTokens = ATTRIBUTION,
-                    number = VISA_NO_SPACES,
-                    expMonth = 12,
-                    expYear = 2050,
-                    cvc = CVC_VALUE_COMMON,
-                    address = Address.Builder()
-                        .setPostalCode(POSTAL_CODE_VALUE)
-                        .build()
-                )
-            )
-
-        assertThat(cardInputWidget.paymentMethodCreateParams)
-            .isEqualTo(
-                PaymentMethodCreateParams.create(
-                    card = PaymentMethodCreateParams.Card(
-                        number = VISA_NO_SPACES,
-                        cvc = CVC_VALUE_COMMON,
-                        expiryMonth = 12,
-                        expiryYear = 2050,
-                        attribution = ATTRIBUTION
-                    ),
-                    billingDetails = PaymentMethod.BillingDetails(
-                        address = Address(
-                            postalCode = POSTAL_CODE_VALUE
+            assertThat(paymentMethodCreateParams)
+                .isEqualTo(
+                    PaymentMethodCreateParams.create(
+                        card = PaymentMethodCreateParams.Card(
+                            number = VISA_NO_SPACES,
+                            cvc = CVC_VALUE_COMMON,
+                            expiryMonth = 12,
+                            expiryYear = 2050,
+                            attribution = ATTRIBUTION
                         )
                     )
                 )
-            )
-    }
+        }
 
     @Test
-    fun getCard_whenInputIsValidAmEx_withPostalCodeDisabled_createsExpectedObjects() {
-        cardInputWidget.postalCodeEnabled = false
+    fun getCard_whenInputIsValidVisa_withPostalCodeEnabled_returnsCardObjectWithLoggingToken() =
+        runCardInputWidgetTest {
+            postalCodeEnabled = true
+
+            updateCardNumberAndIdle(VISA_WITH_SPACES)
+            expiryDateEditText.append("12")
+            expiryDateEditText.append("50")
+            cvcEditText.append(CVC_VALUE_COMMON)
+            postalCodeEditText.setText(POSTAL_CODE_VALUE)
+
+            assertThat(cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.Visa,
+                        loggingTokens = ATTRIBUTION,
+                        number = VISA_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2050,
+                        cvc = CVC_VALUE_COMMON,
+                        address = Address.Builder()
+                            .setPostalCode(POSTAL_CODE_VALUE)
+                            .build()
+                    )
+                )
+
+            assertThat(paymentMethodCreateParams)
+                .isEqualTo(
+                    PaymentMethodCreateParams.create(
+                        card = PaymentMethodCreateParams.Card(
+                            number = VISA_NO_SPACES,
+                            cvc = CVC_VALUE_COMMON,
+                            expiryMonth = 12,
+                            expiryYear = 2050,
+                            attribution = ATTRIBUTION
+                        ),
+                        billingDetails = PaymentMethod.BillingDetails(
+                            address = Address(
+                                postalCode = POSTAL_CODE_VALUE
+                            )
+                        )
+                    )
+                )
+        }
+
+    @Test
+    fun getCard_whenInputIsValidAmEx_withPostalCodeDisabled_createsExpectedObjects() = runCardInputWidgetTest {
+        postalCodeEnabled = false
 
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
-        expiryEditText.append("12")
-        expiryEditText.append("50")
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
         cvcEditText.append(CVC_VALUE_AMEX)
 
-        assertThat(cardInputWidget.cardParams)
+        assertThat(cardParams)
             .isEqualTo(
                 CardParams(
                     brand = CardBrand.AmericanExpress,
@@ -225,7 +185,7 @@ internal class CardInputWidgetTest {
                 )
             )
 
-        assertThat(cardInputWidget.paymentMethodCreateParams)
+        assertThat(paymentMethodCreateParams)
             .isEqualTo(
                 PaymentMethodCreateParams.create(
                     PaymentMethodCreateParams.Card(
@@ -240,16 +200,16 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun getCard_whenInputIsValidAmEx_withPostalCodeEnabled_createsExpectedObjects() {
-        cardInputWidget.postalCodeEnabled = true
+    fun getCard_whenInputIsValidAmEx_withPostalCodeEnabled_createsExpectedObjects() = runCardInputWidgetTest {
+        postalCodeEnabled = true
 
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
-        expiryEditText.append("12")
-        expiryEditText.append("50")
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
         cvcEditText.append(CVC_VALUE_AMEX)
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
 
-        assertThat(cardInputWidget.cardParams)
+        assertThat(cardParams)
             .isEqualTo(
                 CardParams(
                     brand = CardBrand.AmericanExpress,
@@ -264,7 +224,7 @@ internal class CardInputWidgetTest {
                 )
             )
 
-        assertThat(cardInputWidget.paymentMethodCreateParams)
+        assertThat(paymentMethodCreateParams)
             .isEqualTo(
                 PaymentMethodCreateParams.create(
                     card = PaymentMethodCreateParams.Card(
@@ -286,146 +246,148 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun getCard_whenInputIsValidDinersClub_withPostalCodeDisabled_returnsCardObjectWithLoggingToken() {
-        cardInputWidget.postalCodeEnabled = false
+    fun getCard_whenInputIsValidDinersClub_withPostalCodeDisabled_returnsCardObjectWithLoggingToken() =
+        runCardInputWidgetTest {
+            postalCodeEnabled = false
 
-        updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
-        expiryEditText.append("12")
-        expiryEditText.append("50")
-        cvcEditText.append(CVC_VALUE_COMMON)
+            updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
+            expiryDateEditText.append("12")
+            expiryDateEditText.append("50")
+            cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(cardInputWidget.cardParams)
-            .isEqualTo(
-                CardParams(
-                    brand = CardBrand.DinersClub,
-                    loggingTokens = ATTRIBUTION,
-                    number = DINERS_CLUB_14_NO_SPACES,
-                    expMonth = 12,
-                    expYear = 2050,
-                    cvc = CVC_VALUE_COMMON,
-                    address = Address.Builder()
-                        .build()
+            assertThat(cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.DinersClub,
+                        loggingTokens = ATTRIBUTION,
+                        number = DINERS_CLUB_14_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2050,
+                        cvc = CVC_VALUE_COMMON,
+                        address = Address.Builder()
+                            .build()
+                    )
                 )
-            )
 
-        assertThat(cardInputWidget.paymentMethodCard)
-            .isEqualTo(
-                PaymentMethodCreateParams.Card(
-                    number = DINERS_CLUB_14_NO_SPACES,
-                    cvc = CVC_VALUE_COMMON,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
-                    attribution = ATTRIBUTION
+            assertThat(paymentMethodCard)
+                .isEqualTo(
+                    PaymentMethodCreateParams.Card(
+                        number = DINERS_CLUB_14_NO_SPACES,
+                        cvc = CVC_VALUE_COMMON,
+                        expiryMonth = 12,
+                        expiryYear = 2050,
+                        attribution = ATTRIBUTION
+                    )
                 )
-            )
-    }
+        }
 
     @Test
-    fun getCard_whenInputIsValidDinersClub_withPostalCodeEnabled_returnsCardObjectWithLoggingToken() {
-        cardInputWidget.postalCodeEnabled = true
+    fun getCard_whenInputIsValidDinersClub_withPostalCodeEnabled_returnsCardObjectWithLoggingToken() =
+        runCardInputWidgetTest {
+            postalCodeEnabled = true
 
-        updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
-        expiryEditText.append("12")
-        expiryEditText.append("50")
-        cvcEditText.append(CVC_VALUE_COMMON)
-        postalCodeEditText.setText(POSTAL_CODE_VALUE)
+            updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
+            expiryDateEditText.append("12")
+            expiryDateEditText.append("50")
+            cvcEditText.append(CVC_VALUE_COMMON)
+            postalCodeEditText.setText(POSTAL_CODE_VALUE)
 
-        assertThat(cardInputWidget.cardParams)
-            .isEqualTo(
-                CardParams(
-                    brand = CardBrand.DinersClub,
-                    loggingTokens = ATTRIBUTION,
-                    number = DINERS_CLUB_14_NO_SPACES,
-                    expMonth = 12,
-                    expYear = 2050,
-                    cvc = CVC_VALUE_COMMON,
-                    address = Address.Builder()
-                        .setPostalCode(POSTAL_CODE_VALUE)
-                        .build()
+            assertThat(cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.DinersClub,
+                        loggingTokens = ATTRIBUTION,
+                        number = DINERS_CLUB_14_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2050,
+                        cvc = CVC_VALUE_COMMON,
+                        address = Address.Builder()
+                            .setPostalCode(POSTAL_CODE_VALUE)
+                            .build()
+                    )
                 )
-            )
 
-        assertThat(cardInputWidget.paymentMethodCard)
-            .isEqualTo(
-                PaymentMethodCreateParams.Card(
-                    number = DINERS_CLUB_14_NO_SPACES,
-                    cvc = CVC_VALUE_COMMON,
-                    expiryYear = 2050,
-                    expiryMonth = 12,
-                    attribution = ATTRIBUTION
+            assertThat(paymentMethodCard)
+                .isEqualTo(
+                    PaymentMethodCreateParams.Card(
+                        number = DINERS_CLUB_14_NO_SPACES,
+                        cvc = CVC_VALUE_COMMON,
+                        expiryYear = 2050,
+                        expiryMonth = 12,
+                        attribution = ATTRIBUTION
+                    )
                 )
-            )
-    }
+        }
 
     @Test
-    fun getCard_whenPostalCodeIsEnabledAndRequired_andValueIsBlank_returnsNull() {
-        cardInputWidget.postalCodeEnabled = true
-        cardInputWidget.postalCodeRequired = true
+    fun getCard_whenPostalCodeIsEnabledAndRequired_andValueIsBlank_returnsNull() = runCardInputWidgetTest {
+        postalCodeEnabled = true
+        postalCodeRequired = true
 
         updateCardNumberAndIdle(VISA_WITH_SPACES)
-        expiryEditText.append("12")
-        expiryEditText.append("50")
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.append("")
 
-        assertThat(cardInputWidget.cardParams)
+        assertThat(cardParams)
             .isNull()
-        assertThat(cardInputWidget.paymentMethodCard)
+        assertThat(paymentMethodCard)
             .isNull()
     }
 
     @Test
-    fun getCard_whenInputHasIncompleteCardNumber_returnsNull() {
+    fun getCard_whenInputHasIncompleteCardNumber_returnsNull() = runCardInputWidgetTest {
         // This will be 242 4242 4242 4242
         updateCardNumberAndIdle(VISA_WITH_SPACES.drop(1))
-        expiryEditText.append("12")
-        expiryEditText.append("50")
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(cardInputWidget.cardParams)
+        assertThat(cardParams)
             .isNull()
-        assertThat(cardInputWidget.paymentMethodCard)
+        assertThat(paymentMethodCard)
             .isNull()
     }
 
     @Test
-    fun getCard_whenInputHasExpiredDate_returnsNull() {
+    fun getCard_whenInputHasExpiredDate_returnsNull() = runCardInputWidgetTest {
         updateCardNumberAndIdle(VISA_WITH_SPACES)
         // Date interpreted as 12/2012 until 2080, when it will be 12/2112
-        expiryEditText.append("12")
-        expiryEditText.append("12")
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("12")
         cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(cardInputWidget.cardParams)
+        assertThat(cardParams)
             .isNull()
-        assertThat(cardInputWidget.paymentMethodCard)
+        assertThat(paymentMethodCard)
             .isNull()
     }
 
     @Test
-    fun getCard_whenIncompleteCvCForVisa_returnsNull() {
+    fun getCard_whenIncompleteCvCForVisa_returnsNull() = runCardInputWidgetTest {
         updateCardNumberAndIdle(VISA_WITH_SPACES)
-        expiryEditText.append("12")
-        expiryEditText.append("50")
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
         cvcEditText.append("12")
 
-        assertThat(cardInputWidget.cardParams)
+        assertThat(cardParams)
             .isNull()
-        assertThat(cardInputWidget.paymentMethodCard)
+        assertThat(paymentMethodCard)
             .isNull()
     }
 
     @Test
-    fun getCard_doesNotValidatePostalCode() {
-        cardInputWidget.postalCodeEnabled = true
+    fun getCard_doesNotValidatePostalCode() = runCardInputWidgetTest {
+        postalCodeEnabled = true
 
         updateCardNumberAndIdle(VISA_WITH_SPACES)
-        expiryEditText.append("12")
-        expiryEditText.append("50")
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.setText("")
 
-        assertThat(cardInputWidget.cardParams)
+        assertThat(cardParams)
             .isEqualTo(
                 CardParams(
                     brand = CardBrand.Visa,
@@ -437,20 +399,20 @@ internal class CardInputWidgetTest {
                     address = Address()
                 )
             )
-        assertThat(cardInputWidget.paymentMethodCard)
+        assertThat(paymentMethodCard)
             .isNotNull()
     }
 
     @Test
-    fun getCard_when3DigitCvCForAmEx_withPostalCodeDisabled_returnsCard() {
-        cardInputWidget.postalCodeEnabled = false
+    fun getCard_when3DigitCvCForAmEx_withPostalCodeDisabled_returnsCard() = runCardInputWidgetTest {
+        postalCodeEnabled = false
 
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
-        expiryEditText.append("12")
-        expiryEditText.append("50")
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(cardInputWidget.cardParams)
+        assertThat(cardParams)
             .isEqualTo(
                 CardParams(
                     brand = CardBrand.AmericanExpress,
@@ -462,21 +424,21 @@ internal class CardInputWidgetTest {
                     address = Address()
                 )
             )
-        assertThat(cardInputWidget.paymentMethodCard)
+        assertThat(paymentMethodCard)
             .isNotNull()
     }
 
     @Test
-    fun getCard_when3DigitCvCForAmEx_withPostalCodeEnabled_returnsCard() {
-        cardInputWidget.postalCodeEnabled = true
+    fun getCard_when3DigitCvCForAmEx_withPostalCodeEnabled_returnsCard() = runCardInputWidgetTest {
+        postalCodeEnabled = true
 
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
-        expiryEditText.append("12")
-        expiryEditText.append("50")
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
 
-        assertThat(cardInputWidget.cardParams)
+        assertThat(cardParams)
             .isEqualTo(
                 CardParams(
                     brand = CardBrand.AmericanExpress,
@@ -490,33 +452,33 @@ internal class CardInputWidgetTest {
                         .build()
                 )
             )
-        assertThat(cardInputWidget.paymentMethodCard)
+        assertThat(paymentMethodCard)
             .isNotNull()
     }
 
     @Test
-    fun getCard_whenIncompleteCvCForAmEx_returnsNull() {
+    fun getCard_whenIncompleteCvCForAmEx_returnsNull() = runCardInputWidgetTest {
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
-        expiryEditText.append("12")
-        expiryEditText.append("50")
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
         cvcEditText.append("12")
 
-        assertThat(cardInputWidget.cardParams)
+        assertThat(cardParams)
             .isNull()
-        assertThat(cardInputWidget.paymentMethodCard)
+        assertThat(paymentMethodCard)
             .isNull()
     }
 
     @Test
-    fun getPaymentMethodCreateParams_shouldReturnExpectedObject() {
-        cardInputWidget.postalCodeEnabled = true
+    fun getPaymentMethodCreateParams_shouldReturnExpectedObject() = runCardInputWidgetTest {
+        postalCodeEnabled = true
 
-        cardInputWidget.setCardNumber(VISA_NO_SPACES)
-        cardInputWidget.setExpiryDate(12, 2030)
-        cardInputWidget.setCvcCode(CVC_VALUE_COMMON)
-        cardInputWidget.setPostalCode(POSTAL_CODE_VALUE)
+        setCardNumber(VISA_NO_SPACES)
+        setExpiryDate(12, 2030)
+        setCvcCode(CVC_VALUE_COMMON)
+        setPostalCode(POSTAL_CODE_VALUE)
 
-        assertThat(cardInputWidget.paymentMethodCreateParams)
+        assertThat(paymentMethodCreateParams)
             .isEqualTo(
                 PaymentMethodCreateParams.create(
                     card = PaymentMethodCreateParams.Card(
@@ -536,20 +498,20 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun getCard_whenIncompleteCvCForDiners_returnsNull() {
+    fun getCard_whenIncompleteCvCForDiners_returnsNull() = runCardInputWidgetTest {
         updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
-        expiryEditText.append("12")
-        expiryEditText.append("50")
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
         cvcEditText.append("12")
 
-        assertThat(cardInputWidget.cardParams)
+        assertThat(cardParams)
             .isNull()
-        assertThat(cardInputWidget.paymentMethodCard)
+        assertThat(paymentMethodCard)
             .isNull()
     }
 
     @Test
-    fun onCompleteCardNumber_whenValid_shiftsFocusToExpiryDate() {
+    fun onCompleteCardNumber_whenValid_shiftsFocusToExpiryDate() = runCardInputWidgetTest {
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
         assertThat(cardInputListener.cardCompleteCalls)
@@ -561,15 +523,15 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun onDeleteFromExpiryDate_whenEmpty_shiftsFocusToCardNumberAndDeletesDigit() {
-        cardInputWidget.setCardInputListener(cardInputListener)
+    fun onDeleteFromExpiryDate_whenEmpty_shiftsFocusToCardNumberAndDeletesDigit() = runCardInputWidgetTest {
+        setCardInputListener(cardInputListener)
 
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
-        assertThat(expiryEditText.hasFocus())
+        assertThat(expiryDateEditText.hasFocus())
             .isTrue()
 
-        ViewTestUtils.sendDeleteKeyEvent(expiryEditText)
+        ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
 
         assertThat(cardInputListener.focusedFields)
             .isEqualTo(
@@ -587,23 +549,23 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun onDeleteFromExpiryDate_whenNotEmpty_doesNotShiftFocusOrDeleteDigit() {
+    fun onDeleteFromExpiryDate_whenNotEmpty_doesNotShiftFocusOrDeleteDigit() = runCardInputWidgetTest {
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
 
-        assertThat(expiryEditText.hasFocus())
+        assertThat(expiryDateEditText.hasFocus())
             .isTrue()
 
-        expiryEditText.append("1")
-        ViewTestUtils.sendDeleteKeyEvent(expiryEditText)
+        expiryDateEditText.append("1")
+        ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
 
-        assertThat(expiryEditText.hasFocus())
+        assertThat(expiryDateEditText.hasFocus())
             .isTrue()
         assertThat(cardNumberEditText.fieldText)
             .isEqualTo(AMEX_WITH_SPACES)
     }
 
     @Test
-    fun onDeleteFromCvcDate_whenEmpty_shiftsFocusToExpiryAndDeletesDigit() {
+    fun onDeleteFromCvcDate_whenEmpty_shiftsFocusToExpiryAndDeletesDigit() = runCardInputWidgetTest {
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
         assertThat(cardInputListener.cardCompleteCalls)
@@ -613,8 +575,8 @@ internal class CardInputWidgetTest {
                 listOf(CardInputListener.FocusField.ExpiryDate)
             )
 
-        expiryEditText.append("12")
-        expiryEditText.append("79")
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("79")
 
         assertThat(cardInputListener.expirationCompleteCalls)
             .isEqualTo(1)
@@ -639,54 +601,56 @@ internal class CardInputWidgetTest {
             )
 
         val expectedResult = "12/7"
-        assertThat(expiryEditText.fieldText)
+        assertThat(expiryDateEditText.fieldText)
             .isEqualTo(expectedResult)
-        assertThat(expiryEditText.selectionStart)
+        assertThat(expiryDateEditText.selectionStart)
             .isEqualTo(expectedResult.length)
     }
 
     @Test
-    fun onDeleteFromCvcDate_withPostalCodeDisabled_whenNotEmpty_doesNotShiftFocusOrDeleteEntry() {
-        cardInputWidget.postalCodeEnabled = false
+    fun onDeleteFromCvcDate_withPostalCodeDisabled_whenNotEmpty_doesNotShiftFocusOrDeleteEntry() =
+        runCardInputWidgetTest {
+            postalCodeEnabled = false
 
-        updateCardNumberAndIdle(AMEX_WITH_SPACES)
+            updateCardNumberAndIdle(AMEX_WITH_SPACES)
 
-        expiryEditText.append("12")
-        expiryEditText.append("79")
-        assertThat(cvcEditText.hasFocus())
-            .isTrue()
+            expiryDateEditText.append("12")
+            expiryDateEditText.append("79")
+            assertThat(cvcEditText.hasFocus())
+                .isTrue()
 
-        cvcEditText.append(CVC_VALUE_COMMON)
-        ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
+            cvcEditText.append(CVC_VALUE_COMMON)
+            ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
 
-        assertThat(cvcEditText.hasFocus())
-            .isTrue()
-        assertThat(expiryEditText.fieldText)
-            .isEqualTo("12/79")
-    }
-
-    @Test
-    fun onDeleteFromCvcDate_withPostalCodeEnabled_whenNotEmpty_doesNotShiftFocusOrDeleteEntry() {
-        cardInputWidget.postalCodeEnabled = true
-
-        updateCardNumberAndIdle(AMEX_WITH_SPACES)
-
-        expiryEditText.append("12")
-        expiryEditText.append("79")
-        assertThat(cvcEditText.hasFocus())
-            .isTrue()
-
-        cvcEditText.append("12")
-        ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
-
-        assertThat(cvcEditText.hasFocus())
-            .isTrue()
-        assertThat(expiryEditText.fieldText)
-            .isEqualTo("12/79")
-    }
+            assertThat(cvcEditText.hasFocus())
+                .isTrue()
+            assertThat(expiryDateEditText.fieldText)
+                .isEqualTo("12/79")
+        }
 
     @Test
-    fun onDeleteFromCvcDate_whenEmptyAndExpiryDateIsEmpty_shiftsFocusOnly() {
+    fun onDeleteFromCvcDate_withPostalCodeEnabled_whenNotEmpty_doesNotShiftFocusOrDeleteEntry() =
+        runCardInputWidgetTest {
+            postalCodeEnabled = true
+
+            updateCardNumberAndIdle(AMEX_WITH_SPACES)
+
+            expiryDateEditText.append("12")
+            expiryDateEditText.append("79")
+            assertThat(cvcEditText.hasFocus())
+                .isTrue()
+
+            cvcEditText.append("12")
+            ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
+
+            assertThat(cvcEditText.hasFocus())
+                .isTrue()
+            assertThat(expiryDateEditText.fieldText)
+                .isEqualTo("12/79")
+        }
+
+    @Test
+    fun onDeleteFromCvcDate_whenEmptyAndExpiryDateIsEmpty_shiftsFocusOnly() = runCardInputWidgetTest {
         updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
 
         // Simulates user tapping into this text field without filling out the date first.
@@ -704,7 +668,7 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun onUpdateIcon_forCommonLengthBrand_setsLengthOnCvc() {
+    fun onUpdateIcon_forCommonLengthBrand_setsLengthOnCvc() = runCardInputWidgetTest {
         // This should set the brand to Visa. Note that more extensive brand checking occurs
         // in CardNumberEditTextTest.
         updateCardNumberAndIdle(CardNumberFixtures.VISA_BIN)
@@ -714,7 +678,7 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun onUpdateText_forAmexBin_setsLengthOnCvc() {
+    fun onUpdateText_forAmexBin_setsLengthOnCvc() = runCardInputWidgetTest {
         updateCardNumberAndIdle(CardNumberFixtures.AMEX_BIN)
 
         assertThat(ViewTestUtils.hasMaxLength(cvcEditText, 4))
@@ -722,13 +686,13 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun updateToInitialSizes_returnsExpectedValues() {
+    fun updateToInitialSizes_returnsExpectedValues() = runCardInputWidgetTest {
         // Initial spacing should look like
         // |img==60||---total == 500--------|
         // |(card==230)--(space==220)--(date==50)|
         // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
 
-        assertThat(cardInputWidget.placement)
+        assertThat(placement)
             .isEqualTo(
                 CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
@@ -750,86 +714,88 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun updateToPeekSize_withPostalCodeDisabled_withNoData_returnsExpectedValuesForCommonCardLength() {
-        cardInputWidget.postalCodeEnabled = false
+    fun updateToPeekSize_withPostalCodeDisabled_withNoData_returnsExpectedValuesForCommonCardLength() =
+        runCardInputWidgetTest {
+            postalCodeEnabled = false
 
-        // Moving to the end uses Visa-style ("common") defaults
-        // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
-        // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
-        cardInputWidget.updateSpaceSizes(
-            false,
-            frameWidth = SCREEN_WIDTH,
-            frameStart = BRAND_ICON_WIDTH
-        )
-        idleLooper()
-
-        assertThat(cardInputWidget.placement)
-            .isEqualTo(
-                CardInputWidgetPlacement(
-                    totalLengthInPixels = SCREEN_WIDTH,
-                    cardWidth = 230,
-                    hiddenCardWidth = 150,
-                    peekCardWidth = 40,
-                    cardDateSeparation = 185,
-                    dateWidth = 50,
-                    dateCvcSeparation = 195,
-                    cvcWidth = 30,
-                    cvcPostalCodeSeparation = 0,
-                    postalCodeWidth = 100,
-                    cvcStartPosition = 530,
-                    dateEndTouchBufferLimit = 432,
-                    cardTouchBufferLimit = 192,
-                    dateStartPosition = 285
-                )
+            // Moving to the end uses Visa-style ("common") defaults
+            // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
+            // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
+            updateSpaceSizes(
+                false,
+                frameWidth = SCREEN_WIDTH,
+                frameStart = BRAND_ICON_WIDTH
             )
-    }
+            idleLooper()
+
+            assertThat(placement)
+                .isEqualTo(
+                    CardInputWidgetPlacement(
+                        totalLengthInPixels = SCREEN_WIDTH,
+                        cardWidth = 230,
+                        hiddenCardWidth = 150,
+                        peekCardWidth = 40,
+                        cardDateSeparation = 185,
+                        dateWidth = 50,
+                        dateCvcSeparation = 195,
+                        cvcWidth = 30,
+                        cvcPostalCodeSeparation = 0,
+                        postalCodeWidth = 100,
+                        cvcStartPosition = 530,
+                        dateEndTouchBufferLimit = 432,
+                        cardTouchBufferLimit = 192,
+                        dateStartPosition = 285
+                    )
+                )
+        }
 
     @Test
-    fun updateToPeekSize_withPostalCodeEnabled_withNoData_returnsExpectedValuesForCommonCardLength() {
-        cardInputWidget.postalCodeEnabled = true
+    fun updateToPeekSize_withPostalCodeEnabled_withNoData_returnsExpectedValuesForCommonCardLength() =
+        runCardInputWidgetTest {
+            postalCodeEnabled = true
 
-        // Moving to the end uses Visa-style ("common") defaults
-        // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
-        // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
-        cardInputWidget.updateSpaceSizes(
-            false,
-            frameWidth = SCREEN_WIDTH,
-            frameStart = BRAND_ICON_WIDTH
-        )
-        idleLooper()
-
-        assertThat(cardInputWidget.placement)
-            .isEqualTo(
-                CardInputWidgetPlacement(
-                    totalLengthInPixels = SCREEN_WIDTH,
-                    cardWidth = 230,
-                    hiddenCardWidth = 150,
-                    peekCardWidth = 40,
-                    cardDateSeparation = 98,
-                    dateWidth = 50,
-                    dateCvcSeparation = 82,
-                    cvcWidth = 30,
-                    cvcPostalCodeSeparation = 100,
-                    postalCodeWidth = 100,
-                    cvcStartPosition = 330,
-                    dateEndTouchBufferLimit = 110,
-                    cardTouchBufferLimit = 66,
-                    dateStartPosition = 198,
-                    cvcEndTouchBufferLimit = 153,
-                    postalCodeStartPosition = 460
-                )
+            // Moving to the end uses Visa-style ("common") defaults
+            // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
+            // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
+            updateSpaceSizes(
+                false,
+                frameWidth = SCREEN_WIDTH,
+                frameStart = BRAND_ICON_WIDTH
             )
-    }
+            idleLooper()
+
+            assertThat(placement)
+                .isEqualTo(
+                    CardInputWidgetPlacement(
+                        totalLengthInPixels = SCREEN_WIDTH,
+                        cardWidth = 230,
+                        hiddenCardWidth = 150,
+                        peekCardWidth = 40,
+                        cardDateSeparation = 98,
+                        dateWidth = 50,
+                        dateCvcSeparation = 82,
+                        cvcWidth = 30,
+                        cvcPostalCodeSeparation = 100,
+                        postalCodeWidth = 100,
+                        cvcStartPosition = 330,
+                        dateEndTouchBufferLimit = 110,
+                        cardTouchBufferLimit = 66,
+                        dateStartPosition = 198,
+                        cvcEndTouchBufferLimit = 153,
+                        postalCodeStartPosition = 460
+                    )
+                )
+        }
 
     @Test
-    fun addValidVisaCard_withPostalCodeDisabled_scrollsOver_andSetsExpectedDisplayValues() {
-        cardInputWidget.postalCodeEnabled = false
+    fun addValidVisaCard_withPostalCodeDisabled_scrollsOver_andSetsExpectedDisplayValues() = runCardInputWidgetTest {
+        postalCodeEnabled = false
 
         // Moving to the end with an actual Visa number does the same as moving when empty.
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
-        assertThat(cardInputWidget.placement)
+        assertThat(placement)
             .isEqualTo(
                 CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
@@ -851,14 +817,14 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun addValidVisaCard_withPostalCodeEnabled_scrollsOver_andSetsExpectedDisplayValues() {
-        cardInputWidget.postalCodeEnabled = true
+    fun addValidVisaCard_withPostalCodeEnabled_scrollsOver_andSetsExpectedDisplayValues() = runCardInputWidgetTest {
+        postalCodeEnabled = true
 
         // Moving to the end with an actual Visa number does the same as moving when empty.
         // |(peek==40)--(space==98)--(date==50)--(space==82)--(cvc==30)--(space==100)--(postal==100)|
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
-        assertThat(cardInputWidget.placement)
+        assertThat(placement)
             .isEqualTo(
                 CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
@@ -882,14 +848,14 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun addValidAmExCard_withPostalCodeDisabled_scrollsOver_andSetsExpectedDisplayValues() {
-        cardInputWidget.postalCodeEnabled = false
+    fun addValidAmExCard_withPostalCodeDisabled_scrollsOver_andSetsExpectedDisplayValues() = runCardInputWidgetTest {
+        postalCodeEnabled = false
 
         // Moving to the end with an AmEx number has a larger peek and cvc size.
         // |(peek==50)--(space==175)--(date==50)--(space==185)--(cvc==40)|
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
 
-        assertThat(cardInputWidget.placement)
+        assertThat(placement)
             .isEqualTo(
                 CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
@@ -911,14 +877,14 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun addValidAmExCard_withPostalCodeEnabled_scrollsOver_andSetsExpectedDisplayValues() {
-        cardInputWidget.postalCodeEnabled = true
+    fun addValidAmExCard_withPostalCodeEnabled_scrollsOver_andSetsExpectedDisplayValues() = runCardInputWidgetTest {
+        postalCodeEnabled = true
 
         // Moving to the end with an AmEx number has a larger peek and cvc size.
         // |(peek==50)--(space==88)--(date==50)--(space==72)--(cvc==40)--(space==100)--(postal==100)|
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
 
-        assertThat(cardInputWidget.placement)
+        assertThat(placement)
             .isEqualTo(
                 CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
@@ -942,14 +908,14 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun addDinersClubCard_withPostalCodeDisabled_scrollsOver_andSetsExpectedDisplayValues() {
-        cardInputWidget.postalCodeEnabled = false
+    fun addDinersClubCard_withPostalCodeDisabled_scrollsOver_andSetsExpectedDisplayValues() = runCardInputWidgetTest {
+        postalCodeEnabled = false
 
         // When we move for a Diner's club card, the peek text is shorter, so we expect:
         // |(peek==20)--(space==205)--(date==50)--(space==195)--(cvc==30)|
         updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
 
-        assertThat(cardInputWidget.placement)
+        assertThat(placement)
             .isEqualTo(
                 CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
@@ -971,14 +937,14 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun addDinersClubCard_withPostalCodeEnabled_scrollsOver_andSetsExpectedDisplayValues() {
-        cardInputWidget.postalCodeEnabled = true
+    fun addDinersClubCard_withPostalCodeEnabled_scrollsOver_andSetsExpectedDisplayValues() = runCardInputWidgetTest {
+        postalCodeEnabled = true
 
         // When we move for a Diner's club card, the peek text is shorter, so we expect:
         // |(peek==20)--(space==205)--(date==50)--(space==195)--(cvc==30)--(space==100)--(postal==100)|
         updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
 
-        assertThat(cardInputWidget.placement)
+        assertThat(placement)
             .isEqualTo(
                 CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
@@ -1002,8 +968,8 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun setCardNumber_withIncompleteNumber_doesNotValidateCard() {
-        cardInputWidget.setCardNumber("123456")
+    fun setCardNumber_withIncompleteNumber_doesNotValidateCard() = runCardInputWidgetTest {
+        setCardNumber("123456")
         assertThat(cardNumberEditText.isCardNumberValid)
             .isFalse()
         assertThat(cardNumberEditText.hasFocus())
@@ -1011,44 +977,44 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun setExpirationDate_withValidData_setsCorrectValues() {
-        cardInputWidget.setExpiryDate(12, 79)
-        assertThat(expiryEditText.fieldText)
+    fun setExpirationDate_withValidData_setsCorrectValues() = runCardInputWidgetTest {
+        setExpiryDate(12, 79)
+        assertThat(expiryDateEditText.fieldText)
             .isEqualTo("12/79")
     }
 
     @Test
-    fun setCvcCode_withValidData_setsValue() {
-        cardInputWidget.setCvcCode(CVC_VALUE_COMMON)
+    fun setCvcCode_withValidData_setsValue() = runCardInputWidgetTest {
+        setCvcCode(CVC_VALUE_COMMON)
         assertThat(cvcEditText.fieldText)
             .isEqualTo(CVC_VALUE_COMMON)
     }
 
     @Test
-    fun setCvcCode_withLongString_truncatesValue() {
+    fun setCvcCode_withLongString_truncatesValue() = runCardInputWidgetTest {
         cvcEditText.updateBrand(CardBrand.Visa)
-        cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
+        setCvcCode(CVC_VALUE_AMEX)
 
         assertThat(cvcEditText.fieldText)
             .isEqualTo(CVC_VALUE_COMMON)
     }
 
     @Test
-    fun setCvcCode_whenCardBrandIsAmericanExpress_allowsFourDigits() {
-        cardInputWidget.setCardNumber(AMEX_NO_SPACES)
-        cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
+    fun setCvcCode_whenCardBrandIsAmericanExpress_allowsFourDigits() = runCardInputWidgetTest {
+        setCardNumber(AMEX_NO_SPACES)
+        setCvcCode(CVC_VALUE_AMEX)
 
         assertThat(cvcEditText.fieldText)
             .isEqualTo(CVC_VALUE_AMEX)
     }
 
     @Test
-    fun setEnabledTrue_withPostalCodeDisabled_isTrue() {
-        cardInputWidget.postalCodeEnabled = false
-        cardInputWidget.isEnabled = true
+    fun setEnabledTrue_withPostalCodeDisabled_isTrue() = runCardInputWidgetTest {
+        postalCodeEnabled = false
+        isEnabled = true
         assertThat(cardNumberEditText.isEnabled)
             .isTrue()
-        assertThat(expiryEditText.isEnabled)
+        assertThat(expiryDateEditText.isEnabled)
             .isTrue()
         assertThat(cvcEditText.isEnabled)
             .isTrue()
@@ -1057,12 +1023,12 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun setEnabledTrue_withPostalCodeEnabled_isTrue() {
-        cardInputWidget.postalCodeEnabled = true
-        cardInputWidget.isEnabled = true
+    fun setEnabledTrue_withPostalCodeEnabled_isTrue() = runCardInputWidgetTest {
+        postalCodeEnabled = true
+        isEnabled = true
         assertThat(cardNumberEditText.isEnabled)
             .isTrue()
-        assertThat(expiryEditText.isEnabled)
+        assertThat(expiryDateEditText.isEnabled)
             .isTrue()
         assertThat(cvcEditText.isEnabled)
             .isTrue()
@@ -1071,12 +1037,12 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun setEnabledFalse_withPostalCodeDisabled_isFalse() {
-        cardInputWidget.postalCodeEnabled = false
-        cardInputWidget.isEnabled = false
+    fun setEnabledFalse_withPostalCodeDisabled_isFalse() = runCardInputWidgetTest {
+        postalCodeEnabled = false
+        isEnabled = false
         assertThat(cardNumberEditText.isEnabled)
             .isFalse()
-        assertThat(expiryEditText.isEnabled)
+        assertThat(expiryDateEditText.isEnabled)
             .isFalse()
         assertThat(cvcEditText.isEnabled)
             .isFalse()
@@ -1085,12 +1051,12 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun setEnabledFalse_withPostalCodeEnabled_isFalse() {
-        cardInputWidget.postalCodeEnabled = true
-        cardInputWidget.isEnabled = false
+    fun setEnabledFalse_withPostalCodeEnabled_isFalse() = runCardInputWidgetTest {
+        postalCodeEnabled = true
+        isEnabled = false
         assertThat(cardNumberEditText.isEnabled)
             .isFalse()
-        assertThat(expiryEditText.isEnabled)
+        assertThat(expiryDateEditText.isEnabled)
             .isFalse()
         assertThat(cvcEditText.isEnabled)
             .isFalse()
@@ -1099,87 +1065,89 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun setAllCardFields_whenValidValues_withPostalCodeDisabled_allowsGetCardWithExpectedValues() {
-        cardInputWidget.postalCodeEnabled = false
+    fun setAllCardFields_whenValidValues_withPostalCodeDisabled_allowsGetCardWithExpectedValues() =
+        runCardInputWidgetTest {
+            postalCodeEnabled = false
 
-        cardInputWidget.setCardNumber(AMEX_WITH_SPACES)
-        cardInputWidget.setExpiryDate(12, 2079)
-        cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
+            setCardNumber(AMEX_WITH_SPACES)
+            setExpiryDate(12, 2079)
+            setCvcCode(CVC_VALUE_AMEX)
 
-        assertThat(cardInputWidget.cardParams)
-            .isEqualTo(
-                CardParams(
-                    brand = CardBrand.AmericanExpress,
-                    loggingTokens = ATTRIBUTION,
-                    number = AMEX_NO_SPACES,
-                    expMonth = 12,
-                    expYear = 2079,
-                    cvc = CVC_VALUE_AMEX,
-                    address = Address.Builder()
-                        .build()
+            assertThat(cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.AmericanExpress,
+                        loggingTokens = ATTRIBUTION,
+                        number = AMEX_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2079,
+                        cvc = CVC_VALUE_AMEX,
+                        address = Address.Builder()
+                            .build()
+                    )
                 )
-            )
 
-        assertThat(cardInputWidget.paymentMethodCard)
-            .isEqualTo(
-                PaymentMethodCreateParams.Card(
-                    number = AMEX_NO_SPACES,
-                    cvc = CVC_VALUE_AMEX,
-                    expiryMonth = 12,
-                    expiryYear = 2079,
-                    attribution = ATTRIBUTION
+            assertThat(paymentMethodCard)
+                .isEqualTo(
+                    PaymentMethodCreateParams.Card(
+                        number = AMEX_NO_SPACES,
+                        cvc = CVC_VALUE_AMEX,
+                        expiryMonth = 12,
+                        expiryYear = 2079,
+                        attribution = ATTRIBUTION
+                    )
                 )
-            )
-    }
+        }
 
     @Test
-    fun setAllCardFields_whenValidValues_withPostalCodeEnabled_allowsGetCardWithExpectedValues() {
-        cardInputWidget.postalCodeEnabled = true
+    fun setAllCardFields_whenValidValues_withPostalCodeEnabled_allowsGetCardWithExpectedValues() =
+        runCardInputWidgetTest {
+            postalCodeEnabled = true
 
-        cardInputWidget.setCardNumber(AMEX_WITH_SPACES)
-        cardInputWidget.setExpiryDate(12, 2079)
-        cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
-        cardInputWidget.setPostalCode(POSTAL_CODE_VALUE)
+            setCardNumber(AMEX_WITH_SPACES)
+            setExpiryDate(12, 2079)
+            setCvcCode(CVC_VALUE_AMEX)
+            setPostalCode(POSTAL_CODE_VALUE)
 
-        assertThat(cardInputWidget.cardParams)
-            .isEqualTo(
-                CardParams(
-                    brand = CardBrand.AmericanExpress,
-                    loggingTokens = ATTRIBUTION,
-                    number = AMEX_NO_SPACES,
-                    expMonth = 12,
-                    expYear = 2079,
-                    cvc = CVC_VALUE_AMEX,
-                    address = Address.Builder()
-                        .setPostalCode(POSTAL_CODE_VALUE)
-                        .build()
+            assertThat(cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.AmericanExpress,
+                        loggingTokens = ATTRIBUTION,
+                        number = AMEX_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2079,
+                        cvc = CVC_VALUE_AMEX,
+                        address = Address.Builder()
+                            .setPostalCode(POSTAL_CODE_VALUE)
+                            .build()
+                    )
                 )
-            )
 
-        assertThat(cardInputWidget.paymentMethodCard)
-            .isEqualTo(
-                PaymentMethodCreateParams.Card(
-                    number = AMEX_NO_SPACES,
-                    cvc = CVC_VALUE_AMEX,
-                    expiryYear = 2079,
-                    expiryMonth = 12,
-                    attribution = ATTRIBUTION
+            assertThat(paymentMethodCard)
+                .isEqualTo(
+                    PaymentMethodCreateParams.Card(
+                        number = AMEX_NO_SPACES,
+                        cvc = CVC_VALUE_AMEX,
+                        expiryYear = 2079,
+                        expiryMonth = 12,
+                        attribution = ATTRIBUTION
+                    )
                 )
-            )
-    }
+        }
 
     @Test
-    fun addValues_thenClear_withPostalCodeDisabled_leavesAllTextFieldsEmpty() {
-        cardInputWidget.postalCodeEnabled = false
+    fun addValues_thenClear_withPostalCodeDisabled_leavesAllTextFieldsEmpty() = runCardInputWidgetTest {
+        postalCodeEnabled = false
         updateCardNumberAndIdle(VISA_NO_SPACES)
 
-        cardInputWidget.setExpiryDate(12, 2079)
-        cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
-        cardInputWidget.clear()
+        setExpiryDate(12, 2079)
+        setCvcCode(CVC_VALUE_AMEX)
+        clear()
 
         assertThat(cardNumberEditText.fieldText)
             .isEmpty()
-        assertThat(expiryEditText.fieldText)
+        assertThat(expiryDateEditText.fieldText)
             .isEmpty()
         assertThat(cvcEditText.fieldText)
             .isEmpty()
@@ -1195,17 +1163,17 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun addValues_thenClear_withPostalCodeEnabled_leavesAllTextFieldsEmpty() {
-        cardInputWidget.postalCodeEnabled = true
-        cardInputWidget.setCardNumber(VISA_NO_SPACES)
-        cardInputWidget.setExpiryDate(12, 2079)
-        cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
-        cardInputWidget.setPostalCode(POSTAL_CODE_VALUE)
-        cardInputWidget.clear()
+    fun addValues_thenClear_withPostalCodeEnabled_leavesAllTextFieldsEmpty() = runCardInputWidgetTest {
+        postalCodeEnabled = true
+        setCardNumber(VISA_NO_SPACES)
+        setExpiryDate(12, 2079)
+        setCvcCode(CVC_VALUE_AMEX)
+        setPostalCode(POSTAL_CODE_VALUE)
+        clear()
 
         assertThat(cardNumberEditText.fieldText)
             .isEmpty()
-        assertThat(expiryEditText.fieldText)
+        assertThat(expiryDateEditText.fieldText)
             .isEmpty()
         assertThat(cvcEditText.fieldText)
             .isEmpty()
@@ -1223,7 +1191,7 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun shouldIconShowBrand_whenCvcNotFocused_isAlwaysTrue() {
+    fun shouldIconShowBrand_whenCvcNotFocused_isAlwaysTrue() = runCardInputWidgetTest {
         assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, false, CVC_VALUE_AMEX))
             .isTrue()
         assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, false, ""))
@@ -1239,7 +1207,7 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun shouldIconShowBrand_whenAmexAndCvCStringLengthNotFour_isFalse() {
+    fun shouldIconShowBrand_whenAmexAndCvCStringLengthNotFour_isFalse() = runCardInputWidgetTest {
         assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, true, ""))
             .isFalse()
         assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, true, "1"))
@@ -1251,13 +1219,13 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun shouldIconShowBrand_whenAmexAndCvcStringLengthIsFour_isTrue() {
+    fun shouldIconShowBrand_whenAmexAndCvcStringLengthIsFour_isTrue() = runCardInputWidgetTest {
         assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, true, CVC_VALUE_AMEX))
             .isTrue()
     }
 
     @Test
-    fun shouldIconShowBrand_whenNotAmexAndCvcStringLengthIsNotThree_isFalse() {
+    fun shouldIconShowBrand_whenNotAmexAndCvcStringLengthIsNotThree_isFalse() = runCardInputWidgetTest {
         assertThat(shouldIconShowBrand(CardBrand.Visa, true, ""))
             .isFalse()
         assertThat(shouldIconShowBrand(CardBrand.Discover, true, "12"))
@@ -1273,7 +1241,7 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun shouldIconShowBrand_whenNotAmexAndCvcStringLengthIsThree_isTrue() {
+    fun shouldIconShowBrand_whenNotAmexAndCvcStringLengthIsThree_isTrue() = runCardInputWidgetTest {
         assertThat(shouldIconShowBrand(CardBrand.Visa, true, "999"))
             .isTrue()
         assertThat(shouldIconShowBrand(CardBrand.Discover, true, "123"))
@@ -1287,32 +1255,32 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun shouldIconShowBrand_whenUnknownBrandAndCvcStringLengthIsFour_isTrue() {
+    fun shouldIconShowBrand_whenUnknownBrandAndCvcStringLengthIsFour_isTrue() = runCardInputWidgetTest {
         assertThat(shouldIconShowBrand(CardBrand.Unknown, true, "2124"))
             .isTrue()
     }
 
     @Test
-    fun currentFields_equals_requiredFields_withPostalCodeDisabled() {
-        cardInputWidget.postalCodeEnabled = false
+    fun currentFields_equals_requiredFields_withPostalCodeDisabled() = runCardInputWidgetTest {
+        postalCodeEnabled = false
         idleLooper()
 
-        assertThat(cardInputWidget.requiredFields)
-            .isEqualTo(cardInputWidget.currentFields.toHashSet())
+        assertThat(requiredFields)
+            .isEqualTo(currentFields.toHashSet())
     }
 
     @Test
-    fun currentFields_notEquals_requiredFields_withPostalCodeEnabled() {
-        cardInputWidget.postalCodeEnabled = true
-        assertThat(cardInputWidget.requiredFields)
-            .isNotEqualTo(cardInputWidget.currentFields.toHashSet())
+    fun currentFields_notEquals_requiredFields_withPostalCodeEnabled() = runCardInputWidgetTest {
+        postalCodeEnabled = true
+        assertThat(requiredFields)
+            .isNotEqualTo(currentFields.toHashSet())
     }
 
     @Test
-    fun testCardValidCallback_withPostalCodeDefaultDisabled() {
+    fun testCardValidCallback_withPostalCodeDefaultDisabled() = runCardInputWidgetTest {
         var currentIsValid = false
         var currentInvalidFields = emptySet<CardValidCallback.Fields>()
-        cardInputWidget.setCardValidCallback { isValid, invalidFields ->
+        setCardValidCallback { isValid, invalidFields ->
             currentIsValid = isValid
             currentInvalidFields = invalidFields
         }
@@ -1326,19 +1294,19 @@ internal class CardInputWidgetTest {
                 CardValidCallback.Fields.Cvc
             )
 
-        cardInputWidget.setCardNumber(VISA_NO_SPACES)
+        setCardNumber(VISA_NO_SPACES)
         assertThat(currentIsValid)
             .isFalse()
         assertThat(currentInvalidFields)
             .containsExactly(CardValidCallback.Fields.Expiry, CardValidCallback.Fields.Cvc)
 
-        expiryEditText.append("12")
+        expiryDateEditText.append("12")
         assertThat(currentIsValid)
             .isFalse()
         assertThat(currentInvalidFields)
             .containsExactly(CardValidCallback.Fields.Expiry, CardValidCallback.Fields.Cvc)
 
-        expiryEditText.append("50")
+        expiryDateEditText.append("50")
         assertThat(currentIsValid)
             .isFalse()
         assertThat(currentInvalidFields)
@@ -1364,12 +1332,12 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun testCardValidCallback_withPostalCodeEnabledNotRequired() {
+    fun testCardValidCallback_withPostalCodeEnabledNotRequired() = runCardInputWidgetTest {
         var currentIsValid = false
         var currentInvalidFields = emptySet<CardValidCallback.Fields>()
-        cardInputWidget.postalCodeEnabled = true
-        cardInputWidget.postalCodeRequired = false
-        cardInputWidget.setCardValidCallback { isValid, invalidFields ->
+        postalCodeEnabled = true
+        postalCodeRequired = false
+        setCardValidCallback { isValid, invalidFields ->
             currentIsValid = isValid
             currentInvalidFields = invalidFields
         }
@@ -1384,12 +1352,12 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun testCardValidCallback_withPostalCodeEnabledAndRequired() {
+    fun testCardValidCallback_withPostalCodeEnabledAndRequired() = runCardInputWidgetTest {
         var currentIsValid = false
         var currentInvalidFields = emptySet<CardValidCallback.Fields>()
-        cardInputWidget.postalCodeEnabled = true
-        cardInputWidget.usZipCodeRequired = true
-        cardInputWidget.setCardValidCallback { isValid, invalidFields ->
+        postalCodeEnabled = true
+        usZipCodeRequired = true
+        setCardValidCallback { isValid, invalidFields ->
             currentIsValid = isValid
             currentInvalidFields = invalidFields
         }
@@ -1403,8 +1371,8 @@ internal class CardInputWidgetTest {
                 CardValidCallback.Fields.Postal
             )
 
-        cardInputWidget.setCardNumber(VISA_NO_SPACES)
-        expiryEditText.setText("1250")
+        setCardNumber(VISA_NO_SPACES)
+        expiryDateEditText.setText("1250")
         cvcEditText.setText("123")
         assertThat(currentIsValid).isFalse()
         assertThat(currentInvalidFields).containsExactly(CardValidCallback.Fields.Postal)
@@ -1419,99 +1387,99 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun shouldShowErrorIcon_shouldBeUpdatedCorrectly() {
-        cardInputWidget.setExpiryDate(12, 2030)
-        cardInputWidget.setCvcCode(CVC_VALUE_COMMON)
+    fun shouldShowErrorIcon_shouldBeUpdatedCorrectly() = runCardInputWidgetTest {
+        setExpiryDate(12, 2030)
+        setCvcCode(CVC_VALUE_COMMON)
 
         // show error icon when validating fields with invalid card number
-        cardInputWidget.setCardNumber(VISA_NO_SPACES.take(6))
-        assertThat(cardInputWidget.paymentMethodCreateParams)
+        setCardNumber(VISA_NO_SPACES.take(6))
+        assertThat(paymentMethodCreateParams)
             .isNull()
-        assertThat(cardInputWidget.shouldShowErrorIcon)
+        assertThat(shouldShowErrorIcon)
             .isTrue()
 
         // don't show error icon after changing input
-        cardInputWidget.setCardNumber(VISA_NO_SPACES.take(7))
-        assertThat(cardInputWidget.shouldShowErrorIcon)
+        setCardNumber(VISA_NO_SPACES.take(7))
+        assertThat(shouldShowErrorIcon)
             .isFalse()
 
         // don't show error icon when validating fields with invalid card number
-        assertThat(cardInputWidget.paymentMethodCreateParams)
+        assertThat(paymentMethodCreateParams)
             .isNull()
-        cardInputWidget.setCardNumber(VISA_NO_SPACES)
-        assertThat(cardInputWidget.paymentMethodCreateParams)
+        setCardNumber(VISA_NO_SPACES)
+        assertThat(paymentMethodCreateParams)
             .isNotNull()
-        assertThat(cardInputWidget.shouldShowErrorIcon)
+        assertThat(shouldShowErrorIcon)
             .isFalse()
     }
 
     @Test
-    fun `createHiddenCardText with 19 digit PAN`() {
+    fun `createHiddenCardText with 19 digit PAN`() = runCardInputWidgetTest {
         assertThat(
-            cardInputWidget.createHiddenCardText(19)
+            createHiddenCardText(19)
         ).isEqualTo("0000 0000 0000 0000 ")
     }
 
     @Test
-    fun `createHiddenCardText with 16 digit PAN`() {
+    fun `createHiddenCardText with 16 digit PAN`() = runCardInputWidgetTest {
         assertThat(
-            cardInputWidget.createHiddenCardText(16)
+            createHiddenCardText(16)
         ).isEqualTo("0000 0000 0000 ")
     }
 
     @Test
-    fun `createHiddenCardText with 15 digit PAN`() {
+    fun `createHiddenCardText with 15 digit PAN`() = runCardInputWidgetTest {
         assertThat(
-            cardInputWidget.createHiddenCardText(15)
+            createHiddenCardText(15)
         ).isEqualTo("0000 000000 ")
     }
 
     @Test
-    fun `createHiddenCardText with 14 digit PAN`() {
+    fun `createHiddenCardText with 14 digit PAN`() = runCardInputWidgetTest {
         assertThat(
-            cardInputWidget.createHiddenCardText(14)
+            createHiddenCardText(14)
         ).isEqualTo("0000 000000 ")
     }
 
     @Test
-    fun usZipCodeRequired_whenFalse_shouldSetPostalCodeHint() {
-        cardInputWidget.usZipCodeRequired = false
-        assertThat(cardInputWidget.postalCodeEditText.hint)
+    fun usZipCodeRequired_whenFalse_shouldSetPostalCodeHint() = runCardInputWidgetTest {
+        usZipCodeRequired = false
+        assertThat(postalCodeEditText.hint)
             .isEqualTo("Postal code")
     }
 
     @Test
-    fun usZipCodeRequired_whenTrue_withInvalidZipCode_shouldReturnNullCard() {
-        cardInputWidget.usZipCodeRequired = true
-        assertThat(cardInputWidget.postalCodeEditText.hint)
+    fun usZipCodeRequired_whenTrue_withInvalidZipCode_shouldReturnNullCard() = runCardInputWidgetTest {
+        usZipCodeRequired = true
+        assertThat(postalCodeEditText.hint)
             .isEqualTo("ZIP Code")
 
-        cardInputWidget.setCardNumber(VISA_WITH_SPACES)
-        cardInputWidget.expiryDateEditText.append("12")
-        cardInputWidget.expiryDateEditText.append("50")
-        cardInputWidget.cvcEditText.append(CVC_VALUE_COMMON)
+        setCardNumber(VISA_WITH_SPACES)
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
+        cvcEditText.append(CVC_VALUE_COMMON)
 
         // invalid zipcode
-        cardInputWidget.postalCodeEditText.setText(CVC_VALUE_AMEX)
-        assertThat(cardInputWidget.cardParams)
+        postalCodeEditText.setText(CVC_VALUE_AMEX)
+        assertThat(cardParams)
             .isNull()
     }
 
     @Test
-    fun usZipCodeRequired_whenTrue_withValidZipCode_shouldReturnNotNullCard() {
-        cardInputWidget.usZipCodeRequired = true
-        assertThat(cardInputWidget.postalCodeEditText.hint)
+    fun usZipCodeRequired_whenTrue_withValidZipCode_shouldReturnNotNullCard() = runCardInputWidgetTest {
+        usZipCodeRequired = true
+        assertThat(postalCodeEditText.hint)
             .isEqualTo("ZIP Code")
 
-        cardInputWidget.setCardNumber(VISA_WITH_SPACES)
-        cardInputWidget.expiryDateEditText.append("12")
-        cardInputWidget.expiryDateEditText.append("50")
-        cardInputWidget.cvcEditText.append(CVC_VALUE_COMMON)
+        setCardNumber(VISA_WITH_SPACES)
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
+        cvcEditText.append(CVC_VALUE_COMMON)
 
         // valid zipcode
-        cardInputWidget.postalCodeEditText.setText(POSTAL_CODE_VALUE)
+        postalCodeEditText.setText(POSTAL_CODE_VALUE)
 
-        assertThat(cardInputWidget.cardParams)
+        assertThat(cardParams)
             .isEqualTo(
                 CardParams(
                     brand = CardBrand.Visa,
@@ -1528,168 +1496,201 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun usZipCodeRequired_whenFalse_shouldCallOnPostalCodeComplete() {
-        cardInputWidget.usZipCodeRequired = false
+    fun usZipCodeRequired_whenFalse_shouldCallOnPostalCodeComplete() = runCardInputWidgetTest {
+        usZipCodeRequired = false
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
         assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(1)
     }
 
     @Test
-    fun usZipCodeRequired_whenTrue_withValidZip_shouldCallOnPostalCodeComplete() {
-        cardInputWidget.usZipCodeRequired = true
+    fun usZipCodeRequired_whenTrue_withValidZip_shouldCallOnPostalCodeComplete() = runCardInputWidgetTest {
+        usZipCodeRequired = true
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
         assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(1)
     }
 
     @Test
-    fun postalCodeEnabled_whenFalse_shouldNotCallOnPostalCodeComplete() {
-        cardInputWidget.postalCodeEnabled = false
+    fun postalCodeEnabled_whenFalse_shouldNotCallOnPostalCodeComplete() = runCardInputWidgetTest {
+        postalCodeEnabled = false
         postalCodeEditText.setText("123")
         assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
     }
 
     @Test
-    fun usZipCodeRequired_whenTrue_withInvalidZip_shouldNotCallOnPostalCodeComplete() {
-        cardInputWidget.usZipCodeRequired = true
+    fun usZipCodeRequired_whenTrue_withInvalidZip_shouldNotCallOnPostalCodeComplete() = runCardInputWidgetTest {
+        usZipCodeRequired = true
         postalCodeEditText.setText("1234")
         assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
     }
 
     @Test
-    fun postalCode_whenTrue_withNonEmptyZip_shouldCallOnPostalCodeComplete() {
-        cardInputWidget.postalCodeRequired = true
+    fun postalCode_whenTrue_withNonEmptyZip_shouldCallOnPostalCodeComplete() = runCardInputWidgetTest {
+        postalCodeRequired = true
         postalCodeEditText.setText("1234")
         assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(1)
     }
 
     @Test
-    fun postalCode_whenTrue_withEmptyZip_shouldNotCallOnPostalCodeComplete() {
-        cardInputWidget.postalCodeRequired = true
+    fun postalCode_whenTrue_withEmptyZip_shouldNotCallOnPostalCodeComplete() = runCardInputWidgetTest {
+        postalCodeRequired = true
         postalCodeEditText.setText("")
         assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
     }
 
     @Test
-    fun `setCvcLabel is not reset when card number entered`() {
-        cardInputWidget.setCvcLabel("123")
-        assertThat(cardInputWidget.cvcEditText.hint)
+    fun `setCvcLabel is not reset when card number entered`() = runCardInputWidgetTest {
+        setCvcLabel("123")
+        assertThat(cvcEditText.hint)
             .isEqualTo("123")
     }
 
     @Test
-    fun `Verify on postal code focus change listeners trigger the callback`() {
-        cardInputWidget.postalCodeEditText.getParentOnFocusChangeListener()
-            .onFocusChange(cardInputWidget.postalCodeEditText, true)
+    fun `Verify on postal code focus change listeners trigger the callback`() = runCardInputWidgetTest {
+        postalCodeEditText.getParentOnFocusChangeListener()
+            .onFocusChange(postalCodeEditText, true)
 
         assertThat(cardInputListener.focusedFields)
             .contains(CardInputListener.FocusField.PostalCode)
     }
 
     @Test
-    fun `Verify on cvc focus change listeners trigger the callback`() {
-        cardInputWidget.cvcEditText.getParentOnFocusChangeListener()
-            .onFocusChange(cardInputWidget.cvcEditText, true)
+    fun `Verify on cvc focus change listeners trigger the callback`() = runCardInputWidgetTest {
+        cvcEditText.getParentOnFocusChangeListener()
+            .onFocusChange(cvcEditText, true)
 
         assertThat(cardInputListener.focusedFields)
             .contains(CardInputListener.FocusField.Cvc)
     }
 
     @Test
-    fun `Verify on expiration date focus change listeners trigger the callback`() {
-        cardInputWidget.expiryDateEditText.getParentOnFocusChangeListener()
-            .onFocusChange(cardInputWidget.expiryDateEditText, true)
+    fun `Verify on expiration date focus change listeners trigger the callback`() = runCardInputWidgetTest {
+        expiryDateEditText.getParentOnFocusChangeListener()
+            .onFocusChange(expiryDateEditText, true)
 
         assertThat(cardInputListener.focusedFields)
             .contains(CardInputListener.FocusField.ExpiryDate)
     }
 
     @Test
-    fun `Verify on card number focus change listeners trigger the callback`() {
-        cardInputWidget.cardNumberEditText.getParentOnFocusChangeListener()
-            .onFocusChange(cardInputWidget.cardNumberEditText, true)
+    fun `Verify on card number focus change listeners trigger the callback`() = runCardInputWidgetTest {
+        cardNumberEditText.getParentOnFocusChangeListener()
+            .onFocusChange(cardNumberEditText, true)
 
         assertThat(cardInputListener.focusedFields)
             .contains(CardInputListener.FocusField.CardNumber)
     }
 
     @Test
-    fun `Requiring postal code after setting CardValidCallback should still notify of change`() {
-        val callback = mock<CardValidCallback>()
-        cardInputWidget.setCardValidCallback(callback)
+    fun `Requiring postal code after setting CardValidCallback should still notify of change`() =
+        runCardInputWidgetTest {
+            val callback = mock<CardValidCallback>()
+            setCardValidCallback(callback)
 
-        cardInputWidget.postalCodeRequired = true
-        postalCodeEditText.setText("54321")
+            postalCodeRequired = true
+            postalCodeEditText.setText("54321")
 
-        verify(callback, times(2)).onInputChanged(any(), any())
-    }
-
-    @Test
-    fun `Removing postal code requirement keeps CardValidCallback notifications for the field`() {
-        val callback = mock<CardValidCallback>()
-        cardInputWidget.postalCodeRequired = true
-        cardInputWidget.setCardValidCallback(callback)
-        cardInputWidget.postalCodeRequired = false
-
-        postalCodeEditText.setText("54321")
-
-        verify(callback, times(2)).onInputChanged(any(), any())
-    }
+            verify(callback, times(2)).onInputChanged(any(), any())
+        }
 
     @Test
-    fun `Setting postal code requirements multiple times only sets callback once`() {
-        val callback = mock<CardValidCallback>()
-        cardInputWidget.setCardValidCallback(callback)
+    fun `Removing postal code requirement keeps CardValidCallback notifications for the field`() =
+        runCardInputWidgetTest {
+            val callback = mock<CardValidCallback>()
+            postalCodeRequired = true
+            setCardValidCallback(callback)
+            postalCodeRequired = false
 
-        cardInputWidget.postalCodeRequired = true
-        cardInputWidget.postalCodeEnabled = true
-        cardInputWidget.postalCodeEnabled = false
-        cardInputWidget.postalCodeRequired = false
-        cardInputWidget.postalCodeRequired = true
-        cardInputWidget.postalCodeEnabled = true
-        postalCodeEditText.setText("54321")
+            postalCodeEditText.setText("54321")
 
-        // Called only when the callback is set and when the text is set.
-        verify(callback, times(2)).onInputChanged(any(), any())
-    }
+            verify(callback, times(2)).onInputChanged(any(), any())
+        }
 
     @Test
-    fun `getBrand returns the right brands`() {
-        cardInputWidget.setCardNumber(null)
-        assertThat(cardInputWidget.brand).isEqualTo(CardBrand.Unknown)
-
-        cardInputWidget.setCardNumber(VISA_NO_SPACES)
-        assertThat(cardInputWidget.brand).isEqualTo(CardBrand.Visa)
-
-        cardInputWidget.setCardNumber(CardNumberFixtures.MASTERCARD_NO_SPACES)
-        assertThat(cardInputWidget.brand).isEqualTo(CardBrand.MasterCard)
-
-        cardInputWidget.setCardNumber(AMEX_NO_SPACES)
-        assertThat(cardInputWidget.brand).isEqualTo(CardBrand.AmericanExpress)
-
-        cardInputWidget.setCardNumber(CardNumberFixtures.DISCOVER_NO_SPACES)
-        assertThat(cardInputWidget.brand).isEqualTo(CardBrand.Discover)
-
-        cardInputWidget.setCardNumber(CardNumberFixtures.JCB_NO_SPACES)
-        assertThat(cardInputWidget.brand).isEqualTo(CardBrand.JCB)
-
-        cardInputWidget.setCardNumber(DINERS_CLUB_14_NO_SPACES)
-        assertThat(cardInputWidget.brand).isEqualTo(CardBrand.DinersClub)
-    }
-
-    @Test
-    fun `Enabled but not required postal code should fire card valid callback when changed`() {
+    fun `Setting postal code requirements multiple times only sets callback once`() = runCardInputWidgetTest {
         val callback = mock<CardValidCallback>()
-        cardInputWidget.setCardValidCallback(callback)
+        setCardValidCallback(callback)
 
-        cardInputWidget.postalCodeEnabled = true
-        cardInputWidget.postalCodeRequired = false
+        postalCodeRequired = true
+        postalCodeEnabled = true
+        postalCodeEnabled = false
+        postalCodeRequired = false
+        postalCodeRequired = true
+        postalCodeEnabled = true
         postalCodeEditText.setText("54321")
 
         // Called only when the callback is set and when the text is set.
         verify(callback, times(2)).onInputChanged(any(), any())
     }
 
-    private fun updateCardNumberAndIdle(cardNumber: String) {
+    @Test
+    fun `getBrand returns the right brands`() = runCardInputWidgetTest {
+        setCardNumber(null)
+        assertThat(brand).isEqualTo(CardBrand.Unknown)
+
+        setCardNumber(VISA_NO_SPACES)
+        assertThat(brand).isEqualTo(CardBrand.Visa)
+
+        setCardNumber(CardNumberFixtures.MASTERCARD_NO_SPACES)
+        assertThat(brand).isEqualTo(CardBrand.MasterCard)
+
+        setCardNumber(AMEX_NO_SPACES)
+        assertThat(brand).isEqualTo(CardBrand.AmericanExpress)
+
+        setCardNumber(CardNumberFixtures.DISCOVER_NO_SPACES)
+        assertThat(brand).isEqualTo(CardBrand.Discover)
+
+        setCardNumber(CardNumberFixtures.JCB_NO_SPACES)
+        assertThat(brand).isEqualTo(CardBrand.JCB)
+
+        setCardNumber(DINERS_CLUB_14_NO_SPACES)
+        assertThat(brand).isEqualTo(CardBrand.DinersClub)
+    }
+
+    @Test
+    fun `Enabled but not required postal code should fire card valid callback when changed`() = runCardInputWidgetTest {
+        val callback = mock<CardValidCallback>()
+        setCardValidCallback(callback)
+
+        postalCodeEnabled = true
+        postalCodeRequired = false
+        postalCodeEditText.setText("54321")
+
+        // Called only when the callback is set and when the text is set.
+        verify(callback, times(2)).onInputChanged(any(), any())
+    }
+
+    private fun runCardInputWidgetTest(
+        block: CardInputWidget.() -> Unit,
+    ) {
+        val cardInputWidget = activityScenarioFactory.createView { activity ->
+            createCardInputWidget(activity)
+        }
+        cardInputWidget.setCardInputListener(cardInputListener)
+        cardInputWidget.block()
+    }
+
+    private fun createCardInputWidget(activity: Activity): CardInputWidget {
+        return CardInputWidget(activity).also {
+            it.layoutWidthCalculator = CardInputWidget.LayoutWidthCalculator { text, _ ->
+                text.length * 10
+            }
+
+            it.frameWidthSupplier = {
+                SCREEN_WIDTH // That's a pretty small screen, but one that we theoretically support.
+            }
+
+            // Set the width of the icon and its margin so that test calculations have
+            // an expected value that is repeatable on all systems.
+            it.cardBrandView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                width = 48
+                marginEnd = 12
+            }
+
+            it.cardNumberEditText.workContext = testDispatcher
+        }
+    }
+
+    private fun CardInputWidget.updateCardNumberAndIdle(cardNumber: String) {
         cardNumberEditText.setText(cardNumber)
         idleLooper()
     }

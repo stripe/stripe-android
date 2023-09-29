@@ -16,6 +16,8 @@ internal class PaymentSheetPage(
     private val composeTestRule: ComposeTestRule,
 ) {
     fun fillOutCardDetails(fillOutZipCode: Boolean = true) {
+        composeTestRule.waitForIdle()
+
         waitForText("Card number")
 
         replaceText("Card number", "4242424242424242")
@@ -54,6 +56,8 @@ internal class PaymentSheetPage(
     }
 
     fun addPaymentMethod() {
+        composeTestRule.waitForIdle()
+
         waitForText("+ Add")
 
         composeTestRule.onNode(hasText("+ Add"))

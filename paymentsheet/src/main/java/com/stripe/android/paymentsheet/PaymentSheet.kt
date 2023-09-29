@@ -485,15 +485,16 @@ class PaymentSheet internal constructor(
             }
 
             fun build() = Configuration(
-                merchantDisplayName,
-                customer,
-                googlePay,
-                primaryButtonColor,
-                defaultBillingDetails,
-                shippingDetails,
-                allowsDelayedPaymentMethods,
-                allowsPaymentMethodsRequiringShippingAddress,
-                appearance,
+                merchantDisplayName = merchantDisplayName,
+                customer = customer,
+                googlePay = googlePay,
+                primaryButtonColor = primaryButtonColor,
+                defaultBillingDetails = defaultBillingDetails,
+                shippingDetails = shippingDetails,
+                allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+                appearance = appearance,
+                primaryButtonLabel = primaryButtonLabel,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             )
         }
