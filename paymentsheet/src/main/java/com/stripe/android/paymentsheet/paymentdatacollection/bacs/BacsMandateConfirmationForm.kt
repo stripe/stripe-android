@@ -55,7 +55,7 @@ internal fun BacsMandateConfirmationFormView(
     return Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colors.surface)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {

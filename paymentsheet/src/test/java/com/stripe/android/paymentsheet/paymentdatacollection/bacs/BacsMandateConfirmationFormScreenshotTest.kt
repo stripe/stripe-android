@@ -3,13 +3,20 @@ package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.utils.screenshots.FontSize
 import com.stripe.android.utils.screenshots.PaparazziRule
+import com.stripe.android.utils.screenshots.PaymentSheetAppearance
+import com.stripe.android.utils.screenshots.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 
 class BacsMandateConfirmationFormScreenshotTest {
     @get:Rule
-    val paparazziRule = PaparazziRule()
+    val paparazziRule = PaparazziRule(
+        SystemAppearance.values(),
+        PaymentSheetAppearance.values(),
+        FontSize.values()
+    )
 
     @Test
     fun testState() {
