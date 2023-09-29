@@ -24,6 +24,8 @@ stages:
       - run-instrumentation-tests: { }
       - run-paymentsheet-instrumentation-tests: { }
       - run-example-instrumentation-tests: { }
+      - run-financial-connections-instrumentation-tests: { }
+      - run-cardscan-instrumentation-tests: { }
       - run-paymentsheet-end-to-end-tests: { }
 
 workflows:
@@ -188,7 +190,7 @@ workflows:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - content: ./gradlew assembleAndroidTest -x :paymentsheet-example:assembleAndroidTest -x :paymentsheet:assembleAndroidTest -x :example:assembleAndroidTest
+            - content: ./gradlew assembleAndroidTest -x :paymentsheet-example:assembleAndroidTest -x :paymentsheet:assembleAndroidTest -x :example:assembleAndroidTest -x :financial-connections:assembleAndroidTest -x :financial-connections-example:assembleAndroidTest -x :camera-core:assembleAndroidTest -x :stripecardscan:assembleAndroidTest -x :stripecardscan-example:assembleAndroidTest
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -196,7 +198,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest -x :example:connectedAndroidTest
+            - content: ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest -x :example:connectedAndroidTest -x :financial-connections:connectedAndroidTest -x :financial-connections-example:connectedAndroidTest -x :camera-core:connectedAndroidTest -x :stripecardscan:connectedAndroidTest -x :stripecardscan-example:connectedAndroidTest
   run-paymentsheet-instrumentation-tests:
     before_run:
       - start_emulator
@@ -237,6 +239,46 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew :example:connectedAndroidTest
+  run-financial-connections-instrumentation-tests:
+    before_run:
+      - start_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Assemble Instrumentation tests
+          timeout: 600
+          inputs:
+            - content: ./gradlew :financial-connections:assembleAndroidTest :financial-connections-example:assembleAndroidTest
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - script@1:
+          title: Execute instrumentation tests
+          timeout: 1200
+          inputs:
+            - content: ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest
+  run-cardscan-instrumentation-tests:
+    before_run:
+      - start_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Assemble Instrumentation tests
+          timeout: 600
+          inputs:
+            - content: ./gradlew :camera-core:assembleAndroidTest :stripecardscan:assembleAndroidTest :stripecardscan-example:assembleAndroidTest
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - script@1:
+          title: Execute instrumentation tests
+          timeout: 1200
+          inputs:
+            - content: ./gradlew :camera-core:connectedAndroidTest :stripecardscan:connectedAndroidTest :stripecardscan-example:connectedAndroidTest
   run-paymentsheet-end-to-end-tests:
     before_run:
       - prepare_all
