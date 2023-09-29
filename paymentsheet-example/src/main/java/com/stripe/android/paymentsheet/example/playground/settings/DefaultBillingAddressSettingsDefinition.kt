@@ -25,7 +25,9 @@ internal object DefaultBillingAddressSettingsDefinition : BooleanSettingsDefinit
                         postalCode = "94080",
                         country = "US",
                     ),
-                    email = "email@email.com", name = "Jenny Rosen", phone = "+18008675309"
+                    email = "email@email.com",
+                    name = "Jenny Rosen",
+                    phone = "+18008675309",
                 )
             )
         }
