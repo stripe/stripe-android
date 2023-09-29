@@ -16,7 +16,6 @@ import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.utils.AnimationConstants
 import kotlinx.coroutines.flow.collectLatest
 

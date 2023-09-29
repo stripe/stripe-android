@@ -66,13 +66,18 @@ internal fun BacsMandateConfirmationFormView(
         )
         Details(state)
         MandateItem(stringResource(R.string.stripe_paymentsheet_bacs_email_mandate, state.email))
-        MandateItem(stringResource(
-            R.string.stripe_paymentsheet_bacs_notice_mandate,
-            state.payer.resolve()
-        ))
+        MandateItem(
+            stringResource(
+                R.string.stripe_paymentsheet_bacs_notice_mandate,
+                state.payer.resolve()
+            )
+        )
         Row {
             MandateItem(
-                stringResource(R.string.stripe_paymentsheet_bacs_protection_mandate, state.debitGuaranteeAsHtml.resolve()),
+                stringResource(
+                    R.string.stripe_paymentsheet_bacs_protection_mandate,
+                    state.debitGuaranteeAsHtml.resolve()
+                ),
                 modifier = Modifier.weight(WEIGHT_60_PERCENT),
                 isHtml = true
             )
@@ -88,22 +93,7 @@ internal fun BacsMandateConfirmationFormView(
             state.supportAddressAsHtml.resolve(),
             isHtml = true
         )
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            BacsMandateButton(
-                type = BacsMandateButtonType.Primary,
-                label = stringResource(R.string.stripe_paymentsheet_confirm),
-                onClick = {
-                    viewActionHandler.invoke((BacsMandateConfirmationViewAction.OnConfirmPressed))
-                }
-            )
-            BacsMandateButton(
-                type = BacsMandateButtonType.Secondary,
-                label = stringResource(R.string.stripe_paymentsheet_bacs_modify_details_button_label),
-                onClick = {
-                    viewActionHandler.invoke((BacsMandateConfirmationViewAction.OnCancelPressed))
-                }
-            )
-        }
+        MandateButtons(viewActionHandler)
         PaymentSheetContentPadding()
     }
 }
@@ -190,6 +180,28 @@ private fun MandateItem(
             text = text,
             style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
             color = MaterialTheme.stripeColors.subtitle
+        )
+    }
+}
+
+@Composable
+private fun MandateButtons(
+    viewActionHandler: (action: BacsMandateConfirmationViewAction) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        BacsMandateButton(
+            type = BacsMandateButtonType.Primary,
+            label = stringResource(R.string.stripe_paymentsheet_confirm),
+            onClick = {
+                viewActionHandler.invoke((BacsMandateConfirmationViewAction.OnConfirmPressed))
+            }
+        )
+        BacsMandateButton(
+            type = BacsMandateButtonType.Secondary,
+            label = stringResource(R.string.stripe_paymentsheet_bacs_modify_details_button_label),
+            onClick = {
+                viewActionHandler.invoke((BacsMandateConfirmationViewAction.OnCancelPressed))
+            }
         )
     }
 }

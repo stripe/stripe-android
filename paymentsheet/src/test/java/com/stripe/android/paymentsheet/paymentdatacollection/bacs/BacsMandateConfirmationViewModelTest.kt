@@ -58,7 +58,7 @@ class BacsMandateConfirmationViewModelTest {
         viewModel.result.test {
             viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnConfirmPressed)
 
-            assertThat(awaitItem()).isEqualTo( BacsMandateConfirmationResult.Confirmed)
+            assertThat(awaitItem()).isEqualTo(BacsMandateConfirmationResult.Confirmed)
         }
     }
 
