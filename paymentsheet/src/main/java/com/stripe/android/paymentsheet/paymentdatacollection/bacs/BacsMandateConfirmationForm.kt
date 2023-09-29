@@ -24,11 +24,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.common.util.VisibleForTesting
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
 
@@ -64,11 +68,11 @@ internal fun BacsMandateConfirmationFormView(
         MandateItem(stringResource(R.string.stripe_paymentsheet_bacs_email_mandate, state.email))
         MandateItem(stringResource(
             R.string.stripe_paymentsheet_bacs_notice_mandate,
-            stringResource(R.string.stripe_paymentsheet_bacs_notice_default_payer)
+            state.payer.resolve()
         ))
         Row {
             MandateItem(
-                stringResource(R.string.stripe_paymentsheet_bacs_protection_mandate, state.debitGuaranteeAsHtml),
+                stringResource(R.string.stripe_paymentsheet_bacs_protection_mandate, state.debitGuaranteeAsHtml.resolve()),
                 modifier = Modifier.weight(WEIGHT_60_PERCENT),
                 isHtml = true
             )
@@ -81,7 +85,7 @@ internal fun BacsMandateConfirmationFormView(
             }
         }
         MandateItem(
-            state.supportAddressAsHtml,
+            state.supportAddressAsHtml.resolve(),
             isHtml = true
         )
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -186,6 +190,35 @@ private fun MandateItem(
             text = text,
             style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
             color = MaterialTheme.stripeColors.subtitle
+        )
+    }
+}
+
+@Composable
+@Preview
+fun PreviewThisStuff() {
+    StripeTheme {
+        BacsMandateConfirmationFormView(
+            state = BacsMandateConfirmationViewState(
+                accountNumber = "00012345",
+                sortCode = "10-88-00",
+                email = "email@email.com",
+                nameOnAccount = "John Doe",
+                payer = resolvableString(R.string.stripe_paymentsheet_bacs_notice_default_payer),
+                debitGuaranteeAsHtml = resolvableString(
+                    R.string.stripe_paymentsheet_bacs_guarantee_format,
+                    resolvableString(R.string.stripe_paymentsheet_bacs_guarantee_url),
+                    resolvableString(R.string.stripe_paymentsheet_bacs_guarantee)
+                ),
+                supportAddressAsHtml = resolvableString(
+                    R.string.stripe_paymentsheet_bacs_support_address_format,
+                    resolvableString(R.string.stripe_paymentsheet_bacs_support_default_address_line_one),
+                    resolvableString(R.string.stripe_paymentsheet_bacs_support_default_address_line_two),
+                    resolvableString(R.string.stripe_paymentsheet_bacs_support_default_email),
+                    resolvableString(R.string.stripe_paymentsheet_bacs_support_default_email)
+                )
+            ),
+            viewActionHandler = {}
         )
     }
 }

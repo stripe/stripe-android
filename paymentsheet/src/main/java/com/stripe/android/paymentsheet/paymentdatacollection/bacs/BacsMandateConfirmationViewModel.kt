@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -13,7 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 internal class BacsMandateConfirmationViewModel constructor(
-    private val args: Args
+    args: Args
 ) : ViewModel() {
     private val _result = MutableSharedFlow<BacsMandateConfirmationResult>()
     val result: SharedFlow<BacsMandateConfirmationResult>
@@ -25,6 +27,7 @@ internal class BacsMandateConfirmationViewModel constructor(
             nameOnAccount = args.nameOnAccount,
             sortCode = args.sortCode.chunked(size = 2).joinToString(separator = "-"),
             accountNumber = args.accountNumber,
+            payer = buildPayer(),
             supportAddressAsHtml = buildAddressAsHtml(),
             debitGuaranteeAsHtml = buildGuarantee()
         )
@@ -51,70 +54,44 @@ internal class BacsMandateConfirmationViewModel constructor(
         }
     }
 
-    private fun buildAddressAsHtml(): String {
-        val defaultAddress = args.defaultAddress
-
-        return buildString {
-            append(defaultAddress.lineOne)
-            append("<br>")
-            append(defaultAddress.lineTwo)
-            append("<br>")
-            append("<a href=\"mailto:${defaultAddress.supportEmail}\">")
-            append(defaultAddress.supportEmail)
-            append("</a>")
-        }
+    private fun buildPayer(): ResolvableString {
+        return resolvableString(R.string.stripe_paymentsheet_bacs_notice_default_payer)
     }
 
-    private fun buildGuarantee(): String {
-        return buildString {
-            append("<a href=\"${args.guarantee.url}\">")
-            append(args.guarantee.name)
-            append("</a>")
-        }
+    private fun buildAddressAsHtml(): ResolvableString {
+        return resolvableString(
+            R.string.stripe_paymentsheet_bacs_support_address_format,
+            resolvableString(R.string.stripe_paymentsheet_bacs_support_default_address_line_one),
+            resolvableString(R.string.stripe_paymentsheet_bacs_support_default_address_line_two),
+            resolvableString(R.string.stripe_paymentsheet_bacs_support_default_email),
+            resolvableString(R.string.stripe_paymentsheet_bacs_support_default_email)
+        )
+    }
+
+    private fun buildGuarantee(): ResolvableString {
+        return resolvableString(
+            R.string.stripe_paymentsheet_bacs_guarantee_format,
+            resolvableString(R.string.stripe_paymentsheet_bacs_guarantee_url),
+            resolvableString(R.string.stripe_paymentsheet_bacs_guarantee)
+        )
     }
 
     data class Args(
         val email: String,
         val nameOnAccount: String,
         val sortCode: String,
-        val accountNumber: String,
-        val guarantee: Guarantee,
-        val defaultAddress: DefaultAddress,
-        val defaultPayer: String
-    ) {
-        data class Guarantee(
-            val name: String,
-            val url: String
-        )
-
-        data class DefaultAddress(
-            val lineOne: String,
-            val lineTwo: String,
-            val supportEmail: String,
-        )
-    }
+        val accountNumber: String
+    )
 
     class Factory(private val args: BacsMandateConfirmationContract.Args) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val context = extras.requireApplication().applicationContext
-
             return BacsMandateConfirmationViewModel(
                 Args(
                     email = args.email,
                     nameOnAccount = args.nameOnAccount,
                     sortCode = args.sortCode,
-                    accountNumber = args.accountNumber,
-                    guarantee = Args.Guarantee(
-                        name = context.getString(R.string.stripe_paymentsheet_bacs_guarantee),
-                        url = context.getString(R.string.stripe_paymentsheet_bacs_guarantee_url)
-                    ),
-                    defaultAddress = Args.DefaultAddress(
-                        lineOne = context.getString(R.string.stripe_paymentsheet_bacs_support_default_address_line_one),
-                        lineTwo = context.getString(R.string.stripe_paymentsheet_bacs_support_default_address_line_two),
-                        supportEmail = context.getString(R.string.stripe_paymentsheet_bacs_support_default_email)
-                    ),
-                    defaultPayer = context.getString(R.string.stripe_paymentsheet_bacs_notice_default_payer)
+                    accountNumber = args.accountNumber
                 )
             ) as T
         }

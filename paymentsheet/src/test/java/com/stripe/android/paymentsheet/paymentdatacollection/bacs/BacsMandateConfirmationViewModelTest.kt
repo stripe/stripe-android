@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -32,11 +34,19 @@ class BacsMandateConfirmationViewModelTest {
                 sortCode = "10-88-00",
                 email = "email@email.com",
                 nameOnAccount = "John Doe",
-                debitGuaranteeAsHtml = "<a href=\"https://stripe.com/legal/bacs-direct-debit-guarantee\">" +
-                    "Direct Debit Guarantee</a>",
-                supportAddressAsHtml = "Stripe, 7th Floor The Bower Warehouse" +
-                    "<br>207–211 Old St, London EC1V 9NR" +
-                    "<br><a href=\"mailto:support@stripe.com\">support@stripe.com</a>"
+                payer = resolvableString(R.string.stripe_paymentsheet_bacs_notice_default_payer),
+                debitGuaranteeAsHtml = resolvableString(
+                    R.string.stripe_paymentsheet_bacs_guarantee_format,
+                    resolvableString(R.string.stripe_paymentsheet_bacs_guarantee_url),
+                    resolvableString(R.string.stripe_paymentsheet_bacs_guarantee)
+                ),
+                supportAddressAsHtml = resolvableString(
+                    R.string.stripe_paymentsheet_bacs_support_address_format,
+                    resolvableString(R.string.stripe_paymentsheet_bacs_support_default_address_line_one),
+                    resolvableString(R.string.stripe_paymentsheet_bacs_support_default_address_line_two),
+                    resolvableString(R.string.stripe_paymentsheet_bacs_support_default_email),
+                    resolvableString(R.string.stripe_paymentsheet_bacs_support_default_email)
+                ),
             )
         )
     }
@@ -69,17 +79,7 @@ class BacsMandateConfirmationViewModelTest {
                 accountNumber = "00012345",
                 sortCode = "108800",
                 email = "email@email.com",
-                nameOnAccount = "John Doe",
-                guarantee = BacsMandateConfirmationViewModel.Args.Guarantee(
-                    name = "Direct Debit Guarantee",
-                    url = "https://stripe.com/legal/bacs-direct-debit-guarantee"
-                ),
-                defaultAddress = BacsMandateConfirmationViewModel.Args.DefaultAddress(
-                    lineOne = "Stripe, 7th Floor The Bower Warehouse",
-                    lineTwo = "207–211 Old St, London EC1V 9NR",
-                    supportEmail = "support@stripe.com"
-                ),
-                defaultPayer = "Stripe"
+                nameOnAccount = "John Doe"
             )
         )
     }
