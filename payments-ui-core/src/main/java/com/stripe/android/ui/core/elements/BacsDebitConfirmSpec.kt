@@ -10,7 +10,10 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
 class BacsDebitConfirmSpec : FormItemSpec() {
-    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("")
+    override val apiPath: IdentifierSpec = IdentifierSpec(
+        v1 = "bacs_debit[confirmed]",
+        ignoreField = true
+    )
 
     fun transform(merchantName: String) = CheckboxFieldElement(
         apiPath,
