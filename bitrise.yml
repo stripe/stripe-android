@@ -190,6 +190,26 @@ workflows:
           timeout: 1200
           inputs:
             - file_path: ./scripts/execute_instrumentation_tests.sh
+  run-paymentsheet-instrumentation-tests:
+    before_run:
+      - start_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script-runner@0:
+          title: Assemble Instrumentation tests
+          timeout: 600
+          inputs:
+            - file_path: ./gradlew :paymentsheet:assembleAndroidTest
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - script-runner@0:
+          title: Execute instrumentation tests
+          timeout: 1200
+          inputs:
+            - file_path: ./gradlew :paymentsheet:connectedAndroidTest
   run-paymentsheet-end-to-end-tests:
     before_run:
       - prepare_all
