@@ -44,6 +44,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalAutofill
 import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -259,6 +260,7 @@ fun TextField(
                                 Row(
                                     modifier = Modifier
                                         .padding(10.dp)
+                                        .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
                                         .clickable(enabled = show) {
                                             expanded = true
                                         },
@@ -402,3 +404,6 @@ private fun Modifier.conditionallyClickable(onClick: (() -> Unit)?): Modifier {
         this
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val DROPDOWN_MENU_CLICKABLE_TEST_TAG = "dropdown_menu_clickable"
