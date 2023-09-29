@@ -25,10 +25,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.material.MdcTheme
 import com.stripe.android.R
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.databinding.StripeCardBrandViewBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
@@ -209,7 +209,7 @@ private fun CardBrandChoiceDropdown(
     onDismiss: () -> Unit
 ) {
     val noSelection = CardBrandChoice(
-        label = stringResource(id = R.string.stripe_card_brand_choice_no_selection),
+        label = resolvableString(id = R.string.stripe_card_brand_choice_no_selection),
         icon = CardBrand.Unknown.icon
     )
 
@@ -219,7 +219,7 @@ private fun CardBrandChoiceDropdown(
     }
 
     SingleChoiceDropdown(
-        title = stringResource(id = R.string.stripe_card_brand_choice_selection_header),
+        title = resolvableString(id = R.string.stripe_card_brand_choice_selection_header),
         expanded = expanded,
         currentChoice = currentBrand.toChoice(noSelection),
         choices = choices,
@@ -239,7 +239,7 @@ private fun CardBrand.toChoice(noSelection: CardBrandChoice): CardBrandChoice {
         noSelection
     } else {
         CardBrandChoice(
-            label = displayName,
+            label = resolvableString(displayName),
             icon = icon
         )
     }
