@@ -6,23 +6,23 @@ internal object CurrencySettingsDefinition : StringSettingDefinition(
     key = "currency",
     displayName = "Currency",
 ) {
-    private val usd = Option("USD", "USD")
+    private val usd = Option("USD", "usd")
 
     override val defaultValue: String = usd.value
 
     override val options: List<Option<String>> = listOf(
-        Option("AUD", "AUD"),
-        Option("EUR", "EUR"),
-        Option("GBP", "GBP"),
+        Option("AUD", "aud"),
+        Option("EUR", "eur"),
+        Option("GBP", "gbp"),
         usd,
-        Option("INR", "INR"),
-        Option("PLN", "PLN"),
-        Option("SGD", "SGD"),
-        Option("MYR", "MYR"),
-        Option("MXN", "MXN"),
-        Option("BRL", "BRL"),
-        Option("JPY", "JPY"),
-        Option("SEK", "SEK"),
+        Option("INR", "inr"),
+        Option("PLN", "pln"),
+        Option("SGD", "sgd"),
+        Option("MYR", "myr"),
+        Option("MXN", "mxn"),
+        Option("BRL", "brl"),
+        Option("JPY", "jpy"),
+        Option("SEK", "sek"),
     )
 
     override fun configure(value: String, checkoutRequestBuilder: CheckoutRequest.Builder) {

@@ -37,16 +37,16 @@ internal object CountrySettingsDefinition : StringSettingDefinition(
         // When the country changes via the UI, update the currency to be the default currency for
         // that country.
         when (value) {
-            "GB" -> "GBP"
-            "FR" -> "EUR"
-            "AU" -> "AUD"
-            "US" -> "USD"
-            "IN" -> "INR"
-            "SG" -> "SGD"
-            "MY" -> "MYR"
-            "MX" -> "MXN"
-            "BR" -> "BRL"
-            "JP" -> "JPY"
+            "GB" -> "gbp"
+            "FR" -> "eur"
+            "AU" -> "aud"
+            "US" -> "usd"
+            "IN" -> "inr"
+            "SG" -> "sgd"
+            "MY" -> "myr"
+            "MX" -> "mxn"
+            "BR" -> "brl"
+            "JP" -> "jpy"
             else -> null
         }?.let { currency ->
             playgroundSettings[CurrencySettingsDefinition] = currency
