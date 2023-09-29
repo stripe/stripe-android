@@ -22,7 +22,8 @@ stages:
       - check: { }
       - test: { }
       - run-instrumentation-tests: { }
-      - run-paymentsheet-instrumentation-tests: {}
+      - run-paymentsheet-instrumentation-tests: { }
+      - run-example-instrumentation-tests: { }
       - run-paymentsheet-end-to-end-tests: { }
 
 workflows:
@@ -198,19 +199,39 @@ workflows:
     after_run:
       - conclude_all
     steps:
-      - script-runner@0:
+      - script@1:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - file_path: ./gradlew :paymentsheet:assembleAndroidTest
+            - content: ./gradlew :paymentsheet:assembleAndroidTest
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
-      - script-runner@0:
+      - script@1:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - file_path: ./gradlew :paymentsheet:connectedAndroidTest
+            - content: ./gradlew :paymentsheet:connectedAndroidTest
+  run-example-instrumentation-tests:
+    before_run:
+      - start_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Assemble Instrumentation tests
+          timeout: 600
+          inputs:
+            - content: ./gradlew :example:assembleAndroidTest
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - script@1:
+          title: Execute instrumentation tests
+          timeout: 1200
+          inputs:
+            - content: ./gradlew :example:connectedAndroidTest
   run-paymentsheet-end-to-end-tests:
     before_run:
       - prepare_all
