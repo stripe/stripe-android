@@ -8,6 +8,8 @@ import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
+import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
+import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
 import com.stripe.android.ui.core.elements.BlikSpec
 import com.stripe.android.ui.core.elements.BoletoTaxIdSpec
 import com.stripe.android.ui.core.elements.BsbSpec
@@ -73,6 +75,8 @@ class TransformSpecToElements(
                 is EmptyFormSpec -> EmptyFormElement()
                 is MandateTextSpec -> it.transform(merchantName)
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
+                is BacsDebitBankAccountSpec -> it.transform(initialValues)
+                is BacsDebitConfirmSpec -> it.transform(merchantName)
                 is CardDetailsSectionSpec -> it.transform(
                     context = context,
                     isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
