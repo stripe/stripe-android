@@ -18,8 +18,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
     PreviewParameterProvider<LinkAccountPickerState> {
     override val values = sequenceOf(
         canonical(),
-        accountSelected(),
-//        repairableAccountSelected(),
+        accountSelected()
     )
 
     override val count: Int
