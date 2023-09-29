@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.repository
 
 import com.airbnb.mvrx.MavericksRepository
 import com.airbnb.mvrx.MavericksState
+import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
@@ -20,7 +21,7 @@ internal class CoreAuthorizationPendingNetworkingRepairRepository(
 ) : MavericksRepository<State>(
     initialState = State(),
     coroutineScope = coroutineScope,
-    performCorrectnessValidations = true,
+    performCorrectnessValidations = BuildConfig.DEBUG,
 ) {
 
     suspend fun get() = runCatching {
