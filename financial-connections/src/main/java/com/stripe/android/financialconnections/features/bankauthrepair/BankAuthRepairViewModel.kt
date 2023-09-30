@@ -70,13 +70,14 @@ internal class BankAuthRepairViewModel @Inject constructor(
             updateLocalManifest { it.copy(activeInstitution = repairSession.institution) }
             PartnerAuthState.Payload(
                 authSession = repairSession.toAuthSession(),
-                institution = requireNotNull(repairSession.institution),
                 isStripeDirect = getManifest().isStripeDirect ?: false,
+                institution = requireNotNull(repairSession.institution),
                 repairPayload = PartnerAuthState.RepairPayload(
                     consumerSession = requireNotNull(getCachedConsumerSession()).clientSecret,
                     coreAuthorization = coreAuthorization,
                     selectedAccountId = selectedAccount.id,
-                )
+                ),
+                isChallenge = false
             )
         }.execute {
             copy(payload = it)

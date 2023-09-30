@@ -7,6 +7,7 @@ import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
+import com.stripe.android.financialconnections.domain.AuthSessionChallengeResponse
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationRepairSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -82,6 +83,19 @@ internal interface FinancialConnectionsManifestRepository {
         applicationId: String,
         institution: FinancialConnectionsInstitution,
     ): FinancialConnectionsAuthorizationSession
+
+    suspend fun postChallengeState(
+        clientSecret: String,
+        sessionId: String,
+    ): AuthSessionChallengeResponse
+
+    suspend fun answerChallenge(
+        clientSecret: String,
+        sessionId: String,
+        challenge: String,
+        type: String,
+        token: String,
+    ): AuthSessionChallengeResponse
 
     suspend fun postAuthorizationSessionEvent(
         clientSecret: String,
@@ -311,6 +325,48 @@ private class FinancialConnectionsManifestRepositoryImpl(
             updateActiveInstitution("postAuthorizationSession", institution)
             updateCachedActiveAuthSession("postAuthorizationSession", it)
         }
+    }
+
+    override suspend fun postChallengeState(
+        clientSecret: String,
+        sessionId: String
+    ): AuthSessionChallengeResponse {
+        val request = apiRequestFactory.createPost(
+            url = challengeStateUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                NetworkConstants.PARAMS_ID to sessionId,
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            AuthSessionChallengeResponse.serializer()
+        )
+    }
+
+    override suspend fun answerChallenge(
+        clientSecret: String,
+        sessionId: String,
+        challenge: String,
+        type: String,
+        token: String
+    ): AuthSessionChallengeResponse {
+        val request = apiRequestFactory.createPost(
+            url = challengeAnswerUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                NetworkConstants.PARAMS_ID to sessionId,
+                "challenge" to challenge,
+                "type" to type,
+                "$type[token]" to token,
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            AuthSessionChallengeResponse.serializer()
+        )
     }
 
     override suspend fun postAuthorizationSessionEvent(
@@ -546,6 +602,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
         )
     }
 
+
     override fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
     ) {
@@ -629,5 +686,11 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
         internal const val completeRepairSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/repair_sessions/complete"
+
+        internal const val challengeStateUrl: String =
+            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/challenge_state"
+
+        internal const val challengeAnswerUrl: String =
+            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/answer_challenge"
     }
 }

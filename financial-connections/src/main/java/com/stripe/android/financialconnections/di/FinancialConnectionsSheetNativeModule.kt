@@ -22,6 +22,8 @@ import com.stripe.android.financialconnections.network.FinancialConnectionsReque
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
+import com.stripe.android.financialconnections.repository.FinancialConnectionsCredentialsRepository
+import com.stripe.android.financialconnections.repository.FinancialConnectionsCredentialsRepositoryImpl
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
@@ -58,6 +60,11 @@ internal interface FinancialConnectionsSheetNativeModule {
     fun providesNavigationManager(
         impl: NavigationManagerImpl
     ): NavigationManager
+
+    @Binds
+    fun bindsCredentialsRepository(
+        impl: FinancialConnectionsCredentialsRepositoryImpl
+    ): FinancialConnectionsCredentialsRepository
 
     companion object {
         @Provides

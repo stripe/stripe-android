@@ -69,7 +69,8 @@ internal fun PartnerAuthScreen() {
         onClickableTextClick = viewModel::onClickableTextClick,
         onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
         onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.PARTNER_AUTH) },
-        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
+        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
+        onFormSubmit = viewModel::onFormSubmit,
     )
 }
 
@@ -93,7 +94,8 @@ internal fun PartnerAuthPreview(
             ),
             onClickableTextClick = {},
             onCloseFromErrorClick = {},
-            onConfirmModalClick = {}
+            onConfirmModalClick = {},
+            onFormSubmit = { _, _ -> },
         )
     }
 }

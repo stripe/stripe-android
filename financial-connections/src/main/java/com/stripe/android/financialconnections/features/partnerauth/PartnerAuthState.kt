@@ -33,13 +33,23 @@ internal data class PartnerAuthState(
         /**
          * Just for repair flows, null otherwise.
          */
-        val repairPayload: RepairPayload? = null
+        val repairPayload: RepairPayload? = null,
+        /**
+         * Just for challenge flows, null otherwise.
+         */
+        val challengePayload: ChallengePayload? = null,
+        val isChallenge: Boolean
     )
 
     data class RepairPayload(
         val consumerSession: String,
         val selectedAccountId: String,
         val coreAuthorization: String
+    )
+
+    data class ChallengePayload(
+        val id: String,
+        val type: String
     )
 
     val canNavigateBack: Boolean

@@ -32,6 +32,8 @@ internal class PartnerAuthPreviewParameterProvider :
     private fun canonical() = PartnerAuthState(
         payload = Success(
             PartnerAuthState.Payload(
+                authSession = session(),
+                isStripeDirect = false,
                 institution = FinancialConnectionsInstitution(
                     id = "id",
                     name = "name",
@@ -42,8 +44,7 @@ internal class PartnerAuthPreviewParameterProvider :
                     featuredOrder = null,
                     mobileHandoffCapable = false
                 ),
-                authSession = session(),
-                isStripeDirect = false
+                isChallenge = false
             )
         ),
         authenticationStatus = Uninitialized,
@@ -53,6 +54,8 @@ internal class PartnerAuthPreviewParameterProvider :
     private fun browserLoading() = PartnerAuthState(
         payload = Success(
             PartnerAuthState.Payload(
+                authSession = session(),
+                isStripeDirect = false,
                 institution = FinancialConnectionsInstitution(
                     id = "id",
                     name = "name",
@@ -63,8 +66,7 @@ internal class PartnerAuthPreviewParameterProvider :
                     featuredOrder = null,
                     mobileHandoffCapable = false
                 ),
-                authSession = session(),
-                isStripeDirect = false
+                isChallenge = false
             )
         ),
         // While browser is showing, this Async is loading.

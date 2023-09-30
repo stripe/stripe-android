@@ -70,6 +70,7 @@ internal fun BankAuthRepairScreen() {
         onClickableTextClick = viewModel::onClickableTextClick,
         onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
         onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.BANK_AUTH_REPAIR) },
-        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
+        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
+        onFormSubmit = { username, password -> TODO() },
     )
 }

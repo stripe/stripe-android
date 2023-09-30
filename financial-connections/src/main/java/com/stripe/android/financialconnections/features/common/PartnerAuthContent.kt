@@ -20,15 +20,22 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
@@ -46,6 +53,7 @@ import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
@@ -64,6 +72,7 @@ internal fun PartnerAuthScreenContent(
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onConfirmModalClick: () -> Unit,
+    onFormSubmit: (String, String) -> Unit
 ) {
     ModalBottomSheetLayout(
         sheetState = modalBottomSheetState,
@@ -88,6 +97,7 @@ internal fun PartnerAuthScreenContent(
                 onCloseFromErrorClick = onCloseFromErrorClick,
                 onClickableTextClick = onClickableTextClick,
                 onContinueClick = onContinueClick,
+                onFormSubmit = onFormSubmit
             )
         }
     )
@@ -101,7 +111,8 @@ private fun PartnerAuthScreenMainContent(
     onEnterDetailsManually: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onContinueClick: () -> Unit,
-    onClickableTextClick: (String) -> Unit
+    onClickableTextClick: (String) -> Unit,
+    onFormSubmit: (String, String) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
@@ -130,6 +141,7 @@ private fun PartnerAuthScreenMainContent(
                 onClickableTextClick = onClickableTextClick,
                 onContinueClick = onContinueClick,
                 onSelectAnotherBank = onSelectAnotherBank,
+                onFormSubmit = onFormSubmit,
             )
         }
     }
@@ -165,11 +177,13 @@ private fun LoadedContent(
     payload: PartnerAuthState.Payload,
     onContinueClick: () -> Unit,
     onSelectAnotherBank: () -> Unit,
-    onClickableTextClick: (String) -> Unit
+    onClickableTextClick: (String) -> Unit,
+    onFormSubmit: (String, String) -> Unit
 ) {
     when (authenticationStatus) {
-        is Uninitialized -> when (payload.authSession.isOAuth) {
-            true -> InstitutionalPrePaneContent(
+        is Uninitialized -> when {
+            payload.isChallenge -> ChallengeContent(onFormSubmit)
+            payload.authSession.isOAuth -> InstitutionalPrePaneContent(
                 onContinueClick = onContinueClick,
                 content = requireNotNull(payload.authSession.display?.text?.oauthPrepane),
                 onClickableTextClick = onClickableTextClick,
@@ -191,6 +205,55 @@ private fun LoadedContent(
         is Fail -> {
             // TODO@carlosmuvi translate error type to specific error screen.
             InstitutionUnknownErrorContent(onSelectAnotherBank)
+        }
+    }
+}
+
+@Composable
+fun ChallengeContent(
+    onFormSubmit: (String, String) -> Unit
+) {
+    var email by remember { mutableStateOf(TextFieldValue()) }
+    var password by remember { mutableStateOf(TextFieldValue()) }
+    var loading by remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Log In",
+            fontWeight = FontWeight.Bold,
+            fontSize = 32.sp
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        FinancialConnectionsOutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        FinancialConnectionsOutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            visualTransformation = PasswordVisualTransformation()
+        )
+        Spacer(modifier = Modifier.height(36.dp))
+
+        if (loading) {
+            // small centered loading
+            LoadingSpinner()
+        } else {
+            FinancialConnectionsButton(
+                onClick = { onFormSubmit(email.text, password.text) },
+                enabled = true
+            ) {
+                Text("Submit")
+            }
         }
     }
 }

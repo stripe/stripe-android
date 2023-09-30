@@ -19,7 +19,9 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
+import com.stripe.android.financialconnections.domain.AuthSessionChallengeResponse
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
+import com.stripe.android.financialconnections.domain.ChallengeFlowController
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
@@ -57,6 +59,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
     private val uriUtils: UriUtils,
     private val postAuthSessionEvent: PostAuthSessionEvent,
+    private val challengeFlowController: ChallengeFlowController,
     private val getOrFetchSync: GetOrFetchSync,
     private val browserManager: BrowserManager,
     private val navigationManager: NavigationManager,
@@ -88,8 +91,13 @@ internal class PartnerAuthViewModel @Inject constructor(
                 institution = requireNotNull(manifest.activeInstitution),
                 sync = sync
             )
-            buildPayload(authSession, manifest)
+            buildPayload(authSession, manifest, null)//TODO figure.
         }.execute { copy(payload = it) }
+    }
+
+    private fun isChallengeFlow(flow: String): Boolean {
+        // we currently have two different mx challenge-flow flows
+        return flow.matches(Regex("^(mx_nonoauth|mx_non_oauth|independent)"))
     }
 
     private fun createAuthSession() {
@@ -102,7 +110,11 @@ internal class PartnerAuthViewModel @Inject constructor(
                 sync = sync
             )
             logger.debug("Created auth session ${authSession.id}")
-            buildPayload(authSession, manifest).also {
+            val challenge = if (isChallengeFlow(authSession.flow!!)) {
+                challengeFlowController.getChallenge(authSession.id)
+            } else null
+
+            buildPayload(authSession, manifest, challenge).also {
                 // just send loaded event on OAuth flows (prepane). Non-OAuth handled by shim.
                 val loadedEvent: Loaded? = Loaded(Date()).takeIf { authSession.isOAuth }
                 postAuthSessionEvent(
@@ -120,12 +132,20 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     private fun buildPayload(
         authSession: FinancialConnectionsAuthorizationSession,
-        manifest: FinancialConnectionsSessionManifest
+        manifest: FinancialConnectionsSessionManifest,
+        challenge: AuthSessionChallengeResponse?
     ) = Payload(
         authSession = authSession,
         institution = requireNotNull(manifest.activeInstitution),
         isStripeDirect = manifest.isStripeDirect ?: false,
-        repairPayload = null
+        isChallenge = isChallengeFlow(authSession.flow!!),
+        repairPayload = null,
+        challengePayload = challenge?.let {
+            PartnerAuthState.ChallengePayload(
+                id = requireNotNull(it.challenge).id!!,
+                type = requireNotNull(it.challenge).type!!
+            )
+        }
     )
 
     private fun launchBrowserIfNonOauth() {
@@ -133,7 +153,9 @@ internal class PartnerAuthViewModel @Inject constructor(
             asyncProp = PartnerAuthState::payload,
             onSuccess = {
                 // launch auth for non-OAuth (skip pre-pane).
-                if (!it.authSession.isOAuth) launchAuthInBrowser()
+                when {
+                    it.authSession.isOAuth.not() && it.isChallenge.not() -> launchAuthInBrowser()
+                }
             }
         )
     }
@@ -419,6 +441,26 @@ internal class PartnerAuthViewModel @Inject constructor(
     fun onViewEffectLaunched() {
         setState {
             copy(viewEffect = null)
+        }
+    }
+
+    fun onFormSubmit(username: String, password: String) {
+        viewModelScope.launch {
+            awaitState().payload()?.let {
+                val challenge = it.challengePayload!!
+                challengeFlowController.submitChallenge(
+                    authSessionId = it.authSession.id,
+                    username = username,
+                    password = password,
+                    challengeId = challenge.id,
+                    type = challenge.type
+                )
+                navigationManager.tryNavigateTo(
+                    AccountPicker(referrer = PANE),
+                    popUpToCurrent = true,
+                    inclusive = true
+                )
+            }
         }
     }
 
