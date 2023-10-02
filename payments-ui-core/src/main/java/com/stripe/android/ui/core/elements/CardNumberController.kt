@@ -92,13 +92,8 @@ internal class CardNumberEditableController constructor(
     private val brandChoices = MutableStateFlow<List<CardBrand>>(listOf())
     private val chosenBrand = MutableStateFlow(
         when (cardBrandChoiceConfig) {
-            is CardBrandChoiceConfig.Eligible -> {
-                when (val initialBrand = cardBrandChoiceConfig.initialBrand) {
-                    CardBrand.Unknown -> null
-                    else -> initialBrand
-                }
-            }
-            is CardBrandChoiceConfig.Ineligible -> null
+            is CardBrandChoiceConfig.Eligible -> cardBrandChoiceConfig.initialBrand ?: CardBrand.Unknown
+            is CardBrandChoiceConfig.Ineligible -> CardBrand.Unknown
         }
     )
 
@@ -118,7 +113,7 @@ internal class CardNumberEditableController constructor(
         chosenBrand
     ) { impliedBrand, chosenBrand ->
         if (isEligibleForCardBrandChoice) {
-            chosenBrand ?: CardBrand.Unknown
+            chosenBrand
         } else {
             impliedBrand
         }
@@ -145,7 +140,7 @@ internal class CardNumberEditableController constructor(
                 brandChoices.value = newBrandChoices
 
                 if (currentValue !in newBrandChoices) {
-                    chosenBrand.value = null
+                    chosenBrand.value = CardBrand.Unknown
                 }
             }
         },
@@ -173,13 +168,14 @@ internal class CardNumberEditableController constructor(
                     icon = onlyAvailableBrand.icon
                 )
             } else {
-                chosen?.let { brand ->
-                    TextFieldIcon.Dropdown.Item(
-                        id = brand.code,
-                        label = resolvableString(brand.displayName),
-                        icon = brand.icon
+                when (chosen) {
+                    CardBrand.Unknown -> noSelection
+                    else -> TextFieldIcon.Dropdown.Item(
+                        id = chosen.code,
+                        label = resolvableString(chosen.displayName),
+                        icon = chosen.icon
                     )
-                } ?: noSelection
+                }
             }
 
             val items = brands.map { brand ->
@@ -283,9 +279,6 @@ internal class CardNumberEditableController constructor(
     }
 
     override fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {
-        chosenBrand.value = when (val brand = CardBrand.fromCode(item.id)) {
-            CardBrand.Unknown -> null
-            else -> brand
-        }
+        chosenBrand.value = CardBrand.fromCode(item.id)
     }
 }
