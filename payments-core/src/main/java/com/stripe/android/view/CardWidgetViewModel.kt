@@ -63,7 +63,7 @@ internal class CardWidgetViewModel(
             val context = extras.requireApplication()
 
             val stripeRepository = StripeApiRepository(
-                context = extras.requireApplication(),
+                context = context,
                 publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
             )
 
