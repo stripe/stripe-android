@@ -6,6 +6,8 @@
   <string name="stripe_back">Kembali</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">Nomor rekening Anda tidak lengkap.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Rekening bank</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Alamat tagihan</string>
   <!-- Label for BLIK code number field on form -->

@@ -6,6 +6,8 @@
   <string name="stripe_back">上一步</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">您的帳號不完整。</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">銀行帳戶</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">帳單地址</string>
   <!-- Label for BLIK code number field on form -->

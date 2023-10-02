@@ -101,6 +101,8 @@
   <string name="stripe_passport">护照</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">已选择护照</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">电话号码</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">将驾驶证翻到另一面</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -145,4 +147,6 @@
   <string name="stripe_upload_dialog_title_passport">上传护照</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">您也可以手动上传您的%1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">上传您的带照片身份证件</string>
 </resources>

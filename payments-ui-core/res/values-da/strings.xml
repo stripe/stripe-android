@@ -6,6 +6,8 @@
   <string name="stripe_back">Tilbage</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">Dit kontonummer er ikke komplet.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Bankkonto</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Faktureringsadresse</string>
   <!-- Label for BLIK code number field on form -->

@@ -101,6 +101,8 @@
   <string name="stripe_passport">Pass</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Pass är markerat</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Telefonnummer</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Vänd på körkortet</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -145,4 +147,6 @@
   <string name="stripe_upload_dialog_title_passport">Ladda upp pass</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Du kan även manuellt ladda upp ett foto av din/ditt %1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Ladda upp ditt foto-id</string>
 </resources>

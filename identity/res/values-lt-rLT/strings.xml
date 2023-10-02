@@ -101,6 +101,8 @@
   <string name="stripe_passport">Pasas</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Pasirinktas pasas</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Telefono numeris</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Apverskite vairuotojo pažymėjimą kita puse</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -145,4 +147,6 @@
   <string name="stripe_upload_dialog_title_passport">Įkelkite pasą</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Arba galite patys įkelti %1$s nuotrauką</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Įkelkite savo asmens dokumento nuotrauką</string>
 </resources>
