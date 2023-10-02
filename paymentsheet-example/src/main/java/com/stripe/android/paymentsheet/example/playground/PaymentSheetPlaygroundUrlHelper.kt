@@ -16,8 +16,8 @@ internal object PaymentSheetPlaygroundUrlHelper {
     }
 
     fun settingsFromUri(uri: Uri?): PlaygroundSettings? {
-        val base64Settings = uri?.getQueryParameter("settings") ?: return null
-        val settingsJson = base64Settings.decodeBase64()?.utf8() ?: return null
+        val settingsJson = uri?.getQueryParameter("settings")
+            ?.decodeBase64()?.utf8() ?: return null
         return PlaygroundSettings.createFromJsonString(settingsJson)
     }
 }

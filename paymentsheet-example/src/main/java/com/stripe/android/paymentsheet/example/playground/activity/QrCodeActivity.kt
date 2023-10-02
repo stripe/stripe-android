@@ -59,15 +59,14 @@ internal class QrCodeActivity : AppCompatActivity() {
                     bitmap = localBitmap.asImageBitmap(),
                     contentDescription = "QR Code",
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxSize()
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
     }
 
     private fun getQrCodeBitmap(uri: Uri): Bitmap {
-        val size = 512 //pixels
+        val size = QR_CODE_SIZE
         val bits = QRCodeWriter().encode(uri.toString(), BarcodeFormat.QR_CODE, size, size)
         return Bitmap.createBitmap(size, size, Bitmap.Config.RGB_565).also {
             for (x in 0 until size) {
@@ -78,3 +77,5 @@ internal class QrCodeActivity : AppCompatActivity() {
         }
     }
 }
+
+private const val QR_CODE_SIZE = 512 // Pixels.
