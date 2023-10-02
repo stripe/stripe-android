@@ -17,7 +17,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
@@ -114,6 +113,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     playgroundSettings = playgroundSettings,
                 )
             },
+            modifier = Modifier.testTag("RELOAD")
         ) {
             Text("Reload")
         }
@@ -154,7 +154,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         Button(
             onClick = {
                 presentPaymentSheet(paymentSheet, playgroundState)
-            }
+            },
+            modifier = Modifier.testTag("CHECKOUT")
         ) {
             Text("Checkout")
         }
