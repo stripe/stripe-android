@@ -84,7 +84,7 @@ internal fun BacsMandateConfirmationFormView(
             Box(modifier = Modifier.weight(WEIGHT_40_PERCENT), contentAlignment = Alignment.CenterEnd) {
                 Icon(
                     painterResource(id = R.drawable.stripe_bacs_direct_debit_mark),
-                    tint = MaterialTheme.stripeColors.placeholderText,
+                    tint = MaterialTheme.stripeColors.subtitle,
                     contentDescription = null
                 )
             }
