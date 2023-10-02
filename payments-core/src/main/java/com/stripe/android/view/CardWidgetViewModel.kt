@@ -14,18 +14,23 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.BuildConfig.DEBUG
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.utils.FeatureFlags
+import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.seconds
+import javax.inject.Provider
 
 internal class CardWidgetViewModel(
-    private val cbcEligible: () -> Boolean = { DEBUG },
+    private val paymentConfigProvider: Provider<PaymentConfiguration>,
+    private val stripeRepository: StripeRepository,
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
 
@@ -39,16 +44,34 @@ internal class CardWidgetViewModel(
     }
 
     private suspend fun determineCbcEligibility(): Boolean {
-        // TODO(tillh-stripe) Query /wallets-config here
-        delay(1.seconds)
-        return cbcEligible()
+        val paymentConfig = paymentConfigProvider.get()
+
+        val response = stripeRepository.retrieveCardElementConfig(
+            requestOptions = ApiRequest.Options(
+                apiKey = paymentConfig.publishableKey,
+                stripeAccount = paymentConfig.stripeAccountId,
+            ),
+        )
+
+        val config = response.getOrNull()
+        return config?.cardBrandChoice?.eligible ?: false
     }
 
     class Factory : ViewModelProvider.Factory {
 
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            val context = extras.requireApplication()
+
+            val stripeRepository = StripeApiRepository(
+                context = extras.requireApplication(),
+                publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+            )
+
             @Suppress("UNCHECKED_CAST")
-            return CardWidgetViewModel() as T
+            return CardWidgetViewModel(
+                paymentConfigProvider = { PaymentConfiguration.getInstance(context) },
+                stripeRepository = stripeRepository,
+            ) as T
         }
     }
 }

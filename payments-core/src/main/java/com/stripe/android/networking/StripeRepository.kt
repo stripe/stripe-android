@@ -35,6 +35,7 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
+import com.stripe.android.model.MobileCardElementConfig
 import java.util.Locale
 
 /**
@@ -366,6 +367,11 @@ interface StripeRepository {
         cardNumber: String,
         requestOptions: ApiRequest.Options
     ): Result<CardMetadata>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun retrieveCardElementConfig(
+        requestOptions: ApiRequest.Options,
+    ): Result<MobileCardElementConfig>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun buildPaymentUserAgent(attribution: Set<String> = emptySet()): String
