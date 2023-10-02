@@ -142,8 +142,8 @@ internal class PartnerAuthViewModel @Inject constructor(
         repairPayload = null,
         challengePayload = challenge?.let {
             PartnerAuthState.ChallengePayload(
-                id = requireNotNull(it.challenge).id!!,
-                type = requireNotNull(it.challenge).type!!
+                id = requireNotNull(it.challenge).id,
+                type = requireNotNull(it.challenge).type
             )
         }
     )

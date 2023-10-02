@@ -6,14 +6,10 @@ import com.stripe.android.financialconnections.model.serializer.AuthSessionChall
 import com.stripe.android.financialconnections.repository.FinancialConnectionsCredentialsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.TokenResponse
-import com.stripe.android.financialconnections.utils.PollTimingOptions
-import com.stripe.android.financialconnections.utils.retryOnException
-import com.stripe.android.financialconnections.utils.shouldRetry
 import kotlinx.coroutines.delay
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
 
 internal class ChallengeFlowController @Inject constructor(
     private val challengeRepository: FinancialConnectionsManifestRepository,
@@ -28,24 +24,6 @@ internal class ChallengeFlowController @Inject constructor(
             sessionId = authSessionId,
             clientSecret = configuration.financialConnectionsSessionClientSecret,
         )
-    }
-
-    suspend fun pollChallengeState(
-        authSessionId: String,
-    ): AuthSessionChallengeResponse {
-        return retryOnException(
-            PollTimingOptions(
-                initialDelayMs = 0,
-                maxNumberOfRetries = 300, // Stripe.js has 600 second timeout, 600 / 2 = 300 retries
-                retryInterval = 2.seconds.inWholeMilliseconds
-            ),
-            retryCondition = { exception -> exception.shouldRetry }
-        ) {
-            challengeRepository.postChallengeState(
-                clientSecret = configuration.financialConnectionsSessionClientSecret,
-                sessionId = authSessionId
-            )
-        }
     }
 
     suspend fun submitChallenge(
@@ -71,7 +49,10 @@ internal class ChallengeFlowController @Inject constructor(
         var status = answer.status
         while (status == AuthSessionChallengeStatus.AwaitingChallenge) {
             delay(2000)
-            val challenge = pollChallengeState(authSessionId)
+            val challenge = challengeRepository.postChallengeState(
+                clientSecret = configuration.financialConnectionsSessionClientSecret,
+                sessionId = authSessionId
+            )
             status = challenge.status
         }
         if (status != AuthSessionChallengeStatus.Complete) {

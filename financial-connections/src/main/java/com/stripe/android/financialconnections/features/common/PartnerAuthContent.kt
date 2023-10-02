@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
@@ -31,6 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -231,6 +233,7 @@ fun ChallengeContent(
 
         FinancialConnectionsOutlinedTextField(
             value = email,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             onValueChange = { email = it },
             label = { Text("Email") }
         )
@@ -239,21 +242,22 @@ fun ChallengeContent(
         FinancialConnectionsOutlinedTextField(
             value = password,
             onValueChange = { password = it },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation()
         )
         Spacer(modifier = Modifier.height(36.dp))
 
+        FinancialConnectionsButton(
+            onClick = { onFormSubmit(email.text, password.text) },
+            enabled = loading.not()
+        ) {
+            loading = true
+            Text("Submit")
+        }
         if (loading) {
             // small centered loading
             LoadingSpinner()
-        } else {
-            FinancialConnectionsButton(
-                onClick = { onFormSubmit(email.text, password.text) },
-                enabled = true
-            ) {
-                Text("Submit")
-            }
         }
     }
 }
