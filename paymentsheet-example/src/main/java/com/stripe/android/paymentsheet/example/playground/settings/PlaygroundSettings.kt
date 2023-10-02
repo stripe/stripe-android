@@ -59,7 +59,8 @@ internal class PlaygroundSettings private constructor(
             playgroundState: PlaygroundState
         ): PaymentSheet.Configuration {
             val builder = PaymentSheet.Configuration.Builder("Example, Inc.")
-            val configurationData = PlaygroundSettingDefinition.PaymentSheetConfigurationData(builder)
+            val configurationData =
+                PlaygroundSettingDefinition.PaymentSheetConfigurationData(builder)
             settings.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(value, builder, playgroundState, configurationData)
             }
@@ -113,7 +114,10 @@ internal class PlaygroundSettings private constructor(
             )
 
             sharedPreferences.edit {
-                putString(sharedPreferencesKey, asJsonString(filter = { it.saveToSharedPreferences }))
+                putString(
+                    sharedPreferencesKey,
+                    asJsonString(filter = { it.saveToSharedPreferences })
+                )
             }
         }
 
@@ -191,11 +195,11 @@ internal class PlaygroundSettings private constructor(
             IntegrationTypeSettingsDefinition,
         )
 
-        private val testSettingDefinitions:  List<PlaygroundSettingDefinition<*>> = listOf(
+        private val testSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             SupportedPaymentMethodsSettingsDefinition,
         )
 
-        private val allSettingDefinitions:  List<PlaygroundSettingDefinition<*>> =
+        private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =
             uiSettingDefinitions + testSettingDefinitions
     }
 }
