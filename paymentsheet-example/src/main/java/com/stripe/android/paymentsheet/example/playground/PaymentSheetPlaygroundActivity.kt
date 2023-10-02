@@ -113,7 +113,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     playgroundSettings = playgroundSettings,
                 )
             },
-            modifier = Modifier.testTag("RELOAD")
         ) {
             Text("Reload")
         }
@@ -155,7 +154,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             onClick = {
                 presentPaymentSheet(paymentSheet, playgroundState)
             },
-            modifier = Modifier.testTag("CHECKOUT")
         ) {
             Text("Checkout")
         }
