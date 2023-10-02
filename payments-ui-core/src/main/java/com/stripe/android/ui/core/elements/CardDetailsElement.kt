@@ -20,13 +20,11 @@ internal class CardDetailsElement(
     identifier: IdentifierSpec,
     context: Context,
     initialValues: Map<IdentifierSpec, String?>,
-    viewOnlyFields: Set<IdentifierSpec> = emptySet(),
     collectName: Boolean = false,
     private val isEligibleForCardBrandChoice: Boolean = false,
     val controller: CardDetailsController = CardDetailsController(
         context,
         initialValues,
-        viewOnlyFields.contains(IdentifierSpec.CardNumber),
         collectName,
         isEligibleForCardBrandChoice,
     )

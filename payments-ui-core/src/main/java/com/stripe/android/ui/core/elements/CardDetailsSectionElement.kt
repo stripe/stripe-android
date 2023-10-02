@@ -11,14 +11,12 @@ import kotlinx.coroutines.flow.Flow
 class CardDetailsSectionElement(
     val context: Context,
     initialValues: Map<IdentifierSpec, String?>,
-    viewOnlyFields: Set<IdentifierSpec>,
     private val collectName: Boolean = false,
     private val isEligibleForCardBrandChoice: Boolean = false,
     override val identifier: IdentifierSpec,
     override val controller: CardDetailsSectionController = CardDetailsSectionController(
         context = context,
         initialValues = initialValues,
-        viewOnlyFields = viewOnlyFields,
         collectName = collectName,
         isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
     ),

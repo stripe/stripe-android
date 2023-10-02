@@ -35,7 +35,6 @@ class InputAddressViewModelTest {
         mock<FormControllerSubcomponent.Builder>().apply {
             whenever(formSpec(anyOrNull())).thenReturn(this)
             whenever(initialValues(anyOrNull())).thenReturn(this)
-            whenever(viewOnlyFields(anyOrNull())).thenReturn(this)
             whenever(viewModelScope(anyOrNull())).thenReturn(this)
             whenever(merchantName(anyOrNull())).thenReturn(this)
             whenever(stripeIntent(anyOrNull())).thenReturn(this)

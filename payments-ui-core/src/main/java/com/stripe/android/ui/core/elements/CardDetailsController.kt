@@ -23,7 +23,6 @@ import java.util.UUID
 internal class CardDetailsController constructor(
     context: Context,
     initialValues: Map<IdentifierSpec, String?>,
-    cardNumberReadOnly: Boolean = false,
     collectName: Boolean = false,
     isEligibleForCardBrandChoice: Boolean = false,
 ) : SectionFieldErrorController, SectionFieldComposable {
@@ -47,28 +46,21 @@ internal class CardDetailsController constructor(
     val label: Int? = null
     val numberElement = CardNumberElement(
         IdentifierSpec.CardNumber,
-        if (cardNumberReadOnly) {
-            CardNumberViewOnlyController(
-                CardNumberConfig(),
-                initialValues
-            )
-        } else {
-            CardNumberEditableController(
-                CardNumberConfig(),
-                context,
-                initialValues[IdentifierSpec.CardNumber],
-                when (isEligibleForCardBrandChoice) {
-                    true -> CardBrandChoiceConfig.Eligible(
-                        initialBrand = initialValues[
-                            IdentifierSpec.PreferredCardBrand
-                        ]?.let { value ->
-                            CardBrand.fromCode(value)
-                        }
-                    )
-                    false -> CardBrandChoiceConfig.Ineligible
-                },
-            )
-        }
+        DefaultCardNumberController(
+            CardNumberConfig(),
+            context,
+            initialValues[IdentifierSpec.CardNumber],
+            when (isEligibleForCardBrandChoice) {
+                true -> CardBrandChoiceConfig.Eligible(
+                    initialBrand = initialValues[
+                        IdentifierSpec.PreferredCardBrand
+                    ]?.let { value ->
+                        CardBrand.fromCode(value)
+                    }
+                )
+                false -> CardBrandChoiceConfig.Ineligible
+            },
+        )
     )
 
     val cvcElement = CvcElement(
