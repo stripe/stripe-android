@@ -5,6 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PrimaryButtonLabelSettingsDefinition
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -73,159 +74,159 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         )
     }
 
-//    @Test
-//    fun testPaymentSheetNewCustomerAppearance() {
-//        testDriver.screenshotRegression(
-//            testParams.copy(
-//                forceDarkMode = false,
-//                appearance = appearance
-//            )
-//        )
-//    }
-//
-//    @Test
-//    fun testPaymentSheetNewCustomerDark() {
-//        testDriver.screenshotRegression(
-//            testParams.copy(forceDarkMode = true)
-//        )
-//    }
-//
-//    @Test
-//    fun testPaymentSheetNewCustomerDarkAppearance() {
-//        testDriver.screenshotRegression(
-//            testParams.copy(forceDarkMode = true, appearance = appearance)
-//        )
-//    }
-//
-//    @Test
-//    fun testPaymentSheetReturningCustomerLight() {
-//        testDriver.screenshotRegression(
-//            testParams.copy(forceDarkMode = false).copyPlaygroundSettings { settings ->
-//                settings[CustomerSettingsDefinition] =
-//                    CustomerSettingsDefinition.CustomerType.RETURNING
-//            }
-//        )
-//    }
-//
-//    @Test
-//    fun testPaymentSheetReturningCustomerLightAppearance() {
-//        testDriver.screenshotRegression(
-//            testParams.copy(
-//                forceDarkMode = false,
-//                appearance = appearance
-//            ).copyPlaygroundSettings { settings ->
-//                settings[CustomerSettingsDefinition] =
-//                    CustomerSettingsDefinition.CustomerType.RETURNING
-//            }
-//        )
-//    }
-//
-//    @Test
-//    fun testPaymentSheetReturningCustomerDark() {
-//        testDriver.screenshotRegression(
-//            testParams.copy(forceDarkMode = true).copyPlaygroundSettings { settings ->
-//                settings[CustomerSettingsDefinition] =
-//                    CustomerSettingsDefinition.CustomerType.RETURNING
-//            }
-//        )
-//    }
-//
-//    @Test
-//    fun testPaymentSheetReturningCustomerDarkAppearance() {
-//        testDriver.screenshotRegression(
-//            testParams.copy(
-//                forceDarkMode = true,
-//                appearance = appearance
-//            ).copyPlaygroundSettings { settings ->
-//                settings[CustomerSettingsDefinition] =
-//                    CustomerSettingsDefinition.CustomerType.RETURNING
-//            }
-//        )
-//    }
-//
-//    @Test
-//    fun testPaymentSheetEditPaymentMethodsLight() {
-//        testDriver.screenshotRegression(
-//            testParameters = testParams.copy(forceDarkMode = false)
-//                .copyPlaygroundSettings { settings ->
-//                    settings[CustomerSettingsDefinition] =
-//                        CustomerSettingsDefinition.CustomerType.RETURNING
-//                },
-//            customOperations = {
-//                testDriver.pressEdit()
-//            }
-//        )
-//    }
-//
-//    @Test
-//    fun testPaymentSheetEditPaymentMethodsLightAppearance() {
-//        testDriver.screenshotRegression(
-//            testParameters = testParams.copy(
-//                forceDarkMode = false,
-//                appearance = appearance
-//            ).copyPlaygroundSettings { settings ->
-//                settings[CustomerSettingsDefinition] =
-//                    CustomerSettingsDefinition.CustomerType.RETURNING
-//            },
-//            customOperations = {
-//                testDriver.pressEdit()
-//            }
-//        )
-//    }
-//
-//    @Test
-//    fun testPaymentSheetEditPaymentMethodsDark() {
-//        testDriver.screenshotRegression(
-//            testParameters = testParams.copy(forceDarkMode = true)
-//                .copyPlaygroundSettings { settings ->
-//                    settings[CustomerSettingsDefinition] =
-//                        CustomerSettingsDefinition.CustomerType.RETURNING
-//                },
-//            customOperations = {
-//                testDriver.pressEdit()
-//            }
-//        )
-//    }
-//
-//    @Test
-//    fun testPaymentSheetEditPaymentMethodsDarkAppearance() {
-//        testDriver.screenshotRegression(
-//            testParameters = testParams.copy(
-//                forceDarkMode = true,
-//                appearance = appearance
-//            ).copyPlaygroundSettings { settings ->
-//                settings[CustomerSettingsDefinition] =
-//                    CustomerSettingsDefinition.CustomerType.RETURNING
-//            },
-//            customOperations = {
-//                testDriver.pressEdit()
-//            }
-//        )
-//    }
-//
-//    @Test
-//    fun testPaymentSheetPrimaryButtonAppearanceLight() {
-//        testDriver.screenshotRegression(
-//            testParams.copy(
-//                forceDarkMode = false,
-//                appearance = PaymentSheet.Appearance(
-//                    primaryButton = primaryButton
-//                )
-//            )
-//        )
-//    }
-//
-//    @Test
-//    fun testPaymentSheetPrimaryButtonAppearanceDark() {
-//        testDriver.screenshotRegression(
-//            testParams.copy(
-//                forceDarkMode = true,
-//                appearance = PaymentSheet.Appearance(
-//                    primaryButton = primaryButton
-//                )
-//            )
-//        )
-//    }
+    @Test
+    fun testPaymentSheetNewCustomerAppearance() {
+        testDriver.screenshotRegression(
+            testParams.copy(
+                forceDarkMode = false,
+                appearance = appearance
+            )
+        )
+    }
+
+    @Test
+    fun testPaymentSheetNewCustomerDark() {
+        testDriver.screenshotRegression(
+            testParams.copy(forceDarkMode = true)
+        )
+    }
+
+    @Test
+    fun testPaymentSheetNewCustomerDarkAppearance() {
+        testDriver.screenshotRegression(
+            testParams.copy(forceDarkMode = true, appearance = appearance)
+        )
+    }
+
+    @Test
+    fun testPaymentSheetReturningCustomerLight() {
+        testDriver.screenshotRegression(
+            testParams.copy(forceDarkMode = false).copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] =
+                    CustomerSettingsDefinition.CustomerType.RETURNING
+            }
+        )
+    }
+
+    @Test
+    fun testPaymentSheetReturningCustomerLightAppearance() {
+        testDriver.screenshotRegression(
+            testParams.copy(
+                forceDarkMode = false,
+                appearance = appearance
+            ).copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] =
+                    CustomerSettingsDefinition.CustomerType.RETURNING
+            }
+        )
+    }
+
+    @Test
+    fun testPaymentSheetReturningCustomerDark() {
+        testDriver.screenshotRegression(
+            testParams.copy(forceDarkMode = true).copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] =
+                    CustomerSettingsDefinition.CustomerType.RETURNING
+            }
+        )
+    }
+
+    @Test
+    fun testPaymentSheetReturningCustomerDarkAppearance() {
+        testDriver.screenshotRegression(
+            testParams.copy(
+                forceDarkMode = true,
+                appearance = appearance
+            ).copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] =
+                    CustomerSettingsDefinition.CustomerType.RETURNING
+            }
+        )
+    }
+
+    @Test
+    fun testPaymentSheetEditPaymentMethodsLight() {
+        testDriver.screenshotRegression(
+            testParameters = testParams.copy(forceDarkMode = false)
+                .copyPlaygroundSettings { settings ->
+                    settings[CustomerSettingsDefinition] =
+                        CustomerSettingsDefinition.CustomerType.RETURNING
+                },
+            customOperations = {
+                testDriver.pressEdit()
+            }
+        )
+    }
+
+    @Test
+    fun testPaymentSheetEditPaymentMethodsLightAppearance() {
+        testDriver.screenshotRegression(
+            testParameters = testParams.copy(
+                forceDarkMode = false,
+                appearance = appearance
+            ).copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] =
+                    CustomerSettingsDefinition.CustomerType.RETURNING
+            },
+            customOperations = {
+                testDriver.pressEdit()
+            }
+        )
+    }
+
+    @Test
+    fun testPaymentSheetEditPaymentMethodsDark() {
+        testDriver.screenshotRegression(
+            testParameters = testParams.copy(forceDarkMode = true)
+                .copyPlaygroundSettings { settings ->
+                    settings[CustomerSettingsDefinition] =
+                        CustomerSettingsDefinition.CustomerType.RETURNING
+                },
+            customOperations = {
+                testDriver.pressEdit()
+            }
+        )
+    }
+
+    @Test
+    fun testPaymentSheetEditPaymentMethodsDarkAppearance() {
+        testDriver.screenshotRegression(
+            testParameters = testParams.copy(
+                forceDarkMode = true,
+                appearance = appearance
+            ).copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] =
+                    CustomerSettingsDefinition.CustomerType.RETURNING
+            },
+            customOperations = {
+                testDriver.pressEdit()
+            }
+        )
+    }
+
+    @Test
+    fun testPaymentSheetPrimaryButtonAppearanceLight() {
+        testDriver.screenshotRegression(
+            testParams.copy(
+                forceDarkMode = false,
+                appearance = PaymentSheet.Appearance(
+                    primaryButton = primaryButton
+                )
+            )
+        )
+    }
+
+    @Test
+    fun testPaymentSheetPrimaryButtonAppearanceDark() {
+        testDriver.screenshotRegression(
+            testParams.copy(
+                forceDarkMode = true,
+                appearance = PaymentSheet.Appearance(
+                    primaryButton = primaryButton
+                )
+            )
+        )
+    }
 
     @Test
     fun testPaymentSheetCustomPrimaryButtonLabel() {

@@ -1,6 +1,7 @@
 package com.stripe.android.test.core
 
 import androidx.test.platform.app.InstrumentationRegistry
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
@@ -24,6 +25,8 @@ internal data class TestParameters(
     val authorizationAction: AuthorizeAction? = null,
     val snapshotReturningCustomer: Boolean = false,
     val playgroundSettingsSnapshot: PlaygroundSettings.Snapshot = playgroundSettings().snapshot(),
+    val forceDarkMode:Boolean = false,
+    val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
 ) {
     fun copyPlaygroundSettings(block: (PlaygroundSettings) -> Unit): TestParameters {
         val playgroundSettings = playgroundSettingsSnapshot.playgroundSettings()
