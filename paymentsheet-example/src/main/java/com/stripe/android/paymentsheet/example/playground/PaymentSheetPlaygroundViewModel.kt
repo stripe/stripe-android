@@ -1,7 +1,10 @@
 package com.stripe.android.paymentsheet.example.playground
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
@@ -31,7 +34,8 @@ import kotlinx.serialization.json.Json
 import java.io.IOException
 
 internal class PaymentSheetPlaygroundViewModel(
-    application: Application
+    application: Application,
+    launchUri: Uri?,
 ) : AndroidViewModel(application) {
     private val settings by lazy {
         Settings(application)
@@ -45,7 +49,8 @@ internal class PaymentSheetPlaygroundViewModel(
     init {
         viewModelScope.launch(Dispatchers.IO) {
             playgroundSettingsFlow.value =
-                PlaygroundSettings.createFromSharedPreferences(application)
+                PaymentSheetPlaygroundUrlHelper.settingsFromUri(launchUri)
+                    ?: PlaygroundSettings.createFromSharedPreferences(application)
         }
     }
 
@@ -241,6 +246,16 @@ internal class PaymentSheetPlaygroundViewModel(
             }
         }
         return createIntentResult
+    }
+
+    internal class Factory(
+        private val applicationSupplier: () -> Application,
+        private val uriSupplier: () -> Uri?,
+    ) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            @Suppress("UNCHECKED_CAST")
+            return PaymentSheetPlaygroundViewModel(applicationSupplier(), uriSupplier()) as T
+        }
     }
 }
 

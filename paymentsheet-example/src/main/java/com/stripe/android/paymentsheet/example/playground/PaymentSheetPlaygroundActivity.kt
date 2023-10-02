@@ -17,8 +17,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTypeSettingsDefinition
@@ -30,7 +32,12 @@ import com.stripe.android.paymentsheet.rememberPaymentSheet
 import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
 
 internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
-    private val viewModel: PaymentSheetPlaygroundViewModel by viewModels()
+    val viewModel: PaymentSheetPlaygroundViewModel by viewModels {
+        PaymentSheetPlaygroundViewModel.Factory(
+            applicationSupplier = { application },
+            uriSupplier = { intent.data },
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +65,9 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     modifier = Modifier.verticalScroll(rememberScrollState())
                 ) {
                     SettingsUi(playgroundSettings = localPlaygroundSettings)
+
+                    QrCodeButton(playgroundSettings = localPlaygroundSettings)
+
                     ReloadButton(playgroundSettings = localPlaygroundSettings)
 
                     val playgroundState by viewModel.state.collectAsState()
@@ -76,6 +86,23 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun QrCodeButton(playgroundSettings: PlaygroundSettings) {
+        val context = LocalContext.current
+        Button(
+            onClick = {
+                context.startActivity(
+                    QrCodeActivity.create(
+                        context = context,
+                        settingsJson = playgroundSettings.snapshot().asJsonString(),
+                    )
+                )
+            },
+        ) {
+            Text("QR code for current settings")
         }
     }
 
