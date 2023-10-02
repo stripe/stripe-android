@@ -1,75 +1,77 @@
 package com.stripe.android.test.core
 
-import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.example.playground.model.InitializationType
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
+import androidx.test.platform.app.InstrumentationRegistry
+import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultShippingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
+import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.utils.initializedLpmRepository
 
 /**
  * This is the data class that represents the parameters used to run the test.
  */
-data class TestParameters(
-    val initializationType: InitializationType = InitializationType.Normal,
-    val paymentMethod: SupportedPaymentMethod,
-    val customer: Customer,
-    val linkState: LinkState = LinkState.Off,
-    val googlePayState: GooglePayState,
-    val currency: Currency,
-    val intentType: IntentType,
-    val billing: Billing,
-    val shipping: Shipping,
-    val delayed: DelayedPMs,
-    val automatic: Automatic,
+internal data class TestParameters(
+    val paymentMethod: LpmRepository.SupportedPaymentMethod,
     val saveCheckboxValue: Boolean,
     val saveForFutureUseCheckboxVisible: Boolean,
     val useBrowser: Browser? = null,
     val authorizationAction: AuthorizeAction? = null,
-    val forceDarkMode: Boolean? = null,
-    val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
     val snapshotReturningCustomer: Boolean = false,
-    val merchantCountryCode: String,
-    val supportedPaymentMethods: List<PaymentMethodCode> = listOf(),
-    val customPrimaryButtonLabel: String? = null,
-    val attachDefaults: Boolean = false,
-    val collectName: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-    val collectEmail: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-    val collectPhone: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-    val collectAddress: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-)
+    val playgroundSettingsSnapshot: PlaygroundSettings.Snapshot = playgroundSettings().snapshot(),
+) {
+    fun copyPlaygroundSettings(block: (PlaygroundSettings) -> Unit): TestParameters {
+        val playgroundSettings = playgroundSettingsSnapshot.playgroundSettings()
+        block(playgroundSettings)
+        return copy(playgroundSettingsSnapshot = playgroundSettings.snapshot())
+    }
 
-/**
- * Indicates if automatic payment methods are used on the payment intent
- */
-enum class Automatic {
-    On,
-    Off
-}
+    companion object {
+        fun create(
+            paymentMethodCode: String,
+            playgroundSettingsBlock: (PlaygroundSettings) -> Unit = {},
+        ): TestParameters {
+            return create(
+                paymentMethod = lpmRepository.fromCode(paymentMethodCode)!!,
+                playgroundSettingsBlock = playgroundSettingsBlock,
+            )
+        }
 
-/**
- * Indicates if delayed payment methods are used on the payment intent
- */
-enum class DelayedPMs {
-    On,
-    Off
-}
+        fun create(
+            paymentMethod: LpmRepository.SupportedPaymentMethod,
+            playgroundSettingsBlock: (PlaygroundSettings) -> Unit = {},
+        ): TestParameters {
+            return TestParameters(
+                paymentMethod = paymentMethod,
+                saveCheckboxValue = false,
+                saveForFutureUseCheckboxVisible = false,
+                authorizationAction = AuthorizeAction.AuthorizePayment,
+                playgroundSettingsSnapshot = playgroundSettings(playgroundSettingsBlock).snapshot()
+            )
+        }
 
-/**
- * Indicates if default billing details should be provided in the PaymentSheet.Configuration.
- * Setting this to on will make the test run faster so not as many fields
- * need to be filled out.
- */
-enum class Billing {
-    On,
-    Off
-}
+        fun playgroundSettings(block: (PlaygroundSettings) -> Unit = {}): PlaygroundSettings {
+            val settings = PlaygroundSettings.createFromDefaults()
+            settings[CustomerSettingsDefinition] = CustomerSettingsDefinition.CustomerType.NEW
+            settings[LinkSettingsDefinition] = false
+            settings[CountrySettingsDefinition] = CountrySettingsDefinition.Country.GB
+            settings[CurrencySettingsDefinition] = CurrencySettingsDefinition.Currency.EUR
+            settings[DefaultShippingAddressSettingsDefinition] = false
+            settings[DelayedPaymentMethodsSettingsDefinition] = false
+            settings[AutomaticPaymentMethodsSettingsDefinition] = false
+            block(settings)
+            return settings
+        }
 
-/**
- * Indicates if shipping should be provided on the payment intent
- */
-enum class Shipping {
-    On,
-    OnWithDefaults,
-    Off
+        private val lpmRepository = initializedLpmRepository(
+            context = InstrumentationRegistry.getInstrumentation().targetContext,
+        )
+    }
 }
 
 /**
@@ -84,93 +86,47 @@ enum class Browser {
  * Indicate the payment method for this test expects authorization and how the authorization
  * should be handled: complete, fail, cancel
  */
-sealed interface AuthorizeAction {
+internal sealed interface AuthorizeAction {
 
-    fun text(intentType: IntentType): String
+    fun text(checkoutMode: CheckoutModeSettingsDefinition.CheckoutMode): String
 
     val requiresBrowser: Boolean
 
     object PollingSucceedsAfterDelay : AuthorizeAction {
-        override fun text(intentType: IntentType): String = "POLLING SUCCEEDS AFTER DELAY"
+        override fun text(checkoutMode: CheckoutModeSettingsDefinition.CheckoutMode): String =
+            "POLLING SUCCEEDS AFTER DELAY"
+
         override val requiresBrowser: Boolean = false
     }
 
     object AuthorizePayment : AuthorizeAction {
-        override fun text(intentType: IntentType): String {
-            return if (intentType == IntentType.Setup) {
+        override fun text(checkoutMode: CheckoutModeSettingsDefinition.CheckoutMode): String {
+            return if (checkoutMode == CheckoutModeSettingsDefinition.CheckoutMode.SETUP) {
                 "AUTHORIZE TEST SETUP"
             } else {
                 "AUTHORIZE TEST PAYMENT"
             }
         }
+
         override val requiresBrowser: Boolean = true
     }
 
     object DisplayQrCode : AuthorizeAction {
-        override fun text(intentType: IntentType): String = "Display QR code"
+        override fun text(checkoutMode: CheckoutModeSettingsDefinition.CheckoutMode): String =
+            "Display QR code"
+
         override val requiresBrowser: Boolean = false
     }
 
     data class Fail(val expectedError: String) : AuthorizeAction {
-        override fun text(intentType: IntentType): String = "FAIL TEST PAYMENT"
+        override fun text(checkoutMode: CheckoutModeSettingsDefinition.CheckoutMode): String =
+            "FAIL TEST PAYMENT"
+
         override val requiresBrowser: Boolean = true
     }
 
     object Cancel : AuthorizeAction {
-        override fun text(intentType: IntentType): String = ""
+        override fun text(checkoutMode: CheckoutModeSettingsDefinition.CheckoutMode): String = ""
         override val requiresBrowser: Boolean = true
     }
-}
-
-/**
- * Indicates how the payment intent should be set: PaymentIntent, PaymentIntent with
- * setup for future usage set, or SetupIntent
- */
-enum class IntentType {
-    Pay,
-    PayWithSetup,
-    Setup,
-}
-
-/**
- * Indicates the currency to use on the PaymentIntent
- */
-enum class Currency {
-    USD,
-    EUR,
-    AUD,
-    GBP,
-    INR,
-    SGD,
-    PLN,
-    MYR,
-    BRL,
-    MXN,
-    JPY,
-    SEK,
-}
-
-/**
- * Indicates the state of Link in the PaymentSheet Configuration
- */
-enum class LinkState {
-    On,
-    Off
-}
-
-/**
- * Indicates the state of Google Pay in the PaymentSheet Configuration
- */
-enum class GooglePayState {
-    On,
-    Off
-}
-
-/**
- * Indicates the type of customer to use.
- */
-enum class Customer {
-    Guest,
-    New,
-    Returning,
 }

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -24,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -40,6 +42,15 @@ import com.stripe.android.paymentsheet.rememberPaymentSheet
 import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
 
 internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
+    companion object {
+        fun createTestIntent(settingsJson: String): Intent {
+            return Intent(
+                Intent.ACTION_VIEW,
+                PaymentSheetPlaygroundUrlHelper.createUri(settingsJson)
+            )
+        }
+    }
+
     val viewModel: PaymentSheetPlaygroundViewModel by viewModels {
         PaymentSheetPlaygroundViewModel.Factory(
             applicationSupplier = { application },
@@ -130,7 +141,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     playgroundSettings = playgroundSettings,
                 )
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .testTag("RELOAD"),
         ) {
             Text("Reload")
         }
@@ -172,7 +184,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             onClick = {
                 presentPaymentSheet(paymentSheet, playgroundState)
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .testTag("CHECKOUT"),
         ) {
             Text("Checkout")
         }

@@ -1,40 +1,11 @@
 name: Instrumentation tests
 on:
+  pull_request:
   workflow_dispatch:
   schedule:
     # every 12 hours
     - cron: '0 */12 * * *'
 jobs:
-  # This should be updated to use the browserstack github actions when supported
-  browserstack-instrumentation-tests:
-    name: Browserstack Instrumentation tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 55
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/stripe_setup
-      - name: 'Build'
-        run: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug
-
-      - name: 'Install pip modules'
-        run: pip install requests_toolbelt requests
-
-      - name: 'Run BrowserStack tests'
-        env:
-          BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
-          BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-        run: python scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk --is-nightly
-
-      - name: Notify failure endpoint
-        id: notifyFailureEndpoint
-        if: failure()
-        run: |
-          ./scripts/notify_failure_endpoint.rb \
-          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
-          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
-          "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}" \
-          RUN_MOBILESDK
-
   screenshot-regression-tests:
     runs-on: macos-latest
     steps:

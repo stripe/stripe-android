@@ -1,32 +1,35 @@
 package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.BaseLpmTest
-import com.stripe.android.test.core.Automatic
-import com.stripe.android.test.core.Currency
+import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.test.core.TestParameters
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-internal class TestFpx : BaseLpmTest() {
-    private val fpx = newUser.copy(
-        paymentMethod = lpmRepository.fromCode("fpx")!!,
-        currency = Currency.MYR,
-        merchantCountryCode = "MY",
-        automatic = Automatic.On,
-    )
+internal class TestFpx : BasePlaygroundTest() {
+    private val testParameters = TestParameters.create(
+        paymentMethodCode = "fpx",
+    ) { settings ->
+        settings[CountrySettingsDefinition] = CountrySettingsDefinition.Country.MY
+        settings[CurrencySettingsDefinition] = CurrencySettingsDefinition.Currency.MYR
+        settings[AutomaticPaymentMethodsSettingsDefinition] = true
+    }
 
     @Test
     fun testFpx() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters = fpx,
+            testParameters = testParameters,
         )
     }
 
     @Test
     fun testFpxInCustomFlow() {
         testDriver.confirmCustom(
-            testParameters = fpx,
+            testParameters = testParameters,
         )
     }
 }

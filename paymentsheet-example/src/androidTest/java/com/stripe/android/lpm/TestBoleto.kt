@@ -1,26 +1,30 @@
 package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.BaseLpmTest
+import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.AuthorizeAction
-import com.stripe.android.test.core.Billing
-import com.stripe.android.test.core.Currency
-import com.stripe.android.test.core.Customer
-import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.FieldPopulator
-import com.stripe.android.test.core.IntentType
+import com.stripe.android.test.core.TestParameters
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-internal class TestBoleto : BaseLpmTest() {
-    private val boleto = newUser.copy(
-        customer = Customer.Guest,
-        paymentMethod = lpmRepository.fromCode("boleto")!!,
-        currency = Currency.BRL,
-        merchantCountryCode = "BR",
-        delayed = DelayedPMs.On,
-        billing = Billing.Off,
+internal class TestBoleto : BasePlaygroundTest() {
+    private val testParameters = TestParameters.create(
+        paymentMethodCode = "boleto",
+    ) { settings ->
+        settings[CustomerSettingsDefinition] = CustomerSettingsDefinition.CustomerType.GUEST
+        settings[CountrySettingsDefinition] = CountrySettingsDefinition.Country.BR
+        settings[CurrencySettingsDefinition] = CurrencySettingsDefinition.Currency.BRL
+        settings[DelayedPaymentMethodsSettingsDefinition] = true
+        settings[DefaultBillingAddressSettingsDefinition] = false
+    }.copy(
         authorizationAction = AuthorizeAction.DisplayQrCode,
     )
 
@@ -32,7 +36,7 @@ internal class TestBoleto : BaseLpmTest() {
     @Test
     fun testBoleto() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters = boleto,
+            testParameters = testParameters,
             values = boletoValues,
         )
     }
@@ -40,9 +44,10 @@ internal class TestBoleto : BaseLpmTest() {
     @Test
     fun testBoletoSfu() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters = boleto.copy(
-                intentType = IntentType.PayWithSetup,
-            ),
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[CheckoutModeSettingsDefinition] =
+                    CheckoutModeSettingsDefinition.CheckoutMode.PAYMENT_WITH_SETUP
+            },
             values = boletoValues,
         )
     }
@@ -50,9 +55,10 @@ internal class TestBoleto : BaseLpmTest() {
     @Test
     fun testBoletoSetup() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters = boleto.copy(
-                intentType = IntentType.Setup,
-            ),
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[CheckoutModeSettingsDefinition] =
+                    CheckoutModeSettingsDefinition.CheckoutMode.SETUP
+            },
             values = boletoValues,
         )
     }
@@ -60,7 +66,7 @@ internal class TestBoleto : BaseLpmTest() {
     @Test
     fun testBoletoInCustomFlow() {
         testDriver.confirmCustom(
-            testParameters = boleto,
+            testParameters = testParameters,
             values = boletoValues,
         )
     }
