@@ -1,20 +1,4 @@
-
-> Configure project :
-Running on CI: false
-
-> Task :payments-core:dependencies
-
-------------------------------------------------------------
 Project ':payments-core'
-------------------------------------------------------------
-
-_agp_internal_javaPreCompileDebugAndroidTest_kspClasspath
-No dependencies
-
-_agp_internal_javaPreCompileDebugUnitTest_kspClasspath
-No dependencies
-
-_agp_internal_javaPreCompileDebug_kspClasspath
 \--- com.google.dagger:dagger-compiler:2.48
      +--- com.google.dagger:dagger:2.48
      |    \--- javax.inject:javax.inject:1
@@ -61,11 +45,6 @@ _agp_internal_javaPreCompileDebug_kspClasspath
      +--- net.ltgt.gradle.incap:incap:0.2
      +--- org.checkerframework:checker-compat-qual:2.5.5
      \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.0 (*)
-
-_agp_internal_javaPreCompileReleaseUnitTest_kspClasspath
-No dependencies
-
-_agp_internal_javaPreCompileRelease_kspClasspath
 \--- com.google.dagger:dagger-compiler:2.48
      +--- com.google.dagger:dagger:2.48
      |    \--- javax.inject:javax.inject:1
@@ -112,68 +91,10 @@ _agp_internal_javaPreCompileRelease_kspClasspath
      +--- net.ltgt.gradle.incap:incap:0.2
      +--- org.checkerframework:checker-compat-qual:2.5.5
      \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.0 (*)
-
-androidApis - Configuration providing various types of Android JAR file
-No dependencies
-
-androidJdkImage - Configuration providing JDK image for compiling Java 9+ sources
-No dependencies
-
-androidTestAnnotationProcessor - Classpath for the annotation processor for 'androidTest'. (n)
-No dependencies
-
-androidTestApi (n)
-No dependencies
-
-androidTestApiDependenciesMetadata
-No dependencies
-
-androidTestCompileOnly - Compile only dependencies for 'androidTest' sources. (n)
-No dependencies
-
-androidTestCompileOnlyDependenciesMetadata
-No dependencies
-
-androidTestDebugAnnotationProcessor - Classpath for the annotation processor for 'androidTestDebug'. (n)
-No dependencies
-
-androidTestDebugApi (n)
-No dependencies
-
-androidTestDebugApiDependenciesMetadata
-No dependencies
-
-androidTestDebugCompileOnly - Compile only dependencies for 'androidTestDebug' sources. (n)
-No dependencies
-
-androidTestDebugCompileOnlyDependenciesMetadata
-No dependencies
-
-androidTestDebugImplementation - Implementation only dependencies for 'androidTestDebug' sources. (n)
-No dependencies
-
-androidTestDebugImplementationDependenciesMetadata
-No dependencies
-
-androidTestDebugIntransitiveDependenciesMetadata
-No dependencies
-
-androidTestDebugRuntimeOnly - Runtime only dependencies for 'androidTestDebug' sources. (n)
-No dependencies
-
-androidTestDebugRuntimeOnlyDependenciesMetadata
-No dependencies
-
-androidTestDebugWearApp - Link to a wear app to embed for object 'androidTestDebug'. (n)
-No dependencies
-
-androidTestImplementation - Implementation only dependencies for 'androidTest' sources. (n)
 +--- project stripe-ui-core (n)
 +--- androidx.test.espresso:espresso-core:3.5.1 (n)
 +--- androidx.test:rules:1.5.0 (n)
 \--- androidx.test:runner:1.5.2 (n)
-
-androidTestImplementationDependenciesMetadata
 +--- project :stripe-ui-core FAILED
 +--- androidx.test.espresso:espresso-core:3.5.1
 |    +--- androidx.annotation:annotation:1.2.0
@@ -222,65 +143,11 @@ androidTestImplementationDependenciesMetadata
 |    +--- androidx.test:runner:1.5.0 -> 1.5.2 (*)
 |    \--- androidx.test:annotation:1.0.1 (*)
 \--- androidx.test:runner:1.5.2 (*)
-
-androidTestIntransitiveDependenciesMetadata
-No dependencies
-
-androidTestReleaseAnnotationProcessor - Classpath for the annotation processor for 'androidTestRelease'. (n)
-No dependencies
-
-androidTestReleaseApi (n)
-No dependencies
-
-androidTestReleaseApiDependenciesMetadata
-No dependencies
-
-androidTestReleaseCompileOnly - Compile only dependencies for 'androidTestRelease' sources. (n)
-No dependencies
-
-androidTestReleaseCompileOnlyDependenciesMetadata
-No dependencies
-
-androidTestReleaseImplementation - Implementation only dependencies for 'androidTestRelease' sources. (n)
-No dependencies
-
-androidTestReleaseImplementationDependenciesMetadata
-No dependencies
-
-androidTestReleaseIntransitiveDependenciesMetadata
-No dependencies
-
-androidTestReleaseRuntimeOnly - Runtime only dependencies for 'androidTestRelease' sources. (n)
-No dependencies
-
-androidTestReleaseRuntimeOnlyDependenciesMetadata
-No dependencies
-
-androidTestReleaseWearApp - Link to a wear app to embed for object 'androidTestRelease'. (n)
-No dependencies
-
-androidTestRuntimeOnly - Runtime only dependencies for 'androidTest' sources. (n)
-No dependencies
-
-androidTestRuntimeOnlyDependenciesMetadata
-No dependencies
-
-androidTestUtil - Additional APKs used during instrumentation testing.
 \--- androidx.test:orchestrator:1.4.2
      \--- androidx.test.services:test-services:1.4.2
-
-androidTestWearApp - Link to a wear app to embed for object 'androidTest'. (n)
-No dependencies
-
-annotationProcessor - Classpath for the annotation processor for 'main'. (n)
-No dependencies
-
-api - API dependencies for 'main' sources. (n)
 +--- project stripe-core (n)
 +--- project payments-model (n)
 \--- androidx.databinding:viewbinding:8.1.1 (n)
-
-apiDependenciesMetadata
 +--- project :stripe-core FAILED
 +--- project :payments-model FAILED
 +--- androidx.databinding:viewbinding:8.1.1
@@ -291,8 +158,6 @@ apiDependenciesMetadata
      |    \--- org.jetbrains:annotations:13.0
      \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0
           \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-
-checkstyle - The Checkstyle libraries to be used for this project.
 \--- com.puppycrawl.tools:checkstyle:9.3
      +--- info.picocli:picocli:4.6.2
      +--- org.antlr:antlr4-runtime:4.9.3
@@ -309,38 +174,8 @@ checkstyle - The Checkstyle libraries to be used for this project.
      |    +--- org.javassist:javassist:3.28.0-GA
      |    \--- com.google.code.findbugs:jsr305:3.0.2
      \--- net.sf.saxon:Saxon-HE:10.6
-
-compileOnly - Compile only dependencies for 'main' sources. (n)
 \--- project financial-connections (n)
-
-compileOnlyDependenciesMetadata
 \--- project :financial-connections FAILED
-
-coreLibraryDesugaring - Configuration to desugar libraries
-No dependencies
-
-debugAndroidTestAnnotationProcessorClasspath - Resolved configuration for annotation-processor for variant: debugAndroidTest
-No dependencies
-
-debugAndroidTestApi (n)
-No dependencies
-
-debugAndroidTestApiDependenciesMetadata
-No dependencies
-
-debugAndroidTestCompilationApi - API dependencies for compilation 'debugAndroidTest' (target  (androidJvm)). (n)
-No dependencies
-
-debugAndroidTestCompilationCompileOnly - Compile only dependencies for compilation 'debugAndroidTest' (target  (androidJvm)). (n)
-No dependencies
-
-debugAndroidTestCompilationImplementation - Implementation only dependencies for compilation 'debugAndroidTest' (target  (androidJvm)). (n)
-No dependencies
-
-debugAndroidTestCompilationRuntimeOnly - Runtime only dependencies for compilation 'debugAndroidTest' (target  (androidJvm)). (n)
-No dependencies
-
-debugAndroidTestCompileClasspath - Compile classpath for compilation 'debugAndroidTest' (target  (androidJvm)).
 +--- project :stripe-ui-core
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 1.8.10
 |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.21
@@ -944,23 +779,6 @@ debugAndroidTestCompileClasspath - Compile classpath for compilation 'debugAndro
 +--- androidx.print:print:{strictly 1.0.0} -> 1.0.0 (c)
 +--- androidx.compose.foundation:foundation-layout:{strictly 1.5.1} -> 1.5.1 (c)
 \--- androidx.compose.foundation:foundation-layout-android:{strictly 1.5.1} -> 1.5.1 (c)
-
-debugAndroidTestCompileOnly (n)
-No dependencies
-
-debugAndroidTestCompileOnlyDependenciesMetadata
-No dependencies
-
-debugAndroidTestImplementation (n)
-No dependencies
-
-debugAndroidTestImplementationDependenciesMetadata
-No dependencies
-
-debugAndroidTestIntransitiveDependenciesMetadata
-No dependencies
-
-debugAndroidTestRuntimeClasspath - Runtime classpath of compilation 'debugAndroidTest' (target  (androidJvm)).
 +--- project :stripe-ui-core
 |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 1.8.10
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.21
@@ -1879,47 +1697,6 @@ debugAndroidTestRuntimeClasspath - Runtime classpath of compilation 'debugAndroi
      +--- org.bouncycastle:bcprov-jdk15to18:1.69
      \--- com.nimbusds:nimbus-jose-jwt:9.21
           \--- com.github.stephenc.jcip:jcip-annotations:1.0-1
-
-debugAndroidTestRuntimeOnly (n)
-No dependencies
-
-debugAndroidTestRuntimeOnlyDependenciesMetadata
-No dependencies
-
-debugAnnotationProcessor - Classpath for the annotation processor for 'debug'. (n)
-No dependencies
-
-debugAnnotationProcessorClasspath - Resolved configuration for annotation-processor for variant: debug
-No dependencies
-
-debugApi - API dependencies for 'debug' sources. (n)
-No dependencies
-
-debugApiDependenciesMetadata
-No dependencies
-
-debugApiElements - API elements for debug (n)
-No dependencies
-
-debugApiElements-published (n)
-No dependencies
-
-debugArchives (n)
-No dependencies
-
-debugCompilationApi - API dependencies for compilation 'debug' (target  (androidJvm)). (n)
-No dependencies
-
-debugCompilationCompileOnly - Compile only dependencies for compilation 'debug' (target  (androidJvm)). (n)
-No dependencies
-
-debugCompilationImplementation - Implementation only dependencies for compilation 'debug' (target  (androidJvm)). (n)
-No dependencies
-
-debugCompilationRuntimeOnly - Runtime only dependencies for compilation 'debug' (target  (androidJvm)). (n)
-No dependencies
-
-debugCompileClasspath - Compile classpath for compilation 'debug' (target  (androidJvm)).
 +--- project :stripe-core
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 1.8.10
 |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.21
@@ -2462,23 +2239,6 @@ debugCompileClasspath - Compile classpath for compilation 'debug' (target  (andr
 +--- androidx.print:print:{strictly 1.0.0} -> 1.0.0 (c)
 +--- androidx.compose.foundation:foundation-layout:{strictly 1.5.1} -> 1.5.1 (c)
 \--- androidx.compose.foundation:foundation-layout-android:{strictly 1.5.1} -> 1.5.1 (c)
-
-debugCompileOnly - Compile only dependencies for 'debug' sources. (n)
-No dependencies
-
-debugCompileOnlyDependenciesMetadata
-No dependencies
-
-debugImplementation - Implementation only dependencies for 'debug' sources. (n)
-No dependencies
-
-debugImplementationDependenciesMetadata
-No dependencies
-
-debugIntransitiveDependenciesMetadata
-No dependencies
-
-debugRuntimeClasspath - Runtime classpath of compilation 'debug' (target  (androidJvm)).
 +--- project :stripe-core
 |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 1.8.10
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.21
@@ -3212,44 +2972,6 @@ debugRuntimeClasspath - Runtime classpath of compilation 'debug' (target  (andro
      +--- org.bouncycastle:bcprov-jdk15to18:1.69
      \--- com.nimbusds:nimbus-jose-jwt:9.21
           \--- com.github.stephenc.jcip:jcip-annotations:1.0-1
-
-debugRuntimeElements - Runtime elements for debug (n)
-No dependencies
-
-debugRuntimeElements-published (n)
-No dependencies
-
-debugRuntimeOnly - Runtime only dependencies for 'debug' sources. (n)
-No dependencies
-
-debugRuntimeOnlyDependenciesMetadata
-No dependencies
-
-debugSourceArtifacts (n)
-No dependencies
-
-debugUnitTestAnnotationProcessorClasspath - Resolved configuration for annotation-processor for variant: debugUnitTest
-No dependencies
-
-debugUnitTestApi (n)
-No dependencies
-
-debugUnitTestApiDependenciesMetadata
-No dependencies
-
-debugUnitTestCompilationApi - API dependencies for compilation 'debugUnitTest' (target  (androidJvm)). (n)
-No dependencies
-
-debugUnitTestCompilationCompileOnly - Compile only dependencies for compilation 'debugUnitTest' (target  (androidJvm)). (n)
-No dependencies
-
-debugUnitTestCompilationImplementation - Implementation only dependencies for compilation 'debugUnitTest' (target  (androidJvm)). (n)
-No dependencies
-
-debugUnitTestCompilationRuntimeOnly - Runtime only dependencies for compilation 'debugUnitTest' (target  (androidJvm)). (n)
-No dependencies
-
-debugUnitTestCompileClasspath - Compile classpath for compilation 'debugUnitTest' (target  (androidJvm)).
 +--- project :stripe-core
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 1.8.10
 |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.21
@@ -4068,23 +3790,6 @@ debugUnitTestCompileClasspath - Compile classpath for compilation 'debugUnitTest
 +--- androidx.compose.foundation:foundation-layout:{strictly 1.5.1} -> 1.5.1 (c)
 +--- com.squareup.okio:okio-jvm:{strictly 3.2.0} -> 3.2.0 (c)
 \--- androidx.compose.foundation:foundation-layout-android:{strictly 1.5.1} -> 1.5.1 (c)
-
-debugUnitTestCompileOnly (n)
-No dependencies
-
-debugUnitTestCompileOnlyDependenciesMetadata
-No dependencies
-
-debugUnitTestImplementation (n)
-No dependencies
-
-debugUnitTestImplementationDependenciesMetadata
-No dependencies
-
-debugUnitTestIntransitiveDependenciesMetadata
-No dependencies
-
-debugUnitTestRuntimeClasspath - Runtime classpath of compilation 'debugUnitTest' (target  (androidJvm)).
 +--- project :payments-core (*)
 +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.0
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.21
@@ -5208,17 +4913,6 @@ debugUnitTestRuntimeClasspath - Runtime classpath of compilation 'debugUnitTest'
      +--- org.bouncycastle:bcprov-jdk15to18:1.69
      \--- com.nimbusds:nimbus-jose-jwt:9.21
           \--- com.github.stephenc.jcip:jcip-annotations:1.0-1
-
-debugUnitTestRuntimeOnly (n)
-No dependencies
-
-debugUnitTestRuntimeOnlyDependenciesMetadata
-No dependencies
-
-debugWearApp - Link to a wear app to embed for object 'debug'. (n)
-No dependencies
-
-detekt - The detekt dependencies to be used for this project.
 \--- io.gitlab.arturbosch.detekt:detekt-cli:1.22.0
      +--- com.beust:jcommander:1.82
      +--- io.gitlab.arturbosch.detekt:detekt-tooling:1.22.0
@@ -5282,8 +4976,6 @@ detekt - The detekt dependencies to be used for this project.
           +--- io.gitlab.arturbosch.detekt:detekt-rules-naming:1.22.0
           +--- io.gitlab.arturbosch.detekt:detekt-rules-performance:1.22.0
           \--- io.gitlab.arturbosch.detekt:detekt-rules-style:1.22.0
-
-detektPlugins - The detektPlugins libraries to be used for this project.
 +--- io.gitlab.arturbosch.detekt:detekt-formatting:1.22.0
 |    +--- com.pinterest.ktlint:ktlint-ruleset-standard:0.47.1
 |    |    +--- com.pinterest.ktlint:ktlint-core:0.47.1
@@ -5357,8 +5049,6 @@ detektPlugins - The detektPlugins libraries to be used for this project.
           +--- io.gitlab.arturbosch.detekt:detekt-rules-naming:1.22.0
           +--- io.gitlab.arturbosch.detekt:detekt-rules-performance:1.22.0
           \--- io.gitlab.arturbosch.detekt:detekt-rules-style:1.22.0
-
-dokkaGfmPartialPlugin
 +--- org.jetbrains.dokka:dokka-analysis:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-intellij:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-compiler:1.9.0-dev-218
@@ -5399,8 +5089,6 @@ dokkaGfmPartialPlugin
      |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.10 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaGfmPartialRuntime
 \--- org.jetbrains.dokka:dokka-core:1.9.0-dev-218
      +--- org.jetbrains.kotlin:kotlin-reflect:1.8.20
      |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.20
@@ -5455,8 +5143,6 @@ dokkaGfmPartialRuntime
      |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaGfmPlugin
 +--- org.jetbrains.dokka:dokka-analysis:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-intellij:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-compiler:1.9.0-dev-218
@@ -5497,8 +5183,6 @@ dokkaGfmPlugin
      |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.10 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaGfmRuntime
 \--- org.jetbrains.dokka:dokka-core:1.9.0-dev-218
      +--- org.jetbrains.kotlin:kotlin-reflect:1.8.20
      |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.20
@@ -5553,8 +5237,6 @@ dokkaGfmRuntime
      |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaHtmlPartialPlugin
 +--- org.jetbrains.dokka:dokka-analysis:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-intellij:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-compiler:1.9.0-dev-218
@@ -5595,8 +5277,6 @@ dokkaHtmlPartialPlugin
      |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.10 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaHtmlPartialRuntime
 \--- org.jetbrains.dokka:dokka-core:1.9.0-dev-218
      +--- org.jetbrains.kotlin:kotlin-reflect:1.8.20
      |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.20
@@ -5651,8 +5331,6 @@ dokkaHtmlPartialRuntime
      |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaHtmlPlugin
 +--- org.jetbrains.dokka:dokka-analysis:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-intellij:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-compiler:1.9.0-dev-218
@@ -5693,8 +5371,6 @@ dokkaHtmlPlugin
      |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.10 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaHtmlRuntime
 \--- org.jetbrains.dokka:dokka-core:1.9.0-dev-218
      +--- org.jetbrains.kotlin:kotlin-reflect:1.8.20
      |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.20
@@ -5749,8 +5425,6 @@ dokkaHtmlRuntime
      |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaJavadocPartialPlugin
 +--- org.jetbrains.dokka:dokka-analysis:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-intellij:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-compiler:1.9.0-dev-218
@@ -5791,8 +5465,6 @@ dokkaJavadocPartialPlugin
      |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.10 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaJavadocPartialRuntime
 \--- org.jetbrains.dokka:dokka-core:1.9.0-dev-218
      +--- org.jetbrains.kotlin:kotlin-reflect:1.8.20
      |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.20
@@ -5847,8 +5519,6 @@ dokkaJavadocPartialRuntime
      |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaJavadocPlugin
 +--- org.jetbrains.dokka:dokka-analysis:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-intellij:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-compiler:1.9.0-dev-218
@@ -5889,8 +5559,6 @@ dokkaJavadocPlugin
      |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.10 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaJavadocRuntime
 \--- org.jetbrains.dokka:dokka-core:1.9.0-dev-218
      +--- org.jetbrains.kotlin:kotlin-reflect:1.8.20
      |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.20
@@ -5945,8 +5613,6 @@ dokkaJavadocRuntime
      |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaJekyllPartialPlugin
 +--- org.jetbrains.dokka:dokka-analysis:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-intellij:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-compiler:1.9.0-dev-218
@@ -5987,8 +5653,6 @@ dokkaJekyllPartialPlugin
      |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.10 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaJekyllPartialRuntime
 \--- org.jetbrains.dokka:dokka-core:1.9.0-dev-218
      +--- org.jetbrains.kotlin:kotlin-reflect:1.8.20
      |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.20
@@ -6043,8 +5707,6 @@ dokkaJekyllPartialRuntime
      |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaJekyllPlugin
 +--- org.jetbrains.dokka:dokka-analysis:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-intellij:1.9.0-dev-218
 |    +--- org.jetbrains.dokka:kotlin-analysis-compiler:1.9.0-dev-218
@@ -6085,8 +5747,6 @@ dokkaJekyllPlugin
      |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.10 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaJekyllRuntime
 \--- org.jetbrains.dokka:dokka-core:1.9.0-dev-218
      +--- org.jetbrains.kotlin:kotlin-reflect:1.8.20
      |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.20
@@ -6141,149 +5801,6 @@ dokkaJekyllRuntime
      |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31 -> 1.8.20
      +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
      \--- com.fasterxml.jackson.core:jackson-databind:2.12.7.1 (c)
-
-dokkaPlugin
-No dependencies
-
-dokkaRuntime
-No dependencies
-
-generatedByKspDebugAndroidTestKotlinApi (n)
-No dependencies
-
-generatedByKspDebugAndroidTestKotlinApiDependenciesMetadata
-No dependencies
-
-generatedByKspDebugAndroidTestKotlinCompileOnly (n)
-No dependencies
-
-generatedByKspDebugAndroidTestKotlinCompileOnlyDependenciesMetadata
-No dependencies
-
-generatedByKspDebugAndroidTestKotlinImplementation (n)
-No dependencies
-
-generatedByKspDebugAndroidTestKotlinImplementationDependenciesMetadata
-No dependencies
-
-generatedByKspDebugAndroidTestKotlinIntransitiveDependenciesMetadata
-No dependencies
-
-generatedByKspDebugAndroidTestKotlinRuntimeOnly (n)
-No dependencies
-
-generatedByKspDebugAndroidTestKotlinRuntimeOnlyDependenciesMetadata
-No dependencies
-
-generatedByKspDebugKotlinApi (n)
-No dependencies
-
-generatedByKspDebugKotlinApiDependenciesMetadata
-No dependencies
-
-generatedByKspDebugKotlinCompileOnly (n)
-No dependencies
-
-generatedByKspDebugKotlinCompileOnlyDependenciesMetadata
-No dependencies
-
-generatedByKspDebugKotlinImplementation (n)
-No dependencies
-
-generatedByKspDebugKotlinImplementationDependenciesMetadata
-No dependencies
-
-generatedByKspDebugKotlinIntransitiveDependenciesMetadata
-No dependencies
-
-generatedByKspDebugKotlinRuntimeOnly (n)
-No dependencies
-
-generatedByKspDebugKotlinRuntimeOnlyDependenciesMetadata
-No dependencies
-
-generatedByKspDebugUnitTestKotlinApi (n)
-No dependencies
-
-generatedByKspDebugUnitTestKotlinApiDependenciesMetadata
-No dependencies
-
-generatedByKspDebugUnitTestKotlinCompileOnly (n)
-No dependencies
-
-generatedByKspDebugUnitTestKotlinCompileOnlyDependenciesMetadata
-No dependencies
-
-generatedByKspDebugUnitTestKotlinImplementation (n)
-No dependencies
-
-generatedByKspDebugUnitTestKotlinImplementationDependenciesMetadata
-No dependencies
-
-generatedByKspDebugUnitTestKotlinIntransitiveDependenciesMetadata
-No dependencies
-
-generatedByKspDebugUnitTestKotlinRuntimeOnly (n)
-No dependencies
-
-generatedByKspDebugUnitTestKotlinRuntimeOnlyDependenciesMetadata
-No dependencies
-
-generatedByKspReleaseKotlinApi (n)
-No dependencies
-
-generatedByKspReleaseKotlinApiDependenciesMetadata
-No dependencies
-
-generatedByKspReleaseKotlinCompileOnly (n)
-No dependencies
-
-generatedByKspReleaseKotlinCompileOnlyDependenciesMetadata
-No dependencies
-
-generatedByKspReleaseKotlinImplementation (n)
-No dependencies
-
-generatedByKspReleaseKotlinImplementationDependenciesMetadata
-No dependencies
-
-generatedByKspReleaseKotlinIntransitiveDependenciesMetadata
-No dependencies
-
-generatedByKspReleaseKotlinRuntimeOnly (n)
-No dependencies
-
-generatedByKspReleaseKotlinRuntimeOnlyDependenciesMetadata
-No dependencies
-
-generatedByKspReleaseUnitTestKotlinApi (n)
-No dependencies
-
-generatedByKspReleaseUnitTestKotlinApiDependenciesMetadata
-No dependencies
-
-generatedByKspReleaseUnitTestKotlinCompileOnly (n)
-No dependencies
-
-generatedByKspReleaseUnitTestKotlinCompileOnlyDependenciesMetadata
-No dependencies
-
-generatedByKspReleaseUnitTestKotlinImplementation (n)
-No dependencies
-
-generatedByKspReleaseUnitTestKotlinImplementationDependenciesMetadata
-No dependencies
-
-generatedByKspReleaseUnitTestKotlinIntransitiveDependenciesMetadata
-No dependencies
-
-generatedByKspReleaseUnitTestKotlinRuntimeOnly (n)
-No dependencies
-
-generatedByKspReleaseUnitTestKotlinRuntimeOnlyDependenciesMetadata
-No dependencies
-
-implementation - Implementation only dependencies for 'main' sources. (n)
 +--- project stripe-ui-core (n)
 +--- com.google.accompanist:accompanist-themeadapter-material:0.30.1 (n)
 +--- androidx.activity:activity-ktx:1.7.2 (n)
@@ -6308,8 +5825,6 @@ implementation - Implementation only dependencies for 'main' sources. (n)
 +--- com.google.android.gms:play-services-wallet:19.2.1 (n)
 +--- com.google.android.instantapps:instantapps:1.1.0 (n)
 \--- com.stripe:stripe-3ds2-android:6.1.7 (n)
-
-implementationDependenciesMetadata
 +--- project :stripe-core FAILED
 +--- project :payments-model FAILED
 +--- androidx.databinding:viewbinding:8.1.1
@@ -6707,11 +6222,6 @@ implementationDependenciesMetadata
 \--- com.stripe:stripe-3ds2-android:6.1.7
      +--- androidx.databinding:viewbinding:7.4.2 -> 8.1.1 (*)
      \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.20 -> 1.8.10 (*)
-
-intransitiveDependenciesMetadata
-No dependencies
-
-javadocDeps
 +--- androidx.annotation:annotation:1.6.0
 |    \--- androidx.annotation:annotation-jvm:1.6.0
 |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
@@ -6906,11 +6416,7 @@ javadocDeps
           +--- androidx.recyclerview:recyclerview:1.1.0 (*)
           +--- androidx.core:core:1.1.0 -> 1.9.0 (*)
           \--- androidx.collection:collection:1.1.0 (*)
-
-kotlin-extension - Configuration for Compose related kotlin compiler extension
 \--- androidx.compose.compiler:compiler:1.4.1
-
-kotlinCompilerClasspath
 \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0
      +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
      |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
@@ -6920,11 +6426,6 @@ kotlinCompilerClasspath
      +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.0
      +--- org.jetbrains.intellij.deps:trove4j:1.0.20200330
      \--- net.java.dev.jna:jna:5.6.0
-
-kotlinCompilerPluginClasspath
-No dependencies
-
-kotlinCompilerPluginClasspathDebug - Kotlin compiler plugins for compilation 'debug' (target  (androidJvm))
 +--- com.google.devtools.ksp:symbol-processing:1.8.0-1.0.9
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
@@ -6940,8 +6441,6 @@ kotlinCompilerPluginClasspathDebug - Kotlin compiler plugins for compilation 'de
 |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
 \--- org.jetbrains.kotlin:kotlin-parcelize-compiler:1.8.0
      \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0 (*)
-
-kotlinCompilerPluginClasspathDebugAndroidTest - Kotlin compiler plugins for compilation 'debugAndroidTest' (target  (androidJvm))
 +--- com.google.devtools.ksp:symbol-processing:1.8.0-1.0.9
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
@@ -6957,8 +6456,6 @@ kotlinCompilerPluginClasspathDebugAndroidTest - Kotlin compiler plugins for comp
 |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
 \--- org.jetbrains.kotlin:kotlin-parcelize-compiler:1.8.0
      \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0 (*)
-
-kotlinCompilerPluginClasspathDebugUnitTest - Kotlin compiler plugins for compilation 'debugUnitTest' (target  (androidJvm))
 +--- com.google.devtools.ksp:symbol-processing:1.8.0-1.0.9
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
@@ -6974,8 +6471,6 @@ kotlinCompilerPluginClasspathDebugUnitTest - Kotlin compiler plugins for compila
 |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
 \--- org.jetbrains.kotlin:kotlin-parcelize-compiler:1.8.0
      \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0 (*)
-
-kotlinCompilerPluginClasspathRelease - Kotlin compiler plugins for compilation 'release' (target  (androidJvm))
 +--- com.google.devtools.ksp:symbol-processing:1.8.0-1.0.9
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
@@ -6991,8 +6486,6 @@ kotlinCompilerPluginClasspathRelease - Kotlin compiler plugins for compilation '
 |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
 \--- org.jetbrains.kotlin:kotlin-parcelize-compiler:1.8.0
      \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0 (*)
-
-kotlinCompilerPluginClasspathReleaseUnitTest - Kotlin compiler plugins for compilation 'releaseUnitTest' (target  (androidJvm))
 +--- com.google.devtools.ksp:symbol-processing:1.8.0-1.0.9
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
@@ -7008,8 +6501,6 @@ kotlinCompilerPluginClasspathReleaseUnitTest - Kotlin compiler plugins for compi
 |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
 \--- org.jetbrains.kotlin:kotlin-parcelize-compiler:1.8.0
      \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0 (*)
-
-kotlinKlibCommonizerClasspath
 \--- org.jetbrains.kotlin:kotlin-klib-commonizer-embeddable:1.8.0
      +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
      |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
@@ -7021,26 +6512,7 @@ kotlinKlibCommonizerClasspath
           +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.0
           +--- org.jetbrains.intellij.deps:trove4j:1.0.20200330
           \--- net.java.dev.jna:jna:5.6.0
-
-kotlinNativeCompilerPluginClasspath
-No dependencies
-
-ksp - KSP dependencies for the 'main (Android)' source set. (n)
 \--- com.google.dagger:dagger-compiler:2.48 (n)
-
-kspAndroidTest - KSP dependencies for the 'androidTest (Android)' source set. (n)
-No dependencies
-
-kspAndroidTestDebug - KSP dependencies for the 'androidTestDebug (Android)' source set. (n)
-No dependencies
-
-kspAndroidTestRelease - KSP dependencies for the 'androidTestRelease (Android)' source set. (n)
-No dependencies
-
-kspDebug - KSP dependencies for the 'debug (Android)' source set. (n)
-No dependencies
-
-kspDebugAndroidTestKotlinProcessorClasspath
 \--- com.google.dagger:dagger-compiler:2.48
      +--- com.google.dagger:dagger:2.48
      |    \--- javax.inject:javax.inject:1
@@ -7087,8 +6559,6 @@ kspDebugAndroidTestKotlinProcessorClasspath
      +--- net.ltgt.gradle.incap:incap:0.2
      +--- org.checkerframework:checker-compat-qual:2.5.5
      \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.0 (*)
-
-kspDebugKotlinProcessorClasspath
 \--- com.google.dagger:dagger-compiler:2.48
      +--- com.google.dagger:dagger:2.48
      |    \--- javax.inject:javax.inject:1
@@ -7135,8 +6605,6 @@ kspDebugKotlinProcessorClasspath
      +--- net.ltgt.gradle.incap:incap:0.2
      +--- org.checkerframework:checker-compat-qual:2.5.5
      \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.0 (*)
-
-kspDebugUnitTestKotlinProcessorClasspath
 \--- com.google.dagger:dagger-compiler:2.48
      +--- com.google.dagger:dagger:2.48
      |    \--- javax.inject:javax.inject:1
@@ -7183,8 +6651,6 @@ kspDebugUnitTestKotlinProcessorClasspath
      +--- net.ltgt.gradle.incap:incap:0.2
      +--- org.checkerframework:checker-compat-qual:2.5.5
      \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.0 (*)
-
-kspPluginClasspath
 +--- com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.9
 |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
 |         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
@@ -7199,8 +6665,6 @@ kspPluginClasspath
      |    +--- org.jetbrains.intellij.deps:trove4j:1.0.20200330
      |    \--- net.java.dev.jna:jna:5.6.0
      \--- com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.9 (*)
-
-kspPluginClasspathNonEmbeddable
 +--- com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.9
 |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
 |         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
@@ -7213,11 +6677,6 @@ kspPluginClasspathNonEmbeddable
      |    +--- org.jetbrains.kotlin:kotlin-reflect:1.6.10
      |    \--- org.jetbrains.intellij.deps:trove4j:1.0.20200330
      \--- com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.9 (*)
-
-kspRelease - KSP dependencies for the 'release (Android)' source set. (n)
-No dependencies
-
-kspReleaseKotlinProcessorClasspath
 \--- com.google.dagger:dagger-compiler:2.48
      +--- com.google.dagger:dagger:2.48
      |    \--- javax.inject:javax.inject:1
@@ -7264,8 +6723,6 @@ kspReleaseKotlinProcessorClasspath
      +--- net.ltgt.gradle.incap:incap:0.2
      +--- org.checkerframework:checker-compat-qual:2.5.5
      \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.0 (*)
-
-kspReleaseUnitTestKotlinProcessorClasspath
 \--- com.google.dagger:dagger-compiler:2.48
      +--- com.google.dagger:dagger:2.48
      |    \--- javax.inject:javax.inject:1
@@ -7312,26 +6769,6 @@ kspReleaseUnitTestKotlinProcessorClasspath
      +--- net.ltgt.gradle.incap:incap:0.2
      +--- org.checkerframework:checker-compat-qual:2.5.5
      \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.0 (*)
-
-kspTest - KSP dependencies for the 'test (Android)' source set. (n)
-No dependencies
-
-kspTestDebug - KSP dependencies for the 'testDebug (Android)' source set. (n)
-No dependencies
-
-kspTestFixtures - KSP dependencies for the 'testFixtures (Android)' source set. (n)
-No dependencies
-
-kspTestFixturesDebug - KSP dependencies for the 'testFixturesDebug (Android)' source set. (n)
-No dependencies
-
-kspTestFixturesRelease - KSP dependencies for the 'testFixturesRelease (Android)' source set. (n)
-No dependencies
-
-kspTestRelease - KSP dependencies for the 'testRelease (Android)' source set. (n)
-No dependencies
-
-ktlint
 \--- com.pinterest:ktlint:0.48.2
      +--- com.pinterest.ktlint:ktlint-core:0.48.2
      |    +--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0
@@ -7405,47 +6842,6 @@ ktlint
      |    +--- ch.qos.logback:logback-core:1.3.0
      |    \--- org.slf4j:slf4j-api:2.0.0
      \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 (*)
-
-lintChecks - Configuration to apply external lint check jar
-No dependencies
-
-lintPublish - Configuration to publish external lint check jar
-No dependencies
-
-releaseAnnotationProcessor - Classpath for the annotation processor for 'release'. (n)
-No dependencies
-
-releaseAnnotationProcessorClasspath - Resolved configuration for annotation-processor for variant: release
-No dependencies
-
-releaseApi - API dependencies for 'release' sources. (n)
-No dependencies
-
-releaseApiDependenciesMetadata
-No dependencies
-
-releaseApiElements - API elements for release (n)
-No dependencies
-
-releaseApiElements-published (n)
-No dependencies
-
-releaseArchives (n)
-No dependencies
-
-releaseCompilationApi - API dependencies for compilation 'release' (target  (androidJvm)). (n)
-No dependencies
-
-releaseCompilationCompileOnly - Compile only dependencies for compilation 'release' (target  (androidJvm)). (n)
-No dependencies
-
-releaseCompilationImplementation - Implementation only dependencies for compilation 'release' (target  (androidJvm)). (n)
-No dependencies
-
-releaseCompilationRuntimeOnly - Runtime only dependencies for compilation 'release' (target  (androidJvm)). (n)
-No dependencies
-
-releaseCompileClasspath - Compile classpath for compilation 'release' (target  (androidJvm)).
 +--- project :stripe-core
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 1.8.10
 |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.21
@@ -7988,23 +7384,6 @@ releaseCompileClasspath - Compile classpath for compilation 'release' (target  (
 +--- androidx.print:print:{strictly 1.0.0} -> 1.0.0 (c)
 +--- androidx.compose.foundation:foundation-layout:{strictly 1.5.1} -> 1.5.1 (c)
 \--- androidx.compose.foundation:foundation-layout-android:{strictly 1.5.1} -> 1.5.1 (c)
-
-releaseCompileOnly - Compile only dependencies for 'release' sources. (n)
-No dependencies
-
-releaseCompileOnlyDependenciesMetadata
-No dependencies
-
-releaseImplementation - Implementation only dependencies for 'release' sources. (n)
-No dependencies
-
-releaseImplementationDependenciesMetadata
-No dependencies
-
-releaseIntransitiveDependenciesMetadata
-No dependencies
-
-releaseRuntimeClasspath - Runtime classpath of compilation 'release' (target  (androidJvm)).
 +--- project :stripe-core
 |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 1.8.10
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.21
@@ -8670,44 +8049,6 @@ releaseRuntimeClasspath - Runtime classpath of compilation 'release' (target  (a
 |    \--- com.nimbusds:nimbus-jose-jwt:9.21
 |         \--- com.github.stephenc.jcip:jcip-annotations:1.0-1
 \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.0 (*)
-
-releaseRuntimeElements - Runtime elements for release (n)
-No dependencies
-
-releaseRuntimeElements-published (n)
-No dependencies
-
-releaseRuntimeOnly - Runtime only dependencies for 'release' sources. (n)
-No dependencies
-
-releaseRuntimeOnlyDependenciesMetadata
-No dependencies
-
-releaseSourceArtifacts (n)
-No dependencies
-
-releaseUnitTestAnnotationProcessorClasspath - Resolved configuration for annotation-processor for variant: releaseUnitTest
-No dependencies
-
-releaseUnitTestApi (n)
-No dependencies
-
-releaseUnitTestApiDependenciesMetadata
-No dependencies
-
-releaseUnitTestCompilationApi - API dependencies for compilation 'releaseUnitTest' (target  (androidJvm)). (n)
-No dependencies
-
-releaseUnitTestCompilationCompileOnly - Compile only dependencies for compilation 'releaseUnitTest' (target  (androidJvm)). (n)
-No dependencies
-
-releaseUnitTestCompilationImplementation - Implementation only dependencies for compilation 'releaseUnitTest' (target  (androidJvm)). (n)
-No dependencies
-
-releaseUnitTestCompilationRuntimeOnly - Runtime only dependencies for compilation 'releaseUnitTest' (target  (androidJvm)). (n)
-No dependencies
-
-releaseUnitTestCompileClasspath - Compile classpath for compilation 'releaseUnitTest' (target  (androidJvm)).
 +--- project :stripe-core
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 1.8.10
 |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.21
@@ -9526,23 +8867,6 @@ releaseUnitTestCompileClasspath - Compile classpath for compilation 'releaseUnit
 +--- androidx.compose.foundation:foundation-layout:{strictly 1.5.1} -> 1.5.1 (c)
 +--- com.squareup.okio:okio-jvm:{strictly 3.2.0} -> 3.2.0 (c)
 \--- androidx.compose.foundation:foundation-layout-android:{strictly 1.5.1} -> 1.5.1 (c)
-
-releaseUnitTestCompileOnly (n)
-No dependencies
-
-releaseUnitTestCompileOnlyDependenciesMetadata
-No dependencies
-
-releaseUnitTestImplementation (n)
-No dependencies
-
-releaseUnitTestImplementationDependenciesMetadata
-No dependencies
-
-releaseUnitTestIntransitiveDependenciesMetadata
-No dependencies
-
-releaseUnitTestRuntimeClasspath - Runtime classpath of compilation 'releaseUnitTest' (target  (androidJvm)).
 +--- project :payments-core (*)
 +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.0
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.21
@@ -10583,173 +9907,6 @@ releaseUnitTestRuntimeClasspath - Runtime classpath of compilation 'releaseUnitT
      +--- org.bouncycastle:bcprov-jdk15to18:1.69
      \--- com.nimbusds:nimbus-jose-jwt:9.21
           \--- com.github.stephenc.jcip:jcip-annotations:1.0-1
-
-releaseUnitTestRuntimeOnly (n)
-No dependencies
-
-releaseUnitTestRuntimeOnlyDependenciesMetadata
-No dependencies
-
-releaseWearApp - Link to a wear app to embed for object 'release'. (n)
-No dependencies
-
-runtimeOnly - Runtime only dependencies for 'main' sources. (n)
-No dependencies
-
-runtimeOnlyDependenciesMetadata
-No dependencies
-
-signatures (n)
-No dependencies
-
-testAnnotationProcessor - Classpath for the annotation processor for 'test'. (n)
-No dependencies
-
-testApi (n)
-No dependencies
-
-testApiDependenciesMetadata
-No dependencies
-
-testCompileOnly - Compile only dependencies for 'test' sources. (n)
-No dependencies
-
-testCompileOnlyDependenciesMetadata
-No dependencies
-
-testDebugAnnotationProcessor - Classpath for the annotation processor for 'testDebug'. (n)
-No dependencies
-
-testDebugApi (n)
-No dependencies
-
-testDebugApiDependenciesMetadata
-No dependencies
-
-testDebugCompileOnly - Compile only dependencies for 'testDebug' sources. (n)
-No dependencies
-
-testDebugCompileOnlyDependenciesMetadata
-No dependencies
-
-testDebugImplementation - Implementation only dependencies for 'testDebug' sources. (n)
-No dependencies
-
-testDebugImplementationDependenciesMetadata
-No dependencies
-
-testDebugIntransitiveDependenciesMetadata
-No dependencies
-
-testDebugRuntimeOnly - Runtime only dependencies for 'testDebug' sources. (n)
-No dependencies
-
-testDebugRuntimeOnlyDependenciesMetadata
-No dependencies
-
-testDebugWearApp - Link to a wear app to embed for object 'testDebug'. (n)
-No dependencies
-
-testFixturesAnnotationProcessor - Classpath for the annotation processor for 'testFixtures'. (n)
-No dependencies
-
-testFixturesApi - API dependencies for 'testFixtures' sources. (n)
-No dependencies
-
-testFixturesApiDependenciesMetadata
-No dependencies
-
-testFixturesCompileOnly - Compile only dependencies for 'testFixtures' sources. (n)
-No dependencies
-
-testFixturesCompileOnlyDependenciesMetadata
-No dependencies
-
-testFixturesDebugAnnotationProcessor - Classpath for the annotation processor for 'testFixturesDebug'. (n)
-No dependencies
-
-testFixturesDebugApi - API dependencies for 'testFixturesDebug' sources. (n)
-No dependencies
-
-testFixturesDebugApiDependenciesMetadata
-No dependencies
-
-testFixturesDebugCompileOnly - Compile only dependencies for 'testFixturesDebug' sources. (n)
-No dependencies
-
-testFixturesDebugCompileOnlyDependenciesMetadata
-No dependencies
-
-testFixturesDebugImplementation - Implementation only dependencies for 'testFixturesDebug' sources. (n)
-No dependencies
-
-testFixturesDebugImplementationDependenciesMetadata
-No dependencies
-
-testFixturesDebugIntransitiveDependenciesMetadata
-No dependencies
-
-testFixturesDebugRuntimeOnly - Runtime only dependencies for 'testFixturesDebug' sources. (n)
-No dependencies
-
-testFixturesDebugRuntimeOnlyDependenciesMetadata
-No dependencies
-
-testFixturesDebugWearApp - Link to a wear app to embed for object 'testFixturesDebug'. (n)
-No dependencies
-
-testFixturesImplementation - Implementation only dependencies for 'testFixtures' sources. (n)
-No dependencies
-
-testFixturesImplementationDependenciesMetadata
-No dependencies
-
-testFixturesIntransitiveDependenciesMetadata
-No dependencies
-
-testFixturesReleaseAnnotationProcessor - Classpath for the annotation processor for 'testFixturesRelease'. (n)
-No dependencies
-
-testFixturesReleaseApi - API dependencies for 'testFixturesRelease' sources. (n)
-No dependencies
-
-testFixturesReleaseApiDependenciesMetadata
-No dependencies
-
-testFixturesReleaseCompileOnly - Compile only dependencies for 'testFixturesRelease' sources. (n)
-No dependencies
-
-testFixturesReleaseCompileOnlyDependenciesMetadata
-No dependencies
-
-testFixturesReleaseImplementation - Implementation only dependencies for 'testFixturesRelease' sources. (n)
-No dependencies
-
-testFixturesReleaseImplementationDependenciesMetadata
-No dependencies
-
-testFixturesReleaseIntransitiveDependenciesMetadata
-No dependencies
-
-testFixturesReleaseRuntimeOnly - Runtime only dependencies for 'testFixturesRelease' sources. (n)
-No dependencies
-
-testFixturesReleaseRuntimeOnlyDependenciesMetadata
-No dependencies
-
-testFixturesReleaseWearApp - Link to a wear app to embed for object 'testFixturesRelease'. (n)
-No dependencies
-
-testFixturesRuntimeOnly - Runtime only dependencies for 'testFixtures' sources. (n)
-No dependencies
-
-testFixturesRuntimeOnlyDependenciesMetadata
-No dependencies
-
-testFixturesWearApp - Link to a wear app to embed for object 'testFixtures'. (n)
-No dependencies
-
-testImplementation - Implementation only dependencies for 'test' sources. (n)
 +--- project financial-connections (n)
 +--- project network-testing (n)
 +--- project payments-core-testing (n)
@@ -10769,8 +9926,6 @@ testImplementation - Implementation only dependencies for 'test' sources. (n)
 +--- org.robolectric:robolectric:4.10.3 (n)
 +--- com.google.truth:truth:1.1.3 (n)
 \--- app.cash.turbine:turbine:0.12.3 (n)
-
-testImplementationDependenciesMetadata
 +--- project :financial-connections FAILED
 +--- project :network-testing FAILED
 +--- project :payments-core-testing FAILED
@@ -11047,67 +10202,3 @@ testImplementationDependenciesMetadata
 \--- app.cash.turbine:turbine:0.12.3
      +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (*)
      \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
-
-testIntransitiveDependenciesMetadata
-No dependencies
-
-testReleaseAnnotationProcessor - Classpath for the annotation processor for 'testRelease'. (n)
-No dependencies
-
-testReleaseApi (n)
-No dependencies
-
-testReleaseApiDependenciesMetadata
-No dependencies
-
-testReleaseCompileOnly - Compile only dependencies for 'testRelease' sources. (n)
-No dependencies
-
-testReleaseCompileOnlyDependenciesMetadata
-No dependencies
-
-testReleaseImplementation - Implementation only dependencies for 'testRelease' sources. (n)
-No dependencies
-
-testReleaseImplementationDependenciesMetadata
-No dependencies
-
-testReleaseIntransitiveDependenciesMetadata
-No dependencies
-
-testReleaseRuntimeOnly - Runtime only dependencies for 'testRelease' sources. (n)
-No dependencies
-
-testReleaseRuntimeOnlyDependenciesMetadata
-No dependencies
-
-testReleaseWearApp - Link to a wear app to embed for object 'testRelease'. (n)
-No dependencies
-
-testRuntimeOnly - Runtime only dependencies for 'test' sources. (n)
-No dependencies
-
-testRuntimeOnlyDependenciesMetadata
-No dependencies
-
-testWearApp - Link to a wear app to embed for object 'test'. (n)
-No dependencies
-
-wearApp - Link to a wear app to embed for object 'main'. (n)
-No dependencies
-
-(c) - A dependency constraint, not a dependency. The dependency affected by the constraint occurs elsewhere in the tree.
-(*) - Indicates repeated occurrences of a transitive dependency subtree. Gradle expands transitive dependency subtrees only once per project; repeat occurrences only display the root of the subtree, followed by this annotation.
-
-(n) - A dependency or dependency configuration that cannot be resolved.
-
-A web-based, searchable dependency report is available by adding the --scan option.
-
-Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
-
-You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
-
-For more on this, please refer to https://docs.gradle.org/8.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
-
-BUILD SUCCESSFUL in 1s
-1 actionable task: 1 executed
