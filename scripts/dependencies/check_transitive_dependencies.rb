@@ -1,25 +1,16 @@
 #!/usr/bin/env ruby
 
 require_relative 'generate_dependencies'
+require_relative 'list_dependent_modules'
 
 require 'fileutils'
+require 'open3'
 
 def execute_or_fail(command)
     system(command) or raise "Failed to execute #{command}"
 end
 
-modules = [
-    'identity',
-    'link',
-    'paymentsheet',
-    'payments-core',
-    'payments-ui-core',
-    'stripe-core',
-    'stripe-ui-core',
-    'camera-core',
-    'financial-connections',
-    'stripecardscan',
-]
+modules = list_dependent_modules
 
 modules.each do |module_name|
     folder = "#{module_name}/dependencies"
