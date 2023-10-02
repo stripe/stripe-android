@@ -82,6 +82,8 @@ android {
 
         testInstrumentationRunner "com.karumi.shot.ShotTestRunner"
 
+        buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
+
         manifestPlaceholders = [
                 BACKEND_URL: getBackendUrl(),
                 GOOGLE_PLACES_API_KEY: getGooglePlacesApiKey()
