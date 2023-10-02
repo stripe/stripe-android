@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <!--
+    See https://developer.android.com/training/package-visibility/declaring for more details.
+    -->
+    <queries>
+        <!--
+        Added to check the browsers support Custom Tabs Service.
+        -->
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+        <!--
+        Added to check the browsers that can be used to open a URL.
+        -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
+    </queries>
 </manifest>

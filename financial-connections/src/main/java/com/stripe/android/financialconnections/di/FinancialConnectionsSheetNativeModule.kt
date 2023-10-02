@@ -3,6 +3,8 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
+import com.stripe.android.core.browser.customtabs.CustomTabsManager
+import com.stripe.android.core.browser.customtabs.CustomTabsManagerImpl
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
@@ -53,11 +55,18 @@ internal interface FinancialConnectionsSheetNativeModule {
 
     @Singleton
     @Binds
-    fun providesNavigationManager(
+    fun bindsNavigationManager(
         impl: NavigationManagerImpl
     ): NavigationManager
 
+    @Singleton
+    @Binds
+    fun bindsCustomTabsManager(
+        impl: CustomTabsManagerImpl,
+    ): CustomTabsManager
+
     companion object {
+
         @Provides
         @Singleton
         fun provideConsumersApiService(
