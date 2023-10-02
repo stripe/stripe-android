@@ -59,13 +59,13 @@ internal class PaymentSheetPlaygroundViewModel(
         state.value = null
         flowControllerState.value = null
 
-        // Snapshot before making the network request to not rely on UI staying in sync.
-        val playgroundSettingsSnapshot = playgroundSettings.snapshot()
-
         viewModelScope.launch(Dispatchers.IO) {
-            playgroundSettings.saveToSharedPreferences(getApplication())
+            // Snapshot before making the network request to not rely on UI staying in sync.
+            val playgroundSettingsSnapshot = playgroundSettings.snapshot()
 
-            val requestBody = playgroundSettings.checkoutRequest()
+            playgroundSettingsSnapshot.saveToSharedPreferences(getApplication())
+
+            val requestBody = playgroundSettingsSnapshot.checkoutRequest()
 
             val apiResponse = Fuel.post(settings.playgroundBackendUrl + "checkout")
                 .jsonBody(Json.encodeToString(CheckoutRequest.serializer(), requestBody))
@@ -208,7 +208,7 @@ internal class PaymentSheetPlaygroundViewModel(
             clientSecret = playgroundState.clientSecret,
             paymentMethodId = paymentMethodId,
             shouldSavePaymentMethod = shouldSavePaymentMethod,
-            merchantCountryCode = playgroundState.countryCode,
+            merchantCountryCode = playgroundState.countryCode.value,
             mode = playgroundState.checkoutMode.value,
             returnUrl = RETURN_URL,
         )

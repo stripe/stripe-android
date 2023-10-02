@@ -16,8 +16,8 @@ internal object GooglePaySettingsDefinition : BooleanSettingsDefinition(
     ) {
         PaymentSheet.GooglePayConfiguration(
             environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-            countryCode = playgroundState.countryCode,
-            currencyCode = playgroundState.currencyCode,
+            countryCode = playgroundState.countryCode.value,
+            currencyCode = playgroundState.currencyCode.value,
         )
     }
 }

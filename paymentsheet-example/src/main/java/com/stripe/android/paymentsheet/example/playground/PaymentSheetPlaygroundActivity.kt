@@ -161,7 +161,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState) {
         if (playgroundState.initializationType == InitializationTypeSettingsDefinition.InitializationType.Normal) {
-            if (playgroundState.checkoutMode == CheckoutModeSettingsDefinition.CheckoutMode.Setup) {
+            if (playgroundState.checkoutMode == CheckoutModeSettingsDefinition.CheckoutMode.SETUP) {
                 paymentSheet.presentWithSetupIntent(
                     setupIntentClientSecret = playgroundState.clientSecret,
                     configuration = playgroundState.paymentSheetConfiguration()
@@ -188,7 +188,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         playgroundState: PlaygroundState,
     ) {
         if (playgroundState.initializationType == InitializationTypeSettingsDefinition.InitializationType.Normal) {
-            if (playgroundState.checkoutMode == CheckoutModeSettingsDefinition.CheckoutMode.Setup) {
+            if (playgroundState.checkoutMode == CheckoutModeSettingsDefinition.CheckoutMode.SETUP) {
                 flowController.configureWithSetupIntent(
                     setupIntentClientSecret = playgroundState.clientSecret,
                     configuration = playgroundState.paymentSheetConfiguration(),

@@ -14,14 +14,16 @@ internal object SupportedPaymentMethodsSettingsDefinition :
     override val saveToSharedPreferences: Boolean = false
 
     override fun configure(value: List<String>?, checkoutRequestBuilder: CheckoutRequest.Builder) {
-        checkoutRequestBuilder.supportedPaymentMethods(value)
+        if (!value.isNullOrEmpty()) {
+            checkoutRequestBuilder.supportedPaymentMethods(value)
+        }
     }
 
     override fun convertToValue(value: String): List<String> {
-        return value.split(",")
+        return value.split(",").filter { it.isNotEmpty() }
     }
 
     override fun convertToString(value: List<String>?): String {
-        return value.orEmpty().joinToString()
+        return value.orEmpty().joinToString(separator = ",")
     }
 }

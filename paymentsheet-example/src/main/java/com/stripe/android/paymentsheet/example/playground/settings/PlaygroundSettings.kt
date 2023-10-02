@@ -23,51 +23,12 @@ internal class PlaygroundSettings private constructor(
     }
 
     operator fun <T> set(settingsDefinition: PlaygroundSettingDefinition<T>, value: T) {
-        settings[settingsDefinition]?.value = value as Any
+        if (settings.containsKey(settingsDefinition)) {
+            settings[settingsDefinition]?.value = value as Any
+        } else {
+            settings[settingsDefinition] = MutableStateFlow(value)
+        }
         settingsDefinition.valueUpdated(value, this)
-    }
-
-    fun checkoutRequest(): CheckoutRequest {
-        val builder = CheckoutRequest.Builder()
-        settings.onEach { (settingDefinition, value) ->
-            settingDefinition.configure(builder, value.value)
-        }
-        return builder.build()
-    }
-
-    private fun <T> PlaygroundSettingDefinition<T>.configure(
-        checkoutRequestBuilder: CheckoutRequest.Builder,
-        value: Any?,
-    ) {
-        @Suppress("UNCHECKED_CAST")
-        configure(value as T, checkoutRequestBuilder)
-    }
-
-    private fun asJsonString(
-        filter: (PlaygroundSettingDefinition<*>) -> Boolean = { true }
-    ): String {
-        val settingsMap = settings.filter { filter(it.key) }.map {
-            it.key.key to JsonPrimitive(it.key.convertToString(it.value.value))
-        }.toMap()
-        return Json.encodeToString(JsonObject(settingsMap))
-    }
-
-    fun saveToSharedPreferences(context: Context) {
-        val sharedPreferences = context.getSharedPreferences(
-            sharedPreferencesName,
-            Context.MODE_PRIVATE
-        )
-
-        sharedPreferences.edit {
-            putString(sharedPreferencesKey, asJsonString(filter = { it.saveToSharedPreferences }))
-        }
-    }
-
-    private fun <T> PlaygroundSettingDefinition<T>.convertToString(
-        value: Any?,
-    ): String {
-        @Suppress("UNCHECKED_CAST")
-        return convertToString(value as T)
     }
 
     fun snapshot(): Snapshot {
@@ -85,6 +46,13 @@ internal class PlaygroundSettings private constructor(
         operator fun <T> get(settingsDefinition: PlaygroundSettingDefinition<T>): T {
             @Suppress("UNCHECKED_CAST")
             return settings[settingsDefinition] as T
+        }
+
+        fun playgroundSettings(): PlaygroundSettings {
+            val mutableSettings = settings.map {
+                it.key to MutableStateFlow(it.value)
+            }.toMap().toMutableMap()
+            return PlaygroundSettings(mutableSettings)
         }
 
         fun paymentSheetConfiguration(
@@ -112,25 +80,72 @@ internal class PlaygroundSettings private constructor(
                 configurationData = configurationData,
             )
         }
+
+        fun checkoutRequest(): CheckoutRequest {
+            val builder = CheckoutRequest.Builder()
+            settings.onEach { (settingDefinition, value) ->
+                settingDefinition.configure(builder, value)
+            }
+            return builder.build()
+        }
+
+        private fun <T> PlaygroundSettingDefinition<T>.configure(
+            checkoutRequestBuilder: CheckoutRequest.Builder,
+            value: Any?,
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            configure(value as T, checkoutRequestBuilder)
+        }
+
+        private fun asJsonString(
+            filter: (PlaygroundSettingDefinition<*>) -> Boolean
+        ): String {
+            val settingsMap = settings.filter { filter(it.key) }.map {
+                it.key.key to JsonPrimitive(it.key.convertToString(it.value))
+            }.toMap()
+            return Json.encodeToString(JsonObject(settingsMap))
+        }
+
+        fun saveToSharedPreferences(context: Context) {
+            val sharedPreferences = context.getSharedPreferences(
+                sharedPreferencesName,
+                Context.MODE_PRIVATE
+            )
+
+            sharedPreferences.edit {
+                putString(sharedPreferencesKey, asJsonString(filter = { it.saveToSharedPreferences }))
+            }
+        }
+
+        fun asJsonString(): String {
+            return asJsonString { true }
+        }
+
+        private fun <T> PlaygroundSettingDefinition<T>.convertToString(
+            value: Any?,
+        ): String {
+            @Suppress("UNCHECKED_CAST")
+            return convertToString(value as T)
+        }
     }
 
     companion object {
         private const val sharedPreferencesName = "PlaygroundSettings"
         private const val sharedPreferencesKey = "json"
 
-        private fun createFromDefaults(): PlaygroundSettings {
-            val settings = uiSettingDefinitions.associateWith {
+        fun createFromDefaults(): PlaygroundSettings {
+            val settings = allSettingDefinitions.associateWith {
                 MutableStateFlow(it.defaultValue)
             }.toMutableMap()
             return PlaygroundSettings(settings)
         }
 
-        private fun createFromJsonString(jsonString: String): PlaygroundSettings {
+        fun createFromJsonString(jsonString: String): PlaygroundSettings {
             val settings: MutableMap<PlaygroundSettingDefinition<*>, MutableStateFlow<Any?>> =
                 mutableMapOf()
             val jsonObject = Json.decodeFromString(JsonObject.serializer(), jsonString)
 
-            for (settingDefinition in uiSettingDefinitions) {
+            for (settingDefinition in allSettingDefinitions) {
                 val jsonPrimitive = jsonObject[settingDefinition.key] as? JsonPrimitive?
                 if (jsonPrimitive?.isString == true) {
                     settings[settingDefinition] =
@@ -175,5 +190,12 @@ internal class PlaygroundSettings private constructor(
             PrimaryButtonLabelSettingsDefinition,
             IntegrationTypeSettingsDefinition,
         )
+
+        private val testSettingDefinitions:  List<PlaygroundSettingDefinition<*>> = listOf(
+            SupportedPaymentMethodsSettingsDefinition,
+        )
+
+        private val allSettingDefinitions:  List<PlaygroundSettingDefinition<*>> =
+            uiSettingDefinitions + testSettingDefinitions
     }
 }
