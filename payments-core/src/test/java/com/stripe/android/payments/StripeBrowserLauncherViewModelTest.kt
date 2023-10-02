@@ -31,49 +31,42 @@ class StripeBrowserLauncherViewModelTest {
 
     private val savedStateHandle = SavedStateHandle()
 
-    private val viewModel = StripeBrowserLauncherViewModel(
-        analyticsRequestExecutor,
-        analyticsRequestFactory,
-        BrowserCapabilities.CustomTabs,
-        "Verify your payment",
-        savedStateHandle
-    )
-
     @Test
     fun `createLaunchIntent() should create an intent and wrap in a Chooser Intent`() {
+        val viewModel = createViewModel()
         val launchIntent = viewModel.createLaunchIntent(ARGS)
 
-        val browserIntent =
-            requireNotNull(launchIntent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT))
-        assertThat(browserIntent.action)
-            .isEqualTo(Intent.ACTION_VIEW)
-        assertThat(browserIntent.data)
-            .isEqualTo(Uri.parse("https://bank.com"))
-        assertThat(launchIntent.getStringExtra(Intent.EXTRA_TITLE))
-            .isEqualTo("Verify your payment")
+        val browserIntent = requireNotNull(launchIntent?.getParcelableExtra<Intent>(Intent.EXTRA_INTENT))
 
-        // createLaunchIntent() should make an analytics request
-        assertThat(analyticsRequests)
-            .hasSize(1)
+        assertThat(browserIntent.action).isEqualTo(Intent.ACTION_VIEW)
+        assertThat(browserIntent.data).isEqualTo(Uri.parse("https://bank.com"))
+        assertThat(launchIntent?.getStringExtra(Intent.EXTRA_TITLE)).isEqualTo("Verify your payment")
     }
 
     @Test
-    fun `logCapabilities() when shouldUseCustomTabs = true should log expected event`() {
-        viewModel.logCapabilities(shouldUseCustomTabs = true)
+    fun `createLaunchIntent() returns null if intent can't be resolved`() {
+        val viewModel = createViewModel(canResolveIntent = false)
+        val launchIntent = viewModel.createLaunchIntent(ARGS)
+        assertThat(launchIntent).isNull()
+    }
 
-        assertThat(analyticsRequests)
-            .hasSize(1)
+    @Test
+    fun `logCapabilities() should log expected event when using Chrome Custom Tabs`() {
+        val viewModel = createViewModel(browserCapabilities = BrowserCapabilities.CustomTabs)
+
+        viewModel.createLaunchIntent(ARGS)
+        assertThat(analyticsRequests).hasSize(1)
 
         assertThat(analyticsRequests.first().params["event"])
             .isEqualTo("stripe_android.auth_with_customtabs")
     }
 
     @Test
-    fun `logCapabilities() when shouldUseCustomTabs = false should log expected event`() {
-        viewModel.logCapabilities(shouldUseCustomTabs = false)
+    fun `logCapabilities() should log expected event when not using Chrome Custom Tabs`() {
+        val viewModel = createViewModel(browserCapabilities = BrowserCapabilities.Unknown)
 
-        assertThat(analyticsRequests)
-            .hasSize(1)
+        viewModel.createLaunchIntent(ARGS)
+        assertThat(analyticsRequests).hasSize(1)
 
         assertThat(analyticsRequests.first().params["event"])
             .isEqualTo("stripe_android.auth_with_defaultbrowser")
@@ -81,6 +74,7 @@ class StripeBrowserLauncherViewModelTest {
 
     @Test
     fun `getResultIntent() with shouldCancelSource=true should include expected PaymentFlowResult`() {
+        val viewModel = createViewModel()
         val intent = viewModel.getResultIntent(
             ARGS.copy(shouldCancelSource = true)
         )
@@ -97,6 +91,7 @@ class StripeBrowserLauncherViewModelTest {
 
     @Test
     fun `hasLaunched should set entry on savedStateHandle`() {
+        val viewModel = createViewModel()
         assertThat(
             savedStateHandle.contains(StripeBrowserLauncherViewModel.KEY_HAS_LAUNCHED)
         ).isFalse()
@@ -106,6 +101,21 @@ class StripeBrowserLauncherViewModelTest {
         assertThat(
             savedStateHandle.contains(StripeBrowserLauncherViewModel.KEY_HAS_LAUNCHED)
         ).isTrue()
+    }
+
+    private fun createViewModel(
+        browserCapabilities: BrowserCapabilities = BrowserCapabilities.CustomTabs,
+        canResolveIntent: Boolean = true,
+    ): StripeBrowserLauncherViewModel {
+        return StripeBrowserLauncherViewModel(
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            browserCapabilities = browserCapabilities,
+            intentChooserTitle = "Verify your payment",
+            resolveErrorMessage = "Unable to resolve things",
+            savedStateHandle = savedStateHandle,
+            intentResolver = { canResolveIntent },
+        )
     }
 
     private companion object {
