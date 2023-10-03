@@ -247,7 +247,6 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         rules.compose.runOnUiThread {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         }
-
     }
 
     private fun forceLightMode() {
