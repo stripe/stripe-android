@@ -47,7 +47,7 @@ internal fun DataAccessBottomSheetContent(
         dataDialog.subtitle?.let { TextResource.Text(fromHtml(it)) }
     }
     val learnMore = remember(dataDialog.learnMore) {
-        TextResource.Text(fromHtml(dataDialog.learnMore))
+        dataDialog.learnMore?.let { TextResource.Text(fromHtml(it)) }
     }
     val connectedAccountNotice = remember(dataDialog.connectedAccountNotice) {
         dataDialog.connectedAccountNotice?.let { TextResource.Text(fromHtml(it)) }
@@ -102,7 +102,7 @@ private fun ModalBottomSheetContent(
     bullets: List<BulletUI>,
     connectedAccountNotice: TextResource?,
     cta: String,
-    learnMore: TextResource,
+    learnMore: TextResource.Text?,
     onConfirmModalClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -172,22 +172,24 @@ private fun ModalBottomSheetContent(
                 )
                 Spacer(modifier = Modifier.size(12.dp))
             }
-            AnnotatedText(
-                text = learnMore,
-                onClickableTextClick = onClickableTextClick,
-                defaultStyle = typography.caption.copy(
-                    color = colors.textSecondary
-                ),
-                annotationStyles = mapOf(
-                    StringAnnotation.CLICKABLE to typography.captionEmphasized
-                        .toSpanStyle()
-                        .copy(color = colors.textBrand),
-                    StringAnnotation.BOLD to typography.captionEmphasized
-                        .toSpanStyle()
-                        .copy(color = colors.textSecondary),
+            if (false) learnMore?.let {
+                AnnotatedText(
+                    text = learnMore,
+                    onClickableTextClick = onClickableTextClick,
+                    defaultStyle = typography.caption.copy(
+                        color = colors.textSecondary
+                    ),
+                    annotationStyles = mapOf(
+                        StringAnnotation.CLICKABLE to typography.captionEmphasized
+                            .toSpanStyle()
+                            .copy(color = colors.textBrand),
+                        StringAnnotation.BOLD to typography.captionEmphasized
+                            .toSpanStyle()
+                            .copy(color = colors.textSecondary),
+                    )
                 )
-            )
-            Spacer(modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.size(16.dp))
+            }
             FinancialConnectionsButton(
                 onClick = { onConfirmModalClick() },
                 modifier = Modifier.fillMaxWidth()

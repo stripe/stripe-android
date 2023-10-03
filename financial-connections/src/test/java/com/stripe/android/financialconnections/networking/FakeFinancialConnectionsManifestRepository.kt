@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.networking
 
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationRepairSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -92,6 +93,14 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
     }
 
     override suspend fun postMarkLinkStepUpVerified(clientSecret: String): FinancialConnectionsSessionManifest {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun repairSessionGenerateUrl(
+        clientSecret: String,
+        applicationId: String,
+        coreAuthorization: String
+    ): FinancialConnectionsAuthorizationRepairSession {
         TODO("Not yet implemented")
     }
 

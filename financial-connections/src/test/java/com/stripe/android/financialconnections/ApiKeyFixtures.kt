@@ -6,6 +6,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAuthori
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.Flow
 import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -73,7 +74,7 @@ internal object ApiKeyFixtures {
     fun authorizationSession() = FinancialConnectionsAuthorizationSession(
         id = "id",
         nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
-        flow = FinancialConnectionsAuthorizationSession.Flow.MX_OAUTH.value,
+        flow = Flow.MX_OAUTH.value,
         institutionSkipAccountSelection = null,
         showPartnerDisclosure = null,
         skipAccountSelection = null,

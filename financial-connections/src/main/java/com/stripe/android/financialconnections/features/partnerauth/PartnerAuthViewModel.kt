@@ -88,11 +88,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 institution = requireNotNull(manifest.activeInstitution),
                 sync = sync
             )
-            Payload(
-                authSession = authSession,
-                institution = requireNotNull(manifest.activeInstitution),
-                isStripeDirect = manifest.isStripeDirect ?: false
-            )
+            buildPayload(authSession, manifest)
         }.execute { copy(payload = it) }
     }
 
@@ -106,11 +102,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 sync = sync
             )
             logger.debug("Created auth session ${authSession.id}")
-            Payload(
-                authSession = authSession,
-                institution = requireNotNull(manifest.activeInstitution),
-                isStripeDirect = manifest.isStripeDirect ?: false
-            ).also {
+            buildPayload(authSession, manifest).also {
                 // just send loaded event on OAuth flows (prepane). Non-OAuth handled by shim.
                 val loadedEvent: Loaded? = Loaded(Date()).takeIf { authSession.isOAuth }
                 postAuthSessionEvent(
@@ -125,6 +117,16 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
         }
     }
+
+    private fun buildPayload(
+        authSession: FinancialConnectionsAuthorizationSession,
+        manifest: FinancialConnectionsSessionManifest
+    ) = Payload(
+        authSession = authSession,
+        institution = requireNotNull(manifest.activeInstitution),
+        isStripeDirect = manifest.isStripeDirect ?: false,
+        repairPayload = null
+    )
 
     private fun launchBrowserIfNonOauth() {
         onAsync(
@@ -153,47 +155,29 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     fun onLaunchAuthClick() {
         viewModelScope.launch {
-            awaitState().payload()?.authSession?.let {
-                postAuthSessionEvent(it.id, AuthSessionEvent.OAuthLaunched(Date()))
+            awaitState().payload()?.let {
+                postAuthSessionEvent(it.authSession.id, AuthSessionEvent.OAuthLaunched(Date()))
                 eventTracker.track(PrepaneClickContinue(PANE))
+                launchAuthInBrowser()
             }
-            launchAuthInBrowser()
         }
     }
 
-    private suspend fun launchAuthInBrowser() {
-        kotlin.runCatching { requireNotNull(getOrFetchSync().manifest.activeAuthSession) }
-            .onSuccess {
-                it.browserReadyUrl()?.let { url ->
-                    setState { copy(viewEffect = OpenPartnerAuth(url)) }
-                    eventTracker.track(
-                        FinancialConnectionsEvent.AuthSessionOpened(
-                            id = it.id,
-                            pane = PANE,
-                            flow = it.flow,
-                            defaultBrowser = browserManager.getPackageToHandleUri(
-                                uri = url.toUri()
-                            )
-                        )
-                    )
-                }
-            }
-            .onFailure {
-                eventTracker.logError(
-                    extraMessage = "failed retrieving active session from cache",
-                    error = it,
-                    logger = logger,
-                    pane = PANE
+    private suspend fun launchAuthInBrowser() = runCatching {
+        val authSession = requireNotNull(awaitState().payload()).authSession
+        val url = requireNotNull(authSession.browserReadyUrl(applicationId))
+        setState { copy(viewEffect = OpenPartnerAuth(url)) }
+        eventTracker.track(
+            FinancialConnectionsEvent.AuthSessionOpened(
+                id = authSession.id,
+                pane = PANE,
+                flow = authSession.flow,
+                defaultBrowser = browserManager.getPackageToHandleUri(
+                    uri = url.toUri()
                 )
-                setState { copy(authenticationStatus = Fail(it)) }
-            }
+            )
+        )
     }
-
-    /**
-     * Auth Session url after clearing the deep link prefix (required for non-native app2app flows).
-     */
-    private fun FinancialConnectionsAuthorizationSession.browserReadyUrl(): String? =
-        url?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
 
     fun onSelectAnotherBank() {
         navigationManager.tryNavigateTo(

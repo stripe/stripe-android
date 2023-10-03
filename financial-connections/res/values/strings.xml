@@ -123,6 +123,7 @@
     <string name="stripe_link_account_picker_title_nobusiness">Select an account to connect to this business</string>
     <string name="stripe_link_account_picker_new_account">New bank account</string>
     <string name="stripe_link_account_picker_cta">Connect account</string>
+    <string name="stripe_link_account_picker_repair_cta">Repair and connect account</string>
     <string name="stripe_link_stepup_verification_title">Check your email to confirm your identity</string>
     <string name="stripe_link_stepup_verification_desc">To keep your Link account safe, we periodically need to confirm you\'re you. Enter the code sent to your email %1$s.</string>
     <string name="stripe_link_stepup_verification_resend_code"><annotation clickable="resend_code">Resend code</annotation></string>
@@ -134,7 +135,7 @@
     <string name="stripe_verification.codeExpiredSms">It looks like the verification code you provided is not valid anymore. Try again, or <annotation clickable="contact_us">Contact us</annotation>.</string>
     <string name="stripe_verification.maxAttemptsExceeded">We\'re experiencing high volumes. Try again in an hour and if you need immediate assistance, please contact us.</string>
     <string name="stripe_verification.unexpectedError">Something went wrong.</string>
-    <string name="stripe_link_account_picker_disconnected">Disconnected</string>
+    <string name="stripe_link_account_picker_disconnected">Select to repair and connect</string>
     <plurals name="stripe_success_networking_save_to_link_failed">
         <item quantity="one">Your account was connected to %1$s but could not be saved to Link with Stripe at this time.</item>
         <item quantity="other">Your accounts were connected to %1$s but could not be saved to Link with Stripe at this time.</item>

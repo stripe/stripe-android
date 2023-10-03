@@ -20,6 +20,8 @@ internal data class PartnerAccountsList(
     @SerialName(value = "next_pane") @Required val nextPane: Pane,
 
     @SerialName(value = "skip_account_selection") val skipAccountSelection: Boolean? = null,
+
+    @SerialName(value = "total_count") val totalCount: Int? = null,
 )
 
 /**

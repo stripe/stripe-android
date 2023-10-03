@@ -7,6 +7,7 @@ import com.airbnb.mvrx.Success
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.NetworkedAccount
@@ -17,7 +18,8 @@ internal class LinkAccountPickerPreviewParameterProvider :
     PreviewParameterProvider<LinkAccountPickerState> {
     override val values = sequenceOf(
         canonical(),
-        accountSelected()
+        accountSelected(),
+//        repairableAccountSelected(),
     )
 
     override val count: Int
@@ -33,6 +35,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
+                partnerToCoreAuths = emptyMap(),
             )
         ),
     )
@@ -48,9 +51,25 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
+                partnerToCoreAuths = emptyMap(),
             )
         ),
     )
+
+//    private fun repairableAccountSelected() = LinkAccountPickerState(
+//        selectedAccountId = partnerAccountList()
+//            .first { it.status != Status.ACTIVE && it.allowSelection }.id,
+//        payload = Success(
+//            LinkAccountPickerState.Payload(
+//                accounts = partnerAccountList(),
+//                accessibleData = accessibleCallout(),
+//                businessName = "Random business",
+//                consumerSessionClientSecret = "secret",
+//                stepUpAuthenticationRequired = false,
+//                partnerToCoreAuths = emptyMap(),
+//            )
+//        ),
+//    )
 
     private fun partnerAccountList() = listOf(
         PartnerAccount(
@@ -82,7 +101,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             id = "id1",
             name = "With balance",
             balanceAmount = 1000,
-            status = FinancialConnectionsAccount.Status.ACTIVE,
+            status = Status.ACTIVE,
             displayableAccountNumbers = "1234",
             currency = "USD",
             _allowSelection = true,
@@ -98,10 +117,11 @@ internal class LinkAccountPickerPreviewParameterProvider :
             authorization = "Authorization",
             category = FinancialConnectionsAccount.Category.CASH,
             id = "id2",
-            name = "With balance disabled",
+            name = "With balance repairable",
+            status = Status.INACTIVE,
             balanceAmount = 1000,
-            _allowSelection = false,
-            allowSelectionMessage = "Disconnected",
+            _allowSelection = true,
+            allowSelectionMessage = "Select to repair and connect",
             subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
             supportedPaymentMethodTypes = emptyList()
         ) to NetworkedAccount(
@@ -112,11 +132,12 @@ internal class LinkAccountPickerPreviewParameterProvider :
             authorization = "Authorization",
             category = FinancialConnectionsAccount.Category.CASH,
             id = "id3",
-            name = "No balance",
-            displayableAccountNumbers = "1234",
-            subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
-            _allowSelection = true,
-            allowSelectionMessage = "",
+            name = "Repairable + disabled",
+            status = Status.INACTIVE,
+            balanceAmount = 1000,
+            _allowSelection = false,
+            allowSelectionMessage = "Select to repair and connect",
+            subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
             supportedPaymentMethodTypes = emptyList()
         ) to NetworkedAccount(
             allowSelection = true,
@@ -126,11 +147,12 @@ internal class LinkAccountPickerPreviewParameterProvider :
             authorization = "Authorization",
             category = FinancialConnectionsAccount.Category.CASH,
             id = "id4",
-            name = "No balance disabled",
+            name = "No balance",
             displayableAccountNumbers = "1234",
-            subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-            _allowSelection = false,
-            allowSelectionMessage = "Disconnected",
+            status = Status.ACTIVE,
+            subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
+            _allowSelection = true,
+            allowSelectionMessage = "",
             supportedPaymentMethodTypes = emptyList()
         ) to NetworkedAccount(
             allowSelection = false,
@@ -140,7 +162,8 @@ internal class LinkAccountPickerPreviewParameterProvider :
             authorization = "Authorization",
             category = FinancialConnectionsAccount.Category.CASH,
             id = "id5",
-            name = "Very long institution that is already linked",
+            name = "Very long account of a very long institution",
+            status = Status.ACTIVE,
             displayableAccountNumbers = "1234",
             linkedAccountId = "linkedAccountId",
             _allowSelection = true,

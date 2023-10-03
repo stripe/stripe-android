@@ -27,6 +27,7 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -39,6 +40,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val selectNetworkedAccount: SelectNetworkedAccount,
     private val updateLocalManifest: UpdateLocalManifest,
     private val updateCachedAccounts: UpdateCachedAccounts,
+    private val coreAuthorizationPendingNetworkingRepair: CoreAuthorizationPendingNetworkingRepairRepository,
     private val getManifest: GetManifest,
     private val navigationManager: NavigationManager,
     private val logger: Logger
@@ -68,8 +70,10 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                         Pair(matchingPartnerAccount, networkedAccount)
                     }
             }
+
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
+                partnerToCoreAuths = accountsResponse.partnerToCoreAuths,
                 accounts = accounts,
                 nextPaneOnNewAccount = accountsResponse.nextPaneOnAddAccount,
                 addNewAccount = requireNotNull(display.addNewAccount),
@@ -132,8 +136,10 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             }
 
             Pane.BANK_AUTH_REPAIR -> {
+                coreAuthorizationPendingNetworkingRepair.set(
+                    requireNotNull(payload.partnerToCoreAuths).getValue(account.authorization)
+                )
                 eventTracker.track(Click("click.repair_accounts", PANE))
-                TODO("Account repair flow not yet implemented")
             }
 
             Pane.PARTNER_AUTH -> {
@@ -185,7 +191,8 @@ internal data class LinkAccountPickerState(
         val accessibleData: AccessibleDataCalloutModel,
         val consumerSessionClientSecret: String,
         val defaultCta: String,
-        val nextPaneOnNewAccount: Pane?
+        val nextPaneOnNewAccount: Pane?,
+        val partnerToCoreAuths: Map<String, String>?
     )
 
     val cta: String?

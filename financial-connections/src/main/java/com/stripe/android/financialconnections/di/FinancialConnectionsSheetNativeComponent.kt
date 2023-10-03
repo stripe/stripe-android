@@ -6,6 +6,7 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
+import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerSubcomponent
@@ -49,6 +50,7 @@ internal interface FinancialConnectionsSheetNativeComponent {
     val manualEntryBuilder: ManualEntrySubcomponent.Builder
     val manualEntrySuccessBuilder: ManualEntrySuccessSubcomponent.Builder
     val partnerAuthSubcomponent: PartnerAuthSubcomponent.Builder
+    val bankAuthRepairSubcomponent: BankAuthRepairSubcomponent.Builder
     val successSubcomponent: SuccessSubcomponent.Builder
     val attachPaymentSubcomponent: AttachPaymentSubcomponent.Builder
     val resetSubcomponent: ResetSubcomponent.Builder

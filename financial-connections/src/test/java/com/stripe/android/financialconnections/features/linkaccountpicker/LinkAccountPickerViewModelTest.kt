@@ -65,11 +65,25 @@ class LinkAccountPickerViewModelTest {
         selectNetworkedAccount = selectNetworkedAccount,
         updateLocalManifest = updateLocalManifest,
         updateCachedAccounts = updateCachedAccounts,
+        coreAuthorizationPendingNetworkingRepair = mock(),
         initialState = state
     )
 
     @Test
-    fun `init - Fetches existing accounts and zips them by id`() = runTest {
+    fun `init - fetches existing accounts`() = runTest {
+        val accounts = twoAccounts()
+        whenever(getManifest()).thenReturn(sessionManifest())
+        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+        whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
+
+        val viewModel = buildViewModel(LinkAccountPickerState())
+
+        assertThat(viewModel.awaitState().payload()!!.accounts)
+            .isEqualTo(accounts.data)
+    }
+
+    @Test
+    fun `init - non active accounts are rendered as disabled`() = runTest {
         whenever(getManifest()).thenReturn(sessionManifest())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(
@@ -103,6 +117,36 @@ class LinkAccountPickerViewModelTest {
                 )
             )
     }
+
+//    @Test
+//    fun `init - broken accounts are rendered as disabled if repair disabled`() = runTest {
+//        whenever(getManifest()).thenReturn(sessionManifest())
+//        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+//        whenever(fetchNetworkedAccounts(any())).thenReturn(
+//            networkedAccountsList().copy(
+//                repairAuthorizationEnabled = false,
+//                count = 3,
+//                data = listOf(
+//                    partnerAccount().copy(_allowSelection = null, status = Status.DISCONNECTED),
+//                    partnerAccount().copy(_allowSelection = null, status = Status.ACTIVE),
+//                    partnerAccount().copy(_allowSelection = null, status = Status.DISCONNECTED)
+//                )
+//            )
+//        )
+//
+//        val viewModel = buildViewModel(LinkAccountPickerState())
+//
+//        // accounts are sorted by status, so the first account should be active
+//        // allow selection should be true for active accounts, false for others
+//        assertThat(viewModel.awaitState().payload()!!.accounts)
+//            .isEqualTo(
+//                listOf(
+//                    partnerAccount().copy(_allowSelection = true, status = Status.ACTIVE),
+//                    partnerAccount().copy(_allowSelection = false, status = Status.DISCONNECTED),
+//                    partnerAccount().copy(_allowSelection = false, status = Status.DISCONNECTED)
+//                )
+//            )
+//    }
 
     @Test
     fun `onNewBankAccountClick - navigates to AddNewAccount#NextPane`() = runTest {
