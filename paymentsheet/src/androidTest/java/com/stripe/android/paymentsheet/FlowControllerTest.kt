@@ -15,6 +15,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,6 +23,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
+@Ignore("Flakey, https://jira.corp.stripe.com/browse/RUN_MOBILESDK-2640")
 internal class FlowControllerTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
