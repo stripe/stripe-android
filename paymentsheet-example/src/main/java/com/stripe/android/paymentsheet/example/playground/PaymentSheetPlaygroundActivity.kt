@@ -5,12 +5,16 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -58,29 +62,34 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             MaterialTheme(
                 typography = MaterialTheme.typography.copy(
                     body1 = MaterialTheme.typography.body1.copy(fontSize = 14.sp)
-                )
+                ),
+                colors = if (isSystemInDarkTheme()) darkColors() else lightColors(),
             ) {
-                Column(
-                    modifier = Modifier.verticalScroll(rememberScrollState())
+                Surface(
+                    color = MaterialTheme.colors.background
                 ) {
-                    SettingsUi(playgroundSettings = localPlaygroundSettings)
+                    Column(
+                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    ) {
+                        SettingsUi(playgroundSettings = localPlaygroundSettings)
 
-                    QrCodeButton(playgroundSettings = localPlaygroundSettings)
+                        QrCodeButton(playgroundSettings = localPlaygroundSettings)
 
-                    ReloadButton(playgroundSettings = localPlaygroundSettings)
+                        ReloadButton(playgroundSettings = localPlaygroundSettings)
 
-                    val playgroundState by viewModel.state.collectAsState()
-                    PlaygroundStateUi(
-                        playgroundState = playgroundState,
-                        paymentSheet = paymentSheet,
-                        flowController = flowController,
-                    )
+                        val playgroundState by viewModel.state.collectAsState()
+                        PlaygroundStateUi(
+                            playgroundState = playgroundState,
+                            paymentSheet = paymentSheet,
+                            flowController = flowController,
+                        )
 
-                    val status by viewModel.status.collectAsState()
-                    val context = LocalContext.current
-                    LaunchedEffect(status) {
-                        if (!status.isNullOrEmpty()) {
-                            Toast.makeText(context, status, Toast.LENGTH_LONG).show()
+                        val status by viewModel.status.collectAsState()
+                        val context = LocalContext.current
+                        LaunchedEffect(status) {
+                            if (!status.isNullOrEmpty()) {
+                                Toast.makeText(context, status, Toast.LENGTH_LONG).show()
+                            }
                         }
                     }
                 }
