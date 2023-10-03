@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
+import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
@@ -37,6 +38,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTy
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
+import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import com.stripe.android.paymentsheet.rememberPaymentSheet
 import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
@@ -141,8 +143,9 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     playgroundSettings = playgroundSettings,
                 )
             },
-            modifier = Modifier.fillMaxWidth()
-                .testTag("RELOAD"),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(RELOAD_TEST_TAG),
         ) {
             Text("Reload")
         }
@@ -184,8 +187,9 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             onClick = {
                 presentPaymentSheet(paymentSheet, playgroundState)
             },
-            modifier = Modifier.fillMaxWidth()
-                .testTag("CHECKOUT"),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(CHECKOUT_TEST_TAG),
         ) {
             Text("Checkout")
         }
@@ -274,11 +278,16 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
 @Composable
 private fun PlaygroundTheme(content: @Composable ColumnScope.() -> Unit) {
+    val colors = if (isSystemInDarkTheme() || AppearanceStore.forceDarkMode) {
+        darkColors()
+    } else {
+        lightColors()
+    }
     MaterialTheme(
         typography = MaterialTheme.typography.copy(
             body1 = MaterialTheme.typography.body1.copy(fontSize = 14.sp)
         ),
-        colors = if (isSystemInDarkTheme()) darkColors() else lightColors(),
+        colors = colors,
     ) {
         Surface(
             color = MaterialTheme.colors.background
@@ -292,3 +301,5 @@ private fun PlaygroundTheme(content: @Composable ColumnScope.() -> Unit) {
         }
     }
 }
+
+const val RELOAD_TEST_TAG = "RELOAD"

@@ -1,14 +1,18 @@
 package com.stripe.android.screenshot
 
 import android.graphics.Color
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PrimaryButtonLabelSettingsDefinition
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -67,6 +71,13 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         )
     )
 
+    @Before
+    @After
+    fun resetAppearanceStore() {
+        AppearanceStore.reset()
+        forceLightMode()
+    }
+
     @Test
     fun testPaymentSheetNewCustomer() {
         testDriver.screenshotRegression(
@@ -76,32 +87,33 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
 
     @Test
     fun testPaymentSheetNewCustomerAppearance() {
+        AppearanceStore.state = appearance
         testDriver.screenshotRegression(
-            testParams.copy(
-                forceDarkMode = false,
-                appearance = appearance
-            )
+            testParams
         )
     }
 
     @Test
     fun testPaymentSheetNewCustomerDark() {
+        forceDarkMode()
         testDriver.screenshotRegression(
-            testParams.copy(forceDarkMode = true)
+            testParams
         )
     }
 
     @Test
     fun testPaymentSheetNewCustomerDarkAppearance() {
+        AppearanceStore.state = appearance
+        forceDarkMode()
         testDriver.screenshotRegression(
-            testParams.copy(forceDarkMode = true, appearance = appearance)
+            testParams
         )
     }
 
     @Test
     fun testPaymentSheetReturningCustomerLight() {
         testDriver.screenshotRegression(
-            testParams.copy(forceDarkMode = false).copyPlaygroundSettings { settings ->
+            testParams.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] =
                     CustomerSettingsDefinition.CustomerType.RETURNING
             }
@@ -110,11 +122,9 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
 
     @Test
     fun testPaymentSheetReturningCustomerLightAppearance() {
+        AppearanceStore.state = appearance
         testDriver.screenshotRegression(
-            testParams.copy(
-                forceDarkMode = false,
-                appearance = appearance
-            ).copyPlaygroundSettings { settings ->
+            testParams.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] =
                     CustomerSettingsDefinition.CustomerType.RETURNING
             }
@@ -123,8 +133,9 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
 
     @Test
     fun testPaymentSheetReturningCustomerDark() {
+        forceDarkMode()
         testDriver.screenshotRegression(
-            testParams.copy(forceDarkMode = true).copyPlaygroundSettings { settings ->
+            testParams.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] =
                     CustomerSettingsDefinition.CustomerType.RETURNING
             }
@@ -133,11 +144,10 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
 
     @Test
     fun testPaymentSheetReturningCustomerDarkAppearance() {
+        AppearanceStore.state = appearance
+        forceDarkMode()
         testDriver.screenshotRegression(
-            testParams.copy(
-                forceDarkMode = true,
-                appearance = appearance
-            ).copyPlaygroundSettings { settings ->
+            testParams.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] =
                     CustomerSettingsDefinition.CustomerType.RETURNING
             }
@@ -147,7 +157,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     @Test
     fun testPaymentSheetEditPaymentMethodsLight() {
         testDriver.screenshotRegression(
-            testParameters = testParams.copy(forceDarkMode = false)
+            testParameters = testParams
                 .copyPlaygroundSettings { settings ->
                     settings[CustomerSettingsDefinition] =
                         CustomerSettingsDefinition.CustomerType.RETURNING
@@ -160,11 +170,9 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
 
     @Test
     fun testPaymentSheetEditPaymentMethodsLightAppearance() {
+        AppearanceStore.state = appearance
         testDriver.screenshotRegression(
-            testParameters = testParams.copy(
-                forceDarkMode = false,
-                appearance = appearance
-            ).copyPlaygroundSettings { settings ->
+            testParameters = testParams.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] =
                     CustomerSettingsDefinition.CustomerType.RETURNING
             },
@@ -176,8 +184,9 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
 
     @Test
     fun testPaymentSheetEditPaymentMethodsDark() {
+        forceDarkMode()
         testDriver.screenshotRegression(
-            testParameters = testParams.copy(forceDarkMode = true)
+            testParameters = testParams
                 .copyPlaygroundSettings { settings ->
                     settings[CustomerSettingsDefinition] =
                         CustomerSettingsDefinition.CustomerType.RETURNING
@@ -190,11 +199,9 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
 
     @Test
     fun testPaymentSheetEditPaymentMethodsDarkAppearance() {
+        forceDarkMode()
         testDriver.screenshotRegression(
-            testParameters = testParams.copy(
-                forceDarkMode = true,
-                appearance = appearance
-            ).copyPlaygroundSettings { settings ->
+            testParameters = testParams.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] =
                     CustomerSettingsDefinition.CustomerType.RETURNING
             },
@@ -206,25 +213,22 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
 
     @Test
     fun testPaymentSheetPrimaryButtonAppearanceLight() {
+        AppearanceStore.state = PaymentSheet.Appearance(
+            primaryButton = primaryButton
+        )
         testDriver.screenshotRegression(
-            testParams.copy(
-                forceDarkMode = false,
-                appearance = PaymentSheet.Appearance(
-                    primaryButton = primaryButton
-                )
-            )
+            testParams
         )
     }
 
     @Test
     fun testPaymentSheetPrimaryButtonAppearanceDark() {
+        AppearanceStore.state = PaymentSheet.Appearance(
+            primaryButton = primaryButton
+        )
+        forceDarkMode()
         testDriver.screenshotRegression(
-            testParams.copy(
-                forceDarkMode = true,
-                appearance = PaymentSheet.Appearance(
-                    primaryButton = primaryButton
-                )
-            )
+            testParams
         )
     }
 
@@ -236,5 +240,20 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
                     "Buy this now!"
             }
         )
+    }
+
+    private fun forceDarkMode() {
+        AppearanceStore.forceDarkMode = true
+        rules.compose.runOnUiThread {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        }
+
+    }
+
+    private fun forceLightMode() {
+        AppearanceStore.forceDarkMode = false
+        rules.compose.runOnUiThread {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
     }
 }

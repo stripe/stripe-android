@@ -16,7 +16,10 @@ import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod.Type.Blik
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
+import com.stripe.android.paymentsheet.example.playground.RELOAD_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
+import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
 import com.stripe.android.test.core.TestParameters
@@ -37,9 +40,12 @@ internal class Selectors(
     testParameters: TestParameters
 ) {
     val continueButton = BuyButton(composeTestRule)
-    val complete = ComposeButton(composeTestRule, hasTestTag("CHECKOUT"))
-    val reload = ComposeButton(composeTestRule, hasTestTag("RELOAD"))
-    val multiStepSelect = ComposeButton(composeTestRule, hasTestTag("PAYMENT_METHOD_SELECTOR"))
+    val complete = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))
+    val reload = ComposeButton(composeTestRule, hasTestTag(RELOAD_TEST_TAG))
+    val multiStepSelect = ComposeButton(
+        composeTestRule,
+        hasTestTag(PAYMENT_METHOD_SELECTOR_TEST_TAG)
+    )
     val saveForFutureCheckbox = composeTestRule
         .onNodeWithTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
 
@@ -122,6 +128,7 @@ internal class Selectors(
                 }
             }
         }
+
         is AuthorizeAction.Cancel -> {
             object : UiAutomatorText(
                 label = testParameters.authorizationAction.text(checkoutMode),
@@ -133,6 +140,7 @@ internal class Selectors(
                 }
             }
         }
+
         is AuthorizeAction.Fail -> {
             object : UiAutomatorText(
                 label = testParameters.authorizationAction.text(checkoutMode),
@@ -140,6 +148,7 @@ internal class Selectors(
                 device = device
             ) {}
         }
+
         else -> null
     }
 

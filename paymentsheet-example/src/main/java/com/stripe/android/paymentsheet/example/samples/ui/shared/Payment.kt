@@ -48,7 +48,7 @@ fun PaymentMethodSelector(
             modifier = Modifier.clickable(
                 enabled = isEnabled,
                 onClick = onClick
-            ).testTag("PAYMENT_METHOD_SELECTOR"),
+            ).testTag(PAYMENT_METHOD_SELECTOR_TEST_TAG),
         ) {
             if (paymentMethodIcon != null) {
                 Icon(
@@ -85,7 +85,7 @@ fun BuyButton(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp)
-            .testTag("CHECKOUT"),
+            .testTag(CHECKOUT_TEST_TAG),
         onClick = onClick,
         colors = ButtonDefaults.textButtonColors(
             backgroundColor = MaterialTheme.colors.primary,
@@ -99,3 +99,6 @@ fun BuyButton(
         )
     }
 }
+
+const val PAYMENT_METHOD_SELECTOR_TEST_TAG = "PAYMENT_METHOD_SELECTOR"
+const val CHECKOUT_TEST_TAG = "CHECKOUT"
