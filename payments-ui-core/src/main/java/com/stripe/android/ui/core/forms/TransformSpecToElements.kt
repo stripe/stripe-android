@@ -47,8 +47,6 @@ import com.stripe.android.uicore.elements.IdentifierSpec
  * has a controller and identifier.  With only a single field in a section the section
  * controller will be a pass through the field controller.
  *
- * @param viewOnlyFields A set of identifiers for the fields that should be view-only, non-editable.
- * Currently only [IdentifierSpec.CardNumber] is supported and any other identifier is ignored.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class TransformSpecToElements(
@@ -59,8 +57,7 @@ class TransformSpecToElements(
     private val saveForFutureUseInitialValue: Boolean,
     private val merchantName: String,
     private val context: Context,
-    private val isEligibleForCardBrandChoice: Boolean,
-    private val viewOnlyFields: Set<IdentifierSpec> = emptySet(),
+    private val isEligibleForCardBrandChoice: Boolean
 ) {
     fun transform(list: List<FormItemSpec>): List<FormElement> =
         list.mapNotNull {
@@ -80,8 +77,7 @@ class TransformSpecToElements(
                 is CardDetailsSectionSpec -> it.transform(
                     context = context,
                     isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
-                    initialValues = initialValues,
-                    viewOnlyFields = viewOnlyFields,
+                    initialValues = initialValues
                 )
                 is BsbSpec -> it.transform(initialValues)
                 is OTPSpec -> it.transform()

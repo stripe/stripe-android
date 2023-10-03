@@ -26,7 +26,6 @@ class CardDetailsElementTest {
             IdentifierSpec.Generic("card_details"),
             context,
             initialValues = emptyMap(),
-            viewOnlyFields = emptySet(),
             controller = cardController
         )
 
@@ -56,8 +55,7 @@ class CardDetailsElementTest {
             initialValues = mapOf(
                 IdentifierSpec.CardNumber to "4242424242424242",
                 IdentifierSpec.CardBrand to CardBrand.Visa.code
-            ),
-            viewOnlyFields = setOf(IdentifierSpec.CardNumber)
+            )
         )
 
         assertThat(cardDetailsElement.controller.nameElement).isNull()
@@ -88,7 +86,6 @@ class CardDetailsElementTest {
             IdentifierSpec.Generic("card_details"),
             context,
             initialValues = emptyMap(),
-            viewOnlyFields = emptySet(),
             collectName = true,
             controller = cardController,
         )
@@ -125,7 +122,6 @@ class CardDetailsElementTest {
             IdentifierSpec.Generic("card_details"),
             context,
             initialValues = emptyMap(),
-            viewOnlyFields = emptySet(),
             collectName = true,
             controller = cardController,
             isEligibleForCardBrandChoice = true

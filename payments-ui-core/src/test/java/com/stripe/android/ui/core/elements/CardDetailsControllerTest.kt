@@ -50,24 +50,6 @@ class CardDetailsControllerTest {
     }
 
     @Test
-    fun `When card number is not view only then CardNumberControllerEditable is used`() {
-        val cardController =
-            CardDetailsController(context, emptyMap())
-
-        assertThat(cardController.numberElement.controller)
-            .isInstanceOf(CardNumberEditableController::class.java)
-    }
-
-    @Test
-    fun `When card number is view only then CardNumberControllerViewOnly is used`() {
-        val cardController =
-            CardDetailsController(context, emptyMap(), true)
-
-        assertThat(cardController.numberElement.controller)
-            .isInstanceOf(CardNumberViewOnlyController::class.java)
-    }
-
-    @Test
     fun `When eligible for card brand choice and preferred card brand is passed, initial value should have been set`() {
         val cardController = CardDetailsController(
             context,

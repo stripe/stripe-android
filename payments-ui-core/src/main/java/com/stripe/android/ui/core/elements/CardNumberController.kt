@@ -49,7 +49,7 @@ internal sealed class CardNumberController : TextFieldController, SectionFieldEr
     }
 }
 
-internal class CardNumberEditableController constructor(
+internal class DefaultCardNumberController constructor(
     private val cardTextFieldConfig: CardNumberConfig,
     cardAccountRangeRepository: CardAccountRangeRepository,
     workContext: CoroutineContext,
@@ -58,7 +58,6 @@ internal class CardNumberEditableController constructor(
     override val showOptionalLabel: Boolean = false,
     private val cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
 ) : CardNumberController() {
-
     constructor(
         cardTextFieldConfig: CardNumberConfig,
         context: Context,
@@ -203,11 +202,11 @@ internal class CardNumberEditableController constructor(
 
             val staticIcons = cardBrands.map { cardBrand ->
                 TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)
-            }.filterIndexed { index, _ -> index < 3 }
+            }.take(STATIC_ICON_COUNT)
 
             val animatedIcons = cardBrands.map { cardBrand ->
                 TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)
-            }.filterIndexed { index, _ -> index > 2 }
+            }.drop(STATIC_ICON_COUNT)
 
             TextFieldIcon.MultiTrailing(
                 staticIcons = staticIcons,
@@ -287,5 +286,9 @@ internal class CardNumberEditableController constructor(
             CardBrand.Unknown -> null
             else -> brand
         }
+    }
+
+    private companion object {
+        const val STATIC_ICON_COUNT = 3
     }
 }

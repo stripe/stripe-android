@@ -30,7 +30,7 @@ internal class CardNumberControllerTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val cardNumberController = CardNumberEditableController(
+    private val cardNumberController = DefaultCardNumberController(
         CardNumberConfig(),
         FakeCardAccountRangeRepository(),
         testDispatcher,
@@ -108,7 +108,7 @@ internal class CardNumberControllerTest {
     @Test
     fun `Entering VISA BIN does not call accountRangeRepository`() {
         var repositoryCalls = 0
-        val cardNumberController = CardNumberEditableController(
+        val cardNumberController = DefaultCardNumberController(
             CardNumberConfig(),
             object : CardAccountRangeRepository {
                 private val staticCardAccountRangeSource = StaticCardAccountRangeSource()
@@ -205,7 +205,7 @@ internal class CardNumberControllerTest {
 
     @Test
     fun `trailingIcon should be dropdown if card brand choice eligible`() {
-        val cardNumberController = CardNumberEditableController(
+        val cardNumberController = DefaultCardNumberController(
             CardNumberConfig(),
             FakeCardAccountRangeRepository(),
             testDispatcher,
@@ -252,7 +252,7 @@ internal class CardNumberControllerTest {
 
     @Test
     fun `on dropdown item click, card brand should have been changed`() {
-        val cardNumberController = CardNumberEditableController(
+        val cardNumberController = DefaultCardNumberController(
             CardNumberConfig(),
             FakeCardAccountRangeRepository(),
             testDispatcher,

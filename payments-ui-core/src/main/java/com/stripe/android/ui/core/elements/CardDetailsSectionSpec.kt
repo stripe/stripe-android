@@ -22,12 +22,10 @@ data class CardDetailsSectionSpec(
         context: Context,
         isEligibleForCardBrandChoice: Boolean,
         initialValues: Map<IdentifierSpec, String?>,
-        viewOnlyFields: Set<IdentifierSpec>,
     ): FormElement =
         CardDetailsSectionElement(
             context = context,
             initialValues = initialValues,
-            viewOnlyFields = viewOnlyFields,
             identifier = apiPath,
             collectName = collectName,
             isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
