@@ -39,8 +39,6 @@ dependencies {
     implementation libs.compose.materialIcons
     implementation libs.compose.activity
     implementation libs.compose.navigation
-    implementation libs.accompanist.navigationAnimation
-    implementation libs.accompanist.navigationMaterial
     implementation libs.accompanist.systemUiController
 
     // Other
