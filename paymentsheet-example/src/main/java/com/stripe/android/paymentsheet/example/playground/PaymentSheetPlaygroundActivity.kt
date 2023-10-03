@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
@@ -63,6 +64,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             PlaygroundTheme {
                 SettingsUi(playgroundSettings = localPlaygroundSettings)
 
+                AppearanceButton()
+
                 QrCodeButton(playgroundSettings = localPlaygroundSettings)
 
                 ReloadButton(playgroundSettings = localPlaygroundSettings)
@@ -82,6 +85,18 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun AppearanceButton() {
+        Button(
+            onClick = {
+                val bottomSheet = AppearanceBottomSheetDialogFragment.newInstance()
+                bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+            }
+        ) {
+            Text("Change Appearance")
         }
     }
 

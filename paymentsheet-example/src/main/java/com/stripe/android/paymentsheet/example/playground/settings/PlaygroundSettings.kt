@@ -195,11 +195,12 @@ internal class PlaygroundSettings private constructor(
             IntegrationTypeSettingsDefinition,
         )
 
-        private val testSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
+        private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             SupportedPaymentMethodsSettingsDefinition,
+            AppearanceSettingsDefinition,
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =
-            uiSettingDefinitions + testSettingDefinitions
+            uiSettingDefinitions + nonUiSettingDefinitions
     }
 }
