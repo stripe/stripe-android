@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
@@ -22,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
@@ -94,7 +97,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             onClick = {
                 val bottomSheet = AppearanceBottomSheetDialogFragment.newInstance()
                 bottomSheet.show(supportFragmentManager, bottomSheet.tag)
-            }
+            },
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text("Change Appearance")
         }
@@ -112,6 +116,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     )
                 )
             },
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text("QR code for current settings")
         }
@@ -125,6 +130,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     playgroundSettings = playgroundSettings,
                 )
             },
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text("Reload")
         }
@@ -166,6 +172,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             onClick = {
                 presentPaymentSheet(paymentSheet, playgroundState)
             },
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text("Checkout")
         }
@@ -264,7 +271,9 @@ private fun PlaygroundTheme(content: @Composable ColumnScope.() -> Unit) {
             color = MaterialTheme.colors.background
         ) {
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
                 content = content,
             )
         }

@@ -26,10 +26,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 internal fun SettingsUi(playgroundSettings: PlaygroundSettings) {
-    Column(
-        modifier = Modifier
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp)
-    ) {
+    Column {
         for (settingDefinition in PlaygroundSettings.uiSettingDefinitions) {
             Row(modifier = Modifier.padding(bottom = 16.dp)) {
                 Setting(settingDefinition, playgroundSettings)
