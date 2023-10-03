@@ -34,6 +34,7 @@ class ElementsSessionJsonParserTest {
         assertThat(elementsSession?.stripeIntent?.paymentMethodTypes)
             .containsExactlyElementsIn(orderedPaymentMethods)
             .inOrder()
+        assertThat(elementsSession?.linkSettings?.linkPassthroughModeEnabled).isFalse()
     }
 
     @Test
@@ -71,8 +72,9 @@ class ElementsSessionJsonParserTest {
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
         )!!
 
-        assertThat(elementsSession.stripeIntent?.linkFundingSources)
+        assertThat(elementsSession.stripeIntent.linkFundingSources)
             .containsExactly("card", "bank_account")
+        assertThat(elementsSession.linkSettings?.linkPassthroughModeEnabled).isTrue()
     }
 
     @Test
@@ -86,8 +88,9 @@ class ElementsSessionJsonParserTest {
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
         )!!
 
-        assertThat(elementsSession.stripeIntent?.linkFundingSources)
+        assertThat(elementsSession.stripeIntent.linkFundingSources)
             .containsExactly("card", "bank_account")
+        assertThat(elementsSession.linkSettings?.linkPassthroughModeEnabled).isFalse()
     }
 
     @Test

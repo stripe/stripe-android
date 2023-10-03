@@ -27,8 +27,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.material.MdcTheme
+import com.stripe.android.R
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.databinding.StripeCardBrandViewBinding
 import com.stripe.android.model.CardBrand
+import com.stripe.android.uicore.elements.SingleChoiceDropdown
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.properties.Delegates
 
@@ -186,13 +189,58 @@ private fun CardBrand(
             CardBrandChoiceDropdown(
                 expanded = expanded,
                 currentBrand = currentBrand,
-                possibleBrands = possibleBrands,
-                onBrandSelected = {
-                    onBrandSelected(it)
+                brands = possibleBrands,
+                onBrandSelected = { brand ->
+                    onBrandSelected(brand)
                     expanded = false
                 },
                 onDismiss = { expanded = false },
             )
         }
+    }
+}
+
+@Composable
+private fun CardBrandChoiceDropdown(
+    expanded: Boolean,
+    currentBrand: CardBrand,
+    brands: List<CardBrand>,
+    onBrandSelected: (CardBrand?) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val noSelection = CardBrandChoice(
+        label = resolvableString(id = R.string.stripe_card_brand_choice_no_selection),
+        icon = CardBrand.Unknown.icon
+    )
+
+    val allPossibleBrands = listOf(CardBrand.Unknown) + brands
+    val choices = allPossibleBrands.map { brand ->
+        brand.toChoice(noSelection)
+    }
+
+    SingleChoiceDropdown(
+        title = resolvableString(id = R.string.stripe_card_brand_choice_selection_header),
+        expanded = expanded,
+        currentChoice = currentBrand.toChoice(noSelection),
+        choices = choices,
+        onChoiceSelected = { choice ->
+            when (val choiceIndex = choices.indexOf(choice)) {
+                -1 -> Unit
+                0 -> onBrandSelected(null)
+                else -> onBrandSelected(allPossibleBrands[choiceIndex])
+            }
+        },
+        onDismiss = onDismiss,
+    )
+}
+
+private fun CardBrand.toChoice(noSelection: CardBrandChoice): CardBrandChoice {
+    return if (this == CardBrand.Unknown) {
+        noSelection
+    } else {
+        CardBrandChoice(
+            label = resolvableString(displayName),
+            icon = icon
+        )
     }
 }

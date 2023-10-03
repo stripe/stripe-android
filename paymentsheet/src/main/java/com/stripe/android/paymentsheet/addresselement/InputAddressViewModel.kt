@@ -58,7 +58,6 @@ internal class InputAddressViewModel @Inject constructor(
                     ?.toIdentifierMap()
                     ?: emptyMap()
                 _formController.value = formControllerProvider.get()
-                    .viewOnlyFields(emptySet())
                     .viewModelScope(viewModelScope)
                     .stripeIntent(null)
                     .merchantName("")

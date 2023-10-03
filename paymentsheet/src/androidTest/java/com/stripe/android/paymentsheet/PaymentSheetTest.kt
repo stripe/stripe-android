@@ -339,4 +339,39 @@ internal class PaymentSheetTest {
 
         page.clickPrimaryButton()
     }
+
+    @Test
+    fun testPaymentIntentWithCardBrandChoiceSuccess() = runPaymentSheetTest(
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = null,
+            )
+        }
+
+        page.fillOutCardDetailsWithCardBrandChoice()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart(
+                "payment_method_data%5Bcard%5D%5Bnetworks%5D%5Bpreferred%5D",
+                "cartes_bancaires"
+            ),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
 }

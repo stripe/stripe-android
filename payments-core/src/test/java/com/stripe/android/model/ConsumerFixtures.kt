@@ -205,4 +205,13 @@ object ConsumerFixtures {
             }
         """.trimIndent()
     )
+
+    val PAYMENT_DETAILS_SHARE_JSON = JSONObject(
+        """
+        {
+            "object": "payment_method",
+            "payment_method": "pm_1NsnWALu5o3P18Zp36Q7YfWW"
+        }
+        """.trimIndent()
+    )
 }

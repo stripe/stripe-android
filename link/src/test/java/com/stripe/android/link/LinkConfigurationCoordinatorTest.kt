@@ -30,6 +30,7 @@ class LinkConfigurationCoordinatorTest {
         customerPhone = CUSTOMER_PHONE,
         customerBillingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
         shippingValues = null,
+        passthroughModeEnabled = false,
     )
 
     private val linkComponentBuilder: LinkComponent.Builder = mock()

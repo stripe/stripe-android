@@ -17,6 +17,7 @@ data class ElementsSession(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
-        val linkFundingSources: List<String>
+        val linkFundingSources: List<String>,
+        val linkPassthroughModeEnabled: Boolean,
     ) : StripeModel
 }

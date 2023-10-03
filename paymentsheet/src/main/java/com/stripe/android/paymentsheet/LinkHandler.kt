@@ -39,7 +39,9 @@ internal class LinkHandler @Inject constructor(
 
         object Started : ProcessingState()
 
-        class PaymentDetailsCollected(val details: LinkPaymentDetails.New?) : ProcessingState()
+        class PaymentDetailsCollected(
+            val paymentSelection: PaymentSelection?
+        ) : ProcessingState()
 
         data class Error(val message: String?) : ProcessingState()
 
@@ -150,12 +152,28 @@ internal class LinkHandler @Inject constructor(
             linkAnalyticsHelper.onLinkPopupSkipped()
             _processingState.emit(ProcessingState.CompleteWithoutLink)
         } else {
+            val linkPaymentDetails = linkConfigurationCoordinator.attachNewCardToAccount(
+                configuration,
+                paymentMethodCreateParams
+            ).getOrNull()
             _processingState.emit(
                 ProcessingState.PaymentDetailsCollected(
-                    linkConfigurationCoordinator.attachNewCardToAccount(
-                        configuration,
-                        paymentMethodCreateParams
-                    ).getOrNull()
+                    when (linkPaymentDetails) {
+                        is LinkPaymentDetails.New -> {
+                            PaymentSelection.New.LinkInline(linkPaymentDetails)
+                        }
+                        is LinkPaymentDetails.Saved -> {
+                            PaymentSelection.Saved(
+                                paymentMethod = PaymentMethod.Builder()
+                                    .setId(linkPaymentDetails.paymentDetails.id)
+                                    .setCode(paymentMethodCreateParams.typeCode)
+                                    .setType(PaymentMethod.Type.Card)
+                                    .build(),
+                                walletType = PaymentSelection.Saved.WalletType.Link,
+                            )
+                        }
+                        null -> null
+                    }
                 )
             )
         }

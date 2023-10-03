@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -21,21 +22,24 @@ internal object FormArgumentsFactory {
     ): FormArguments {
         val layoutFormDescriptor = paymentMethod.getPMAddForm(stripeIntent, config)
 
-        val initialParams = if (newLpm is PaymentSelection.New.LinkInline) {
-            newLpm.linkPaymentDetails.originalParams
-        } else {
-            newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {
+        val originalParams = (
+            (newLpm as? PaymentSelection.New.LinkInline)
+                ?.linkPaymentDetails as? LinkPaymentDetails.New
+            )?.originalParams
+        val initialParams = originalParams
+            ?: newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {
                 it == paymentMethod.code
             }?.let {
                 when (newLpm) {
                     is PaymentSelection.New.GenericPaymentMethod ->
                         newLpm.paymentMethodCreateParams
+
                     is PaymentSelection.New.Card ->
                         newLpm.paymentMethodCreateParams
+
                     else -> null
                 }
             }
-        }
 
         val showCheckboxControlledFields = if (newLpm != null) {
             newLpm.customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse

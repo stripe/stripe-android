@@ -14,6 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.BuildConfig.DEBUG
+import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -24,7 +25,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 internal class CardWidgetViewModel(
-    private val cbcEnabled: CbcEnabledProvider,
+    private val cbcEligible: () -> Boolean = { DEBUG },
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
 
@@ -33,24 +34,21 @@ internal class CardWidgetViewModel(
 
     init {
         viewModelScope.launch(dispatcher) {
-            _isCbcEligible.value = cbcEnabled() && determineCbcEligibility()
+            _isCbcEligible.value = FeatureFlags.cardBrandChoice.isEnabled && determineCbcEligibility()
         }
     }
 
     private suspend fun determineCbcEligibility(): Boolean {
         // TODO(tillh-stripe) Query /wallets-config here
-        // TODO(tillh-stripe) Make sure we don't use an outdated PaymentConfiguration
         delay(1.seconds)
-        return DEBUG
+        return cbcEligible()
     }
 
-    class Factory(
-        private val cbcEnabledProvider: CbcEnabledProvider,
-    ) : ViewModelProvider.Factory {
+    class Factory : ViewModelProvider.Factory {
 
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             @Suppress("UNCHECKED_CAST")
-            return CardWidgetViewModel(cbcEnabledProvider) as T
+            return CardWidgetViewModel() as T
         }
     }
 }
@@ -74,9 +72,7 @@ internal fun View.doWithCardWidgetViewModel(
             return@doOnAttach
         }
 
-        val factory = CardWidgetViewModel.Factory(
-            cbcEnabledProvider = RealCbcEnabledProvider(),
-        )
+        val factory = CardWidgetViewModel.Factory()
 
         val viewModel = ViewModelProvider(
             owner = storeOwner,

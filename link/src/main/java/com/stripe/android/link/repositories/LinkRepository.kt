@@ -40,6 +40,14 @@ internal interface LinkRepository {
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
+        consumerPublishableKey: String?,
+        active: Boolean,
     ): Result<LinkPaymentDetails.New>
+
+    suspend fun shareCardPaymentDetails(
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        id: String,
+        last4: String,
+        consumerSessionClientSecret: String,
+    ): Result<LinkPaymentDetails>
 }

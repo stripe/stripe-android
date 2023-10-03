@@ -6,6 +6,8 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillNode
@@ -41,6 +44,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalAutofill
 import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -245,6 +249,59 @@ fun TextField(
                                 AnimatedIcons(icons = it.animatedIcons, loading = loading)
                             }
                         }
+                        is TextFieldIcon.Dropdown -> {
+                            var expanded by remember {
+                                mutableStateOf(false)
+                            }
+
+                            val show = !loading && !it.hide
+
+                            Box {
+                                Row(
+                                    modifier = Modifier
+                                        .padding(10.dp)
+                                        .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
+                                        .clickable(enabled = show) {
+                                            expanded = true
+                                        },
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    TrailingIcon(
+                                        TextFieldIcon.Trailing(
+                                            it.currentItem.icon,
+                                            isTintable = false
+                                        ),
+                                        loading
+                                    )
+
+                                    if (show) {
+                                        TrailingIcon(
+                                            trailingIcon = TextFieldIcon.Trailing(
+                                                R.drawable.stripe_ic_chevron_down,
+                                                isTintable = false
+                                            ),
+                                            loading = false
+                                        )
+                                    }
+                                }
+
+                                SingleChoiceDropdown(
+                                    expanded = expanded,
+                                    title = it.title,
+                                    currentChoice = it.currentItem,
+                                    choices = it.items,
+                                    onChoiceSelected = { item ->
+                                        textFieldController.onDropdownItemClicked(item)
+
+                                        expanded = false
+                                    },
+                                    onDismiss = {
+                                        expanded = false
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -341,7 +398,12 @@ internal fun TrailingIcon(
 }
 
 private fun Modifier.conditionallyClickable(onClick: (() -> Unit)?): Modifier {
-    return clickable(enabled = onClick != null) {
-        onClick?.invoke()
+    return if (onClick != null) {
+        clickable { onClick() }
+    } else {
+        this
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val DROPDOWN_MENU_CLICKABLE_TEST_TAG = "dropdown_menu_clickable"

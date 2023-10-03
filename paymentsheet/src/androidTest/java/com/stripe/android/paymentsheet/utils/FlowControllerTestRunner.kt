@@ -33,25 +33,46 @@ internal fun runFlowControllerTest(
     resultCallback: PaymentSheetResultCallback,
     block: (FlowControllerTestRunnerContext) -> Unit,
 ) {
-    for (integrationType in FlowControllerTestFactory.IntegrationType.values()) {
-        val countDownLatch = CountDownLatch(1)
+    runFlowControllerTest(
+        createIntentCallback = createIntentCallback,
+        paymentOptionCallback = paymentOptionCallback,
+        resultCallback = resultCallback,
+        integrationType = FlowControllerTestFactory.IntegrationType.Activity,
+        block = block
+    )
+    runFlowControllerTest(
+        createIntentCallback = createIntentCallback,
+        paymentOptionCallback = paymentOptionCallback,
+        resultCallback = resultCallback,
+        integrationType = FlowControllerTestFactory.IntegrationType.Compose,
+        block = block
+    )
+}
 
-        val factory = FlowControllerTestFactory(
-            integrationType = integrationType,
-            createIntentCallback = createIntentCallback,
-            paymentOptionCallback = paymentOptionCallback,
-            resultCallback = { result ->
-                resultCallback.onPaymentSheetResult(result)
-                countDownLatch.countDown()
-            }
-        )
+private fun runFlowControllerTest(
+    createIntentCallback: CreateIntentCallback? = null,
+    paymentOptionCallback: PaymentOptionCallback,
+    resultCallback: PaymentSheetResultCallback,
+    integrationType: FlowControllerTestFactory.IntegrationType,
+    block: (FlowControllerTestRunnerContext) -> Unit,
+) {
+    val countDownLatch = CountDownLatch(1)
 
-        runFlowControllerTest(
-            countDownLatch = countDownLatch,
-            makeFlowController = factory::make,
-            block = block,
-        )
-    }
+    val factory = FlowControllerTestFactory(
+        integrationType = integrationType,
+        createIntentCallback = createIntentCallback,
+        paymentOptionCallback = paymentOptionCallback,
+        resultCallback = { result ->
+            resultCallback.onPaymentSheetResult(result)
+            countDownLatch.countDown()
+        }
+    )
+
+    runFlowControllerTest(
+        countDownLatch = countDownLatch,
+        makeFlowController = factory::make,
+        block = block,
+    )
 }
 
 private fun runFlowControllerTest(

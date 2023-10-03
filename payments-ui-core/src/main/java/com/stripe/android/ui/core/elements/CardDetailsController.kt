@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -22,7 +23,6 @@ import java.util.UUID
 internal class CardDetailsController constructor(
     context: Context,
     initialValues: Map<IdentifierSpec, String?>,
-    cardNumberReadOnly: Boolean = false,
     collectName: Boolean = false,
     isEligibleForCardBrandChoice: Boolean = false,
 ) : SectionFieldErrorController, SectionFieldComposable {
@@ -46,19 +46,21 @@ internal class CardDetailsController constructor(
     val label: Int? = null
     val numberElement = CardNumberElement(
         IdentifierSpec.CardNumber,
-        if (cardNumberReadOnly) {
-            CardNumberViewOnlyController(
-                CardNumberConfig(),
-                initialValues
-            )
-        } else {
-            CardNumberEditableController(
-                CardNumberConfig(),
-                context,
-                initialValues[IdentifierSpec.CardNumber],
-                isEligibleForCardBrandChoice,
-            )
-        }
+        DefaultCardNumberController(
+            CardNumberConfig(),
+            context,
+            initialValues[IdentifierSpec.CardNumber],
+            when (isEligibleForCardBrandChoice) {
+                true -> CardBrandChoiceConfig.Eligible(
+                    initialBrand = initialValues[
+                        IdentifierSpec.PreferredCardBrand
+                    ]?.let { value ->
+                        CardBrand.fromCode(value)
+                    }
+                )
+                false -> CardBrandChoiceConfig.Ineligible
+            },
+        )
     )
 
     val cvcElement = CvcElement(
