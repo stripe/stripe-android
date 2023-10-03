@@ -27,6 +27,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
@@ -60,6 +62,9 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 paymentResultCallback = viewModel::onPaymentSheetResult,
                 createIntentCallback = viewModel::createIntentCallback
             )
+            val addressLauncher = rememberAddressLauncher(
+                callback = viewModel::onAddressLauncherResult
+            )
 
             val playgroundSettings by viewModel.playgroundSettingsFlow.collectAsState()
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
@@ -78,6 +83,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     playgroundState = playgroundState,
                     paymentSheet = paymentSheet,
                     flowController = flowController,
+                    addressLauncher = addressLauncher,
                 )
 
                 val status by viewModel.status.collectAsState()
@@ -140,11 +146,17 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private fun PlaygroundStateUi(
         playgroundState: PlaygroundState?,
         paymentSheet: PaymentSheet,
-        flowController: PaymentSheet.FlowController
+        flowController: PaymentSheet.FlowController,
+        addressLauncher: AddressLauncher
     ) {
         if (playgroundState == null) {
             return
         }
+
+        ShippingAddressButton(
+            addressLauncher = addressLauncher,
+            playgroundState = playgroundState,
+        )
 
         when (playgroundState.integrationType) {
             IntegrationTypeSettingsDefinition.IntegrationType.PaymentSheet -> {
@@ -191,6 +203,11 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         val flowControllerState by viewModel.flowControllerState.collectAsState()
+        val localFlowControllerState = flowControllerState
+
+        LaunchedEffect(localFlowControllerState?.addressDetails) {
+            flowController.shippingDetails = localFlowControllerState?.addressDetails
+        }
 
         PaymentMethodSelector(
             isEnabled = flowControllerState != null,
@@ -202,6 +219,21 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             buyButtonEnabled = flowControllerState?.selectedPaymentOption != null,
             onClick = flowController::confirm
         )
+    }
+
+    @Composable
+    private fun ShippingAddressButton(
+        addressLauncher: AddressLauncher,
+        playgroundState: PlaygroundState,
+    ) {
+        Button(
+            onClick = {
+                addressLauncher.present(playgroundState.clientSecret)
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Set Shipping Address")
+        }
     }
 
     private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState) {
