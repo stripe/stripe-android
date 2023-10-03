@@ -1,5 +1,5 @@
 ext.versions = [
-        accompanist                 : '0.30.1',
+        accompanist                 : '0.32.0',
         alipay                      : '15.8.12',
         androidGradlePlugin         : '8.1.1',
         androidTest                 : '1.5.0',
@@ -20,7 +20,7 @@ ext.versions = [
         androidxFragment            : '1.5.5',
         androidxLegacySupport       : '1.0.0',
         androidxLifecycle           : '2.5.1',
-        androidxNavigation          : '2.5.3',
+        androidxNavigation          : '2.6.0',
         androidxPreference          : '1.2.0',
         androidxRecyclerview        : '1.2.1',
         androidxSecurity            : '1.1.0-alpha05',

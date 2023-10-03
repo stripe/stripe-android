@@ -17,10 +17,10 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.common.ui.rememberBottomSheetState
@@ -54,7 +54,7 @@ internal class AddressElementActivity : ComponentActivity() {
 
         setContent {
             val coroutineScope = rememberCoroutineScope()
-            val navController = rememberAnimatedNavController()
+            val navController = rememberNavController()
             viewModel.navigator.navigationController = navController
 
             val bottomSheetState = rememberBottomSheetState()
@@ -78,7 +78,7 @@ internal class AddressElementActivity : ComponentActivity() {
                     onDismissed = viewModel.navigator::dismiss,
                 ) {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        AnimatedNavHost(
+                        NavHost(
                             navController = navController,
                             startDestination = AddressElementScreen.Loading.route,
                         ) {
