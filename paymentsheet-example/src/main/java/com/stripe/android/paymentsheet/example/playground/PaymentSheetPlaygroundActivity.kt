@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
@@ -59,38 +60,25 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             val playgroundSettings by viewModel.playgroundSettingsFlow.collectAsState()
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
 
-            MaterialTheme(
-                typography = MaterialTheme.typography.copy(
-                    body1 = MaterialTheme.typography.body1.copy(fontSize = 14.sp)
-                ),
-                colors = if (isSystemInDarkTheme()) darkColors() else lightColors(),
-            ) {
-                Surface(
-                    color = MaterialTheme.colors.background
-                ) {
-                    Column(
-                        modifier = Modifier.verticalScroll(rememberScrollState())
-                    ) {
-                        SettingsUi(playgroundSettings = localPlaygroundSettings)
+            PlaygroundTheme {
+                SettingsUi(playgroundSettings = localPlaygroundSettings)
 
-                        QrCodeButton(playgroundSettings = localPlaygroundSettings)
+                QrCodeButton(playgroundSettings = localPlaygroundSettings)
 
-                        ReloadButton(playgroundSettings = localPlaygroundSettings)
+                ReloadButton(playgroundSettings = localPlaygroundSettings)
 
-                        val playgroundState by viewModel.state.collectAsState()
-                        PlaygroundStateUi(
-                            playgroundState = playgroundState,
-                            paymentSheet = paymentSheet,
-                            flowController = flowController,
-                        )
+                val playgroundState by viewModel.state.collectAsState()
+                PlaygroundStateUi(
+                    playgroundState = playgroundState,
+                    paymentSheet = paymentSheet,
+                    flowController = flowController,
+                )
 
-                        val status by viewModel.status.collectAsState()
-                        val context = LocalContext.current
-                        LaunchedEffect(status) {
-                            if (!status.isNullOrEmpty()) {
-                                Toast.makeText(context, status, Toast.LENGTH_LONG).show()
-                            }
-                        }
+                val status by viewModel.status.collectAsState()
+                val context = LocalContext.current
+                LaunchedEffect(status) {
+                    if (!status.isNullOrEmpty()) {
+                        Toast.makeText(context, status, Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -244,6 +232,25 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 ),
                 configuration = playgroundState.paymentSheetConfiguration(),
                 callback = viewModel::onFlowControllerConfigured,
+            )
+        }
+    }
+}
+
+@Composable
+fun PlaygroundTheme(content: @Composable ColumnScope.() -> Unit) {
+    MaterialTheme(
+        typography = MaterialTheme.typography.copy(
+            body1 = MaterialTheme.typography.body1.copy(fontSize = 14.sp)
+        ),
+        colors = if (isSystemInDarkTheme()) darkColors() else lightColors(),
+    ) {
+        Surface(
+            color = MaterialTheme.colors.background
+        ) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                content = content,
             )
         }
     }
