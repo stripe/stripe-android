@@ -1366,9 +1366,9 @@ public abstract interface class com/stripe/android/paymentsheet/addresselement/A
 
 public final class com/stripe/android/paymentsheet/addresselement/ComposableSingletons$AddressElementActivityKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/addresselement/ComposableSingletons$AddressElementActivityKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function4;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/paymentsheet/databinding/StripeFragmentPaymentOptionsPrimaryButtonBinding : androidx/viewbinding/ViewBinding {

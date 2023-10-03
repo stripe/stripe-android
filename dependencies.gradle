@@ -20,7 +20,7 @@ ext.versions = [
         androidxFragment            : '1.5.5',
         androidxLegacySupport       : '1.0.0',
         androidxLifecycle           : '2.5.1',
-        androidxNavigation          : '2.6.0',
+        androidxNavigation          : '2.5.3',
         androidxPreference          : '1.2.0',
         androidxRecyclerview        : '1.2.1',
         androidxSecurity            : '1.1.0-alpha05',
@@ -92,8 +92,6 @@ ext.configs = [
 ext.libs = [
         accompanist                         : [
                 flowLayout         : "com.google.accompanist:accompanist-flowlayout:${versions.accompanist}",
-                navigationAnimation: "com.google.accompanist:accompanist-navigation-animation:${versions.accompanist}",
-                navigationMaterial : "com.google.accompanist:accompanist-navigation-material:${versions.accompanist}",
                 systemUiController : "com.google.accompanist:accompanist-systemuicontroller:${versions.accompanist}",
                 themeAdapter       : "com.google.accompanist:accompanist-themeadapter-material:${versions.accompanist}",
                 webView            : "com.google.accompanist:accompanist-webview:${versions.accompanist}",
