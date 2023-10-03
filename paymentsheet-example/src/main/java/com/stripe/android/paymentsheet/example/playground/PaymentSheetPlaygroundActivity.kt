@@ -238,7 +238,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 }
 
 @Composable
-fun PlaygroundTheme(content: @Composable ColumnScope.() -> Unit) {
+private fun PlaygroundTheme(content: @Composable ColumnScope.() -> Unit) {
     MaterialTheme(
         typography = MaterialTheme.typography.copy(
             body1 = MaterialTheme.typography.body1.copy(fontSize = 14.sp)
