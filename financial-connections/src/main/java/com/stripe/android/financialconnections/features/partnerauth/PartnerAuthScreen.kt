@@ -4,6 +4,7 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
 import android.view.ViewGroup.LayoutParams
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.webkit.WebView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -427,10 +428,7 @@ private fun GifWebView(
                  * https://stackoverflow.com/questions/74829526/
                  */
                 alpha = WEBVIEW_ALPHA
-                layoutParams = LayoutParams(
-                    LayoutParams.MATCH_PARENT,
-                    LayoutParams.MATCH_PARENT
-                )
+                layoutParams = LayoutParams(MATCH_PARENT, MATCH_PARENT)
                 isVerticalScrollBarEnabled = false
                 isVerticalFadingEdgeEnabled = false
                 loadData(body, null, "UTF-8")
