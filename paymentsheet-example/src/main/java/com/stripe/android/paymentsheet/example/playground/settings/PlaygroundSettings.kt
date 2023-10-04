@@ -98,8 +98,8 @@ internal class PlaygroundSettings private constructor(
             configure(value as T, checkoutRequestBuilder)
         }
 
-        fun asJsonString(): String {
-            val settingsMap = settings.map {
+        private fun asJsonString(filter: (PlaygroundSettingDefinition<*>) -> Boolean): String {
+            val settingsMap = settings.filterKeys(filter).map {
                 val saveable = it.key.saveable()
                 if (saveable != null) {
                     saveable.key to JsonPrimitive(saveable.convertToString(it.value))
@@ -119,9 +119,13 @@ internal class PlaygroundSettings private constructor(
             sharedPreferences.edit {
                 putString(
                     sharedPreferencesKey,
-                    asJsonString()
+                    asJsonString(filter = { it.saveable()?.saveToSharedPreferences == true })
                 )
             }
+        }
+
+        fun asJsonString(): String {
+            return asJsonString { true }
         }
 
         private fun <T> PlaygroundSettingDefinition.Saveable<T>.convertToString(
