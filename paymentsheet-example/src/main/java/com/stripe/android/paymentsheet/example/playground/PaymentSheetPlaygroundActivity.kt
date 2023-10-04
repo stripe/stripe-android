@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -24,22 +25,36 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
+import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
-import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTypeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
+import com.stripe.android.paymentsheet.example.playground.settings.IntegrationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
+import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import com.stripe.android.paymentsheet.rememberPaymentSheet
 import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
 
 internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
+    companion object {
+        fun createTestIntent(settingsJson: String): Intent {
+            return Intent(
+                Intent.ACTION_VIEW,
+                PaymentSheetPlaygroundUrlHelper.createUri(settingsJson)
+            )
+        }
+    }
+
     val viewModel: PaymentSheetPlaygroundViewModel by viewModels {
         PaymentSheetPlaygroundViewModel.Factory(
             applicationSupplier = { application },
@@ -60,6 +75,9 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 paymentResultCallback = viewModel::onPaymentSheetResult,
                 createIntentCallback = viewModel::createIntentCallback
             )
+            val addressLauncher = rememberAddressLauncher(
+                callback = viewModel::onAddressLauncherResult
+            )
 
             val playgroundSettings by viewModel.playgroundSettingsFlow.collectAsState()
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
@@ -78,6 +96,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     playgroundState = playgroundState,
                     paymentSheet = paymentSheet,
                     flowController = flowController,
+                    addressLauncher = addressLauncher,
                 )
 
                 val status by viewModel.status.collectAsState()
@@ -130,7 +149,9 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     playgroundSettings = playgroundSettings,
                 )
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(RELOAD_TEST_TAG),
         ) {
             Text("Reload")
         }
@@ -140,21 +161,27 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private fun PlaygroundStateUi(
         playgroundState: PlaygroundState?,
         paymentSheet: PaymentSheet,
-        flowController: PaymentSheet.FlowController
+        flowController: PaymentSheet.FlowController,
+        addressLauncher: AddressLauncher
     ) {
         if (playgroundState == null) {
             return
         }
 
+        ShippingAddressButton(
+            addressLauncher = addressLauncher,
+            playgroundState = playgroundState,
+        )
+
         when (playgroundState.integrationType) {
-            IntegrationTypeSettingsDefinition.IntegrationType.PaymentSheet -> {
+            IntegrationType.PaymentSheet -> {
                 PaymentSheetUi(
                     paymentSheet = paymentSheet,
                     playgroundState = playgroundState,
                 )
             }
 
-            IntegrationTypeSettingsDefinition.IntegrationType.FlowController -> {
+            IntegrationType.FlowController -> {
                 FlowControllerUi(
                     flowController = flowController,
                     playgroundState = playgroundState,
@@ -172,7 +199,9 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             onClick = {
                 presentPaymentSheet(paymentSheet, playgroundState)
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(CHECKOUT_TEST_TAG),
         ) {
             Text("Checkout")
         }
@@ -191,6 +220,11 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         val flowControllerState by viewModel.flowControllerState.collectAsState()
+        val localFlowControllerState = flowControllerState
+
+        LaunchedEffect(localFlowControllerState?.addressDetails) {
+            flowController.shippingDetails = localFlowControllerState?.addressDetails
+        }
 
         PaymentMethodSelector(
             isEnabled = flowControllerState != null,
@@ -204,9 +238,24 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         )
     }
 
+    @Composable
+    private fun ShippingAddressButton(
+        addressLauncher: AddressLauncher,
+        playgroundState: PlaygroundState,
+    ) {
+        Button(
+            onClick = {
+                addressLauncher.present(playgroundState.clientSecret)
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Set Shipping Address")
+        }
+    }
+
     private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState) {
-        if (playgroundState.initializationType == InitializationTypeSettingsDefinition.InitializationType.Normal) {
-            if (playgroundState.checkoutMode == CheckoutModeSettingsDefinition.CheckoutMode.SETUP) {
+        if (playgroundState.initializationType == InitializationType.Normal) {
+            if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
                 paymentSheet.presentWithSetupIntent(
                     setupIntentClientSecret = playgroundState.clientSecret,
                     configuration = playgroundState.paymentSheetConfiguration()
@@ -232,8 +281,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         flowController: PaymentSheet.FlowController,
         playgroundState: PlaygroundState,
     ) {
-        if (playgroundState.initializationType == InitializationTypeSettingsDefinition.InitializationType.Normal) {
-            if (playgroundState.checkoutMode == CheckoutModeSettingsDefinition.CheckoutMode.SETUP) {
+        if (playgroundState.initializationType == InitializationType.Normal) {
+            if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
                 flowController.configureWithSetupIntent(
                     setupIntentClientSecret = playgroundState.clientSecret,
                     configuration = playgroundState.paymentSheetConfiguration(),
@@ -261,11 +310,16 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
 @Composable
 private fun PlaygroundTheme(content: @Composable ColumnScope.() -> Unit) {
+    val colors = if (isSystemInDarkTheme() || AppearanceStore.forceDarkMode) {
+        darkColors()
+    } else {
+        lightColors()
+    }
     MaterialTheme(
         typography = MaterialTheme.typography.copy(
             body1 = MaterialTheme.typography.body1.copy(fontSize = 14.sp)
         ),
-        colors = if (isSystemInDarkTheme()) darkColors() else lightColors(),
+        colors = colors,
     ) {
         Surface(
             color = MaterialTheme.colors.background
@@ -279,3 +333,5 @@ private fun PlaygroundTheme(content: @Composable ColumnScope.() -> Unit) {
         }
     }
 }
+
+const val RELOAD_TEST_TAG = "RELOAD"

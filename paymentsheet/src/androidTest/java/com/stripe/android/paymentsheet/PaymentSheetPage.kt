@@ -31,6 +31,8 @@ internal class PaymentSheetPage(
     }
 
     fun fillOutCardDetailsWithCardBrandChoice(fillOutZipCode: Boolean = true) {
+        composeTestRule.waitForIdle()
+
         waitForText("Card number")
 
         replaceText("Card number", "4000002500001001")

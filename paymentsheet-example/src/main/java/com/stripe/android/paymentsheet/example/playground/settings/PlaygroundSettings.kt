@@ -24,7 +24,7 @@ internal class PlaygroundSettings private constructor(
 
     operator fun <T> set(settingsDefinition: PlaygroundSettingDefinition<T>, value: T) {
         if (settings.containsKey(settingsDefinition)) {
-            settings[settingsDefinition]?.value = value as Any
+            settings[settingsDefinition]?.value = value
         } else {
             settings[settingsDefinition] = MutableStateFlow(value)
         }
@@ -98,12 +98,15 @@ internal class PlaygroundSettings private constructor(
             configure(value as T, checkoutRequestBuilder)
         }
 
-        private fun asJsonString(
-            filter: (PlaygroundSettingDefinition<*>) -> Boolean
-        ): String {
-            val settingsMap = settings.filter { filter(it.key) }.map {
-                it.key.key to JsonPrimitive(it.key.convertToString(it.value))
-            }.toMap()
+        private fun asJsonString(filter: (PlaygroundSettingDefinition<*>) -> Boolean): String {
+            val settingsMap = settings.filterKeys(filter).map {
+                val saveable = it.key.saveable()
+                if (saveable != null) {
+                    saveable.key to JsonPrimitive(saveable.convertToString(it.value))
+                } else {
+                    null
+                }
+            }.filterNotNull().toMap()
             return Json.encodeToString(JsonObject(settingsMap))
         }
 
@@ -116,7 +119,7 @@ internal class PlaygroundSettings private constructor(
             sharedPreferences.edit {
                 putString(
                     sharedPreferencesKey,
-                    asJsonString(filter = { it.saveToSharedPreferences })
+                    asJsonString(filter = { it.saveable()?.saveToSharedPreferences == true })
                 )
             }
         }
@@ -125,7 +128,7 @@ internal class PlaygroundSettings private constructor(
             return asJsonString { true }
         }
 
-        private fun <T> PlaygroundSettingDefinition<T>.convertToString(
+        private fun <T> PlaygroundSettingDefinition.Saveable<T>.convertToString(
             value: Any?,
         ): String {
             @Suppress("UNCHECKED_CAST")
@@ -138,9 +141,14 @@ internal class PlaygroundSettings private constructor(
         private const val sharedPreferencesKey = "json"
 
         fun createFromDefaults(): PlaygroundSettings {
-            val settings = allSettingDefinitions.associateWith {
-                MutableStateFlow(it.defaultValue)
-            }.toMutableMap()
+            val settings = allSettingDefinitions.mapNotNull {
+                val saveable = it.saveable()
+                if (saveable != null) {
+                    it to MutableStateFlow(saveable.defaultValue)
+                } else {
+                    null
+                }
+            }.toMap().toMutableMap()
             return PlaygroundSettings(settings)
         }
 
@@ -150,12 +158,13 @@ internal class PlaygroundSettings private constructor(
             val jsonObject = Json.decodeFromString(JsonObject.serializer(), jsonString)
 
             for (settingDefinition in allSettingDefinitions) {
-                val jsonPrimitive = jsonObject[settingDefinition.key] as? JsonPrimitive?
+                val saveable = settingDefinition.saveable() ?: continue
+                val jsonPrimitive = jsonObject[saveable.key] as? JsonPrimitive?
                 if (jsonPrimitive?.isString == true) {
                     settings[settingDefinition] =
-                        MutableStateFlow(settingDefinition.convertToValue(jsonPrimitive.content))
+                        MutableStateFlow(saveable.convertToValue(jsonPrimitive.content))
                 } else {
-                    settings[settingDefinition] = MutableStateFlow(settingDefinition.defaultValue)
+                    settings[settingDefinition] = MutableStateFlow(saveable.defaultValue)
                 }
             }
 
@@ -174,7 +183,7 @@ internal class PlaygroundSettings private constructor(
             return createFromJsonString(jsonString)
         }
 
-        val uiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
+        val uiSettingDefinitions: List<PlaygroundSettingDefinition.Displayable<*>> = listOf(
             InitializationTypeSettingsDefinition,
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
@@ -198,6 +207,7 @@ internal class PlaygroundSettings private constructor(
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             SupportedPaymentMethodsSettingsDefinition,
             AppearanceSettingsDefinition,
+            ShippingAddressSettingsDefinition,
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =

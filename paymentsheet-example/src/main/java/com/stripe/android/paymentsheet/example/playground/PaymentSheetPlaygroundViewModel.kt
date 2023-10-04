@@ -16,14 +16,16 @@ import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState.Companion.asPlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
-import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
+import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
@@ -178,16 +180,16 @@ internal class PaymentSheetPlaygroundViewModel(
         playgroundState: PlaygroundState,
     ): CreateIntentResult {
         return when (playgroundState.initializationType) {
-            InitializationTypeSettingsDefinition.InitializationType.Normal -> {
+            InitializationType.Normal -> {
                 error("createAndConfirmIntent should not be called when initialization type is Normal")
             }
 
-            InitializationTypeSettingsDefinition.InitializationType.DeferredClientSideConfirmation -> {
+            InitializationType.DeferredClientSideConfirmation -> {
                 createIntent(playgroundState.clientSecret)
             }
 
-            InitializationTypeSettingsDefinition.InitializationType.DeferredServerSideConfirmation,
-            InitializationTypeSettingsDefinition.InitializationType.DeferredManualConfirmation -> {
+            InitializationType.DeferredServerSideConfirmation,
+            InitializationType.DeferredManualConfirmation -> {
                 createAndConfirmIntentInternal(
                     paymentMethodId = paymentMethodId,
                     shouldSavePaymentMethod = shouldSavePaymentMethod,
@@ -195,7 +197,7 @@ internal class PaymentSheetPlaygroundViewModel(
                 )
             }
 
-            InitializationTypeSettingsDefinition.InitializationType.DeferredMultiprocessor -> {
+            InitializationType.DeferredMultiprocessor -> {
                 CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
             }
         }
@@ -246,6 +248,20 @@ internal class PaymentSheetPlaygroundViewModel(
             }
         }
         return createIntentResult
+    }
+
+    fun onAddressLauncherResult(addressLauncherResult: AddressLauncherResult) {
+        when (addressLauncherResult) {
+            AddressLauncherResult.Canceled -> {
+                status.value = "Canceled"
+            }
+
+            is AddressLauncherResult.Succeeded -> {
+                val addressDetails = addressLauncherResult.address
+                playgroundSettingsFlow.value?.set(ShippingAddressSettingsDefinition, addressDetails)
+                flowControllerState.update { it?.copy(addressDetails = addressDetails) }
+            }
+        }
     }
 
     internal class Factory(

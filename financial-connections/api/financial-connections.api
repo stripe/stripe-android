@@ -1584,6 +1584,7 @@ public final class com/stripe/android/financialconnections/navigation/Composable
 	public static field lambda-13 Lkotlin/jvm/functions/Function3;
 	public static field lambda-14 Lkotlin/jvm/functions/Function3;
 	public static field lambda-15 Lkotlin/jvm/functions/Function3;
+	public static field lambda-16 Lkotlin/jvm/functions/Function3;
 	public static field lambda-2 Lkotlin/jvm/functions/Function3;
 	public static field lambda-3 Lkotlin/jvm/functions/Function3;
 	public static field lambda-4 Lkotlin/jvm/functions/Function3;
@@ -1600,6 +1601,7 @@ public final class com/stripe/android/financialconnections/navigation/Composable
 	public final fun getLambda-13$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-14$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-15$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-16$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-3$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-4$financial_connections_release ()Lkotlin/jvm/functions/Function3;

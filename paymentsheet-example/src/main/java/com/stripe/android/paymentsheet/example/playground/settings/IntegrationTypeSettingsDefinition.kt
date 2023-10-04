@@ -1,25 +1,21 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 internal object IntegrationTypeSettingsDefinition :
-    PlaygroundSettingDefinition<IntegrationTypeSettingsDefinition.IntegrationType>(
+    PlaygroundSettingDefinition<IntegrationType>,
+    PlaygroundSettingDefinition.Saveable<IntegrationType> by EnumSaveable(
         key = "integrationType",
-        displayName = "Integration Type",
-    ) {
-    override val defaultValue: IntegrationType = IntegrationType.PaymentSheet
-    override val options: List<Option<IntegrationType>> = listOf(
-        Option("Payment Sheet", IntegrationType.PaymentSheet),
-        Option("Flow Controller", IntegrationType.FlowController)
-    )
+        values = IntegrationType.values(),
+        defaultValue = IntegrationType.PaymentSheet,
+    ),
+    PlaygroundSettingDefinition.Displayable<IntegrationType> {
+    override val displayName: String = "Integration Type"
+    override val options: List<PlaygroundSettingDefinition.Displayable.Option<IntegrationType>> =
+        listOf(
+            option("Payment Sheet", IntegrationType.PaymentSheet),
+            option("Flow Controller", IntegrationType.FlowController)
+        )
+}
 
-    override fun convertToValue(value: String): IntegrationType {
-        return IntegrationType.values().firstOrNull { it.value == value } ?: defaultValue
-    }
-
-    override fun convertToString(value: IntegrationType): String {
-        return value.value
-    }
-
-    enum class IntegrationType(val value: String) {
-        PaymentSheet("paymentSheet"), FlowController("flowController")
-    }
+enum class IntegrationType(override val value: String) : ValueEnum {
+    PaymentSheet("paymentSheet"), FlowController("flowController")
 }

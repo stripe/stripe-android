@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.repository
 
 import com.airbnb.mvrx.MavericksRepository
 import com.airbnb.mvrx.MavericksState
+import com.stripe.android.financialconnections.BuildConfig
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository.State
 import kotlinx.coroutines.CoroutineScope
 
@@ -10,7 +11,7 @@ internal class SaveToLinkWithStripeSucceededRepository(
 ) : MavericksRepository<State>(
     initialState = State(),
     coroutineScope = coroutineScope,
-    performCorrectnessValidations = true,
+    performCorrectnessValidations = BuildConfig.DEBUG,
 ) {
 
     suspend fun get() = awaitState().saveToLinkWithStripeSucceeded
