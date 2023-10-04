@@ -235,7 +235,7 @@ internal class PartnerAuthViewModelTest {
         }
 
     private fun createViewModel(
-        initialState: PartnerAuthState = PartnerAuthState()
+        initialState: SharedPartnerAuthState = SharedPartnerAuthState()
     ): PartnerAuthViewModel {
         return PartnerAuthViewModel(
             navigationManager = TestNavigationManager(),

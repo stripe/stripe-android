@@ -11,7 +11,7 @@ import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 
-internal data class PartnerAuthState(
+internal data class SharedPartnerAuthState(
     /**
      * The active auth session id. Used across process kills to prevent re-creating the session
      * if one is already active.

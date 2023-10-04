@@ -39,7 +39,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
 import com.stripe.android.financialconnections.model.Entry
 import com.stripe.android.financialconnections.model.OauthPrepane
 import com.stripe.android.financialconnections.ui.LocalImageLoader
@@ -55,7 +55,7 @@ import com.stripe.android.uicore.image.StripeImage
 
 @Composable
 internal fun SharedPartnerAuthContent(
-    state: PartnerAuthState,
+    state: SharedPartnerAuthState,
     modalBottomSheetState: ModalBottomSheetState,
     onContinueClick: () -> Unit,
     onSelectAnotherBank: () -> Unit,
@@ -95,7 +95,7 @@ internal fun SharedPartnerAuthContent(
 
 @Composable
 private fun PartnerAuthScreenMainContent(
-    state: PartnerAuthState,
+    state: SharedPartnerAuthState,
     onCloseClick: () -> Unit,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
@@ -162,7 +162,7 @@ fun ErrorContent(
 @Composable
 private fun LoadedContent(
     authenticationStatus: Async<String>,
-    payload: PartnerAuthState.Payload,
+    payload: SharedPartnerAuthState.Payload,
     onContinueClick: () -> Unit,
     onSelectAnotherBank: () -> Unit,
     onClickableTextClick: (String) -> Unit

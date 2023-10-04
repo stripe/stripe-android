@@ -16,9 +16,9 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.SharedPartnerAuthContent
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenBottomSheet
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenBottomSheet
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenPartnerAuth
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -34,7 +34,7 @@ internal fun PartnerAuthScreen() {
     // step view model
     val viewModel: PartnerAuthViewModel = mavericksViewModel()
 
-    val state: State<PartnerAuthState> = viewModel.collectAsState()
+    val state: State<SharedPartnerAuthState> = viewModel.collectAsState()
 
     val scope = rememberCoroutineScope()
 
@@ -79,7 +79,7 @@ internal fun PartnerAuthScreen() {
 @Composable
 internal fun PartnerAuthPreview(
     @PreviewParameter(PartnerAuthPreviewParameterProvider::class)
-    state: PartnerAuthState
+    state: SharedPartnerAuthState
 ) {
     FinancialConnectionsPreview {
         SharedPartnerAuthContent(

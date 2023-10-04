@@ -12,7 +12,7 @@ internal interface PartnerAuthSubcomponent {
     interface Builder {
 
         @BindsInstance
-        fun initialState(initialState: PartnerAuthState): Builder
+        fun initialState(initialState: SharedPartnerAuthState): Builder
 
         fun build(): PartnerAuthSubcomponent
     }

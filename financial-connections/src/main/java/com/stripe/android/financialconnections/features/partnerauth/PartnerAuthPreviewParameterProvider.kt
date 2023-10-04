@@ -19,7 +19,7 @@ import com.stripe.android.financialconnections.model.PartnerNotice
 import com.stripe.android.financialconnections.model.TextUpdate
 
 internal class PartnerAuthPreviewParameterProvider :
-    PreviewParameterProvider<PartnerAuthState> {
+    PreviewParameterProvider<SharedPartnerAuthState> {
     override val values = sequenceOf(
         canonical(),
         browserLoading()
@@ -28,9 +28,9 @@ internal class PartnerAuthPreviewParameterProvider :
     override val count: Int
         get() = super.count
 
-    private fun canonical() = PartnerAuthState(
+    private fun canonical() = SharedPartnerAuthState(
         payload = Success(
-            PartnerAuthState.Payload(
+            SharedPartnerAuthState.Payload(
                 institution = FinancialConnectionsInstitution(
                     id = "id",
                     name = "name",
@@ -49,9 +49,9 @@ internal class PartnerAuthPreviewParameterProvider :
         viewEffect = null
     )
 
-    private fun browserLoading() = PartnerAuthState(
+    private fun browserLoading() = SharedPartnerAuthState(
         payload = Success(
-            PartnerAuthState.Payload(
+            SharedPartnerAuthState.Payload(
                 institution = FinancialConnectionsInstitution(
                     id = "id",
                     name = "name",
