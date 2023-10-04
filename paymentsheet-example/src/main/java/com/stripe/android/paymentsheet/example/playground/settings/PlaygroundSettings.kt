@@ -198,6 +198,7 @@ internal class PlaygroundSettings private constructor(
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             SupportedPaymentMethodsSettingsDefinition,
             AppearanceSettingsDefinition,
+            ShippingAddressSettingsDefinition,
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =
