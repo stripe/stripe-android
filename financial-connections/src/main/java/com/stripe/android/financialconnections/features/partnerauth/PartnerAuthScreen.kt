@@ -3,6 +3,8 @@
 
 package com.stripe.android.financialconnections.features.partnerauth
 
+import android.view.ViewGroup.LayoutParams
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.webkit.WebView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -41,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
@@ -48,8 +51,6 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
-import com.google.accompanist.web.WebView
-import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
@@ -417,16 +418,25 @@ private fun GifWebView(
     modifier: Modifier,
     gifUrl: String
 ) {
-    val state = rememberWebViewStateWithHTMLData(
-        "<html><body><img style=\"width: 100%\" src=\"$gifUrl\"></body></html>"
-    )
-    WebView(
+    val body = "<html><body><img style=\"width: 100%\" src=\"$gifUrl\"></body></html>"
+    AndroidView(
         modifier = modifier,
-        onCreated = { it: WebView ->
-            it.isVerticalScrollBarEnabled = false
-            it.isVerticalFadingEdgeEnabled = false
+        factory = {
+            WebView(it).apply {
+                /**
+                 * WebView crashes when leaving the composition. Adding alpha acts as a workaround.
+                 * https://stackoverflow.com/questions/74829526/
+                 */
+                alpha = WEBVIEW_ALPHA
+                layoutParams = LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                isVerticalScrollBarEnabled = false
+                isVerticalFadingEdgeEnabled = false
+                loadData(body, null, "UTF-8")
+            }
         },
-        state = state
+        update = {
+            it.loadData(body, null, "UTF-8")
+        }
     )
 }
 
@@ -457,3 +467,4 @@ internal fun PartnerAuthPreview(
 
 private const val PHONE_BACKGROUND_WIDTH_DP = 272
 private const val PHONE_BACKGROUND_HEIGHT_DP = 264
+private const val WEBVIEW_ALPHA = .99f
