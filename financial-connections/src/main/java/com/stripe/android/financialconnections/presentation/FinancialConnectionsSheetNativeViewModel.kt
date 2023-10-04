@@ -297,10 +297,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                             connectedAccounts = null
                         )
                     )
-                    if (closeAuthFlowError == null) FinancialConnections.emitEvent(
-                        name = Name.ERROR,
-                        metadata = Metadata(errorCode = completeSessionError.toErrorCode())
-                    )
+                    if (closeAuthFlowError == null) {
+                        FinancialConnections.emitEvent(
+                            name = Name.ERROR,
+                            metadata = Metadata(errorCode = completeSessionError.toErrorCode())
+                        )
+                    }
                     finishWithResult(Failed(closeAuthFlowError ?: completeSessionError))
                 }
         }
