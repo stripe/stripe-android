@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.common
 
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.webkit.WebView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -229,6 +230,7 @@ private fun LoadedContent(
 }
 
 @Composable
+@Suppress("LongMethod")
 private fun InstitutionalPrePaneContent(
     onContinueClick: () -> Unit,
     content: OauthPrepane,
@@ -375,7 +377,7 @@ private fun GifWebView(
                  * https://stackoverflow.com/questions/74829526/
                  */
                 alpha = WEBVIEW_ALPHA
-                layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
                 isVerticalScrollBarEnabled = false
                 isVerticalFadingEdgeEnabled = false
                 loadData(body, null, "UTF-8")
