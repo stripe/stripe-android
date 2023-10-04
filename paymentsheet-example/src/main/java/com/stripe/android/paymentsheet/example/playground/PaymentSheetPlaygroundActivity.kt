@@ -34,9 +34,9 @@ import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
-import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTypeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
+import com.stripe.android.paymentsheet.example.playground.settings.IntegrationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
@@ -174,14 +174,14 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         )
 
         when (playgroundState.integrationType) {
-            IntegrationTypeSettingsDefinition.IntegrationType.PaymentSheet -> {
+            IntegrationType.PaymentSheet -> {
                 PaymentSheetUi(
                     paymentSheet = paymentSheet,
                     playgroundState = playgroundState,
                 )
             }
 
-            IntegrationTypeSettingsDefinition.IntegrationType.FlowController -> {
+            IntegrationType.FlowController -> {
                 FlowControllerUi(
                     flowController = flowController,
                     playgroundState = playgroundState,
@@ -254,8 +254,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     }
 
     private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState) {
-        if (playgroundState.initializationType == InitializationTypeSettingsDefinition.InitializationType.Normal) {
-            if (playgroundState.checkoutMode == CheckoutModeSettingsDefinition.CheckoutMode.SETUP) {
+        if (playgroundState.initializationType == InitializationType.Normal) {
+            if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
                 paymentSheet.presentWithSetupIntent(
                     setupIntentClientSecret = playgroundState.clientSecret,
                     configuration = playgroundState.paymentSheetConfiguration()
@@ -281,8 +281,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         flowController: PaymentSheet.FlowController,
         playgroundState: PlaygroundState,
     ) {
-        if (playgroundState.initializationType == InitializationTypeSettingsDefinition.InitializationType.Normal) {
-            if (playgroundState.checkoutMode == CheckoutModeSettingsDefinition.CheckoutMode.SETUP) {
+        if (playgroundState.initializationType == InitializationType.Normal) {
+            if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
                 flowController.configureWithSetupIntent(
                     setupIntentClientSecret = playgroundState.clientSecret,
                     configuration = playgroundState.paymentSheetConfiguration(),

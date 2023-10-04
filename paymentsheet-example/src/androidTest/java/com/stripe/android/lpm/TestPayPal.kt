@@ -2,6 +2,7 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
@@ -12,7 +13,7 @@ internal class TestPayPal : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "paypal",
     ) { settings ->
-        settings[CurrencySettingsDefinition] = CurrencySettingsDefinition.Currency.GBP
+        settings[CurrencySettingsDefinition] = Currency.GBP
     }
 
     @Test

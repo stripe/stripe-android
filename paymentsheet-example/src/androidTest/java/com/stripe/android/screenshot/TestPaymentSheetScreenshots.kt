@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.PrimaryButtonLabelSettingsDefinition
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -114,8 +115,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     fun testPaymentSheetReturningCustomerLight() {
         testDriver.screenshotRegression(
             testParams.copyPlaygroundSettings { settings ->
-                settings[CustomerSettingsDefinition] =
-                    CustomerSettingsDefinition.CustomerType.RETURNING
+                settings[CustomerSettingsDefinition] = CustomerType.RETURNING
             }
         )
     }
@@ -125,8 +125,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         AppearanceStore.state = appearance
         testDriver.screenshotRegression(
             testParams.copyPlaygroundSettings { settings ->
-                settings[CustomerSettingsDefinition] =
-                    CustomerSettingsDefinition.CustomerType.RETURNING
+                settings[CustomerSettingsDefinition] = CustomerType.RETURNING
             }
         )
     }
@@ -136,8 +135,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         forceDarkMode()
         testDriver.screenshotRegression(
             testParams.copyPlaygroundSettings { settings ->
-                settings[CustomerSettingsDefinition] =
-                    CustomerSettingsDefinition.CustomerType.RETURNING
+                settings[CustomerSettingsDefinition] = CustomerType.RETURNING
             }
         )
     }
@@ -148,8 +146,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         forceDarkMode()
         testDriver.screenshotRegression(
             testParams.copyPlaygroundSettings { settings ->
-                settings[CustomerSettingsDefinition] =
-                    CustomerSettingsDefinition.CustomerType.RETURNING
+                settings[CustomerSettingsDefinition] = CustomerType.RETURNING
             }
         )
     }
@@ -159,8 +156,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         testDriver.screenshotRegression(
             testParameters = testParams
                 .copyPlaygroundSettings { settings ->
-                    settings[CustomerSettingsDefinition] =
-                        CustomerSettingsDefinition.CustomerType.RETURNING
+                    settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                 },
             customOperations = {
                 testDriver.pressEdit()
@@ -173,8 +169,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         AppearanceStore.state = appearance
         testDriver.screenshotRegression(
             testParameters = testParams.copyPlaygroundSettings { settings ->
-                settings[CustomerSettingsDefinition] =
-                    CustomerSettingsDefinition.CustomerType.RETURNING
+                settings[CustomerSettingsDefinition] = CustomerType.RETURNING
             },
             customOperations = {
                 testDriver.pressEdit()
@@ -188,8 +183,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         testDriver.screenshotRegression(
             testParameters = testParams
                 .copyPlaygroundSettings { settings ->
-                    settings[CustomerSettingsDefinition] =
-                        CustomerSettingsDefinition.CustomerType.RETURNING
+                    settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                 },
             customOperations = {
                 testDriver.pressEdit()
@@ -202,8 +196,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         forceDarkMode()
         testDriver.screenshotRegression(
             testParameters = testParams.copyPlaygroundSettings { settings ->
-                settings[CustomerSettingsDefinition] =
-                    CustomerSettingsDefinition.CustomerType.RETURNING
+                settings[CustomerSettingsDefinition] = CustomerType.RETURNING
             },
             customOperations = {
                 testDriver.pressEdit()

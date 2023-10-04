@@ -3,26 +3,22 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
 internal object InitializationTypeSettingsDefinition :
-    PlaygroundSettingDefinition<InitializationTypeSettingsDefinition.InitializationType>(
+    PlaygroundSettingDefinition<InitializationType>,
+    PlaygroundSettingDefinition.Saveable<InitializationType> by EnumSaveable(
         key = "initialization",
-        displayName = "Initialization",
-    ) {
-    override val defaultValue: InitializationType = InitializationType.Normal
-    override val options: List<Option<InitializationType>> = listOf(
-        Option("Normal", InitializationType.Normal),
-        Option("Deferred CSC", InitializationType.DeferredClientSideConfirmation),
-        Option("Deferred SSC", InitializationType.DeferredServerSideConfirmation),
-        Option("Deferred SSC + MC", InitializationType.DeferredManualConfirmation),
-        Option("Deferred SSC + MP", InitializationType.DeferredMultiprocessor),
-    )
-
-    override fun convertToValue(value: String): InitializationType {
-        return InitializationType.values().firstOrNull { it.value == value } ?: defaultValue
-    }
-
-    override fun convertToString(value: InitializationType): String {
-        return value.value
-    }
+        values = InitializationType.values(),
+        defaultValue = InitializationType.Normal,
+    ),
+    PlaygroundSettingDefinition.Displayable<InitializationType> {
+    override val displayName: String = "Initialization"
+    override val options: List<PlaygroundSettingDefinition.Displayable.Option<InitializationType>> =
+        listOf(
+            option("Normal", InitializationType.Normal),
+            option("Deferred CSC", InitializationType.DeferredClientSideConfirmation),
+            option("Deferred SSC", InitializationType.DeferredServerSideConfirmation),
+            option("Deferred SSC + MC", InitializationType.DeferredManualConfirmation),
+            option("Deferred SSC + MP", InitializationType.DeferredMultiprocessor),
+        )
 
     override fun configure(
         value: InitializationType,
@@ -30,12 +26,12 @@ internal object InitializationTypeSettingsDefinition :
     ) {
         checkoutRequestBuilder.initialization(value.value)
     }
+}
 
-    enum class InitializationType(val value: String) {
-        Normal("Normal"),
-        DeferredClientSideConfirmation("Deferred CSC"),
-        DeferredServerSideConfirmation("Deferred SSC"),
-        DeferredManualConfirmation("Deferred SSC + MC"),
-        DeferredMultiprocessor("Deferred SSC + MP"),
-    }
+enum class InitializationType(override val value: String) : ValueEnum {
+    Normal("Normal"),
+    DeferredClientSideConfirmation("Deferred CSC"),
+    DeferredServerSideConfirmation("Deferred SSC"),
+    DeferredManualConfirmation("Deferred SSC + MC"),
+    DeferredMultiprocessor("Deferred SSC + MP"),
 }

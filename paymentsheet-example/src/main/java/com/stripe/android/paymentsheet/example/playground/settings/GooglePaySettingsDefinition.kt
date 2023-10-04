@@ -12,7 +12,7 @@ internal object GooglePaySettingsDefinition : BooleanSettingsDefinition(
         value: Boolean,
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState,
-        configurationData: PaymentSheetConfigurationData,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
         PaymentSheet.GooglePayConfiguration(
             environment = PaymentSheet.GooglePayConfiguration.Environment.Test,

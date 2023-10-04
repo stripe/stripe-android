@@ -2,8 +2,11 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.AuthorizeAction
@@ -17,8 +20,8 @@ internal class TestCashApp : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "cashapp",
     ) { settings ->
-        settings[CountrySettingsDefinition] = CountrySettingsDefinition.Country.US
-        settings[CurrencySettingsDefinition] = CurrencySettingsDefinition.Currency.USD
+        settings[CountrySettingsDefinition] = Country.US
+        settings[CurrencySettingsDefinition] = Currency.USD
         settings[SupportedPaymentMethodsSettingsDefinition] = listOf("card", "cashapp")
     }
 
@@ -53,8 +56,7 @@ internal class TestCashApp : BasePlaygroundTest() {
     fun testCashAppPayWithSfu() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[CheckoutModeSettingsDefinition] =
-                    CheckoutModeSettingsDefinition.CheckoutMode.PAYMENT_WITH_SETUP
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
             }
         )
     }
@@ -63,8 +65,7 @@ internal class TestCashApp : BasePlaygroundTest() {
     fun testCashAppPayWithSetupIntent() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[CheckoutModeSettingsDefinition] =
-                    CheckoutModeSettingsDefinition.CheckoutMode.SETUP
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             }
         )
     }

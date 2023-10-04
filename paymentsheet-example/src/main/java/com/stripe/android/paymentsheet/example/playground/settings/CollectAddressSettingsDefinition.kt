@@ -4,22 +4,27 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode as CollectionMode
 
-internal object CollectAddressSettingsDefinition : PlaygroundSettingDefinition<CollectionMode>(
-    key = "collectAddress",
-    displayName = "Collect Address",
-) {
+internal object CollectAddressSettingsDefinition :
+    PlaygroundSettingDefinition<CollectionMode>,
+    PlaygroundSettingDefinition.Saveable<CollectionMode>,
+    PlaygroundSettingDefinition.Displayable<CollectionMode> {
+
     override val defaultValue: CollectionMode = CollectionMode.Automatic
-    override val options: List<Option<CollectionMode>> = listOf(
-        Option("Auto", CollectionMode.Automatic),
-        Option("Never", CollectionMode.Never),
-        Option("Full", CollectionMode.Full),
-    )
+    override val key: String = "collectAddress"
+    override val displayName: String = "Collect Address"
+    override val options: List<PlaygroundSettingDefinition.Displayable.Option<CollectionMode>> by lazy {
+        listOf(
+            option("Auto", CollectionMode.Automatic),
+            option("Never", CollectionMode.Never),
+            option("Full", CollectionMode.Full),
+        )
+    }
 
     override fun configure(
-        value: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
+        value: CollectionMode,
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState,
-        configurationData: PaymentSheetConfigurationData,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
         configurationData.updateBillingDetails { copy(address = value) }
     }

@@ -27,7 +27,9 @@ import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
 import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.IntegrationType
 import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTypeSettingsDefinition
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.Selectors
@@ -163,8 +165,7 @@ internal class PlaygroundTestDriver(
     ) {
         setup(
             testParameters.copyPlaygroundSettings { settings ->
-                settings[IntegrationTypeSettingsDefinition] =
-                    IntegrationTypeSettingsDefinition.IntegrationType.FlowController
+                settings[IntegrationTypeSettingsDefinition] = IntegrationType.FlowController
             }
         )
         launchCustom()
@@ -408,7 +409,7 @@ internal class PlaygroundTestDriver(
                     assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
 
                     blockUntilAuthorizationPageLoaded(
-                        isSetup = checkoutMode == CheckoutModeSettingsDefinition.CheckoutMode.SETUP
+                        isSetup = checkoutMode == CheckoutMode.SETUP
                     )
                 }
 
@@ -429,7 +430,7 @@ internal class PlaygroundTestDriver(
 
                 when (val authAction = testParameters.authorizationAction) {
                     is AuthorizeAction.DisplayQrCode -> {
-                        if (checkoutMode != CheckoutModeSettingsDefinition.CheckoutMode.SETUP) {
+                        if (checkoutMode != CheckoutMode.SETUP) {
                             closeQrCodeButton.wait(5000)
                             onView(withText("CLOSE")).perform(click())
                         }
