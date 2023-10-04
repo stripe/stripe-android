@@ -440,6 +440,15 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     companion object : MavericksViewModelFactory<PartnerAuthViewModel, SharedPartnerAuthState> {
 
+        override fun initialState(viewModelContext: ViewModelContext) =
+            SharedPartnerAuthState(
+                activeAuthSession = null,
+                pane = PANE,
+                payload = Uninitialized,
+                viewEffect = null,
+                authenticationStatus = Uninitialized
+            )
+
         override fun create(
             viewModelContext: ViewModelContext,
             state: SharedPartnerAuthState

@@ -12,7 +12,7 @@ import com.stripe.android.financialconnections.model.Display
 import com.stripe.android.financialconnections.model.Entry
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.OauthPrepane
 import com.stripe.android.financialconnections.model.PartnerNotice
@@ -46,7 +46,9 @@ internal class PartnerAuthPreviewParameterProvider :
             )
         ),
         authenticationStatus = Uninitialized,
-        viewEffect = null
+        viewEffect = null,
+        activeAuthSession = null,
+        pane = Pane.PARTNER_AUTH
     )
 
     private fun browserLoading() = SharedPartnerAuthState(
@@ -68,7 +70,9 @@ internal class PartnerAuthPreviewParameterProvider :
         ),
         // While browser is showing, this Async is loading.
         authenticationStatus = Loading(),
-        viewEffect = null
+        viewEffect = null,
+        activeAuthSession = null,
+        pane = Pane.PARTNER_AUTH
     )
 
     private fun session() =
@@ -76,7 +80,7 @@ internal class PartnerAuthPreviewParameterProvider :
             flow = FinancialConnectionsAuthorizationSession.Flow.FINICITY_CONNECT_V2_OAUTH.name,
             showPartnerDisclosure = true,
             _isOAuth = true,
-            nextPane = FinancialConnectionsSessionManifest.Pane.PARTNER_AUTH,
+            nextPane = Pane.PARTNER_AUTH,
             id = "1234",
             display = Display(
                 TextUpdate(
