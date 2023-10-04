@@ -29,6 +29,7 @@ import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSessi
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.common.enableRetrieveAuthSession
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Payload
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenPartnerAuth
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -409,7 +410,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         if (URLUtil.isNetworkUrl(uri)) {
             setState {
                 copy(
-                    viewEffect = SharedPartnerAuthState.ViewEffect.OpenUrl(
+                    viewEffect = ViewEffect.OpenUrl(
                         uri,
                         Date().time
                     )
@@ -422,7 +423,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 SharedPartnerAuthState.ClickableText.DATA -> {
                     setState {
                         copy(
-                            viewEffect = SharedPartnerAuthState.ViewEffect.OpenBottomSheet(Date().time)
+                            viewEffect = ViewEffect.OpenBottomSheet(Date().time)
                         )
                     }
                 }
