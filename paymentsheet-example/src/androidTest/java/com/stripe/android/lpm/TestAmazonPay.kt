@@ -1,32 +1,35 @@
 package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.BaseLpmTest
-import com.stripe.android.test.core.Currency
+import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.test.core.TestParameters
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-internal class TestAmazonPay : BaseLpmTest() {
-    private val amazonPay = newUser.copy(
-        paymentMethod = lpmRepository.fromCode("amazon_pay")!!,
-        currency = Currency.USD,
-        merchantCountryCode = "US",
-    )
+internal class TestAmazonPay : BasePlaygroundTest() {
+    private val testParameters = TestParameters.create(
+        paymentMethodCode = "amazon_pay",
+    ) { settings ->
+        settings[CountrySettingsDefinition] = CountrySettingsDefinition.Country.US
+        settings[CurrencySettingsDefinition] = CurrencySettingsDefinition.Currency.USD
+    }
 
     @Ignore("Complex authorization handling required")
     @Test
     fun testAmazonPay() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters = amazonPay,
+            testParameters = testParameters,
         )
     }
 
     @Test
     fun testAmazonPayInCustomFlow() {
         testDriver.confirmCustom(
-            testParameters = amazonPay,
+            testParameters = testParameters,
         )
     }
 }

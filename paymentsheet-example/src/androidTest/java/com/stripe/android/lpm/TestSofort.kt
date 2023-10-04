@@ -1,58 +1,59 @@
 package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.BaseLpmTest
-import com.stripe.android.test.core.Automatic
-import com.stripe.android.test.core.Currency
-import com.stripe.android.test.core.DelayedPMs
-import com.stripe.android.test.core.GooglePayState
-import com.stripe.android.test.core.IntentType
+import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
+import com.stripe.android.test.core.TestParameters
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-internal class TestSofort : BaseLpmTest() {
-    private val sofort = newUser.copy(
-        paymentMethod = lpmRepository.fromCode("sofort")!!,
-        currency = Currency.EUR,
-        merchantCountryCode = "FR",
-        delayed = DelayedPMs.On,
-        googlePayState = GooglePayState.Off,
-    )
+internal class TestSofort : BasePlaygroundTest() {
+    private val testParameters = TestParameters.create(
+        paymentMethodCode = "sofort",
+    ) { settings ->
+        settings[CountrySettingsDefinition] = CountrySettingsDefinition.Country.FR
+        settings[DelayedPaymentMethodsSettingsDefinition] = true
+        settings[GooglePaySettingsDefinition] = false
+    }
 
     @Test
     fun testSofort() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters = sofort,
+            testParameters = testParameters,
         )
     }
 
     @Test
     fun testSofortSfu() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters = sofort.copy(
-                delayed = DelayedPMs.On,
-                automatic = Automatic.On,
-                intentType = IntentType.PayWithSetup,
-            ),
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[AutomaticPaymentMethodsSettingsDefinition] = true
+                settings[CheckoutModeSettingsDefinition] =
+                    CheckoutModeSettingsDefinition.CheckoutMode.PAYMENT_WITH_SETUP
+            }
         )
     }
 
     @Test
     fun testSofortSetup() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters = sofort.copy(
-                delayed = DelayedPMs.On,
-                automatic = Automatic.On,
-                intentType = IntentType.Setup,
-            ),
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[AutomaticPaymentMethodsSettingsDefinition] = true
+                settings[CheckoutModeSettingsDefinition] =
+                    CheckoutModeSettingsDefinition.CheckoutMode.SETUP
+            }
         )
     }
 
     @Test
     fun testSofortInCustomFlow() {
         testDriver.confirmCustom(
-            testParameters = sofort,
+            testParameters = testParameters,
         )
     }
 }

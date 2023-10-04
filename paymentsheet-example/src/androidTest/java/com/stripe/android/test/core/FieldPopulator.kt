@@ -9,6 +9,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
+import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
@@ -24,7 +26,7 @@ import com.stripe.android.ui.core.elements.KlarnaCountrySpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 
-class FieldPopulator(
+internal class FieldPopulator(
     private val selectors: Selectors,
     private val testParameters: TestParameters,
     private val populateCustomLpmFields: () -> Unit,
@@ -119,19 +121,19 @@ class FieldPopulator(
                         .assertContentDescriptionEquals(accessibleCvc)
                 }
                 is EmailSpec -> {
-                    if (testParameters.billing == Billing.Off) {
+                    if (!defaultBillingAddress) {
                         selectors.getEmail()
                             .assertContentDescriptionEquals(values.email)
                     }
                 }
                 is NameSpec -> {
-                    if (testParameters.billing == Billing.Off) {
+                    if (!defaultBillingAddress) {
                         selectors.getName(it.labelTranslationId.resourceId)
                             .assertContentDescriptionEquals(values.name)
                     }
                 }
                 is AddressSpec -> {
-                    if (testParameters.billing == Billing.Off) {
+                    if (!defaultBillingAddress) {
                         selectors.getLine1()
                             .assertContentDescriptionEquals(values.line1)
                         selectors.getCity()
@@ -158,7 +160,7 @@ class FieldPopulator(
                 is IbanSpec -> {}
                 is KlarnaCountrySpec -> {}
                 is CardBillingSpec -> {
-                    if (testParameters.billing == Billing.Off) {
+                    if (!defaultBillingAddress) {
                         validateZip()
                     }
                 }
@@ -191,7 +193,7 @@ class FieldPopulator(
                     }
                 }
                 is EmailSpec -> {
-                    if (testParameters.billing == Billing.Off) {
+                    if (!defaultBillingAddress) {
                         selectors.getEmail().apply {
                             performClick()
                             performTextInput(values.email)
@@ -199,7 +201,7 @@ class FieldPopulator(
                     }
                 }
                 is NameSpec -> {
-                    if (testParameters.billing == Billing.Off) {
+                    if (!defaultBillingAddress) {
                         selectors.getName(it.labelTranslationId.resourceId).apply {
                             performTextInput(values.name)
                         }
@@ -213,12 +215,12 @@ class FieldPopulator(
                 is IbanSpec -> {}
                 is KlarnaCountrySpec -> {}
                 is CardBillingSpec -> {
-                    if (testParameters.billing == Billing.Off) {
+                    if (!defaultBillingAddress) {
                         populateZip()
                     }
                 }
                 is AddressSpec -> {
-                    if (testParameters.billing == Billing.Off) {
+                    if (!defaultBillingAddress) {
                         selectors
                             .getLine1()
                             .performScrollTo()
@@ -281,11 +283,17 @@ class FieldPopulator(
         }
     }
 
+    private val defaultBillingAddress: Boolean
+        get() = testParameters.playgroundSettingsSnapshot[DefaultBillingAddressSettingsDefinition]
+
+    private val merchantCountryCode: String
+        get() = testParameters.playgroundSettingsSnapshot[CountrySettingsDefinition].value
+
     private fun usesStateDropdown(): Boolean {
-        return testParameters.merchantCountryCode in setOf("US", "GB")
+        return merchantCountryCode in setOf("US", "GB")
     }
 
     private fun usesZip(): Boolean {
-        return testParameters.merchantCountryCode in setOf("US", "GB")
+        return merchantCountryCode in setOf("US", "GB")
     }
 }
