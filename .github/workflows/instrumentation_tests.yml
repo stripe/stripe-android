@@ -29,11 +29,11 @@ jobs:
         id: notifyFailureEndpoint
         if: failure()
         run: |
-          ./scripts/notify_failure_endpoint.rb \	
-          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \	
-          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \	
-          "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}" \	
-          RUN_MOBILESDK	
+          ./scripts/notify_failure_endpoint.rb \
+          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
+          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
+          "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}" \
+          RUN_MOBILESDK
 
   screenshot-regression-tests:
     runs-on: macos-latest
