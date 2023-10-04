@@ -4,21 +4,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
-internal abstract class PlaygroundSettingDefinition<T>(
-    val key: String,
-    val displayName: String,
-) {
-    abstract val defaultValue: T
-
-    abstract val options: List<Option<T>>
-
-    abstract fun convertToString(value: T): String
-
-    abstract fun convertToValue(value: String): T
-
-    open val saveToSharedPreferences: Boolean = true
-
-    open fun configure(
+internal interface PlaygroundSettingDefinition<T> {
+    fun configure(
         value: T,
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState,
@@ -26,15 +13,22 @@ internal abstract class PlaygroundSettingDefinition<T>(
     ) {
     }
 
-    open fun configure(
+    fun configure(
         value: T,
         checkoutRequestBuilder: CheckoutRequest.Builder,
     ) {
     }
 
-    open fun valueUpdated(value: T, playgroundSettings: PlaygroundSettings) {}
+    fun valueUpdated(value: T, playgroundSettings: PlaygroundSettings) {}
 
-    data class Option<T>(val name: String, val value: T)
+    fun saveable(): Saveable<T>? {
+        @Suppress("UNCHECKED_CAST")
+        return this as? Saveable<T>?
+    }
+
+    fun displayable(): Displayable<T>? {
+        return this as? Displayable<T>?
+    }
 
     data class PaymentSheetConfigurationData(
         private val configurationBuilder: PaymentSheet.Configuration.Builder,
@@ -54,5 +48,25 @@ internal abstract class PlaygroundSettingDefinition<T>(
                 billingDetailsCollectionConfiguration
             )
         }
+    }
+
+    interface Saveable<T> {
+        val key: String
+        val defaultValue: T
+        fun convertToString(value: T): String
+        fun convertToValue(value: String): T
+        val saveToSharedPreferences: Boolean
+            get() = true
+    }
+
+    interface Displayable<T> : PlaygroundSettingDefinition<T> {
+        val displayName: String
+        val options: List<Option<T>>
+
+        fun option(name: String, value: T): Option<T> {
+            return Option(name, value)
+        }
+
+        data class Option<T>(val name: String, val value: T)
     }
 }

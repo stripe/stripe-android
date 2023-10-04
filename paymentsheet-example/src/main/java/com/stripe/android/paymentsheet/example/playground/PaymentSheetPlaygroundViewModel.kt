@@ -23,7 +23,7 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
-import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
@@ -180,16 +180,16 @@ internal class PaymentSheetPlaygroundViewModel(
         playgroundState: PlaygroundState,
     ): CreateIntentResult {
         return when (playgroundState.initializationType) {
-            InitializationTypeSettingsDefinition.InitializationType.Normal -> {
+            InitializationType.Normal -> {
                 error("createAndConfirmIntent should not be called when initialization type is Normal")
             }
 
-            InitializationTypeSettingsDefinition.InitializationType.DeferredClientSideConfirmation -> {
+            InitializationType.DeferredClientSideConfirmation -> {
                 createIntent(playgroundState.clientSecret)
             }
 
-            InitializationTypeSettingsDefinition.InitializationType.DeferredServerSideConfirmation,
-            InitializationTypeSettingsDefinition.InitializationType.DeferredManualConfirmation -> {
+            InitializationType.DeferredServerSideConfirmation,
+            InitializationType.DeferredManualConfirmation -> {
                 createAndConfirmIntentInternal(
                     paymentMethodId = paymentMethodId,
                     shouldSavePaymentMethod = shouldSavePaymentMethod,
@@ -197,7 +197,7 @@ internal class PaymentSheetPlaygroundViewModel(
                 )
             }
 
-            InitializationTypeSettingsDefinition.InitializationType.DeferredMultiprocessor -> {
+            InitializationType.DeferredMultiprocessor -> {
                 CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
             }
         }

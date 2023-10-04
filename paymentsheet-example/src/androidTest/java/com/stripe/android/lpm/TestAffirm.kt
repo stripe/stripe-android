@@ -2,7 +2,9 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultShippingAddressSettingsDefinition
 import com.stripe.android.test.core.TestParameters
@@ -14,8 +16,8 @@ internal class TestAffirm : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "affirm",
     ) { settings ->
-        settings[CountrySettingsDefinition] = CountrySettingsDefinition.Country.US
-        settings[CurrencySettingsDefinition] = CurrencySettingsDefinition.Currency.USD
+        settings[CountrySettingsDefinition] = Country.US
+        settings[CurrencySettingsDefinition] = Currency.USD
         settings[DefaultShippingAddressSettingsDefinition] = true
     }
 

@@ -3,6 +3,7 @@ package com.stripe.android.lpm
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
@@ -28,8 +29,7 @@ internal class TestIdeal : BasePlaygroundTest() {
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[DelayedPaymentMethodsSettingsDefinition] = true
                 settings[AutomaticPaymentMethodsSettingsDefinition] = true
-                settings[CheckoutModeSettingsDefinition] =
-                    CheckoutModeSettingsDefinition.CheckoutMode.PAYMENT_WITH_SETUP
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
             }
         )
     }
@@ -40,8 +40,7 @@ internal class TestIdeal : BasePlaygroundTest() {
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[DelayedPaymentMethodsSettingsDefinition] = true
                 settings[AutomaticPaymentMethodsSettingsDefinition] = true
-                settings[CheckoutModeSettingsDefinition] =
-                    CheckoutModeSettingsDefinition.CheckoutMode.SETUP
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             }
         )
     }

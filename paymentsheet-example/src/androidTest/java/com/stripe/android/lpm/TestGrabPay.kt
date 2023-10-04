@@ -2,7 +2,9 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
@@ -15,8 +17,8 @@ internal class TestGrabPay : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "grabpay",
     ) { settings ->
-        settings[CountrySettingsDefinition] = CountrySettingsDefinition.Country.SG
-        settings[CurrencySettingsDefinition] = CurrencySettingsDefinition.Currency.SGD
+        settings[CountrySettingsDefinition] = Country.SG
+        settings[CurrencySettingsDefinition] = Currency.SGD
     }
 
     @Test

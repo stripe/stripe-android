@@ -2,7 +2,9 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.AuthorizeAction
@@ -16,7 +18,7 @@ internal class TestRevolutPay : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "revolut_pay",
     ) { settings ->
-        settings[CurrencySettingsDefinition] = CurrencySettingsDefinition.Currency.GBP
+        settings[CurrencySettingsDefinition] = Currency.GBP
         settings[SupportedPaymentMethodsSettingsDefinition] = listOf("card", "revolut_pay")
     }
 
@@ -55,8 +57,7 @@ internal class TestRevolutPay : BasePlaygroundTest() {
     fun testRevolutPayWithSfu() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[CheckoutModeSettingsDefinition] =
-                    CheckoutModeSettingsDefinition.CheckoutMode.PAYMENT_WITH_SETUP
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
             }
         )
     }
@@ -66,8 +67,7 @@ internal class TestRevolutPay : BasePlaygroundTest() {
     fun testRevolutPayWithSetupIntent() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[CheckoutModeSettingsDefinition] =
-                    CheckoutModeSettingsDefinition.CheckoutMode.SETUP
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             }
         )
     }

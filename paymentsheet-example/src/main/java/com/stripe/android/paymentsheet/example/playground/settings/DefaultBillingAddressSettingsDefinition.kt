@@ -12,7 +12,7 @@ internal object DefaultBillingAddressSettingsDefinition : BooleanSettingsDefinit
         value: Boolean,
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState,
-        configurationData: PaymentSheetConfigurationData,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
         if (value) {
             configurationBuilder.defaultBillingDetails(

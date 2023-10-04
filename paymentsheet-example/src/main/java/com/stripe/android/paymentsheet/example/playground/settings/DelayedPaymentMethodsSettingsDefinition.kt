@@ -12,7 +12,7 @@ internal object DelayedPaymentMethodsSettingsDefinition : BooleanSettingsDefinit
         value: Boolean,
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState,
-        configurationData: PaymentSheetConfigurationData
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
         configurationBuilder.allowsDelayedPaymentMethods(value)
     }

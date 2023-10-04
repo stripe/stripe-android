@@ -1,14 +1,18 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 internal abstract class BooleanSettingsDefinition(
-    key: String,
-    displayName: String,
+    override val key: String,
+    override val displayName: String,
     override val defaultValue: Boolean,
-) : PlaygroundSettingDefinition<Boolean>(key, displayName) {
-    override val options: List<Option<Boolean>> = listOf(
-        Option("On", true),
-        Option("Off", false),
-    )
+) : PlaygroundSettingDefinition<Boolean>,
+    PlaygroundSettingDefinition.Saveable<Boolean>,
+    PlaygroundSettingDefinition.Displayable<Boolean> {
+    override val options: List<PlaygroundSettingDefinition.Displayable.Option<Boolean>> by lazy {
+        listOf(
+            option("On", true),
+            option("Off", false),
+        )
+    }
 
     override fun convertToString(value: Boolean): String {
         return value.toString()
