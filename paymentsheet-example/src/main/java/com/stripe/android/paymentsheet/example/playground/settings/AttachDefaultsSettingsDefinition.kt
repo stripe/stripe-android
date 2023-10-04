@@ -12,7 +12,7 @@ internal object AttachDefaultsSettingsDefinition : BooleanSettingsDefinition(
         value: Boolean,
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState,
-        configurationData: PaymentSheetConfigurationData,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
         configurationData.updateBillingDetails { copy(attachDefaultsToPaymentMethod = value) }
     }

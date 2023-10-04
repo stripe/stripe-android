@@ -4,7 +4,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.AuthorizeAction
@@ -17,8 +19,8 @@ internal class TestBlik : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "blik",
     ) { settings ->
-        settings[CountrySettingsDefinition] = CountrySettingsDefinition.Country.FR
-        settings[CurrencySettingsDefinition] = CurrencySettingsDefinition.Currency.PLN
+        settings[CountrySettingsDefinition] = Country.FR
+        settings[CurrencySettingsDefinition] = Currency.PLN
         settings[SupportedPaymentMethodsSettingsDefinition] = listOf("card", "blik")
     }.copy(
         authorizationAction = AuthorizeAction.PollingSucceedsAfterDelay,

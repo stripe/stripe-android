@@ -5,24 +5,20 @@ import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
 internal object CustomerSettingsDefinition :
-    PlaygroundSettingDefinition<CustomerSettingsDefinition.CustomerType>(
+    PlaygroundSettingDefinition<CustomerType>,
+    PlaygroundSettingDefinition.Saveable<CustomerType> by EnumSaveable(
         key = "customer",
-        displayName = "Customer",
-    ) {
-    override val defaultValue: CustomerType = CustomerType.GUEST
-    override val options: List<Option<CustomerType>> = listOf(
-        Option("Guest", CustomerType.GUEST),
-        Option("New", CustomerType.NEW),
-        Option("Returning", CustomerType.RETURNING),
-    )
-
-    override fun convertToValue(value: String): CustomerType {
-        return CustomerType.values().firstOrNull { it.value == value } ?: defaultValue
-    }
-
-    override fun convertToString(value: CustomerType): String {
-        return value.value
-    }
+        values = CustomerType.values(),
+        defaultValue = CustomerType.GUEST,
+    ),
+    PlaygroundSettingDefinition.Displayable<CustomerType> {
+    override val displayName: String = "Customer"
+    override val options: List<PlaygroundSettingDefinition.Displayable.Option<CustomerType>> =
+        listOf(
+            option("Guest", CustomerType.GUEST),
+            option("New", CustomerType.NEW),
+            option("Returning", CustomerType.RETURNING),
+        )
 
     override fun configure(
         value: CustomerType,
@@ -35,15 +31,15 @@ internal object CustomerSettingsDefinition :
         value: CustomerType,
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState,
-        configurationData: PaymentSheetConfigurationData,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
         configurationBuilder.customer(playgroundState.customerConfig)
     }
+}
 
-    enum class CustomerType(val value: String) {
-        GUEST("guest"),
-        NEW("new"),
-        RETURNING("returning"),
-        SNAPSHOT("snapshot"),
-    }
+enum class CustomerType(override val value: String) : ValueEnum {
+    GUEST("guest"),
+    NEW("new"),
+    RETURNING("returning"),
+    SNAPSHOT("snapshot"),
 }

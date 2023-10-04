@@ -2,6 +2,7 @@ package com.stripe.android
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.test.core.Browser
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
@@ -19,8 +20,7 @@ internal class TestCustomers : BasePlaygroundTest() {
     fun testAuthorizeGuest() {
         testDriver.confirmNewOrGuestComplete(
             testParameters.copyPlaygroundSettings { settings ->
-                settings[CustomerSettingsDefinition] =
-                    CustomerSettingsDefinition.CustomerType.GUEST
+                settings[CustomerSettingsDefinition] = CustomerType.GUEST
             }
         )
     }

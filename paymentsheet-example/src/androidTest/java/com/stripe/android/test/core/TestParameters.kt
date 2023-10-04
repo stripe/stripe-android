@@ -2,10 +2,13 @@ package com.stripe.android.test.core
 
 import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultShippingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
@@ -57,10 +60,10 @@ internal data class TestParameters(
 
         fun playgroundSettings(block: (PlaygroundSettings) -> Unit = {}): PlaygroundSettings {
             val settings = PlaygroundSettings.createFromDefaults()
-            settings[CustomerSettingsDefinition] = CustomerSettingsDefinition.CustomerType.NEW
+            settings[CustomerSettingsDefinition] = CustomerType.NEW
             settings[LinkSettingsDefinition] = false
-            settings[CountrySettingsDefinition] = CountrySettingsDefinition.Country.GB
-            settings[CurrencySettingsDefinition] = CurrencySettingsDefinition.Currency.EUR
+            settings[CountrySettingsDefinition] = Country.GB
+            settings[CurrencySettingsDefinition] = Currency.EUR
             settings[DefaultShippingAddressSettingsDefinition] = false
             settings[DelayedPaymentMethodsSettingsDefinition] = false
             settings[AutomaticPaymentMethodsSettingsDefinition] = false
@@ -88,20 +91,19 @@ enum class Browser {
  */
 internal sealed interface AuthorizeAction {
 
-    fun text(checkoutMode: CheckoutModeSettingsDefinition.CheckoutMode): String
+    fun text(checkoutMode: CheckoutMode): String
 
     val requiresBrowser: Boolean
 
     object PollingSucceedsAfterDelay : AuthorizeAction {
-        override fun text(checkoutMode: CheckoutModeSettingsDefinition.CheckoutMode): String =
-            "POLLING SUCCEEDS AFTER DELAY"
+        override fun text(checkoutMode: CheckoutMode): String = "POLLING SUCCEEDS AFTER DELAY"
 
         override val requiresBrowser: Boolean = false
     }
 
     object AuthorizePayment : AuthorizeAction {
-        override fun text(checkoutMode: CheckoutModeSettingsDefinition.CheckoutMode): String {
-            return if (checkoutMode == CheckoutModeSettingsDefinition.CheckoutMode.SETUP) {
+        override fun text(checkoutMode: CheckoutMode): String {
+            return if (checkoutMode == CheckoutMode.SETUP) {
                 "AUTHORIZE TEST SETUP"
             } else {
                 "AUTHORIZE TEST PAYMENT"
@@ -112,21 +114,19 @@ internal sealed interface AuthorizeAction {
     }
 
     object DisplayQrCode : AuthorizeAction {
-        override fun text(checkoutMode: CheckoutModeSettingsDefinition.CheckoutMode): String =
-            "Display QR code"
+        override fun text(checkoutMode: CheckoutMode): String = "Display QR code"
 
         override val requiresBrowser: Boolean = false
     }
 
     data class Fail(val expectedError: String) : AuthorizeAction {
-        override fun text(checkoutMode: CheckoutModeSettingsDefinition.CheckoutMode): String =
-            "FAIL TEST PAYMENT"
+        override fun text(checkoutMode: CheckoutMode): String = "FAIL TEST PAYMENT"
 
         override val requiresBrowser: Boolean = true
     }
 
     object Cancel : AuthorizeAction {
-        override fun text(checkoutMode: CheckoutModeSettingsDefinition.CheckoutMode): String = ""
+        override fun text(checkoutMode: CheckoutMode): String = ""
         override val requiresBrowser: Boolean = true
     }
 }

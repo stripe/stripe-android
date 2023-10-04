@@ -37,7 +37,7 @@ internal fun SettingsUi(playgroundSettings: PlaygroundSettings) {
 
 @Composable
 private fun <T> Setting(
-    settingDefinition: PlaygroundSettingDefinition<T>,
+    settingDefinition: PlaygroundSettingDefinition.Displayable<T>,
     playgroundSettings: PlaygroundSettings,
 ) {
     Setting(
@@ -52,7 +52,7 @@ private fun <T> Setting(
 @Composable
 private fun <T> Setting(
     name: String,
-    options: List<PlaygroundSettingDefinition.Option<T>>,
+    options: List<PlaygroundSettingDefinition.Displayable.Option<T>>,
     valueFlow: StateFlow<T>,
     onOptionChanged: (T) -> Unit,
 ) {
@@ -101,7 +101,7 @@ private fun TextSetting(
 @Composable
 private fun <T> RadioButtonSetting(
     name: String,
-    options: List<PlaygroundSettingDefinition.Option<T>>,
+    options: List<PlaygroundSettingDefinition.Displayable.Option<T>>,
     value: T,
     onOptionChanged: (T) -> Unit,
 ) {
@@ -145,7 +145,7 @@ private fun <T> RadioButtonSetting(
 @Composable
 private fun <T> DropdownSetting(
     name: String,
-    options: List<PlaygroundSettingDefinition.Option<T>>,
+    options: List<PlaygroundSettingDefinition.Displayable.Option<T>>,
     value: T,
     onOptionChanged: (T) -> Unit,
 ) {

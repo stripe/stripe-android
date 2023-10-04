@@ -3,8 +3,11 @@ package com.stripe.android.lpm
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
@@ -17,8 +20,8 @@ internal class TestAuBecsDD : BasePlaygroundTest() {
         paymentMethodCode = "au_becs_debit",
     ) { settings ->
         settings[DelayedPaymentMethodsSettingsDefinition] = true
-        settings[CountrySettingsDefinition] = CountrySettingsDefinition.Country.AU
-        settings[CurrencySettingsDefinition] = CurrencySettingsDefinition.Currency.AUD
+        settings[CountrySettingsDefinition] = Country.AU
+        settings[CurrencySettingsDefinition] = Currency.AUD
     }.copy(
         authorizationAction = null,
     )
@@ -42,8 +45,7 @@ internal class TestAuBecsDD : BasePlaygroundTest() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[AutomaticPaymentMethodsSettingsDefinition] = true
-                settings[CheckoutModeSettingsDefinition] =
-                    CheckoutModeSettingsDefinition.CheckoutMode.PAYMENT_WITH_SETUP
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
             }
         )
     }
@@ -53,8 +55,7 @@ internal class TestAuBecsDD : BasePlaygroundTest() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[AutomaticPaymentMethodsSettingsDefinition] = true
-                settings[CheckoutModeSettingsDefinition] =
-                    CheckoutModeSettingsDefinition.CheckoutMode.SETUP
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             }
         )
     }
