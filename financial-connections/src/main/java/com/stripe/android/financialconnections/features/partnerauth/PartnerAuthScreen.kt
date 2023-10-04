@@ -422,7 +422,11 @@ private fun GifWebView(
         modifier = modifier,
         factory = {
             WebView(it).apply {
-                alpha = .99f
+                /**
+                 * WebView crashes when leaving the composition. Adding alpha acts as a workaround.
+                 * https://stackoverflow.com/questions/74829526/
+                 */
+                alpha = WEBVIEW_ALPHA
                 layoutParams = LayoutParams(
                     LayoutParams.MATCH_PARENT,
                     LayoutParams.MATCH_PARENT
@@ -434,7 +438,8 @@ private fun GifWebView(
         },
         update = {
             it.loadData(body, null, "UTF-8")
-        })
+        }
+    )
 }
 
 @Preview(
@@ -464,3 +469,4 @@ internal fun PartnerAuthPreview(
 
 private const val PHONE_BACKGROUND_WIDTH_DP = 272
 private const val PHONE_BACKGROUND_HEIGHT_DP = 264
+private const val WEBVIEW_ALPHA = .99f
