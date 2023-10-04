@@ -307,6 +307,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 } else {
                     // auth session succeeded although client didn't retrieve any deeplink.
                     postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
+                    FinancialConnections.emitEvent(Name.INSTITUTION_AUTHORIZED)
                     navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
                 }
             } else {
@@ -363,8 +364,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
             requireNotNull(authSession)
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
-            FinancialConnections.emitEvent(Name.INSTITUTION_AUTHORIZED)
-            if (authSession.isOAuth) {
+            val nextPane = if (authSession.isOAuth) {
                 logger.debug("Web AuthFlow completed! waiting for oauth results")
                 val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
                 logger.debug("OAuth results received! completing session")
@@ -373,18 +373,12 @@ internal class PartnerAuthViewModel @Inject constructor(
                     publicToken = oAuthResults.publicToken
                 )
                 logger.debug("Session authorized!")
-                navigationManager.tryNavigateTo(
-                    updatedSession.nextPane.destination(referrer = PANE),
-                    popUpToCurrent = true,
-                    inclusive = true
-                )
+                updatedSession.nextPane.destination(referrer = PANE)
             } else {
-                navigationManager.tryNavigateTo(
-                    AccountPicker(referrer = PANE),
-                    popUpToCurrent = true,
-                    inclusive = true
-                )
+                AccountPicker(referrer = PANE)
             }
+            FinancialConnections.emitEvent(Name.INSTITUTION_AUTHORIZED)
+            navigationManager.tryNavigateTo(nextPane)
         }.onFailure {
             eventTracker.logError(
                 extraMessage = "failed authorizing session",

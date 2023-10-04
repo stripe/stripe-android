@@ -264,6 +264,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     )
                     when {
                         session.isCustomManualEntryError() -> {
+                            FinancialConnections.emitEvent(name = Name.MANUAL_ENTRY_INITIATED)
                             finishWithResult(Failed(CustomManualEntryRequiredError()))
                         }
 
