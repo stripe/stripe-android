@@ -2,7 +2,6 @@ package com.stripe.android.test.core
 
 import android.app.Activity
 import android.app.Application
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -15,8 +14,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.lifecycle.lifecycleScope
 import androidx.test.core.app.ActivityScenario
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.onView
@@ -27,12 +26,15 @@ import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
 import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
-import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
+import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTypeSettingsDefinition
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
+import kotlinx.coroutines.launch
 import org.junit.Assume
-import java.util.concurrent.Semaphore
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -47,7 +49,7 @@ import kotlin.time.Duration.Companion.seconds
  * It works for all screen sizes
  * It does not test every possible drop down parameter
  */
-class PlaygroundTestDriver(
+internal class PlaygroundTestDriver(
     private val device: UiDevice,
     private val composeTestRule: ComposeTestRule,
 ) : ScreenshotTest {
@@ -159,7 +161,12 @@ class PlaygroundTestDriver(
         populateCustomLpmFields: () -> Unit = {},
         verifyCustomLpmFields: () -> Unit = {},
     ) {
-        setup(testParameters)
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings[IntegrationTypeSettingsDefinition] =
+                    IntegrationTypeSettingsDefinition.IntegrationType.FlowController
+            }
+        )
         launchCustom()
 
         if (isSelectPaymentMethodScreen()) {
@@ -311,7 +318,8 @@ class PlaygroundTestDriver(
      * Here we wait for PollingActivity to first come into view then wait for it to go away by checking if the Approve payment text is there
      */
     private fun waitForPollingToFinish(timeout: Duration = 30.seconds) {
-        val className = "com.stripe.android.paymentsheet.paymentdatacollection.polling.PollingActivity"
+        val className =
+            "com.stripe.android.paymentsheet.paymentdatacollection.polling.PollingActivity"
         while (currentActivity[0]?.componentName?.className != className) {
             Thread.sleep(10)
         }
@@ -360,46 +368,6 @@ class PlaygroundTestDriver(
         application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
     }
 
-    private fun setConfiguration(selectors: Selectors) {
-        selectors.reset.click()
-        // Could consider setting these preferences instead of clicking
-        // if it is faster (possibly 1-2s)
-        selectors.customer.click()
-        selectors.automatic.click()
-
-        selectors.setInitializationType(testParameters.initializationType)
-
-        // Set the country first because it will update the default currency value
-        selectors.setMerchantCountry(testParameters.merchantCountryCode)
-        selectors.setCurrency(testParameters.currency)
-
-        selectors.linkState.click()
-
-        selectors.checkout.click()
-        selectors.delayed.click()
-        selectors.shipping.click()
-
-        // billing is not saved to preferences
-        selectors.billing.click()
-
-        // billing is not saved to preferences
-        selectors.shipping.click()
-
-        // Can't guarantee that google pay will be on the phone
-        selectors.googlePayState.click()
-
-        // Billing details collection.
-        selectors.attachDefaults.click()
-        selectors.collectName.click()
-        selectors.collectEmail.click()
-        selectors.collectPhone.click()
-        selectors.collectAddress.click()
-
-        testParameters.customPrimaryButtonLabel?.let { customLabel ->
-            selectors.enterCustomPrimaryButtonLabel(text = customLabel)
-        }
-    }
-
     internal fun launchComplete() {
         selectors.reload.click()
         selectors.complete.waitForEnabled()
@@ -423,6 +391,8 @@ class PlaygroundTestDriver(
 
     private fun doAuthorization() {
         selectors.apply {
+            val checkoutMode =
+                testParameters.playgroundSettingsSnapshot[CheckoutModeSettingsDefinition]
             if (testParameters.authorizationAction != null) {
                 if (testParameters.authorizationAction?.requiresBrowser == true) {
                     // If a specific browser is requested we will use it, otherwise, we will
@@ -438,7 +408,7 @@ class PlaygroundTestDriver(
                     assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
 
                     blockUntilAuthorizationPageLoaded(
-                        isSetup = testParameters.intentType == IntentType.Setup
+                        isSetup = checkoutMode == CheckoutModeSettingsDefinition.CheckoutMode.SETUP
                     )
                 }
 
@@ -449,7 +419,7 @@ class PlaygroundTestDriver(
                         // Buttons aren't showing the same way each time in the web page.
                         object : UiAutomatorText(
                             label = requireNotNull(testParameters.authorizationAction)
-                                .text(testParameters.intentType),
+                                .text(checkoutMode),
                             className = "android.widget.TextView",
                             device = device
                         ) {}.click()
@@ -459,11 +429,12 @@ class PlaygroundTestDriver(
 
                 when (val authAction = testParameters.authorizationAction) {
                     is AuthorizeAction.DisplayQrCode -> {
-                        if (testParameters.intentType != IntentType.Setup) {
+                        if (checkoutMode != CheckoutModeSettingsDefinition.CheckoutMode.SETUP) {
                             closeQrCodeButton.wait(5000)
                             onView(withText("CLOSE")).perform(click())
                         }
                     }
+
                     is AuthorizeAction.AuthorizePayment -> {}
                     is AuthorizeAction.PollingSucceedsAfterDelay -> {
                         waitForPollingToFinish()
@@ -522,31 +493,10 @@ class PlaygroundTestDriver(
         this.testParameters = testParameters
         this.selectors = Selectors(device, composeTestRule, testParameters)
 
-        val launchPlayground = Semaphore(1)
-        launchPlayground.acquire()
+        val launchPlayground = CountDownLatch(1)
 
-        // Setup the playground for scenario, and launch it.  We use the playground
-        // so we don't have to implement another route to create a payment intent,
-        // the challenge is that we don't have access to the activity or it's viewmodels
-        val intent = Intent(
-            ApplicationProvider.getApplicationContext(),
-            PaymentSheetPlaygroundActivity::class.java
-        )
-        intent.putExtra(
-            PaymentSheetPlaygroundActivity.FORCE_DARK_MODE_EXTRA,
-            testParameters.forceDarkMode
-        )
-        intent.putExtra(
-            PaymentSheetPlaygroundActivity.APPEARANCE_EXTRA,
-            testParameters.appearance
-        )
-        intent.putExtra(
-            PaymentSheetPlaygroundActivity.USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA,
-            testParameters.snapshotReturningCustomer
-        )
-        intent.putExtra(
-            PaymentSheetPlaygroundActivity.SUPPORTED_PAYMENT_METHODS_EXTRA,
-            testParameters.supportedPaymentMethods.toTypedArray()
+        val intent = PaymentSheetPlaygroundActivity.createTestIntent(
+            settingsJson = testParameters.playgroundSettingsSnapshot.asJsonString()
         )
 
         val scenario = ActivityScenario.launch<PaymentSheetPlaygroundActivity>(intent)
@@ -557,18 +507,15 @@ class PlaygroundTestDriver(
             IdlingPolicies.setMasterPolicyTimeout(45, TimeUnit.SECONDS)
 
             // Observe the result of the PaymentSheet completion
-            activity.viewModel.status.observeForever {
-                resultValue = it
+            activity.lifecycleScope.launch {
+                activity.viewModel.status.collect {
+                    resultValue = it
+                }
             }
-            launchPlayground.release()
+            launchPlayground.countDown()
         }
 
-        launchPlayground.acquire()
-        launchPlayground.release()
-
-        closeSoftKeyboard()
-
-        setConfiguration(selectors)
+        launchPlayground.await(5, TimeUnit.SECONDS)
     }
 
     internal fun teardown() {

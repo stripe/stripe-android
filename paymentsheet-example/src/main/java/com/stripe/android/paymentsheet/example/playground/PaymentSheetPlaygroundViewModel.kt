@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState.Companion.asPlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
@@ -24,6 +25,7 @@ import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentReq
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
+import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
@@ -246,6 +248,20 @@ internal class PaymentSheetPlaygroundViewModel(
             }
         }
         return createIntentResult
+    }
+
+    fun onAddressLauncherResult(addressLauncherResult: AddressLauncherResult) {
+        when (addressLauncherResult) {
+            AddressLauncherResult.Canceled -> {
+                status.value = "Canceled"
+            }
+
+            is AddressLauncherResult.Succeeded -> {
+                val addressDetails = addressLauncherResult.address
+                playgroundSettingsFlow.value?.set(ShippingAddressSettingsDefinition, addressDetails)
+                flowControllerState.update { it?.copy(addressDetails = addressDetails) }
+            }
+        }
     }
 
     internal class Factory(
