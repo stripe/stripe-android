@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 
 private typealias ComposeTestRule = AndroidComposeTestRule<ActivityScenarioRule<MainActivity>, MainActivity>
 
@@ -16,11 +17,31 @@ internal class PaymentSheetPage(
     private val composeTestRule: ComposeTestRule,
 ) {
     fun fillOutCardDetails(fillOutZipCode: Boolean = true) {
+        composeTestRule.waitForIdle()
+
         waitForText("Card number")
 
         replaceText("Card number", "4242424242424242")
         replaceText("MM / YY", "12/34")
         replaceText("CVC", "123")
+
+        if (fillOutZipCode) {
+            replaceText("ZIP Code", "12345")
+        }
+    }
+
+    fun fillOutCardDetailsWithCardBrandChoice(fillOutZipCode: Boolean = true) {
+        composeTestRule.waitForIdle()
+
+        waitForText("Card number")
+
+        replaceText("Card number", "4000002500001001")
+        replaceText("MM / YY", "12/34")
+        replaceText("CVC", "123")
+
+        clickDropdownMenu()
+        waitForText("Select card brand (optional)")
+        clickViewWithText("Cartes Bancaires")
 
         if (fillOutZipCode) {
             replaceText("ZIP Code", "12345")
@@ -54,6 +75,8 @@ internal class PaymentSheetPage(
     }
 
     fun addPaymentMethod() {
+        composeTestRule.waitForIdle()
+
         waitForText("+ Add")
 
         composeTestRule.onNode(hasText("+ Add"))
@@ -66,5 +89,11 @@ internal class PaymentSheetPage(
         composeTestRule.onNode(hasText(label))
             .performScrollTo()
             .performTextReplacement(text)
+    }
+
+    private fun clickDropdownMenu() {
+        composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
+            .performScrollTo()
+            .performClick()
     }
 }

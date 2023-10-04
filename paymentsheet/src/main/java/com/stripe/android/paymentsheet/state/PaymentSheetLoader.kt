@@ -28,7 +28,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.view.CbcEnabledProvider
+import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -62,7 +62,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val eventReporter: EventReporter,
     @IOContext private val workContext: CoroutineContext,
     private val accountStatusProvider: LinkAccountStatusProvider,
-    private val cbcEnabled: CbcEnabledProvider,
 ) : PaymentSheetLoader {
 
     override suspend fun load(
@@ -114,8 +113,11 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val stripeIntent = elementsSession.stripeIntent
         val merchantCountry = elementsSession.merchantCountry
 
-        val isLinkAvailable = stripeIntent.paymentMethodTypes.contains(Link.code) &&
-            stripeIntent.linkFundingSources.intersect(supportedFundingSources).isNotEmpty()
+        val linkPassthroughModeEnabled = elementsSession.linkSettings?.linkPassthroughModeEnabled ?: false
+        val isLinkAvailable = (
+            stripeIntent.paymentMethodTypes.contains(Link.code) &&
+                stripeIntent.linkFundingSources.intersect(supportedFundingSources).isNotEmpty()
+            ) || linkPassthroughModeEnabled
 
         val savedSelection = async {
             prefsRepository.getSavedSelection(
@@ -163,7 +165,12 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val linkState = async {
             if (isLinkAvailable) {
-                loadLinkState(config, stripeIntent, merchantCountry)
+                loadLinkState(
+                    config = config,
+                    stripeIntent = stripeIntent,
+                    merchantCountry = merchantCountry,
+                    passthroughModeEnabled = linkPassthroughModeEnabled,
+                )
             } else {
                 null
             }
@@ -178,7 +185,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 customerPaymentMethods = sortedPaymentMethods.await(),
                 isGooglePayReady = isGooglePayReady,
                 linkState = linkState.await(),
-                isEligibleForCardBrandChoice = elementsSession.isEligibleForCardBrandChoice && cbcEnabled(),
+                isEligibleForCardBrandChoice = FeatureFlags.cardBrandChoice.isEnabled &&
+                    elementsSession.isEligibleForCardBrandChoice,
                 paymentSelection = initialPaymentSelection.await(),
             )
         } else {
@@ -250,8 +258,14 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         config: PaymentSheet.Configuration?,
         stripeIntent: StripeIntent,
         merchantCountry: String?,
+        passthroughModeEnabled: Boolean,
     ): LinkState {
-        val linkConfig = createLinkConfiguration(config, stripeIntent, merchantCountry)
+        val linkConfig = createLinkConfiguration(
+            config = config,
+            stripeIntent = stripeIntent,
+            merchantCountry = merchantCountry,
+            passthroughModeEnabled = passthroughModeEnabled,
+        )
 
         val loginState = when (accountStatusProvider(linkConfig)) {
             AccountStatus.Verified -> LinkState.LoginState.LoggedIn
@@ -271,6 +285,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         config: PaymentSheet.Configuration?,
         stripeIntent: StripeIntent,
         merchantCountry: String?,
+        passthroughModeEnabled: Boolean,
     ): LinkConfiguration {
         val shippingDetails: AddressDetails? = config?.shippingDetails
 
@@ -303,7 +318,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             customerPhone = customerPhone,
             customerName = config?.defaultBillingDetails?.name,
             customerBillingCountryCode = config?.defaultBillingDetails?.address?.country,
-            shippingValues = shippingAddress
+            shippingValues = shippingAddress,
+            passthroughModeEnabled = passthroughModeEnabled,
         )
     }
 

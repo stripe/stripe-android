@@ -1,5 +1,5 @@
 ext.versions = [
-        accompanist                 : '0.30.1',
+        accompanist                 : '0.32.0',
         alipay                      : '15.8.12',
         androidGradlePlugin         : '8.1.1',
         androidTest                 : '1.5.0',
@@ -68,6 +68,7 @@ ext.versions = [
         truth                       : '1.1.3',
         turbine                     : '0.12.3',
         uiAutomator                 : '2.2.0',
+        zxing                       : '3.5.2',
 ]
 
 ext.buildLibs = [
@@ -91,8 +92,6 @@ ext.configs = [
 ext.libs = [
         accompanist                         : [
                 flowLayout         : "com.google.accompanist:accompanist-flowlayout:${versions.accompanist}",
-                navigationAnimation: "com.google.accompanist:accompanist-navigation-animation:${versions.accompanist}",
-                navigationMaterial : "com.google.accompanist:accompanist-navigation-material:${versions.accompanist}",
                 systemUiController : "com.google.accompanist:accompanist-systemuicontroller:${versions.accompanist}",
                 themeAdapter       : "com.google.accompanist:accompanist-themeadapter-material:${versions.accompanist}",
                 webView            : "com.google.accompanist:accompanist-webview:${versions.accompanist}",
@@ -173,6 +172,7 @@ ext.libs = [
         tensorflowLiteSupport               : "org.tensorflow:tensorflow-lite-support:${versions.tensorflowLiteSupport}",
         tensorflowLitePlayServices          : "com.google.android.gms:play-services-tflite-java:${versions.playServicesTfLite}",
         tensorflowLitePlayServicesSupport   : "com.google.android.gms:play-services-tflite-support:${versions.playServicesTfLite}",
+        zxing                               : "com.google.zxing:core:${versions.zxing}",
 ]
 
 ext.testLibs = [

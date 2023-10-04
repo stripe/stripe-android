@@ -433,6 +433,7 @@ class PaymentSheet internal constructor(
             private var allowsDelayedPaymentMethods: Boolean = false
             private var allowsPaymentMethodsRequiringShippingAddress: Boolean = false
             private var appearance: Appearance = Appearance()
+            private var primaryButtonLabel: String? = null
             private var billingDetailsCollectionConfiguration =
                 BillingDetailsCollectionConfiguration()
 
@@ -474,6 +475,9 @@ class PaymentSheet internal constructor(
             fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
 
+            fun primaryButtonLabel(primaryButtonLabel: String) =
+                apply { this.primaryButtonLabel = primaryButtonLabel }
+
             fun billingDetailsCollectionConfiguration(
                 billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
             ) = apply {
@@ -481,15 +485,16 @@ class PaymentSheet internal constructor(
             }
 
             fun build() = Configuration(
-                merchantDisplayName,
-                customer,
-                googlePay,
-                primaryButtonColor,
-                defaultBillingDetails,
-                shippingDetails,
-                allowsDelayedPaymentMethods,
-                allowsPaymentMethodsRequiringShippingAddress,
-                appearance,
+                merchantDisplayName = merchantDisplayName,
+                customer = customer,
+                googlePay = googlePay,
+                primaryButtonColor = primaryButtonColor,
+                defaultBillingDetails = defaultBillingDetails,
+                shippingDetails = shippingDetails,
+                allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+                appearance = appearance,
+                primaryButtonLabel = primaryButtonLabel,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             )
         }

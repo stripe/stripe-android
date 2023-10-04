@@ -10,7 +10,6 @@ import com.stripe.android.uicore.elements.SectionFieldErrorController
 class CardDetailsSectionController(
     context: Context,
     initialValues: Map<IdentifierSpec, String?>,
-    viewOnlyFields: Set<IdentifierSpec>,
     collectName: Boolean = false,
     isEligibleForCardBrandChoice: Boolean = false,
 ) : SectionFieldErrorController {
@@ -19,7 +18,6 @@ class CardDetailsSectionController(
         IdentifierSpec.Generic("card_detail"),
         context,
         initialValues,
-        viewOnlyFields,
         collectName,
         isEligibleForCardBrandChoice,
     )

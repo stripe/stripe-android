@@ -158,9 +158,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
             LinkHandler.ProcessingState.Launched -> {
             }
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
-                processingState.details?.let {
+                processingState.paymentSelection?.let {
                     // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-                    updateSelection(PaymentSelection.New.LinkInline(it))
+                    updateSelection(it)
                     onUserSelection()
                 } ?: run {
                     // Creating Link PaymentDetails failed, fallback to regular checkout.

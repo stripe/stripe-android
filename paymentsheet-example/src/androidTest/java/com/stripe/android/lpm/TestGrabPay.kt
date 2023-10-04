@@ -1,31 +1,35 @@
 package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.BaseLpmTest
+import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.settings.Country
+import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Currency
+import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.test.core.AuthorizeAction
-import com.stripe.android.test.core.Currency
+import com.stripe.android.test.core.TestParameters
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-internal class TestGrabPay : BaseLpmTest() {
+internal class TestGrabPay : BasePlaygroundTest() {
 
-    private val grabPay = newUser.copy(
-        paymentMethod = lpmRepository.fromCode("grabpay")!!,
-        currency = Currency.SGD,
-        merchantCountryCode = "SG",
-        authorizationAction = AuthorizeAction.AuthorizePayment,
-    )
+    private val testParameters = TestParameters.create(
+        paymentMethodCode = "grabpay",
+    ) { settings ->
+        settings[CountrySettingsDefinition] = Country.SG
+        settings[CurrencySettingsDefinition] = Currency.SGD
+    }
 
     @Test
     fun testGrabPay() {
-        testDriver.confirmNewOrGuestComplete(grabPay)
+        testDriver.confirmNewOrGuestComplete(testParameters)
     }
 
     @Test
     fun testGrabPayFailure() {
         testDriver.confirmNewOrGuestComplete(
-            grabPay.copy(
+            testParameters.copy(
                 authorizationAction = AuthorizeAction.Fail(
                     expectedError = "We are unable to authenticate your payment method. Please " +
                         "choose a different payment method and try again.",
@@ -36,6 +40,6 @@ internal class TestGrabPay : BaseLpmTest() {
 
     @Test
     fun testGrabPayInCustomFlow() {
-        testDriver.confirmCustom(grabPay)
+        testDriver.confirmCustom(testParameters)
     }
 }

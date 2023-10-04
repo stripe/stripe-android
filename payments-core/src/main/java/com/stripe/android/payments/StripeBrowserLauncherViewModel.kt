@@ -11,66 +11,79 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
+import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.browser.BrowserCapabilities
 import com.stripe.android.core.browser.BrowserCapabilitiesSupplier
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.utils.requireApplication
-import kotlin.properties.Delegates
 
 internal class StripeBrowserLauncherViewModel(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val browserCapabilities: BrowserCapabilities,
     private val intentChooserTitle: String,
-    private val savedStateHandle: SavedStateHandle
+    private val resolveErrorMessage: String,
+    private val savedStateHandle: SavedStateHandle,
+    private val intentResolver: (Intent) -> Boolean,
 ) : ViewModel() {
 
-    var hasLaunched: Boolean by Delegates.observable(
-        savedStateHandle.contains(KEY_HAS_LAUNCHED)
-    ) { _, _, newValue ->
-        savedStateHandle.set(KEY_HAS_LAUNCHED, true)
-    }
+    var hasLaunched: Boolean
+        get() = savedStateHandle[KEY_HAS_LAUNCHED] ?: false
+        set(value) {
+            savedStateHandle[KEY_HAS_LAUNCHED] = value
+        }
 
     fun createLaunchIntent(
         args: PaymentBrowserAuthContract.Args
-    ): Intent {
-        val shouldUseCustomTabs = browserCapabilities == BrowserCapabilities.CustomTabs
-        logCapabilities(shouldUseCustomTabs)
-
+    ): Intent? {
         val url = Uri.parse(args.url)
-        return if (shouldUseCustomTabs) {
-            val customTabColorSchemeParams = args.statusBarColor?.let { statusBarColor ->
-                CustomTabColorSchemeParams.Builder()
-                    .setToolbarColor(statusBarColor)
-                    .build()
+        logBrowserCapabilities()
+
+        val intent = when (browserCapabilities) {
+            BrowserCapabilities.CustomTabs -> {
+                val customTabsIntent = createCustomTabsIntent(args, url)
+                customTabsIntent.intent
             }
-
-            // use Custom Tabs
-            val customTabsIntent = CustomTabsIntent.Builder()
-                .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
-                .also {
-                    if (customTabColorSchemeParams != null) {
-                        it.setDefaultColorSchemeParams(customTabColorSchemeParams)
-                    }
-                }
-                .build()
-            customTabsIntent.intent.data = url
-
-            Intent.createChooser(
-                customTabsIntent.intent,
-                intentChooserTitle
-            )
-        } else {
-            // use default device browser
-            Intent.createChooser(
-                Intent(Intent.ACTION_VIEW, url),
-                intentChooserTitle
-            )
+            BrowserCapabilities.Unknown -> {
+                Intent(Intent.ACTION_VIEW, url)
+            }
         }
+
+        val canResolve = intentResolver(intent)
+
+        return if (canResolve) {
+            Intent.createChooser(intent, intentChooserTitle)
+        } else {
+            null
+        }
+    }
+
+    private fun createCustomTabsIntent(
+        args: PaymentBrowserAuthContract.Args,
+        url: Uri,
+    ): CustomTabsIntent {
+        val customTabColorSchemeParams = args.statusBarColor?.let { statusBarColor ->
+            CustomTabColorSchemeParams.Builder()
+                .setToolbarColor(statusBarColor)
+                .build()
+        }
+
+        return CustomTabsIntent.Builder()
+            .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+            .also {
+                if (customTabColorSchemeParams != null) {
+                    it.setDefaultColorSchemeParams(customTabColorSchemeParams)
+                }
+            }
+            .build()
+            .apply {
+                intent.data = url
+            }
     }
 
     fun getResultIntent(args: PaymentBrowserAuthContract.Args): Intent {
@@ -85,16 +98,29 @@ internal class StripeBrowserLauncherViewModel(
         )
     }
 
-    fun logCapabilities(
-        shouldUseCustomTabs: Boolean
-    ) {
+    fun getFailureIntent(args: PaymentBrowserAuthContract.Args): Intent {
+        val url = Uri.parse(args.url)
+        val exception = LocalStripeException(displayMessage = resolveErrorMessage)
+
+        return Intent().putExtras(
+            PaymentFlowResult.Unvalidated(
+                clientSecret = args.clientSecret,
+                sourceId = url.lastPathSegment.orEmpty(),
+                stripeAccountId = args.stripeAccountId,
+                canCancelSource = args.shouldCancelSource,
+                flowOutcome = StripeIntentResult.Outcome.FAILED,
+                exception = exception,
+            ).toBundle()
+        )
+    }
+
+    private fun logBrowserCapabilities() {
+        val event = when (browserCapabilities) {
+            BrowserCapabilities.CustomTabs -> PaymentAnalyticsEvent.AuthWithCustomTabs
+            BrowserCapabilities.Unknown -> PaymentAnalyticsEvent.AuthWithDefaultBrowser
+        }
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(
-                when (shouldUseCustomTabs) {
-                    true -> PaymentAnalyticsEvent.AuthWithCustomTabs
-                    false -> PaymentAnalyticsEvent.AuthWithDefaultBrowser
-                }
-            )
+            paymentAnalyticsRequestFactory.createRequest(event)
         )
     }
 
@@ -109,14 +135,16 @@ internal class StripeBrowserLauncherViewModel(
             val browserCapabilitiesSupplier = BrowserCapabilitiesSupplier(application)
 
             return StripeBrowserLauncherViewModel(
-                DefaultAnalyticsRequestExecutor(),
-                PaymentAnalyticsRequestFactory(
-                    application,
-                    config.publishableKey
+                analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
+                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                    context = application,
+                    publishableKey = config.publishableKey,
                 ),
-                browserCapabilitiesSupplier.get(),
-                application.getString(R.string.stripe_verify_your_payment),
-                savedStateHandle
+                browserCapabilities = browserCapabilitiesSupplier.get(),
+                intentChooserTitle = application.getString(R.string.stripe_verify_your_payment),
+                resolveErrorMessage = application.getString(R.string.stripe_failure_reason_authentication),
+                savedStateHandle = savedStateHandle,
+                intentResolver = { it.resolveActivity(application.packageManager) != null },
             ) as T
         }
     }

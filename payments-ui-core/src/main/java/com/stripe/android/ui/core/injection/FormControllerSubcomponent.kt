@@ -39,9 +39,6 @@ interface FormControllerSubcomponent {
         ): Builder
 
         @BindsInstance
-        fun viewOnlyFields(viewOnlyFields: Set<IdentifierSpec>): Builder
-
-        @BindsInstance
         fun viewModelScope(viewModelScope: CoroutineScope): Builder
 
         @BindsInstance

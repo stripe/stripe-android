@@ -10,6 +10,8 @@ data class CartState(
     val subtotal: Long? = null,
     val salesTax: Long? = null,
     val total: Long? = null,
+    val customerId: String? = null,
+    val customerEphemeralKeySecret: String? = null,
 ) {
 
     val formattedSubtotal: String
@@ -35,6 +37,15 @@ data class CartState(
 
     fun countOf(id: CartProduct.Id): Int {
         return products.filter { it.id == id }.sumOf { it.quantity }
+    }
+
+    fun makeCustomerConfig() = if (customerId != null && customerEphemeralKeySecret != null) {
+        PaymentSheet.CustomerConfiguration(
+            id = customerId,
+            ephemeralKeySecret = customerEphemeralKeySecret
+        )
+    } else {
+        null
     }
 
     companion object {
@@ -70,6 +81,8 @@ internal fun CartState.updateWithResponse(
         subtotal = response.subtotal,
         salesTax = response.tax,
         total = response.total,
+        customerId = response.customer,
+        customerEphemeralKeySecret = response.ephemeralKey,
     )
 }
 

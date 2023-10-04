@@ -42,6 +42,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_fl
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
+import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity as NewPaymentSheetPlaygroundActivity
 
 private const val SurfaceOverlayOpacity = 0.12f
 
@@ -96,6 +97,12 @@ class MainActivity : AppCompatActivity() {
                 titleResId = R.string.playground_title,
                 subtitleResId = R.string.playground_subtitle,
                 klass = PaymentSheetPlaygroundActivity::class.java,
+                section = MenuItem.Section.Internal,
+            ),
+            MenuItem(
+                titleResId = R.string.playground_title,
+                subtitleResId = R.string.playground_subtitle,
+                klass = NewPaymentSheetPlaygroundActivity::class.java,
                 section = MenuItem.Section.Internal,
             ),
             MenuItem(

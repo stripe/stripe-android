@@ -1,9 +1,7 @@
 package com.stripe.android.payments
 
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -37,37 +35,42 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             return
         }
 
+        if (viewModel.hasLaunched) {
+            finishWithSuccess(args)
+        } else {
+            launchBrowser(args)
+        }
+    }
+
+    private fun launchBrowser(args: PaymentBrowserAuthContract.Args) {
+        val contract = ActivityResultContracts.StartActivityForResult()
+        val launcher = registerForActivityResult(contract) {
+            finishWithSuccess(args)
+        }
+
+        val intent = viewModel.createLaunchIntent(args)
+
+        if (intent != null) {
+            launcher.launch(intent)
+            viewModel.hasLaunched = true
+        } else {
+            finishWithFailure(args)
+        }
+    }
+
+    private fun finishWithSuccess(args: PaymentBrowserAuthContract.Args) {
         setResult(
             Activity.RESULT_OK,
             viewModel.getResultIntent(args)
         )
-
-        if (viewModel.hasLaunched) {
-            finish()
-        } else {
-            val launcher = registerForActivityResult(
-                ActivityResultContracts.StartActivityForResult(),
-                ::onResult
-            )
-
-            launcher.launch(
-                viewModel.createLaunchIntent(args)
-            )
-
-            viewModel.hasLaunched = true
-        }
-    }
-
-    private fun onResult(activityResult: ActivityResult) {
-        // always dismiss the activity when a result is available
-
         finish()
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-
-        // This is invoked by the intent filter. We might not need to implement this method but
-        // leaving it here for posterity.
+    private fun finishWithFailure(args: PaymentBrowserAuthContract.Args) {
+        setResult(
+            Activity.RESULT_OK,
+            viewModel.getFailureIntent(args)
+        )
+        finish()
     }
 }
