@@ -5,15 +5,13 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.material.MdcTheme
@@ -183,7 +182,9 @@ private fun CardBrand(
         }
     }
 
-    val showDropdown = remember(possibleBrands) { isCbcEligible && possibleBrands.size > 1 }
+    val showDropdown = remember(possibleBrands, shouldShowCvc) {
+        isCbcEligible && possibleBrands.size > 1 && !shouldShowCvc
+    }
 
     Box(modifier) {
         Row(
@@ -192,6 +193,11 @@ private fun CardBrand(
                 expanded = true
             },
         ) {
+            val animatedAlpha by animateFloatAsState(
+                targetValue = if (showDropdown) ContentAlpha.medium else 0f,
+                label = "alpha"
+            )
+
             Image(
                 painter = painterResource(icon),
                 colorFilter = tint?.let { ColorFilter.tint(it) },
@@ -199,14 +205,13 @@ private fun CardBrand(
                 modifier = Modifier.requiredSize(width = 32.dp, height = 21.dp),
             )
 
-            if (showDropdown) {
-                Image(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = null,
-                    alpha = ContentAlpha.disabled,
-                    modifier = Modifier.padding(end = 4.dp),
-                )
-            }
+            Image(
+                painter = painterResource(R.drawable.stripe_ic_arrow_down),
+                contentDescription = null,
+                modifier = Modifier
+                    .requiredSize(8.dp)
+                    .graphicsLayer { alpha = animatedAlpha },
+            )
         }
 
         if (showDropdown) {
