@@ -25,7 +25,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.themeadapter.material.MdcTheme
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.databinding.StripeCardBrandViewBinding
@@ -33,6 +32,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
+import com.stripe.android.utils.AppCompatOrMdcTheme
 import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.properties.Delegates
@@ -120,7 +120,7 @@ internal class CardBrandView @JvmOverloads constructor(
         isFocusable = false
 
         iconView.setContent {
-            MdcTheme {
+            AppCompatOrMdcTheme {
                 val isCbcEligible by isCbcEligibleFlow.collectAsState()
                 val isLoading by isLoadingFlow.collectAsState()
                 val currentBrand by brandFlow.collectAsState()
