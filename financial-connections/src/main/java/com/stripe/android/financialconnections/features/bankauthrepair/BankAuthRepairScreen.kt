@@ -19,11 +19,11 @@ internal fun BankAuthRepairScreen() {
 
     SharedPartnerAuth(
         state = state.value,
-        onContinueClick = { /*TODO*/ },
-        onSelectAnotherBank = { /*TODO*/ },
-        onClickableTextClick = { /*TODO*/ },
-        onEnterDetailsManually = { /*TODO*/ },
-        onWebAuthFlowFinished = { /*TODO*/ },
-        onViewEffectLaunched = { /*TODO*/ }
+        onPrepaneContinueClick = viewModel::onLaunchAuthClick,
+        onSelectAnotherBank = viewModel::onSelectAnotherBank,
+        onClickableTextClick = viewModel::onClickableTextClick,
+        onEnterDetailsManually = viewModel::onEnterDetailsManuallyClick,
+        onWebAuthFlowFinished = viewModel::onWebAuthFlowFinished,
+        onViewEffectLaunched = viewModel::onViewEffectLaunched
     )
 }
