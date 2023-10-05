@@ -1384,7 +1384,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
-    override suspend fun retrieveCardElementConfig(requestOptions: ApiRequest.Options): Result<MobileCardElementConfig> {
+    override suspend fun retrieveCardElementConfig(
+        requestOptions: ApiRequest.Options,
+    ): Result<MobileCardElementConfig> {
         return fetchStripeModelResult(
             apiRequestFactory.createGet(
                 url = mobileCardElementConfigUrl,

@@ -27,59 +27,62 @@ class CardWidgetViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     @Test
-    fun `Emits correct CBC eligibility when the feature is enabled and merchant is eligible`() = runTest(testDispatcher) {
-        featureFlagTestRule.setEnabled(true)
+    fun `Emits correct CBC eligibility when the feature is enabled and merchant is eligible`() =
+        runTest(testDispatcher) {
+            featureFlagTestRule.setEnabled(true)
 
-        val stripeRepository = FakeCardElementConfigRepository()
+            val stripeRepository = FakeCardElementConfigRepository()
 
-        val viewModel = CardWidgetViewModel(
-            paymentConfigProvider = { paymentConfig },
-            stripeRepository = stripeRepository,
-            dispatcher = testDispatcher,
-        )
+            val viewModel = CardWidgetViewModel(
+                paymentConfigProvider = { paymentConfig },
+                stripeRepository = stripeRepository,
+                dispatcher = testDispatcher,
+            )
 
-        viewModel.isCbcEligible.test {
-            assertThat(awaitItem()).isFalse()
-            stripeRepository.enqueueEligible()
-            assertThat(awaitItem()).isTrue()
+            viewModel.isCbcEligible.test {
+                assertThat(awaitItem()).isFalse()
+                stripeRepository.enqueueEligible()
+                assertThat(awaitItem()).isTrue()
+            }
         }
-    }
 
     @Test
-    fun `Emits correct CBC eligibility when the feature is disabled even if merchant is eligible`() = runTest(testDispatcher) {
-        val stripeRepository = FakeCardElementConfigRepository()
+    fun `Emits correct CBC eligibility when the feature is disabled even if merchant is eligible`() =
+        runTest(testDispatcher) {
+            val stripeRepository = FakeCardElementConfigRepository()
 
-        val viewModel = CardWidgetViewModel(
-            paymentConfigProvider = { paymentConfig },
-            stripeRepository = stripeRepository,
-            dispatcher = testDispatcher,
-        )
+            val viewModel = CardWidgetViewModel(
+                paymentConfigProvider = { paymentConfig },
+                stripeRepository = stripeRepository,
+                dispatcher = testDispatcher,
+            )
 
-        viewModel.isCbcEligible.test {
-            assertThat(awaitItem()).isFalse()
-            stripeRepository.enqueueEligible()
-            expectNoEvents()
+            viewModel.isCbcEligible.test {
+                assertThat(awaitItem()).isFalse()
+                stripeRepository.enqueueEligible()
+                expectNoEvents()
+            }
         }
-    }
 
     @Test
-    fun `Emits correct CBC eligibility when the feature is enabled and merchant is not eligible`() = runTest(testDispatcher) {
-        featureFlagTestRule.setEnabled(true)
+    fun `Emits correct CBC eligibility when the feature is enabled and merchant is not eligible`() =
+        runTest(testDispatcher) {
+            featureFlagTestRule.setEnabled(true)
 
-        val stripeRepository = FakeCardElementConfigRepository()
+            val stripeRepository = FakeCardElementConfigRepository()
 
-        val viewModel = CardWidgetViewModel(
-            paymentConfigProvider = { paymentConfig },
-            stripeRepository = stripeRepository,
-            dispatcher = testDispatcher,
-        )
+            val viewModel = CardWidgetViewModel(
+                paymentConfigProvider = { paymentConfig },
+                stripeRepository = stripeRepository,
+                dispatcher = testDispatcher,
+            )
 
-        viewModel.isCbcEligible.test {
-            assertThat(awaitItem()).isFalse()
-            stripeRepository.enqueueNotEligible()
-            expectNoEvents()
+            viewModel.isCbcEligible.test {
+                assertThat(awaitItem()).isFalse()
+                stripeRepository.enqueueNotEligible()
+                expectNoEvents()
+            }
         }
-    }
 
     @Test
     fun `Emits correct CBC eligibility when query fails`() = runTest(testDispatcher) {

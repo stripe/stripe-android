@@ -11,13 +11,17 @@ class FakeCardElementConfigRepository : AbsFakeStripeRepository() {
     private val channel = Channel<Result<MobileCardElementConfig>>()
 
     fun enqueueEligible() {
-        val config = MobileCardElementConfig(cardBrandChoice = MobileCardElementConfig.CardBrandChoice(eligible = true))
+        val config = MobileCardElementConfig(
+            cardBrandChoice = MobileCardElementConfig.CardBrandChoice(eligible = true),
+        )
         val result = Result.success(config)
         channel.trySend(result)
     }
 
     fun enqueueNotEligible() {
-        val config = MobileCardElementConfig(cardBrandChoice = MobileCardElementConfig.CardBrandChoice(eligible = false))
+        val config = MobileCardElementConfig(
+            cardBrandChoice = MobileCardElementConfig.CardBrandChoice(eligible = false),
+        )
         val result = Result.success(config)
         channel.trySend(result)
     }
