@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.bankauthrepair
 
-import android.webkit.URLUtil
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksViewModel
@@ -8,7 +7,6 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.APPLICATION_ID
@@ -21,7 +19,7 @@ import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
-import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ClickableText
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ClickableText.DATA
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Payload
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.RepairPayload
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
@@ -39,6 +37,7 @@ import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.utils.ClickHandler
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -60,6 +59,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
     private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
     private val getCachedAccounts: GetCachedAccounts,
     private val navigationManager: NavigationManager,
+    private val clickHandler: ClickHandler,
     private val logger: Logger,
 ) : MavericksViewModel<SharedPartnerAuthState>(initialState) {
 
@@ -210,31 +210,14 @@ internal class BankAuthRepairViewModel @Inject constructor(
     }
 
     fun onClickableTextClick(uri: String) = viewModelScope.launch {
-        // if clicked uri contains an eventName query param, track click event.
-        uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
-            eventTracker.track(Click(eventName, pane = PANE))
-        }
-        if (URLUtil.isNetworkUrl(uri)) {
-            setState {
-                copy(
-                    viewEffect = OpenUrl(uri, Date().time)
-                )
-            }
-        } else {
-            val managedUri = ClickableText.values()
-                .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
-            when (managedUri) {
-                ClickableText.DATA -> {
-                    setState {
-                        copy(
-                            viewEffect = OpenBottomSheet(Date().time)
-                        )
-                    }
-                }
-
-                null -> logger.error("Unrecognized clickable text: $uri")
-            }
-        }
+        clickHandler.handle(
+            uri,
+            pane = PANE,
+            onNetworkUrlClick = { setState { copy(viewEffect = OpenUrl(uri, Date().time)) } },
+            clickActions = mapOf(
+                DATA.value to { setState { copy(viewEffect = OpenBottomSheet(Date().time)) } }
+            )
+        )
     }
 
     fun onViewEffectLaunched() {

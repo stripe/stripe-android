@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import android.webkit.URLUtil
 import androidx.core.net.toUri
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
@@ -27,10 +26,13 @@ import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
+import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairViewModel
 import com.stripe.android.financialconnections.features.common.enableRetrieveAuthSession
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ClickableText.DATA
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Payload
-import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenPartnerAuth
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -42,7 +44,7 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
-import com.stripe.android.financialconnections.utils.UriUtils
+import com.stripe.android.financialconnections.utils.ClickHandler
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
@@ -56,7 +58,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val retrieveAuthorizationSession: RetrieveAuthorizationSession,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     @Named(APPLICATION_ID) private val applicationId: String,
-    private val uriUtils: UriUtils,
+    private val clickHandler: ClickHandler,
     private val postAuthSessionEvent: PostAuthSessionEvent,
     private val getOrFetchSync: GetOrFetchSync,
     private val browserManager: BrowserManager,
@@ -399,38 +401,16 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     // if clicked uri contains an eventName query param, track click event.
     fun onClickableTextClick(uri: String) = viewModelScope.launch {
-        uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
-            eventTracker.track(
-                FinancialConnectionsEvent.Click(
-                    eventName,
-                    pane = PANE
-                )
+        clickHandler.handle(
+            uri,
+            pane = BankAuthRepairViewModel.PANE,
+            onNetworkUrlClick = {
+                setState { copy(viewEffect = OpenUrl(uri, Date().time)) }
+            },
+            clickActions = mapOf(
+                DATA.value to { setState { copy(viewEffect = OpenBottomSheet(Date().time)) } }
             )
-        }
-        if (URLUtil.isNetworkUrl(uri)) {
-            setState {
-                copy(
-                    viewEffect = ViewEffect.OpenUrl(
-                        uri,
-                        Date().time
-                    )
-                )
-            }
-        } else {
-            val managedUri = SharedPartnerAuthState.ClickableText.values()
-                .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
-            when (managedUri) {
-                SharedPartnerAuthState.ClickableText.DATA -> {
-                    setState {
-                        copy(
-                            viewEffect = ViewEffect.OpenBottomSheet(Date().time)
-                        )
-                    }
-                }
-
-                null -> logger.error("Unrecognized clickable text: $uri")
-            }
-        }
+        )
     }
 
     fun onViewEffectLaunched() {
