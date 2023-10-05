@@ -6,7 +6,12 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.border
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
@@ -27,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -97,15 +104,30 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     QrCodeButton(playgroundSettings = localPlaygroundSettings)
 
                     ReloadButton(playgroundSettings = localPlaygroundSettings)
-                }, bottomBarContent = {
-                    PlaygroundStateUi(
-                        playgroundState = playgroundState,
-                        paymentSheet = paymentSheet,
-                        flowController = flowController,
-                        addressLauncher = addressLauncher,
-                    )
                 },
-                hasBottomBarContent = playgroundState != null
+                bottomBarContent = {
+                    AnimatedContent(
+                        label = PLAYGROUND_BOTTOM_BAR_LABEL,
+                        targetState = playgroundState
+                    ) {
+                        it?.let { playgroundState ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colors.surface)
+                                    .animateContentSize()
+                            ) {
+                                Divider()
+                                PlaygroundStateUi(
+                                    playgroundState = playgroundState,
+                                    paymentSheet = paymentSheet,
+                                    flowController = flowController,
+                                    addressLauncher = addressLauncher,
+                                )
+                            }
+                        }
+                    }
+                }
             )
 
             val status by viewModel.status.collectAsState()
@@ -167,33 +189,35 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     @Composable
     private fun PlaygroundStateUi(
-        playgroundState: PlaygroundState?,
+        playgroundState: PlaygroundState,
         paymentSheet: PaymentSheet,
         flowController: PaymentSheet.FlowController,
         addressLauncher: AddressLauncher
     ) {
-        if (playgroundState == null) {
-            return
-        }
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .fillMaxWidth()
+        ) {
+            ShippingAddressButton(
+                addressLauncher = addressLauncher,
+                playgroundState = playgroundState,
+            )
 
-        ShippingAddressButton(
-            addressLauncher = addressLauncher,
-            playgroundState = playgroundState,
-        )
+            when (playgroundState.integrationType) {
+                IntegrationType.PaymentSheet -> {
+                    PaymentSheetUi(
+                        paymentSheet = paymentSheet,
+                        playgroundState = playgroundState,
+                    )
+                }
 
-        when (playgroundState.integrationType) {
-            IntegrationType.PaymentSheet -> {
-                PaymentSheetUi(
-                    paymentSheet = paymentSheet,
-                    playgroundState = playgroundState,
-                )
-            }
-
-            IntegrationType.FlowController -> {
-                FlowControllerUi(
-                    flowController = flowController,
-                    playgroundState = playgroundState,
-                )
+                IntegrationType.FlowController -> {
+                    FlowControllerUi(
+                        flowController = flowController,
+                        playgroundState = playgroundState,
+                    )
+                }
             }
         }
     }
@@ -319,8 +343,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 @Composable
 private fun PlaygroundTheme(
     content: @Composable() (ColumnScope.() -> Unit),
-    bottomBarContent: @Composable () -> Unit,
-    hasBottomBarContent: Boolean,
+    bottomBarContent: @Composable () -> Unit = {},
 ) {
     val colors = if (isSystemInDarkTheme() || AppearanceStore.forceDarkMode) {
         darkColors()
@@ -338,15 +361,7 @@ private fun PlaygroundTheme(
         ) {
             Scaffold(
                 bottomBar = {
-                    if (hasBottomBarContent) {
-                        Column(
-                            modifier = Modifier
-                                .border(2.dp, MaterialTheme.colors.secondaryVariant)
-                                .padding(16.dp)
-                        ) {
-                            bottomBarContent()
-                        }
-                    }
+                    bottomBarContent()
                 },
             ) { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
@@ -364,3 +379,4 @@ private fun PlaygroundTheme(
 }
 
 const val RELOAD_TEST_TAG = "RELOAD"
+private const val PLAYGROUND_BOTTOM_BAR_LABEL = "PlaygroundBottomBar"
