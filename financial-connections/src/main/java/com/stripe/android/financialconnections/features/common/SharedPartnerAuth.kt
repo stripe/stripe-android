@@ -19,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
@@ -34,6 +35,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.airbnb.mvrx.Async
@@ -45,12 +48,14 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthPreviewParameterProvider
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
 import com.stripe.android.financialconnections.model.Entry
 import com.stripe.android.financialconnections.model.OauthPrepane
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
@@ -64,7 +69,7 @@ import com.stripe.android.uicore.image.StripeImage
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun SharedPartnerAuthContent(
+internal fun SharedPartnerAuth(
     state: SharedPartnerAuthState,
     onContinueClick: () -> Unit,
     onSelectAnotherBank: () -> Unit,
@@ -77,7 +82,6 @@ internal fun SharedPartnerAuthContent(
 
     val webAuthFlow = viewModel.collectAsState { it.webAuthFlow }
     val uriHandler = LocalUriHandler.current
-    val scope = rememberCoroutineScope()
 
     val bottomSheetState = rememberModalBottomSheetState(
         ModalBottomSheetValue.Hidden,
@@ -99,6 +103,30 @@ internal fun SharedPartnerAuthContent(
         }
     }
 
+    SharedPartnerAuthContent(
+        bottomSheetState = bottomSheetState,
+        state = state,
+        onClickableTextClick = onClickableTextClick,
+        onSelectAnotherBank = onSelectAnotherBank,
+        onEnterDetailsManually = onEnterDetailsManually,
+        onCloseClick = { viewModel.onCloseNoConfirmationClick(state.pane) },
+        onContinueClick = onContinueClick,
+        onCloseFromErrorClick = viewModel::onCloseFromErrorClick
+    )
+}
+
+@Composable
+private fun SharedPartnerAuthContent(
+    bottomSheetState: ModalBottomSheetState,
+    state: SharedPartnerAuthState,
+    onClickableTextClick: (String) -> Unit,
+    onSelectAnotherBank: () -> Unit,
+    onEnterDetailsManually: () -> Unit,
+    onContinueClick: () -> Unit,
+    onCloseClick: () -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit
+) {
+    val scope = rememberCoroutineScope()
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
         sheetBackgroundColor = FinancialConnectionsTheme.colors.backgroundSurface,
@@ -114,12 +142,12 @@ internal fun SharedPartnerAuthContent(
             } ?: Spacer(modifier = Modifier.size(16.dp))
         },
         content = {
-            PartnerAuthScreenMainContent(
+            SharedPartnerAuthBody(
                 state = state,
-                onCloseClick = { viewModel.onCloseNoConfirmationClick(state.pane) },
+                onCloseClick = onCloseClick,
                 onSelectAnotherBank = onSelectAnotherBank,
                 onEnterDetailsManually = onEnterDetailsManually,
-                onCloseFromErrorClick = viewModel::onCloseFromErrorClick,
+                onCloseFromErrorClick = onCloseFromErrorClick,
                 onClickableTextClick = onClickableTextClick,
                 onContinueClick = onContinueClick,
             )
@@ -128,7 +156,7 @@ internal fun SharedPartnerAuthContent(
 }
 
 @Composable
-private fun PartnerAuthScreenMainContent(
+private fun SharedPartnerAuthBody(
     state: SharedPartnerAuthState,
     onCloseClick: () -> Unit,
     onSelectAnotherBank: () -> Unit,
@@ -170,7 +198,7 @@ private fun PartnerAuthScreenMainContent(
 }
 
 @Composable
-fun ErrorContent(
+private fun ErrorContent(
     error: Throwable,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
@@ -387,6 +415,30 @@ private fun GifWebView(
             it.loadData(body, null, "UTF-8")
         }
     )
+}
+
+@Preview(
+    group = "Shared Partner Auth"
+)
+@Composable
+internal fun PartnerAuthPreview(
+    @PreviewParameter(PartnerAuthPreviewParameterProvider::class)
+    state: SharedPartnerAuthState
+) {
+    FinancialConnectionsPreview {
+        SharedPartnerAuthContent(
+            state = state,
+            bottomSheetState = rememberModalBottomSheetState(
+                ModalBottomSheetValue.Hidden,
+            ),
+            onContinueClick = {},
+            onSelectAnotherBank = {},
+            onEnterDetailsManually = {},
+            onClickableTextClick = {},
+            onCloseClick = {},
+            onCloseFromErrorClick = {}
+        )
+    }
 }
 
 private const val PHONE_BACKGROUND_WIDTH_DP = 272

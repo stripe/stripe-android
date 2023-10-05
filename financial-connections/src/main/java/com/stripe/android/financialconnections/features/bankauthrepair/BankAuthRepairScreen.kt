@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
-import com.stripe.android.financialconnections.features.common.SharedPartnerAuthContent
+import com.stripe.android.financialconnections.features.common.SharedPartnerAuth
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
 
 @Composable
@@ -17,7 +17,7 @@ internal fun BankAuthRepairScreen() {
     val viewModel: BankAuthRepairViewModel = mavericksViewModel()
     val state: State<SharedPartnerAuthState> = viewModel.collectAsState()
 
-    SharedPartnerAuthContent(
+    SharedPartnerAuth(
         state = state.value,
         onContinueClick = { /*TODO*/ },
         onSelectAnotherBank = { /*TODO*/ },
