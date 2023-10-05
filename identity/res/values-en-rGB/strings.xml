@@ -101,6 +101,8 @@
   <string name="stripe_passport">Passport</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Passport is selected</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Phone Number</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Flip your driving licence over to the other side</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -145,4 +147,6 @@
   <string name="stripe_upload_dialog_title_passport">Upload passport</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Alternatively, you may manually upload a photo of your %1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Upload your photo ID</string>
 </resources>

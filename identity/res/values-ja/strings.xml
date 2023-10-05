@@ -101,6 +101,8 @@
   <string name="stripe_passport">パスポート</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">パスポートが選択されました</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">電話番号</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">運転免許証を裏返してください</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -145,4 +147,6 @@
   <string name="stripe_upload_dialog_title_passport">パスポートをアップロード</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">または、%1$sの写真を手動でアップロードすることもできます。</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">写真付き身分証明書をアップロードする</string>
 </resources>

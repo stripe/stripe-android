@@ -101,6 +101,8 @@
   <string name="stripe_passport">Pase</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Pase ir atlasīta</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Tālruņa numurs</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Apgrieziet autovadītāja apliecību uz otru pusi</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -145,4 +147,6 @@
   <string name="stripe_upload_dialog_title_passport">Augšupielādēt pasi</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Vai arī varat manuāli augšupielādēt %1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Augšupielādējiet savu ID dokumentu ar fotogrāfiju</string>
 </resources>

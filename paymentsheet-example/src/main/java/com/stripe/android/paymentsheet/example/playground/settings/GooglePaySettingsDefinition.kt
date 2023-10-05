@@ -14,10 +14,14 @@ internal object GooglePaySettingsDefinition : BooleanSettingsDefinition(
         playgroundState: PlaygroundState,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
-        PaymentSheet.GooglePayConfiguration(
-            environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-            countryCode = playgroundState.countryCode.value,
-            currencyCode = playgroundState.currencyCode.value,
-        )
+        if (value) {
+            configurationBuilder.googlePay(
+                PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = playgroundState.countryCode.value,
+                    currencyCode = playgroundState.currencyCode.value,
+                )
+            )
+        }
     }
 }

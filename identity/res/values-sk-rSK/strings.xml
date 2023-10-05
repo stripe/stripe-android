@@ -101,6 +101,8 @@
   <string name="stripe_passport">Pas</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Pas je zvolený</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Telefónne číslo</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Otočte svoj vodičský preukaz na druhú stranu</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -145,4 +147,6 @@
   <string name="stripe_upload_dialog_title_passport">Nahrať pas</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Prípadne môžete nahrať fotografiu vášho %1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Nahrajte doklad totožnosti s fotografiou</string>
 </resources>

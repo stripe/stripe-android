@@ -101,6 +101,8 @@
   <string name="stripe_passport">Útlevél</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Útlevél ki van választva</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Telefonszám</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Fordítsa vezetői engedélyét a másik oldalára</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -145,4 +147,6 @@
   <string name="stripe_upload_dialog_title_passport">Az útlevél feltöltése</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Emellett lehetősége van arra is, hogy fotót töltsön fel a következőről: %1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Fényképes azonosító igazolvány feltöltése</string>
 </resources>
