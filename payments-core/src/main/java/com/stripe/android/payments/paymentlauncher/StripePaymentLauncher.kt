@@ -5,13 +5,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -41,7 +37,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
     @UIContext uiContext: CoroutineContext,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
-) : PaymentLauncher, Injector {
+) : PaymentLauncher {
     private val paymentLauncherComponent: PaymentLauncherComponent =
         DaggerPaymentLauncherComponent.builder()
             .context(context)
@@ -58,29 +54,9 @@ class StripePaymentLauncher @AssistedInject internal constructor(
         paymentLauncherComponent.authenticatorRegistry
     }
 
-    @InjectorKey
-    private val injectorKey: String =
-        WeakMapInjectorRegistry.nextKey(requireNotNull(PaymentLauncher::class.simpleName))
-
-    init {
-        WeakMapInjectorRegistry.register(this, injectorKey)
-    }
-
-    override fun inject(injectable: Injectable<*>) {
-        when (injectable) {
-            is PaymentLauncherViewModel.Factory -> {
-                paymentLauncherComponent.inject(injectable)
-            }
-            else -> {
-                throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
-            }
-        }
-    }
-
     override fun confirm(params: ConfirmPaymentIntentParams) {
         hostActivityLauncher.launch(
             PaymentLauncherContract.Args.IntentConfirmationArgs(
-                injectorKey = injectorKey,
                 publishableKey = publishableKeyProvider(),
                 stripeAccountId = stripeAccountIdProvider(),
                 enableLogging = enableLogging,
@@ -94,7 +70,6 @@ class StripePaymentLauncher @AssistedInject internal constructor(
     override fun confirm(params: ConfirmSetupIntentParams) {
         hostActivityLauncher.launch(
             PaymentLauncherContract.Args.IntentConfirmationArgs(
-                injectorKey = injectorKey,
                 publishableKey = publishableKeyProvider(),
                 stripeAccountId = stripeAccountIdProvider(),
                 enableLogging = enableLogging,
@@ -108,7 +83,6 @@ class StripePaymentLauncher @AssistedInject internal constructor(
     override fun handleNextActionForPaymentIntent(clientSecret: String) {
         hostActivityLauncher.launch(
             PaymentLauncherContract.Args.PaymentIntentNextActionArgs(
-                injectorKey = injectorKey,
                 publishableKey = publishableKeyProvider(),
                 stripeAccountId = stripeAccountIdProvider(),
                 enableLogging = enableLogging,
@@ -122,7 +96,6 @@ class StripePaymentLauncher @AssistedInject internal constructor(
     override fun handleNextActionForSetupIntent(clientSecret: String) {
         hostActivityLauncher.launch(
             PaymentLauncherContract.Args.SetupIntentNextActionArgs(
-                injectorKey = injectorKey,
                 publishableKey = publishableKeyProvider(),
                 stripeAccountId = stripeAccountIdProvider(),
                 enableLogging = enableLogging,

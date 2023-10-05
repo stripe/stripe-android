@@ -9,7 +9,6 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
-import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModel
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -27,8 +26,6 @@ import kotlin.coroutines.CoroutineContext
 internal interface PaymentLauncherComponent {
 
     val authenticatorRegistry: PaymentAuthenticatorRegistry
-
-    fun inject(factory: PaymentLauncherViewModel.Factory)
 
     @Component.Builder
     interface Builder {
