@@ -2,7 +2,6 @@ package com.stripe.android.payments.paymentlauncher
 
 import android.graphics.Color
 import androidx.activity.result.ActivityResultLauncher
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,7 +36,6 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.IntentConfirmationArgs &&
-                    arg.injectorKey == (PaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get()) &&
                     arg.confirmStripeIntentParams == params
             }
         )
@@ -52,7 +50,6 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.IntentConfirmationArgs &&
-                    arg.injectorKey == (PaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get()) &&
                     arg.confirmStripeIntentParams == params
             }
         )
@@ -65,7 +62,6 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.PaymentIntentNextActionArgs &&
-                    arg.injectorKey == (PaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get()) &&
                     arg.paymentIntentClientSecret == CLIENT_SECRET
             }
         )
@@ -78,7 +74,6 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.SetupIntentNextActionArgs &&
-                    arg.injectorKey == (PaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get()) &&
                     arg.setupIntentClientSecret == CLIENT_SECRET
             }
         )
