@@ -71,7 +71,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun SharedPartnerAuth(
     state: SharedPartnerAuthState,
-    onContinueClick: () -> Unit,
+    onPrepaneContinueClick: () -> Unit,
     onSelectAnotherBank: () -> Unit,
     onClickableTextClick: (String) -> Unit,
     onEnterDetailsManually: () -> Unit,
@@ -110,7 +110,7 @@ internal fun SharedPartnerAuth(
         onSelectAnotherBank = onSelectAnotherBank,
         onEnterDetailsManually = onEnterDetailsManually,
         onCloseClick = { viewModel.onCloseNoConfirmationClick(state.pane) },
-        onContinueClick = onContinueClick,
+        onContinueClick = onPrepaneContinueClick,
         onCloseFromErrorClick = viewModel::onCloseFromErrorClick
     )
 }
