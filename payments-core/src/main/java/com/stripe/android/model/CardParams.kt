@@ -28,7 +28,6 @@ data class CardParams internal constructor(
      *
      * [card.exp_month](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_month)
      */
-    @property:DelicateCardDetailsApi
     val expMonth: Int,
 
     /**
@@ -36,7 +35,6 @@ data class CardParams internal constructor(
      *
      * [card.exp_year](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_year)
      */
-    @property:DelicateCardDetailsApi
     val expYear: Int,
 
     /**
