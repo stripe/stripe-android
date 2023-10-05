@@ -25,4 +25,3 @@ internal fun PartnerAuthScreen() {
         onViewEffectLaunched = viewModel::onViewEffectLaunched
     )
 }
-
