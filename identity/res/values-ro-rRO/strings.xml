@@ -101,6 +101,8 @@
   <string name="stripe_passport">Pașaport</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Este selectat pașaportul</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Număr de telefon</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Întoarceți permisul de conducere pe partea cealaltă</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -145,4 +147,6 @@
   <string name="stripe_upload_dialog_title_passport">Încărcați pașaportul</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Alternativ, puteți încărca manual o fotografie a %1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Încărcați documentul de identitate cu fotografie</string>
 </resources>

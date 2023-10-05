@@ -101,6 +101,8 @@
   <string name="stripe_passport">Pasaporte</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Napili ang pasaporte</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Numero ng Telepono</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Baliktarin ang iyong lisensya sa pagmamaneho</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -145,4 +147,6 @@
   <string name="stripe_upload_dialog_title_passport">Mag-upload ng pasaporte</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Bilang alternatibo, maaari kang manu-manong mag-upload ng larawan ng iyong %1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">I-upload ang iyong photo ID</string>
 </resources>

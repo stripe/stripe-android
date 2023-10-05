@@ -6,6 +6,8 @@
   <string name="stripe_back">뒤로</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">계좌 번호가 불완전합니다.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">은행 계좌</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">청구 주소</string>
   <!-- Label for BLIK code number field on form -->

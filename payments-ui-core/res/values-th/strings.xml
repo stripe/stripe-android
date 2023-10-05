@@ -6,6 +6,8 @@
   <string name="stripe_back">ย้อนกลับ</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">หมายเลขบัญชีไม่ครบถ้วน</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">บัญชีธนาคาร</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">ที่อยู่ในการเรียกเก็บเงิน</string>
   <!-- Label for BLIK code number field on form -->
