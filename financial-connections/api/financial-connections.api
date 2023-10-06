@@ -291,6 +291,13 @@ public final class com/stripe/android/financialconnections/features/common/Compo
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 }
 
+public final class com/stripe/android/financialconnections/features/common/ComposableSingletons$SharedPartnerAuthKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/common/ComposableSingletons$SharedPartnerAuthKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+}
+
 public final class com/stripe/android/financialconnections/features/consent/ComposableSingletons$ConsentScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/consent/ComposableSingletons$ConsentScreenKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
@@ -369,17 +376,6 @@ public final class com/stripe/android/financialconnections/features/networkingsa
 	public fun <init> ()V
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class com/stripe/android/financialconnections/features/partnerauth/ComposableSingletons$PartnerAuthScreenKt {
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/partnerauth/ComposableSingletons$PartnerAuthScreenKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function3;
-	public fun <init> ()V
-	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-}
-
-public final class com/stripe/android/financialconnections/features/partnerauth/PartnerAuthScreenKt {
-	public static final fun ErrorContent (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
 }
 
 public final class com/stripe/android/financialconnections/features/reset/ComposableSingletons$ResetScreenKt {

@@ -10,17 +10,19 @@ import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 
-internal data class PartnerAuthState(
+internal data class SharedPartnerAuthState(
     /**
      * The active auth session id. Used across process kills to prevent re-creating the session
      * if one is already active.
      */
     @PersistState
     val activeAuthSession: String? = null,
+    val pane: FinancialConnectionsSessionManifest.Pane,
     val payload: Async<Payload> = Uninitialized,
     val viewEffect: ViewEffect? = null,
-    val authenticationStatus: Async<String> = Uninitialized
+    val authenticationStatus: Async<String> = Uninitialized,
 ) : MavericksState {
 
     val dataAccess: DataAccessNotice?
