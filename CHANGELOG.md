@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+Dependencies updated:
+* [7409](https://github.com/stripe/stripe-android/pull/7409) Bumped Kotlin to 1.8.22 and Compose Compiler to 1.4.8.
+
 ## 20.32.0 - 2023-09-25
 
 ### PaymentSheet
