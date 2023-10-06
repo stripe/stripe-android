@@ -47,7 +47,7 @@ class CardNumberEditText internal constructor(
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-    viewModelStoreOwner: ViewModelStoreOwner? = null,
+    internal var viewModelStoreOwner: ViewModelStoreOwner? = null,
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads
@@ -102,6 +102,14 @@ class CardNumberEditText internal constructor(
             // Immediately display the brand if known, in case this method is invoked when
             // partial data already exists.
             callback(cardBrand)
+        }
+
+    private var implicitCardBrandForCbcFlow: CardBrand = CardBrand.Unknown
+
+    internal var implicitCardBrandChangeCallback: (CardBrand) -> Unit = {}
+        set(callback) {
+            field = callback
+            callback(implicitCardBrandForCbcFlow)
         }
 
     internal var possibleCardBrands: List<CardBrand> = emptyList()
@@ -160,10 +168,12 @@ class CardNumberEditText internal constructor(
             override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
                 updateLengthFilter()
 
+                val brands = accountRanges.map { it.brand }.distinct()
+                cardBrand = brands.singleOrNull() ?: CardBrand.Unknown
+
                 if (isCbcEligible) {
-                    possibleCardBrands = accountRanges.map { it.brand }.distinct()
-                } else {
-                    cardBrand = accountRanges.singleOrNull()?.brand ?: CardBrand.Unknown
+                    implicitCardBrandForCbcFlow = brands.firstOrNull() ?: CardBrand.Unknown
+                    possibleCardBrands = brands
                 }
             }
         }
@@ -193,24 +203,30 @@ class CardNumberEditText internal constructor(
         updateLengthFilter()
 
         this.layoutDirection = LAYOUT_DIRECTION_LTR
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        loadingJob = CoroutineScope(workContext).launch {
+            cardAccountRangeRepository.loading.collect {
+                withContext(Dispatchers.Main) {
+                    isLoadingCallback(it)
+                }
+            }
+        }
 
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 this@CardNumberEditText.isCbcEligible = isCbcEligible
 
-                if (isCbcEligible) {
-                    possibleCardBrands = accountRangeService.accountRanges.map { it.brand }.distinct()
-                }
-            }
-        }
-    }
+                val brands = accountRangeService.accountRanges.map { it.brand }.distinct()
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        loadingJob = CoroutineScope(workContext).launch {
-            cardAccountRangeRepository.loading.collect {
-                withContext(Dispatchers.Main) {
-                    isLoadingCallback(it)
+                if (isCbcEligible) {
+                    implicitCardBrandForCbcFlow = brands.firstOrNull() ?: CardBrand.Unknown
+                    possibleCardBrands = brands
+                } else {
+                    cardBrand = brands.singleOrNull() ?: CardBrand.Unknown
                 }
             }
         }

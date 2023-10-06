@@ -24,12 +24,16 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.utils.CardInputWidgetTestHelper
+import com.stripe.android.utils.FeatureFlags
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -43,6 +47,13 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class CardInputWidgetTest {
+
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.cardBrandChoice,
+        isEnabled = false,
+    )
+
     private val testDispatcher = StandardTestDispatcher()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
@@ -1659,12 +1670,83 @@ internal class CardInputWidgetTest {
         verify(callback, times(2)).onInputChanged(any(), any())
     }
 
+    @Test
+    fun `Adds no Networks field to card PM params if not CBC eligible`() {
+        featureFlagTestRule.setEnabled(true)
+
+        runCardInputWidgetTest(isCbcEligible = false) {
+            postalCodeEnabled = false
+
+            updateCardNumberAndIdle("4000 0025 0000 1001")
+            expiryDateEditText.append("12")
+            expiryDateEditText.append("50")
+            cvcEditText.append("123")
+
+            val networks = paymentMethodCreateParams?.card?.networks
+            assertThat(networks).isNull()
+        }
+    }
+
+    @Test
+    fun `Adds correct Networks field to card PM params if customer does not select a network`() {
+        featureFlagTestRule.setEnabled(true)
+
+        runCardInputWidgetTest(isCbcEligible = true) {
+            postalCodeEnabled = false
+
+            updateCardNumberAndIdle("4000 0025 0000 1001")
+            expiryDateEditText.append("12")
+            expiryDateEditText.append("50")
+            cvcEditText.append("123")
+
+            val expectedNetworks = PaymentMethodCreateParams.Card.Networks(preferred = null)
+
+            val createCardParams = paymentMethodCreateParams?.card
+            assertThat(createCardParams?.networks).isEqualTo(expectedNetworks)
+        }
+    }
+
+    @Test
+    fun `Adds correct Networks field to card PM params if customer selects a network`() {
+        featureFlagTestRule.setEnabled(true)
+
+        runCardInputWidgetTest(isCbcEligible = true) {
+            featureFlagTestRule.setEnabled(true)
+            postalCodeEnabled = false
+
+            updateCardNumberAndIdle("4000 0025 0000 1001")
+            expiryDateEditText.append("12")
+            expiryDateEditText.append("50")
+            cvcEditText.append("123")
+
+            cardBrandView.brand = CardBrand.CartesBancaires
+
+            val expectedNetworks = PaymentMethodCreateParams.Card.Networks(
+                preferred = "cartes_bancaires",
+            )
+
+            val createCardParams = paymentMethodCreateParams?.card
+            assertThat(createCardParams?.networks).isEqualTo(expectedNetworks)
+        }
+    }
+
     private fun runCardInputWidgetTest(
+        isCbcEligible: Boolean = false,
         block: CardInputWidget.() -> Unit,
     ) {
-        val cardInputWidget = activityScenarioFactory.createView { activity ->
-            createCardInputWidget(activity)
-        }
+        val viewModelStoreOwner = CardInputWidgetTestHelper.createViewModelStoreOwner(
+            isCbcEligible = isCbcEligible,
+        )
+
+        val cardInputWidget = activityScenarioFactory.createView(
+            viewFactory = { activity ->
+                createCardInputWidget(activity)
+            },
+            beforeAttach = { cardInputWidget ->
+                cardInputWidget.cardNumberEditText.viewModelStoreOwner = viewModelStoreOwner
+                cardInputWidget.viewModelStoreOwner = viewModelStoreOwner
+            },
+        )
         cardInputWidget.setCardInputListener(cardInputListener)
         cardInputWidget.block()
     }

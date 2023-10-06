@@ -296,6 +296,8 @@ data class PaymentMethodCreateParams internal constructor(
         internal val networks: Networks? = null,
     ) : StripeParamsModel, Parcelable {
 
+        // TODO(tillh-stripe) Add docs and remove restriction
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         class Networks(
             val preferred: String? = null,

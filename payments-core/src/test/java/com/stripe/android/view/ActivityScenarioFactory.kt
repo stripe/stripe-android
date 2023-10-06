@@ -47,7 +47,8 @@ internal class ActivityScenarioFactory(
      * Return a view created with an `Activity` context.
      */
     fun <ViewType : View> createView(
-        viewFactory: (Activity) -> ViewType
+        beforeAttach: (ViewType) -> Unit = {},
+        viewFactory: (Activity) -> ViewType,
     ): ViewType {
         var view: ViewType? = null
 
@@ -60,6 +61,7 @@ internal class ActivityScenarioFactory(
                         root.removeAllViews()
 
                         view = viewFactory(activity).also {
+                            beforeAttach(it)
                             root.addView(it)
                         }
                     }
