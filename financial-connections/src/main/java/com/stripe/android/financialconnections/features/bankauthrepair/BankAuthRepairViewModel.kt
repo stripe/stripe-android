@@ -38,7 +38,6 @@ import com.stripe.android.financialconnections.repository.CoreAuthorizationPendi
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ClickHandler
-import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
@@ -48,7 +47,6 @@ internal class BankAuthRepairViewModel @Inject constructor(
     initialState: SharedPartnerAuthState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     @Named(APPLICATION_ID) private val applicationId: String,
-    private val uriUtils: UriUtils,
     private val createRepairSession: CreateRepairSession,
     private val updateLocalManifest: UpdateLocalManifest,
     private val getCachedConsumerSession: GetCachedConsumerSession,
