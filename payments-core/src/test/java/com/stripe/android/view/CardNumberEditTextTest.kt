@@ -39,6 +39,7 @@ import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.utils.FakeCardElementConfigRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -1058,10 +1059,13 @@ internal class CardNumberEditTextTest {
         dispatcher: CoroutineDispatcher,
         block: (CardNumberEditText) -> Unit,
     ) {
-        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        PaymentConfiguration.init(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+
+        val repository = FakeCardElementConfigRepository()
 
         val cardWidgetViewModel = CardWidgetViewModel(
-            cbcEligible = { isCbcEligible },
+            paymentConfigProvider = { PaymentConfiguration.getInstance(context) },
+            stripeRepository = repository,
             dispatcher = dispatcher,
         )
 
@@ -1086,6 +1090,12 @@ internal class CardNumberEditTextTest {
                     paymentAnalyticsRequestFactory = analyticsRequestFactory,
                     viewModelStoreOwner = storeOwner,
                 )
+
+                if (isCbcEligible) {
+                    repository.enqueueEligible()
+                } else {
+                    repository.enqueueNotEligible()
+                }
 
                 activity.findViewById<ViewGroup>(R.id.add_payment_method_card).also {
                     it.removeAllViews()

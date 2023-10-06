@@ -3052,6 +3052,22 @@ public final class com/stripe/android/model/MandateDataParams$Type$Online$Creato
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/MobileCardElementConfig$CardBrandChoice$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/MobileCardElementConfig$CardBrandChoice;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/MobileCardElementConfig$CardBrandChoice;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/MobileCardElementConfig$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/MobileCardElementConfig;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/MobileCardElementConfig;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/model/PaymentIntent : com/stripe/android/model/StripeIntent {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
