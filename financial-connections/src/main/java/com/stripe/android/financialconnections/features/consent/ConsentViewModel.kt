@@ -108,7 +108,6 @@ internal class ConsentViewModel @Inject constructor(
         )
     }
 
-
     fun onViewEffectLaunched() {
         setState { copy(viewEffect = null) }
     }
@@ -129,7 +128,5 @@ internal class ConsentViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
-
     }
-
 }

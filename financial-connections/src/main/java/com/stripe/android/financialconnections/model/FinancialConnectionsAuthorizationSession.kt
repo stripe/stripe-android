@@ -157,7 +157,6 @@ enum class Flow(val value: String) {
         EnumIgnoreUnknownSerializer<Flow>(Flow.values(), UNKNOWN)
 }
 
-
 @Parcelize
 @Serializable
 internal data class Display(
