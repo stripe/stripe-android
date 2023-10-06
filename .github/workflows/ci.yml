@@ -75,4 +75,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check for transitive dependency updates
-        run: scripts/dependencies/check_transitive_dependencies.rb
+        run: ruby scripts/dependencies/check_transitive_dependencies.rb
