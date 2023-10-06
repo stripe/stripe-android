@@ -190,15 +190,13 @@ class CardInputWidget @JvmOverloads constructor(
         @OptIn(DelicateCardDetailsApi::class)
         get() {
             return cardParams?.let { params ->
-                val networks = cardBrandView.createNetworksParam()
-
                 PaymentMethodCreateParams.Card(
                     number = params.number,
                     cvc = params.cvc,
                     expiryMonth = params.expMonth,
                     expiryYear = params.expYear,
                     attribution = params.attribution,
-                    networks = networks,
+                    networks = cardBrandView.createNetworksParam(),
                 )
             }
         }
@@ -765,8 +763,6 @@ class CardInputWidget @JvmOverloads constructor(
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.CardNumber)
             }
         }
-
-        cardNumberEditText.viewModelStoreOwner = viewModelStoreOwner
 
         expiryDateEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (hasFocus) {

@@ -4078,7 +4078,6 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Card$Build
 	public final fun setCvc (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Builder;
 	public final fun setExpiryMonth (Ljava/lang/Integer;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Builder;
 	public final fun setExpiryYear (Ljava/lang/Integer;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Builder;
-	public final fun setNetworks (Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Networks;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Builder;
 	public final fun setNumber (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Builder;
 }
 

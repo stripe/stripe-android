@@ -296,7 +296,7 @@ data class PaymentMethodCreateParams internal constructor(
         internal val networks: Networks? = null,
     ) : StripeParamsModel, Parcelable {
 
-        // TODO(tillh-stripe) Add docs and remove restriction
+        // TODO(tillh-stripe) Add docs and make public
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         class Networks(
@@ -312,8 +312,7 @@ data class PaymentMethodCreateParams internal constructor(
             }
 
             override fun equals(other: Any?): Boolean {
-                return other is Networks &&
-                    other.preferred == preferred
+                return other is Networks && other.preferred == preferred
             }
 
             override fun hashCode(): Int {
@@ -353,7 +352,7 @@ data class PaymentMethodCreateParams internal constructor(
             private var expiryMonth: Int? = null
             private var expiryYear: Int? = null
             private var cvc: String? = null
-            private var networks: Networks = Networks()
+            private var networks: Networks? = null
 
             fun setNumber(number: String?): Builder = apply {
                 this.number = number
@@ -371,7 +370,8 @@ data class PaymentMethodCreateParams internal constructor(
                 this.cvc = cvc
             }
 
-            fun setNetworks(networks: Networks): Builder = apply {
+            // TODO(tillh-stripe) Make public
+            internal fun setNetworks(networks: Networks?): Builder = apply {
                 this.networks = networks
             }
 
