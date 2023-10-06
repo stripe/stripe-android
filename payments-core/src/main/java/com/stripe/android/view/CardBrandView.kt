@@ -15,6 +15,7 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +32,7 @@ import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.databinding.StripeCardBrandViewBinding
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.properties.Delegates
@@ -51,8 +53,10 @@ internal class CardBrandView @JvmOverloads constructor(
     internal var tintColorInt: Int = 0
 
     private val isLoadingFlow = MutableStateFlow(false)
-    private val brandFlow = MutableStateFlow(CardBrand.Unknown)
+    private val brandFlow = MutableStateFlow(Unknown)
+    private val userSelectedBrandFlow = MutableStateFlow<CardBrand?>(null)
     private val possibleBrandsFlow = MutableStateFlow(emptyList<CardBrand>())
+    private val merchantPreferredNetworksFlow = MutableStateFlow(emptyList<CardBrand>())
     private val shouldShowCvcFlow = MutableStateFlow(false)
     private val shouldShowErrorIconFlow = MutableStateFlow(false)
 
@@ -84,6 +88,12 @@ internal class CardBrandView @JvmOverloads constructor(
             possibleBrandsFlow.value = value
         }
 
+    var merchantPreferredNetworks: List<CardBrand>
+        get() = merchantPreferredNetworksFlow.value
+        set(value) {
+            merchantPreferredNetworksFlow.value = value
+        }
+
     var shouldShowCvc: Boolean
         get() = shouldShowCvcFlow.value
         set(value) {
@@ -104,9 +114,15 @@ internal class CardBrandView @JvmOverloads constructor(
             MdcTheme {
                 val isLoading by isLoadingFlow.collectAsState()
                 val currentBrand by brandFlow.collectAsState()
+                val userSelectedBrand by userSelectedBrandFlow.collectAsState()
                 val possibleBrands by possibleBrandsFlow.collectAsState()
+                val merchantPreferredBrands by merchantPreferredNetworksFlow.collectAsState()
                 val shouldShowCvc by shouldShowCvcFlow.collectAsState()
                 val shouldShowErrorIcon by shouldShowErrorIconFlow.collectAsState()
+
+                LaunchedEffect(userSelectedBrand, possibleBrands, merchantPreferredBrands) {
+                    determineCardBrandToDisplay(userSelectedBrand, possibleBrands, merchantPreferredBrands)
+                }
 
                 CardBrand(
                     isLoading = isLoading,
@@ -123,7 +139,15 @@ internal class CardBrandView @JvmOverloads constructor(
     }
 
     private fun handleBrandSelected(brand: CardBrand?) {
-        brandFlow.value = brand ?: CardBrand.Unknown
+        userSelectedBrandFlow.value = brand ?: Unknown
+    }
+
+    private fun determineCardBrandToDisplay(
+        currentBrand: CardBrand?,
+        possibleBrands: List<CardBrand>,
+        merchantPreferredBrands: List<CardBrand>,
+    ) {
+        brand = selectCardBrandToDisplay(currentBrand, possibleBrands, merchantPreferredBrands)
     }
 }
 
@@ -152,10 +176,10 @@ private fun CardBrand(
 
     val tint = remember(isLoading, currentBrand, shouldShowCvc, shouldShowErrorIcon) {
         when {
-            isLoading -> Color(tintColorInt).takeIf { currentBrand == CardBrand.Unknown }
+            isLoading -> Color(tintColorInt).takeIf { currentBrand == Unknown }
             shouldShowErrorIcon -> null
             shouldShowCvc -> Color(tintColorInt)
-            else -> Color(tintColorInt).takeIf { currentBrand == CardBrand.Unknown }
+            else -> Color(tintColorInt).takeIf { currentBrand == Unknown }
         }
     }
 

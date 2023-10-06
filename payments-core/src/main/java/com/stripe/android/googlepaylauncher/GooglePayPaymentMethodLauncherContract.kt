@@ -89,14 +89,5 @@ private fun GooglePayPaymentMethodLauncherContract.Args.toV2(): GooglePayPayment
         currencyCode = currencyCode,
         amount = amount.toLong(),
         transactionId = transactionId,
-        injectionParams = injectionParams?.let { params ->
-            GooglePayPaymentMethodLauncherContractV2.Args.InjectionParams(
-                injectorKey = params.injectorKey,
-                productUsage = params.productUsage,
-                enableLogging = params.enableLogging,
-                stripeAccountId = params.stripeAccountId,
-                publishableKey = params.publishableKey,
-            )
-        },
     )
 }

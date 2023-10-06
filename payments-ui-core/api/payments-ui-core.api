@@ -269,7 +269,7 @@ public final class com/stripe/android/ui/core/elements/ConfirmResponseStatusSpec
 	public final fun getUrlPath ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs$RedirectNextActionSpec;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs$RedirectNextActionSpec;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class com/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs$RedirectNextActionSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -318,7 +318,7 @@ public final class com/stripe/android/ui/core/elements/ConfirmStatusSpecAssociat
 	public final fun getSucceeded ()Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/ui/core/elements/ConfirmStatusSpecAssociation;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/ui/core/elements/ConfirmStatusSpecAssociation;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class com/stripe/android/ui/core/elements/ConfirmStatusSpecAssociation$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -565,7 +565,7 @@ public final class com/stripe/android/ui/core/elements/NextActionSpec {
 	public final fun getPostConfirmHandlingPiStatusSpecs ()Lcom/stripe/android/ui/core/elements/PostConfirmStatusSpecAssociation;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/ui/core/elements/NextActionSpec;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/ui/core/elements/NextActionSpec;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class com/stripe/android/ui/core/elements/NextActionSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -679,7 +679,7 @@ public final class com/stripe/android/ui/core/elements/PostConfirmStatusSpecAsso
 	public final fun getSucceeded ()Lcom/stripe/android/ui/core/elements/PostConfirmHandlingPiStatusSpecs;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/ui/core/elements/PostConfirmStatusSpecAssociation;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/ui/core/elements/PostConfirmStatusSpecAssociation;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class com/stripe/android/ui/core/elements/PostConfirmStatusSpecAssociation$$serializer : kotlinx/serialization/internal/GeneratedSerializer {

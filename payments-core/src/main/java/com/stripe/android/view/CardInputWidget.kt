@@ -23,6 +23,7 @@ import android.widget.LinearLayout
 import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.withStyledAttributes
 import androidx.core.os.bundleOf
@@ -481,6 +482,12 @@ class CardInputWidget @JvmOverloads constructor(
     @JvmSynthetic
     internal fun setPostalCode(postalCode: String?) {
         postalCodeEditText.setText(postalCode)
+    }
+
+    // TODO(tillh-stripe) Add docs and make public
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun setPreferredNetworks(preferredNetworks: List<CardBrand>) {
+        cardBrandView.merchantPreferredNetworks = preferredNetworks
     }
 
     /**
