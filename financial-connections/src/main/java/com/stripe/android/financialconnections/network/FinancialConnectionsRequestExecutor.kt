@@ -12,6 +12,7 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
+import com.stripe.android.financialconnections.analytics.userfacing.FinancialConnectionsResponseEventEmitter
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
@@ -19,6 +20,7 @@ import javax.inject.Inject
 
 internal class FinancialConnectionsRequestExecutor @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
+    private val eventEmitter: FinancialConnectionsResponseEventEmitter,
     private val json: Json
 ) {
 
@@ -34,6 +36,7 @@ internal class FinancialConnectionsRequestExecutor @Inject constructor(
         stripeNetworkClient.executeRequest(request)
     }.fold(
         onSuccess = { response ->
+            eventEmitter.emitIfPresent(response)
             when {
                 /**
                  * HTTP_ACCEPTED (202) means the processing hasn't been completed, and API
