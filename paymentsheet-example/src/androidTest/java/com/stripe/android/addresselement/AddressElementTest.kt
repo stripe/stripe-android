@@ -24,17 +24,21 @@ internal class AddressElementTest {
     @Test
     fun testAddressElement() {
         rules.compose.onNodeWithTag(SELECT_ADDRESS_BUTTON).performClick()
-        rules.compose.onNodeWithText("Full name").performTextReplacement("Real Name")
-        rules.compose.onNodeWithText("Address line 1").performTextReplacement("1234 Main St")
-        rules.compose.onNodeWithText("City").performTextReplacement("Boston")
-        rules.compose.onNodeWithText("ZIP Code").performTextReplacement("12345")
-        rules.compose.onNodeWithText("State").performClick()
+        replaceText("Full name", "Real Name")
+        replaceText("Address line 1", "1234 Main St")
+        replaceText("City", "Boston")
+        replaceText("ZIP Code", "12345")
+        rules.compose.onNodeWithText("State").performScrollTo().performClick()
         rules.compose.onNodeWithText("Massachusetts").performScrollTo().performClick()
-        rules.compose.onNodeWithText("Save address").performClick()
+        rules.compose.onNodeWithText("Save address").performScrollTo().performClick()
         val resultTextMatcher = hasText("Real Name\n1234 Main St\n\nBoston, MA 12345\nUS")
         rules.compose.waitUntil {
             rules.compose.onAllNodes(resultTextMatcher).fetchSemanticsNodes().isNotEmpty()
         }
         rules.compose.onNode(resultTextMatcher).assertIsDisplayed()
+    }
+
+    private fun replaceText(label: String, text: String) {
+        rules.compose.onNodeWithText(label).performScrollTo().performTextReplacement(text)
     }
 }
