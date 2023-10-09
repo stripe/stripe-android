@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Coche indiquant la réussite de la capture du document</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Choisir une photo</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Terminer avec les données de test</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Pour gagner du temps, choisissez le résultat souhaité et finalisez instantanément avec ce résultat. Le flux de la trousse SDK mobile renverra le résultat Terminé.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Impossible de prendre une photo de bonne qualité.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Vous pouvez réessayer ou téléverser une photo à partir de votre appareil.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Impossible de prendre une photo</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">icône d\'appareil photo</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Icône d\'horloge</string>
   <!-- Content description for close button -->
@@ -101,6 +107,8 @@
   <string name="stripe_passport">Passeport</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Le passeport est sélectionné</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Numéro de téléphone</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Retournez votre permis de conduire</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -127,12 +135,22 @@
   <string name="stripe_selfie_item_description">un égoportrait capturé</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Vos égoportraits n\'ont pas été enregistrés. Voulez-vous quitter?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">À l\'étape suivante, nous allons prendre automatiquement quelques photos afin de vérifier votre identité</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Préparez-vous à vous prendre en photo</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Prendre une photo</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Cette page ne s\'affiche qu\'en mode test.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Vous êtes actuellement en mode test</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Réessayer</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Une erreur inattendue est survenue. Réessayez dans quelques secondes.</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Téléverser une photo</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Téléverser le verso du permis de conduire</string>
   <!-- Title of dialog to upload front of driver license -->
@@ -145,4 +163,6 @@
   <string name="stripe_upload_dialog_title_passport">Téléverser le passeport</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Vous pouvez également téléverser manuellement une photo de votre %1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Téléverser votre pièce d\'identité avec photo</string>
 </resources>

@@ -9,7 +9,6 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
-import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionViewModelFactory
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -35,8 +34,6 @@ import kotlin.coroutines.CoroutineContext
 )
 internal interface AuthenticationComponent {
     val registry: DefaultPaymentAuthenticatorRegistry
-
-    fun inject(stripe3ds2TransactionViewModelFactory: Stripe3ds2TransactionViewModelFactory)
 
     @Component.Builder
     interface Builder {

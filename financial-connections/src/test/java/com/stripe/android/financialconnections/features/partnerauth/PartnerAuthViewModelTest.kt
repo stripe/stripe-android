@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
+import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.test.MavericksTestRule
 import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
@@ -272,7 +273,13 @@ internal class PartnerAuthViewModelTest {
         }
 
     private fun createViewModel(
-        initialState: PartnerAuthState = PartnerAuthState()
+        initialState: SharedPartnerAuthState = SharedPartnerAuthState(
+            activeAuthSession = null,
+            pane = Pane.PARTNER_AUTH,
+            payload = Uninitialized,
+            viewEffect = null,
+            authenticationStatus = Uninitialized
+        )
     ): PartnerAuthViewModel {
         return PartnerAuthViewModel(
             navigationManager = TestNavigationManager(),

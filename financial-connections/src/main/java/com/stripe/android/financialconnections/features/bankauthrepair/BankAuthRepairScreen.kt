@@ -4,18 +4,26 @@
 package com.stripe.android.financialconnections.features.bankauthrepair
 
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState
+import com.stripe.android.financialconnections.features.common.SharedPartnerAuth
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
 
 @Composable
 internal fun BankAuthRepairScreen() {
     // step view model
     val viewModel: BankAuthRepairViewModel = mavericksViewModel()
-    val state: State<PartnerAuthState> = viewModel.collectAsState()
+    val state: State<SharedPartnerAuthState> = viewModel.collectAsState()
 
-    Text(text = "Bank Auth Repair ${state.value.payload}")
+    SharedPartnerAuth(
+        state = state.value,
+        onContinueClick = { /*TODO*/ },
+        onSelectAnotherBank = { /*TODO*/ },
+        onClickableTextClick = { /*TODO*/ },
+        onEnterDetailsManually = { /*TODO*/ },
+        onWebAuthFlowFinished = { /*TODO*/ },
+        onViewEffectLaunched = { /*TODO*/ }
+    )
 }

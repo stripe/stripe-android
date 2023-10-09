@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">チェックマークは、書類のキャプチャーが完了したことを示します</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">写真を選択</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">テストデータで完了</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">目的の結果を選択し、その結果を速やかに完了することで、時間を短縮します。モバイル SDK のフローでは完了の結果が返されます。</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">高画質の画像をキャプチャーできませんでした。</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">もう一度お試しいただくか、デバイスから画像をアプロードしてください。</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">画像をキャプチャーできませんでした</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">カメラアイコン</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">クロックアイコン</string>
   <!-- Content description for close button -->
@@ -101,6 +107,8 @@
   <string name="stripe_passport">パスポート</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">パスポートが選択されました</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">電話番号</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">運転免許証を裏返してください</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -127,12 +135,22 @@
   <string name="stripe_selfie_item_description">セルフィ―が 1 つキャプチャーされました</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">自撮りの画像が保存されていません。終了しますか？</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">次のステップで写真が数枚撮影され、本人確認が行われます。</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">自撮り写真の撮影準備をする</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">写真を撮る</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">このページはテスト環境でのみ表示されます。</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">現在、テスト環境です</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">やり直す</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">予期しないエラーが発生しました。数秒後にもう一度お試しください</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">写真をアップロードする</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">運転免許証の裏面をアップロード</string>
   <!-- Title of dialog to upload front of driver license -->
@@ -145,4 +163,6 @@
   <string name="stripe_upload_dialog_title_passport">パスポートをアップロード</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">または、%1$sの写真を手動でアップロードすることもできます。</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">写真付き身分証明書をアップロードする</string>
 </resources>

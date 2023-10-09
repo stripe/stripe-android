@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Dấu tích thể hiện đã chụp giấy tờ thành công</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Chọn ảnh</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Hoàn tất với dữ liệu kiểm tra</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Tiết kiệm thời gian bằng cách chọn một kết quả mong muốn và hoàn tất ngay lập tức với kết quả đó. Luồng SDK di động sẽ trả về kết quả Đã hoàn thành.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Chúng tôi không thể chụp ảnh có chất lượng cao.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Bạn có thể thử lại hoặc tải lên hình ảnh từ thiết bị của mình.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Không thể chụp ảnh</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">biểu tượng máy ảnh</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Biểu tượng đồng hồ</string>
   <!-- Content description for close button -->
@@ -101,6 +107,8 @@
   <string name="stripe_passport">Hộ chiếu</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Đã chọn hộ chiếu</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Số điện thoại</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Lật bằng lái xe của bạn sang mặt khác</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -127,12 +135,22 @@
   <string name="stripe_selfie_item_description">đã chụp một ảnh selfie</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Ảnh selfie của bạn chưa được lưu. Bạn có muốn rời khỏi?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">Một vài ảnh sẽ được chụp tự động ở bước tiếp theo để xác minh đó là bạn</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Sẵn sàng để tự chụp ảnh</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Chụp ảnh</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Trang này chỉ được hiển thị ở chế độ thử nghiệm.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Bạn hiện đang ở chế độ kiểm tra</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Hãy thử lại</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Có lỗi bất ngờ -- hãy thử lại sau vài giây</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Tải lên ảnh</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Tải lên mặt sau bằng lái xe</string>
   <!-- Title of dialog to upload front of driver license -->
@@ -145,4 +163,6 @@
   <string name="stripe_upload_dialog_title_passport">Tải lên hộ chiếu</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Ngoài ra, bạn có thể tự tải lên ảnh %1$s của mình</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Tải lên ID có ảnh của bạn</string>
 </resources>

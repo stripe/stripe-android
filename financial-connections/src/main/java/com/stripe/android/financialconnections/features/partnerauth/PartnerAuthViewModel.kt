@@ -33,8 +33,9 @@ import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.common.enableRetrieveAuthSession
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Payload
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenPartnerAuth
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -67,8 +68,8 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
-    initialState: PartnerAuthState
-) : MavericksViewModel<PartnerAuthState>(initialState) {
+    initialState: SharedPartnerAuthState
+) : MavericksViewModel<SharedPartnerAuthState>(initialState) {
 
     init {
         logErrors()
@@ -133,7 +134,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     private fun launchBrowserIfNonOauth() {
         onAsync(
-            asyncProp = PartnerAuthState::payload,
+            asyncProp = SharedPartnerAuthState::payload,
             onSuccess = {
                 // launch auth for non-OAuth (skip pre-pane).
                 if (!it.authSession.isOAuth) launchAuthInBrowser()
@@ -143,7 +144,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     private fun logErrors() {
         onAsync(
-            PartnerAuthState::payload,
+            SharedPartnerAuthState::payload,
             onFail = {
                 eventTracker.logError(
                     extraMessage = "Error fetching payload / posting AuthSession",
@@ -404,20 +405,20 @@ internal class PartnerAuthViewModel @Inject constructor(
         if (URLUtil.isNetworkUrl(uri)) {
             setState {
                 copy(
-                    viewEffect = PartnerAuthState.ViewEffect.OpenUrl(
+                    viewEffect = ViewEffect.OpenUrl(
                         uri,
                         Date().time
                     )
                 )
             }
         } else {
-            val managedUri = PartnerAuthState.ClickableText.values()
+            val managedUri = SharedPartnerAuthState.ClickableText.values()
                 .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
             when (managedUri) {
-                PartnerAuthState.ClickableText.DATA -> {
+                SharedPartnerAuthState.ClickableText.DATA -> {
                     setState {
                         copy(
-                            viewEffect = PartnerAuthState.ViewEffect.OpenBottomSheet(Date().time)
+                            viewEffect = ViewEffect.OpenBottomSheet(Date().time)
                         )
                     }
                 }
@@ -433,11 +434,14 @@ internal class PartnerAuthViewModel @Inject constructor(
         }
     }
 
-    companion object : MavericksViewModelFactory<PartnerAuthViewModel, PartnerAuthState> {
+    companion object : MavericksViewModelFactory<PartnerAuthViewModel, SharedPartnerAuthState> {
+
+        override fun initialState(viewModelContext: ViewModelContext) =
+            SharedPartnerAuthState(pane = PANE)
 
         override fun create(
             viewModelContext: ViewModelContext,
-            state: PartnerAuthState
+            state: SharedPartnerAuthState
         ): PartnerAuthViewModel {
             return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
                 .viewModel

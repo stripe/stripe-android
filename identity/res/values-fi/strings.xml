@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Valintamerkki, joka osoittaa asiakirjan suorituksen onnistumisen</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Valitse kuva</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Suorita testitiedoilla</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Säästä aikaa valitsemalla haluamasi tulos ja suorittamalla lopputulos välittömästi. SDK-mobiilivirta palautuu tuloksella valmis.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Emme kyenneet ottamaan korkealaatuista kuvaa.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Voit joko yrittää uudelleen tai ladata kuvan laitteestasi.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Kuvaa ei voitu ottaa</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">kamerakuvake</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Kellokuvake</string>
   <!-- Content description for close button -->
@@ -101,6 +107,8 @@
   <string name="stripe_passport">Passi</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Passi valittu</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Puhelinnumero</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Käännä ajokortti toisinpäin</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -127,12 +135,22 @@
   <string name="stripe_selfie_item_description">yksi selfie otettu</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Selfiekuviasi ei ole tallennettu. Haluatko poistua?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">Seuraavassa vaiheessa otetaan automaattisesti muutama kuva sen vahvistamiseksi, että kyseessä olet sinä</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Valmistaudu selfien ottoon</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Ota kuva</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Tämä sivu näytetään vain testitilassa.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Käytät tällä hetkellä testitilaa</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Yritä uudelleen</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Odottamaton virhe – kokeile uudelleen muutaman sekunnin kuluttua</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Lataa kuva</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Lataa ajokortin takapuoli</string>
   <!-- Title of dialog to upload front of driver license -->
@@ -145,4 +163,6 @@
   <string name="stripe_upload_dialog_title_passport">Lataa passi</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Voit vaihtoehtoisesti ladata %1$s kuvan manuaalisesti</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Lataa kuvallinen henkilöllisyystodistus</string>
 </resources>

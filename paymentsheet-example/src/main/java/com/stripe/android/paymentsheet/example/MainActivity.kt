@@ -32,7 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
-import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetExampleActivity
@@ -92,12 +91,6 @@ class MainActivity : AppCompatActivity() {
                 subtitleResId = R.string.address_element_subtitle,
                 klass = AddressElementExampleActivity::class.java,
                 section = MenuItem.Section.AddressElement,
-            ),
-            MenuItem(
-                titleResId = R.string.playground_title,
-                subtitleResId = R.string.playground_subtitle,
-                klass = PaymentSheetPlaygroundActivity::class.java,
-                section = MenuItem.Section.Internal,
             ),
             MenuItem(
                 titleResId = R.string.playground_title,

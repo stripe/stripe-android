@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Kaxxa mmarkata biex turik li ttieħdet kopja tad-dokument</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Agħżel Ritratt</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Imla b\'dejta ta\' prova</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Iffranka l-ħin billi tagħżel ir-riżultat mixtieq u timla minnufih b\'dak ir-riżultat. Il-fluss tal-SDK tal-mowbajl se turi r-riżultat Lest.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Ma stajniex nieħdu ritratt ta\' kwalità tajba.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Tista\' terġa\' tipprova jew tagħżel li ttella\' ritratt mit-tagħmir tiegħek.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Ma stajniex nieħdu r-ritratt</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">l-ikona tal-kamera</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Ikona tal-arloġġ</string>
   <!-- Content description for close button -->
@@ -101,6 +107,8 @@
   <string name="stripe_passport">Passaport</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Għażilt il-passaport</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Numru tal-Mowbajl</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Dawwar il-liċenzja tas-sewqan tiegħek</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -127,12 +135,22 @@
   <string name="stripe_selfie_item_description">ittieħed stessu wieħed</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">L-istessi tiegħek għadhom ma ntrefgħux. Tixtieq toħroġ?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">Fil-pass li jmiss se niġbdu ftit ritratti awtomatikament biex nivverifikaw li int min qed tgħid li int</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Ħejji ruħek għall-istessu</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Ħu Ritratt</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Din il-paġna tintwera biss fil-modalità ta\' prova.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Bħalissa qed tuża l-modalità ta\' prova</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Erġa\' Pprova</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Kien hemm żball mhux mistenni -- erġa\' pprova wara ftit sekondi</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Tella\' ritratt</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Tella\' n-naħa ta\' wara tal-liċenzja tas-sewqan</string>
   <!-- Title of dialog to upload front of driver license -->
@@ -145,4 +163,6 @@
   <string name="stripe_upload_dialog_title_passport">Tella\' l-passaport</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Inkella tista\' tipprova ttella\' ritratt tal-%1$s tiegħek int stess</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Tella\' d-dokument tal-identità b\'ritratt tiegħek</string>
 </resources>
