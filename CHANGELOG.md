@@ -4,6 +4,9 @@
 
 ## 20.32.1 - 2023-10-09
 
+### PaymentSheet
+* [FIXED][7387](https://github.com/stripe/stripe-android/pull/7387) Fix a bug where `AddressLauncher.present` would crash.
+
 Dependencies updated:
 * [7409](https://github.com/stripe/stripe-android/pull/7409) Bumped Kotlin to 1.8.22 and Compose Compiler to 1.4.8.
 
