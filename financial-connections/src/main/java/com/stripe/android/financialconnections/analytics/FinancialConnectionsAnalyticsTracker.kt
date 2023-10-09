@@ -8,8 +8,6 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -41,16 +39,38 @@ internal suspend fun FinancialConnectionsAnalyticsTracker.logError(
     logger.error(extraMessage, error)
 
     // log error to live events listener if needed.
-    error.toErrorCode()?.let {
-        FinancialConnections.emitEvent(Name.ERROR, Metadata(errorCode = it))
+    emitPublicClientErrorEventIfNeeded(error)
+}
+
+/**
+ * Emits client error events to the live events listener. Backend errors should be emitted
+ * by the response handler.
+ *
+ * @see [com.stripe.android.financialconnections.analytics.FinancialConnectionsResponseEventEmitter]
+ */
+fun emitPublicClientErrorEventIfNeeded(error: Throwable) {
+    if (error.isStripeErrorWithEvents().not()) when (error) {
+        is AppInitializationError -> FinancialConnections.emitEvent(
+            name = FinancialConnectionsEvent.Name.ERROR,
+            metadata = FinancialConnectionsEvent.Metadata(
+                errorCode = ErrorCode.WEB_BROWSER_UNAVAILABLE
+            )
+        )
+
+        else -> FinancialConnections.emitEvent(
+            name = FinancialConnectionsEvent.Name.ERROR,
+            metadata = FinancialConnectionsEvent.Metadata(
+                errorCode = ErrorCode.UNEXPECTED_ERROR
+            )
+        )
     }
 }
 
-internal fun Throwable.toErrorCode(): ErrorCode? = when (this) {
-    is AppInitializationError -> ErrorCode.WEB_BROWSER_UNAVAILABLE
-    is StripeException -> null
-    else -> ErrorCode.UNEXPECTED_ERROR
-}
+private fun Throwable.isStripeErrorWithEvents(): Boolean = (this as? StripeException)
+    ?.stripeError
+    ?.extraFields
+    ?.get("events_to_emit")
+    ?.isNotEmpty() == true
 
 internal class FinancialConnectionsAnalyticsTrackerImpl(
     private val stripeNetworkClient: StripeNetworkClient,

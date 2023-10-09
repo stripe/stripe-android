@@ -1,10 +1,9 @@
-package com.stripe.android.financialconnections.analytics.userfacing
+package com.stripe.android.financialconnections.analytics
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.financialconnections.FinancialConnections
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name

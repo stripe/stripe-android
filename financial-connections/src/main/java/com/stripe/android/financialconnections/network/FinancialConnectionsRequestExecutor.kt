@@ -12,7 +12,7 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
-import com.stripe.android.financialconnections.analytics.userfacing.FinancialConnectionsResponseEventEmitter
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsResponseEventEmitter
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
