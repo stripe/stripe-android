@@ -46,6 +46,7 @@ internal class Selectors(
         composeTestRule,
         hasTestTag(PAYMENT_METHOD_SELECTOR_TEST_TAG)
     )
+    val linkButton = ComposeButton(composeTestRule, hasTestTag("LinkButtonTestTag"))
     val saveForFutureCheckbox = composeTestRule
         .onNodeWithTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
 

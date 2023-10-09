@@ -8,7 +8,6 @@ import android.util.Log
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -32,6 +31,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeS
 import com.stripe.android.paymentsheet.example.playground.settings.IntegrationType
 import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTypeSettingsDefinition
 import com.stripe.android.test.core.ui.BrowserUI
+import com.stripe.android.test.core.ui.LinkWebViewPage
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
 import kotlinx.coroutines.launch
@@ -80,7 +80,11 @@ internal class PlaygroundTestDriver(
         populateCustomLpmFields: () -> Unit = {},
         verifyCustomLpmFields: () -> Unit = {},
     ) {
-        setup(testParameters)
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings[IntegrationTypeSettingsDefinition] = IntegrationType.FlowController
+            }
+        )
         launchCustom()
 
         composeTestRule.waitForIdle()
@@ -130,12 +134,6 @@ internal class PlaygroundTestDriver(
 
         selectors.continueButton.click()
 
-        composeTestRule.waitUntil(timeoutMillis = 5000L) {
-            composeTestRule.onAllNodesWithTag("OTP-0").fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule.onNodeWithTag("OTP-0").performTextInput("123456")
-
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
@@ -145,14 +143,31 @@ internal class PlaygroundTestDriver(
 
         waitForNotPlaygroundActivity()
 
-        composeTestRule.waitUntil(timeoutMillis = 5000L) {
-            composeTestRule.onAllNodesWithTag("SignedInBox").fetchSemanticsNodes().isNotEmpty()
-        }
+        fieldPopulator.verifyFields()
 
-        Espresso.onIdle()
+        teardown()
+    }
+
+    fun confirmLink(
+        testParameters: TestParameters,
+    ) {
+        setup(testParameters)
+        launchComplete()
+
         composeTestRule.waitForIdle()
 
-        fieldPopulator.verifyFields()
+        selectors.linkButton.waitForEnabled()
+        selectors.linkButton.click()
+
+        val linkWebViewPage = LinkWebViewPage(device)
+        linkWebViewPage.emailButton.setText("email@email.com")
+        linkWebViewPage.verificationInput.setText("123456")
+        linkWebViewPage.payButton.click()
+
+        closeSoftKeyboard()
+
+        waitForPlaygroundActivity()
+        doAuthorization()
 
         teardown()
     }
