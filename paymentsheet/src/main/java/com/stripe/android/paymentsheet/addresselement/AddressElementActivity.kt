@@ -15,14 +15,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.stripe.android.common.ui.BottomSheet
-import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.uicore.StripeTheme
@@ -74,17 +72,13 @@ internal class AddressElementActivity : ComponentActivity() {
             StripeTheme {
                 BottomSheet(
                     state = bottomSheetState,
-                    onShow = navController::navigateToContent,
                     onDismissed = viewModel.navigator::dismiss,
                 ) {
                     Surface(modifier = Modifier.fillMaxSize()) {
                         NavHost(
                             navController = navController,
-                            startDestination = AddressElementScreen.Loading.route,
+                            startDestination = AddressElementScreen.InputAddress.route,
                         ) {
-                            composable(AddressElementScreen.Loading.route) {
-                                LoadingIndicator(modifier = Modifier.fillMaxSize())
-                            }
                             composable(AddressElementScreen.InputAddress.route) {
                                 InputAddressScreen(viewModel.inputAddressViewModelSubcomponentBuilderProvider)
                             }
@@ -125,13 +119,5 @@ internal class AddressElementActivity : ComponentActivity() {
     override fun finish() {
         super.finish()
         overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
-    }
-}
-
-private fun NavHostController.navigateToContent() {
-    return navigate(AddressElementScreen.InputAddress.route) {
-        popUpTo(AddressElementScreen.Loading.route) {
-            inclusive = true
-        }
     }
 }
