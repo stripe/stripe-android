@@ -144,7 +144,7 @@
   <!-- Description for test mode -->
   <string name="stripe_test_model_content">This page is only shown in testmode.</string>
   <!-- Title for test mode -->
-  <string name="stripe_test_model_title">You\'re currently in testmode</string>
+  <string name="stripe_test_model_title">You\\'re currently in testmode</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Try Again</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->

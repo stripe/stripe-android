@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Kvačica za označavanje uspješnog preuzimanja dokumenta</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Odaberi fotografiju</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Dovršite s testnim podacima</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Uštedite vrijeme biranjem željenog rezultata i trenutnim popunjavanjem s tim ishodom. Tijek mobilnog SDK-a vratit će se s rezultatom Completed.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Nismo uspjeli snimiti fotografiju visoke kvalitete.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Možete pokušati ponovno ili prenijeti sliku sa svog uređaja.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Nismo uspjeli snimiti fotografiju</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">ikona kamere</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Ikona sata</string>
   <!-- Content description for close button -->
@@ -129,12 +135,22 @@
   <string name="stripe_selfie_item_description">snimljen je jedan selfie</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Vaše selfie slike nisu pohranjene. Želite li napustiti?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">U sljedećem koraku automatski će se snimiti nekoliko fotografija kako bi se potvrdilo da ste to vi</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Pripremite se za snimanje selfija</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Snimi fotografiju</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Ova je stranica prikazana samo u testnom režimu.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Trenutno ste u testnom režimu</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Pokušaj ponovno</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Došlo je do neočekivane pogreške -- pokušajte ponovno za nekoliko sekundi</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Učitaj fotografiju</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Učitajte poleđinu vozačke dozvole</string>
   <!-- Title of dialog to upload front of driver license -->

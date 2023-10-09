@@ -4,14 +4,24 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Bayar dalam <num_installments/> kali pembayaran tanpa faedah sebanyak <installment_price/> dengan <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Undur</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Nombor akaun</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">Nombor akaun anda tidak lengkap.</string>
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Akaun bank</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Saya faham bahawa Stripe akan mengutip Debit Terus bagi pihak %s dan mengesahkan sayalah pemegang akaun dan satu-satunya individu yang diperlukan untuk mengizinkan debit daripada akaun ini.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Kod isihan</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">Kod isihan anda tidak lengkap.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Alamat pengebilan</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">Kod BLIK</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Dengan meneruskan langkah, anda mengizinkan %1$s untuk mendebitkan akaun Cash App anda bagi pembayaran ini dan pembayaran masa hadapan menurut terma %2$s, sehinggalah keizinan ini dibatalkan. Anda boleh mengubah keizinan ini pada bila-bila masa dalam Tetapan Cash App anda.</string>
   <!-- Title for the contact information section -->
@@ -21,7 +31,7 @@
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">Bank EPS</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
-  <string name="stripe_fpx_bank">Bank FPX</string>
+  <string name="stripe_fpx_bank">Bank untuk FPX</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">IBAN yang anda masukkan tidak lengkap.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -59,10 +69,14 @@
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Debit Terus BECS AU</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kad</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Debit SEPA</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Dengan mengesahkan pembayaran anda dengan PayPal, anda membenarkan %s mengecaj akaun PayPal anda bagi pembayaran masa hadapan menurut terma mereka.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">Dengan mengesahkan pembayaran anda menggunakan RevolutPay, anda membenarkan %s mengecaj akaun RevolutPay anda bagi pembayaran masa hadapan menurut terma mereka.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Simpan untuk pembayaran %s masa hadapan</string>
   <!-- Button title to open camera to scan credit/debit card -->

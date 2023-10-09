@@ -6,6 +6,8 @@
   <string name="stripe_bank_account_ending_in">Pašalinti banko sąskaitą, kurios paskutiniai skaičiai %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Patvirtinkite mokėjimą savo banko programėlėje per %s ir užbaikite pirkimą.</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">Įvyko klaida. Patikrinkite ryšį ir bandykite dar kartą.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Tęsdami sutinkate autorizuoti mokėjimus pagal šias <terms>sąlygas</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -59,6 +61,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Pasirinkite mokėjimo būdą</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Bendra suma: %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">Kažkas nepavyko</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Atšaukti ir sumokėti kitu būdu</string>
   <!-- Text on a screen asking the user to approve a payment -->

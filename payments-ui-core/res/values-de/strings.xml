@@ -4,14 +4,24 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Zahlen Sie mit <img/> in <num_installments/> zinslosen Raten zu je <installment_price/>.]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Zurück</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Kontonummer</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">Die Kontonummer ist unvollständig.</string>
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Bankkonto</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Ich verstehe, dass Stripe im Namen von %s Lastschriften einzieht und bestätige, dass ich der Kontoinhaber/die Kontoinhaberin und die einzige Person bin, die zur Autorisierung von Lastschriften von diesem Konto erforderlich ist.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Bankleitzahl</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">Ihre Bankleitzahl ist unvollständig.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Rechnungsadresse</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">BLIK-Code</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Indem Sie fortfahren, erteilen Sie %1$s die Genehmigung, Ihr Cash-App-Konto in Höhe dieser und künftiger Zahlungen zu belasten im Einklang mit den AGB von %2$s, bis diese Genehmigung widerrufen wird. Sie können dies jederzeit in Ihren Cash-App-Einstellungen ändern.</string>
   <!-- Title for the contact information section -->
@@ -59,10 +69,14 @@
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS-Lastschriftverfahren</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Karte</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA-Lastschrift</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Indem Sie Ihre Zahlung bei PayPal bestätigen, erklären Sie sich damit einverstanden, dass %s Ihr PayPal-Konto zur Durchführung zukünftiger Zahlungen gemäß der Nutzungsbedingungen belastet.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">Indem Sie Ihre Zahlung bei RevolutPay bestätigen, erklären Sie sich damit einverstanden, dass %s Ihr RevolutPay-Konto zur Durchführung zukünftiger Zahlungen gemäß den Nutzungsbedingungen belastet.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Für zukünftige %s-Zahlungen speichern</string>
   <!-- Button title to open camera to scan credit/debit card -->

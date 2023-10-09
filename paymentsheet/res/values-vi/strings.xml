@@ -6,6 +6,8 @@
   <string name="stripe_bank_account_ending_in">Gỡ bỏ tài khoản ngân hàng có đuôi là %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Hãy xác nhận thanh toán trong ứng dụng ngân hàng của quý vị trong vòng %s để hoàn tất giao dịch mua.</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">Đã xảy ra lỗi. Hãy kiểm tra kết nối của bạn và thử lại.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Bằng việc tiếp tục, bạn đồng ý cho phép thanh toán tuân theo <terms>các điều khoản này</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -59,6 +61,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Chọn phương thức thanh toán của bạn</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Tổng cộng: %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">Đã xảy ra sự cố</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Hủy và thanh toán theo cách khác</string>
   <!-- Text on a screen asking the user to approve a payment -->

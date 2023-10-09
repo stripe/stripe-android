@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Varnelė, nurodanti, kad dokumentas sėkmingai užfiksuotas</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Pasirinkti nuotrauką</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Užpildyti bandymo duomenimis</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Sutaupykite laiko pasirinkdami norimą rezultatą ir atitinkamai automatiškai užbaigdami pildymo procesą. Mobilusis SDK grąžins būseną „Baigta“.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Nepavyko užfiksuoti aukštos kokybės vaizdo.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Galite bandyti dar kartą arba įkelti vaizdą iš savo įrenginio.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Nepavyko užfiksuoti vaizdo</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">vaizdo kameros piktograma</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Laikrodžio piktograma</string>
   <!-- Content description for close button -->
@@ -129,12 +135,22 @@
   <string name="stripe_selfie_item_description">užfiksuota viena asmenukė</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Jūsų asmenukės vaizdai neįrašyti. Ar norite išeiti?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">Sekančiame žingsnyje, siekiant patvirtinti jūsų tapatybę, bus padarytos kelios jūsų nuotraukos</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Pasiruoškite nusifotografuoti</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Fotografuoti</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Šis puslapis rodomas tik bandomuoju režimu.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Naudojatės bandomuoju režimu</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Bandyti dar kartą</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Įvyko netikėta klaida, po kelių sekundžių bandykite dar kartą</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Įkelti nuotrauką</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Įkelkite vairuotojo pažymėjimo galinę pusę</string>
   <!-- Title of dialog to upload front of driver license -->
