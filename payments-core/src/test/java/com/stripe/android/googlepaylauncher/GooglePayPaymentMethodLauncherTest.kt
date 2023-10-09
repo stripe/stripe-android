@@ -49,9 +49,6 @@ class GooglePayPaymentMethodLauncherTest {
                 skipReadyCheck = true,
                 context = activity,
                 googlePayRepositoryFactory = mock(),
-                productUsage = emptySet(),
-                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-                stripeAccountIdProvider = { null },
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = activity,
                     publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

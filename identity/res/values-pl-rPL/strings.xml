@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Zaznacz, aby wskazać pomyślne zarejestrowanie dokumentu</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Wybierz zdjęcie</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Wypełnij danymi testowymi</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Oszczędź czas, wybierając pożądany wynik i wypełniając dane automatycznie. Mobilny przepływ SDK zostanie zwrócony z wynikiem Zakończone.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Nie można zarejestrować obrazu wysokiej jakości.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Możesz spróbować ponownie lub przesłać obraz z urządzenia.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Nie można wykonać zdjęcia</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">ikona aparatu</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Ikona zegara</string>
   <!-- Content description for close button -->
@@ -101,6 +107,8 @@
   <string name="stripe_passport">Paszport</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Wybrano paszport</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Numer telefonu</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Obróć prawo jazdy na drugą stronę</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -127,12 +135,22 @@
   <string name="stripe_selfie_item_description">przechwycono jedno selfie</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Nie zapisano Twoich selfie. Czy chcesz wyjść?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">W kolejnym kroku zostanie zrobionych kilka zdjęć, aby potwierdzić Twoją tożsamość</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Przygotuj się do zrobienia selfie</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Zrób zdjęcie</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Ta strona jest widoczna tylko w trybie testowym.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Obecnie korzystasz z trybu testowego</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Spróbuj ponownie</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Wystąpił nieoczekiwany błąd – spróbuj ponownie za kilka sekund</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Prześlij zdjęcie</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Prześlij tył prawa jazdy</string>
   <!-- Title of dialog to upload front of driver license -->
@@ -145,4 +163,6 @@
   <string name="stripe_upload_dialog_title_passport">Prześlij paszport</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Możesz też ręcznie przesłać zdjęcie swojego %1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Prześlij dokument tożsamości ze zdjęciem</string>
 </resources>

@@ -6,6 +6,8 @@
   <string name="stripe_bank_account_ending_in">Elimina la cuenta bancaria que termina en %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Confirma el pago en la aplicación de tu banco en %s para completar la compra.</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">Se produjo un error. Verifica tu conexión y vuelve a intentarlo.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Al continuar, aceptas autorizar pagos de conformidad con <terms>estas condiciones</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -59,6 +61,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Selecciona tu método de pago</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">Se ha producido un error</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Cancelar y usar otro método de pago</string>
   <!-- Text on a screen asking the user to approve a payment -->

@@ -3,6 +3,7 @@ package com.stripe.example.activity
 import android.os.Bundle
 import com.stripe.android.Stripe
 import com.stripe.android.model.Address
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.example.Settings
 import com.stripe.example.databinding.CardBrandChoiceExampleActivityBinding
@@ -22,6 +23,10 @@ class CardBrandChoiceExampleActivity : StripeIntentActivity() {
 
         viewModel.inProgress.observe(this, this::enableUi)
         viewModel.status.observe(this, viewBinding.status::setText)
+
+        viewBinding.cardInputWidget.setPreferredNetworks(
+            preferredNetworks = listOf(CardBrand.CartesBancaires),
+        )
 
         val stripeAccountId = Settings(this).stripeAccountId
 

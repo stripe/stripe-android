@@ -4,12 +4,24 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Bayar dalam <num_installments/> angsuran bebas bunga sebesar <installment_price/> dengan <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Kembali</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Nomor rekening</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">Nomor rekening Anda tidak lengkap.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Rekening bank</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Saya memahami bahwa Stripe akan menagih Debit Langsung atas nama %s serta mengonfirmasikan bahwa sayalah pemilik akun dan satu-satunya orang yang diperlukan untuk mengotorisasi debit dari akun ini.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Kode sort</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">Kode sort Anda tidak lengkap.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Alamat tagihan</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">Kode BLIK</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Dengan melanjutkan, berarti Anda memberi %1$s otorisasi untuk mendebit akun Cash App Anda bagi pembayaran ini dan pembayaran mendatang sesuai dengan ketentuan %2$s, hingga otorisasi ini dicabut. Anda dapat mengubahnya kapan saja di Pengaturan Cash App.</string>
   <!-- Title for the contact information section -->
@@ -57,10 +69,14 @@
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Debit Langsung BECS AU</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kartu</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Dengan mengonfirmasi pembayaran menggunakan PayPal, berarti Anda mengizinkan %s mengenakan charge untuk pembayaran mendatang pada akun PayPal Anda sesuai dengan ketentuan mereka.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">Dengan mengonfirmasi pembayaran menggunakan RevolutPay, berarti Anda mengizinkan %s mengenakan charge untuk pembayaran mendatang pada akun RevolutPay Anda sesuai dengan ketentuan mereka.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Simpan untuk pembayaran %s mendatang</string>
   <!-- Button title to open camera to scan credit/debit card -->

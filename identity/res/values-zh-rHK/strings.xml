@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">選中標記，表示證件捕獲成功</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">選擇照片</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">用測試資料來完成</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">選擇期望的結果並利用生成的結果立即完成，如此可節省時間。移動 SDK 流程返回時會返回「已完成」結果。</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">我們未能捕捉到高品質圖片。</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">您可以重試或從設備上載一張照片。</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">無法捕獲圖片</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">照相機圖示</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">時鐘圖示</string>
   <!-- Content description for close button -->
@@ -101,6 +107,8 @@
   <string name="stripe_passport">護照</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">已選擇護照</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">電話號碼</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">將駕駛執照翻到另一面</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -127,12 +135,22 @@
   <string name="stripe_selfie_item_description">拍攝了一張自拍照</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">尚未保存您的自拍照。想要離開嗎？</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">下一步將自動拍攝一些照片來驗證是否是您本人</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">準備好自拍</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">拍照</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">該頁面僅在測試模式下顯示。</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">您當前處於測試模式</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">重試</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">發生了意外錯誤 -- 請稍候再試</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">上載照片</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">上載駕駛執照背面</string>
   <!-- Title of dialog to upload front of driver license -->
@@ -145,4 +163,6 @@
   <string name="stripe_upload_dialog_title_passport">上載護照</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">您也可以手動上載您的%1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">上載您帶照片的身份證件</string>
 </resources>

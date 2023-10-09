@@ -6,6 +6,8 @@
   <string name="stripe_bank_account_ending_in">%s(으)로 끝나는 은행 계좌 제거</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">%s 이내에 은행 앱에서 결제를 확인하여 구매를 완료하십시오.</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">오류가 발생했습니다. 연결을 확인하고 다시 시도하십시오.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[계속하면 <terms>해당 약관</terms>에 따라 결제를 승인하는 데 동의하는 것입니다.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -59,6 +61,8 @@
   <string name="stripe_paymentsheet_select_payment_method">결제 수단을 선택하세요.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">합계 : %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">문제가 발생했습니다.</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">취소 및 다른 방법으로 결제</string>
   <!-- Text on a screen asking the user to approve a payment -->

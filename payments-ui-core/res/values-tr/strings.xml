@@ -4,12 +4,22 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[<img/> ile <installment_price/> tutarında faizsiz <num_installments/> taksitle ödeyin]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Geri</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Hesap numarası</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">Hesap numaranız eksik.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Banka hesabı</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Stripe\'ın %s adına Otomatik Ödeme alacağını anlıyorum. Hesap sahibi ve bu hesaptan ödemeleri yetkilendirmek için gereken tek kişi olduğumu onaylıyorum.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Şube kodu</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">Şube kodunuz eksik.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Fatura adresi</string>
-  <!-- Label for BLIK code number field on form -->
-  <string name="stripe_blik_code">BLIK kodu</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Devam ederek %1$s şirketinin bu ödeme ve gelecekteki ödemeler için Cash Uygulaması hesabınızı %2$s şirketinin şartlarına uygun olarak borçlandırmasına izin vermiş olursunuz. Bu durum, izin iptal edilene kadar geçerli olur. İstediğiniz zaman Cash Uygulamasının Ayarlarından bu izni değiştirebilirsiniz.</string>
   <!-- Title for the contact information section -->
@@ -28,10 +38,6 @@
   <string name="stripe_iban_invalid_start">IBAN numaranız iki harfli bir ülke koduyla başlamalıdır.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">iDEAL Bank</string>
-  <!-- Error message when BLIK code is invalid -->
-  <string name="stripe_incomplete_blik_code">BLIK kodunuz eksik.</string>
-  <!-- Error message when BLIK code is invalid -->
-  <string name="stripe_invalid_blik_code">BLIK kodunuz geçersiz.</string>
   <string name="stripe_invalid_email_address">Geçersiz e-posta adresi: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Geçersiz UPI Numarası</string>
@@ -57,10 +63,14 @@
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS Otomatik Ödeme</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kart</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Bankamatik</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">PayPal\'la ödemeyi onayladığınızda, %s şirketine gelecekteki ödemeler için kendi koşullarına uygun olarak PayPal hesabınızı ücretlendirme izni vermiş olursunuz.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">RevolutPay ile ödemenizi doğrulayarak, %s tarafından RevolutPay hesabınızdan, kendi koşulları doğrultusunda gelecekteki ödemelerinizin tahsil edilmesine izin vermektesiniz.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Gelecekteki %s ödemeleri için kaydedilsin</string>
   <!-- Button title to open camera to scan credit/debit card -->

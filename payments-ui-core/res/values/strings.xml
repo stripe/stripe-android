@@ -4,18 +4,18 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Pay in <num_installments/> interest-free payments of <installment_price/> with <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Back</string>
-  <!-- Section title for Bacs bank account fields -->
-  <string name="stripe_bacs_bank_account_title">Bank account</string>
   <!-- Label for Bacs account number field -->
   <string name="stripe_bacs_account_number">Account number</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">Your account number is incomplete.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Bank account</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">I understand that Stripe will be collecting Direct Debits on behalf of %s and confirm that I am the account holder and the only person required to authorise debits from this account.</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">Sort code</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Your sort code is incomplete.</string>
-  <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">I understand that Stripe will be collecting Direct Debits on behalf of %s and confirm that I am the account holder and the only person required to authorise debits from this account.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Billing address</string>
   <!-- Label for BLIK code number field on form -->
