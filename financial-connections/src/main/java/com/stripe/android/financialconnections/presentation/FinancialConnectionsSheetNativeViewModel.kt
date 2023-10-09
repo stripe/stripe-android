@@ -21,9 +21,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Complete
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLaunched
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
-import com.stripe.android.financialconnections.analytics.toErrorCode
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
@@ -269,7 +267,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         }
 
                         session.hasAValidAccount() -> {
-                            FinancialConnections.emitEvent(name = Name.SUCCESS)
                             finishWithResult(
                                 Completed(
                                     financialConnectionsSession = session,
@@ -283,7 +280,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         }
 
                         else -> {
-                            FinancialConnections.emitEvent(name = Name.CANCEL)
                             finishWithResult(Canceled)
                         }
                     }
@@ -298,12 +294,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                             connectedAccounts = null
                         )
                     )
-                    if (closeAuthFlowError == null) {
-                        FinancialConnections.emitEvent(
-                            name = Name.ERROR,
-                            metadata = Metadata(errorCode = completeSessionError.toErrorCode())
-                        )
-                    }
                     finishWithResult(Failed(closeAuthFlowError ?: completeSessionError))
                 }
         }

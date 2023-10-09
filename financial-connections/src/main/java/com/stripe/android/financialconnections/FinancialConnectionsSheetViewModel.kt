@@ -116,7 +116,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 )
             }
         } else {
-            FinancialConnections.emitEvent(name = Name.OPEN)
             if (nativeAuthFlowEnabled) {
                 setState {
                     copy(

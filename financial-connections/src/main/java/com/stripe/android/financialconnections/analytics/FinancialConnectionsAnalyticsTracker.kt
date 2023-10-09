@@ -8,15 +8,10 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.exception.AccountLoadError
-import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
-import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
 import com.stripe.android.financialconnections.exception.AppInitializationError
-import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
-import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
-import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import java.util.Locale
 
@@ -45,29 +40,15 @@ internal suspend fun FinancialConnectionsAnalyticsTracker.logError(
     // log error locally.
     logger.error(extraMessage, error)
 
-    // log error to live events listener
-    FinancialConnections.emitEvent(
-        Name.ERROR,
-        FinancialConnectionsEvent.Metadata(
-            errorCode = error.toErrorCode()
-        )
-    )
+    // log error to live events listener if needed.
+    error.toErrorCode()?.let {
+        FinancialConnections.emitEvent(Name.ERROR, Metadata(errorCode = it))
+    }
 }
 
-// TODO finish mapping.
-internal fun Throwable.toErrorCode(): ErrorCode = when (this) {
+internal fun Throwable.toErrorCode(): ErrorCode? = when (this) {
     is AppInitializationError -> ErrorCode.WEB_BROWSER_UNAVAILABLE
-    is AccountNumberRetrievalError -> ErrorCode.ACCOUNT_NUMBERS_UNAVAILABLE
-    is AccountLoadError -> ErrorCode.ACCOUNTS_UNAVAILABLE
-    is AccountNoneEligibleForPaymentMethodError -> ErrorCode.NO_DEBITABLE_ACCOUNT
-    is InstitutionPlannedDowntimeError -> ErrorCode.INSTITUTION_UNAVAILABLE_PLANNED
-    is InstitutionUnplannedDowntimeError -> ErrorCode.INSTITUTION_UNAVAILABLE_UNPLANNED
-    is WebAuthFlowFailedException -> ErrorCode.AUTHORIZATION_FAILED
-    is StripeException -> when {
-        // string contains ignore case
-        message?.contains("expired", ignoreCase = true) == true -> ErrorCode.SESSION_EXPIRED
-        else -> ErrorCode.UNEXPECTED_ERROR
-    }
+    is StripeException -> null
     else -> ErrorCode.UNEXPECTED_ERROR
 }
 
