@@ -283,3 +283,12 @@ enum class CardBrand(
         private const val CVC_COMMON_LENGTH: Int = 3
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun CardBrand.icon(isCoBrandedCard: Boolean): Int {
+    return if (this == CardBrand.Unknown && isCoBrandedCard) {
+        R.drawable.stripe_ic_unknown_brand_cbc
+    } else {
+        icon
+    }
+}

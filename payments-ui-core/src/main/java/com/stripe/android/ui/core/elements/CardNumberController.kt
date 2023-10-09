@@ -16,6 +16,7 @@ import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.icon
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.BuildConfig
 import com.stripe.android.ui.core.asIndividualDigits
@@ -152,10 +153,12 @@ internal class DefaultCardNumberController constructor(
         chosenBrand
     ) { number, brands, chosen ->
         if (isEligibleForCardBrandChoice && number.isNotEmpty()) {
+            val isCoBrandedCard = brands.size > 1
+
             val noSelection = TextFieldIcon.Dropdown.Item(
                 id = CardBrand.Unknown.code,
                 label = resolvableString(PaymentsCoreR.string.stripe_card_brand_choice_no_selection),
-                icon = CardBrand.Unknown.icon
+                icon = CardBrand.Unknown.icon(isCoBrandedCard),
             )
 
             val selected = if (brands.size == 1) {
@@ -189,7 +192,7 @@ internal class DefaultCardNumberController constructor(
                 title = resolvableString(PaymentsCoreR.string.stripe_card_brand_choice_selection_header),
                 currentItem = selected,
                 items = listOf(noSelection) + items,
-                hide = brands.size < 2
+                hide = !isCoBrandedCard,
             )
         } else if (accountRangeService.accountRange != null) {
             TextFieldIcon.Trailing(accountRangeService.accountRange!!.brand.icon, isTintable = false)

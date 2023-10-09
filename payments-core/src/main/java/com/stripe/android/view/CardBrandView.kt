@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -32,6 +33,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.databinding.StripeCardBrandViewBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
+import com.stripe.android.model.icon
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.properties.Delegates
@@ -164,12 +166,17 @@ private fun CardBrand(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    val icon = remember(isLoading, currentBrand, shouldShowCvc, shouldShowErrorIcon) {
-        when {
-            isLoading -> currentBrand.icon
-            shouldShowErrorIcon -> currentBrand.errorIcon
-            shouldShowCvc -> currentBrand.cvcIcon
-            else -> currentBrand.icon
+    val isEnteringCoBrandedCard = remember(possibleBrands) {
+        possibleBrands.size > 1
+    }
+
+    val icon = remember(isLoading, currentBrand, isEnteringCoBrandedCard, shouldShowCvc, shouldShowErrorIcon) {
+        if (shouldShowErrorIcon) {
+            currentBrand.errorIcon
+        } else if (shouldShowCvc) {
+            currentBrand.cvcIcon
+        } else {
+            currentBrand.icon(isCoBrandedCard = isEnteringCoBrandedCard)
         }
     }
 
@@ -198,12 +205,17 @@ private fun CardBrand(
                 label = "alpha"
             )
 
-            Image(
-                painter = painterResource(icon),
-                colorFilter = tint?.let { ColorFilter.tint(it) },
-                contentDescription = null,
-                modifier = Modifier.requiredSize(width = 32.dp, height = 21.dp),
-            )
+            Crossfade(
+                targetState = icon,
+                label = "CardBrandIconCrossfade",
+            ){ brandIcon ->
+                Image(
+                    painter = painterResource(brandIcon),
+                    colorFilter = tint?.let { ColorFilter.tint(it) },
+                    contentDescription = null,
+                    modifier = Modifier.requiredSize(width = 32.dp, height = 21.dp),
+                )
+            }
 
             Image(
                 painter = painterResource(R.drawable.stripe_ic_arrow_down),
@@ -239,10 +251,10 @@ private fun CardBrandChoiceDropdown(
 ) {
     val noSelection = CardBrandChoice(
         label = resolvableString(id = R.string.stripe_card_brand_choice_no_selection),
-        icon = CardBrand.Unknown.icon
+        icon = Unknown.icon(isCoBrandedCard = true),
     )
 
-    val allPossibleBrands = listOf(CardBrand.Unknown) + brands
+    val allPossibleBrands = listOf(Unknown) + brands
     val choices = allPossibleBrands.map { brand ->
         brand.toChoice(noSelection)
     }
@@ -264,7 +276,7 @@ private fun CardBrandChoiceDropdown(
 }
 
 private fun CardBrand.toChoice(noSelection: CardBrandChoice): CardBrandChoice {
-    return if (this == CardBrand.Unknown) {
+    return if (this == Unknown) {
         noSelection
     } else {
         CardBrandChoice(
