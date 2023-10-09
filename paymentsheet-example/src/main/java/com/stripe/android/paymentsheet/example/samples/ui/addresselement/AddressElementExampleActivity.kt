@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
@@ -62,6 +63,7 @@ class AddressElementExampleActivity : AppCompatActivity() {
                                     configuration = config,
                                 )
                             },
+                            modifier = Modifier.testTag(SELECT_ADDRESS_BUTTON)
                         ) {
                             Text("Select address")
                         }
@@ -110,3 +112,5 @@ private fun Address(addressDetails: AddressDetails) {
 
     Text(text)
 }
+
+internal const val SELECT_ADDRESS_BUTTON = "SELECT_ADDRESS_BUTTON"

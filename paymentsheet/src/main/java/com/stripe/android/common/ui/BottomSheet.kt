@@ -122,7 +122,6 @@ internal fun BottomSheet(
     state: BottomSheetState,
     modifier: Modifier = Modifier,
     onDismissed: () -> Unit,
-    onShow: () -> Unit = {},
     sheetContent: @Composable () -> Unit,
 ) {
     val systemUiController = rememberSystemUiController()
@@ -142,7 +141,6 @@ internal fun BottomSheet(
         state.show()
         if (isFirstLaunch) {
             isFirstLaunch = false
-            onShow()
         }
 
         val dismissalType = state.awaitDismissal()
