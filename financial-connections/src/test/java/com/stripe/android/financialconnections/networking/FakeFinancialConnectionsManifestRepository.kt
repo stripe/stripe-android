@@ -104,6 +104,14 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         TODO("Not yet implemented")
     }
 
+    override suspend fun completeRepairSession(
+        clientSecret: String,
+        authRepairSessionId: String,
+        coreAuthorization: String
+    ): FinancialConnectionsAuthorizationRepairSession {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun synchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String

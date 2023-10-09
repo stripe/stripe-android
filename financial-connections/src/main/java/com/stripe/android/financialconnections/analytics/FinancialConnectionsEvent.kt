@@ -387,7 +387,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     override fun toString(): String {
-        return "FinancialConnectionsEvent(name='$name', params=$params)"
+        return "FinancialConnectionsEvent(name='$eventName', params=$params)"
     }
 
     override fun equals(other: Any?): Boolean {

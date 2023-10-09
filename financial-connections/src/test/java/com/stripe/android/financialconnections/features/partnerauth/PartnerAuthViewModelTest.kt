@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.features.partnerauth
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.test.MavericksTestRule
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
@@ -20,7 +19,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.utils.TestNavigationManager
-import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -257,7 +255,7 @@ internal class PartnerAuthViewModelTest {
             logger = mock(),
             initialState = initialState,
             browserManager = mock(),
-            uriUtils = UriUtils(Logger.noop(), mock()),
+            clickHandler = mock(),
             applicationId = applicationId
         )
     }

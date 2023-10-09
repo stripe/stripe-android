@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections
 
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 
@@ -23,13 +23,15 @@ internal class TestFinancialConnectionsAnalyticsTracker : FinancialConnectionsAn
         expectedEventName: String,
         expectedParams: Map<String, String>? = null
     ) {
-        Truth.assertThat(
-            sentEvents.any {
-                it.eventName == expectedEventName &&
-                    expectedParams
-                        .orEmpty()
-                        .all { (k, v) -> it.params.orEmpty()[k] == v }
-            }
-        ).isTrue()
+        val containsEvent = sentEvents.any {
+            it.eventName == expectedEventName &&
+                expectedParams?.all { (k, v) -> it.params.orEmpty()[k] == v } == true
+        }
+
+        assertWithMessage(
+            "Expected an event with name '$expectedEventName' " +
+                "and params '$expectedParams', but no such event was found.\n" +
+                "Emitted events: $sentEvents"
+        ).that(containsEvent).isTrue()
     }
 }
