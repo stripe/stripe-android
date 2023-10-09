@@ -98,18 +98,24 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     AppearanceButton()
 
                     QrCodeButton(playgroundSettings = localPlaygroundSettings)
-
-                    ReloadButton(playgroundSettings = localPlaygroundSettings)
                 },
                 bottomBarContent = {
-                    PlaygroundStateUi(
-                        playgroundState = playgroundState,
-                        paymentSheet = paymentSheet,
-                        flowController = flowController,
-                        addressLauncher = addressLauncher,
-                    )
+                    ReloadButton(playgroundSettings = localPlaygroundSettings)
+
+                    AnimatedContent(
+                        label = PLAYGROUND_BOTTOM_BAR_LABEL,
+                        targetState = playgroundState
+                    ) { playgroundState ->
+                        Column {
+                            PlaygroundStateUi(
+                                playgroundState = playgroundState,
+                                paymentSheet = paymentSheet,
+                                flowController = flowController,
+                                addressLauncher = addressLauncher,
+                            )
+                        }
+                    }
                 },
-                hasBottomBarContent = playgroundState != null
             )
 
             val status by viewModel.status.collectAsState()
@@ -322,9 +328,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
 @Composable
 private fun PlaygroundTheme(
-    content: @Composable (ColumnScope.() -> Unit),
-    bottomBarContent: @Composable () -> Unit = {},
-    hasBottomBarContent: Boolean,
+    content: @Composable ColumnScope.() -> Unit,
+    bottomBarContent: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = if (isSystemInDarkTheme() || AppearanceStore.forceDarkMode) {
         darkColors()
@@ -342,27 +347,19 @@ private fun PlaygroundTheme(
         ) {
             Scaffold(
                 bottomBar = {
-                    AnimatedContent(
-                        label = PLAYGROUND_BOTTOM_BAR_LABEL,
-                        targetState = hasBottomBarContent
-                    ) { targetState ->
-                        if (targetState) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colors.surface)
-                                    .animateContentSize()
-                            ) {
-                                Divider()
-                                Column(
-                                    modifier = Modifier
-                                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                                        .fillMaxWidth()
-                                ) {
-                                    bottomBarContent()
-                                }
-                            }
-                        }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colors.surface)
+                            .animateContentSize()
+                    ) {
+                        Divider()
+                        Column(
+                            content = bottomBarContent,
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                                .fillMaxWidth()
+                        )
                     }
                 },
             ) { paddingValues ->
