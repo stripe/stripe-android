@@ -815,7 +815,9 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
         cardNumberEditText.implicitCardBrandChangeCallback = { brand ->
-            // TODO Explanation
+            // With co-branded cards, a card number can belong to multiple brands. Since we still
+            // need do validate based on the card's pan length and expected CVC length, we add this
+            // callback to perform the validations, but don't update the current brand.
             hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
             updateCvc(brand)
         }
