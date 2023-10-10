@@ -17,13 +17,11 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.VerificationPageStaticConsentLineContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentBottomSheetContent
 import com.stripe.android.identity.networking.models.getContentDescriptionId
 import com.stripe.android.identity.networking.models.getResourceId
-import com.stripe.android.identity.viewmodel.BottomSheetViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -31,7 +29,6 @@ internal fun ConsentLines(
     lines: List<VerificationPageStaticConsentLineContent>,
     bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?
 ) {
-    val bottomSheetViewModel = viewModel<BottomSheetViewModel>()
     for (line in lines) {
         Row(
             modifier = Modifier
@@ -51,7 +48,6 @@ internal fun ConsentLines(
                     alpha = 0.6f
                 ),
                 style = LocalTextStyle.current.merge(fontSize = 16.sp),
-                bottomSheetViewModel = bottomSheetViewModel,
                 bottomSheets = bottomSheets,
                 urlSpanStyle = SpanStyle(
                     textDecoration = TextDecoration.Underline,
