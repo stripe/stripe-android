@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Bifă care indică faptul că documentele au fost captate cu succes</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Alegeți o fotografie</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Finalizați cu datele de testare</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Economisiți timp alegând rezultatul dorit și completând instantaneu cu acel rezultat. Fluxul SDK pe mobil va returna rezultatul Finalizat.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Nu am putut captura o imagine de înaltă calitate.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Puteți să încercați din nou sau să încărcați o imagine de pe dispozitivul dvs.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Nu s-a putut capta imaginea</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">pictogramă cameră</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Pictogramă ceas</string>
   <!-- Content description for close button -->
@@ -129,12 +135,22 @@
   <string name="stripe_selfie_item_description">un selfie captat</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Fotografiile dvs. de tip selfie nu au fost salvate. Doriți să ieșiți?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">Câteva fotografii vor fi efectuate automat la următorul pas pentru a verifica dacă sunteți dvs.</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Pregătiți-vă pentru a efectua un selfie</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Faceți o fotografie</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Această pagină este afișată numai în modul de testare.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">În prezent, sunteți în modul de testare</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Încercați din nou</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">A apărut o eroare neașteptată -- încercați din nou în câteva secunde</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Încărcați o fotografie</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Încărcați verso-ul permisului de conducere</string>
   <!-- Title of dialog to upload front of driver license -->

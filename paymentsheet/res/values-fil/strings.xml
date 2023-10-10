@@ -4,8 +4,8 @@
   <string name="stripe_add_new_payment_method">Magdagadag ng bagong pamamaraan ng pagbabayad</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_bank_account_ending_in">Alisin ang account na nagtatapos sa %s</string>
-  <!-- Text for alert message when user needs to confirm payment in their banking app -->
-  <string name="stripe_blik_confirm_payment">Kumpirmahin ang pagbabayad sa app ng iyong bangko sa loob ng %s para kumpletuhin ang pagbili.</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">May nangyaring mali. Tingnan ang iyong koneksyon at subukan muli.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Sa pagpapatuloy, sumasang-ayon ka na pahintulutan ang mga pagbabayad alinsunod sa <terms>mga tuntuning ito</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -23,12 +23,8 @@
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Pumili ng pamamaraan ng pagbabayad</string>
   <string name="stripe_paymentsheet_close">Isara</string>
-  <!-- A button used to confirm selecting a saved payment method -->
-  <string name="stripe_paymentsheet_confirm">Kumpirmahin</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Manwal na ilagay ang address</string>
-  <!-- Title shown above a carousel containing the customer's payment methods -->
-  <string name="stripe_paymentsheet_manage_your_payment_methods">Pangasiwaan ang iyong mga paraan ng pagbabayad</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Idedeposito ng Stripe ang $0.01 sa iyong account sa loob ng 1-2 araw ng trabaho. Pagkatapos ay makakatanggap ka ng email na may mga tagubilin para kumpletuhin ang pagbabayad sa %s.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
@@ -47,10 +43,6 @@
   <string name="stripe_paymentsheet_remove_bank_account_title">Alisin ang account sa bangko</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Alisin ang %s</string>
-  <!-- A button used for saving a new payment method -->
-  <string name="stripe_paymentsheet_save">i-save</string>
-  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-  <string name="stripe_paymentsheet_save_a_new_payment_method">I-save ang bagong paraan ng pagbabayad</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">I-save para sa mga pagbabayad sa hinaharap</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
@@ -59,6 +51,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Piliin ang iyong paraan ng pagbabayad</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Kabuuan: %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">May nangyaring mali</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Kanselahin at magbayad sa ibang paraan</string>
   <!-- Text on a screen asking the user to approve a payment -->

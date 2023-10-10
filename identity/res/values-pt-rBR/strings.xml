@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Marca que indica o sucesso da captura do documento</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Escolher foto</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Preencher com dados de teste</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Poupe tempo escolhendo um resultado desejado e fazendo o preenchimento automático. O fluxo do SDK para dispositivos móveis retornará o resultado Concluído.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Não foi possível capturar uma imagem com qualidade.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Você pode tentar novamente ou carregar uma imagem do dispositivo.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Não foi possível capturar a imagem</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">ícone de câmera</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Ícone do relógio</string>
   <!-- Content description for close button -->
@@ -129,12 +135,22 @@
   <string name="stripe_selfie_item_description">uma selfie capturada</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">As imagens da sua selfie não foram salvas. Quer sair?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">Algumas fotos serão tiradas automaticamente na próxima etapa para verificar sua identidade</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Prepare-se para tirar uma selfie</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Tirar foto</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Esta página só é exibida em modo de teste.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Você está no modo de teste</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Tentar novamente</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Erro inesperado – tente novamente em alguns segundos</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Carregue uma foto</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Carregar verso da habilitação</string>
   <!-- Title of dialog to upload front of driver license -->

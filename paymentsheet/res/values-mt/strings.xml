@@ -6,6 +6,8 @@
   <string name="stripe_bank_account_ending_in">Neħħi l-kont tal-bank li jispiċċa b\'%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Ikkonferma l-pagament fl-app tal-bank fi żmien %s biex tlesti x-xirja.</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">Seħħ żball. Iċċekkja l-konnessjoni tiegħek u erġa\' pprova.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Meta tkompli tkun qed taqbel li tawtorizza l-pagamenti skont <terms>dar-regoli</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -59,6 +61,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Agħżel il-metodu tal-ħlas tiegħek</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">Xi ħaġa marret ħażin</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Ikkanċella u ħallas mod ieħor</string>
   <!-- Text on a screen asking the user to approve a payment -->

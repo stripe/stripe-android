@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Beri tanda centang untuk menunjukkan keberhasilan pengambilan dokumen</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Pilih Foto</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Selesaikan dengan data percobaan</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Hemat waktu dengan memilih hasil yang diinginkan dan menyelesaikan hasil itu secara instan. Alur SDK seluler akan kembali dengan hasil Selesai.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Kami tidak dapat mengambil gambar berkualitas tinggi.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Anda dapat mencoba lagi atau mengunggah gambar dari perangkat.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Tidak dapat mengambil gambar</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">ikon kamera</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Ikon jam</string>
   <!-- Content description for close button -->
@@ -129,12 +135,22 @@
   <string name="stripe_selfie_item_description">Satu swafoto diambil</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Gambar swafoto Anda belum disimpan. Apakah Anda ingin keluar?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">Beberapa foto akan diambil secara otomatis pada langkah berikutnya untuk memverifikasi diri Anda</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Bersiaplah untuk mengambil swafoto</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Ambil Foto</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Halaman ini hanya ditampilkan dalam mode percobaan.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Anda saat ini dalam mode percobaan</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Coba Lagi</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Ada kesalahan tak terduga -- cobalah lagi dalam beberapa detik</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Unggah foto</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Unggah bagian belakang surat izin mengemudi</string>
   <!-- Title of dialog to upload front of driver license -->

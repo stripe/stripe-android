@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">เครื่องหมายถูกที่แสดงว่าถ่ายรูปเอกสารสำเร็จแล้ว</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">เลือกรูปภาพ</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">ดำเนินการโดยใช้ข้อมูลทดสอบ</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">ประหยัดเวลาด้วยการเลือกผลลัพธ์ที่ต้องการแล้วดำเนินการทันทีด้วยผลลัพธ์ดังกล่าว ขั้นตอน SDK ในอุปกรณ์เคลื่อนที่จะส่งผลลัพธ์ \"ดำเนินการสำเร็จ\" กลับมา</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">ไม่สามารถถ่ายรูปคุณภาพสูงได้</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">โปรดลองอีกครั้งหรืออัปโหลดรูปภาพจากอุปกรณ์</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">ไม่สามารถถ่ายภาพ</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">ไอคอนกล้อง</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">ไอคอนนาฬิกา</string>
   <!-- Content description for close button -->
@@ -129,12 +135,22 @@
   <string name="stripe_selfie_item_description">ถ่ายเซลฟี 1 ภาพแล้ว</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">ระบบยังไม่ได้บันทึกภาพเซลฟี คุณต้องการออกจากส่วนนี้ไหม</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">ระบบจะถ่ายภาพ 2-3 รายการโดยอัตโนมัติในขั้นตอนถัดไปเพื่อยืนยันว่าเป็นคุณจริงๆ</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">เตรียมตัวถ่ายภาพเซลฟี</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">ถ่ายภาพ</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">หน้านี้จะแสดงในโหมดทดสอบเท่านั้น</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">ขณะนี้คุณอยู่ในโหมดทดสอบ</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">ลองอีกครั้ง</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">เกิดข้อผิดพลาดที่ไม่คาดคิด โปรดลองอีกครั้งในอีกสักครู่</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">อัปโหลดรูปภาพ</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">อัปโหลดใบอนุญาตขับขี่ด้านหลัง</string>
   <!-- Title of dialog to upload front of driver license -->

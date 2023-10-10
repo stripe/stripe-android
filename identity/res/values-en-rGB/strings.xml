@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Tick mark to indicate document capture success</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Choose Photo</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Complete with test data</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Save time by choosing a desired result and completing instantly with that outcome. The mobile SDK flow will return with result Completed.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">We could not capture a high-quality image.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">You can either try again or upload an image from your device.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Could not capture image</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">camera icon</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Clock icon</string>
   <!-- Content description for close button -->
@@ -129,12 +135,22 @@
   <string name="stripe_selfie_item_description">one selfie captured</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Your selfie images have not been saved. Do you want to leave?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">A few photos will be taken automatically on the next step to verify it\'s you</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Get ready to take a selfie</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Take Photo</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">This page is only shown in testmode.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">You\'re currently in testmode</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Try Again</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">There was an unexpected error - please try again in a few seconds</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Upload a photo</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Upload back of driving licence</string>
   <!-- Title of dialog to upload front of driver license -->
