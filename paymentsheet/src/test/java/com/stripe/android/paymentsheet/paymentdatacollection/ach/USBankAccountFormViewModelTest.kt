@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +58,7 @@ class USBankAccountFormViewModelTest {
                 name = CUSTOMER_NAME,
                 email = CUSTOMER_EMAIL
             ),
-            isEligibleForCardBrandChoice = false,
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         ),
         isCompleteFlow = true,
         isPaymentFlow = true,

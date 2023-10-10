@@ -5,6 +5,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import org.junit.Test
 
@@ -62,7 +63,7 @@ class FormArgumentsTest {
             amount = Amount(50, "USD"),
             billingDetails = billingDetails,
             initialPaymentMethodCreateParams = paymentMethodCreateParams,
-            isEligibleForCardBrandChoice = false,
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible
         )
 
         assertThat(formArguments.getInitialValuesMap()).isEqualTo(
@@ -95,7 +96,7 @@ class FormArgumentsTest {
             amount = Amount(50, "USD"),
             billingDetails = billingDetails,
             initialPaymentMethodCreateParams = null,
-            isEligibleForCardBrandChoice = false,
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible
         )
 
         assertThat(formArguments.getInitialValuesMap()).isEqualTo(
