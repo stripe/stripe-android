@@ -208,7 +208,7 @@ private fun CardBrand(
             Crossfade(
                 targetState = icon,
                 label = "CardBrandIconCrossfade",
-            ){ brandIcon ->
+            ) { brandIcon ->
                 Image(
                     painter = painterResource(brandIcon),
                     colorFilter = tint?.let { ColorFilter.tint(it) },

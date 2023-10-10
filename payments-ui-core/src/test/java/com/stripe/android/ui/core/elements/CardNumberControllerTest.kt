@@ -226,13 +226,13 @@ internal class CardNumberControllerTest {
                     currentItem = TextFieldIcon.Dropdown.Item(
                         id = CardBrand.Unknown.code,
                         label = resolvableString(R.string.stripe_card_brand_choice_no_selection),
-                        icon = CardBrand.Unknown.icon
+                        icon = PaymentModelR.drawable.stripe_ic_unknown_brand_cbc,
                     ),
                     items = listOf(
                         TextFieldIcon.Dropdown.Item(
                             id = CardBrand.Unknown.code,
                             label = resolvableString(R.string.stripe_card_brand_choice_no_selection),
-                            icon = CardBrand.Unknown.icon
+                            icon = PaymentModelR.drawable.stripe_ic_unknown_brand_cbc,
                         ),
                         TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
@@ -286,7 +286,7 @@ internal class CardNumberControllerTest {
                         TextFieldIcon.Dropdown.Item(
                             id = CardBrand.Unknown.code,
                             label = resolvableString(R.string.stripe_card_brand_choice_no_selection),
-                            icon = CardBrand.Unknown.icon
+                            icon = PaymentModelR.drawable.stripe_ic_unknown_brand_cbc,
                         ),
                         TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
