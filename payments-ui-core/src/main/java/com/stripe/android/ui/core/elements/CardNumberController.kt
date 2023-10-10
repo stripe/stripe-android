@@ -36,6 +36,8 @@ import com.stripe.android.R as PaymentsCoreR
 internal sealed class CardNumberController : TextFieldController, SectionFieldErrorController {
     abstract val cardBrandFlow: Flow<CardBrand>
 
+    abstract val selectedCardBrandFlow: Flow<CardBrand>
+
     abstract val cardScanEnabled: Boolean
 
     @OptIn(ExperimentalComposeUiApi::class)
@@ -89,12 +91,41 @@ internal class DefaultCardNumberController constructor(
 
     private val isEligibleForCardBrandChoice = cardBrandChoiceConfig is CardBrandChoiceConfig.Eligible
     private val brandChoices = MutableStateFlow<List<CardBrand>>(listOf())
-    private val chosenBrand = MutableStateFlow(
+
+    private val preferredBrands = when (cardBrandChoiceConfig) {
+        is CardBrandChoiceConfig.Eligible -> cardBrandChoiceConfig.preferredBrands
+        is CardBrandChoiceConfig.Ineligible -> listOf()
+    }
+
+    /*
+     * This flow is keep track of whatever brand the user had selected from the dropdown menu
+     * regardless of whether their card number has changed.
+     *
+     * This will allow us re-reference the previously selected choice if the user changes the card
+     * number.
+     */
+    private val uncheckedChosenBrand = MutableStateFlow(
         when (cardBrandChoiceConfig) {
-            is CardBrandChoiceConfig.Eligible -> cardBrandChoiceConfig.initialBrand ?: CardBrand.Unknown
-            is CardBrandChoiceConfig.Ineligible -> CardBrand.Unknown
+            is CardBrandChoiceConfig.Eligible -> cardBrandChoiceConfig.initialBrand
+            is CardBrandChoiceConfig.Ineligible -> null
         }
     )
+
+    override val selectedCardBrandFlow: Flow<CardBrand> = uncheckedChosenBrand.combine(
+        brandChoices
+    ) { previous, choices ->
+        when (previous) {
+            CardBrand.Unknown -> previous
+            in choices -> previous ?: CardBrand.Unknown
+            else -> {
+                val firstAvailablePreferred = preferredBrands
+                    .intersect(choices.toSet())
+                    .firstOrNull()
+
+                firstAvailablePreferred ?: CardBrand.Unknown
+            }
+        }
+    }
 
     /*
      * In state validation, we check that the card number itself is valid and do not care about
@@ -108,14 +139,18 @@ internal class DefaultCardNumberController constructor(
             ?: CardBrand.Unknown
     }
 
-    override val cardBrandFlow = impliedCardBrand.combine(
-        chosenBrand
-    ) { impliedBrand, chosenBrand ->
-        if (isEligibleForCardBrandChoice) {
-            chosenBrand
-        } else {
-            impliedBrand
+    override val cardBrandFlow = if (isEligibleForCardBrandChoice) {
+        combine(
+            brandChoices,
+            selectedCardBrandFlow
+        ) { choices, selected ->
+            when (choices.size) {
+                1 -> choices.first()
+                else -> selected
+            }
         }
+    } else {
+        impliedCardBrand
     }
 
     override val cardScanEnabled = true
@@ -133,14 +168,9 @@ internal class DefaultCardNumberController constructor(
                         panLength
                 }
 
-                val currentValue = chosenBrand.value
                 val newBrandChoices = accountRanges.map { it.brand }.distinct()
 
                 brandChoices.value = newBrandChoices
-
-                if (currentValue !in newBrandChoices) {
-                    chosenBrand.value = CardBrand.Unknown
-                }
             }
         },
         isCbcEligible = { isEligibleForCardBrandChoice },
@@ -149,7 +179,7 @@ internal class DefaultCardNumberController constructor(
     override val trailingIcon: Flow<TextFieldIcon?> = combine(
         _fieldValue,
         brandChoices,
-        chosenBrand
+        selectedCardBrandFlow
     ) { number, brands, chosen ->
         if (isEligibleForCardBrandChoice && number.isNotEmpty()) {
             val noSelection = TextFieldIcon.Dropdown.Item(
@@ -278,7 +308,7 @@ internal class DefaultCardNumberController constructor(
     }
 
     override fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {
-        chosenBrand.value = CardBrand.fromCode(item.id)
+        uncheckedChosenBrand.value = CardBrand.fromCode(item.id)
     }
 
     private companion object {

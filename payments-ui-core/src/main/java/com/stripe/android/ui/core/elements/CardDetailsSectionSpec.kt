@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.serialization.SerialName
@@ -20,7 +21,7 @@ data class CardDetailsSectionSpec(
 ) : FormItemSpec() {
     fun transform(
         context: Context,
-        isEligibleForCardBrandChoice: Boolean,
+        cbcEligibility: CardBrandChoiceEligibility,
         initialValues: Map<IdentifierSpec, String?>,
     ): FormElement =
         CardDetailsSectionElement(
@@ -28,6 +29,6 @@ data class CardDetailsSectionSpec(
             initialValues = initialValues,
             identifier = apiPath,
             collectName = collectName,
-            isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+            cbcEligibility = cbcEligibility,
         )
 }

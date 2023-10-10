@@ -7,6 +7,7 @@ import com.stripe.android.core.injection.SHIPPING_VALUES
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -40,6 +41,6 @@ object FormControllerModule {
         saveForFutureUseInitialValue = false,
         merchantName = merchantName,
         context = context,
-        isEligibleForCardBrandChoice = false,
+        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
     )
 }

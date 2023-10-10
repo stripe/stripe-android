@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.R
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -57,7 +58,7 @@ class CardDetailsControllerTest {
                 IdentifierSpec.CardNumber to "4000002500001001",
                 IdentifierSpec.PreferredCardBrand to CardBrand.CartesBancaires.code
             ),
-            isEligibleForCardBrandChoice = true
+            cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf())
         )
 
         val flowValues = mutableListOf<CardBrand?>()

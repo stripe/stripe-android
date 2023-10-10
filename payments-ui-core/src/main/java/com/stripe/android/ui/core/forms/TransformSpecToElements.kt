@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.forms
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
@@ -57,7 +58,7 @@ class TransformSpecToElements(
     private val saveForFutureUseInitialValue: Boolean,
     private val merchantName: String,
     private val context: Context,
-    private val isEligibleForCardBrandChoice: Boolean
+    private val cbcEligibility: CardBrandChoiceEligibility
 ) {
     fun transform(list: List<FormItemSpec>): List<FormElement> =
         list.mapNotNull {
@@ -76,7 +77,7 @@ class TransformSpecToElements(
                 is BacsDebitConfirmSpec -> it.transform(merchantName)
                 is CardDetailsSectionSpec -> it.transform(
                     context = context,
-                    isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+                    cbcEligibility = cbcEligibility,
                     initialValues = initialValues
                 )
                 is BsbSpec -> it.transform(initialValues)

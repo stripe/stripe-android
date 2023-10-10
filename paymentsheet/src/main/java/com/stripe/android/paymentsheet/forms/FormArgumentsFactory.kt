@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.getPMAddForm
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 
 internal object FormArgumentsFactory {
@@ -18,7 +19,7 @@ internal object FormArgumentsFactory {
         merchantName: String,
         amount: Amount? = null,
         newLpm: PaymentSelection.New?,
-        isEligibleForCardBrandChoice: Boolean,
+        cbcEligibility: CardBrandChoiceEligibility,
     ): FormArguments {
         val layoutFormDescriptor = paymentMethod.getPMAddForm(stripeIntent, config)
 
@@ -58,7 +59,7 @@ internal object FormArgumentsFactory {
             initialPaymentMethodCreateParams = initialParams,
             billingDetailsCollectionConfiguration = config?.billingDetailsCollectionConfiguration
                 ?: PaymentSheet.BillingDetailsCollectionConfiguration(),
-            isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+            cbcEligibility = cbcEligibility,
             requiresMandate = paymentMethod.requiresMandate,
             requiredFields = paymentMethod.placeholderOverrideList,
         )

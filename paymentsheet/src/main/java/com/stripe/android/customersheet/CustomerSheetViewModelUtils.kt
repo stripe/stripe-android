@@ -7,6 +7,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import javax.inject.Provider
@@ -28,7 +29,7 @@ internal fun ViewModel.buildFormObserver(
         billingDetails = configuration.defaultBillingDetails,
         billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
         // TODO(tillh-stripe) Determine this based on /wallets-config response
-        isEligibleForCardBrandChoice = false,
+        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
     )
 
     val formViewModel = formViewModelSubcomponentBuilderProvider.get()
