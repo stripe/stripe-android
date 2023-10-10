@@ -2,13 +2,22 @@ package com.stripe.android.identity.navigation
 
 import android.util.Log
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Scaffold
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
@@ -30,6 +39,7 @@ import com.stripe.android.identity.networking.models.CollectedDataParam.Companio
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.IdentityScanState.Companion.toScanDestination
 import com.stripe.android.identity.states.IdentityScanState.Companion.toUploadDestination
+import com.stripe.android.identity.ui.BottomSheet
 import com.stripe.android.identity.ui.ConfirmationScreen
 import com.stripe.android.identity.ui.ConsentScreen
 import com.stripe.android.identity.ui.CountryNotListedScreen
@@ -49,11 +59,14 @@ import com.stripe.android.identity.ui.OTPScreen
 import com.stripe.android.identity.ui.SelfieScanScreen
 import com.stripe.android.identity.ui.SelfieWarmupScreen
 import com.stripe.android.identity.ui.UploadScreen
+import com.stripe.android.identity.viewmodel.BottomSheetViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.uicore.stripeShapes
 import kotlinx.coroutines.launch
 
 @Composable
+@ExperimentalMaterialApi
 internal fun IdentityNavGraph(
     navController: NavHostController = rememberNavController(),
     identityViewModel: IdentityViewModel,
@@ -332,7 +345,7 @@ internal fun IdentityNavGraph(
             screen(ErrorDestination.ROUTE) {
                 Log.d(
                     ErrorDestination.TAG,
-                    "About to show error screen with error caused by ${identityViewModel.errorCause.value}"
+                    "About to show error screen with error caused by ${identityViewModel.errorCause.value?.cause}"
                 )
                 ErrorScreen(
                     identityViewModel = identityViewModel,
@@ -456,13 +469,52 @@ private fun DocumentUploadScreenContent(
     )
 }
 
+@ExperimentalMaterialApi
+/**
+ * Built a composable screen with ModalBottomSheetLayout
+ */
 private fun NavGraphBuilder.screen(
     route: IdentityTopLevelDestination.DestinationRoute,
     content: @Composable (NavBackStackEntry) -> Unit
 ) {
     composable(
         route = route.route,
-        arguments = route.arguments,
-        content = content
-    )
+        arguments = route.arguments
+    ) { navBackStackEntry ->
+        val bottomSheetViewModel = viewModel<BottomSheetViewModel>()
+        val bottomSheetState by bottomSheetViewModel.bottomSheetState.collectAsState()
+        val modalSheetState = rememberModalBottomSheetState(
+            initialValue = ModalBottomSheetValue.Hidden
+        )
+
+        // Required when bottomsheet is dismissed by swiping down or clicking outside, need to
+        // update the state inside viewmodel
+        LaunchedEffect(modalSheetState.isVisible) {
+            if (modalSheetState.isVisible.not()) {
+                bottomSheetViewModel.dismissBottomSheet()
+            }
+        }
+
+        LaunchedEffect(bottomSheetState.shouldShow) {
+            if (bottomSheetState.shouldShow) {
+                modalSheetState.show()
+            } else {
+                modalSheetState.hide()
+            }
+        }
+
+        ModalBottomSheetLayout(
+            sheetContent = {
+                BottomSheet()
+            },
+            sheetState = modalSheetState,
+            sheetGesturesEnabled = true,
+            sheetShape = RoundedCornerShape(
+                topStart = MaterialTheme.stripeShapes.cornerRadius.dp,
+                topEnd = MaterialTheme.stripeShapes.cornerRadius.dp,
+            )
+        ) {
+            content(navBackStackEntry)
+        }
+    }
 }

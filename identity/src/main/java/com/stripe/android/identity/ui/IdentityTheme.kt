@@ -3,8 +3,11 @@ package com.stripe.android.identity.ui
 import android.content.res.Resources
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.Colors
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Shapes
+import androidx.compose.material.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -52,6 +55,23 @@ internal fun IdentityTheme(content: @Composable () -> Unit) {
     val hostingAppTypography = themeParams.typography ?: MaterialTheme.typography
     val hostingAppShapes = themeParams.shapes ?: MaterialTheme.shapes
 
+    AdoptForStripeTheme(
+        hostingAppColors = hostingAppColors,
+        hostingAppTypography = hostingAppTypography,
+        hostingAppShapes = hostingAppShapes,
+        inspectionMode = inspectionMode,
+        content = content
+    )
+}
+
+@Composable
+internal fun AdoptForStripeTheme(
+    hostingAppColors: Colors,
+    hostingAppTypography: Typography,
+    hostingAppShapes: Shapes,
+    inspectionMode: Boolean,
+    content: @Composable () -> Unit
+) {
     val stripeTypography: StripeTypography = StripeThemeDefaults.typography.copy(
         body1FontFamily = hostingAppTypography.body1.fontFamily,
         body2FontFamily = hostingAppTypography.body2.fontFamily,
@@ -61,7 +81,6 @@ internal fun IdentityTheme(content: @Composable () -> Unit) {
         subtitle1FontFamily = hostingAppTypography.subtitle1.fontFamily,
         captionFontFamily = hostingAppTypography.caption.fontFamily,
     )
-
     // These LocalProviders are required by StripeTheme, refer to StripeTheme.kt for details
     CompositionLocalProvider(
         LocalColors provides StripeThemeDefaults.colors(isSystemInDarkTheme()).copy(
@@ -121,4 +140,4 @@ private inline val Resources.Theme.key: Any?
 
 private var sThemeGetKeyMethodFetched = false
 private var sThemeGetKeyMethod: Method? = null
-private const val DividerAlpha = 0.12f
+internal const val DividerAlpha = 0.12f
