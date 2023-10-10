@@ -8,8 +8,9 @@ import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
+import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -29,7 +30,7 @@ class LogErrorTest {
     }
 
     @Test
-    fun `InstitutionUnplannedDowntimeError should log analytics and emit live event`() = runTest {
+    fun `InstitutionUnplannedDowntimeError should log analytics and not emit live event`() = runTest {
         // Given
         val analyticsTracker = mock<FinancialConnectionsAnalyticsTracker>()
 
@@ -44,7 +45,7 @@ class LogErrorTest {
             extraMessage = "Test error",
             error = unplannedDowntimeError,
             logger = Logger.noop(),
-            pane = FinancialConnectionsSessionManifest.Pane.PARTNER_AUTH,
+            pane = Pane.PARTNER_AUTH,
         )
 
         // Then
@@ -52,17 +53,48 @@ class LogErrorTest {
         verify(analyticsTracker).track(
             FinancialConnectionsAnalyticsEvent.Error(
                 extraMessage = "Test error",
-                pane = FinancialConnectionsSessionManifest.Pane.PARTNER_AUTH,
+                pane = Pane.PARTNER_AUTH,
                 exception = unplannedDowntimeError
             )
         )
 
         // emits live event
-        assertThat(liveEvents).containsExactly(
+        assertThat(liveEvents).isEmpty()
+    }
+
+    @Test
+    fun `AppInitializationError should log analytics and emit live event`() = runTest {
+        // Given
+        val analyticsTracker = mock<FinancialConnectionsAnalyticsTracker>()
+
+        val appInitializationError = AppInitializationError(
+            message = "Browser unavailable",
+        )
+
+        // When
+        analyticsTracker.logError(
+            extraMessage = "Test error",
+            error = appInitializationError,
+            logger = Logger.noop(),
+            pane = Pane.PARTNER_AUTH,
+        )
+
+        // Then
+        // logs analytics
+        verify(analyticsTracker).track(
+            FinancialConnectionsAnalyticsEvent.Error(
+                extraMessage = "Test error",
+                pane = Pane.PARTNER_AUTH,
+                exception = appInitializationError
+            )
+        )
+
+        // emits live event
+        assertThat(liveEvents).contains(
             FinancialConnectionsEvent(
                 name = Name.ERROR,
                 metadata = Metadata(
-                    errorCode = ErrorCode.INSTITUTION_UNAVAILABLE_UNPLANNED
+                    errorCode = ErrorCode.WEB_BROWSER_UNAVAILABLE
                 )
             )
         )

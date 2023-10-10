@@ -362,7 +362,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
             requireNotNull(authSession)
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
-            val nextPane = if (authSession.isOAuth) {
+            if (authSession.isOAuth) {
                 logger.debug("Web AuthFlow completed! waiting for oauth results")
                 val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
                 logger.debug("OAuth results received! completing session")
@@ -371,11 +371,18 @@ internal class PartnerAuthViewModel @Inject constructor(
                     publicToken = oAuthResults.publicToken
                 )
                 logger.debug("Session authorized!")
-                updatedSession.nextPane.destination(referrer = PANE)
+                navigationManager.tryNavigateTo(
+                    updatedSession.nextPane.destination(referrer = PANE),
+                    popUpToCurrent = true,
+                    inclusive = true
+                )
             } else {
-                AccountPicker(referrer = PANE)
+                navigationManager.tryNavigateTo(
+                    AccountPicker(referrer = PANE),
+                    popUpToCurrent = true,
+                    inclusive = true
+                )
             }
-            navigationManager.tryNavigateTo(nextPane)
         }.onFailure {
             eventTracker.logError(
                 extraMessage = "failed authorizing session",
