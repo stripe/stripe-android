@@ -8,7 +8,6 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.ImageSpan
 import android.text.style.StyleSpan
 import android.text.style.URLSpan
-import android.text.style.UnderlineSpan
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -384,12 +383,9 @@ fun annotatedStringResource(
                                 )
                             }
                         }
-                        is UnderlineSpan -> {
-                            addStyle(
-                                SpanStyle(textDecoration = TextDecoration.Underline),
-                                start,
-                                end
-                            )
+                        is BulletSpan -> {
+                            // append a bullet and a tab character in front
+                            append("\u2022\t")
                         }
                         is BulletSpan -> {
                             // append a bullet and a tab character in front

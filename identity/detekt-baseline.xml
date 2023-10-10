@@ -13,8 +13,8 @@
     <ID>LongMethod:AddressSection.kt$@Composable internal fun AddressSection( enabled: Boolean, identityViewModel: IdentityViewModel, addressCountries: List&lt;Country>, addressNotListedText: String, navController: NavController, onAddressCollected: (Resource&lt;RequiredInternationalAddress>) -> Unit )</ID>
     <ID>LongMethod:CameraScreenLaunchedEffect.kt$@Composable internal fun CameraScreenLaunchedEffect( identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, verificationPage: VerificationPage, navController: NavController, cameraManager: IdentityCameraManager, onCameraReady: () -> Unit )</ID>
     <ID>LongMethod:ConfirmationScreen.kt$@Composable internal fun ConfirmationScreen( navController: NavController, identityViewModel: IdentityViewModel, verificationFlowFinishable: VerificationFlowFinishable )</ID>
-    <ID>LongMethod:ConsentScreen.kt$@Composable private fun ConsentHeader( merchantLogoUri: Uri, title: String, privacyPolicy: String, timeEstimate: String )</ID>
-    <ID>LongMethod:ConsentScreen.kt$@Composable private fun SuccessUI( merchantLogoUri: Uri, verificationPage: VerificationPage, onConsentAgreed: () -> Unit, onConsentDeclined: () -> Unit )</ID>
+    <ID>LongMethod:ConsentScreen.kt$@Composable private fun SuccessUI( merchantLogoUri: Uri, consentPage: VerificationPageStaticContentConsentPage, bottomSheets: Map&lt;String, VerificationPageStaticContentBottomSheetContent>?, visitedIndividualWelcomePage: Boolean, onConsentAgreed: () -> Unit, onConsentDeclined: () -> Unit )</ID>
+    <ID>LongMethod:ConsentWelcomeHeader.kt$@Composable internal fun ConsentWelcomeHeader( modifier: Modifier = Modifier, merchantLogoUri: Uri, title: String?, showLogos: Boolean = true )</ID>
     <ID>LongMethod:DebugScreen.kt$@Composable internal fun CompleteWithTestDataSection( onClickSubmit: (CompleteOption) -> Unit )</ID>
     <ID>LongMethod:DebugScreen.kt$@Composable internal fun DebugScreen( navController: NavController, identityViewModel: IdentityViewModel, verificationFlowFinishable: VerificationFlowFinishable )</ID>
     <ID>LongMethod:DocSelectionScreen.kt$@Composable internal fun DocSelectionScreen( navController: NavController, identityViewModel: IdentityViewModel, cameraPermissionEnsureable: CameraPermissionEnsureable )</ID>
@@ -78,8 +78,6 @@
     <ID>TooManyFunctions:IdentityRepository.kt$IdentityRepository</ID>
     <ID>TooManyFunctions:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
     <ID>TooManyFunctions:UploadDestinations.kt$DocumentUploadDestination$Companion</ID>
-    <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationConfirmButtonTag = "ConfirmButton"</ID>
-    <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationTitleTag = "ConfirmationTitle"</ID>
     <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val docSelectionTitleTag = "Title"</ID>
     <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val singleSelectionTag = "SingleSelection"</ID>
     <ID>UnnecessaryAbstractClass:IdentityCommonModule.kt$IdentityCommonModule$IdentityCommonModule</ID>
