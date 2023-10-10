@@ -29,6 +29,7 @@ dependencies {
     implementation libs.compose.navigation
     implementation libs.compose.runtime
     implementation libs.compose.viewModels
+    implementation libs.compose.uiToolingPreview
     implementation libs.dagger
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.serialization
