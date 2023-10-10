@@ -2,12 +2,12 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.CardUtils
 import com.stripe.android.Stripe
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.Objects
 
 /**
  * Model for PaymentMethod creation parameters.
@@ -292,13 +292,41 @@ data class PaymentMethodCreateParams internal constructor(
         internal val expiryYear: Int? = null,
         internal val cvc: String? = null,
         private val token: String? = null,
-        internal val attribution: Set<String>? = null
+        internal val attribution: Set<String>? = null,
+        internal val networks: Networks? = null,
     ) : StripeParamsModel, Parcelable {
-        internal val brand: CardBrand get() = CardUtils.getPossibleCardBrand(number)
-        internal val last4: String? get() = number?.takeLast(4)
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-        fun getLast4() = last4
+        // TODO(tillh-stripe) Add docs and make public
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        class Networks(
+            val preferred: String? = null,
+        ) : StripeParamsModel, Parcelable {
+
+            override fun toParamMap(): Map<String, Any> {
+                return if (preferred != null) {
+                    mapOf(PARAM_PREFERRED to preferred)
+                } else {
+                    emptyMap()
+                }
+            }
+
+            override fun equals(other: Any?): Boolean {
+                return other is Networks && other.preferred == preferred
+            }
+
+            override fun hashCode(): Int {
+                return Objects.hash(preferred)
+            }
+
+            override fun toString(): String {
+                return "PaymentMethodCreateParams.Card.Networks(preferred=$preferred)"
+            }
+
+            private companion object {
+                const val PARAM_PREFERRED = "preferred"
+            }
+        }
 
         override fun toParamMap(): Map<String, Any> {
             return listOf(
@@ -306,7 +334,8 @@ data class PaymentMethodCreateParams internal constructor(
                 PARAM_EXP_MONTH to expiryMonth,
                 PARAM_EXP_YEAR to expiryYear,
                 PARAM_CVC to cvc,
-                PARAM_TOKEN to token
+                PARAM_TOKEN to token,
+                PARAM_NETWORKS to networks?.toParamMap(),
             ).mapNotNull {
                 it.second?.let { value ->
                     it.first to value
@@ -323,6 +352,7 @@ data class PaymentMethodCreateParams internal constructor(
             private var expiryMonth: Int? = null
             private var expiryYear: Int? = null
             private var cvc: String? = null
+            private var networks: Networks? = null
 
             fun setNumber(number: String?): Builder = apply {
                 this.number = number
@@ -340,12 +370,18 @@ data class PaymentMethodCreateParams internal constructor(
                 this.cvc = cvc
             }
 
+            // TODO(tillh-stripe) Make public
+            internal fun setNetworks(networks: Networks?): Builder = apply {
+                this.networks = networks
+            }
+
             fun build(): Card {
                 return Card(
                     number = number,
                     expiryMonth = expiryMonth,
                     expiryYear = expiryYear,
-                    cvc = cvc
+                    cvc = cvc,
+                    networks = networks,
                 )
             }
         }
@@ -356,6 +392,7 @@ data class PaymentMethodCreateParams internal constructor(
             private const val PARAM_EXP_YEAR: String = "exp_year"
             private const val PARAM_CVC: String = "cvc"
             private const val PARAM_TOKEN: String = "token"
+            private const val PARAM_NETWORKS: String = "networks"
 
             /**
              * Create a [Card] from a Card token.
