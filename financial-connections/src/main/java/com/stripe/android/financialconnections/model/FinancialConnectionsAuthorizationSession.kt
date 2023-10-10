@@ -89,7 +89,7 @@ internal data class FinancialConnectionsAuthorizationRepairSession(
 ) : Parcelable
 
 @Serializable(with = Flow.Serializer::class)
-enum class Flow(val value: String) {
+internal enum class Flow(val value: String) {
     @SerialName("direct")
     DIRECT("direct"),
 

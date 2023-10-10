@@ -32,34 +32,23 @@ internal class ClickHandler @Inject constructor(
 
         when {
             URLUtil.isNetworkUrl(uri) -> onNetworkUrlClick(uri)
-            else -> getActionOrNull(
-                clickActions = clickActions,
-                uri = uri
-            )
-                // An actionable url has been found: Trigger action.
-                ?.let { (_, action) -> action() }
-                // No actionable url found on [clickActions]: Log error.
-                ?: run {
-                    eventTracker.logError(
-                        logger = logger,
-                        pane = pane,
-                        error = IllegalArgumentException("Unknown clickable URL: $uri"),
-                        extraMessage = "Error resolving clickable URL"
-                    )
-                }
+            else ->
+                clickActions
+                    // get the first action that matches the uri.
+                    .firstNotNullOfOrNull { (url, action) ->
+                        action.takeIf { uriUtils.compareSchemeAuthorityAndPath(url, uri) }
+                    }
+                    // An actionable url has been found: Trigger action.
+                    ?.let { action -> action() }
+                    ?: run {
+                        // No actionable url found on [clickActions]: Log error.
+                        eventTracker.logError(
+                            logger = logger,
+                            pane = pane,
+                            error = IllegalArgumentException("Unknown clickable URL: $uri"),
+                            extraMessage = "Error resolving clickable URL"
+                        )
+                    }
         }
     }
-
-    private suspend fun getActionOrNull(
-        clickActions: Map<String, () -> Unit>,
-        uri: String
-    ): Pair<String, () -> Unit>? = clickActions
-        .firstNotNullOfOrNull { actionableUrl ->
-            if (uriUtils.compareSchemeAuthorityAndPath(
-                    actionableUrl.key,
-                    uri
-                )
-            ) actionableUrl else null
-        }
-        ?.toPair()
 }
