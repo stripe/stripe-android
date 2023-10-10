@@ -3,6 +3,7 @@ package com.stripe.android.uicore.text
 import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
+import android.text.style.BulletSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.ImageSpan
 import android.text.style.StyleSpan
@@ -345,6 +346,10 @@ fun annotatedStringResource(
                                 start,
                                 end
                             )
+                        }
+                        is BulletSpan -> {
+                            // append a bullet and a tab character in front
+                            append("\u2022\t")
                         }
                         is ForegroundColorSpan -> {
                             addStyle(SpanStyle(color = Color(span.foregroundColor)), start, end)
