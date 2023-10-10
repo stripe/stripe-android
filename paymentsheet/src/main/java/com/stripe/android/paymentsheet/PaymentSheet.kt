@@ -320,7 +320,7 @@ class PaymentSheet internal constructor(
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    data class Configuration @JvmOverloads constructor(
+    data class Configuration internal constructor(
         /**
          * Your customer-facing business name.
          *
@@ -431,6 +431,35 @@ class PaymentSheet internal constructor(
          */
         val preferredNetworks: List<CardBrand>? = null,
     ) : Parcelable {
+        @JvmOverloads
+        constructor(
+            merchantDisplayName: String,
+            customer: CustomerConfiguration? = null,
+            googlePay: GooglePayConfiguration? = null,
+            primaryButtonColor: ColorStateList? = null,
+            defaultBillingDetails: BillingDetails? = null,
+            shippingDetails: AddressDetails? = null,
+            allowsDelayedPaymentMethods: Boolean = false,
+            allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
+            appearance: Appearance = Appearance(),
+            primaryButtonLabel: String? = null,
+            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+                BillingDetailsCollectionConfiguration(),
+        ) : this(
+            merchantDisplayName = merchantDisplayName,
+            customer = customer,
+            googlePay = googlePay,
+            primaryButtonColor = primaryButtonColor,
+            defaultBillingDetails = defaultBillingDetails,
+            shippingDetails = shippingDetails,
+            allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+            appearance = appearance,
+            primaryButtonLabel = primaryButtonLabel,
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            preferredNetworks = null
+        )
+
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */
@@ -449,6 +478,7 @@ class PaymentSheet internal constructor(
             private var primaryButtonLabel: String? = null
             private var billingDetailsCollectionConfiguration =
                 BillingDetailsCollectionConfiguration()
+            private var preferredNetworks: List<CardBrand>? = null
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -497,6 +527,12 @@ class PaymentSheet internal constructor(
                 this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
             }
 
+            internal fun preferredNetworks(
+                preferredNetworks: List<CardBrand>
+            ) = apply {
+                this.preferredNetworks = preferredNetworks
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -509,6 +545,7 @@ class PaymentSheet internal constructor(
                 appearance = appearance,
                 primaryButtonLabel = primaryButtonLabel,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                preferredNetworks = preferredNetworks
             )
         }
     }

@@ -98,7 +98,7 @@ internal class DefaultCardNumberController constructor(
     }
 
     /*
-     * This flow is keep track of whatever brand the user had selected from the dropdown menu
+     * This flow is keeping track of whatever brand the user had selected from the dropdown menu
      * regardless of whether their card number has changed.
      *
      * This will allow us re-reference the previously selected choice if the user changes the card
@@ -118,9 +118,7 @@ internal class DefaultCardNumberController constructor(
             CardBrand.Unknown -> previous
             in choices -> previous ?: CardBrand.Unknown
             else -> {
-                val firstAvailablePreferred = preferredBrands
-                    .intersect(choices.toSet())
-                    .firstOrNull()
+                val firstAvailablePreferred = preferredBrands.firstOrNull { it in choices }
 
                 firstAvailablePreferred ?: CardBrand.Unknown
             }
