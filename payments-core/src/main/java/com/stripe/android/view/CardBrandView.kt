@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
+import androidx.annotation.RestrictTo
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
@@ -33,7 +34,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.databinding.StripeCardBrandViewBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
-import com.stripe.android.model.icon
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.properties.Delegates
@@ -283,5 +283,14 @@ private fun CardBrand.toChoice(noSelection: CardBrandChoice): CardBrandChoice {
             label = resolvableString(displayName),
             icon = icon
         )
+    }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun CardBrand.icon(isCoBrandedCard: Boolean): Int {
+    return if (this == Unknown && isCoBrandedCard) {
+        com.stripe.payments.model.R.drawable.stripe_ic_unknown_brand_cbc
+    } else {
+        icon
     }
 }
