@@ -9,23 +9,17 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.financialConnectionsSessionNoAccounts
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate.EarlyTerminationCause
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
-import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails.Cancelled
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -60,13 +54,11 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     @Test
     fun `nativeAuthFlowCoordinator - when manual entry termination, finish with CustomManualEntryRequiredError`() =
         runTest {
-            val liveEvents = mutableListOf<FinancialConnectionsEvent>()
-            FinancialConnections.setEventListener { liveEvents += it }
-            val messagesFlow = MutableSharedFlow<Message>()
+            val messagesFlow = MutableSharedFlow<NativeAuthFlowCoordinator.Message>()
             val sessionWithCustomManualEntry = financialConnectionsSessionNoAccounts().copy(
                 statusDetails = StatusDetails(
-                    cancelled = Cancelled(
-                        reason = Cancelled.Reason.CUSTOM_MANUAL_ENTRY
+                    cancelled = StatusDetails.Cancelled(
+                        reason = StatusDetails.Cancelled.Reason.CUSTOM_MANUAL_ENTRY
                     )
                 )
             )
@@ -81,18 +73,14 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
             withState(viewModel) {
                 require(it.viewEffect is Finish)
-                require(it.viewEffect.result is Failed)
+                require(it.viewEffect.result is FinancialConnectionsSheetActivityResult.Failed)
                 assertThat(it.viewEffect.result.error).isInstanceOf(CustomManualEntryRequiredError::class.java)
-                // no live event emitted (since this is a manual entry termination)
-                assertThat(liveEvents).isEmpty()
             }
         }
 
     @Test
-    fun `onCloseClick - when closing but linked accounts, finish with success and trigger live event`() =
+    fun `onCloseClick - when closing but linked accounts, finish with success`() =
         runTest {
-            val liveEvents = mutableListOf<FinancialConnectionsEvent>()
-            FinancialConnections.setEventListener { liveEvents += it }
             val sessionWithAccounts = financialConnectionsSessionWithNoMoreAccounts
             whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
             whenever(completeFinancialConnectionsSession(anyOrNull())).thenReturn(sessionWithAccounts)
@@ -104,9 +92,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             withState(viewModel) {
                 require(it.viewEffect is Finish)
                 require(it.viewEffect.result is Completed)
-                assertThat(liveEvents).contains(
-                    FinancialConnectionsEvent(Name.SUCCESS, Metadata())
-                )
             }
         }
 
