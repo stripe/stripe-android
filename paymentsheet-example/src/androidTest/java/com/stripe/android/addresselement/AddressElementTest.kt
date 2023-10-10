@@ -1,8 +1,8 @@
 package com.stripe.android.addresselement
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.SELECT_ADDRESS_BUTTON
+import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.utils.TestRules
 import org.junit.Rule
 import org.junit.Test
@@ -23,7 +24,9 @@ internal class AddressElementTest {
 
     @Test
     fun testAddressElement() {
-        rules.compose.onNodeWithTag(SELECT_ADDRESS_BUTTON).performClick()
+        val selectAddressButton = ComposeButton(rules.compose, hasTestTag(SELECT_ADDRESS_BUTTON))
+        selectAddressButton.waitForEnabled()
+        selectAddressButton.click()
         replaceText("Full name", "Real Name")
         replaceText("Address line 1", "1234 Main St")
         replaceText("City", "Boston")
