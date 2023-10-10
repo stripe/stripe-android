@@ -27,6 +27,7 @@ class FinancialConnectionsRepositoryImplTest {
     private val financialConnectionsRepositoryImpl = FinancialConnectionsRepositoryImpl(
         requestExecutor = FinancialConnectionsRequestExecutor(
             json = testJson(),
+            eventEmitter = mock(),
             stripeNetworkClient = mockStripeNetworkClient
         ),
         apiRequestFactory = apiRequestFactory,

@@ -49,20 +49,22 @@ internal suspend fun FinancialConnectionsAnalyticsTracker.logError(
  * @see [com.stripe.android.financialconnections.analytics.FinancialConnectionsResponseEventEmitter]
  */
 fun emitPublicClientErrorEventIfNeeded(error: Throwable) {
-    if (error.isStripeErrorWithEvents().not()) when (error) {
-        is AppInitializationError -> FinancialConnections.emitEvent(
-            name = FinancialConnectionsEvent.Name.ERROR,
-            metadata = FinancialConnectionsEvent.Metadata(
-                errorCode = ErrorCode.WEB_BROWSER_UNAVAILABLE
+    if (error.isStripeErrorWithEvents().not()) {
+        when (error) {
+            is AppInitializationError -> FinancialConnections.emitEvent(
+                name = FinancialConnectionsEvent.Name.ERROR,
+                metadata = FinancialConnectionsEvent.Metadata(
+                    errorCode = ErrorCode.WEB_BROWSER_UNAVAILABLE
+                )
             )
-        )
 
-        else -> FinancialConnections.emitEvent(
-            name = FinancialConnectionsEvent.Name.ERROR,
-            metadata = FinancialConnectionsEvent.Metadata(
-                errorCode = ErrorCode.UNEXPECTED_ERROR
+            else -> FinancialConnections.emitEvent(
+                name = FinancialConnectionsEvent.Name.ERROR,
+                metadata = FinancialConnectionsEvent.Metadata(
+                    errorCode = ErrorCode.UNEXPECTED_ERROR
+                )
             )
-        )
+        }
     }
 }
 
