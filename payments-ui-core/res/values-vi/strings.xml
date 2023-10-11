@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Tài khoản ngân hàng</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Tôi hiểu rằng Stripe sẽ thu Ghi nợ Trực tiếp thay mặt %s và tôi xác nhận rằng tôi là chủ tài khoản và là người duy nhất cần có để ủy quyền ghi nợ từ tài khoản này.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Mã sắp xếp</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Mã sắp xếp chưa đầy đủ.</string>
   <!-- Billing address section title for card form entry. -->

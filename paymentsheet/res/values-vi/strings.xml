@@ -22,6 +22,14 @@
   <string name="stripe_paymentsheet_address_element_primary_button">Lưu địa chỉ</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Địa chỉ vận chuyển</string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_account_number_label">Số tài khoản</string>
+  <!-- Caption for Email field on address form -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_email_label">Email</string>
+  <!-- Label for Name on account field on form -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_name_label">Tên trên tài khoản</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_sort_code_label">Mã sắp xếp</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Chọn phương thức thanh toán</string>
   <string name="stripe_paymentsheet_close">Đóng</string>

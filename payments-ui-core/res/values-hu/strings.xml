@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Bankszámla</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Tudomásul veszem, hogy a Stripe beszedéseket végez a(z) %s nevében, és megerősítem, hogy én vagyok a számla tulajdonosa és az egyetlen személy, aki a terheléseket engedélyezheti erről a számláról.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Bankazonosító</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">A bankazonosítója hiányos.</string>
   <!-- Billing address section title for card form entry. -->

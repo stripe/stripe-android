@@ -70,16 +70,12 @@
   <string name="stripe_address_state_required">Geef je staat op</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">Betalen in termijnen met &lt;img src=\"affirm\"&gt;.</string>
-  <!-- Label for Name on account field on form -->
-  <string name="stripe_au_becs_account_name">Naam op account</string>
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">BSB-nummer</string>
   <!-- Legal text shown when using AUBECS. -->
   <string name="stripe_au_becs_mandate">Door je bankrekeninggegevens te verstrekken en deze betaling te bevestigen ga je akkoord met deze aanvraag voor automatische incasso en de &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Direct Debit Request-serviceovereenkomst&lt;/a&gt;, en autoriseer je Stripe Payments Australia Pty Ltd ACN 160 180 343 met gebruikers-ID voor automatische incasso\'s 507156 (“Stripe”) om bedragen van je rekening af te schrijven via het BECS-systeem (Bulk Electronic Clearing System) namens %s (de \"Handelaar\") voor bedragen die afzonderlijk door de handelaar aan je kenbaar worden gemaakt. Je verklaart dat je de rekeninghouder bent van of bevoegd bent om te tekenen voor de hierboven vermelde rekening.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="stripe_becs_mandate_acceptance">\n    Door je bankrekeninggegevens te verstrekken en deze betaling te bevestigen ga je akkoord met deze\n    aanvraag voor automatische incasso en de Direct Debit Request-serviceovereenkomst, en autoriseer je\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 met gebruikers-ID voor automatische incasso\'s 507156\n    (“Stripe”) om bedragen van je rekening af te schrijven via het BECS-systeem (Bulk Electronic Clearing System)\n    namens %1$s (de \"Handelaar\") voor bedragen die afzonderlijk door de handelaar\n    aan je kenbaar worden gemaakt. Je verklaart dat je de rekeninghouder bent van of bevoegd bent\n    om te tekenen voor de hierboven vermelde rekening.\n    </string>
-  <!-- Placeholder text for Account number entry field for BECS Debit. -->
-  <string name="stripe_becs_widget_account_number">Rekeningnummer</string>
   <!-- Error description for incomplete account number -->
   <string name="stripe_becs_widget_account_number_incomplete">Het opgegeven rekeningnummer is onvolledig.</string>
   <!-- BECS Debit Widget - account number field - required error message -->

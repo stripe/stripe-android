@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">銀行口座</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">私は、Stripe が %s の代理として口座引き落としによる回収を行うことを理解しています。また、私が当該口座を保有しており、この口座からの引き落としを承認すべき唯一の人間であることを認めます。</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">ソートコード</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">ソートコードの入力に不備があります。</string>
   <!-- Billing address section title for card form entry. -->

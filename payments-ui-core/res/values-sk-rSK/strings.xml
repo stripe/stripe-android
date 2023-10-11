@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Bankový účet</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Rozumiem, že spoločnosť Stripe bude inkasovať priame inkasá v mene spoločnosti %s a potvrdzujem, že som majiteľom účtu a som jediná osoba, ktorá musí autorizovať inkasá z tohto účtu.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Triediaci kód</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Váš triediaci kód je neúplný.</string>
   <!-- Billing address section title for card form entry. -->

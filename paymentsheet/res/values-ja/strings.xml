@@ -22,6 +22,14 @@
   <string name="stripe_paymentsheet_address_element_primary_button">住所を保存する</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">配送先住所</string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_account_number_label">アカウント番号</string>
+  <!-- Caption for Email field on address form -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_email_label">メールアドレス</string>
+  <!-- Label for Name on account field on form -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_name_label">口座名義人</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_sort_code_label">ソートコード</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">支払い方法を選択</string>
   <string name="stripe_paymentsheet_close">閉じる</string>

@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Pankkitili</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Ymmärrän, että Stripe kerää suoraveloituksia yrityksen %s puolesta sekä vahvistan, että olen tilinhaltija ja ainoa henkilö, jota tarvitaan tämän tilin veloitusten varmentamiseen.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Pankin tunnusnumero</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Pankin tunnusnumero on puutteellinen.</string>
   <!-- Billing address section title for card form entry. -->

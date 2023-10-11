@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Bančni račun</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Potrjujem, da bo podjetje Stripe zbiralo direktne obremenitve v imenu podjetja %s ter da sem lastnik računa in edina oseba, ki lahko odobri bremenitve s tega računa.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Številka banke</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Vaša številka banke ni popolna.</string>
   <!-- Billing address section title for card form entry. -->

@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Banko sąskaita</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Suprantu, kad „Stripe“ atliks tiesioginio debeto nuskaitymus %s vardu ir patvirtinu, kad esu sąskaitos turėtojas ir vienintelis asmuo, galintis leisti atlikti debeto nuskaitymus nuo šios sąskaitos.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Identifikacinis kodas</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">SORT kodas neišsamus.</string>
   <!-- Billing address section title for card form entry. -->

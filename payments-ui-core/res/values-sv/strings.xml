@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Bankkonto</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Jag är införstådd med att Stripe samlar in autogireringar på uppdrag av %s och bekräftar att jag är kontoinnehavaren och den enda person som krävs för att godkänna debiteringar från detta konto.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Clearingnummer (sort code)</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Sort code (clearingnummer) är ofullständigt.</string>
   <!-- Billing address section title for card form entry. -->

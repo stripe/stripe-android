@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Банковский счет</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Я понимаю, что Stripe будет принимать прямые дебетования от имени %s, и подтверждаю, что являюсь владельцем счета и единственным лицом, согласие которого требуется для проведения дебетований с этого счета.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Код банка</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Код банка введен не полностью.</string>
   <!-- Billing address section title for card form entry. -->

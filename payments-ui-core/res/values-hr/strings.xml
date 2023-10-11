@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Bankovni račun</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Razumijem da će Stripe naplaćivati izravna terećenja u ime %s i potvrđujem da sam vlasnik računa i jedina osoba koja mora autorizirati terećenja s ovog računa.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Bankovni kod za razvrstavanje (UK)</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Vaš bankovni kod za razvrstavanje je nepotpun.</string>
   <!-- Billing address section title for card form entry. -->

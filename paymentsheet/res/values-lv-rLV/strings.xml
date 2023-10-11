@@ -22,6 +22,14 @@
   <string name="stripe_paymentsheet_address_element_primary_button">saglabāt adresi</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Piegādes adrese</string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_account_number_label">Konta numurs</string>
+  <!-- Caption for Email field on address form -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_email_label">E-pasts</string>
+  <!-- Label for Name on account field on form -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_name_label">Konta īpašnieks</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_sort_code_label">Bankas filiāles kods</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Izvēlēties maksājuma veidu</string>
   <string name="stripe_paymentsheet_close">Aizvērt</string>

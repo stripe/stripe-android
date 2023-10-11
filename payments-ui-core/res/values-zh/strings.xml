@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">银行账户</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">我理解 Stripe 将代表 %s 收取直接扣款，且确认我是该账户持有人，且是唯一一个需要授权该账户扣款的人。</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">分类代码</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">您的分类代码不完整。</string>
   <!-- Billing address section title for card form entry. -->

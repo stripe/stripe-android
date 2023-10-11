@@ -22,6 +22,14 @@
   <string name="stripe_paymentsheet_address_element_primary_button">Salvare adresă</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Adresa de expediere</string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_account_number_label">Număr cont</string>
+  <!-- Caption for Email field on address form -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_email_label">E-mail</string>
+  <!-- Label for Name on account field on form -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_name_label">Numele contului</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_sort_code_label">Cod de sortare</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Alegeți o metodă de plată</string>
   <string name="stripe_paymentsheet_close">Închidere</string>

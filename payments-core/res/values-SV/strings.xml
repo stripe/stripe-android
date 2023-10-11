@@ -70,16 +70,12 @@
   <string name="stripe_address_state_required">Ange delstat</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">Sprid ut betalningarna med &lt;img src=\"affirm\"&gt;.</string>
-  <!-- Label for Name on account field on form -->
-  <string name="stripe_au_becs_account_name">Namn på kontot</string>
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">BSB-nummer</string>
   <!-- Legal text shown when using AUBECS. -->
   <string name="stripe_au_becs_mandate">Genom att tillhandahålla dina bankkontouppgifter och bekräfta denna betalning samtycker du till denna begäran om autogiro och &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;användaravtalet för autogiro&lt;/a&gt;, och godkänner att Stripe Payments Australia Pty Ltd ACN 160 180 343 Användar-ID för autogiro 507156 (“Stripe”) debiterar ditt konto via Bulk Electronic Clearing System (BECS) på uppdrag av %s (”handlaren”) för alla belopp som separat meddelats till dig av handlaren. Du intygar att du antingen är kontoinnehavare eller auktoriserad undertecknare på det konto som anges ovan.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="stripe_becs_mandate_acceptance">\n    Genom att tillhandahålla dina bankkontouppgifter och bekräfta denna betalning, samtycker du till denna \n    begäran om autogiro och användaravtalet för autogiro, och godkänner att\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Användar-ID för autogiro 507156\n    (“Stripe”) debiterar ditt konto via Bulk Electronic Clearing System (BECS) på \n    uppdrag av %1$s (\"handlaren\") för alla belopp som separat meddelats till dig\n    av handlaren. Du intygar att du antingen är kontoinnehavare eller auktoriserad\n    undertecknare på det konto som anges ovan.\n    </string>
-  <!-- Placeholder text for Account number entry field for BECS Debit. -->
-  <string name="stripe_becs_widget_account_number">Kontonummer</string>
   <!-- Error description for incomplete account number -->
   <string name="stripe_becs_widget_account_number_incomplete">Kontonumret du angav är ofullständigt.</string>
   <!-- BECS Debit Widget - account number field - required error message -->

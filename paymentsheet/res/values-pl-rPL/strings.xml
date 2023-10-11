@@ -22,6 +22,14 @@
   <string name="stripe_paymentsheet_address_element_primary_button">Zapisz adres</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Adres dostawy</string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_account_number_label">Numer konta</string>
+  <!-- Caption for Email field on address form -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_email_label">Adres e-mail</string>
+  <!-- Label for Name on account field on form -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_name_label">Imię i nazwisko na rachunku</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_paymentsheet_bacs_mandate_info_sort_code_label">Kod sortowania</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Wybierz metodę płatności</string>
   <string name="stripe_paymentsheet_close">Zamknij</string>

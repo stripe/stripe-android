@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Bankkonto</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Jeg er indforstået med, at Stripe vil opkræve direkte debiteringer på vegne af %s og bekræfter, at jeg er kontoindehaveren og den eneste person, der skal godkende debiteringer fra denne konto.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Sort code</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Din sort code er ufuldstændig.</string>
   <!-- Billing address section title for card form entry. -->

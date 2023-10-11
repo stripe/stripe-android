@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Compte bancari</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Entenc que Stripe cobrarà els dèbits directes de part de %s i confirmo que soc el titular del compte i l\'única persona requerida per autoritzar dèbits des d\'aquest compte.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Codi de classificació</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">El codi Sort no és complet.</string>
   <!-- Billing address section title for card form entry. -->

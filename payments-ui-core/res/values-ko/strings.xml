@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">은행 계좌</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">본인은 Stripe가 %s을(를) 대신하여 자동 이체를 수취하고 본인이 계정 소유자이며 이 계정에서 인출을 승인할 수 있는 유일한 당사자임을 확인합니다.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">분류 코드</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">분류 코드가 불완전합니다.</string>
   <!-- Billing address section title for card form entry. -->

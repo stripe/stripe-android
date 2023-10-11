@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">บัญชีธนาคาร</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">ฉันเข้าใจว่า Stripe จะดำเนินการหักบัญชีอัตโนมัติในนามของ %s และยืนยันว่าฉันเป็นเจ้าของบัญชีและเป็นบุคคลเดียวเท่านั้นที่อนุญาตให้หักเงินจากบัญชีนี้ได้</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Sort Code</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Sort Code ของคุณไม่ครบถ้วน</string>
   <!-- Billing address section title for card form entry. -->

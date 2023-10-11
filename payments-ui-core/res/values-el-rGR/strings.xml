@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Τραπεζικός λογαριασμός</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Κατανοώ ότι η Stripe θα εισπράττει άμεσες χρεώσεις εκ μέρους της %s και επιβεβαιώνω ότι είμαι ο δικαιούχος του λογαριασμού και το μόνο άτομο που απαιτείται για την έγκριση των χρεώσεων από αυτόν τον λογαριασμό.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Κωδικός sort</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Ο κωδικός sort σας είναι ελλιπής.</string>
   <!-- Billing address section title for card form entry. -->

@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Account sa bangko</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Nauunawaan ko na mangongolekta ang Stripe ng Direct Debits sa ngalan ng %s at kinukumpirma ko na ako ang may-ari ng account at tanging taong kinakailangan na magpahintulot sa mga debit mula sa account na ito.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Sort code</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Ang iyong sort code ay kulang.</string>
   <!-- Billing address section title for card form entry. -->

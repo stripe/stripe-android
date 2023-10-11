@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Compte bancaire</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Je comprends que Stripe effectuera des prélèvements automatiques pour le compte de %s et je confirme que je suis le titulaire du compte et la seule personne habilitée à autoriser des prélèvements sur ce compte.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Code guichet</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Votre code guichet est incomplet.</string>
   <!-- Billing address section title for card form entry. -->

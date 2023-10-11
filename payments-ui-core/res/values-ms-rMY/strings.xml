@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Akaun bank</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Saya faham bahawa Stripe akan mengutip Debit Terus bagi pihak %s dan mengesahkan sayalah pemegang akaun dan satu-satunya individu yang diperlukan untuk mengizinkan debit daripada akaun ini.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Kod isihan</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Kod isihan anda tidak lengkap.</string>
   <!-- Billing address section title for card form entry. -->

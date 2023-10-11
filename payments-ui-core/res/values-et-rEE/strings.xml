@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Pangakonto</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Mõistan, et Stripe kogub ettevõtte %s nimel otsekorraldusi, ja kinnitan, et olen konto omanik ja ainus isik, kes peab konto debiteerimise lubama.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Sorteerimiskood</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Teie sorteerimiskood on puudulik.</string>
   <!-- Billing address section title for card form entry. -->

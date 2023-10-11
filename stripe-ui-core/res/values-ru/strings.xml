@@ -52,8 +52,6 @@
   <string name="stripe_blank_and_required">Введите данные в это поле.</string>
   <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
   <string name="stripe_change">Изменить</string>
-  <!-- Caption for Email field on address form -->
-  <string name="stripe_email">Эл. почта</string>
   <!-- Error message when email is invalid -->
   <string name="stripe_email_is_invalid">Недействительный адрес эл. почты.</string>
   <!-- label for text field to enter card expiry -->

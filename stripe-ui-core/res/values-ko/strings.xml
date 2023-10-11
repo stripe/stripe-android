@@ -52,8 +52,6 @@
   <string name="stripe_blank_and_required">이 필드는 공란으로 비워둘 수 없습니다.</string>
   <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
   <string name="stripe_change">변경</string>
-  <!-- Caption for Email field on address form -->
-  <string name="stripe_email">이메일</string>
   <!-- Error message when email is invalid -->
   <string name="stripe_email_is_invalid">이메일이 잘못되었습니다.</string>
   <!-- label for text field to enter card expiry -->

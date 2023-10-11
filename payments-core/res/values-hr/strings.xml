@@ -70,16 +70,12 @@
   <string name="stripe_address_state_required">Unesite svoju državu</string>
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">Platite u ratama koristeći &lt;img src=\"affirm\"&gt;.</string>
-  <!-- Label for Name on account field on form -->
-  <string name="stripe_au_becs_account_name">Ime na računu</string>
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">BSB broj</string>
   <!-- Legal text shown when using AUBECS. -->
   <string name="stripe_au_becs_mandate">Unosom svojih podataka o bankovnom računu i potvrdom ovoga plaćanja, suglasni ste s ovim Zahtjevom za izravno terećenje i &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Ugovorom o usluzi za izravno terećenje&lt;/a&gt;, te ovlašćujete Stripe Payments Australia Pty Ltd ACN 160 180 343, ID broj korisnika za izravno terećenje 507156 (“Stripe”) da tereti vaš račun koristeći Bulk Electronic Clearing System (BECS) u ime %s (\"Trgovac\") za bilo koji iznos koji vam je Trgovac javio u odvojenoj korespondenciji. Potvrđujete da ste ili vlasnik računa ili ovlašteni potpisnik na prethodno navedenom računu.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="stripe_becs_mandate_acceptance">\n    Unosom svojih podataka o bankovnom računu i potvrdom ovoga plaćanja, suglasni ste s \n    ovim Zahtjevom za izravno terećenje i Ugovorom o usluzi za izravno terećenje te ovlašćujete\n    Stripe Payments Australia Pty Ltd ACN 160 180 343, ID broj korisnika za izravno terećenje\n    507156 (“Stripe”) da tereti vaš račun koristeći Bulk Electronic Clearing System (BECS) u ime %1$s \n    (\"Trgovac\") za bilo koji iznos koji vam je Trgovac javio u odvojenoj korespondenciji. \n    Potvrđujete da ste ili vlasnik računa ili ovlašteni potpisnik na prethodno \n    navedenom računu.\n    </string>
-  <!-- Placeholder text for Account number entry field for BECS Debit. -->
-  <string name="stripe_becs_widget_account_number">Broj računa</string>
   <!-- Error description for incomplete account number -->
   <string name="stripe_becs_widget_account_number_incomplete">Uneseni broj računa je nepotpun.</string>
   <!-- BECS Debit Widget - account number field - required error message -->

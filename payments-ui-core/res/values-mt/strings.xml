@@ -12,8 +12,6 @@
   <string name="stripe_bacs_bank_account_title">Kont tal-bank</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">Jiena nifhem li Stripe se tkun qed tiġbor id-Debiti Diretti f\'isem %s u nikkonferma li jiena d-detentur tal-kont u l-unika persuna meħtieġa biex tawtorizza d-debiti minn dan il-kont.</string>
-  <!-- Label for Bacs sort code field -->
-  <string name="stripe_bacs_sort_code">Il-kodiċi sort</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">Il-kodiċi sort tiegħek mhux komplut.</string>
   <!-- Billing address section title for card form entry. -->
