@@ -36,6 +36,7 @@ internal class BacsMandateConfirmationContract :
                 return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     intent.getParcelableExtra(EXTRA_ARGS, Args::class.java)
                 } else {
+                    @Suppress("DEPRECATION")
                     intent.getParcelableExtra(EXTRA_ARGS)
                 }
             }

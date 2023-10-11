@@ -24,6 +24,7 @@ internal sealed interface BacsMandateConfirmationResult : Parcelable {
             val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 intent?.getParcelableExtra(EXTRA_RESULT, BacsMandateConfirmationResult::class.java)
             } else {
+                @Suppress("DEPRECATION")
                 intent?.getParcelableExtra(EXTRA_RESULT)
             }
 
