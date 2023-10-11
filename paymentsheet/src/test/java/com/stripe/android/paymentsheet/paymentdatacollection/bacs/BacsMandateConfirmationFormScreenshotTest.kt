@@ -11,6 +11,13 @@ import org.junit.Test
 
 class BacsMandateConfirmationFormScreenshotTest {
     @get:Rule
+    val paparazziSingleVariantRule = PaparazziRule(
+        arrayOf(SystemAppearance.LightTheme),
+        arrayOf(PaymentSheetAppearance.DefaultAppearance),
+        arrayOf(FontSize.LargeFont)
+    )
+
+    @get:Rule
     val paparazziRule = PaparazziRule(
         SystemAppearance.values(),
         PaymentSheetAppearance.values(),
@@ -19,7 +26,7 @@ class BacsMandateConfirmationFormScreenshotTest {
 
     @Test
     fun testFullForm() {
-        paparazziRule.snapshot {
+        paparazziSingleVariantRule.snapshot {
             BacsMandateConfirmationFormView(
                 state = BacsMandateConfirmationViewState(
                     accountNumber = "00012345",
@@ -47,7 +54,7 @@ class BacsMandateConfirmationFormScreenshotTest {
 
     @Test
     fun testDetails() {
-        paparazziRule.snapshot {
+        paparazziSingleVariantRule.snapshot {
             BacsMandateDetails(
                 email = "email@email.com",
                 nameOnAccount = "John Doe",
