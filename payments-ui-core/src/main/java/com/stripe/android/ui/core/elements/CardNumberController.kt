@@ -168,7 +168,7 @@ internal class DefaultCardNumberController constructor(
                 )
             } else {
                 when (chosen) {
-                    CardBrand.Unknown -> noSelection
+                    CardBrand.Unknown -> null
                     else -> TextFieldIcon.Dropdown.Item(
                         id = chosen.code,
                         label = resolvableString(chosen.displayName),
@@ -187,8 +187,8 @@ internal class DefaultCardNumberController constructor(
 
             TextFieldIcon.Dropdown(
                 title = resolvableString(PaymentsCoreR.string.stripe_card_brand_choice_selection_header),
-                currentItem = selected,
-                items = listOf(noSelection) + items,
+                currentItem = selected ?: noSelection,
+                items = items,
                 hide = brands.size < 2
             )
         } else if (accountRangeService.accountRange != null) {
