@@ -64,16 +64,21 @@ internal fun BacsMandateConfirmationFormView(
             style = MaterialTheme.typography.h4.copy(fontWeight = FontWeight.Medium),
             color = MaterialTheme.colors.onBackground
         )
-        Details(state)
-        MandateItem(stringResource(R.string.stripe_paymentsheet_bacs_email_mandate, state.email))
-        MandateItem(
+        BacsMandateDetails(
+            email = state.email,
+            nameOnAccount = state.nameOnAccount,
+            sortCode = state.sortCode,
+            accountNumber = state.accountNumber
+        )
+        BacsMandateItem(stringResource(R.string.stripe_paymentsheet_bacs_email_mandate, state.email))
+        BacsMandateItem(
             stringResource(
                 R.string.stripe_paymentsheet_bacs_notice_mandate,
                 state.payer.resolve()
             )
         )
         Row {
-            MandateItem(
+            BacsMandateItem(
                 stringResource(
                     R.string.stripe_paymentsheet_bacs_protection_mandate,
                     state.debitGuaranteeAsHtml.resolve()
@@ -89,7 +94,7 @@ internal fun BacsMandateConfirmationFormView(
                 )
             }
         }
-        MandateItem(
+        BacsMandateItem(
             state.supportAddressAsHtml.resolve(),
             isHtml = true
         )
@@ -99,7 +104,13 @@ internal fun BacsMandateConfirmationFormView(
 }
 
 @Composable
-private fun Details(state: BacsMandateConfirmationViewState) {
+@VisibleForTesting
+internal fun BacsMandateDetails(
+    email: String,
+    nameOnAccount: String,
+    sortCode: String,
+    accountNumber: String
+) {
     Box(
         modifier = Modifier
             .clip(MaterialTheme.shapes.small)
@@ -117,28 +128,29 @@ private fun Details(state: BacsMandateConfirmationViewState) {
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            DetailsRow(
+            BacsMandateDetailsRow(
                 label = stringResource(R.string.stripe_paymentsheet_bacs_mandate_info_email_label),
-                value = state.email
+                value = email
             )
-            DetailsRow(
+            BacsMandateDetailsRow(
                 label = stringResource(R.string.stripe_paymentsheet_bacs_mandate_info_name_label),
-                value = state.nameOnAccount
+                value = nameOnAccount
             )
-            DetailsRow(
+            BacsMandateDetailsRow(
                 label = stringResource(R.string.stripe_paymentsheet_bacs_mandate_info_sort_code_label),
-                value = state.sortCode
+                value = sortCode
             )
-            DetailsRow(
+            BacsMandateDetailsRow(
                 label = stringResource(R.string.stripe_paymentsheet_bacs_mandate_info_account_number_label),
-                value = state.accountNumber
+                value = accountNumber
             )
         }
     }
 }
 
 @Composable
-private fun DetailsRow(
+@VisibleForTesting
+internal fun BacsMandateDetailsRow(
     label: String,
     value: String,
     modifier: Modifier = Modifier
@@ -160,7 +172,8 @@ private fun DetailsRow(
 }
 
 @Composable
-private fun MandateItem(
+@VisibleForTesting
+internal fun BacsMandateItem(
     text: String,
     modifier: Modifier = Modifier,
     isHtml: Boolean = false
