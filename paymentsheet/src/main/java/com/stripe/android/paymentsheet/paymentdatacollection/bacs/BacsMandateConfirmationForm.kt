@@ -206,14 +206,14 @@ private fun MandateButtons(
             type = BacsMandateButtonType.Primary,
             label = stringResource(R.string.stripe_paymentsheet_confirm),
             onClick = {
-                viewActionHandler.invoke((BacsMandateConfirmationViewAction.OnConfirmPressed))
+                viewActionHandler.invoke(BacsMandateConfirmationViewAction.OnConfirmPressed)
             }
         )
         BacsMandateButton(
             type = BacsMandateButtonType.Secondary,
             label = stringResource(R.string.stripe_paymentsheet_bacs_modify_details_button_label),
             onClick = {
-                viewActionHandler.invoke((BacsMandateConfirmationViewAction.OnCancelPressed))
+                viewActionHandler.invoke(BacsMandateConfirmationViewAction.OnCancelPressed)
             }
         )
     }
