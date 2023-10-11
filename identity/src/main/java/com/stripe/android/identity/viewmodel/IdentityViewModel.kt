@@ -189,6 +189,13 @@ internal class IdentityViewModel constructor(
     )
     val cameraPermissionGranted: StateFlow<Boolean> = _cameraPermissionGranted
 
+    private val _visitedIndividualWelcomeScreen = MutableStateFlow(
+        savedStateHandle[VISITED_INDIVIDUAL_WELCOME_PAGE] ?: run {
+            false
+        }
+    )
+    val visitedIndividualWelcomeScreen: StateFlow<Boolean> = _visitedIndividualWelcomeScreen
+
     /**
      * StateFlow to track request status of postVerificationPageData
      */
@@ -1798,6 +1805,10 @@ internal class IdentityViewModel constructor(
         )
     }
 
+    fun visitedIndividualWelcome() {
+        _visitedIndividualWelcomeScreen.updateStateAndSave { true }
+    }
+
     fun updateImageHandlerScanTypes(
         frontScanType: IdentityScanState.ScanType,
         backScanType: IdentityScanState.ScanType?
@@ -1827,6 +1838,7 @@ internal class IdentityViewModel constructor(
                 _cameraPermissionGranted -> CAMERA_PERMISSION_GRANTED
                 verificationPageData -> VERIFICATION_PAGE_DATA
                 verificationPageSubmit -> VERIFICATION_PAGE_SUBMIT
+                _visitedIndividualWelcomeScreen -> VISITED_INDIVIDUAL_WELCOME_PAGE
                 else -> {
                     throw IllegalStateException("Unexpected state flow: $this")
                 }
@@ -1880,5 +1892,6 @@ internal class IdentityViewModel constructor(
         private const val VERIFICATION_PAGE = "verification_page"
         private const val VERIFICATION_PAGE_DATA = "verification_page_data"
         private const val VERIFICATION_PAGE_SUBMIT = "verification_page_submit"
+        private const val VISITED_INDIVIDUAL_WELCOME_PAGE = "visited_individual_welcome_page"
     }
 }
