@@ -50,7 +50,7 @@ internal data class SharedPartnerAuthState(
         /**
          * Authentication is in progress on the browser / bank app.
          */
-        object InProgress : AuthStatus
+        object Pending : AuthStatus
 
         /**
          * User returned from the browser / bank app and post-auth operations are being executed.

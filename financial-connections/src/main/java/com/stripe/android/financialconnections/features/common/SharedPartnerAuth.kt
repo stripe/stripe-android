@@ -232,11 +232,19 @@ private fun LoadedContent(
     when (authenticationStatus) {
         is AuthStatus.Completing -> FullScreenGenericLoading()
         is AuthStatus.Fail -> InstitutionUnknownErrorContent(onSelectAnotherBank)
-        is AuthStatus.InProgress -> InstitutionalPrePaneContent(
-            onContinueClick = onContinueClick,
-            content = requireNotNull(payload.authSession.display?.text?.oauthPrepanePending),
-            onClickableTextClick = onClickableTextClick,
-        )
+        is AuthStatus.Pending -> when (payload.authSession.isOAuth) {
+            true -> InstitutionalPrePaneContent(
+                onContinueClick = onContinueClick,
+                content = requireNotNull(payload.authSession.display?.text?.oauthPrepanePending),
+                onClickableTextClick = onClickableTextClick,
+            )
+
+            false -> LoadingContent(
+                title = stringResource(id = R.string.stripe_partnerauth_loading_title),
+                content = stringResource(id = R.string.stripe_partnerauth_loading_desc)
+            )
+        }
+
 
         is AuthStatus.Uninitialized -> when (payload.authSession.isOAuth) {
             true -> InstitutionalPrePaneContent(

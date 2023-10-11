@@ -217,7 +217,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 }
 
                 WebAuthFlowState.InProgress -> {
-                    setState { copy(authenticationStatus = AuthStatus.InProgress) }
+                    setState { copy(authenticationStatus = AuthStatus.Pending) }
                 }
 
                 is WebAuthFlowState.Success -> {
@@ -300,7 +300,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                     if (authSession.isOAuth && url == null) {
                         // if the client returned to SDK mid-flow on an OAuth institution
                         // show the pending pre-pane prompting the user to return to the bank app.
-                        setState { copy(authenticationStatus = AuthStatus.InProgress) }
+                        setState { copy(authenticationStatus = AuthStatus.Pending) }
                     } else {
                         cancelAuthSessionAndContinue(authSession = retrievedAuthSession)
                     }

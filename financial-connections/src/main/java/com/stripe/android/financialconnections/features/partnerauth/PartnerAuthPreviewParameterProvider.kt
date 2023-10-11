@@ -68,7 +68,7 @@ internal class PartnerAuthPreviewParameterProvider :
             )
         ),
         // While browser is showing, show the "pending prepane".
-        authenticationStatus = AuthStatus.InProgress,
+        authenticationStatus = AuthStatus.Pending,
         viewEffect = null,
         activeAuthSession = null,
         pane = Pane.PARTNER_AUTH
