@@ -234,7 +234,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         message: String,
         reason: String?
     ) {
-        setState { copy(authenticationStatus = AuthStatus.Loading) }
+        setState { copy(authenticationStatus = AuthStatus.Completing) }
         val error = WebAuthFlowFailedException(message, reason)
         kotlin.runCatching {
             val authSession = getOrFetchSync().manifest.activeAuthSession
@@ -272,7 +272,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     private suspend fun onAuthCancelled(url: String?) {
         kotlin.runCatching {
-            setState { copy(authenticationStatus = AuthStatus.Loading) }
+            setState { copy(authenticationStatus = AuthStatus.Completing) }
             logger.debug("Auth cancelled, cancelling AuthSession")
             val manifest = getOrFetchSync().manifest
             val authSession = manifest.activeAuthSession
@@ -352,7 +352,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     private suspend fun completeAuthorizationSession(url: String) {
         kotlin.runCatching {
-            setState { copy(authenticationStatus = AuthStatus.Loading) }
+            setState { copy(authenticationStatus = AuthStatus.Completing) }
             val authSession = getOrFetchSync().manifest.activeAuthSession
             eventTracker.track(
                 FinancialConnectionsEvent.AuthSessionUrlReceived(

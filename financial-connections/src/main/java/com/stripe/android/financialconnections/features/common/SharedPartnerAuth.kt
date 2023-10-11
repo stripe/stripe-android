@@ -230,7 +230,7 @@ private fun LoadedContent(
     onClickableTextClick: (String) -> Unit
 ) {
     when (authenticationStatus) {
-        is AuthStatus.Loading -> FullScreenGenericLoading()
+        is AuthStatus.Completing -> FullScreenGenericLoading()
         is AuthStatus.Fail -> InstitutionUnknownErrorContent(onSelectAnotherBank)
         is AuthStatus.InProgress -> InstitutionalPrePaneContent(
             onContinueClick = onContinueClick,

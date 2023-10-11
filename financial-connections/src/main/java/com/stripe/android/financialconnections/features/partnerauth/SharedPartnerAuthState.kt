@@ -20,7 +20,7 @@ internal data class SharedPartnerAuthState(
     val pane: FinancialConnectionsSessionManifest.Pane,
     val payload: Async<Payload> = Uninitialized,
     val viewEffect: ViewEffect? = null,
-    val authenticationStatus: AuthStatus = AuthStatus.Loading,
+    val authenticationStatus: AuthStatus = AuthStatus.Uninitialized,
 ) : MavericksState {
 
     val dataAccess: DataAccessNotice?
@@ -35,14 +35,31 @@ internal data class SharedPartnerAuthState(
     val canNavigateBack: Boolean
         get() =
             // Authentication running -> don't allow back navigation
-            authenticationStatus !is AuthStatus.Loading &&
+            authenticationStatus !is AuthStatus.Completing &&
                 // Failures posting institution -> don't allow back navigation
                 payload !is Fail
 
     sealed interface AuthStatus {
+        /**
+         * Authentication hasn't started yet:
+         * - Auth Session is being created,
+         * - Pre-pane is showing on an OAuth institution.
+         */
         object Uninitialized : AuthStatus
+
+        /**
+         * Authentication is in progress on the browser / bank app.
+         */
         object InProgress : AuthStatus
-        object Loading : AuthStatus
+
+        /**
+         * User returned from the browser / bank app and post-auth operations are being executed.
+         */
+        object Completing : AuthStatus
+
+        /**
+         * Something went wrong during authentication.
+         */
         data class Fail(val error: Throwable) : AuthStatus
     }
     sealed interface ViewEffect {
