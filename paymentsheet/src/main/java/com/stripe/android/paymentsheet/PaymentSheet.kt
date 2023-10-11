@@ -428,7 +428,7 @@ class PaymentSheet internal constructor(
          * be used. If no preferred network is applicable, Stripe will select
          * the network.
          */
-        val preferredNetworks: List<CardBrand>? = null,
+        val preferredNetworks: List<CardBrand> = listOf(),
     ) : Parcelable {
         @JvmOverloads
         constructor(
@@ -456,7 +456,7 @@ class PaymentSheet internal constructor(
             appearance = appearance,
             primaryButtonLabel = primaryButtonLabel,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-            preferredNetworks = null
+            preferredNetworks = listOf()
         )
 
         /**
@@ -477,7 +477,7 @@ class PaymentSheet internal constructor(
             private var primaryButtonLabel: String? = null
             private var billingDetailsCollectionConfiguration =
                 BillingDetailsCollectionConfiguration()
-            private var preferredNetworks: List<CardBrand>? = null
+            private var preferredNetworks: List<CardBrand> = listOf()
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
