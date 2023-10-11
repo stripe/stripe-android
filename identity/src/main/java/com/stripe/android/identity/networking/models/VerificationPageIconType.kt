@@ -41,7 +41,8 @@ internal fun VerificationPageIconType.getResourceId() =
     when (this) {
         VerificationPageIconType.CLOUD -> R.drawable.stripe_cloud_icon
         VerificationPageIconType.DOCUMENT -> R.drawable.stripe_document_icon
-        VerificationPageIconType.CREATE_IDENTITY_VERIFICATION -> R.drawable.stripe_create_identity_verification_icon
+        VerificationPageIconType.CREATE_IDENTITY_VERIFICATION ->
+            R.drawable.stripe_create_identity_verification_icon
         VerificationPageIconType.LOCK -> R.drawable.stripe_lock_icon
         VerificationPageIconType.MOVED -> R.drawable.stripe_moved_icon
         VerificationPageIconType.WALLET -> R.drawable.stripe_wallet_icon
