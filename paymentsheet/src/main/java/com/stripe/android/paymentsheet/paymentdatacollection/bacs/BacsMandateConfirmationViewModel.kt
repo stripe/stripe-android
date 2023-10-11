@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 internal class BacsMandateConfirmationViewModel constructor(
@@ -31,8 +32,7 @@ internal class BacsMandateConfirmationViewModel constructor(
             debitGuaranteeAsHtml = buildGuarantee()
         )
     )
-    val viewState: StateFlow<BacsMandateConfirmationViewState>
-        get() = _viewState
+    val viewState: StateFlow<BacsMandateConfirmationViewState> = _viewState.asStateFlow()
 
     fun handleViewAction(action: BacsMandateConfirmationViewAction) {
         when (action) {
