@@ -297,8 +297,8 @@ internal class PartnerAuthViewModel @Inject constructor(
                     )
                 )
                 if (nextPane == PANE) {
-                    if (authSession.useAppToApp == true && url == null) {
-                        // if the client returned to SDK mid-flow and the institution supports app2app,
+                    if (authSession.isOAuth && url == null) {
+                        // if the client returned to SDK mid-flow on an OAuth institution
                         // show the pending pre-pane prompting the user to return to the bank app.
                         setState { copy(authenticationStatus = AuthStatus.InProgress) }
                     } else {
