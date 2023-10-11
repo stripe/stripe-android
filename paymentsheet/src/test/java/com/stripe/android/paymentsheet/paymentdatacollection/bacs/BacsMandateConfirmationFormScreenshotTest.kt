@@ -87,7 +87,8 @@ class BacsMandateConfirmationFormScreenshotTest {
     fun testItemWithHtml() {
         paparazziRule.snapshot {
             BacsMandateItem(
-                text = "An email will be sent to <a href=\"\">email@email.com</a>."
+                text = "An email will be sent to <a href=\"\">email@email.com</a>.",
+                isHtml = true
             )
         }
     }
