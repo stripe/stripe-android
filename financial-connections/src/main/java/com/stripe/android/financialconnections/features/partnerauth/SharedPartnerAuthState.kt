@@ -2,10 +2,8 @@ package com.stripe.android.financialconnections.features.partnerauth
 
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.PersistState
-import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
@@ -22,7 +20,7 @@ internal data class SharedPartnerAuthState(
     val pane: FinancialConnectionsSessionManifest.Pane,
     val payload: Async<Payload> = Uninitialized,
     val viewEffect: ViewEffect? = null,
-    val authenticationStatus: Async<String> = Uninitialized,
+    val authenticationStatus: AuthStatus = AuthStatus.Loading,
 ) : MavericksState {
 
     val dataAccess: DataAccessNotice?
@@ -37,11 +35,16 @@ internal data class SharedPartnerAuthState(
     val canNavigateBack: Boolean
         get() =
             // Authentication running -> don't allow back navigation
-            authenticationStatus !is Loading &&
-                authenticationStatus !is Success &&
+            authenticationStatus !is AuthStatus.Loading &&
                 // Failures posting institution -> don't allow back navigation
                 payload !is Fail
 
+    sealed interface AuthStatus {
+        object Uninitialized : AuthStatus
+        object InProgress : AuthStatus
+        object Loading : AuthStatus
+        data class Fail(val error: Throwable) : AuthStatus
+    }
     sealed interface ViewEffect {
         data class OpenPartnerAuth(
             val url: String

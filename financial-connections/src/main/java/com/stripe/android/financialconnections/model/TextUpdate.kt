@@ -16,6 +16,8 @@ internal data class TextUpdate(
     val networkingLinkSignupPane: NetworkingLinkSignupPane? = null,
     @SerialName("oauth_prepane")
     val oauthPrepane: OauthPrepane? = null,
+    @SerialName("oauth_prepane_pending")
+    val oauthPrepanePending: OauthPrepane? = null,
     @SerialName("returning_networking_user_account_picker")
     val returningNetworkingUserAccountPicker: ReturningNetworkingUserAccountPicker? = null
 ) : Parcelable

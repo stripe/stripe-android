@@ -3,9 +3,8 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthStatus
 import com.stripe.android.financialconnections.model.Body
 import com.stripe.android.financialconnections.model.Cta
 import com.stripe.android.financialconnections.model.Display
@@ -45,7 +44,7 @@ internal class PartnerAuthPreviewParameterProvider :
                 isStripeDirect = false
             )
         ),
-        authenticationStatus = Uninitialized,
+        authenticationStatus = AuthStatus.Uninitialized,
         viewEffect = null,
         activeAuthSession = null,
         pane = Pane.PARTNER_AUTH
@@ -68,8 +67,8 @@ internal class PartnerAuthPreviewParameterProvider :
                 isStripeDirect = false
             )
         ),
-        // While browser is showing, this Async is loading.
-        authenticationStatus = Loading(),
+        // While browser is showing, show the "pending prepane".
+        authenticationStatus = AuthStatus.InProgress,
         viewEffect = null,
         activeAuthSession = null,
         pane = Pane.PARTNER_AUTH

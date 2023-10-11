@@ -39,7 +39,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
@@ -50,6 +49,7 @@ import com.stripe.android.financialconnections.exception.InstitutionPlannedDownt
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthPreviewParameterProvider
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthStatus
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
 import com.stripe.android.financialconnections.model.Entry
 import com.stripe.android.financialconnections.model.OauthPrepane
@@ -223,14 +223,22 @@ private fun ErrorContent(
 
 @Composable
 private fun LoadedContent(
-    authenticationStatus: Async<String>,
+    authenticationStatus: AuthStatus,
     payload: SharedPartnerAuthState.Payload,
     onContinueClick: () -> Unit,
     onSelectAnotherBank: () -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
     when (authenticationStatus) {
-        is Uninitialized -> when (payload.authSession.isOAuth) {
+        is AuthStatus.Loading -> FullScreenGenericLoading()
+        is AuthStatus.Fail -> InstitutionUnknownErrorContent(onSelectAnotherBank)
+        is AuthStatus.InProgress -> InstitutionalPrePaneContent(
+            onContinueClick = onContinueClick,
+            content = requireNotNull(payload.authSession.display?.text?.oauthPrepanePending),
+            onClickableTextClick = onClickableTextClick,
+        )
+
+        is AuthStatus.Uninitialized -> when (payload.authSession.isOAuth) {
             true -> InstitutionalPrePaneContent(
                 onContinueClick = onContinueClick,
                 content = requireNotNull(payload.authSession.display?.text?.oauthPrepane),
@@ -241,18 +249,6 @@ private fun LoadedContent(
                 title = stringResource(id = R.string.stripe_partnerauth_loading_title),
                 content = stringResource(id = R.string.stripe_partnerauth_loading_desc)
             )
-        }
-
-        is Loading -> FullScreenGenericLoading()
-
-        is Success -> LoadingContent(
-            title = stringResource(R.string.stripe_account_picker_loading_title),
-            content = stringResource(R.string.stripe_account_picker_loading_desc)
-        )
-
-        is Fail -> {
-            // TODO@carlosmuvi translate error type to specific error screen.
-            InstitutionUnknownErrorContent(onSelectAnotherBank)
         }
     }
 }
