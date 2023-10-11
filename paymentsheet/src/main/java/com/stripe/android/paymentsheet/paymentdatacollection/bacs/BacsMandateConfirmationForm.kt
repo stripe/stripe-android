@@ -208,7 +208,7 @@ private fun MandateButtons(
 
 @Composable
 @Preview
-fun PreviewThisStuff() {
+private fun BacsMandateConfirmationFormPreview() {
     StripeTheme {
         BacsMandateConfirmationFormView(
             state = BacsMandateConfirmationViewState(
