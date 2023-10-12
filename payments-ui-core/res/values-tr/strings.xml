@@ -18,6 +18,8 @@
   <string name="stripe_bacs_sort_code_incomplete">Şube kodunuz eksik.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Fatura adresi</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">BLIK kodu</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
   <!-- Cash App mandate text -->
@@ -38,6 +40,10 @@
   <string name="stripe_iban_invalid_start">IBAN numaranız iki harfli bir ülke koduyla başlamalıdır.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">iDEAL Bank</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">BLIK kodunuz eksik.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">BLIK kodunuz geçersiz.</string>
   <string name="stripe_invalid_email_address">Geçersiz e-posta adresi: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Geçersiz UPI Numarası</string>

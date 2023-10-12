@@ -163,4 +163,6 @@
   <string name="stripe_upload_dialog_title_passport">Pasaport yükleyin</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">%1$s belgenizin fotoğrafını manuel olarak da yükleyebilirsiniz.</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Fotoğraflı kimliğinizi yükleyin</string>
 </resources>
