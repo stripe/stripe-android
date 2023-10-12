@@ -295,7 +295,7 @@ internal class DefaultPaymentSheetLoaderTest {
     fun `load() with customer should filter out PayPal`() = runTest {
         var requestPaymentMethodTypes: List<PaymentMethod.Type>? = null
         val result = createPaymentSheetLoader(
-            customerRepo = object: FakeCustomerRepository() {
+            customerRepo = object : FakeCustomerRepository() {
                 override suspend fun getPaymentMethods(
                     customerConfig: PaymentSheet.CustomerConfiguration,
                     types: List<PaymentMethod.Type>,
