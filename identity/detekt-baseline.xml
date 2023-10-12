@@ -7,7 +7,7 @@
     <ID>CyclomaticComplexMethod:IdentityTopLevelDestination.kt$internal fun String.routeToScreenName(): String</ID>
     <ID>CyclomaticComplexMethod:IdentityViewModel.kt$IdentityViewModel$fun updateNewScanType(scanType: IdentityScanState.ScanType)</ID>
     <ID>CyclomaticComplexMethod:OTPScreen.kt$@Composable internal fun OTPScreen( navController: NavController, identityViewModel: IdentityViewModel, otpViewModelFactory: ViewModelProvider.Factory = OTPViewModel.Factory( identityRepository = identityViewModel.identityRepository, verificationArgs = identityViewModel.verificationArgs ) )</ID>
-    <ID>CyclomaticComplexMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, collectedDataParamType: CollectedDataParam.Type, route: String, @StringRes titleRes: Int, @StringRes contextRes: Int, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, shouldShowTakePhoto: Boolean, shouldShowChoosePhoto: Boolean )</ID>
+    <ID>CyclomaticComplexMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, collectedDataParamType: CollectedDataParam.Type, route: String, @StringRes titleRes: Int, @StringRes contextRes: Int, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo? )</ID>
     <ID>LargeClass:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
     <ID>LargeClass:IdentityViewModelTest.kt$IdentityViewModelTest</ID>
     <ID>LongMethod:AddressSection.kt$@Composable internal fun AddressSection( enabled: Boolean, identityViewModel: IdentityViewModel, addressCountries: List&lt;Country>, addressNotListedText: String, navController: NavController, onAddressCollected: (Resource&lt;RequiredInternationalAddress>) -> Unit )</ID>
@@ -35,7 +35,7 @@
     <ID>LongMethod:OTPScreen.kt$@Composable private fun OTPViewStateEffect( viewState: OTPViewState?, navController: NavController, identityViewModel: IdentityViewModel, viewModel: OTPViewModel, focusRequester: FocusRequester )</ID>
     <ID>LongMethod:SelfieScreen.kt$@Composable internal fun SelfieScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, )</ID>
     <ID>LongMethod:SelfieScreen.kt$@Composable private fun ResultView( displayState: IdentityScanState, allowImageCollectionHtml: String, isSubmittingSelfie: Boolean, allowImageCollection: Boolean, navController: NavController, onAllowImageCollectionChanged: (Boolean) -> Unit )</ID>
-    <ID>LongMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, collectedDataParamType: CollectedDataParam.Type, route: String, @StringRes titleRes: Int, @StringRes contextRes: Int, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, shouldShowTakePhoto: Boolean, shouldShowChoosePhoto: Boolean )</ID>
+    <ID>LongMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, collectedDataParamType: CollectedDataParam.Type, route: String, @StringRes titleRes: Int, @StringRes contextRes: Int, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo? )</ID>
     <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$100</ID>
     <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$5</ID>
     <ID>MagicNumber:DobParam.kt$DobParam.Companion$4</ID>
@@ -77,7 +77,6 @@
     <ID>TooManyFunctions:IdentityAnalyticsRequestFactory.kt$IdentityAnalyticsRequestFactory</ID>
     <ID>TooManyFunctions:IdentityRepository.kt$IdentityRepository</ID>
     <ID>TooManyFunctions:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
-    <ID>TooManyFunctions:UploadDestinations.kt$DocumentUploadDestination$Companion</ID>
     <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationConfirmButtonTag = "ConfirmButton"</ID>
     <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationTitleTag = "ConfirmationTitle"</ID>
     <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val docSelectionTitleTag = "Title"</ID>

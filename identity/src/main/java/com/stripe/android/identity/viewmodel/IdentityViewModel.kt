@@ -189,6 +189,13 @@ internal class IdentityViewModel constructor(
     )
     val collectedData: StateFlow<CollectedDataParam> = _collectedData
 
+    private val _cameraPermissionGranted = MutableStateFlow(
+        savedStateHandle[CAMERA_PERMISSION_GRANTED] ?: run {
+            false
+        }
+    )
+    val cameraPermissionGranted: StateFlow<Boolean> = _cameraPermissionGranted
+
     /**
      * StateFlow to track request status of postVerificationPageData
      */
@@ -1369,6 +1376,7 @@ internal class IdentityViewModel constructor(
                                 type.toAnalyticsScanType()
                             )
                         )
+                        _cameraPermissionGranted.update { true }
                         idDetectorModelFile.observe(viewLifecycleOwner) { modelResource ->
                             when (modelResource.status) {
                                 // model ready, camera permission is granted -> navigate to scan
@@ -1393,10 +1401,7 @@ internal class IdentityViewModel constructor(
                                             )
                                         } else {
                                             navController.navigateTo(
-                                                type.toUploadDestination(
-                                                    shouldShowTakePhoto = true,
-                                                    shouldShowChoosePhoto = true
-                                                )
+                                                type.toUploadDestination()
                                             )
                                         }
                                     }
@@ -1413,6 +1418,7 @@ internal class IdentityViewModel constructor(
                                 type.toAnalyticsScanType()
                             )
                         )
+                        _cameraPermissionGranted.update { false }
                         requireVerificationPage(
                             viewLifecycleOwner,
                             navController
@@ -1717,28 +1723,16 @@ internal class IdentityViewModel constructor(
             else -> throw IllegalStateException("Invalid CollectedDataParam.Type")
         }
 
-    private fun CollectedDataParam.Type.toUploadDestination(
-        shouldShowTakePhoto: Boolean,
-        shouldShowChoosePhoto: Boolean
-    ) =
+    private fun CollectedDataParam.Type.toUploadDestination() =
         when (this) {
             CollectedDataParam.Type.IDCARD ->
-                IDUploadDestination(
-                    shouldShowTakePhoto,
-                    shouldShowChoosePhoto
-                )
+                IDUploadDestination()
 
             CollectedDataParam.Type.PASSPORT ->
-                PassportUploadDestination(
-                    shouldShowTakePhoto,
-                    shouldShowChoosePhoto
-                )
+                PassportUploadDestination()
 
             CollectedDataParam.Type.DRIVINGLICENSE ->
-                DriverLicenseUploadDestination(
-                    shouldShowTakePhoto,
-                    shouldShowChoosePhoto
-                )
+                DriverLicenseUploadDestination()
 
             else -> throw IllegalStateException("Invalid CollectedDataParam.Type")
         }
@@ -1760,6 +1754,7 @@ internal class IdentityViewModel constructor(
                 _documentBackUploadedState -> DOCUMENT_BACK_UPLOAD_STATE
                 _collectedData -> COLLECTED_DATA
                 _missingRequirements -> MISSING_REQUIREMENTS
+                _cameraPermissionGranted -> CAMERA_PERMISSION_GRANTED
                 verificationPageData -> VERIFICATION_PAGE_DATA
                 verificationPageSubmit -> VERIFICATION_PAGE_SUBMIT
                 else -> {
@@ -1811,6 +1806,7 @@ internal class IdentityViewModel constructor(
         private const val ANALYTICS_STATE = "analytics_upload_state"
         private const val COLLECTED_DATA = "collected_data"
         private const val MISSING_REQUIREMENTS = "missing_requirements"
+        private const val CAMERA_PERMISSION_GRANTED = "cameraPermissionGranted"
         private const val VERIFICATION_PAGE = "verification_page"
         private const val VERIFICATION_PAGE_DATA = "verification_page_data"
         private const val VERIFICATION_PAGE_SUBMIT = "verification_page_submit"
