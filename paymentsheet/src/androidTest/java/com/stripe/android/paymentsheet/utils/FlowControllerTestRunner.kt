@@ -110,12 +110,6 @@ internal class SynchronizedTestFlowController(
     private var isIdleNow: Boolean = false
     private var onIdleTransitionCallback: IdlingResource.ResourceCallback? = null
 
-    override var shippingDetails: AddressDetails?
-        get() = flowController.shippingDetails
-        set(value) {
-            flowController.shippingDetails = value
-        }
-
     init {
         IdlingRegistry.getInstance().register(this)
     }
