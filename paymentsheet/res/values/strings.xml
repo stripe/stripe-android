@@ -8,14 +8,6 @@
   <string name="stripe_blik_confirm_payment">Confirm the payment in your bank\'s app within %s to complete the purchase.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">An error occurred. Check your connection and try again.</string>
-  <!-- Label shown in Bacs mandate indicating the shown value is an email -->
-  <string name="stripe_paymentsheet_bacs_mandate_info_email_label">Email</string>
-  <!-- Label shown in Bacs mandate indicating the shown value is the name on the bank account -->
-  <string name="stripe_paymentsheet_bacs_mandate_info_name_label">Name on account</string>
-  <!-- Label shown in Bacs mandate indicating the shown value is a sort code of the bank account -->
-  <string name="stripe_paymentsheet_bacs_mandate_info_sort_code_label">Sort code</string>
-  <!-- Label shown in Bacs mandate indicating the shown value is an account number of the bank account -->
-  <string name="stripe_paymentsheet_bacs_mandate_info_account_number_label">Account number</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[By continuing, you agree to authorize payments pursuant to <terms>these terms</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->

@@ -35,6 +35,9 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
+import com.stripe.android.R as PaymentsCoreR
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
 internal fun BacsMandateConfirmationFormScreen(
@@ -129,19 +132,19 @@ internal fun BacsMandateDetails(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             BacsMandateDetailsRow(
-                label = stringResource(R.string.stripe_paymentsheet_bacs_mandate_info_email_label),
+                label = stringResource(StripeUiCoreR.string.stripe_email),
                 value = email
             )
             BacsMandateDetailsRow(
-                label = stringResource(R.string.stripe_paymentsheet_bacs_mandate_info_name_label),
+                label = stringResource(PaymentsCoreR.string.stripe_au_becs_account_name),
                 value = nameOnAccount
             )
             BacsMandateDetailsRow(
-                label = stringResource(R.string.stripe_paymentsheet_bacs_mandate_info_sort_code_label),
+                label = stringResource(PaymentsUiCoreR.string.stripe_bacs_sort_code),
                 value = sortCode
             )
             BacsMandateDetailsRow(
-                label = stringResource(R.string.stripe_paymentsheet_bacs_mandate_info_account_number_label),
+                label = stringResource(PaymentsUiCoreR.string.stripe_bacs_account_number),
                 value = accountNumber
             )
         }
