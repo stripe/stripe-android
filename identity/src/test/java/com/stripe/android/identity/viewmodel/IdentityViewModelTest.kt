@@ -573,7 +573,6 @@ internal class IdentityViewModelTest {
                 any()
             )
 
-
             // no missing, submit
             verify(mockIdentityRepository).postVerificationPageSubmit(
                 eq(VERIFICATION_SESSION_ID),
