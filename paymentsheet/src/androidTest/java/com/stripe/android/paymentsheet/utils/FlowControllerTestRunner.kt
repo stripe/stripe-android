@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
