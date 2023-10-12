@@ -8,8 +8,6 @@
   <string name="stripe_blik_confirm_payment">Confirm the payment in your bank\'s app within %s to complete the purchase.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">An error occurred. Check your connection and try again.</string>
-  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
-  <string name="stripe_paymentsheet_bacs_mandate_title">Confirm your Direct Debit details</string>
   <!-- Label shown in Bacs mandate indicating the shown value is an email -->
   <string name="stripe_paymentsheet_bacs_mandate_info_email_label">Email</string>
   <!-- Label shown in Bacs mandate indicating the shown value is the name on the bank account -->
@@ -18,14 +16,6 @@
   <string name="stripe_paymentsheet_bacs_mandate_info_sort_code_label">Sort code</string>
   <!-- Label shown in Bacs mandate indicating the shown value is an account number of the bank account -->
   <string name="stripe_paymentsheet_bacs_mandate_info_account_number_label">Account number</string>
-  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
-  <string name="stripe_paymentsheet_bacs_email_mandate">An email will be sent to %s within three business days to confirm the setup of this debit instruction.</string>
-  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
-  <string name="stripe_paymentsheet_bacs_notice_mandate">Additionally, you will receive two days advance notice via email of any amount to be debited under this instruction. Payments will show as \'%s\' on your bank statement.</string>
-  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
-  <string name="stripe_paymentsheet_bacs_protection_mandate">Your payments are protected by the %s.</string>
-  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
-  <string name="stripe_paymentsheet_bacs_modify_details_button_label">Modify details</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[By continuing, you agree to authorize payments pursuant to <terms>these terms</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
