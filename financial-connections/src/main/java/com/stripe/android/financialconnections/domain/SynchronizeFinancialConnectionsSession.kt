@@ -18,10 +18,21 @@ internal class SynchronizeFinancialConnectionsSession @Inject constructor(
     private val financialConnectionsRepository: FinancialConnectionsManifestRepository
 ) {
 
-    suspend operator fun invoke(): SynchronizeSessionResponse {
+    /**
+     * @param emitEvents whether the backend should return live events to emit in the response.
+     * events should just be emitted on the first sync call.
+     */
+    suspend operator fun invoke(
+        emitEvents: Boolean
+    ): SynchronizeSessionResponse {
         return financialConnectionsRepository.synchronizeFinancialConnectionsSession(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
-            applicationId = applicationId
+            applicationId = applicationId,
+            // Sync session is called in a few places:
+            // - when the flow starts -> we expect an "open" event.
+            // - networking account picker (to retrieve the latest TextUpdate) -> no events expected
+            // - after process kills, to restore the session. -> no events expected
+            emitEvents = emitEvents
         )
     }
 }

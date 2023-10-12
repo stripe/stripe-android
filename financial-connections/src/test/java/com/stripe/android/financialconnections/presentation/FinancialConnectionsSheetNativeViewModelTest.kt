@@ -15,9 +15,12 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate.EarlyTerminationCause
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
+import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,6 +31,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import kotlin.test.assertIs
@@ -68,9 +72,26 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             messagesFlow.emit(Terminate(EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY))
 
             withState(viewModel) {
-                require(it.viewEffect is FinancialConnectionsSheetNativeViewEffect.Finish)
+                require(it.viewEffect is Finish)
                 require(it.viewEffect.result is FinancialConnectionsSheetActivityResult.Failed)
                 assertThat(it.viewEffect.result.error).isInstanceOf(CustomManualEntryRequiredError::class.java)
+            }
+        }
+
+    @Test
+    fun `onCloseClick - when closing but linked accounts, finish with success`() =
+        runTest {
+            val sessionWithAccounts = financialConnectionsSessionWithNoMoreAccounts
+            whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
+            whenever(completeFinancialConnectionsSession(anyOrNull())).thenReturn(sessionWithAccounts)
+
+            val viewModel = createViewModel()
+
+            viewModel.onCloseConfirm()
+
+            withState(viewModel) {
+                require(it.viewEffect is Finish)
+                require(it.viewEffect.result is Completed)
             }
         }
 

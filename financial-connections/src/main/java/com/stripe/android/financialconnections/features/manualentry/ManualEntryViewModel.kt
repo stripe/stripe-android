@@ -7,8 +7,10 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -43,6 +45,7 @@ internal class ManualEntryViewModel @Inject constructor(
             val sync = getOrFetchSync()
             val manifest = requireNotNull(sync.manifest)
             eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY))
+            FinancialConnections.emitEvent(Name.MANUAL_ENTRY_INITIATED)
             ManualEntryState.Payload(
                 verifyWithMicrodeposits = manifest.manualEntryUsesMicrodeposits,
                 customManualEntry = manifest.manualEntryMode == ManualEntryMode.CUSTOM

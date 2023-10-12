@@ -14,6 +14,9 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.browser.BrowserManager
@@ -82,7 +85,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         withState { state ->
             viewModelScope.launch {
                 kotlin.runCatching {
-                    synchronizeFinancialConnectionsSession()
+                    synchronizeFinancialConnectionsSession(emitEvents = true)
                 }.onFailure {
                     finishWithResult(state, Failed(it))
                 }.onSuccess {
@@ -122,6 +125,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     )
                 }
             } else {
+                FinancialConnections.emitEvent(name = Name.FLOW_LAUNCHED_IN_BROWSER)
                 setState {
                     copy(
                         manifest = sync.manifest,
@@ -237,9 +241,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         val result: FinancialConnectionsSheetActivityResult? = activityResult.data
             ?.parcelable(FinancialConnectionsSheetNativeActivity.EXTRA_RESULT)
         if (activityResult.resultCode == Activity.RESULT_OK && result != null) {
-            withState { finishWithResult(it, result) }
+            withState { finishWithResult(it, result, fromNative = true) }
         } else {
-            withState { finishWithResult(it, Canceled) }
+            withState { finishWithResult(it, Canceled, fromNative = true) }
         }
     }
 
@@ -443,9 +447,21 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun finishWithResult(
         state: FinancialConnectionsSheetState,
         result: FinancialConnectionsSheetActivityResult,
+        fromNative: Boolean = false,
         @StringRes finishMessage: Int? = null,
     ) {
         eventReporter.onResult(state.initialArgs.configuration, result)
+        // Native emits its own events before finishing.
+        if (fromNative.not()) {
+            when (result) {
+                is Completed -> FinancialConnections.emitEvent(Name.SUCCESS)
+                is Canceled -> FinancialConnections.emitEvent(Name.CANCEL)
+                is Failed -> FinancialConnections.emitEvent(
+                    name = Name.ERROR,
+                    metadata = Metadata(errorCode = ErrorCode.UNEXPECTED_ERROR)
+                )
+            }
+        }
         setState { copy(viewEffect = FinishWithResult(result, finishMessage)) }
     }
 
