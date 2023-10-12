@@ -214,17 +214,17 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val paymentMethods = customerRepository.getPaymentMethods(
             customerConfig = customerConfig,
-            types = paymentMethodTypes,
+            types = paymentMethodTypes.filter { paymentMethodType ->
+                paymentMethodType in setOf(
+                    PaymentMethod.Type.Card,
+                    PaymentMethod.Type.USBankAccount,
+                )
+            },
             silentlyFail = true,
         ).getOrDefault(emptyList())
 
         return paymentMethods.filter { paymentMethod ->
             paymentMethod.hasExpectedDetails()
-        }.filter { paymentMethod ->
-            paymentMethod.type in setOf(
-                PaymentMethod.Type.Card,
-                PaymentMethod.Type.USBankAccount,
-            )
         }
     }
 
