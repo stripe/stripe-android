@@ -32,6 +32,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
@@ -179,6 +180,8 @@ class CardInputWidget @JvmOverloads constructor(
                 .filterNotNull()
         }
 
+    internal var viewModelStoreOwner: ViewModelStoreOwner? = null
+
     /**
      * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
      * otherwise `null`. If a field is invalid focus will shift to the invalid field.
@@ -186,13 +189,14 @@ class CardInputWidget @JvmOverloads constructor(
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
         @OptIn(DelicateCardDetailsApi::class)
         get() {
-            return cardParams?.let {
+            return cardParams?.let { params ->
                 PaymentMethodCreateParams.Card(
-                    number = it.number,
-                    cvc = it.cvc,
-                    expiryMonth = it.expMonth,
-                    expiryYear = it.expYear,
-                    attribution = it.attribution
+                    number = params.number,
+                    cvc = params.cvc,
+                    expiryMonth = params.expMonth,
+                    expiryYear = params.expYear,
+                    attribution = params.attribution,
+                    networks = cardBrandView.createNetworksParam(),
                 )
             }
         }
@@ -399,8 +403,12 @@ class CardInputWidget @JvmOverloads constructor(
         allFields = requiredFields.plus(postalCodeEditText)
 
         initView(attrs)
+    }
 
-        doWithCardWidgetViewModel { viewModel ->
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 cardBrandView.isCbcEligible = isCbcEligible
             }
@@ -803,7 +811,15 @@ class CardInputWidget @JvmOverloads constructor(
         cardNumberEditText.brandChangeCallback = { brand ->
             cardBrandView.brand = brand
             hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
-            updateCvc()
+            updateCvc(brand)
+        }
+
+        cardNumberEditText.implicitCardBrandChangeCallback = { brand ->
+            // With co-branded cards, a card number can belong to multiple brands. Since we still
+            // need do validate based on the card's pan length and expected CVC length, we add this
+            // callback to perform the validations, but don't update the current brand.
+            hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
+            updateCvc(brand)
         }
 
         cardNumberEditText.possibleCardBrandsCallback = this::handlePossibleCardBrandsChanged
@@ -839,10 +855,10 @@ class CardInputWidget @JvmOverloads constructor(
      */
     fun setCvcLabel(cvcLabel: String?) {
         customCvcLabel = cvcLabel
-        updateCvc()
+        updateCvc(cardBrandView.brand)
     }
 
-    private fun updateCvc(brand: CardBrand = cardBrandView.brand) {
+    private fun updateCvc(brand: CardBrand) {
         cvcEditText.updateBrand(
             brand,
             customCvcLabel

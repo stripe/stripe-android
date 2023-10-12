@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
-import androidx.annotation.ColorInt
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -33,7 +32,9 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.databinding.StripeCardBrandViewBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
+import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.properties.Delegates
 
@@ -49,9 +50,7 @@ internal class CardBrandView @JvmOverloads constructor(
     private val iconView = viewBinding.icon
     private val progressView = viewBinding.progress
 
-    @ColorInt
-    internal var tintColorInt: Int = 0
-
+    private val isCbcEligibleFlow = MutableStateFlow(false)
     private val isLoadingFlow = MutableStateFlow(false)
     private val brandFlow = MutableStateFlow(Unknown)
     private val userSelectedBrandFlow = MutableStateFlow<CardBrand?>(null)
@@ -59,8 +58,13 @@ internal class CardBrandView @JvmOverloads constructor(
     private val merchantPreferredNetworksFlow = MutableStateFlow(emptyList<CardBrand>())
     private val shouldShowCvcFlow = MutableStateFlow(false)
     private val shouldShowErrorIconFlow = MutableStateFlow(false)
+    private val tintColorFlow = MutableStateFlow(0)
 
-    var isCbcEligible: Boolean = false
+    var isCbcEligible: Boolean
+        get() = isCbcEligibleFlow.value
+        set(value) {
+            isCbcEligibleFlow.value = value
+        }
 
     var isLoading: Boolean by Delegates.observable(
         false
@@ -106,12 +110,19 @@ internal class CardBrandView @JvmOverloads constructor(
             shouldShowErrorIconFlow.value = value
         }
 
+    internal var tintColorInt: Int
+        get() = tintColorFlow.value
+        set(value) {
+            tintColorFlow.value = value
+        }
+
     init {
         isClickable = false
         isFocusable = false
 
         iconView.setContent {
             MdcTheme {
+                val isCbcEligible by isCbcEligibleFlow.collectAsState()
                 val isLoading by isLoadingFlow.collectAsState()
                 val currentBrand by brandFlow.collectAsState()
                 val userSelectedBrand by userSelectedBrandFlow.collectAsState()
@@ -119,6 +130,7 @@ internal class CardBrandView @JvmOverloads constructor(
                 val merchantPreferredBrands by merchantPreferredNetworksFlow.collectAsState()
                 val shouldShowCvc by shouldShowCvcFlow.collectAsState()
                 val shouldShowErrorIcon by shouldShowErrorIconFlow.collectAsState()
+                val tintColorInt by tintColorFlow.collectAsState()
 
                 LaunchedEffect(userSelectedBrand, possibleBrands, merchantPreferredBrands) {
                     determineCardBrandToDisplay(userSelectedBrand, possibleBrands, merchantPreferredBrands)
@@ -135,6 +147,14 @@ internal class CardBrandView @JvmOverloads constructor(
                     onBrandSelected = this::handleBrandSelected,
                 )
             }
+        }
+    }
+
+    fun createNetworksParam(): PaymentMethodCreateParams.Card.Networks? {
+        return PaymentMethodCreateParams.Card.Networks(
+            preferred = brand.takeIf { it != Unknown }?.code,
+        ).takeIf {
+            FeatureFlags.cardBrandChoice.isEnabled && isCbcEligible && possibleBrands.size > 1
         }
     }
 
@@ -234,10 +254,10 @@ private fun CardBrandChoiceDropdown(
 ) {
     val noSelection = CardBrandChoice(
         label = resolvableString(id = R.string.stripe_card_brand_choice_no_selection),
-        icon = CardBrand.Unknown.icon
+        icon = Unknown.icon
     )
 
-    val allPossibleBrands = listOf(CardBrand.Unknown) + brands
+    val allPossibleBrands = listOf(Unknown) + brands
     val choices = allPossibleBrands.map { brand ->
         brand.toChoice(noSelection)
     }
@@ -259,7 +279,7 @@ private fun CardBrandChoiceDropdown(
 }
 
 private fun CardBrand.toChoice(noSelection: CardBrandChoice): CardBrandChoice {
-    return if (this == CardBrand.Unknown) {
+    return if (this == Unknown) {
         noSelection
     } else {
         CardBrandChoice(

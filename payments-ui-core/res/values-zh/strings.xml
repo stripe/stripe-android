@@ -30,6 +30,8 @@
   <string name="stripe_continue_button_label">继续</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">EPS 银行</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX 银行</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">您输入的 IBAN 不完整。</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->

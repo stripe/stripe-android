@@ -22,6 +22,10 @@
             android:theme="@style/StripePaymentSheetDefaultTheme"
             android:exported="false" />
         <activity
+            android:name=".paymentdatacollection.bacs.BacsMandateConfirmationActivity"
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:exported="false" />
+        <activity
             android:name=".paymentdatacollection.polling.PollingActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
             android:exported="false" />
