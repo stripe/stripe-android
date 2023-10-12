@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.utils
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
+import androidx.test.espresso.IdlingRegistry
+import androidx.test.espresso.IdlingResource
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -10,6 +12,7 @@ import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -88,8 +91,8 @@ private fun runFlowControllerTest(
     }
 
     lateinit var flowController: PaymentSheet.FlowController
-    scenario.onActivity {
-        flowController = makeFlowController(it)
+    scenario.onActivity { activity ->
+        flowController = SynchronizedTestFlowController(makeFlowController(activity))
     }
 
     scenario.moveToState(Lifecycle.State.RESUMED)
@@ -99,4 +102,43 @@ private fun runFlowControllerTest(
 
     assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     scenario.close()
+}
+
+internal class SynchronizedTestFlowController(
+    private val flowController: PaymentSheet.FlowController
+) : PaymentSheet.FlowController by flowController, IdlingResource {
+    private var isIdleNow: Boolean = false
+    private var onIdleTransitionCallback: IdlingResource.ResourceCallback? = null
+
+    override var shippingDetails: AddressDetails?
+        get() = flowController.shippingDetails
+        set(value) {
+            flowController.shippingDetails = value
+        }
+
+    init {
+        IdlingRegistry.getInstance().register(this)
+    }
+
+    override fun presentPaymentOptions() {
+        flowController.presentPaymentOptions()
+        isIdleNow = true
+        onIdleTransitionCallback?.onTransitionToIdle()
+        IdlingRegistry.getInstance().unregister(this)
+        onIdleTransitionCallback = null
+    }
+
+    override fun getName(): String = FLOW_CONTROLLER_RESOURCE
+
+    override fun registerIdleTransitionCallback(callback: IdlingResource.ResourceCallback?) {
+        onIdleTransitionCallback = callback
+    }
+
+    override fun isIdleNow(): Boolean {
+        return isIdleNow
+    }
+
+    companion object {
+        private const val FLOW_CONTROLLER_RESOURCE = "FlowControllerResource"
+    }
 }

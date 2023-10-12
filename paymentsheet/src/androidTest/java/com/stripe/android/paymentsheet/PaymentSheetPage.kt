@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
+import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
@@ -17,6 +18,7 @@ internal class PaymentSheetPage(
     private val composeTestRule: ComposeTestRule,
 ) {
     fun fillOutCardDetails(fillOutZipCode: Boolean = true) {
+        Espresso.onIdle()
         composeTestRule.waitForIdle()
 
         waitForText("Card number")
@@ -31,6 +33,7 @@ internal class PaymentSheetPage(
     }
 
     fun fillOutCardDetailsWithCardBrandChoice(fillOutZipCode: Boolean = true) {
+        Espresso.onIdle()
         composeTestRule.waitForIdle()
 
         waitForText("Card number")
@@ -75,6 +78,7 @@ internal class PaymentSheetPage(
     }
 
     fun addPaymentMethod() {
+        Espresso.onIdle()
         composeTestRule.waitForIdle()
 
         waitForText("+ Add")
