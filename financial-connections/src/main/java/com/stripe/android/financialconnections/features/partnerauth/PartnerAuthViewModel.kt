@@ -25,6 +25,7 @@ import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.common.enableRetrieveAuthSession
+import com.stripe.android.financialconnections.features.common.showPendingPrepaneWhenReturning
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthStatus
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Payload
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
@@ -297,7 +298,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                     )
                 )
                 if (nextPane == PANE) {
-                    if (authSession.isOAuth && url == null) {
+                    if (authSession.showPendingPrepaneWhenReturning() && url == null) {
                         // if the client returned to SDK mid-flow on an OAuth institution
                         // show the pending pre-pane prompting the user to return to the bank app.
                         setState { copy(authenticationStatus = AuthStatus.Pending) }

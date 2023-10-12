@@ -245,7 +245,6 @@ private fun LoadedContent(
             )
         }
 
-
         is AuthStatus.Uninitialized -> when (payload.authSession.isOAuth) {
             true -> InstitutionalPrePaneContent(
                 onContinueClick = onContinueClick,

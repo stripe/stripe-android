@@ -53,6 +53,9 @@ internal data class FinancialConnectionsAuthorizationSession(
     @SerialName(value = "is_oauth")
     private val _isOAuth: Boolean? = false,
 
+    @SerialName(value = "features")
+    val features: Map<String, Boolean>? = null,
+
     @SerialName(value = "display")
     val display: Display? = null
 ) : Parcelable {
