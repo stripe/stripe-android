@@ -37,7 +37,7 @@
   <string name="stripe_description_clock">Clock icon</string>
   <!-- Content description for close button -->
   <string name="stripe_description_close">close verification page</string>
-  <!-- ø     -->
+  <!-- Content description for cloud icon -->
   <string name="stripe_description_cloud">cloud icon</string>
   <!-- Content description for create_identity_verification icon -->
   <string name="stripe_description_create_identity_verification">create_identity_verification icon</string>
