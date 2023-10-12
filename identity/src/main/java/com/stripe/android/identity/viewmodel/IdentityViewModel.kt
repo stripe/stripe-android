@@ -39,20 +39,17 @@ import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.navigation.CameraPermissionDeniedDestination
 import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.DocSelectionDestination
-import com.stripe.android.identity.navigation.DriverLicenseScanDestination
-import com.stripe.android.identity.navigation.DriverLicenseUploadDestination
-import com.stripe.android.identity.navigation.IDScanDestination
-import com.stripe.android.identity.navigation.IDUploadDestination
+import com.stripe.android.identity.navigation.ErrorDestination
+import com.stripe.android.identity.navigation.IdentityTopLevelDestination
 import com.stripe.android.identity.navigation.IndividualDestination
 import com.stripe.android.identity.navigation.OTPDestination
-import com.stripe.android.identity.navigation.PassportScanDestination
-import com.stripe.android.identity.navigation.PassportUploadDestination
 import com.stripe.android.identity.navigation.SelfieDestination
 import com.stripe.android.identity.navigation.SelfieWarmupDestination
 import com.stripe.android.identity.navigation.navigateOnVerificationPageData
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithRequirementError
+import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
 import com.stripe.android.identity.navigation.routeToScreenName
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
@@ -67,11 +64,14 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.clearData
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.collectedRequirements
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.mergeWith
+import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.toScanDestination
+import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.toUploadDestination
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.Requirement.Companion.INDIVIDUAL_REQUIREMENT_SET
 import com.stripe.android.identity.networking.models.Requirement.Companion.nextDestination
+import com.stripe.android.identity.networking.models.Requirement.Companion.supportsForceConfirm
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -178,7 +178,8 @@ internal class IdentityViewModel constructor(
     /**
      * StateFlow to track the data collected so far.
      */
-    private val _collectedData = MutableStateFlow(
+    @VisibleForTesting
+    internal val _collectedData = MutableStateFlow(
         savedStateHandle[COLLECTED_DATA] ?: CollectedDataParam()
     )
     val collectedData: StateFlow<CollectedDataParam> = _collectedData
@@ -956,6 +957,7 @@ internal class IdentityViewModel constructor(
                 submittedVerificationPageData.submittedAndClosed() -> {
                     navController.navigateTo(ConfirmationDestination)
                 }
+
                 else -> {
                     errorCause.postValue(IllegalStateException("VerificationPage submit failed"))
                     navController.navigateToErrorScreenWithDefaultValues(getApplication())
@@ -1445,6 +1447,110 @@ internal class IdentityViewModel constructor(
     }
 
     /**
+     * Post VerificationPageData for force confirm. Currently it's only possible to force confirm
+     * [Requirement.IDDOCUMENTFRONT] and [Requirement.IDDOCUMENTBACK] when user clicks continue
+     * anyway on error page after document front/back upload fails.
+     *
+     * After force confirm, the session would ended up in 3 possible possible states
+     *  1. missingBack -
+     *    uploaded front -> got failure for front from server -> forced confirm front
+     *     -> now need to upload back
+     *  2. missingSelfie -
+     *    uploaded front and back -> got failure for back from server -> forced confirm back
+     *     -> session requires selfie -> now need to upload selfie
+     *  3. readyToSubmit -
+     *    uploaded front and back -> got failure for back from server -> forced confirm back
+     *     -> session doesn't selfie -> now need to submit session
+     *
+     *  Note: missingFront is impossible here -
+     *  because force confirming [Requirement.IDDOCUMENTFRONT] ends up fulfilling front,
+     *  and force confirming [Requirement.IDDOCUMENTBACK] assumes front is already fulfilled.
+     */
+    suspend fun postVerificationPageDataForForceConfirm(
+        requirementToForceConfirm: Requirement,
+        navController: NavController,
+        fromRoute: String = ErrorDestination.ROUTE.route
+    ) {
+        try {
+            val (forceConfirmParam, nextDestination) =
+                calculateParamForForceConfirm(requirementToForceConfirm)
+            postVerificationPageDataAndMaybeNavigate(
+                navController = navController,
+                collectedDataParam = forceConfirmParam,
+                fromRoute = fromRoute,
+                onMissingBack = {
+                    navController.navigateTo(nextDestination)
+                },
+                onReadyToSubmit = {
+                    submitAndNavigate(navController, fromRoute)
+                }
+            )
+        } catch (e: IllegalStateException) {
+            Log.e(TAG, "Failed to postVerificationPageDataForForceConfirm: ${e.message}")
+            navController.navigateToFinalErrorScreen(getApplication())
+        }
+    }
+
+    /**
+     * Calculates the parameters for screen transitioning on force confirm, return null if fails to
+     * calculate.
+     *
+     * @return CollectedDataParam to force confirm, and [IdentityTopLevelDestination] to navigate to
+     *  if back is missing.
+     */
+    private fun calculateParamForForceConfirm(
+        requirementToForceConfirm: Requirement
+    ): Pair<CollectedDataParam, IdentityTopLevelDestination> {
+        check(requirementToForceConfirm.supportsForceConfirm()) {
+            "Unsupported requirement to forceConfirm: $requirementToForceConfirm"
+        }
+        val failedDocumentType = collectedData.value.idDocumentType
+        val failedDocumentParam =
+            if (requirementToForceConfirm == Requirement.IDDOCUMENTFRONT) {
+                collectedData.value.idDocumentFront
+            } else {
+                collectedData.value.idDocumentBack
+            }
+        val failedUploadMethod = failedDocumentParam?.uploadMethod
+
+        check(failedDocumentType != null && failedDocumentParam != null && failedUploadMethod != null) {
+            "Failed to calculate params to forceConfirm"
+        }
+        val collectedDataParamWithForceConfirm =
+            if (requirementToForceConfirm == Requirement.IDDOCUMENTFRONT) {
+                CollectedDataParam(
+                    idDocumentFront = failedDocumentParam.copy(forceConfirm = true)
+                )
+            } else {
+                CollectedDataParam(
+                    idDocumentBack = failedDocumentParam.copy(forceConfirm = true)
+                )
+            }
+        val destinationWhenMissingBack =
+            when (failedUploadMethod) {
+                UploadMethod.AUTOCAPTURE -> {
+                    failedDocumentType.toScanDestination(
+                        shouldStartFromBack = true,
+                        shouldPopUpToDocSelection = true
+                    )
+                }
+
+                UploadMethod.FILEUPLOAD -> {
+                    failedDocumentType.toUploadDestination(
+                        shouldPopUpToDocSelection = true
+                    )
+                }
+
+                UploadMethod.MANUALCAPTURE -> {
+                    failedDocumentType.toUploadDestination(
+                        shouldPopUpToDocSelection = true
+                    )
+                }
+            }
+        return collectedDataParamWithForceConfirm to destinationWhenMissingBack
+    }
+
+    /**
      * Post verification with OTP, and decide next step based on result with 3 possible cases.
      *  1. correct OTP - navigate based on missings(could be none or document related)
      *  2. incorrect OTP - missings still contains otp, show inline error on OTP screen
@@ -1700,28 +1806,6 @@ internal class IdentityViewModel constructor(
         savedStateHandle[IdentityImageHandler.BACK_SCAN_TYPE] = backScanType
         imageHandler.updateScanTypes(frontScanType, backScanType)
     }
-
-    private fun CollectedDataParam.Type.toScanDestination() =
-        when (this) {
-            CollectedDataParam.Type.IDCARD -> IDScanDestination()
-            CollectedDataParam.Type.PASSPORT -> PassportScanDestination()
-            CollectedDataParam.Type.DRIVINGLICENSE -> DriverLicenseScanDestination()
-            else -> throw IllegalStateException("Invalid CollectedDataParam.Type")
-        }
-
-    private fun CollectedDataParam.Type.toUploadDestination() =
-        when (this) {
-            CollectedDataParam.Type.IDCARD ->
-                IDUploadDestination()
-
-            CollectedDataParam.Type.PASSPORT ->
-                PassportUploadDestination()
-
-            CollectedDataParam.Type.DRIVINGLICENSE ->
-                DriverLicenseUploadDestination()
-
-            else -> throw IllegalStateException("Invalid CollectedDataParam.Type")
-        }
 
     private fun CollectedDataParam.Type.toAnalyticsScanType() = when (this) {
         CollectedDataParam.Type.DRIVINGLICENSE -> IdentityScanState.ScanType.DL_FRONT

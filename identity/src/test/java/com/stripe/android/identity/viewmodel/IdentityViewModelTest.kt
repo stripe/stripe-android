@@ -41,14 +41,18 @@ import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.DocSelectionDestination
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.IdentityTopLevelDestination
+import com.stripe.android.identity.navigation.SELFIE
 import com.stripe.android.identity.navigation.SelfieWarmupDestination
+import com.stripe.android.identity.navigation.SelfieWarmupDestination.SELFIE_WARMUP
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.toScanDestination
 import com.stripe.android.identity.networking.models.DocumentUploadParam
+import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
@@ -63,6 +67,7 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.BACK
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.FRONT
 import com.stripe.android.mlcore.base.InterpreterInitializer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
@@ -462,6 +467,111 @@ internal class IdentityViewModelTest {
             verify(mockOnReadyToSubmit).invoke()
         }
     }
+
+    @Test
+    fun `forceConfirm unSupportedRequirement - navigate to error`() =
+        runBlocking {
+            // sending a requirement not in REQUIREMENTS_SUPPORTS_FORCE_CONFIRM
+            viewModel.postVerificationPageDataForForceConfirm(
+                requirementToForceConfirm = Requirement.IDDOCUMENTTYPE,
+                navController = mockController
+            )
+
+            verify(mockController).navigate(
+                argWhere {
+                    it.startsWith(ErrorDestination.ERROR)
+                },
+                any<NavOptionsBuilder.() -> Unit>()
+            )
+        }
+
+    @Test
+    fun `forceConfirm front - missingBack - navigate to back`() =
+        testForceConfirm(VERIFICATION_PAGE_DATA_MISSING_BACK) { targetDestination, failedCollectedDataParam ->
+            // fulfilling front, should post with force confirm front
+            viewModel.postVerificationPageDataForForceConfirm(
+                requirementToForceConfirm = Requirement.IDDOCUMENTFRONT,
+                navController = mockController
+            )
+
+            // verify postVerificationPageData with force confirming front
+            verify(mockIdentityRepository).postVerificationPageData(
+                eq(VERIFICATION_SESSION_ID),
+                eq(EPHEMERAL_KEY),
+                eq(
+                    CollectedDataParam(
+                        idDocumentFront = failedCollectedDataParam.idDocumentFront?.copy(
+                            forceConfirm = true
+                        )
+                    )
+                ),
+                any()
+            )
+
+            verify(mockController).navigate(
+                eq(targetDestination.routeWithArgs),
+                any<NavOptionsBuilder.() -> Unit>()
+            )
+        }
+
+    @Test
+    fun `forceConfirm back - missingSelfie - navigate to selfie warmup`() =
+        testForceConfirm(VERIFICATION_PAGE_DATA_MISSING_SELFIE) { _, failedCollectedDataParam ->
+            // fulfilling back, should post with force confirm bcak
+            viewModel.postVerificationPageDataForForceConfirm(
+                requirementToForceConfirm = Requirement.IDDOCUMENTBACK,
+                navController = mockController
+            )
+
+            // verify postVerificationPageData with force confirming back
+            verify(mockIdentityRepository).postVerificationPageData(
+                eq(VERIFICATION_SESSION_ID),
+                eq(EPHEMERAL_KEY),
+                eq(
+                    CollectedDataParam(
+                        idDocumentBack = failedCollectedDataParam.idDocumentBack?.copy(
+                            forceConfirm = true
+                        )
+                    )
+                ),
+                any()
+            )
+
+            verify(mockController).navigate(
+                eq(SELFIE_WARMUP),
+                any<NavOptionsBuilder.() -> Unit>()
+            )
+        }
+
+    @Test
+    fun `forceConfirm back - noMissing - submit`() =
+        testForceConfirm(CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA) { _, failedCollectedDataParam ->
+            // fulfilling back, should post with force confirm bcak
+            viewModel.postVerificationPageDataForForceConfirm(
+                requirementToForceConfirm = Requirement.IDDOCUMENTBACK,
+                navController = mockController
+            )
+
+            // verify postVerificationPageData with force confirming back
+            verify(mockIdentityRepository).postVerificationPageData(
+                eq(VERIFICATION_SESSION_ID),
+                eq(EPHEMERAL_KEY),
+                eq(
+                    CollectedDataParam(
+                        idDocumentBack = failedCollectedDataParam.idDocumentBack?.copy(
+                            forceConfirm = true
+                        )
+                    )
+                ),
+                any()
+            )
+
+            // no missing, submit
+            verify(mockIdentityRepository).postVerificationPageSubmit(
+                eq(VERIFICATION_SESSION_ID),
+                eq(EPHEMERAL_KEY),
+            )
+        }
 
     @Test
     fun `navigateToSelfieOrSubmit - requireSelfie`() = runBlocking {
@@ -1005,6 +1115,49 @@ internal class IdentityViewModelTest {
                 )
             )
         }
+    }
+
+    private fun testForceConfirm(
+        verificationPageDataResponse: VerificationPageData,
+        paramsCallback: suspend (IdentityTopLevelDestination, CollectedDataParam) -> Unit
+    ) = runBlocking {
+        // mock failed scanning front of driver license
+        val failedDocumentType = CollectedDataParam.Type.DRIVINGLICENSE
+
+        // failed front, now fulfilled, target destination should be failed back
+        val targetDestination = failedDocumentType.toScanDestination(
+            shouldStartFromBack = true,
+            shouldPopUpToDocSelection = true
+        )
+
+        val failedCollectedDataParam =
+            CollectedDataParam(
+                idDocumentType = failedDocumentType,
+                idDocumentFront = DocumentUploadParam(
+                    highResImage = "high/res/image/path",
+                    uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
+                ),
+                idDocumentBack = DocumentUploadParam(
+                    highResImage = "high/res/image/path",
+                    uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
+                )
+            )
+        viewModel._collectedData.update {
+            failedCollectedDataParam
+        }
+
+        whenever(
+            mockIdentityRepository.postVerificationPageData(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenReturn(verificationPageDataResponse)
+        paramsCallback(
+            targetDestination,
+            failedCollectedDataParam
+        )
     }
 
     private companion object {
