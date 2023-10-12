@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.analytics
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnections
@@ -30,37 +31,45 @@ class LogErrorTest {
     }
 
     @Test
-    fun `InstitutionUnplannedDowntimeError should log analytics and not emit live event`() = runTest {
-        // Given
-        val analyticsTracker = mock<FinancialConnectionsAnalyticsTracker>()
+    fun `InstitutionUnplannedDowntimeError with live events in response should not emit live event`() =
+        runTest {
+            // Given
+            val analyticsTracker = mock<FinancialConnectionsAnalyticsTracker>()
 
-        val unplannedDowntimeError = InstitutionUnplannedDowntimeError(
-            institution = ApiKeyFixtures.institution(),
-            showManualEntry = false,
-            stripeException = APIException()
-        )
-
-        // When
-        analyticsTracker.logError(
-            extraMessage = "Test error",
-            error = unplannedDowntimeError,
-            logger = Logger.noop(),
-            pane = Pane.PARTNER_AUTH,
-        )
-
-        // Then
-        // logs analytics
-        verify(analyticsTracker).track(
-            FinancialConnectionsAnalyticsEvent.Error(
-                extraMessage = "Test error",
-                pane = Pane.PARTNER_AUTH,
-                exception = unplannedDowntimeError
+            val unplannedDowntimeError = InstitutionUnplannedDowntimeError(
+                institution = ApiKeyFixtures.institution(),
+                showManualEntry = false,
+                // Simulates an api error that includes events to emit.
+                stripeException = APIException(
+                    stripeError = StripeError(
+                        extraFields = mapOf(
+                            "events_to_emit" to "[{\"type\":\"error\"}]"
+                        )
+                    ),
+                )
             )
-        )
 
-        // emits live event
-        assertThat(liveEvents).isEmpty()
-    }
+            // When
+            analyticsTracker.logError(
+                extraMessage = "Test error",
+                error = unplannedDowntimeError,
+                logger = Logger.noop(),
+                pane = Pane.PARTNER_AUTH,
+            )
+
+            // Then
+            // logs analytics
+            verify(analyticsTracker).track(
+                FinancialConnectionsAnalyticsEvent.Error(
+                    extraMessage = "Test error",
+                    pane = Pane.PARTNER_AUTH,
+                    exception = unplannedDowntimeError
+                )
+            )
+
+            // emits live event
+            assertThat(liveEvents).isEmpty()
+        }
 
     @Test
     fun `AppInitializationError should log analytics and emit live event`() = runTest {

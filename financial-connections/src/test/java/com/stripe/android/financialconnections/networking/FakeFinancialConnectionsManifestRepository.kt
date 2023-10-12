@@ -63,7 +63,8 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
 
     override suspend fun retrieveAuthorizationSession(
         clientSecret: String,
-        sessionId: String
+        sessionId: String,
+        emitEvents: Boolean
     ): FinancialConnectionsAuthorizationSession {
         TODO("Not yet implemented")
     }
@@ -97,7 +98,8 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
 
     override suspend fun synchronizeFinancialConnectionsSession(
         clientSecret: String,
-        applicationId: String
+        applicationId: String,
+        emitEvents: Boolean
     ): SynchronizeSessionResponse = getSynchronizeSessionResponseProvider()
 
     override fun updateLocalManifest(

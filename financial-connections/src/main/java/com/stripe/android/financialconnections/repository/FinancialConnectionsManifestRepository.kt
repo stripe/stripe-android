@@ -53,7 +53,8 @@ internal interface FinancialConnectionsManifestRepository {
     )
     suspend fun synchronizeFinancialConnectionsSession(
         clientSecret: String,
-        applicationId: String
+        applicationId: String,
+        emitEvents: Boolean
     ): SynchronizeSessionResponse
 
     /**
@@ -118,7 +119,8 @@ internal interface FinancialConnectionsManifestRepository {
 
     suspend fun retrieveAuthorizationSession(
         clientSecret: String,
-        sessionId: String
+        sessionId: String,
+        emitEvents: Boolean
     ): FinancialConnectionsAuthorizationSession
 
     /**
@@ -223,7 +225,11 @@ private class FinancialConnectionsManifestRepositoryImpl(
         cachedSynchronizeSessionResponse ?: run {
             // fetch manifest and save it locally
             return requestExecutor.execute(
-                synchronizeRequest(applicationId, clientSecret),
+                synchronizeRequest(
+                    applicationId = applicationId,
+                    clientSecret = clientSecret,
+                    emitEvents = false
+                ),
                 SynchronizeSessionResponse.serializer()
             ).also { updateCachedSynchronizeSessionResponse("get/fetch", it) }
         }
@@ -231,9 +237,15 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
     override suspend fun synchronizeFinancialConnectionsSession(
         clientSecret: String,
-        applicationId: String
+        applicationId: String,
+        emitEvents: Boolean
     ): SynchronizeSessionResponse = mutex.withLock {
-        val financialConnectionsRequest = synchronizeRequest(applicationId, clientSecret)
+        val financialConnectionsRequest =
+            synchronizeRequest(
+                applicationId = applicationId,
+                clientSecret = clientSecret,
+                emitEvents = emitEvents
+            )
         return requestExecutor.execute(
             financialConnectionsRequest,
             SynchronizeSessionResponse.serializer()
@@ -242,12 +254,14 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
     private fun synchronizeRequest(
         applicationId: String,
-        clientSecret: String
+        clientSecret: String,
+        emitEvents: Boolean
     ): ApiRequest = apiRequestFactory.createPost(
         url = synchronizeSessionUrl,
         options = apiOptions,
         params = mapOf(
             "expand" to listOf("manifest.active_auth_session"),
+            "emit_events" to emitEvents,
             "locale" to locale.toLanguageTag(),
             "mobile" to mapOf(
                 PARAMS_FULLSCREEN to true,
@@ -345,14 +359,16 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
     override suspend fun retrieveAuthorizationSession(
         clientSecret: String,
-        sessionId: String
+        sessionId: String,
+        emitEvents: Boolean
     ): FinancialConnectionsAuthorizationSession = requestExecutor.execute(
         request = apiRequestFactory.createPost(
             url = retrieveAuthSessionUrl,
             options = apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "emit_events" to emitEvents
             )
         ),
         FinancialConnectionsAuthorizationSession.serializer()
