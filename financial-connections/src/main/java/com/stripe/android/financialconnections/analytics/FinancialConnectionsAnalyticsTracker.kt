@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsResponseEventEmitter.Companion.EVENTS_TO_EMIT
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -51,7 +52,7 @@ internal suspend fun FinancialConnectionsAnalyticsTracker.logError(
 private fun emitPublicClientErrorEventIfNeeded(error: Throwable) {
     val isStripeErrorWithEvents = (error as? StripeException)
         ?.stripeError?.extraFields
-        ?.get("events_to_emit")
+        ?.get(EVENTS_TO_EMIT)
         ?.isNotEmpty() == true
 
     // only emit events for client errors.

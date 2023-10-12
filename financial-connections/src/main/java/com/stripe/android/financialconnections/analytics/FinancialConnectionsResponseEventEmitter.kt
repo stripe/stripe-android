@@ -48,7 +48,7 @@ internal class FinancialConnectionsResponseEventEmitter @Inject constructor(
         // success responses: events to emit come in the root json object
         else -> responseJson()
     }
-        ?.optString("events_to_emit")
+        ?.optString(EVENTS_TO_EMIT)
         ?.takeIf { it.isNotEmpty() }
 
     private fun UserFacingEventResponse.toEvent() = runCatching {
@@ -68,4 +68,8 @@ internal class FinancialConnectionsResponseEventEmitter @Inject constructor(
     }.onFailure {
         logger.error("Error mapping event response", it)
     }.getOrNull()
+
+    companion object {
+        const val EVENTS_TO_EMIT = "events_to_emit"
+    }
 }
