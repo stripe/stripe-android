@@ -41,7 +41,6 @@ import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.DocSelectionDestination
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.IdentityTopLevelDestination
-import com.stripe.android.identity.navigation.SELFIE
 import com.stripe.android.identity.navigation.SelfieWarmupDestination
 import com.stripe.android.identity.navigation.SelfieWarmupDestination.SELFIE_WARMUP
 import com.stripe.android.identity.networking.IdentityModelFetcher
@@ -546,6 +545,14 @@ internal class IdentityViewModelTest {
     @Test
     fun `forceConfirm back - noMissing - submit`() =
         testForceConfirm(CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA) { _, failedCollectedDataParam ->
+
+            whenever(
+                mockIdentityRepository.postVerificationPageSubmit(
+                    any(),
+                    any()
+                )
+            ).thenReturn(CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA)
+
             // fulfilling back, should post with force confirm bcak
             viewModel.postVerificationPageDataForForceConfirm(
                 requirementToForceConfirm = Requirement.IDDOCUMENTBACK,
@@ -565,6 +572,7 @@ internal class IdentityViewModelTest {
                 ),
                 any()
             )
+
 
             // no missing, submit
             verify(mockIdentityRepository).postVerificationPageSubmit(
