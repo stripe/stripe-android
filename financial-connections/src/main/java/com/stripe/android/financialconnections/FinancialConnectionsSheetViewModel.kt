@@ -85,7 +85,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         withState { state ->
             viewModelScope.launch {
                 kotlin.runCatching {
-                    synchronizeFinancialConnectionsSession(emitEvents = true)
+                    synchronizeFinancialConnectionsSession()
                 }.onFailure {
                     finishWithResult(state, Failed(it))
                 }.onSuccess {
@@ -116,6 +116,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 )
             }
         } else {
+            FinancialConnections.emitEvent(name = Name.OPEN)
             if (nativeAuthFlowEnabled) {
                 setState {
                     copy(

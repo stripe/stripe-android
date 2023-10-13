@@ -67,7 +67,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         observeAsyncs()
         suspend {
             val manifest = getManifest()
-            val content = requireNotNull(sync(emitEvents = false).text?.networkingLinkSignupPane)
+            val content = requireNotNull(sync().text?.networkingLinkSignupPane)
             eventTracker.track(PaneLoaded(PANE))
             NetworkingLinkSignupState.Payload(
                 content = content,

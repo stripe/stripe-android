@@ -83,7 +83,7 @@ class FinancialConnectionsSheetViewModelTest {
             whenever(synchronizeFinancialConnectionsSession(emitEvents = true)).thenReturn(syncResponse)
             createViewModel(defaultInitialState)
 
-            verify(synchronizeFinancialConnectionsSession).invoke(emitEvents = true)
+            verify(synchronizeFinancialConnectionsSession).invoke()
         }
 
     @Test

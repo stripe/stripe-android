@@ -18,10 +18,6 @@ internal class RetrieveAuthorizationSession @Inject constructor(
         return repository.retrieveAuthorizationSession(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
             sessionId = authorizationSessionId,
-            // Retrieve session is currently just called after returning from institution
-            // auth, and we expect a "institution_authorized" event.
-            // If we ever call this method in other places, this value should be passed in.
-            emitEvents = true
         ).also { coordinator().emit(Message.ClearPartnerWebAuth) }
     }
 }
