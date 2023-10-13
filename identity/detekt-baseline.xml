@@ -84,6 +84,6 @@
     <ID>UnnecessaryAbstractClass:IdentityCommonModule.kt$IdentityCommonModule$IdentityCommonModule</ID>
     <ID>UnusedPrivateMember:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$i</ID>
     <ID>VariableNaming:IdentityViewModel.kt$IdentityViewModel$/** * Response for initial VerificationPage, used for building UI. */ @VisibleForTesting internal val _verificationPage: MutableLiveData&lt;Resource&lt;VerificationPage>> = // No need to write to savedStateHandle for livedata savedStateHandle.getLiveData( key = VERIFICATION_PAGE, initialValue = Resource.idle() )</ID>
-    <ID>VariableNaming:IdentityViewModel.kt$IdentityViewModel$/** * StateFlow to track the data collected so far. */ @VisibleForTesting internal val _collectedData = MutableStateFlow( savedStateHandle[COLLECTED_DATA] ?: run { CollectedDataParam() } )</ID>
+    <ID>VariableNaming:IdentityViewModel.kt$IdentityViewModel$/** * StateFlow to track the data collected so far. */ @VisibleForTesting internal val _collectedData = MutableStateFlow( savedStateHandle[COLLECTED_DATA] ?: CollectedDataParam() )</ID>
   </CurrentIssues>
 </SmellBaseline>
