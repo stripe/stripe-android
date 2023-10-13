@@ -35,6 +35,7 @@
     <string name="cash_app_pay_example">Cash App Pay</string>
     <string name="revolut_pay_example">Revolut Pay</string>
     <string name="swish_example">Swish</string>
+    <string name="mobilepay_example">MobilePay</string>
     <string name="card_brands">Card Brands</string>
     <string name="card_brands_hint">Card number</string>
     <string name="possible_card_brands">Possible Card Brands</string>

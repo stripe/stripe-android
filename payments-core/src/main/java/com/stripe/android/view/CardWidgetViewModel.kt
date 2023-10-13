@@ -1,7 +1,6 @@
 package com.stripe.android.view
 
 import android.view.View
-import androidx.core.view.doOnAttach
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
@@ -77,33 +76,35 @@ internal class CardWidgetViewModel(
 }
 
 internal fun View.doWithCardWidgetViewModel(
-    viewModelStoreOwner: ViewModelStoreOwner? = null,
+    viewModelStoreOwner: ViewModelStoreOwner?,
     action: LifecycleOwner.(CardWidgetViewModel) -> Unit,
 ) {
-    doOnAttach {
-        val lifecycleOwner = findViewTreeLifecycleOwner()
-        val storeOwner = viewModelStoreOwner ?: findViewTreeViewModelStoreOwner()
-
-        if (lifecycleOwner == null || storeOwner == null) {
-            if (DEBUG) {
-                if (lifecycleOwner == null) {
-                    error("Couldn't find a LifecycleOwner for view")
-                } else {
-                    error("Couldn't find a ViewModelStoreOwner for view")
-                }
-            }
-            return@doOnAttach
-        }
-
-        val factory = CardWidgetViewModel.Factory()
-
-        val viewModel = ViewModelProvider(
-            owner = storeOwner,
-            factory = factory,
-        )[CardWidgetViewModel::class.java]
-
-        lifecycleOwner.action(viewModel)
+    if (!isAttachedToWindow && DEBUG) {
+        error("Bla")
     }
+
+    val lifecycleOwner = findViewTreeLifecycleOwner()
+    val storeOwner = viewModelStoreOwner ?: findViewTreeViewModelStoreOwner()
+
+    if (lifecycleOwner == null || storeOwner == null) {
+        if (DEBUG) {
+            if (lifecycleOwner == null) {
+                error("Couldn't find a LifecycleOwner for view")
+            } else {
+                error("Couldn't find a ViewModelStoreOwner for view")
+            }
+        }
+        return
+    }
+
+    val factory = CardWidgetViewModel.Factory()
+
+    val viewModel = ViewModelProvider(
+        owner = storeOwner,
+        factory = factory,
+    )[CardWidgetViewModel::class.java]
+
+    lifecycleOwner.action(viewModel)
 }
 
 context(LifecycleOwner)
