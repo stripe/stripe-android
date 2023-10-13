@@ -65,7 +65,7 @@ class NetworkingLinkSignupViewModelTest {
             businessName = "Business",
             accountholderCustomerEmailAddress = "test@test.com"
         )
-        whenever(sync(emitEvents = false)).thenReturn(
+        whenever(sync()).thenReturn(
             syncResponse().copy(
                 text = TextUpdate(
                     consent = null,
