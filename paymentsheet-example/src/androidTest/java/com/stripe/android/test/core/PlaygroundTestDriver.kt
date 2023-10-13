@@ -510,7 +510,7 @@ internal class PlaygroundTestDriver(
             // Observe the result of the PaymentSheet completion
             activity.lifecycleScope.launch {
                 activity.viewModel.status.collect {
-                    resultValue = it
+                    resultValue = it?.message
                 }
             }
             launchPlayground.countDown()
