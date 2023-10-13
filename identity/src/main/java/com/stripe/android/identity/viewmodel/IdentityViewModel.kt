@@ -163,9 +163,7 @@ internal class IdentityViewModel constructor(
      * StateFlow to track the upload status of high/low resolution images of selfies.
      */
     private val _selfieUploadedState = MutableStateFlow(
-        savedStateHandle[SELFIE_UPLOAD_STATE] ?: run {
-            SelfieUploadState()
-        }
+        savedStateHandle[SELFIE_UPLOAD_STATE] ?: SelfieUploadState()
     )
     val selfieUploadState: StateFlow<SelfieUploadState> = _selfieUploadedState
 
@@ -173,9 +171,7 @@ internal class IdentityViewModel constructor(
      * StateFlow to track analytics status.
      */
     private val _analyticsState = MutableStateFlow(
-        savedStateHandle[ANALYTICS_STATE] ?: run {
-            AnalyticsState()
-        }
+        savedStateHandle[ANALYTICS_STATE] ?: AnalyticsState()
     )
     val analyticsState: StateFlow<AnalyticsState> = _analyticsState
 
@@ -183,15 +179,12 @@ internal class IdentityViewModel constructor(
      * StateFlow to track the data collected so far.
      */
     private val _collectedData = MutableStateFlow(
-        savedStateHandle[COLLECTED_DATA] ?: run {
-            CollectedDataParam()
-        }
+        savedStateHandle[COLLECTED_DATA] ?: CollectedDataParam()
     )
     val collectedData: StateFlow<CollectedDataParam> = _collectedData
 
     private val _cameraPermissionGranted = MutableStateFlow(
         savedStateHandle[CAMERA_PERMISSION_GRANTED] ?: false
-        }
     )
     val cameraPermissionGranted: StateFlow<Boolean> = _cameraPermissionGranted
 
@@ -200,9 +193,7 @@ internal class IdentityViewModel constructor(
      */
     @VisibleForTesting
     internal val verificationPageData = MutableStateFlow<Resource<Int>>(
-        savedStateHandle[VERIFICATION_PAGE_DATA] ?: run {
-            Resource.idle()
-        }
+        savedStateHandle[VERIFICATION_PAGE_DATA] ?: Resource.idle()
     )
 
     /**
@@ -210,18 +201,14 @@ internal class IdentityViewModel constructor(
      */
     @VisibleForTesting
     internal val verificationPageSubmit = MutableStateFlow<Resource<Int>>(
-        savedStateHandle[VERIFICATION_PAGE_SUBMIT] ?: run {
-            Resource.idle()
-        }
+        savedStateHandle[VERIFICATION_PAGE_SUBMIT] ?: Resource.idle()
     )
 
     /**
      * StateFlow to track missing requirements.
      */
     private val _missingRequirements = MutableStateFlow<Set<Requirement>>(
-        savedStateHandle[MISSING_REQUIREMENTS] ?: run {
-            setOf()
-        }
+        savedStateHandle[MISSING_REQUIREMENTS] ?: setOf()
     )
     val missingRequirements: StateFlow<Set<Requirement>> = _missingRequirements
 
