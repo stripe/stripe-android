@@ -190,8 +190,7 @@ internal class IdentityViewModel constructor(
     val collectedData: StateFlow<CollectedDataParam> = _collectedData
 
     private val _cameraPermissionGranted = MutableStateFlow(
-        savedStateHandle[CAMERA_PERMISSION_GRANTED] ?: run {
-            false
+        savedStateHandle[CAMERA_PERMISSION_GRANTED] ?: false
         }
     )
     val cameraPermissionGranted: StateFlow<Boolean> = _cameraPermissionGranted
