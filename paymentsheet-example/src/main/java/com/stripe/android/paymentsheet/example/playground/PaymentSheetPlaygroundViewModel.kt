@@ -44,7 +44,7 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     val playgroundSettingsFlow = MutableStateFlow<PlaygroundSettings?>(null)
-    val status = MutableStateFlow<String?>(null)
+    val status = MutableStateFlow<StatusMessage?>(null)
     val state = MutableStateFlow<PlaygroundState?>(null)
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
 
@@ -80,8 +80,9 @@ internal class PaymentSheetPlaygroundViewModel(
                 .awaitModel(CheckoutResponse.serializer())
             when (apiResponse) {
                 is Result.Failure -> {
-                    status.value =
+                    status.value = StatusMessage(
                         "Preparing checkout failed:\n${apiResponse.getException().message}"
+                    )
                 }
 
                 is Result.Success -> {
@@ -106,7 +107,7 @@ internal class PaymentSheetPlaygroundViewModel(
         if (success) {
             flowControllerState.value = FlowControllerState()
         } else {
-            status.value = error?.message ?: "Failed to configure flow controller."
+            status.value = StatusMessage(error?.message ?: "Failed to configure flow controller.")
         }
     }
 
@@ -149,7 +150,7 @@ internal class PaymentSheetPlaygroundViewModel(
             }
         }
 
-        status.value = statusMessage
+        status.value = StatusMessage(statusMessage)
     }
 
     private fun createIntent(clientSecret: String): CreateIntentResult {
@@ -227,7 +228,7 @@ internal class PaymentSheetPlaygroundViewModel(
         val createIntentResult = when (result) {
             is Result.Failure -> {
                 val message = "Creating intent failed:\n${result.getException().message}"
-                status.value = message
+                status.value = StatusMessage(message)
 
                 val error = if (result.error.cause is IOException) {
                     ConfirmIntentNetworkException()
@@ -253,7 +254,7 @@ internal class PaymentSheetPlaygroundViewModel(
     fun onAddressLauncherResult(addressLauncherResult: AddressLauncherResult) {
         when (addressLauncherResult) {
             AddressLauncherResult.Canceled -> {
-                status.value = "Canceled"
+                status.value = StatusMessage("Canceled")
             }
 
             is AddressLauncherResult.Succeeded -> {
@@ -281,3 +282,8 @@ class ConfirmIntentNetworkException : Exception()
 
 private const val RETURN_URL = "stripesdk://payment_return_url/" +
     "com.stripe.android.paymentsheet.example"
+
+data class StatusMessage(
+    val message: String?,
+    val hasBeenDisplayed: Boolean = false
+)

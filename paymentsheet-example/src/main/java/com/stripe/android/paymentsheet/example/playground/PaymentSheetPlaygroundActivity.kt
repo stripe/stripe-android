@@ -121,9 +121,10 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             val status by viewModel.status.collectAsState()
             val context = LocalContext.current
             LaunchedEffect(status) {
-                if (!status.isNullOrEmpty()) {
-                    Toast.makeText(context, status, Toast.LENGTH_LONG).show()
+                if (!status?.message.isNullOrEmpty() && status?.hasBeenDisplayed == false) {
+                    Toast.makeText(context, status?.message, Toast.LENGTH_LONG).show()
                 }
+                viewModel.status.value = status?.copy(hasBeenDisplayed = true)
             }
         }
     }
