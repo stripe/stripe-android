@@ -231,22 +231,10 @@ internal data class CollectedDataParam(
             return requirements
         }
 
-        fun Type.toUploadDestination(
-            shouldShowTakePhoto: Boolean,
-            shouldShowChoosePhoto: Boolean
-        ) = when (this) {
-            Type.IDCARD -> IDUploadDestination(
-                shouldShowTakePhoto,
-                shouldShowChoosePhoto
-            )
-            Type.DRIVINGLICENSE -> DriverLicenseUploadDestination(
-                shouldShowTakePhoto,
-                shouldShowChoosePhoto
-            )
-            Type.PASSPORT -> PassportUploadDestination(
-                shouldShowTakePhoto,
-                shouldShowChoosePhoto
-            )
+        fun Type.toUploadDestination() = when (this) {
+            Type.IDCARD -> IDUploadDestination()
+            Type.DRIVINGLICENSE -> DriverLicenseUploadDestination()
+            Type.PASSPORT -> PassportUploadDestination()
             else -> throw java.lang.IllegalStateException("Invalid CollectedDataParam.Type")
         }
 

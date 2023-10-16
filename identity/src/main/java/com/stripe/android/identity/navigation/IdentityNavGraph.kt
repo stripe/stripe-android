@@ -268,10 +268,7 @@ internal fun IdentityNavGraph(
                                 IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
                             )
                             navController.navigateTo(
-                                collectedDataParamType.toUploadDestination(
-                                    shouldShowTakePhoto = false,
-                                    shouldShowChoosePhoto = true
-                                )
+                                collectedDataParamType.toUploadDestination()
                             )
                         }
                     } else {
@@ -312,10 +309,7 @@ internal fun IdentityNavGraph(
                                 IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
                             )
                             navController.navigateTo(
-                                scanType.toUploadDestination(
-                                    shouldShowTakePhoto = true,
-                                    shouldShowChoosePhoto = !requireLiveCapture
-                                )
+                                scanType.toUploadDestination()
                             )
                         }
                     },
@@ -444,9 +438,7 @@ private fun DocumentUploadScreenContent(
             )
         } else {
             null
-        },
-        shouldShowTakePhoto = DocumentUploadDestination.shouldShowTakePhoto(backStackEntry),
-        shouldShowChoosePhoto = DocumentUploadDestination.shouldShowChoosePhoto(backStackEntry)
+        }
     )
 }
 
