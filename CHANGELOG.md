@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.33.0 - 2023-10-16
+
 ### Payments
 * [ADDED][7431](https://github.com/stripe/stripe-android/pull/7431) Added bindings support for MobilePay. See [private beta information](https://stripe.com/docs/payments/mobilepay).
 
