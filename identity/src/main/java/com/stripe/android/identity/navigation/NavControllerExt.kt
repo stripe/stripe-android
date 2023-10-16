@@ -1,10 +1,13 @@
 package com.stripe.android.identity.navigation
 
 import android.content.Context
+import android.util.Log
 import androidx.navigation.NavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_ROUTE
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNSET_BUTTON_TEXT
 import com.stripe.android.identity.networking.models.Requirement.Companion.matchesFromRoute
+import com.stripe.android.identity.networking.models.Requirement.Companion.supportsForceConfirm
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingBack
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingConsent
@@ -24,11 +27,30 @@ internal fun NavController.navigateToErrorScreenWithRequirementError(
     route: String,
     requirementError: VerificationPageDataRequirementError,
 ) {
+    val requirement = requirementError.requirement
+
+    // only show continue button when both text is not empty and requirement is supported
+    val shouldShowContinueButton =
+        !requirementError.continueButtonText.isNullOrEmpty() && requirement.supportsForceConfirm()
+
+    // Received a button with continue text, but with unsupported requirement.
+    //  Don't show continue button text and log an error
+    if (!requirementError.continueButtonText.isNullOrEmpty() && !requirement.supportsForceConfirm()) {
+        Log.e(NAV_CONTROLLER_TAG, "received unsupported requirement for forceConfirm: $requirement")
+    }
+
     navigateTo(
         ErrorDestination(
             errorTitle = requirementError.title ?: context.getString(R.string.stripe_error),
             errorContent = requirementError.body
                 ?: context.getString(R.string.stripe_unexpected_error_try_again),
+            continueButtonText =
+            if (shouldShowContinueButton && requirementError.continueButtonText != null) {
+                requirementError.continueButtonText
+            } else {
+                UNSET_BUTTON_TEXT
+            },
+            continueButtonRequirement = if (shouldShowContinueButton) requirementError.requirement else null,
             backButtonText = requirementError.backButtonText
                 ?: context.getString(R.string.stripe_go_back),
             backButtonDestination =
@@ -133,3 +155,5 @@ internal suspend fun NavController.navigateOnVerificationPageData(
         onReadyToSubmit()
     }
 }
+
+const val NAV_CONTROLLER_TAG = "NavController"
