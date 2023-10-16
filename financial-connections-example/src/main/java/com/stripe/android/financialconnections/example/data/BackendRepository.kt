@@ -9,33 +9,17 @@ class BackendRepository(
     private val backendService: BackendApiService = BackendApiFactory(settings).create()
 
     suspend fun createLinkAccountSession(
-        flow: String? = null,
-        keys: Pair<String, String>? = null,
-        customerEmail: String? = null,
-        testEnvironment: String = BuildConfig.TEST_ENVIRONMENT
-    ) = backendService.createLinkAccountSession(
-        LinkAccountSessionBody(
-            flow = flow,
-            publishableKey = keys?.first,
-            secretKey = keys?.second,
-            customerEmail = customerEmail,
-            testEnvironment = testEnvironment
+        linkAccountSessionBody: LinkAccountSessionBody = LinkAccountSessionBody(
+            testEnvironment = BuildConfig.TEST_ENVIRONMENT
         )
-    )
+    ) = backendService.createLinkAccountSession(linkAccountSessionBody)
 
     suspend fun createLinkAccountSessionForToken(
-        flow: String? = null,
-        keys: Pair<String, String>? = null,
-        customerEmail: String? = null,
-        testEnvironment: String = BuildConfig.TEST_ENVIRONMENT
-    ) = backendService.createLinkAccountSessionForToken(
-        LinkAccountSessionBody(
-            flow = flow,
-            publishableKey = keys?.first,
-            secretKey = keys?.second,
-            customerEmail = customerEmail,
-            testEnvironment = testEnvironment,
+        linkAccountSessionBody: LinkAccountSessionBody = LinkAccountSessionBody(
+            testEnvironment = BuildConfig.TEST_ENVIRONMENT
         )
+    ) = backendService.createLinkAccountSessionForToken(
+        linkAccountSessionBody
     )
 
     suspend fun createPaymentIntent(

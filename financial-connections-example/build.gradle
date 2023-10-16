@@ -2,6 +2,8 @@ apply from: configs.androidApplication
 
 apply plugin: 'com.google.firebase.appdistribution'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+
 
 def testEnvironment = System.getenv("test_environment") ?: "production"
 
@@ -61,6 +63,7 @@ dependencies {
     implementation libs.material
     implementation libs.retrofit
     implementation libs.retrofitGsonConverter
+    implementation libs.kotlin.serialization
 
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.compose.uiTooling

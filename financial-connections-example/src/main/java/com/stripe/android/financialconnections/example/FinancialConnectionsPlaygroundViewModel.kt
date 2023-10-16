@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetForToken
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
+import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
@@ -20,12 +21,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class FinancialConnectionsPlaygroundViewModel(
+internal class FinancialConnectionsPlaygroundViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
     private val settings = Settings(application)
     private val repository = BackendRepository(settings)
+
     private val _state = MutableStateFlow(FinancialConnectionsPlaygroundState())
     val state: StateFlow<FinancialConnectionsPlaygroundState> = _state
 
@@ -37,17 +39,17 @@ class FinancialConnectionsPlaygroundViewModel(
     }
 
     fun startFinancialConnectionsSession(
-        merchant: Merchant,
         flow: Flow,
         keys: Pair<String, String>,
         email: String
     ) {
         _state.update { it.copy(status = emptyList()) }
+        _state.value.settings.saveToSharedPreferences(getApplication())
         when (flow) {
-            Flow.Data -> startForData(merchant, keys, email.takeIf { it.isNotEmpty() })
-            Flow.Token -> startForToken(merchant, keys, email.takeIf { it.isNotEmpty() })
+            Flow.Data -> startForData(email.takeIf { it.isNotEmpty() })
+            Flow.Token -> startForToken(email.takeIf { it.isNotEmpty() })
             Flow.PaymentIntent -> startWithPaymentIntent(
-                merchant,
+                _state.value.settings.settings.values.first { it.value is Merchant }.value as Merchant,
                 keys,
                 email.takeIf { it.isNotEmpty() }
             )
@@ -62,6 +64,7 @@ class FinancialConnectionsPlaygroundViewModel(
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
+                _state.value.settings.toBackendRequest(email)
                 repository.createPaymentIntent(
                     country = "US",
                     flow = merchant.flow,
@@ -95,17 +98,15 @@ class FinancialConnectionsPlaygroundViewModel(
     }
 
     private fun startForData(
-        merchant: Merchant,
-        keys: Pair<String, String>,
         email: String?
     ) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
                 repository.createLinkAccountSession(
-                    flow = merchant.flow,
-                    keys = keys,
-                    customerEmail = email
+                    _state.value.settings.toBackendRequest(
+                        customerEmail = email
+                    )
                 )
             }
                 // Success creating session: open the financial connections sheet with received secret
@@ -127,17 +128,15 @@ class FinancialConnectionsPlaygroundViewModel(
     }
 
     private fun startForToken(
-        merchant: Merchant,
-        keys: Pair<String, String>,
         email: String?
     ) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
                 repository.createLinkAccountSessionForToken(
-                    flow = merchant.flow,
-                    keys = keys,
-                    customerEmail = email
+                    state.value.settings.toBackendRequest(
+                        customerEmail = email
+                    )
                 )
             }
                 // Success creating session: open the financial connections sheet with received secret
@@ -260,6 +259,14 @@ class FinancialConnectionsPlaygroundViewModel(
         true,
         emptySet()
     )
+
+    fun onSettingsChanged(playgroundSettings: PlaygroundSettings) {
+        _state.update {
+            it.copy(
+                settings = playgroundSettings,
+            )
+        }
+    }
 }
 
 enum class Merchant(val flow: String) {
@@ -297,8 +304,9 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
     ) : FinancialConnectionsPlaygroundViewEffect()
 }
 
-data class FinancialConnectionsPlaygroundState(
+internal data class FinancialConnectionsPlaygroundState(
     val backendUrl: String = "",
+    val settings: PlaygroundSettings = PlaygroundSettings.default(),
     val loading: Boolean = false,
     val publishableKey: String? = null,
     val status: List<String> = emptyList()

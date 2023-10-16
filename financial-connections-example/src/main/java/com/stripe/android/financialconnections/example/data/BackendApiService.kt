@@ -27,15 +27,15 @@ interface BackendApiService {
 @Keep
 data class LinkAccountSessionBody(
     @SerializedName("flow")
-    val flow: String?,
+    val flow: String? = null,
     @SerializedName("custom_pk")
-    val publishableKey: String?,
+    val publishableKey: String? = null,
     @SerializedName("custom_sk")
-    val secretKey: String?,
+    val secretKey: String? = null,
     @SerializedName("customer_email")
-    val customerEmail: String?,
+    val customerEmail: String? = null,
     @SerializedName("test_environment")
-    val testEnvironment: String?
+    val testEnvironment: String? = null
 )
 
 @Keep
