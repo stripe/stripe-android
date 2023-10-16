@@ -96,7 +96,7 @@ internal class SuccessViewModel @Inject constructor(
             },
             onSuccess = {
                 if (it.skipSuccessPane.not()) {
-                    eventTracker.track(PaneLoaded(Pane.SUCCESS))
+                    eventTracker.track(PaneLoaded(PANE))
                 } else {
                     completeSession()
                 }
@@ -205,7 +205,7 @@ internal class SuccessViewModel @Inject constructor(
     }
 
     fun onDoneClick() {
-        viewModelScope.launch { eventTracker.track(ClickDone(Pane.SUCCESS)) }
+        viewModelScope.launch { eventTracker.track(ClickDone(PANE)) }
         completeSession()
     }
 
@@ -222,13 +222,13 @@ internal class SuccessViewModel @Inject constructor(
 
     fun onLearnMoreAboutDataAccessClick() {
         viewModelScope.launch {
-            eventTracker.track(ClickLearnMoreDataAccess(Pane.SUCCESS))
+            eventTracker.track(ClickLearnMoreDataAccess(PANE))
         }
     }
 
     fun onDisconnectLinkClick() {
         viewModelScope.launch {
-            eventTracker.track(ClickDisconnectLink(Pane.SUCCESS))
+            eventTracker.track(ClickDisconnectLink(PANE))
         }
     }
 
@@ -246,6 +246,8 @@ internal class SuccessViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        private val PANE = Pane.SUCCESS
     }
 }
 
