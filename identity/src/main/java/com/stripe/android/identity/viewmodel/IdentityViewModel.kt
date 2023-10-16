@@ -163,9 +163,7 @@ internal class IdentityViewModel constructor(
      * StateFlow to track the upload status of high/low resolution images of selfies.
      */
     private val _selfieUploadedState = MutableStateFlow(
-        savedStateHandle[SELFIE_UPLOAD_STATE] ?: run {
-            SelfieUploadState()
-        }
+        savedStateHandle[SELFIE_UPLOAD_STATE] ?: SelfieUploadState()
     )
     val selfieUploadState: StateFlow<SelfieUploadState> = _selfieUploadedState
 
@@ -173,9 +171,7 @@ internal class IdentityViewModel constructor(
      * StateFlow to track analytics status.
      */
     private val _analyticsState = MutableStateFlow(
-        savedStateHandle[ANALYTICS_STATE] ?: run {
-            AnalyticsState()
-        }
+        savedStateHandle[ANALYTICS_STATE] ?: AnalyticsState()
     )
     val analyticsState: StateFlow<AnalyticsState> = _analyticsState
 
@@ -183,20 +179,21 @@ internal class IdentityViewModel constructor(
      * StateFlow to track the data collected so far.
      */
     private val _collectedData = MutableStateFlow(
-        savedStateHandle[COLLECTED_DATA] ?: run {
-            CollectedDataParam()
-        }
+        savedStateHandle[COLLECTED_DATA] ?: CollectedDataParam()
     )
     val collectedData: StateFlow<CollectedDataParam> = _collectedData
+
+    private val _cameraPermissionGranted = MutableStateFlow(
+        savedStateHandle[CAMERA_PERMISSION_GRANTED] ?: false
+    )
+    val cameraPermissionGranted: StateFlow<Boolean> = _cameraPermissionGranted
 
     /**
      * StateFlow to track request status of postVerificationPageData
      */
     @VisibleForTesting
     internal val verificationPageData = MutableStateFlow<Resource<Int>>(
-        savedStateHandle[VERIFICATION_PAGE_DATA] ?: run {
-            Resource.idle()
-        }
+        savedStateHandle[VERIFICATION_PAGE_DATA] ?: Resource.idle()
     )
 
     /**
@@ -204,18 +201,14 @@ internal class IdentityViewModel constructor(
      */
     @VisibleForTesting
     internal val verificationPageSubmit = MutableStateFlow<Resource<Int>>(
-        savedStateHandle[VERIFICATION_PAGE_SUBMIT] ?: run {
-            Resource.idle()
-        }
+        savedStateHandle[VERIFICATION_PAGE_SUBMIT] ?: Resource.idle()
     )
 
     /**
      * StateFlow to track missing requirements.
      */
     private val _missingRequirements = MutableStateFlow<Set<Requirement>>(
-        savedStateHandle[MISSING_REQUIREMENTS] ?: run {
-            setOf()
-        }
+        savedStateHandle[MISSING_REQUIREMENTS] ?: setOf()
     )
     val missingRequirements: StateFlow<Set<Requirement>> = _missingRequirements
 
@@ -1369,6 +1362,7 @@ internal class IdentityViewModel constructor(
                                 type.toAnalyticsScanType()
                             )
                         )
+                        _cameraPermissionGranted.update { true }
                         idDetectorModelFile.observe(viewLifecycleOwner) { modelResource ->
                             when (modelResource.status) {
                                 // model ready, camera permission is granted -> navigate to scan
@@ -1393,10 +1387,7 @@ internal class IdentityViewModel constructor(
                                             )
                                         } else {
                                             navController.navigateTo(
-                                                type.toUploadDestination(
-                                                    shouldShowTakePhoto = true,
-                                                    shouldShowChoosePhoto = true
-                                                )
+                                                type.toUploadDestination()
                                             )
                                         }
                                     }
@@ -1413,6 +1404,7 @@ internal class IdentityViewModel constructor(
                                 type.toAnalyticsScanType()
                             )
                         )
+                        _cameraPermissionGranted.update { false }
                         requireVerificationPage(
                             viewLifecycleOwner,
                             navController
@@ -1717,28 +1709,16 @@ internal class IdentityViewModel constructor(
             else -> throw IllegalStateException("Invalid CollectedDataParam.Type")
         }
 
-    private fun CollectedDataParam.Type.toUploadDestination(
-        shouldShowTakePhoto: Boolean,
-        shouldShowChoosePhoto: Boolean
-    ) =
+    private fun CollectedDataParam.Type.toUploadDestination() =
         when (this) {
             CollectedDataParam.Type.IDCARD ->
-                IDUploadDestination(
-                    shouldShowTakePhoto,
-                    shouldShowChoosePhoto
-                )
+                IDUploadDestination()
 
             CollectedDataParam.Type.PASSPORT ->
-                PassportUploadDestination(
-                    shouldShowTakePhoto,
-                    shouldShowChoosePhoto
-                )
+                PassportUploadDestination()
 
             CollectedDataParam.Type.DRIVINGLICENSE ->
-                DriverLicenseUploadDestination(
-                    shouldShowTakePhoto,
-                    shouldShowChoosePhoto
-                )
+                DriverLicenseUploadDestination()
 
             else -> throw IllegalStateException("Invalid CollectedDataParam.Type")
         }
@@ -1760,6 +1740,7 @@ internal class IdentityViewModel constructor(
                 _documentBackUploadedState -> DOCUMENT_BACK_UPLOAD_STATE
                 _collectedData -> COLLECTED_DATA
                 _missingRequirements -> MISSING_REQUIREMENTS
+                _cameraPermissionGranted -> CAMERA_PERMISSION_GRANTED
                 verificationPageData -> VERIFICATION_PAGE_DATA
                 verificationPageSubmit -> VERIFICATION_PAGE_SUBMIT
                 else -> {
@@ -1811,6 +1792,7 @@ internal class IdentityViewModel constructor(
         private const val ANALYTICS_STATE = "analytics_upload_state"
         private const val COLLECTED_DATA = "collected_data"
         private const val MISSING_REQUIREMENTS = "missing_requirements"
+        private const val CAMERA_PERMISSION_GRANTED = "cameraPermissionGranted"
         private const val VERIFICATION_PAGE = "verification_page"
         private const val VERIFICATION_PAGE_DATA = "verification_page_data"
         private const val VERIFICATION_PAGE_SUBMIT = "verification_page_submit"

@@ -142,21 +142,18 @@ internal sealed class IdentityScanState(
 
         fun ScanType?.isNullOrFront() = this == null || this.isFront()
 
-        fun ScanType.toUploadDestination(
-            shouldShowTakePhoto: Boolean,
-            shouldShowChoosePhoto: Boolean
-        ) =
+        fun ScanType.toUploadDestination() =
             when (this) {
                 ScanType.ID_FRONT ->
-                    IDUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
+                    IDUploadDestination(true)
                 ScanType.ID_BACK ->
-                    IDUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
+                    IDUploadDestination(true)
                 ScanType.DL_FRONT ->
-                    DriverLicenseUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
+                    DriverLicenseUploadDestination(true)
                 ScanType.DL_BACK ->
-                    DriverLicenseUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
+                    DriverLicenseUploadDestination(true)
                 ScanType.PASSPORT ->
-                    PassportUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
+                    PassportUploadDestination(true)
                 ScanType.SELFIE -> {
                     throw IllegalArgumentException("SELFIE doesn't support upload")
                 }
