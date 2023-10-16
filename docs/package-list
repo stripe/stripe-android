@@ -18,6 +18,7 @@ com.stripe.android.financialconnections.launcher
 com.stripe.android.financialconnections.model
 module:identity
 com.stripe.android.identity
+com.stripe.android.identity.navigation
 com.stripe.android.identity.utils
 module:link
 com.stripe.android.link
