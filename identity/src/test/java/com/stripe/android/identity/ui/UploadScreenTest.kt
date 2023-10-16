@@ -17,6 +17,8 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.Requirement
+import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.IdentityImageHandler
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -51,14 +53,29 @@ class UploadScreenTest {
     private val missingRequirements =
         MutableStateFlow(setOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK))
 
+    private val cameraPermissionGranted = MutableStateFlow(true)
+
+    private val documentCaptureRequireLiveCaptureMock =
+        mock<VerificationPageStaticContentDocumentCapturePage> {
+            on { requireLiveCapture } doReturn true
+        }
+    private val verificationPageRequireLiveCapture = mock<VerificationPage> {
+        on { documentCapture } doReturn documentCaptureRequireLiveCaptureMock
+    }
     private val mockImageHandler = mock<IdentityImageHandler>()
+
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { documentFrontUploadedState } doReturn documentFrontUploadState
         on { documentBackUploadedState } doReturn documentBackUploadState
         on { collectedData } doReturn collectedData
         on { missingRequirements } doReturn missingRequirements
-        on { verificationPage } doReturn MutableLiveData(Resource.success(mock()))
+        on { verificationPage } doReturn MutableLiveData(
+            Resource.success(
+                verificationPageRequireLiveCapture
+            )
+        )
         on { imageHandler } doReturn mockImageHandler
+        on { cameraPermissionGranted } doReturn cameraPermissionGranted
     }
 
     @Test
@@ -195,9 +212,7 @@ class UploadScreenTest {
                     )
                 } else {
                     null
-                },
-                shouldShowTakePhoto = true,
-                shouldShowChoosePhoto = true,
+                }
             )
         }
         with(composeTestRule, testBlock)

@@ -9,8 +9,6 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.IdentityScanState
 
 internal abstract class DocumentUploadDestination(
-    shouldShowTakePhoto: Boolean,
-    shouldShowChoosePhoto: Boolean,
     shouldPopUpToDocSelection: Boolean,
     frontScanType: IdentityScanState.ScanType,
     backScanType: IdentityScanState.ScanType,
@@ -33,8 +31,6 @@ internal abstract class DocumentUploadDestination(
 ) {
     override val routeWithArgs by lazy {
         destinationRoute.withParams(
-            ARG_SHOULD_SHOW_TAKE_PHOTO to shouldShowTakePhoto,
-            ARG_SHOULD_SHOW_CHOOSE_PHOTO to shouldShowChoosePhoto,
             ARG_FRONT_SCAN_TYPE to frontScanType,
             ARG_BACK_SCAN_TYPE to backScanType,
             ARG_TITLE_RES to titleRes,
@@ -52,12 +48,6 @@ internal abstract class DocumentUploadDestination(
         val ROUTE = object : DestinationRoute() {
             override val routeBase = PASSPORT_UPLOAD
         }
-
-        fun shouldShowTakePhoto(backStackEntry: NavBackStackEntry) =
-            backStackEntry.getBooleanArgument(ARG_SHOULD_SHOW_TAKE_PHOTO)
-
-        fun shouldShowChoosePhoto(backStackEntry: NavBackStackEntry) =
-            backStackEntry.getBooleanArgument(ARG_SHOULD_SHOW_CHOOSE_PHOTO)
 
         fun frontScanType(backStackEntry: NavBackStackEntry) =
             backStackEntry.arguments?.getSerializable(ARG_FRONT_SCAN_TYPE) as IdentityScanState.ScanType
@@ -92,12 +82,6 @@ internal class DocumentUploadDestinationRoute(
     override val routeBase: String
 ) : IdentityTopLevelDestination.DestinationRoute() {
     override val arguments = mutableListOf(
-        navArgument(ARG_SHOULD_SHOW_TAKE_PHOTO) {
-            type = NavType.BoolType
-        },
-        navArgument(ARG_SHOULD_SHOW_CHOOSE_PHOTO) {
-            type = NavType.BoolType
-        },
         navArgument(ARG_FRONT_SCAN_TYPE) {
             type = NavType.EnumType(IdentityScanState.ScanType::class.java)
         },
@@ -129,12 +113,8 @@ internal class DocumentUploadDestinationRoute(
 }
 
 internal class PassportUploadDestination(
-    shouldShowTakePhoto: Boolean,
-    shouldShowChoosePhoto: Boolean,
     shouldPopUpToDocSelection: Boolean = false,
 ) : DocumentUploadDestination(
-    shouldShowTakePhoto = shouldShowTakePhoto,
-    shouldShowChoosePhoto = shouldShowChoosePhoto,
     shouldPopUpToDocSelection = shouldPopUpToDocSelection,
     frontScanType = IdentityScanState.ScanType.PASSPORT,
     backScanType = IdentityScanState.ScanType.PASSPORT,
@@ -153,12 +133,8 @@ internal class PassportUploadDestination(
 }
 
 internal class IDUploadDestination(
-    shouldShowTakePhoto: Boolean,
-    shouldShowChoosePhoto: Boolean,
     shouldPopUpToDocSelection: Boolean = false
 ) : DocumentUploadDestination(
-    shouldShowTakePhoto = shouldShowTakePhoto,
-    shouldShowChoosePhoto = shouldShowChoosePhoto,
     shouldPopUpToDocSelection = shouldPopUpToDocSelection,
     frontScanType = IdentityScanState.ScanType.ID_FRONT,
     backScanType = IdentityScanState.ScanType.ID_BACK,
@@ -179,12 +155,8 @@ internal class IDUploadDestination(
 }
 
 internal class DriverLicenseUploadDestination(
-    shouldShowTakePhoto: Boolean,
-    shouldShowChoosePhoto: Boolean,
     shouldPopUpToDocSelection: Boolean = false
 ) : DocumentUploadDestination(
-    shouldShowTakePhoto = shouldShowTakePhoto,
-    shouldShowChoosePhoto = shouldShowChoosePhoto,
     shouldPopUpToDocSelection = shouldPopUpToDocSelection,
     frontScanType = IdentityScanState.ScanType.DL_FRONT,
     backScanType = IdentityScanState.ScanType.DL_BACK,
@@ -203,16 +175,6 @@ internal class DriverLicenseUploadDestination(
         val ROUTE = DocumentUploadDestinationRoute(routeBase = DRIVE_LICENSE_UPLOAD)
     }
 }
-
-/**
- * Argument to indicate if choose photo option should be shown when picking an image.
- */
-internal const val ARG_SHOULD_SHOW_CHOOSE_PHOTO = "shouldShowChoosePhoto"
-
-/**
- * Argument to indicate if take photo option should be shown when picking an image.
- */
-internal const val ARG_SHOULD_SHOW_TAKE_PHOTO = "shouldShowTakePhoto"
 
 internal const val ARG_TITLE_RES = "titleRes"
 internal const val ARG_CONTEXT_RES = "contextRes"
