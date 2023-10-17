@@ -37,11 +37,8 @@ internal class PlaygroundSettings private constructor(
         }
     }
 
-    fun toBackendRequest(customerEmail: String?) = settings.toList().fold(
-        LinkAccountSessionBody(
-            customerEmail = customerEmail,
-            testEnvironment = BuildConfig.TEST_ENVIRONMENT,
-        )
+    fun toBackendRequest() = settings.toList().fold(
+        LinkAccountSessionBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
     ) { acc, (definition: PlaygroundSettingDefinition<*>, value: MutableStateFlow<Any?>) ->
         definition.sessionRequest(acc, value.value)
     }
@@ -89,6 +86,7 @@ internal class PlaygroundSettings private constructor(
                 MerchantDefinition() to MutableStateFlow(Merchant.Test),
                 NativeOverrideDefinition() to MutableStateFlow(NativeOverride.None),
                 FlowDefinition() to MutableStateFlow(Flow.PaymentIntent),
+                EmailDefinition() to MutableStateFlow(""),
             )
         )
     }

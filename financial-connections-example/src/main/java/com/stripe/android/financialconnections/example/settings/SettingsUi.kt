@@ -9,6 +9,7 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material.ExposedDropdownMenuDefaults
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -94,7 +95,7 @@ private fun TextSetting(
     value: String,
     onOptionChanged: (String) -> Unit,
 ) {
-    TextField(
+    OutlinedTextField(
         placeholder = { Text(text = name) },
         label = { Text(text = name) },
         value = value,

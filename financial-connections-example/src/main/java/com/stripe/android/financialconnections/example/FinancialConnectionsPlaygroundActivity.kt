@@ -18,7 +18,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
@@ -32,9 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -115,11 +111,10 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     private fun FinancialConnectionsContent(
         state: FinancialConnectionsPlaygroundState,
         onSettingsChanged: (PlaygroundSettings) -> Unit,
-        onButtonClick: (Pair<String, String>, String) -> Unit
+        onButtonClick: (Pair<String, String>) -> Unit
     ) {
         val (publicKey, onPublicKeyChanged) = remember { mutableStateOf("") }
         val (secretKey, onSecretKeyChanged) = remember { mutableStateOf("") }
-        val (email, onEmailChange) = remember { mutableStateOf("") }
 
         Scaffold(
             topBar = { TopAppBar(title = { Text("Connections Playground") }) },
@@ -149,7 +144,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 //                        )
 //                    }
                     Spacer(modifier = Modifier.height(8.dp))
-                    EmailInputSection(email, onEmailChange)
                     SettingsUi(
                         playgroundSettings = state.settings,
                         onSettingsChanged = onSettingsChanged
@@ -170,10 +164,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     )
                     Button(
                         onClick = {
-                            onButtonClick(
-                                publicKey to secretKey,
-                                email
-                            )
+                            onButtonClick(publicKey to secretKey,)
                         },
                     ) {
                         Text("Connect Accounts!")
@@ -199,22 +190,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         )
     }
 
-    @Composable
-    private fun EmailInputSection(
-        email: String,
-        onEmailChange: (String) -> Unit
-    ) {
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .semantics { testTagsAsResourceId = true }
-                .testTag("email_input"),
-            value = email,
-            onValueChange = onEmailChange,
-            label = { Text("Customer email (optional)") }
-        )
-    }
-
     @Preview
     @Composable
     fun ContentPreview() {
@@ -226,7 +201,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 status = listOf("Result: Pending")
             ),
             onSettingsChanged = {},
-            onButtonClick = { _, _ -> }
+            onButtonClick = { _ -> }
         )
     }
 }

@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetForToken
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
+import com.stripe.android.financialconnections.example.settings.EmailDefinition
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -40,15 +41,17 @@ internal class FinancialConnectionsPlaygroundViewModel(
 
     fun startFinancialConnectionsSession(
         keys: Pair<String, String>,
-        email: String
     ) {
         _state.update { it.copy(status = emptyList()) }
-        state.value.settings.saveToSharedPreferences(getApplication())
+        val pgSettings = state.value.settings
+        pgSettings.saveToSharedPreferences(getApplication())
         // TODO abstract this logic.
-        val flow = _state.value.settings.settings.values.first { it.value is Flow }.value as Flow
+        val flow = pgSettings.settings.values.first { it.value is Flow }.value as Flow
+        val email: String = pgSettings.settings.toList()
+            .first { (def, _) -> def is EmailDefinition }.second.value as String
         when (flow) {
-            Flow.Data -> startForData(email.takeIf { it.isNotEmpty() })
-            Flow.Token -> startForToken(email.takeIf { it.isNotEmpty() })
+            Flow.Data -> startForData()
+            Flow.Token -> startForToken()
             // TODO migrate to Settings.
             Flow.PaymentIntent -> startWithPaymentIntent(
                 _state.value.settings.settings.values.first { it.value is Merchant }.value as Merchant,
@@ -66,7 +69,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
-                _state.value.settings.toBackendRequest(email)
+                _state.value.settings.toBackendRequest()
                 repository.createPaymentIntent(
                     country = "US",
                     flow = merchant.flow,
@@ -99,16 +102,12 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun startForData(
-        email: String?
-    ) {
+    private fun startForData() {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
                 repository.createLinkAccountSession(
-                    _state.value.settings.toBackendRequest(
-                        customerEmail = email
-                    )
+                    _state.value.settings.toBackendRequest()
                 )
             }
                 // Success creating session: open the financial connections sheet with received secret
@@ -129,16 +128,12 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun startForToken(
-        email: String?
-    ) {
+    private fun startForToken() {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
                 repository.createLinkAccountSessionForToken(
-                    state.value.settings.toBackendRequest(
-                        customerEmail = email
-                    )
+                    state.value.settings.toBackendRequest()
                 )
             }
                 // Success creating session: open the financial connections sheet with received secret
