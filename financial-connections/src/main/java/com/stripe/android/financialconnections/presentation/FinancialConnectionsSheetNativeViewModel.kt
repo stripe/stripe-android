@@ -241,54 +241,50 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     ) = viewModelScope.launch {
         mutex.withLock {
             // prevents multiple complete triggers.
-            if (awaitState().completed.not()) runCatching {
-                setState { copy(completed = true) }
-                completeFinancialConnectionsSession(
-                    terminalError = earlyTerminationCause?.value
-                )
-            }.onSuccess { session ->
-                eventTracker.track(
-                    FinancialConnectionsEvent.Complete(
-                        exception = null,
-                        exceptionExtraMessage = null,
-                        connectedAccounts = session.accounts.data.count()
+            if (awaitState().completed.not()) {
+                runCatching {
+                    setState { copy(completed = true) }
+                    completeFinancialConnectionsSession(terminalError = earlyTerminationCause?.value)
+                }.onSuccess { session ->
+                    eventTracker.track(
+                        FinancialConnectionsEvent.Complete(
+                            exception = null,
+                            exceptionExtraMessage = null,
+                            connectedAccounts = session.accounts.data.count()
+                        )
                     )
-                )
-                when {
-                    session.isCustomManualEntryError() -> {
-                        finishWithResult(Failed(CustomManualEntryRequiredError()))
-                    }
+                    when {
+                        session.isCustomManualEntryError() -> finishWithResult(
+                            Failed(error = CustomManualEntryRequiredError())
+                        )
 
-                    session.hasAValidAccount() -> {
-                        finishWithResult(
+                        session.hasAValidAccount() -> finishWithResult(
                             Completed(
                                 financialConnectionsSession = session,
                                 token = session.parsedToken
                             )
                         )
-                    }
 
-                    closeAuthFlowError != null -> {
-                        finishWithResult(Failed(closeAuthFlowError))
-                    }
-
-                    else -> {
-                        finishWithResult(Canceled)
-                    }
-                }
-            }
-                .onFailure { completeSessionError ->
-                    val errorMessage = "Error completing session before closing"
-                    logger.error(errorMessage, completeSessionError)
-                    eventTracker.track(
-                        FinancialConnectionsEvent.Complete(
-                            exception = completeSessionError,
-                            exceptionExtraMessage = errorMessage,
-                            connectedAccounts = null
+                        closeAuthFlowError != null -> finishWithResult(
+                            Failed(error = closeAuthFlowError)
                         )
-                    )
-                    finishWithResult(Failed(closeAuthFlowError ?: completeSessionError))
+
+                        else -> finishWithResult(Canceled)
+                    }
                 }
+                    .onFailure { completeSessionError ->
+                        val errorMessage = "Error completing session before closing"
+                        logger.error(errorMessage, completeSessionError)
+                        eventTracker.track(
+                            FinancialConnectionsEvent.Complete(
+                                exception = completeSessionError,
+                                exceptionExtraMessage = errorMessage,
+                                connectedAccounts = null
+                            )
+                        )
+                        finishWithResult(Failed(closeAuthFlowError ?: completeSessionError))
+                    }
+            }
         }
     }
 
