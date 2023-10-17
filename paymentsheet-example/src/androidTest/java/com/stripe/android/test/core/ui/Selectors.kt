@@ -67,7 +67,7 @@ internal class Selectors(
         }
     )
 
-    val playgroundBuyButton =  ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))
+    val playgroundBuyButton = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))
 
     val addPaymentMethodButton = AddPaymentMethodButton(device)
 
