@@ -20,6 +20,7 @@ internal class SepaMandateContract :
         resultCode: Int,
         intent: Intent?
     ): SepaMandateResult {
+        @Suppress("DEPRECATION")
         return intent?.getParcelableExtra(EXTRA_RESULT) ?: SepaMandateResult.Canceled
     }
 
