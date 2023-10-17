@@ -8,14 +8,11 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
-import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Finish
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.TextResource.PluralId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,7 +22,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import kotlin.test.assertEquals
 
@@ -42,7 +38,6 @@ internal class SuccessViewModelTest {
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
     private val getCachedAccounts = mock<GetCachedAccounts>()
-    private val completeFinancialConnectionsSession = mock<CompleteFinancialConnectionsSession>()
     private val saveToLinkWithStripeSucceeded = mock<SaveToLinkWithStripeSucceededRepository>()
 
     private fun buildViewModel(
@@ -55,12 +50,10 @@ internal class SuccessViewModelTest {
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         getCachedAccounts = getCachedAccounts,
         saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
-        completeFinancialConnectionsSession = completeFinancialConnectionsSession
     )
 
     @Test
     fun `init - when skipSuccessPane is true, complete session and emit Finish`() = runTest {
-        val session = ApiKeyFixtures.financialConnectionsSessionNoAccounts()
         val accounts = ApiKeyFixtures.partnerAccountList().data
         val manifest = ApiKeyFixtures.sessionManifest().copy(
             skipSuccessPane = true,
@@ -69,27 +62,19 @@ internal class SuccessViewModelTest {
         )
         whenever(getCachedAccounts()).thenReturn(accounts)
         whenever(getManifest()).thenReturn(manifest)
-        whenever(completeFinancialConnectionsSession()).thenReturn(session)
 
         whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
 
         nativeAuthFlowCoordinator().test {
             buildViewModel(SuccessState())
-            // Just emits the complete event, no page loaded events.
-            assertThat(eventTracker.sentEvents).containsExactly(
-                FinancialConnectionsEvent.Complete(
-                    connectedAccounts = session.accounts.count,
-                    exceptionExtraMessage = null,
-                    exception = null
-                )
-            )
-            assertThat(awaitItem()).isEqualTo(Finish(Completed(financialConnectionsSession = session)))
+            // Triggers flow termination.
+            assertThat(eventTracker.sentEvents).isEmpty()
+            assertThat(awaitItem()).isEqualTo(Complete())
         }
     }
 
     @Test
     fun `init - when skipSuccessPane is false, session is not auto completed`() = runTest {
-        val session = ApiKeyFixtures.financialConnectionsSessionNoAccounts()
         val accounts = ApiKeyFixtures.partnerAccountList()
         val manifest = ApiKeyFixtures.sessionManifest().copy(
             skipSuccessPane = false,
@@ -98,7 +83,6 @@ internal class SuccessViewModelTest {
         )
         whenever(getCachedAccounts()).thenReturn(accounts.data)
         whenever(getManifest()).thenReturn(manifest)
-        whenever(completeFinancialConnectionsSession()).thenReturn(session)
 
         whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
 
@@ -106,39 +90,20 @@ internal class SuccessViewModelTest {
             buildViewModel(SuccessState())
             assertThat(eventTracker.sentEvents).containsExactly(
                 FinancialConnectionsEvent.PaneLoaded(
-                    pane = FinancialConnectionsSessionManifest.Pane.SUCCESS,
+                    pane = Pane.SUCCESS,
                 )
             )
             expectNoEvents()
-            verifyNoInteractions(completeFinancialConnectionsSession)
         }
     }
 
     @Test
-    fun `onDoneClick - when complete succeeds, AuthFlow finishes with success result`() = runTest {
-        val session = ApiKeyFixtures.financialConnectionsSessionNoAccounts()
-        whenever(completeFinancialConnectionsSession()).thenReturn(session)
-
+    fun `onDoneClick - complete session is triggered`() = runTest {
         whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         nativeAuthFlowCoordinator().test {
             buildViewModel(SuccessState()).onDoneClick()
             assertEquals(
-                expected = Finish(Completed(financialConnectionsSession = session)),
-                actual = awaitItem(),
-            )
-        }
-    }
-
-    @Test
-    fun `onDoneClick - when complete fails, AuthFlow finishes with fail result`() = runTest {
-        val error = IllegalArgumentException("Something went wrong!")
-        whenever(completeFinancialConnectionsSession()).thenThrow(error)
-
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
-        nativeAuthFlowCoordinator().test {
-            buildViewModel(SuccessState()).onDoneClick()
-            assertEquals(
-                expected = Finish(Failed(error = error)),
+                expected = Complete(),
                 actual = awaitItem(),
             )
         }

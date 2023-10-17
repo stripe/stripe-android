@@ -161,7 +161,7 @@ internal class SuccessViewModel @Inject constructor(
     }
 
     fun onDoneClick() = viewModelScope.launch {
-         eventTracker.track(ClickDone(PANE))
+        eventTracker.track(ClickDone(PANE))
         setState { copy(completeSession = Loading()) }
         completeSession()
     }
