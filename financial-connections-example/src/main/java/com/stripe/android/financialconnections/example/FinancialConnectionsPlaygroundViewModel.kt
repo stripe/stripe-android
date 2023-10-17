@@ -38,9 +38,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
         _state.update { it.copy(backendUrl = settings.backendUrl) }
     }
 
-    fun startFinancialConnectionsSession(
-        keys: Pair<String, String>,
-    ) {
+    fun startFinancialConnectionsSession() {
         _state.update { it.copy(status = emptyList()) }
         val pgSettings = state.value.settings
         pgSettings.saveToSharedPreferences(getApplication())
@@ -49,13 +47,11 @@ internal class FinancialConnectionsPlaygroundViewModel(
         when (flow) {
             Flow.Data -> startForData()
             Flow.Token -> startForToken()
-            Flow.PaymentIntent -> startWithPaymentIntent(keys)
+            Flow.PaymentIntent -> startWithPaymentIntent()
         }
     }
 
-    private fun startWithPaymentIntent(
-        keys: Pair<String, String>,
-    ) {
+    private fun startWithPaymentIntent() {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
