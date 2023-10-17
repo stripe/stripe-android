@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
@@ -62,7 +63,7 @@ internal fun SuccessScreen() {
             accounts = payload.accounts,
             institution = payload.institution,
             successMessage = payload.successMessage,
-            loading = false,
+            loading = state.value.completeSession is Loading,
             skipSuccessPane = payload.skipSuccessPane,
             onDoneClick = viewModel::onDoneClick,
             accountFailedToLinkMessage = payload.accountFailedToLinkMessage,
