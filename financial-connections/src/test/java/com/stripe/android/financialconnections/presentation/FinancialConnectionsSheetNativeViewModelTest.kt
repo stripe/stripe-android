@@ -12,8 +12,8 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.financialConnectio
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate.EarlyTerminationCause
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
@@ -65,7 +65,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
             val viewModel = createViewModel()
 
-            messagesFlow.emit(Terminate(EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY))
+            messagesFlow.emit(Complete(EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY))
 
             withState(viewModel) {
                 require(it.viewEffect is FinancialConnectionsSheetNativeViewEffect.Finish)

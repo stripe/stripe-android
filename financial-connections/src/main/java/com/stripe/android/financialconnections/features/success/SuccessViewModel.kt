@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.features.success
 
 import androidx.annotation.VisibleForTesting
 import com.airbnb.mvrx.Async
+import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
@@ -13,17 +14,13 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickDisconnectLink
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickDone
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLearnMoreDataAccess
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
-import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -43,7 +40,6 @@ internal class SuccessViewModel @Inject constructor(
     private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
-    private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
 ) : MavericksViewModel<SuccessState>(initialState) {
 
@@ -93,47 +89,10 @@ internal class SuccessViewModel @Inject constructor(
             },
             onSuccess = {
                 if (it.skipSuccessPane.not()) {
-                    eventTracker.track(PaneLoaded(Pane.SUCCESS))
+                    eventTracker.track(PaneLoaded(PANE))
                 } else {
                     completeSession()
                 }
-            }
-        )
-        onAsync(
-            SuccessState::completeSession,
-            onSuccess = {
-                // Complete session succeeds, finish the AuthFlow with the received session.
-                eventTracker.track(
-                    Complete(
-                        connectedAccounts = it.accounts.data.count(),
-                        exceptionExtraMessage = null,
-                        exception = null
-                    )
-                )
-                nativeAuthFlowCoordinator().emit(
-                    Message.Finish(
-                        Completed(
-                            financialConnectionsSession = it,
-                            token = it.parsedToken
-                        )
-                    )
-                )
-            },
-            // Complete session fails, finish the AuthFlow with the received error.
-            onFail = { error ->
-                eventTracker.track(
-                    Complete(
-                        connectedAccounts = null,
-                        exceptionExtraMessage = "Error completing session",
-                        exception = error
-                    )
-                )
-                logger.error("Error completing session", error)
-                nativeAuthFlowCoordinator().emit(
-                    Message.Finish(
-                        Failed(error)
-                    )
-                )
             }
         )
     }
@@ -201,26 +160,25 @@ internal class SuccessViewModel @Inject constructor(
         else -> PluralId(R.plurals.stripe_success_pane_no_business_name, count)
     }
 
-    fun onDoneClick() {
-        viewModelScope.launch { eventTracker.track(ClickDone(Pane.SUCCESS)) }
+    fun onDoneClick() = viewModelScope.launch {
+         eventTracker.track(ClickDone(PANE))
+        setState { copy(completeSession = Loading()) }
         completeSession()
     }
 
-    private fun completeSession() {
-        suspend {
-            completeFinancialConnectionsSession()
-        }.execute { copy(completeSession = it) }
+    private suspend fun completeSession() {
+        nativeAuthFlowCoordinator().emit(Complete())
     }
 
     fun onLearnMoreAboutDataAccessClick() {
         viewModelScope.launch {
-            eventTracker.track(ClickLearnMoreDataAccess(Pane.SUCCESS))
+            eventTracker.track(ClickLearnMoreDataAccess(PANE))
         }
     }
 
     fun onDisconnectLinkClick() {
         viewModelScope.launch {
-            eventTracker.track(ClickDisconnectLink(Pane.SUCCESS))
+            eventTracker.track(ClickDisconnectLink(PANE))
         }
     }
 
@@ -238,6 +196,8 @@ internal class SuccessViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        private val PANE = Pane.SUCCESS
     }
 }
 

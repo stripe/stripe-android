@@ -29,8 +29,8 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
         /**
          * Triggers a termination of the AuthFlow, completing the session in the current state.
          */
-        data class Terminate(
-            val cause: EarlyTerminationCause
+        data class Complete(
+            val cause: EarlyTerminationCause? = null
         ) : Message {
             enum class EarlyTerminationCause(val value: String) {
                 USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY("user_initiated_with_custom_manual_entry")
