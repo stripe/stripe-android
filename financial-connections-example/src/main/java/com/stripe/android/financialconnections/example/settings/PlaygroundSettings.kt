@@ -3,51 +3,66 @@ package com.stripe.android.financialconnections.example.settings
 import android.content.Context
 import androidx.core.content.edit
 import com.stripe.android.financialconnections.example.BuildConfig
-import com.stripe.android.financialconnections.example.Flow
-import com.stripe.android.financialconnections.example.Merchant
-import com.stripe.android.financialconnections.example.NativeOverride
 import com.stripe.android.financialconnections.example.data.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.PaymentIntentBody
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
-internal class PlaygroundSettings private constructor(
-    val settings: MutableMap<PlaygroundSettingDefinition<*>, MutableStateFlow<Any?>>
+internal data class PlaygroundSettings(
+    private val settings: Map<PlaygroundSettingDefinition<*>, Any?>
 ) {
 
-    val uiSettings: Map<PlaygroundSettingDefinition.Displayable<*>, MutableStateFlow<Any?>> =
-        settings
-        .mapNotNull { (def, value) -> def.displayable()?.let { it to value } }
-        .toMap()
+    val uiSettings: Map<PlaygroundSettingDefinition.Displayable<*>, Any?>
+        get() = settings
+            .mapNotNull { (def, value) -> def.displayable()?.let { it to value } }
+            .toMap()
 
-    operator fun <T> get(settingsDefinition: PlaygroundSettingDefinition<T>): StateFlow<T> {
-        @Suppress("UNCHECKED_CAST")
-        return settings[settingsDefinition]?.asStateFlow() as StateFlow<T>
+
+    fun <T> withValue(
+        settingsDefinition: PlaygroundSettingDefinition<T>,
+        value: T
+    ): PlaygroundSettings {
+        val newSettings = copy(settings = settings + (settingsDefinition to value))
+        // apply any side effects
+        return settingsDefinition.valueUpdated(value, newSettings)
     }
 
-    operator fun <T> set(settingsDefinition: PlaygroundSettingDefinition<T>, value: T) {
-        if (settings.containsKey(settingsDefinition)) {
-            settings[settingsDefinition]?.value = value
-        } else {
-            settings[settingsDefinition] = MutableStateFlow(value)
-        }
+    fun <T> remove(
+        settingsDefinition: PlaygroundSettingDefinition<T>
+    ): PlaygroundSettings = copy(
+        settings = settings - settingsDefinition
+    )
+
+    operator fun <T> get(settingsDefinition: PlaygroundSettingDefinition<T>): T {
+        @Suppress("UNCHECKED_CAST")
+        return settings[settingsDefinition] as T
     }
 
     fun lasRequest() = settings.toList().fold(
         LinkAccountSessionBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
-    ) { acc, (definition: PlaygroundSettingDefinition<*>, value: MutableStateFlow<Any?>) ->
-        definition.lasRequest(acc, value.value)
+    ) { acc, (definition: PlaygroundSettingDefinition<*>, value: Any?) ->
+        definition.lasRequest(acc, value)
     }
 
     fun paymentIntentRequest() = settings.toList().fold(
         PaymentIntentBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
-    ) { acc, (definition: PlaygroundSettingDefinition<*>, value: MutableStateFlow<Any?>) ->
-        definition.paymentIntentRequest(acc, value.value)
+    ) { acc, (definition: PlaygroundSettingDefinition<*>, value: Any?) ->
+        definition.paymentIntentRequest(acc, value)
+    }
+
+
+    fun asJsonString(): String {
+        val settingsMap = settings.map {
+            val saveable = it.key.saveable()
+            if (saveable != null) {
+                saveable.key to JsonPrimitive(saveable.convertToString(it.value))
+            } else {
+                null
+            }
+        }.filterNotNull().toMap()
+        return Json.encodeToString(JsonObject(settingsMap))
     }
 
     fun saveToSharedPreferences(context: Context) {
@@ -64,18 +79,6 @@ internal class PlaygroundSettings private constructor(
         }
     }
 
-    private fun asJsonString(): String {
-        val settingsMap = settings.map {
-            val saveable = it.key.saveable()
-            if (saveable != null) {
-                saveable.key to JsonPrimitive(saveable.convertToString(it.value.value))
-            } else {
-                null
-            }
-        }.filterNotNull().toMap()
-        return Json.encodeToString(JsonObject(settingsMap))
-    }
-
     private fun <T> PlaygroundSettingDefinition.Saveable<T>.convertToString(
         value: Any?,
     ): String {
@@ -88,13 +91,23 @@ internal class PlaygroundSettings private constructor(
         private const val sharedPreferencesName = "FINANCIAL_CONNECTIONS_DEBUG"
         private const val sharedPreferencesKey = "json"
 
-        fun default() = PlaygroundSettings(
-            mutableMapOf(
-                MerchantDefinition() to MutableStateFlow(Merchant.Test),
-                NativeOverrideDefinition() to MutableStateFlow(NativeOverride.None),
-                FlowDefinition() to MutableStateFlow(Flow.PaymentIntent),
-                EmailDefinition() to MutableStateFlow(""),
-            )
+        fun createFromDefaults(): PlaygroundSettings {
+            val settings = allSettingDefinitions.mapNotNull {
+                val saveable = it.saveable()
+                if (saveable != null) {
+                    it to saveable.defaultValue
+                } else {
+                    null
+                }
+            }.toMap().toMutableMap()
+            return PlaygroundSettings(settings)
+        }
+
+        private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
+            MerchantDefinition,
+            NativeOverrideDefinition,
+            FlowDefinition,
+            EmailDefinition,
         )
     }
 

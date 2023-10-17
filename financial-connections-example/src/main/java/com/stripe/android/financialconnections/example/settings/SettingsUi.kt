@@ -14,7 +14,6 @@ import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,13 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 internal fun SettingsUi(
     playgroundSettings: PlaygroundSettings,
     onSettingsChanged: (PlaygroundSettings) -> Unit,
-
 ) {
     Column {
         for (settingDefinition in playgroundSettings.uiSettings.map { it.key }) {
@@ -44,16 +41,14 @@ internal fun SettingsUi(
 private fun <T> Setting(
     settingDefinition: PlaygroundSettingDefinition.Displayable<T>,
     playgroundSettings: PlaygroundSettings,
-    onSettingsChanged: (PlaygroundSettings) -> Unit,
-
-    ) {
+    onSettingsChanged: (PlaygroundSettings) -> Unit
+) {
     Setting(
         name = settingDefinition.displayName,
         options = settingDefinition.options,
-        valueFlow = playgroundSettings[settingDefinition],
+        value = playgroundSettings[settingDefinition],
     ) { newValue ->
-        playgroundSettings[settingDefinition] = newValue
-        onSettingsChanged(playgroundSettings)
+        onSettingsChanged(playgroundSettings.withValue(settingDefinition, newValue))
     }
 }
 
@@ -61,10 +56,9 @@ private fun <T> Setting(
 private fun <T> Setting(
     name: String,
     options: List<PlaygroundSettingDefinition.Displayable.Option<T>>,
-    valueFlow: StateFlow<T>,
+    value: T,
     onOptionChanged: (T) -> Unit,
 ) {
-    val value by valueFlow.collectAsState()
     if (options.isEmpty() && value is String) {
         @Suppress("UNCHECKED_CAST")
         TextSetting(

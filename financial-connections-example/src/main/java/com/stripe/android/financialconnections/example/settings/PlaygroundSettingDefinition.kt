@@ -24,6 +24,11 @@ internal interface PlaygroundSettingDefinition<T> {
         value: Any?
     ): PaymentIntentBody
 
+    fun valueUpdated(
+        value: T,
+        playgroundSettings: PlaygroundSettings
+    ) : PlaygroundSettings = playgroundSettings
+
     interface Saveable<T> {
         val key: String
         val defaultValue: T

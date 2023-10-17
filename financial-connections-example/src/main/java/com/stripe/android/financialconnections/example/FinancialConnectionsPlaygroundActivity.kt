@@ -7,9 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,10 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,7 +36,6 @@ import com.stripe.android.financialconnections.rememberFinancialConnectionsSheet
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 
-@OptIn(ExperimentalComposeUiApi::class)
 class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<FinancialConnectionsPlaygroundViewModel>()
@@ -111,11 +105,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     private fun FinancialConnectionsContent(
         state: FinancialConnectionsPlaygroundState,
         onSettingsChanged: (PlaygroundSettings) -> Unit,
-        onButtonClick: (Pair<String, String>) -> Unit
+        onButtonClick: () -> Unit
     ) {
-        val (publicKey, onPublicKeyChanged) = remember { mutableStateOf("") }
-        val (secretKey, onSecretKeyChanged) = remember { mutableStateOf("") }
-
         Scaffold(
             topBar = { TopAppBar(title = { Text("Connections Playground") }) },
             content = {
@@ -124,26 +115,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                         .padding(it)
                         .padding(16.dp)
                 ) {
-                    // TODO custom keys
-//                    if (selectedMode == Merchant.Other) {
-//                        OutlinedTextField(
-//                            value = publicKey,
-//                            onValueChange = onPublicKeyChanged,
-//                            placeholder = { Text("pk_...") },
-//                            label = { Text("Public key") },
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                        )
-//                        OutlinedTextField(
-//                            value = secretKey,
-//                            onValueChange = onSecretKeyChanged,
-//                            placeholder = { Text("sk_...") },
-//                            label = { Text("Secret key") },
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                        )
-//                    }
-                    Spacer(modifier = Modifier.height(8.dp))
                     SettingsUi(
                         playgroundSettings = state.settings,
                         onSettingsChanged = onSettingsChanged
@@ -163,9 +134,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                         color = Color.Gray
                     )
                     Button(
-                        onClick = {
-                            onButtonClick(publicKey to secretKey,)
-                        },
+                        onClick = { onButtonClick() },
                     ) {
                         Text("Connect Accounts!")
                     }
@@ -200,8 +169,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 publishableKey = "pk",
                 status = listOf("Result: Pending")
             ),
-            onSettingsChanged = {},
-            onButtonClick = { _ -> }
+            onButtonClick = {},
+            onSettingsChanged = {}
         )
     }
 }

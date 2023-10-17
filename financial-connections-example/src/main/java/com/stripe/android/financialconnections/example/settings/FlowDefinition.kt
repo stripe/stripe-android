@@ -5,11 +5,11 @@ import com.stripe.android.financialconnections.example.data.LinkAccountSessionBo
 import com.stripe.android.financialconnections.example.data.PaymentIntentBody
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Displayable.Option
 
-internal class FlowDefinition : PlaygroundSettingDefinition.Displayable<Flow> {
-    override val displayName: String
-        get() = "Flow"
-    override val options: List<Option<Flow>>
-        get() = Flow.values().map { option(it.name, it) }
+internal object FlowDefinition :
+    PlaygroundSettingDefinition.Displayable<Flow>,
+    PlaygroundSettingDefinition.Saveable<Flow> {
+    override val displayName: String = "Flow"
+    override val options: List<Option<Flow>> = Flow.values().map { option(it.name, it) }
 
     override fun lasRequest(
         body: LinkAccountSessionBody,
@@ -20,4 +20,12 @@ internal class FlowDefinition : PlaygroundSettingDefinition.Displayable<Flow> {
         body: PaymentIntentBody,
         value: Any?
     ) = body
+
+    override val key: String = "flow"
+    override val defaultValue: Flow
+        get() = Flow.PaymentIntent
+
+    override fun convertToValue(value: String): Flow = Flow.valueOf(value)
+
+    override fun convertToString(value: Flow): String = value.name
 }

@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.example
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Stripe
@@ -10,6 +11,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetForToken
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
+import com.stripe.android.financialconnections.example.settings.FlowDefinition
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -39,24 +41,28 @@ internal class FinancialConnectionsPlaygroundViewModel(
     }
 
     fun startFinancialConnectionsSession() {
-        _state.update { it.copy(status = emptyList()) }
-        val pgSettings = state.value.settings
-        pgSettings.saveToSharedPreferences(getApplication())
-        // TODO abstract this logic.
-        val flow = pgSettings.settings.values.first { it.value is Flow }.value as Flow
-        when (flow) {
-            Flow.Data -> startForData()
-            Flow.Token -> startForToken()
-            Flow.PaymentIntent -> startWithPaymentIntent()
+        _state.update {
+            it.copy(status = emptyList())
+        }
+        val snapshot = state.value.settings
+        Log.d(
+            "FinancialConnections",
+            "Starting session with settings: ${snapshot.asJsonString()}"
+        )
+        snapshot.saveToSharedPreferences(getApplication())
+        when (state.value.flow) {
+            Flow.Data -> startForData(snapshot)
+            Flow.Token -> startForToken(snapshot)
+            Flow.PaymentIntent -> startWithPaymentIntent(snapshot)
         }
     }
 
-    private fun startWithPaymentIntent() {
+    private fun startWithPaymentIntent(snapshot: PlaygroundSettings) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
                 repository.createPaymentIntent(
-                    _state.value.settings.paymentIntentRequest()
+                    snapshot.paymentIntentRequest()
                 )
             }
                 // Success creating session: open the financial connections sheet with received secret
@@ -84,13 +90,11 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun startForData() {
+    private fun startForData(snapshot: PlaygroundSettings) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
-                repository.createLinkAccountSession(
-                    _state.value.settings.lasRequest()
-                )
+                repository.createLinkAccountSession(snapshot.lasRequest())
             }
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
@@ -110,13 +114,11 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun startForToken() {
+    private fun startForToken(snapshot: PlaygroundSettings) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
-                repository.createLinkAccountSessionForToken(
-                    state.value.settings.lasRequest()
-                )
+                repository.createLinkAccountSessionForToken(snapshot.lasRequest())
             }
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
@@ -285,8 +287,10 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
 
 internal data class FinancialConnectionsPlaygroundState(
     val backendUrl: String = "",
-    val settings: PlaygroundSettings = PlaygroundSettings.default(),
+    val settings: PlaygroundSettings = PlaygroundSettings.createFromDefaults(),
     val loading: Boolean = false,
     val publishableKey: String? = null,
     val status: List<String> = emptyList()
-)
+) {
+    val flow = settings[FlowDefinition]
+}

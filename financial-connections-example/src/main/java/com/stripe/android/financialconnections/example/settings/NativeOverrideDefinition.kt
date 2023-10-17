@@ -5,8 +5,8 @@ import com.stripe.android.financialconnections.example.data.LinkAccountSessionBo
 import com.stripe.android.financialconnections.example.data.PaymentIntentBody
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Displayable.Option
 
-internal class NativeOverrideDefinition :
-    PlaygroundSettingDefinition.Saveable<NativeOverride>, PlaygroundSettingDefinition.Displayable<NativeOverride> {
+internal object NativeOverrideDefinition : PlaygroundSettingDefinition.Saveable<NativeOverride>,
+    PlaygroundSettingDefinition.Displayable<NativeOverride> {
 
     override val displayName: String = "Native Override"
     override val options: List<Option<NativeOverride>>
