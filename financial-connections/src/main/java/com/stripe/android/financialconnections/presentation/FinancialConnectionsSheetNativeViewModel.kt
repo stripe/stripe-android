@@ -32,8 +32,6 @@ import com.stripe.android.financialconnections.exception.CustomManualEntryRequir
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -241,49 +239,46 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     ) = viewModelScope.launch {
         mutex.withLock {
             // prevents multiple complete triggers.
-            if (awaitState().completed.not()) {
-                runCatching {
-                    setState { copy(completed = true) }
-                    completeFinancialConnectionsSession(terminalError = earlyTerminationCause?.value)
-                }.onSuccess { session ->
-                    eventTracker.track(
-                        FinancialConnectionsEvent.Complete(
-                            exception = null,
-                            exceptionExtraMessage = null,
-                            connectedAccounts = session.accounts.data.count()
+            if (awaitState().completed) return@launch
+            setState { copy(completed = true) }
+            runCatching {
+                val session = completeFinancialConnectionsSession(earlyTerminationCause?.value)
+                eventTracker.track(
+                    FinancialConnectionsEvent.Complete(
+                        exception = null,
+                        exceptionExtraMessage = null,
+                        connectedAccounts = session.accounts.data.count()
+                    )
+                )
+                when {
+                    session.isCustomManualEntryError() -> finishWithResult(
+                        Failed(error = CustomManualEntryRequiredError())
+                    )
+
+                    session.hasAValidAccount() -> finishWithResult(
+                        FinancialConnectionsSheetActivityResult.Completed(
+                            financialConnectionsSession = session,
+                            token = session.parsedToken
                         )
                     )
-                    when {
-                        session.isCustomManualEntryError() -> finishWithResult(
-                            Failed(error = CustomManualEntryRequiredError())
-                        )
 
-                        session.hasAValidAccount() -> finishWithResult(
-                            Completed(
-                                financialConnectionsSession = session,
-                                token = session.parsedToken
-                            )
-                        )
+                    closeAuthFlowError != null -> finishWithResult(
+                        Failed(error = closeAuthFlowError)
+                    )
 
-                        closeAuthFlowError != null -> finishWithResult(
-                            Failed(error = closeAuthFlowError)
-                        )
-
-                        else -> finishWithResult(Canceled)
-                    }
+                    else -> finishWithResult(FinancialConnectionsSheetActivityResult.Canceled)
                 }
-                    .onFailure { completeSessionError ->
-                        val errorMessage = "Error completing session before closing"
-                        logger.error(errorMessage, completeSessionError)
-                        eventTracker.track(
-                            FinancialConnectionsEvent.Complete(
-                                exception = completeSessionError,
-                                exceptionExtraMessage = errorMessage,
-                                connectedAccounts = null
-                            )
-                        )
-                        finishWithResult(Failed(closeAuthFlowError ?: completeSessionError))
-                    }
+            }.onFailure { completeSessionError ->
+                val errorMessage = "Error completing session before closing"
+                logger.error(errorMessage, completeSessionError)
+                eventTracker.track(
+                    FinancialConnectionsEvent.Complete(
+                        exception = completeSessionError,
+                        exceptionExtraMessage = errorMessage,
+                        connectedAccounts = null
+                    )
+                )
+                finishWithResult(Failed(closeAuthFlowError ?: completeSessionError))
             }
         }
     }
