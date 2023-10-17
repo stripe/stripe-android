@@ -16,15 +16,16 @@ class PaymentSelectionTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
-    fun `Doesn't display a mandate for Link`() = runAllConfigurations { isSaveForFutureUseSelected ->
-        val link = PaymentSelection.Link
-        val result = link.mandateText(
-            context = context,
-            merchantName = "Merchant",
-            isSaveForFutureUseSelected = isSaveForFutureUseSelected,
-        )
-        assertThat(result).isNull()
-    }
+    fun `Doesn't display a mandate for Link`() =
+        runAllConfigurations { isSaveForFutureUseSelected ->
+            val link = PaymentSelection.Link
+            val result = link.mandateText(
+                context = context,
+                merchantName = "Merchant",
+                isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+            )
+            assertThat(result).isNull()
+        }
 
     @Test
     fun `Doesn't display a mandate for Google Pay`() =
@@ -110,6 +111,29 @@ class PaymentSelectionTest {
     }
 
     @Test
+    fun `Displays the correct mandate for a sepa family PMs`() {
+        val paymentSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFactory.sepaDebit(),
+        )
+
+        val result = paymentSelection.mandateText(
+            context = context,
+            merchantName = "Merchant",
+            isSaveForFutureUseSelected = false,
+        )
+
+        assertThat(result).isEqualTo(
+            "By providing your payment information and confirming this payment, you authorise (A) Merchant and" +
+                " Stripe, our payment service provider, to send instructions to your bank to debit your account and" +
+                " (B) your bank to debit your account in accordance with those instructions. As part of your rights," +
+                " you are entitled to a refund from your bank under the terms and conditions of your agreement with" +
+                " your bank. A refund must be claimed within 8 weeks starting from the date on which your account " +
+                "was debited. Your rights are explained in a statement that you can obtain from your bank. You agree" +
+                " to receive notifications for future debits up to 2 days before they occur."
+        )
+    }
+
+    @Test
     fun `Doesn't display a mandate for a saved payment method that isn't US bank account`() =
         runAllConfigurations { isSaveForFutureUseSelected ->
             val newPaymentSelection = PaymentSelection.Saved(
@@ -123,6 +147,47 @@ class PaymentSelectionTest {
             )
             assertThat(result).isNull()
         }
+
+    @Test
+    fun `showMandateAbovePrimaryButton is true for sepa family`() {
+        assertThat(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFactory.sepaDebit(),
+            ).showMandateAbovePrimaryButton
+        ).isTrue()
+    }
+
+    @Test
+    fun `showMandateAbovePrimaryButton is false for US Bank Account`() {
+        assertThat(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFactory.usBankAccount(),
+            ).showMandateAbovePrimaryButton
+        ).isFalse()
+    }
+
+    @Test
+    fun `requiresConfirmation is true for US Bank Account and Sepa Family`() {
+        assertThat(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFactory.usBankAccount(),
+            ).requiresConfirmation
+        ).isTrue()
+        assertThat(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFactory.sepaDebit(),
+            ).requiresConfirmation
+        ).isTrue()
+    }
+
+    @Test
+    fun `requiresConfirmation is false for cards`() {
+        assertThat(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFactory.card(),
+            ).requiresConfirmation
+        ).isFalse()
+    }
 
     private fun runAllConfigurations(block: (Boolean) -> Unit) {
         for (isSaveForFutureUseSelected in listOf(true, false)) {

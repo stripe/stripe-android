@@ -7,6 +7,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -727,7 +728,7 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity {
             val text = context.getString(StripeUiCoreR.string.stripe_paymentsheet_payment_method_us_bank_account)
-            viewModel.updateBelowButtonText(text)
+            viewModel.updateMandateText(text, false)
 
             composeTestRule
                 .onNodeWithText(text)
@@ -736,24 +737,48 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `notes visibility is gone`() {
+    fun `mandate text is shown below primary button when showAbove is false`() {
         val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
             val text = "some text"
+            val mandateNode = composeTestRule.onNode(hasText(text))
+            val primaryButtonNode = composeTestRule
+                .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-            viewModel.updateBelowButtonText(text)
+            viewModel.updateMandateText(text, false)
+            mandateNode.assertIsDisplayed()
 
-            composeTestRule
-                .onNodeWithText(text)
-                .assertIsDisplayed()
+            val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
+            val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
+            assertThat(mandatePosition).isGreaterThan(primaryButtonPosition)
 
-            viewModel.updateBelowButtonText(null)
+            viewModel.updateMandateText(null, false)
+            mandateNode.assertDoesNotExist()
+        }
+    }
 
-            composeTestRule
-                .onNodeWithText(text)
-                .assertDoesNotExist()
+    @Test
+    fun `mandate text is shown above primary button when showAbove is true`() {
+        val viewModel = createViewModel()
+        val scenario = activityScenario(viewModel)
+
+        scenario.launch(intent).onActivity {
+            val text = "some text"
+            val mandateNode = composeTestRule.onNode(hasText(text))
+            val primaryButtonNode = composeTestRule
+                .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+
+            viewModel.updateMandateText(text, true)
+            mandateNode.assertIsDisplayed()
+
+            val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
+            val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
+            assertThat(mandatePosition).isLessThan(primaryButtonPosition)
+
+            viewModel.updateMandateText(null, true)
+            mandateNode.assertDoesNotExist()
         }
     }
 

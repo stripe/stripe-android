@@ -218,6 +218,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 paymentMethodType in setOf(
                     PaymentMethod.Type.Card,
                     PaymentMethod.Type.USBankAccount,
+                    PaymentMethod.Type.SepaDebit,
                 )
             },
             silentlyFail = true,
