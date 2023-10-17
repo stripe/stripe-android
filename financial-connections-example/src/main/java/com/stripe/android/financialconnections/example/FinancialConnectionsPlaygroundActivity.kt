@@ -18,9 +18,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.RadioButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
@@ -117,9 +115,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     private fun FinancialConnectionsContent(
         state: FinancialConnectionsPlaygroundState,
         onSettingsChanged: (PlaygroundSettings) -> Unit,
-        onButtonClick: (Flow, Pair<String, String>, String) -> Unit
+        onButtonClick: (Pair<String, String>, String) -> Unit
     ) {
-        val (selectedFlow, onFlowSelected) = remember { mutableStateOf(Flow.values()[0]) }
         val (publicKey, onPublicKeyChanged) = remember { mutableStateOf("") }
         val (secretKey, onSecretKeyChanged) = remember { mutableStateOf("") }
         val (email, onEmailChange) = remember { mutableStateOf("") }
@@ -152,9 +149,11 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 //                        )
 //                    }
                     Spacer(modifier = Modifier.height(8.dp))
-                    FlowSection(selectedFlow, onFlowSelected)
                     EmailInputSection(email, onEmailChange)
-                    SettingsUi(playgroundSettings = state.settings)
+                    SettingsUi(
+                        playgroundSettings = state.settings,
+                        onSettingsChanged = onSettingsChanged
+                    )
                     if (state.loading) {
                         LinearProgressIndicator(
                             modifier = Modifier.fillMaxWidth(),
@@ -172,7 +171,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     Button(
                         onClick = {
                             onButtonClick(
-                                selectedFlow,
                                 publicKey to secretKey,
                                 email
                             )
@@ -217,34 +215,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         )
     }
 
-    @Composable
-    private fun FlowSection(
-        selectedOption: Flow,
-        onOptionSelected: (Flow) -> Unit
-    ) {
-        Text(
-            text = "Flow",
-            style = MaterialTheme.typography.h6.merge(),
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Flow.values().forEach { text ->
-                RadioButton(
-                    modifier = Modifier
-                        .semantics { testTagsAsResourceId = true }
-                        .testTag("${text.name}_checkbox"),
-                    selected = (text == selectedOption),
-                    onClick = { onOptionSelected(text) }
-                )
-                Text(
-                    text = text.name,
-                    style = MaterialTheme.typography.body1.merge(),
-                )
-            }
-        }
-    }
-
     @Preview
     @Composable
     fun ContentPreview() {
@@ -256,7 +226,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 status = listOf("Result: Pending")
             ),
             onSettingsChanged = {},
-            onButtonClick = { _, _, _ -> }
+            onButtonClick = { _, _ -> }
         )
     }
 }

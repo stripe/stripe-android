@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.example.settings
 import android.content.Context
 import androidx.core.content.edit
 import com.stripe.android.financialconnections.example.BuildConfig
+import com.stripe.android.financialconnections.example.Flow
 import com.stripe.android.financialconnections.example.Merchant
 import com.stripe.android.financialconnections.example.NativeOverride
 import com.stripe.android.financialconnections.example.data.LinkAccountSessionBody
@@ -22,6 +23,7 @@ internal class PlaygroundSettings private constructor(
         settings
         .mapNotNull { (def, value) -> def.displayable()?.let { it to value } }
         .toMap()
+
     operator fun <T> get(settingsDefinition: PlaygroundSettingDefinition<T>): StateFlow<T> {
         @Suppress("UNCHECKED_CAST")
         return settings[settingsDefinition]?.asStateFlow() as StateFlow<T>
@@ -62,7 +64,7 @@ internal class PlaygroundSettings private constructor(
         val settingsMap = settings.map {
             val saveable = it.key.saveable()
             if (saveable != null) {
-                saveable.key to JsonPrimitive(saveable.convertToString(it.value))
+                saveable.key to JsonPrimitive(saveable.convertToString(it.value.value))
             } else {
                 null
             }
@@ -86,6 +88,7 @@ internal class PlaygroundSettings private constructor(
             mutableMapOf(
                 MerchantDefinition() to MutableStateFlow(Merchant.Test),
                 NativeOverrideDefinition() to MutableStateFlow(NativeOverride.None),
+                FlowDefinition() to MutableStateFlow(Flow.PaymentIntent),
             )
         )
     }

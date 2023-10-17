@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Context
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import javax.inject.Inject
 
@@ -19,7 +19,11 @@ internal class DebugConfiguration @Inject constructor(
         get() = runCatching {
             sharedPreferences.getString("json", null)?.let {
                 val jsonObject = Json.decodeFromString(JsonObject.serializer(), it)
-                jsonObject[KEY_OVERRIDE_NATIVE]?.jsonPrimitive?.booleanOrNull
+                when(jsonObject[KEY_OVERRIDE_NATIVE]?.jsonPrimitive?.contentOrNull) {
+                    "Native" -> true
+                    "Web" -> false
+                    else -> null
+                }
             }
         }.getOrNull()
 }

@@ -27,11 +27,13 @@ import kotlinx.coroutines.flow.StateFlow
 @Composable
 internal fun SettingsUi(
     playgroundSettings: PlaygroundSettings,
+    onSettingsChanged: (PlaygroundSettings) -> Unit,
+
 ) {
     Column {
         for (settingDefinition in playgroundSettings.uiSettings.map { it.key }) {
             Row(modifier = Modifier.padding(bottom = 16.dp)) {
-                Setting(settingDefinition, playgroundSettings)
+                Setting(settingDefinition, playgroundSettings, onSettingsChanged)
             }
         }
     }
@@ -41,13 +43,16 @@ internal fun SettingsUi(
 private fun <T> Setting(
     settingDefinition: PlaygroundSettingDefinition.Displayable<T>,
     playgroundSettings: PlaygroundSettings,
-) {
+    onSettingsChanged: (PlaygroundSettings) -> Unit,
+
+    ) {
     Setting(
         name = settingDefinition.displayName,
         options = settingDefinition.options,
         valueFlow = playgroundSettings[settingDefinition],
     ) { newValue ->
         playgroundSettings[settingDefinition] = newValue
+        onSettingsChanged(playgroundSettings)
     }
 }
 

@@ -39,15 +39,17 @@ internal class FinancialConnectionsPlaygroundViewModel(
     }
 
     fun startFinancialConnectionsSession(
-        flow: Flow,
         keys: Pair<String, String>,
         email: String
     ) {
         _state.update { it.copy(status = emptyList()) }
-        _state.value.settings.saveToSharedPreferences(getApplication())
+        state.value.settings.saveToSharedPreferences(getApplication())
+        // TODO abstract this logic.
+        val flow = _state.value.settings.settings.values.first { it.value is Flow }.value as Flow
         when (flow) {
             Flow.Data -> startForData(email.takeIf { it.isNotEmpty() })
             Flow.Token -> startForToken(email.takeIf { it.isNotEmpty() })
+            // TODO migrate to Settings.
             Flow.PaymentIntent -> startWithPaymentIntent(
                 _state.value.settings.settings.values.first { it.value is Merchant }.value as Merchant,
                 keys,
