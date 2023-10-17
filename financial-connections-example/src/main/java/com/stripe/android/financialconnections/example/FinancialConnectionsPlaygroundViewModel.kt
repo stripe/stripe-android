@@ -40,20 +40,17 @@ internal class FinancialConnectionsPlaygroundViewModel(
         _state.update { it.copy(backendUrl = settings.backendUrl) }
     }
 
-    fun startFinancialConnectionsSession() {
-        _state.update {
-            it.copy(status = emptyList())
-        }
-        val snapshot = state.value.settings
+    fun startFinancialConnectionsSession() = with(state.value.settings) {
+        _state.update { it.copy(status = emptyList()) }
         Log.d(
             "FinancialConnections",
-            "Starting session with settings: ${snapshot.asJsonString()}"
+            "Starting session with settings: ${asJsonString()}"
         )
-        snapshot.saveToSharedPreferences(getApplication())
+        saveToSharedPreferences(getApplication())
         when (state.value.flow) {
-            Flow.Data -> startForData(snapshot)
-            Flow.Token -> startForToken(snapshot)
-            Flow.PaymentIntent -> startWithPaymentIntent(snapshot)
+            Flow.Data -> startForData(this)
+            Flow.Token -> startForToken(this)
+            Flow.PaymentIntent -> startWithPaymentIntent(this)
         }
     }
 
