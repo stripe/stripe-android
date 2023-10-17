@@ -8,6 +8,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDisconnectLink
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDone
@@ -15,6 +16,8 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Complete
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -93,7 +96,7 @@ internal class SuccessViewModel @Inject constructor(
             },
             onSuccess = {
                 if (it.skipSuccessPane.not()) {
-                    eventTracker.track(PaneLoaded(Pane.SUCCESS))
+                    eventTracker.track(PaneLoaded(PANE))
                 } else {
                     completeSession()
                 }
@@ -202,25 +205,30 @@ internal class SuccessViewModel @Inject constructor(
     }
 
     fun onDoneClick() {
-        viewModelScope.launch { eventTracker.track(ClickDone(Pane.SUCCESS)) }
+        viewModelScope.launch { eventTracker.track(ClickDone(PANE)) }
         completeSession()
     }
 
     private fun completeSession() {
         suspend {
-            completeFinancialConnectionsSession()
+            completeFinancialConnectionsSession().also {
+                FinancialConnections.emitEvent(
+                    name = Name.SUCCESS,
+                    metadata = Metadata(manualEntry = false)
+                )
+            }
         }.execute { copy(completeSession = it) }
     }
 
     fun onLearnMoreAboutDataAccessClick() {
         viewModelScope.launch {
-            eventTracker.track(ClickLearnMoreDataAccess(Pane.SUCCESS))
+            eventTracker.track(ClickLearnMoreDataAccess(PANE))
         }
     }
 
     fun onDisconnectLinkClick() {
         viewModelScope.launch {
-            eventTracker.track(ClickDisconnectLink(Pane.SUCCESS))
+            eventTracker.track(ClickDisconnectLink(PANE))
         }
     }
 
@@ -238,6 +246,8 @@ internal class SuccessViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        private val PANE = Pane.SUCCESS
     }
 }
 

@@ -61,27 +61,4 @@ class FinancialConnectionsResponseEventEmitterTest {
             )
         )
     }
-
-    @Test
-    fun `emmitIfPresent - consent acquired`() {
-        val response = StripeResponse(
-            code = 200,
-            body = """
-            {
-                "events_to_emit": "[{\"type\":\"consent_acquired\"}]"
-            }
-            """.trimIndent()
-
-        )
-
-        emitter.emitIfPresent(response)
-
-        assertContains(
-            liveEvents,
-            FinancialConnectionsEvent(
-                name = Name.CONSENT_ACQUIRED,
-                metadata = Metadata()
-            )
-        )
-    }
 }

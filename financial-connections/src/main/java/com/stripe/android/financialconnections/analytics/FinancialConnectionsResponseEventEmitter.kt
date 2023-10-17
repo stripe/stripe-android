@@ -45,8 +45,8 @@ internal class FinancialConnectionsResponseEventEmitter @Inject constructor(
             .optJSONObject("error")
             ?.optJSONObject("extra_fields")
 
-        // success responses: events to emit come in the root json object
-        else -> responseJson()
+        // success responses: events are emitted by clients.
+        else -> null
     }
         ?.optString(EVENTS_TO_EMIT)
         ?.takeIf { it.isNotEmpty() }

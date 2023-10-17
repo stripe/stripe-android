@@ -9,6 +9,7 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.FeaturedInstitutionsLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.InstitutionSelected
@@ -16,6 +17,8 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.SearchScroll
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.SearchSucceeded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -145,6 +148,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                         resultCount = result.data.count()
                     )
                 )
+                FinancialConnections.emitEvent(Name.SEARCH_INITIATED)
                 result
             } else {
                 InstitutionResponse(
@@ -166,6 +170,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
                     fromFeatured = fromFeatured,
                     institutionId = institution.id
                 )
+            )
+            FinancialConnections.emitEvent(
+                name = Name.INSTITUTION_SELECTED,
+                metadata = Metadata(institutionName = institution.name)
             )
             // updates local manifest with active institution and cleans auth session if present.
             updateLocalManifest {

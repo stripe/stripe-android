@@ -12,6 +12,7 @@ import com.airbnb.mvrx.PersistState
 import com.airbnb.mvrx.ViewModelContext
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AppBackgrounded
@@ -20,6 +21,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Complete
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLaunched
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
@@ -36,6 +38,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.UNEXPECTED_ERROR
@@ -259,26 +262,26 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     )
                     when {
                         session.isCustomManualEntryError() -> {
-                            val result = Failed(CustomManualEntryRequiredError())
-                            setState { copy(viewEffect = Finish(result)) }
+                            finishWithResult(Failed(CustomManualEntryRequiredError()))
                         }
 
-                        session.accounts.data.isNotEmpty() ||
-                            session.paymentAccount != null ||
-                            session.bankAccountToken != null -> {
-                            val result = Completed(
-                                financialConnectionsSession = session,
-                                token = session.parsedToken
+                        session.hasAValidAccount() -> {
+                            FinancialConnections.emitEvent(name = Name.SUCCESS)
+                            finishWithResult(
+                                Completed(
+                                    financialConnectionsSession = session,
+                                    token = session.parsedToken
+                                )
                             )
-                            setState { copy(viewEffect = Finish(result)) }
                         }
 
-                        closeAuthFlowError != null -> setState {
-                            copy(viewEffect = Finish(Failed(closeAuthFlowError)))
+                        closeAuthFlowError != null -> {
+                            finishWithResult(Failed(closeAuthFlowError))
                         }
 
-                        else -> setState {
-                            copy(viewEffect = Finish(Canceled))
+                        else -> {
+                            FinancialConnections.emitEvent(name = Name.CANCEL)
+                            finishWithResult(Canceled)
                         }
                     }
                 }
@@ -292,16 +295,21 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                             connectedAccounts = null
                         )
                     )
-                    setState {
-                        copy(
-                            viewEffect = Finish(
-                                Failed(closeAuthFlowError ?: completeSessionError)
-                            )
-                        )
-                    }
+                    finishWithResult(Failed(closeAuthFlowError ?: completeSessionError))
                 }
         }
     }
+
+    private fun finishWithResult(
+        result: FinancialConnectionsSheetActivityResult
+    ) {
+        setState { copy(viewEffect = Finish(result)) }
+    }
+
+    private fun FinancialConnectionsSession.hasAValidAccount() =
+        accounts.data.isNotEmpty() ||
+            paymentAccount != null ||
+            bankAccountToken != null
 
     fun onPaneLaunched(pane: Pane, referrer: Pane?) {
         viewModelScope.launch {

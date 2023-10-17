@@ -9,6 +9,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Launched
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Loaded
@@ -19,6 +20,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PrepaneClickContinue
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
@@ -362,7 +364,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
             requireNotNull(authSession)
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
-            if (authSession.isOAuth) {
+            val nextPane = if (authSession.isOAuth) {
                 logger.debug("Web AuthFlow completed! waiting for oauth results")
                 val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
                 logger.debug("OAuth results received! completing session")
@@ -371,18 +373,12 @@ internal class PartnerAuthViewModel @Inject constructor(
                     publicToken = oAuthResults.publicToken
                 )
                 logger.debug("Session authorized!")
-                navigationManager.tryNavigateTo(
-                    updatedSession.nextPane.destination(referrer = PANE),
-                    popUpToCurrent = true,
-                    inclusive = true
-                )
+                updatedSession.nextPane.destination(referrer = PANE)
             } else {
-                navigationManager.tryNavigateTo(
-                    AccountPicker(referrer = PANE),
-                    popUpToCurrent = true,
-                    inclusive = true
-                )
+                AccountPicker(referrer = PANE)
             }
+            FinancialConnections.emitEvent(Name.INSTITUTION_AUTHORIZED)
+            navigationManager.tryNavigateTo(nextPane)
         }.onFailure {
             eventTracker.logError(
                 extraMessage = "failed authorizing session",
