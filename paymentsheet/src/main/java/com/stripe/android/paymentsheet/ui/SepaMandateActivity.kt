@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
@@ -70,10 +71,11 @@ internal fun SepaMandateScreen(
             .padding(16.dp)
     ) {
         Text(
-            stringResource(
+            text = stringResource(
                 id = StripeUiCoreR.string.stripe_sepa_mandate,
                 merchantName
-            )
+            ),
+            style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
         )
         Button(
             onClick = acknowledgedCallback,
