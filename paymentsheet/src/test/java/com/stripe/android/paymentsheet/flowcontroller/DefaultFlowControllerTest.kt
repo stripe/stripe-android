@@ -884,6 +884,40 @@ internal class DefaultFlowControllerTest {
         verify(paymentResultCallback).onPaymentSheetResult(PaymentSheetResult.Canceled)
     }
 
+    @Test
+    fun `confirm() selecting sepa saved payment method`() = runTest {
+        val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+        val flowController = createFlowController(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+                    .paymentMethodTypes.plus("sepa_debit")
+            )
+        )
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
+                allowsDelayedPaymentMethods = true,
+            )
+        )
+
+        fakeIntentConfirmationInterceptor.enqueueConfirmStep(
+            confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = mock(),
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET
+            )
+        )
+
+        flowController.onPaymentOptionResult(PaymentOptionResult.Succeeded(paymentSelection))
+
+        flowController.confirm()
+
+        verify(sepaMandateActivityLauncher, never()).launch(any())
+
+        verify(paymentLauncher).confirm(any<ConfirmPaymentIntentParams>())
+        flowController.onPaymentResult(PaymentResult.Completed)
+        verify(paymentResultCallback).onPaymentSheetResult(PaymentSheetResult.Completed)
+    }
+
     private fun verifyPaymentSelection(
         clientSecret: String,
         paymentMethodCreateParams: PaymentMethodCreateParams,
