@@ -16,7 +16,9 @@ import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.utils.ContextUtils.packageInfo
+import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetViewState
+import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -25,6 +27,8 @@ import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import dagger.Binds
 import dagger.Module
@@ -51,6 +55,16 @@ internal interface CustomerSheetViewModelModule {
         impl: DefaultCustomerSheetEventReporter
     ): CustomerSheetEventReporter
 
+    @Binds
+    fun bindsCustomerSheetLoader(
+        impl: DefaultCustomerSheetLoader
+    ): CustomerSheetLoader
+
+    @Binds
+    fun bindsStripeIntentRepository(
+        impl: RealElementsSessionRepository,
+    ): ElementsSessionRepository
+
     @Suppress("TooManyFunctions")
     companion object {
         /**
@@ -64,6 +78,11 @@ internal interface CustomerSheetViewModelModule {
         @Provides
         fun paymentConfiguration(application: Application): PaymentConfiguration {
             return PaymentConfiguration.getInstance(application)
+        }
+
+        @Provides
+        fun provideCoroutineContext(): CoroutineContext {
+            return Dispatchers.IO
         }
 
         @Provides

@@ -139,6 +139,7 @@ object CustomerSheetTestHelper {
             },
             statusBarColor = { null },
             eventReporter = eventReporter,
+            customerSheetLoader = mock()
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
         }
