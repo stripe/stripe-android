@@ -72,6 +72,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
+    @Suppress("unused") private val customerSheetLoader: CustomerSheetLoader,
 ) : ViewModel() {
 
     private val backStack = MutableStateFlow(initialBackStack)
