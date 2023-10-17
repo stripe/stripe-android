@@ -80,10 +80,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->
                 when (message) {
-                    is Message.Finish -> {
-                        setState { copy(viewEffect = Finish(message.result)) }
-                    }
-
                     Message.ClearPartnerWebAuth -> {
                         setState { copy(webAuthFlow = WebAuthFlowState.Uninitialized) }
                     }
