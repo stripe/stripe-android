@@ -6,3 +6,4 @@ ktlint_standard_trailing-comma-on-call-site = disabled
 ktlint_standard_trailing-comma-on-declaration-site = disabled
 ktlint_standard_indent = disabled
 ktlint_standard_no-semi = disabled
+max_line_length = 120
