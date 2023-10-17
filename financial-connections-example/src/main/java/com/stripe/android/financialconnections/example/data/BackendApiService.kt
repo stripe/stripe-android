@@ -41,19 +41,19 @@ data class LinkAccountSessionBody(
 @Keep
 data class PaymentIntentBody(
     @SerializedName("flow")
-    val flow: String?,
+    val flow: String? = null,
     @SerializedName("country")
-    val country: String?,
+    val country: String? = "US",
     @SerializedName("customer_id")
-    val customerId: String?,
+    val customerId: String? = null,
     @SerializedName("supported_payment_methods")
-    val supportedPaymentMethods: String?,
+    val supportedPaymentMethods: String? = null,
     @SerializedName("custom_pk")
-    val publishableKey: String?,
+    val publishableKey: String? = null,
     @SerializedName("custom_sk")
-    val secretKey: String?,
+    val secretKey: String? = null,
     @SerializedName("customer_email")
-    val customerEmail: String?,
+    val customerEmail: String? = null,
     @SerializedName("test_environment")
-    val testEnvironment: String?
+    val testEnvironment: String? = null
 )

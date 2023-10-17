@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.example.settings
 
 import com.stripe.android.financialconnections.example.data.LinkAccountSessionBody
+import com.stripe.android.financialconnections.example.data.PaymentIntentBody
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Displayable.Option
 
 internal class EmailDefinition : PlaygroundSettingDefinition.Displayable<String> {
@@ -8,10 +9,17 @@ internal class EmailDefinition : PlaygroundSettingDefinition.Displayable<String>
         get() = "Customer email"
     override val options: List<Option<String>> = emptyList()
 
-    override fun sessionRequest(
+    override fun lasRequest(
         body: LinkAccountSessionBody,
         value: Any?
     ): LinkAccountSessionBody = body.copy(
+        customerEmail = value as String?
+    )
+
+    override fun paymentIntentRequest(
+        body: PaymentIntentBody,
+        value: Any?
+    ) = body.copy(
         customerEmail = value as String?
     )
 }

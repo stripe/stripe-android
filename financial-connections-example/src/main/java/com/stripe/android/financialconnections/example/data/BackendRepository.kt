@@ -23,23 +23,10 @@ class BackendRepository(
     )
 
     suspend fun createPaymentIntent(
-        country: String,
-        flow: String? = null,
-        customerId: String? = null,
-        supportedPaymentMethods: String? = null,
-        keys: Pair<String, String>? = null,
-        customerEmail: String? = null,
-        testEnvironment: String = BuildConfig.TEST_ENVIRONMENT
-    ): CreateIntentResponse = backendService.createPaymentIntent(
-        PaymentIntentBody(
-            flow = flow,
-            country = country,
-            customerId = customerId,
-            supportedPaymentMethods = supportedPaymentMethods,
-            publishableKey = keys?.first,
-            secretKey = keys?.second,
-            customerEmail = customerEmail,
-            testEnvironment = testEnvironment
+        paymentIntentBody: PaymentIntentBody = PaymentIntentBody(
+            testEnvironment = BuildConfig.TEST_ENVIRONMENT
         )
+    ): CreateIntentResponse = backendService.createPaymentIntent(
+        paymentIntentBody
     )
 }

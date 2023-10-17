@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.example.settings
 
 import com.stripe.android.financialconnections.example.NativeOverride
 import com.stripe.android.financialconnections.example.data.LinkAccountSessionBody
+import com.stripe.android.financialconnections.example.data.PaymentIntentBody
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Displayable.Option
 
 internal class NativeOverrideDefinition :
@@ -15,13 +16,15 @@ internal class NativeOverrideDefinition :
             option("Web", NativeOverride.Web),
         )
 
-    /**
-     * Not used in create session request.
-     */
-    override fun sessionRequest(
+    override fun lasRequest(
         body: LinkAccountSessionBody,
         value: Any?
     ): LinkAccountSessionBody = body
+
+    override fun paymentIntentRequest(
+        body: PaymentIntentBody,
+        value: Any?
+    ): PaymentIntentBody = body
 
     override val key: String = "financial_connections_override_native"
     override val defaultValue: NativeOverride = NativeOverride.None

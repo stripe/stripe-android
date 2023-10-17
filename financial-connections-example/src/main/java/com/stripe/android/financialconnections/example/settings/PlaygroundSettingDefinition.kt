@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.example.settings
 
 import com.stripe.android.financialconnections.example.data.LinkAccountSessionBody
+import com.stripe.android.financialconnections.example.data.PaymentIntentBody
 
 internal interface PlaygroundSettingDefinition<T> {
 
@@ -13,10 +14,15 @@ internal interface PlaygroundSettingDefinition<T> {
         return this as? Saveable<T>?
     }
 
-    fun sessionRequest(
+    fun lasRequest(
         body: LinkAccountSessionBody,
         value: Any?
     ): LinkAccountSessionBody
+
+    fun paymentIntentRequest(
+        body: PaymentIntentBody,
+        value: Any?
+    ): PaymentIntentBody
 
     interface Saveable<T> {
         val key: String

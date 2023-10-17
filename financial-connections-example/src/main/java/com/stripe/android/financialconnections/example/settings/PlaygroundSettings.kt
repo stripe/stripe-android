@@ -7,6 +7,7 @@ import com.stripe.android.financialconnections.example.Flow
 import com.stripe.android.financialconnections.example.Merchant
 import com.stripe.android.financialconnections.example.NativeOverride
 import com.stripe.android.financialconnections.example.data.LinkAccountSessionBody
+import com.stripe.android.financialconnections.example.data.PaymentIntentBody
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,10 +38,16 @@ internal class PlaygroundSettings private constructor(
         }
     }
 
-    fun toBackendRequest() = settings.toList().fold(
+    fun lasRequest() = settings.toList().fold(
         LinkAccountSessionBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
     ) { acc, (definition: PlaygroundSettingDefinition<*>, value: MutableStateFlow<Any?>) ->
-        definition.sessionRequest(acc, value.value)
+        definition.lasRequest(acc, value.value)
+    }
+
+    fun paymentIntentRequest() = settings.toList().fold(
+        PaymentIntentBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
+    ) { acc, (definition: PlaygroundSettingDefinition<*>, value: MutableStateFlow<Any?>) ->
+        definition.paymentIntentRequest(acc, value.value)
     }
 
     fun saveToSharedPreferences(context: Context) {
