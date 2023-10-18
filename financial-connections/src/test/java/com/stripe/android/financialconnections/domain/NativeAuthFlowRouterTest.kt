@@ -2,9 +2,10 @@ package com.stripe.android.financialconnections.domain
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Exposure
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.debug.DebugConfiguration
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -12,6 +13,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class NativeAuthFlowRouterTest {
 
     private val eventTracker = mock<FinancialConnectionsAnalyticsTracker>()
@@ -81,7 +83,7 @@ internal class NativeAuthFlowRouterTest {
         router.logExposure(syncResponse.manifest)
 
         verify(eventTracker).track(
-            FinancialConnectionsEvent.Exposure(
+            Exposure(
                 experimentName = "connections_mobile_native",
                 assignmentEventId = "id",
                 accountHolderId = "token"

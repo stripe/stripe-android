@@ -7,13 +7,13 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.ConfirmVerificationSessionError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.StartVerificationSessionError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationSuccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.ConfirmVerificationSessionError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.StartVerificationSessionError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationSuccess
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
@@ -78,8 +78,12 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
                 }
             },
             onFail = { error ->
-                logger.error("Error fetching payload", error)
-                eventTracker.track(Error(PANE, error))
+                eventTracker.logError(
+                    extraMessage = "Error fetching payload",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
             },
         )
         onAsync(
@@ -89,8 +93,12 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
                 navigationManager.tryNavigateTo(Success(referrer = PANE))
             },
             onFail = { error ->
-                logger.error("Error confirming verification", error)
-                eventTracker.track(Error(PANE, error))
+                eventTracker.logError(
+                    extraMessage = "Error confirming verification",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
                 if (error !is OTPError) {
                     saveToLinkWithStripeSucceeded.set(false)
                     navigationManager.tryNavigateTo(Success(referrer = PANE))
