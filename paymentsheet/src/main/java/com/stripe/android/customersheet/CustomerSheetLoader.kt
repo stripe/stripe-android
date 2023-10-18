@@ -20,7 +20,7 @@ import javax.inject.Named
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal interface CustomerSheetLoader {
-    suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState>
+    suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full>
 }
 
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -31,7 +31,7 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
     private val lpmRepository: LpmRepository,
     private val customerAdapter: CustomerAdapter,
 ) : CustomerSheetLoader {
-    override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState> {
+    override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full> {
         val card = LpmRepository.hardcodedCardSpec(
             billingDetailsCollectionConfiguration =
             configuration?.billingDetailsCollectionConfiguration?.toInternal()
