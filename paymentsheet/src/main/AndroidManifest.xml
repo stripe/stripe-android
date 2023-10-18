@@ -29,5 +29,9 @@
             android:name=".paymentdatacollection.polling.PollingActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
             android:exported="false" />
+        <activity
+            android:name=".ui.SepaMandateActivity"
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:exported="false" />
     </application>
 </manifest>
