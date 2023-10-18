@@ -6,11 +6,7 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
 internal object CustomerSettingsDefinition :
     PlaygroundSettingDefinition<CustomerType>,
-    PlaygroundSettingDefinition.Saveable<CustomerType> by EnumSaveable(
-        key = "customer",
-        values = CustomerType.values(),
-        defaultValue = CustomerType.GUEST,
-    ),
+    PlaygroundSettingDefinition.Saveable<CustomerType>,
     PlaygroundSettingDefinition.Displayable<CustomerType> {
     override val displayName: String = "Customer"
     override val options: List<PlaygroundSettingDefinition.Displayable.Option<CustomerType>> =
@@ -35,11 +31,36 @@ internal object CustomerSettingsDefinition :
     ) {
         configurationBuilder.customer(playgroundState.customerConfig)
     }
+
+    override val key: String = "customer"
+    override val defaultValue: CustomerType = CustomerType.GUEST
+
+    override fun convertToValue(value: String): CustomerType {
+        val hardcodedCustomerTypes = mapOf(
+            CustomerType.GUEST.value to CustomerType.GUEST,
+            CustomerType.NEW.value to CustomerType.NEW,
+            CustomerType.RETURNING.value to CustomerType.RETURNING,
+        )
+        return if (value.startsWith("cus_")) {
+            CustomerType.Existing(value)
+        } else if (hardcodedCustomerTypes.containsKey(value)) {
+            hardcodedCustomerTypes[value]!!
+        } else {
+            defaultValue
+        }
+    }
+
+    override fun convertToString(value: CustomerType): String {
+        return value.value
+    }
 }
 
-enum class CustomerType(override val value: String) : ValueEnum {
-    GUEST("guest"),
-    NEW("new"),
-    RETURNING("returning"),
-    SNAPSHOT("snapshot"),
+sealed class CustomerType(val value: String) {
+    object GUEST : CustomerType("guest")
+
+    object NEW : CustomerType("new")
+
+    object RETURNING : CustomerType("returning")
+
+    class Existing(customerId: String) : CustomerType(customerId)
 }
