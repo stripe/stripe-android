@@ -74,7 +74,7 @@ internal fun ManualEntryScreen() {
         onAccountEntered = viewModel::onAccountEntered,
         onAccountConfirmEntered = viewModel::onAccountConfirmEntered,
         onSubmit = viewModel::onSubmit,
-    ) { parentViewModel.onCloseNoConfirmationClick(Pane.MANUAL_ENTRY) }
+    ) { parentViewModel.onCloseWithConfirmationClick(Pane.MANUAL_ENTRY) }
 }
 
 @Composable
