@@ -782,11 +782,12 @@ internal class PaymentSheetViewModelTest {
             PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
         )
 
-        assertThat(viewModel.notesText.value)
+        assertThat(viewModel.mandateText.value?.text)
             .isEqualTo(
                 "By continuing, you agree to authorize payments pursuant to " +
                     "<a href=\"https://stripe.com/ach-payments/authorization\">these terms</a>."
             )
+        assertThat(viewModel.mandateText.value?.showAbovePrimaryButton).isFalse()
 
         viewModel.updateSelection(
             PaymentSelection.New.GenericPaymentMethod(
@@ -799,15 +800,41 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        assertThat(viewModel.notesText.value)
-            .isEqualTo(null)
+        assertThat(viewModel.mandateText.value).isNull()
 
         viewModel.updateSelection(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
 
-        assertThat(viewModel.notesText.value)
-            .isEqualTo(null)
+        assertThat(viewModel.mandateText.value).isNull()
+    }
+
+    @Test
+    fun `updateSelection() posts mandate text when selected payment is sepa`() {
+        val viewModel = createViewModel()
+
+        viewModel.updateSelection(
+            PaymentSelection.Saved(SEPA_DEBIT_PAYMENT_METHOD)
+        )
+
+        assertThat(viewModel.mandateText.value?.text)
+            .isEqualTo(
+                "By providing your payment information and confirming this payment, you authorise (A) Merchant, Inc. " +
+                    "and Stripe, our payment service provider, to send instructions to your bank to debit your " +
+                    "account and (B) your bank to debit your account in accordance with those instructions. As part" +
+                    " of your rights, you are entitled to a refund from your bank under the terms and conditions of" +
+                    " your agreement with your bank. A refund must be claimed within 8 weeks starting from the date" +
+                    " on which your account was debited. Your rights are explained in a statement that you can " +
+                    "obtain from your bank. You agree to receive notifications for future debits up to 2 days before" +
+                    " they occur."
+            )
+        assertThat(viewModel.mandateText.value?.showAbovePrimaryButton).isTrue()
+
+        viewModel.updateSelection(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        assertThat(viewModel.mandateText.value).isNull()
     }
 
     @Test

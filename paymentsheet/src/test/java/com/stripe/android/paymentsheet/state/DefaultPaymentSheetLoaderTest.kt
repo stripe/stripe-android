@@ -322,6 +322,46 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
+    fun `load() with customer should allow sepa`() = runTest {
+        var requestPaymentMethodTypes: List<PaymentMethod.Type>? = null
+        val result = createPaymentSheetLoader(
+            customerRepo = object : FakeCustomerRepository() {
+                override suspend fun getPaymentMethods(
+                    customerConfig: PaymentSheet.CustomerConfiguration,
+                    types: List<PaymentMethod.Type>,
+                    silentlyFail: Boolean
+                ): Result<List<PaymentMethod>> {
+                    requestPaymentMethodTypes = types
+                    return Result.success(
+                        listOf(
+                            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                            PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+                        )
+                    )
+                }
+            },
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "sepa_debit")
+            )
+        ).load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+            ),
+            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
+                allowsDelayedPaymentMethods = true,
+            ),
+        ).getOrThrow()
+
+        assertThat(result.customerPaymentMethods)
+            .containsExactly(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+            )
+        assertThat(requestPaymentMethodTypes)
+            .containsExactly(PaymentMethod.Type.Card, PaymentMethod.Type.SepaDebit)
+    }
+
+    @Test
     fun `load() when PaymentIntent has invalid status should return null`() = runTest {
         val result = createPaymentSheetLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
