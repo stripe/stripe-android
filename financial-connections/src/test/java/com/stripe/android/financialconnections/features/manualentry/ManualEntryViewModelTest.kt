@@ -48,7 +48,7 @@ class ManualEntryViewModelTest {
     )
 
     @Test
-    fun `init - when custom manual entry, Terminate events is emitted`() = runTest {
+    fun `init - when custom manual entry, Complete events is emitted`() = runTest {
         val sync = syncResponse(
             sessionManifest().copy(manualEntryMode = ManualEntryMode.CUSTOM)
         )
