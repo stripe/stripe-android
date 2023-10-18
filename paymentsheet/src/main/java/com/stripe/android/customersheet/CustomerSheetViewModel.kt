@@ -72,6 +72,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
+    @Suppress("unused") private val customerSheetLoader: CustomerSheetLoader,
 ) : ViewModel() {
 
     private val backStack = MutableStateFlow(initialBackStack)
@@ -86,8 +87,12 @@ internal class CustomerSheetViewModel @Inject constructor(
     private var unconfirmedPaymentMethod: PaymentMethod? = null
 
     init {
-        lpmRepository.initializeWithCardSpec(
-            configuration.billingDetailsCollectionConfiguration.toInternal()
+        lpmRepository.initializeWithPaymentMethods(
+            mapOf(
+                PaymentMethod.Type.Card.code to LpmRepository.hardcodedCardSpec(
+                    configuration.billingDetailsCollectionConfiguration.toInternal()
+                )
+            )
         )
 
         configuration.appearance.parseAppearance()

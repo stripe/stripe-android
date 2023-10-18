@@ -48,28 +48,9 @@ object CustomerSheetTestHelper {
         )
     }
 
-    internal fun createViewModel(
-        lpmRepository: LpmRepository = this.lpmRepository,
-        isLiveMode: Boolean = false,
-        initialBackStack: List<CustomerSheetViewState> = listOf(CustomerSheetViewState.Loading(isLiveMode)),
-        savedPaymentSelection: PaymentSelection? = null,
-        customerAdapter: CustomerAdapter = FakeCustomerAdapter(
-            paymentMethods = CustomerAdapter.Result.success(listOf(CARD_PAYMENT_METHOD))
-        ),
-        stripeRepository: StripeRepository = FakeStripeRepository(),
-        paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
-            publishableKey = "pk_test_123",
-            stripeAccountId = null,
-        ),
-        configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
-            googlePayEnabled = true
-        ),
-        isGooglePayAvailable: Boolean = true,
-        eventReporter: CustomerSheetEventReporter = mock(),
-        intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueCompleteStep(true)
-        }
-    ): CustomerSheetViewModel {
+    private fun mockedFormViewModel(
+        configuration: CustomerSheet.Configuration,
+    ): Provider<FormViewModelSubcomponent.Builder> {
         val formViewModel = FormViewModel(
             context = application,
             formArguments = FormArguments(
@@ -100,12 +81,39 @@ object CustomerSheetTestHelper {
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 
+        return mockFormSubComponentBuilderProvider
+    }
+
+    internal fun createViewModel(
+        lpmRepository: LpmRepository = this.lpmRepository,
+        isLiveMode: Boolean = false,
+        initialBackStack: List<CustomerSheetViewState> = listOf(CustomerSheetViewState.Loading(isLiveMode)),
+        savedPaymentSelection: PaymentSelection? = null,
+        customerAdapter: CustomerAdapter = FakeCustomerAdapter(
+            paymentMethods = CustomerAdapter.Result.success(listOf(CARD_PAYMENT_METHOD))
+        ),
+        stripeRepository: StripeRepository = FakeStripeRepository(),
+        paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
+            publishableKey = "pk_test_123",
+            stripeAccountId = null,
+        ),
+        configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
+            googlePayEnabled = true
+        ),
+        isGooglePayAvailable: Boolean = true,
+        formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder> =
+            mockedFormViewModel(configuration),
+        eventReporter: CustomerSheetEventReporter = mock(),
+        intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+            enqueueCompleteStep(true)
+        }
+    ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
             application = application,
             initialBackStack = initialBackStack,
             savedPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
-            formViewModelSubcomponentBuilderProvider = mockFormSubComponentBuilderProvider,
+            formViewModelSubcomponentBuilderProvider = formViewModelSubcomponentBuilderProvider,
             resources = application.resources,
             stripeRepository = stripeRepository,
             customerAdapter = customerAdapter,
@@ -131,6 +139,7 @@ object CustomerSheetTestHelper {
             },
             statusBarColor = { null },
             eventReporter = eventReporter,
+            customerSheetLoader = mock()
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
         }

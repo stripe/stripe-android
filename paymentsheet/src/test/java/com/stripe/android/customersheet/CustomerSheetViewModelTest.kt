@@ -18,6 +18,7 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
@@ -121,6 +122,31 @@ class CustomerSheetViewModelTest {
                 SelectPaymentMethod::class.java
             )
         }
+    }
+
+    @Test
+    fun `LPM repository is initialized with the necessary payment methods`() {
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = CustomerSheetTestHelper.application.resources,
+                isFinancialConnectionsAvailable = { true },
+            ),
+            lpmInitialFormData = LpmRepository.LpmInitialFormData()
+        )
+
+        var card = lpmRepository.fromCode("card")
+        assertThat(card).isNull()
+
+        // createViewModel by default initializes a FormViewModel, which requires a valid LpmRepository
+        // initialized with supported payment methods. We are passing in a mocked provider that doesn't
+        // initialize a FormViewModel
+        createViewModel(
+            lpmRepository = lpmRepository,
+            formViewModelSubcomponentBuilderProvider = mock()
+        )
+
+        card = lpmRepository.fromCode("card")
+        assertThat(card).isNotNull()
     }
 
     @Test
