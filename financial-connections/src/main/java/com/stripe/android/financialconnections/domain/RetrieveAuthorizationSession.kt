@@ -17,7 +17,7 @@ internal class RetrieveAuthorizationSession @Inject constructor(
     ): FinancialConnectionsAuthorizationSession {
         return repository.retrieveAuthorizationSession(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
-            sessionId = authorizationSessionId
+            sessionId = authorizationSessionId,
         ).also { coordinator().emit(Message.ClearPartnerWebAuth) }
     }
 }

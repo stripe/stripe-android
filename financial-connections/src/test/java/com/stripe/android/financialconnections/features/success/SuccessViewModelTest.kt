@@ -7,7 +7,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -89,7 +89,7 @@ internal class SuccessViewModelTest {
         nativeAuthFlowCoordinator().test {
             buildViewModel(SuccessState())
             assertThat(eventTracker.sentEvents).containsExactly(
-                FinancialConnectionsEvent.PaneLoaded(
+                PaneLoaded(
                     pane = Pane.SUCCESS,
                 )
             )

@@ -21,7 +21,7 @@ internal class SynchronizeFinancialConnectionsSession @Inject constructor(
     suspend operator fun invoke(): SynchronizeSessionResponse {
         return financialConnectionsRepository.synchronizeFinancialConnectionsSession(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
-            applicationId = applicationId
+            applicationId = applicationId,
         )
     }
 }

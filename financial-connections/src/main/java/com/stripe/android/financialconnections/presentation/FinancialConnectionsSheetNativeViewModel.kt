@@ -12,14 +12,17 @@ import com.airbnb.mvrx.PersistState
 import com.airbnb.mvrx.ViewModelContext
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AppBackgrounded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarBack
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarClose
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Complete
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLaunched
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.AppBackgrounded
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickNavBarBack
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickNavBarClose
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLaunched
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
@@ -32,8 +35,11 @@ import com.stripe.android.financialconnections.exception.CustomManualEntryRequir
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
+import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
@@ -244,35 +250,49 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             runCatching {
                 val session = completeFinancialConnectionsSession(earlyTerminationCause?.value)
                 eventTracker.track(
-                    FinancialConnectionsEvent.Complete(
+                    Complete(
                         exception = null,
                         exceptionExtraMessage = null,
                         connectedAccounts = session.accounts.data.count()
                     )
                 )
                 when {
-                    session.isCustomManualEntryError() -> finishWithResult(
-                        Failed(error = CustomManualEntryRequiredError())
-                    )
-
-                    session.hasAValidAccount() -> finishWithResult(
-                        FinancialConnectionsSheetActivityResult.Completed(
-                            financialConnectionsSession = session,
-                            token = session.parsedToken
+                    session.isCustomManualEntryError() -> {
+                        FinancialConnections.emitEvent(Name.MANUAL_ENTRY_INITIATED)
+                        finishWithResult(
+                            Failed(error = CustomManualEntryRequiredError())
                         )
-                    )
+                    }
+
+                    session.hasAValidAccount() -> {
+                        FinancialConnections.emitEvent(
+                            name = Name.SUCCESS,
+                            metadata = Metadata(
+                                manualEntry = session.paymentAccount is BankAccount,
+                            )
+                        )
+                        finishWithResult(
+                            Completed(
+                                financialConnectionsSession = session,
+                                token = session.parsedToken
+                            )
+                        )
+                    }
 
                     closeAuthFlowError != null -> finishWithResult(
                         Failed(error = closeAuthFlowError)
                     )
 
-                    else -> finishWithResult(FinancialConnectionsSheetActivityResult.Canceled)
+                    else -> {
+                        FinancialConnections.emitEvent(Name.CANCEL)
+                        finishWithResult(Canceled)
+                    }
                 }
             }.onFailure { completeSessionError ->
                 val errorMessage = "Error completing session before closing"
                 logger.error(errorMessage, completeSessionError)
                 eventTracker.track(
-                    FinancialConnectionsEvent.Complete(
+                    Complete(
                         exception = completeSessionError,
                         exceptionExtraMessage = errorMessage,
                         connectedAccounts = null
