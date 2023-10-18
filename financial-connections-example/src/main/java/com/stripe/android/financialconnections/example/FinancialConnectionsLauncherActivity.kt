@@ -57,6 +57,10 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
                 FinancialConnectionsDataExampleActivity::class.java
             ),
             Item(
+                activity.getString(R.string.collect_bank_account_for_data_java),
+                FinancialConnectionsDataExampleActivityJava::class.java
+            ),
+            Item(
                 activity.getString(R.string.collect_bank_account_for_bank_account_token),
                 FinancialConnectionsBankAccountTokenExampleActivity::class.java
             ),

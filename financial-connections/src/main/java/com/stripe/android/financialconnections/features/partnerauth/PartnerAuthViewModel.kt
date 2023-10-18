@@ -6,13 +6,18 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Launched
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Loaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AuthSessionOpened
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AuthSessionRetrieved
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AuthSessionUrlReceived
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PrepaneClickContinue
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PrepaneClickContinue
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
@@ -167,7 +172,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 it.browserReadyUrl()?.let { url ->
                     setState { copy(viewEffect = OpenPartnerAuth(url)) }
                     eventTracker.track(
-                        FinancialConnectionsEvent.AuthSessionOpened(
+                        AuthSessionOpened(
                             id = it.id,
                             pane = PANE,
                             flow = it.flow,
@@ -240,7 +245,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         kotlin.runCatching {
             val authSession = getOrFetchSync().manifest.activeAuthSession
             eventTracker.track(
-                FinancialConnectionsEvent.AuthSessionUrlReceived(
+                AuthSessionUrlReceived(
                     url = url,
                     authSessionId = authSession?.id,
                     status = "failed"
@@ -278,7 +283,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             val manifest = getOrFetchSync().manifest
             val authSession = manifest.activeAuthSession
             eventTracker.track(
-                FinancialConnectionsEvent.AuthSessionUrlReceived(
+                AuthSessionUrlReceived(
                     url = url ?: "none",
                     authSessionId = authSession?.id,
                     status = "cancelled"
@@ -292,7 +297,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 val retrievedAuthSession = retrieveAuthorizationSession(authSession.id)
                 val nextPane = retrievedAuthSession.nextPane
                 eventTracker.track(
-                    FinancialConnectionsEvent.AuthSessionRetrieved(
+                    AuthSessionRetrieved(
                         authSessionId = retrievedAuthSession.id,
                         nextPane = nextPane
                     )
@@ -356,7 +361,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             setState { copy(authenticationStatus = AuthStatus.Completing) }
             val authSession = getOrFetchSync().manifest.activeAuthSession
             eventTracker.track(
-                FinancialConnectionsEvent.AuthSessionUrlReceived(
+                AuthSessionUrlReceived(
                     url = url,
                     authSessionId = authSession?.id,
                     status = "success"
@@ -364,7 +369,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
             requireNotNull(authSession)
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
-            if (authSession.isOAuth) {
+            val nextPane = if (authSession.isOAuth) {
                 logger.debug("Web AuthFlow completed! waiting for oauth results")
                 val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
                 logger.debug("OAuth results received! completing session")
@@ -373,18 +378,12 @@ internal class PartnerAuthViewModel @Inject constructor(
                     publicToken = oAuthResults.publicToken
                 )
                 logger.debug("Session authorized!")
-                navigationManager.tryNavigateTo(
-                    updatedSession.nextPane.destination(referrer = PANE),
-                    popUpToCurrent = true,
-                    inclusive = true
-                )
+                updatedSession.nextPane.destination(referrer = PANE)
             } else {
-                navigationManager.tryNavigateTo(
-                    AccountPicker(referrer = PANE),
-                    popUpToCurrent = true,
-                    inclusive = true
-                )
+                AccountPicker(referrer = PANE)
             }
+            FinancialConnections.emitEvent(Name.INSTITUTION_AUTHORIZED)
+            navigationManager.tryNavigateTo(nextPane)
         }.onFailure {
             eventTracker.logError(
                 extraMessage = "failed authorizing session",
@@ -405,12 +404,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     // if clicked uri contains an eventName query param, track click event.
     fun onClickableTextClick(uri: String) = viewModelScope.launch {
         uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
-            eventTracker.track(
-                FinancialConnectionsEvent.Click(
-                    eventName,
-                    pane = PANE
-                )
-            )
+            eventTracker.track(Click(eventName, pane = PANE))
         }
         if (URLUtil.isNetworkUrl(uri)) {
             setState {

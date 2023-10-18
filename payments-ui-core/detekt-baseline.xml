@@ -8,7 +8,6 @@
     <ID>CyclomaticComplexMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod( stripeIntent: StripeIntent, sharedDataSpec: SharedDataSpec, billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration, )</ID>
     <ID>CyclomaticComplexMethod:TransformGoogleToStripeAddress.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Place.transformGoogleToStripeAddress( context: Context ): com.stripe.android.model.Address</ID>
     <ID>CyclomaticComplexMethod:TransformSpecToElements.kt$TransformSpecToElements$fun transform(list: List&lt;FormItemSpec>): List&lt;FormElement></ID>
-    <ID>EmptyFunctionBlock:CardNumberViewOnlyController.kt$CardNumberViewOnlyController${}</ID>
     <ID>ForbiddenComment:Menu.kt$// TODO: Make sure this gets the rounded corner values</ID>
     <ID>LongMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod( stripeIntent: StripeIntent, sharedDataSpec: SharedDataSpec, billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration, )</ID>
     <ID>LongMethod:Menu.kt$@Suppress("ModifierParameter") @Composable internal fun DropdownMenuContent( expandedStates: MutableTransitionState&lt;Boolean>, transformOriginState: MutableState&lt;TransformOrigin>, initialFirstVisibleItemIndex: Int, modifier: Modifier = Modifier, content: LazyListScope.() -> Unit )</ID>
@@ -21,7 +20,6 @@
     <ID>MagicNumber:AfterpayClearpayHeaderElement.kt$AfterpayClearpayHeaderElement$4</ID>
     <ID>MagicNumber:CardDetailsElement.kt$2000</ID>
     <ID>MagicNumber:CardDetailsElement.kt$4</ID>
-    <ID>MagicNumber:CardNumberController.kt$CardNumberEditableController$3</ID>
     <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$14</ID>
     <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$15</ID>
     <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$16</ID>
