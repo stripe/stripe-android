@@ -11,8 +11,8 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate.EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
 import com.stripe.android.financialconnections.model.ManualEntryMode
@@ -59,7 +59,7 @@ class ManualEntryViewModelTest {
         nativeAuthFlowCoordinator().test {
             val viewModel = buildViewModel()
             assertEquals(
-                expected = Terminate(USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY),
+                expected = Complete(USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY),
                 actual = awaitItem(),
             )
             withState(viewModel) {
