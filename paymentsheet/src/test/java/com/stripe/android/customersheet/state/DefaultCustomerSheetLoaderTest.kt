@@ -10,6 +10,7 @@ import com.stripe.android.customersheet.CustomerSheetState
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
+import com.stripe.android.customersheet.utils.CustomerSheetTestHelper
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -137,12 +138,107 @@ class DefaultCustomerSheetLoaderTest {
         )
     }
 
+    @Test
+    fun `when there is a payment selection, the selected PM should be first in the list`() = runTest {
+        val loader = createCustomerSheetLoader(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
+                    )
+                ),
+                selectedPaymentOption = CustomerAdapter.Result.success(
+                    CustomerAdapter.PaymentOption.fromId("pm_3")
+                )
+            )
+        )
+
+        val config = CustomerSheet.Configuration()
+
+        assertThat(
+            loader.load(config).getOrThrow()
+        ).isEqualTo(
+            CustomerSheetState.Full(
+                config = config,
+                stripeIntent = STRIPE_INTENT,
+                customerPaymentMethods = listOf(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                ),
+                isGooglePayReady = false,
+                paymentSelection = PaymentSelection.Saved(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3")
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `when there is no payment selection, the order of the payment methods is preserved`() = runTest {
+        val loader = createCustomerSheetLoader(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
+                    )
+                ),
+                selectedPaymentOption = CustomerAdapter.Result.success(null)
+            )
+        )
+
+        val config = CustomerSheet.Configuration()
+
+        assertThat(
+            loader.load(config).getOrThrow()
+        ).isEqualTo(
+            CustomerSheetState.Full(
+                config = config,
+                stripeIntent = STRIPE_INTENT,
+                customerPaymentMethods = listOf(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
+                ),
+                isGooglePayReady = false,
+                paymentSelection = null,
+            )
+        )
+    }
+
+    @Test
+    fun `LPM repository is initialized with the necessary payment methods`() = runTest {
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = CustomerSheetTestHelper.application.resources,
+                isFinancialConnectionsAvailable = { true },
+            ),
+            lpmInitialFormData = LpmRepository.LpmInitialFormData()
+        )
+
+        var card = lpmRepository.fromCode("card")
+        assertThat(card).isNull()
+
+        val loader = createCustomerSheetLoader(
+            lpmRepository = lpmRepository,
+        )
+        loader.load(CustomerSheet.Configuration())
+
+        card = lpmRepository.fromCode("card")
+        assertThat(card).isNotNull()
+    }
+
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
         stripeIntent: StripeIntent = STRIPE_INTENT,
         error: Throwable? = null,
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
+        lpmRepository: LpmRepository = this.lpmRepository,
     ): CustomerSheetLoader {
         return DefaultCustomerSheetLoader(
             isLiveModeProvider = isLiveModeProvider,
