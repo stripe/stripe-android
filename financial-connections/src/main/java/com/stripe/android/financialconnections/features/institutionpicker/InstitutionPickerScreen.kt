@@ -105,7 +105,7 @@ internal fun InstitutionPickerScreen() {
         onQueryChanged = viewModel::onQueryChanged,
         onInstitutionSelected = viewModel::onInstitutionSelected,
         onCancelSearchClick = viewModel::onCancelSearchClick,
-        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.INSTITUTION_PICKER) },
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.INSTITUTION_PICKER) },
         onSearchFocused = viewModel::onSearchFocused,
         onManualEntryClick = viewModel::onManualEntryClick,
         onScrollChanged = viewModel::onScrollChanged
