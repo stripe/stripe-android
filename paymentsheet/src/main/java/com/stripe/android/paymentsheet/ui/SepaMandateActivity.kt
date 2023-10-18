@@ -10,17 +10,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.stripeColors
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -53,6 +59,9 @@ internal class SepaMandateActivity : AppCompatActivity() {
                             setResult(RESULT_OK, result)
                             finish()
                         },
+                        closeCallback = {
+                            finish()
+                        }
                     )
                 }
             }
@@ -64,30 +73,51 @@ internal class SepaMandateActivity : AppCompatActivity() {
 internal fun SepaMandateScreen(
     merchantName: String,
     acknowledgedCallback: () -> Unit,
+    closeCallback: () -> Unit,
 ) {
     Column(
         modifier = Modifier
             .background(MaterialTheme.colors.surface)
-            .padding(16.dp)
     ) {
-        Text(
-            text = stringResource(
-                id = StripeUiCoreR.string.stripe_sepa_mandate,
-                merchantName
-            ),
-            style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
-        )
-        Button(
-            onClick = acknowledgedCallback,
+        IconButton(
+            onClick = closeCallback,
             modifier = Modifier
-                .fillMaxWidth()
-                .testTag("SEPA_MANDATE_CONTINUE_BUTTON"),
+                .testTag("SEPA_MANDATE_CLOSE_BUTTON")
         ) {
+            Icon(
+                painter = painterResource(R.drawable.stripe_ic_paymentsheet_close),
+                contentDescription = stringResource(R.string.stripe_paymentsheet_close),
+                tint = MaterialTheme.stripeColors.appBarIcon,
+            )
+        }
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp)
+        ) {
+            H4Text(
+                text = stringResource(id = StripeUiCoreR.string.stripe_paymentsheet_payment_method_sepa_debit),
+            )
             Text(
                 text = stringResource(
-                    id = StripeUiCoreR.string.stripe_continue_button_label
+                    id = StripeUiCoreR.string.stripe_sepa_mandate,
+                    merchantName
                 ),
+                style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
+                modifier = Modifier.padding(vertical = 16.dp)
             )
+            Button(
+                onClick = acknowledgedCallback,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("SEPA_MANDATE_CONTINUE_BUTTON"),
+            ) {
+                Text(
+                    text = stringResource(
+                        id = StripeUiCoreR.string.stripe_continue_button_label
+                    ),
+                )
+            }
         }
     }
 }

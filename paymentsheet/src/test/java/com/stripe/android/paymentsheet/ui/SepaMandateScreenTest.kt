@@ -17,15 +17,33 @@ internal class SepaMandateScreenTest {
     val composeRule = createComposeRule()
 
     @Test
-    fun testClick() {
+    fun testContinueClick() {
         val clickCountDownLatch = CountDownLatch(1)
         composeRule.setContent {
-            SepaMandateScreen(merchantName = "Example, Inc.") {
-                clickCountDownLatch.countDown()
-            }
+            SepaMandateScreen(
+                merchantName = "Example, Inc.",
+                acknowledgedCallback = { clickCountDownLatch.countDown() },
+                closeCallback = { throw AssertionError("No expected") },
+            )
         }
 
         composeRule.onNode(hasTestTag("SEPA_MANDATE_CONTINUE_BUTTON")).performClick()
+
+        assertThat(clickCountDownLatch.await(1, TimeUnit.SECONDS)).isTrue()
+    }
+
+    @Test
+    fun testCloseClick() {
+        val clickCountDownLatch = CountDownLatch(1)
+        composeRule.setContent {
+            SepaMandateScreen(
+                merchantName = "Example, Inc.",
+                acknowledgedCallback = { throw AssertionError("No expected") },
+                closeCallback = { clickCountDownLatch.countDown() },
+            )
+        }
+
+        composeRule.onNode(hasTestTag("SEPA_MANDATE_CLOSE_BUTTON")).performClick()
 
         assertThat(clickCountDownLatch.await(1, TimeUnit.SECONDS)).isTrue()
     }

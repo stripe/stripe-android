@@ -20,7 +20,8 @@ internal class SepaMandateScreenSnapshotTest {
         paparazziRule.snapshot {
             SepaMandateScreen(
                 merchantName = "Example, Inc.",
-                acknowledgedCallback = {}
+                acknowledgedCallback = {},
+                closeCallback = {},
             )
         }
     }
