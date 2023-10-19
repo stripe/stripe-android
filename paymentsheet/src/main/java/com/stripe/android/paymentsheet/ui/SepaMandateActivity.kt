@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
@@ -20,6 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.paymentsheet.R
@@ -43,6 +45,8 @@ internal class SepaMandateActivity : AppCompatActivity() {
             finish()
             return
         }
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             StripeTheme {
@@ -110,6 +114,7 @@ internal fun SepaMandateScreen(
                 onClick = acknowledgedCallback,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(48.dp)
                     .testTag("SEPA_MANDATE_CONTINUE_BUTTON"),
             ) {
                 Text(
