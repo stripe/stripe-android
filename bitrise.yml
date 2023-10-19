@@ -95,9 +95,6 @@ workflows:
     before_run:
       - prepare_all
     steps:
-      - wait-for-android-emulator@1:
-          inputs:
-            - boot_timeout: 600
       - android-build@1:
           inputs:
             - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
@@ -126,6 +123,9 @@ workflows:
     after_run:
       - conclude_all
     steps:
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
       - cache-pull@2: {}
       - script@1:
           title: Execute Maestro tests 1
@@ -146,6 +146,9 @@ workflows:
     after_run:
       - conclude_all
     steps:
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
       - cache-pull@2: { }
       - script@1:
           title: Execute Maestro tests 1
