@@ -116,6 +116,10 @@ workflows:
       - build-router-start@0.11.3:
           inputs:
             - workflows: maestro-financial-connections-native,maestro-financial-connections-web
+            - access_token: $BITRISE_ACCESS_TOKEN
+      - build-router-wait@0:
+          inputs:
+            - access_token: $BITRISE_ACCESS_TOKEN
   maestro-financial-connections-native:
     before_run:
       - start_emulator
