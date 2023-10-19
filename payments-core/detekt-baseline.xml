@@ -36,6 +36,7 @@
     <ID>LargeClass:StripeApiRepository.kt$StripeApiRepository : StripeRepository</ID>
     <ID>LargeClass:StripeApiRepositoryTest.kt$StripeApiRepositoryTest</ID>
     <ID>LargeClass:StripeKtxTest.kt$StripeKtxTest</ID>
+    <ID>LongMethod:CardBrandView.kt$@Composable private fun CardBrand( isLoading: Boolean, currentBrand: CardBrand, possibleBrands: List&lt;CardBrand>, shouldShowCvc: Boolean, shouldShowErrorIcon: Boolean, tintColorInt: Int, isCbcEligible: Boolean, modifier: Modifier = Modifier, onBrandSelected: (CardBrand?) -> Unit, )</ID>
     <ID>LongMethod:CardFormView.kt$CardFormView$private fun setupCardWidget()</ID>
     <ID>LongMethod:CardFormViewTest.kt$CardFormViewTest$@Test fun testCardValidCallback()</ID>
     <ID>LongMethod:CardInputWidget.kt$CardInputWidget$private fun initView(attrs: AttributeSet?)</ID>
