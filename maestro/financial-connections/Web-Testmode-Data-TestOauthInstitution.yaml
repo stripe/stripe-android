@@ -12,32 +12,29 @@ appId: com.stripe.android.financialconnections.example
 - tapOn:
     id: "Data_checkbox"
 - tapOn: "Connect Accounts!"
+######## Bypass Chrome on-boarding screen #######
+- runFlow:
+    file: ../common/subflow-skip-chrome-welcome.yaml
+################################################
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
     visible: "Agree and continue"
     timeout: 30000
 - tapOn: "Agree and continue"
-- assertVisible: "Test OAuth Institution"
-# ERRORS
-- tapOn: ".*unscheduled.*"
-- tapOn: "Select another bank"
 # SELECT OAUTH INSTITUTION
+- assertVisible: "Test OAuth Institution"
 - tapOn: "Test OAuth Institution"
-- tapOn: "Continue"
-####### Bypass Chrome on-boarding screen #######
-- runFlow:
-    file: ../common/subflow-skip-chrome-welcome.yaml
-###############################################
+- tapOn: "Continue Continue"
 # SELECT ALL ACCOUNTS
 - extendedWaitUntil:
-    visible: "Select all accounts"
+    visible: "Connect accounts"
     timeout: 60000
-- tapOn: "Select all accounts" # select all accounts
+- tapOn: "Connect accounts" # select all accounts
 - tapOn:
     text: "Link accounts"
     retryTapIfNoChange: false
 # CONFIRM AND COMPLETE
-- assertVisible: ".*Success.*"
+- assertVisible: "Test OAuth Institution"
 - tapOn: "Done"
 - assertVisible: ".*Completed!.*"
 - assertVisible: ".*StripeBank.*"

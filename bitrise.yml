@@ -93,10 +93,7 @@ workflows:
       - deploy-to-bitrise-io@2: { }
   maestro-edge-financial-connections:
     before_run:
-      - start_emulator
       - prepare_all
-    after_run:
-      - conclude_all
     steps:
       - wait-for-android-emulator@1:
           inputs:
@@ -108,21 +105,59 @@ workflows:
             - variant: debug
             - build_type: apk
             - cache_level: all
+      - deploy-to-bitrise-io@2: {}
       - script@1:
-          title: Execute Maestro tests
+          title: Rename APK
           inputs:
             - content: |-
-                #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh
-      - slack@3:
-          is_always_run: true
+                #!/usr/bin/env bash  
+                mv $BITRISE_DEPLOY_DIR/financial-connections-example-debug.apk $BITRISE_DEPLOY_DIR/financial-connections-example.apk
+      - cache-push@2:
           inputs:
-            - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-            - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+            - cache_paths: |-
+                $BITRISE_DEPLOY_DIR/financial-connections-example-debug.apk
+      - build-router-start@0.11.3:
+          inputs:
+            - workflows: maestro-financial-connections-native,maestro-financial-connections-web
+  maestro-financial-connections-native:
+    before_run:
+      - start_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - cache-pull@2: {}
+      - script@1:
+          title: Execute Maestro tests 1
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash  
+                export BITRISE_APK_PATH="$BITRISE_DEPLOY_DIR/financial-connections-example.apk"  
+                bash ./scripts/execute_maestro_tests.sh
       - custom-test-results-export@1:
           inputs:
-            - search_pattern: '*/maestroReport.xml'
-            - test_name: Maestro tests
+            - search_pattern: '*/maestroReportNative.xml'
+            - test_name: Maestro tests native
+      - deploy-to-bitrise-io@2: { }
+  maestro-financial-connections-web:
+    before_run:
+      - start_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - cache-pull@2: { }
+      - script@1:
+          title: Execute Maestro tests 1
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash  
+                export BITRISE_APK_PATH="$BITRISE_DEPLOY_DIR/financial-connections-example.apk"  
+                bash ./scripts/execute_maestro_tests.sh
+      - custom-test-results-export@1:
+          inputs:
+            - search_pattern: '*/maestroReportWeb.xml'
+            - test_name: Maestro tests web
       - deploy-to-bitrise-io@2: { }
   maestro-paymentsheet:
     before_run:
