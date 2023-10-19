@@ -115,11 +115,13 @@ workflows:
                 $BITRISE_DEPLOY_DIR/financial-connections-example-debug.apk
       - build-router-start@0.14.6:
           inputs:
-            - workflows: maestro-financial-connections-native,maestro-financial-connections-web
-            - access_token: "$BITRISE_ACCESS_TOKEN"
+            - workflows: |-
+                maestro-financial-connections-native
+                maestro-financial-connections-web
+            - access_token: ${{ secrets.BITRISE_ACCESS_TOKEN }}
       - build-router-wait@0:
           inputs:
-            - access_token: "$BITRISE_ACCESS_TOKEN"
+            - access_token: ${{ secrets.BITRISE_ACCESS_TOKEN }}
   maestro-financial-connections-native:
     before_run:
       - start_emulator
