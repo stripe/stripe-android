@@ -19,7 +19,7 @@ fun MandateTextUI(
 ) {
     Text(
         text = stringResource(element.stringResId, *element.args.toTypedArray()),
-        style = MaterialTheme.typography.body2.copy(textAlign = TextAlign.Center),
+        style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
         color = MaterialTheme.stripeColors.subtitle,
         modifier = Modifier
             .padding(vertical = 8.dp)
