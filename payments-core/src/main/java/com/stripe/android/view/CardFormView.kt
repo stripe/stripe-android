@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
@@ -137,8 +138,16 @@ class CardFormView @JvmOverloads constructor(
             val expirationDate =
                 requireNotNull(cardMultilineWidget.expiryDateEditText.validatedDate)
 
+            val cardBrand = selectCardBrandToDisplay(
+                userSelectedBrand = brand.takeUnless { it == CardBrand.Unknown },
+                possibleBrands = cardMultilineWidget.cardBrandView.possibleBrands,
+                merchantPreferredBrands = emptyList(),
+            )
+
+            val cardNumber = cardMultilineWidget.validatedCardNumber
+
             return CardParams(
-                brand = cardMultilineWidget.brand,
+                brand = cardBrand ?: CardBrand.fromCardNumber(cardNumber?.value),
                 loggingTokens = setOf(CARD_FORM_VIEW),
                 number = cardMultilineWidget.validatedCardNumber?.value.orEmpty(),
                 expMonth = expirationDate.month,
@@ -301,8 +310,16 @@ class CardFormView @JvmOverloads constructor(
             resources.getDimensionPixelSize(R.dimen.stripe_card_form_view_text_margin_horizontal)
         val layoutMarginVertical =
             resources.getDimensionPixelSize(R.dimen.stripe_card_form_view_text_margin_vertical)
+
+        cardMultilineWidget.cardNumberTextInputLayout.updateLayoutParams<FrameLayout.LayoutParams> {
+            marginStart = layoutMarginHorizontal
+            marginEnd = layoutMarginHorizontal
+            topMargin = layoutMarginVertical
+            bottomMargin = layoutMarginVertical
+        }
+
         setOf(
-            cardMultilineWidget.cardNumberTextInputLayout,
+//            cardMultilineWidget.cardNumberTextInputLayout,
             cardMultilineWidget.expiryTextInputLayout,
             cardMultilineWidget.cvcInputLayout
         ).forEach { layout ->

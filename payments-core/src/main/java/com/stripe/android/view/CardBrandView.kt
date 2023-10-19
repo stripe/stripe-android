@@ -5,6 +5,7 @@ import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -62,6 +63,7 @@ internal class CardBrandView @JvmOverloads constructor(
     @Parcelize
     internal data class State(
         val isCbcEligible: Boolean = false,
+        val reserveSpaceForCbcDropdown: Boolean = true,
         val isLoading: Boolean = false,
         val brand: CardBrand = Unknown,
         val userSelectedBrand: CardBrand? = null,
@@ -136,6 +138,12 @@ internal class CardBrandView @JvmOverloads constructor(
             stateFlow.update { it.copy(tintColor = value) }
         }
 
+    internal var reserveSpaceForCbcDropdown: Boolean
+        get() = state.reserveSpaceForCbcDropdown
+        set(value) {
+            stateFlow.update { it.copy(reserveSpaceForCbcDropdown = value) }
+        }
+
     init {
         isClickable = false
         isFocusable = false
@@ -161,6 +169,7 @@ internal class CardBrandView @JvmOverloads constructor(
                     shouldShowErrorIcon = state.shouldShowErrorIcon,
                     tintColorInt = state.tintColor,
                     isCbcEligible = state.isCbcEligible,
+                    reserveSpaceForCbcDropdown = state.reserveSpaceForCbcDropdown,
                     onBrandSelected = this::handleBrandSelected,
                 )
             }
@@ -219,6 +228,7 @@ private fun CardBrand(
     shouldShowErrorIcon: Boolean,
     tintColorInt: Int,
     isCbcEligible: Boolean,
+    reserveSpaceForCbcDropdown: Boolean,
     modifier: Modifier = Modifier,
     onBrandSelected: (CardBrand?) -> Unit,
 ) {
@@ -274,6 +284,18 @@ private fun CardBrand(
                     .requiredSize(8.dp)
                     .graphicsLayer { alpha = dropdownIconAlpha },
             )
+
+            AnimatedVisibility(visible = showDropdown || reserveSpaceForCbcDropdown) {
+                Spacer(modifier = Modifier.requiredWidth(1.dp))
+
+                Image(
+                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_chevron_down),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .requiredSize(8.dp)
+                        .graphicsLayer { alpha = dropdownIconAlpha },
+                )
+            }
         }
 
         if (showDropdown) {
