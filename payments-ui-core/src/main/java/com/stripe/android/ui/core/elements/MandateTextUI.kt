@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.stripeColors
 
@@ -18,7 +19,7 @@ fun MandateTextUI(
 ) {
     Text(
         text = stringResource(element.stringResId, *element.args.toTypedArray()),
-        style = MaterialTheme.typography.body2,
+        style = MaterialTheme.typography.body2.copy(textAlign = TextAlign.Center),
         color = MaterialTheme.stripeColors.subtitle,
         modifier = Modifier
             .padding(vertical = 8.dp)
