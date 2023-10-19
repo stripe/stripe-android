@@ -6,9 +6,12 @@ import androidx.core.content.edit
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -33,6 +36,10 @@ internal class PlaygroundSettings private constructor(
 
     fun snapshot(): Snapshot {
         return Snapshot(this)
+    }
+
+    fun asFlow(): Flow<PlaygroundSettings> {
+        return settings.values.merge().map { snapshot().playgroundSettings() }
     }
 
     @Stable

@@ -29,12 +29,19 @@ import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddre
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.io.IOException
+import kotlin.time.Duration.Companion.seconds
 
+private val ReloadDebounceDuration = 1.seconds
+
+@OptIn(FlowPreview::class)
 internal class PaymentSheetPlaygroundViewModel(
     application: Application,
     launchUri: Uri?,
@@ -50,9 +57,15 @@ internal class PaymentSheetPlaygroundViewModel(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            playgroundSettingsFlow.value =
-                PaymentSheetPlaygroundUrlHelper.settingsFromUri(launchUri)
-                    ?: PlaygroundSettings.createFromSharedPreferences(application)
+            val settings = PaymentSheetPlaygroundUrlHelper.settingsFromUri(launchUri)
+                ?: PlaygroundSettings.createFromSharedPreferences(application)
+
+            playgroundSettingsFlow.value = settings
+
+            settings
+                .asFlow()
+                .debounce(ReloadDebounceDuration)
+                .collectLatest(this@PaymentSheetPlaygroundViewModel::prepareCheckout)
         }
     }
 
