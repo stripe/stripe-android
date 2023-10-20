@@ -68,12 +68,12 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body: ${{ steps.failed-screenshots.outputs.PR_COMMENT }}
           token: ${{ secrets.GITHUB_TOKEN }}
-#       - name: Notify failure endpoint
-#         id: notifyFailureEndpoint
-#         if: failure()
-#         run: |
-#           ./scripts/notify_failure_endpoint.rb \
-#           ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
-#           ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
-#           "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}" \
-#           RUN_MOBILESDK
+      - name: Notify failure endpoint
+        id: notifyFailureEndpoint
+        if: failure()
+        run: |
+          ./scripts/notify_failure_endpoint.rb \
+          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
+          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
+          "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}" \
+          RUN_MOBILESDK
