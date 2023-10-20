@@ -284,7 +284,7 @@ private fun SavedPaymentMethod(
         isEditing = isEditing,
         isSelected = isSelected,
         isEnabled = isEnabled,
-        iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
+        iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(),
         labelIcon = labelIcon,
         labelText = labelText,
         removePmDialogTitle = removeTitle,
