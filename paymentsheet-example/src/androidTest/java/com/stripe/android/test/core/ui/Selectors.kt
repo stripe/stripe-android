@@ -91,6 +91,18 @@ internal class Selectors(
         device.waitForIdle()
     }
 
+    fun blockUntilUSBankAccountPageLoaded() {
+        assertThat(
+            device.wait(
+                Until.findObject(
+                    By.textContains("Agree and continue")
+                ),
+                HOOKS_PAGE_LOAD_TIMEOUT * 1000
+            )
+        ).isNotNull()
+        device.waitForIdle()
+    }
+
     fun getInstalledBrowsers() = getInstalledPackages()
         .mapNotNull {
             when (it.packageName) {

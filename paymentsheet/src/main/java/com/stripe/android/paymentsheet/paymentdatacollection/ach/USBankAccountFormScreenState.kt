@@ -13,7 +13,7 @@ internal sealed class USBankAccountFormScreenState(
     abstract val mandateText: String?
 
     @Parcelize
-    data class BillingDetailsCollection(
+    class BillingDetailsCollection(
         @StringRes override val error: Int? = null,
         override val primaryButtonText: String,
     ) : USBankAccountFormScreenState() {
