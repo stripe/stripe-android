@@ -19,6 +19,8 @@
   <string name="stripe_check_mark">Check mark to indicate document capture success</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Choose Photo</string>
+  <!-- Close button text -->
+  <string name="stripe_close_button_text">close</string>
   <!-- Button to complete with test data -->
   <string name="stripe_complete_with_test_data">Complete with test data</string>
   <!-- Description for complete button on test mode -->
@@ -35,12 +37,26 @@
   <string name="stripe_description_clock">Clock icon</string>
   <!-- Content description for close button -->
   <string name="stripe_description_close">close verification page</string>
+  <!-- Content description for cloud icon -->
+  <string name="stripe_description_cloud">cloud icon</string>
+  <!-- Content description for create_identity_verification icon -->
+  <string name="stripe_description_create_identity_verification">create_identity_verification icon</string>
+  <!-- Content description for dispute_protection icon -->
+  <string name="stripe_description_dispute_protection">dispute_protection icon</string>
+  <!-- Content description for document icon -->
+  <string name="stripe_description_document">document icon</string>
   <!-- Content description for exclamation icon -->
   <string name="stripe_description_exclamation">exclamation icon</string>
   <!-- Content description for back button -->
   <string name="stripe_description_go_back">go back to the previous screen</string>
+  <!-- Content description for lock icon -->
+  <string name="stripe_description_lock">lock icon</string>
   <!-- Content description for merchant logo -->
   <string name="stripe_description_merchant_logo">merchant logo</string>
+  <!-- Content description for moved icon -->
+  <string name="stripe_description_moved">moved icon</string>
+  <!-- Content description for phone icon -->
+  <string name="stripe_description_phone">phone icon</string>
   <!-- Content description for plus icon -->
   <string name="stripe_description_plus">plus icon</string>
   <!-- Content description for the icon for privacy policy -->
@@ -49,6 +65,8 @@
   <string name="stripe_description_stripe_logo">stripe logo</string>
   <!-- Content description for the icon for estimated time to complete verification -->
   <string name="stripe_description_time_estimate">estimated time to complete verification icon</string>
+  <!-- Content description for wallet icon -->
+  <string name="stripe_description_wallet">wallet icon</string>
   <!-- Label for Date of birth field -->
   <string name="stripe_dob">Date of birth</string>
   <!-- Label of the driver's license option for document type selection -->

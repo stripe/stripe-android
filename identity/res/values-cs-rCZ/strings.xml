@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Zaškrtávací políčko k označení úspěšného zachycení dokumentu</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Zvolte fotku</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Dokončit se zkušebními daty</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Ušetřete čas výběrem požadovaného výsledku a jeho okamžitým dokončením. Tok mobilního SDK se vrátí s výsledkem Dokončeno.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Nepodařilo se nám pořídit vysoce kvalitní snímek.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Můžete to zkusit znovu nebo nahrát obrázek ze svého zařízení.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Nebylo možné pořídit obrázek</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">ikona kamery</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Ikona hodin</string>
   <!-- Content description for close button -->
@@ -129,12 +135,22 @@
   <string name="stripe_selfie_item_description">pořízeno jedno selfie</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Vaše selfie snímky nebyly uloženy. Chcete skutečně skončit?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">V dalším kroku se automaticky pořídí několik fotografií, aby se ověřilo, že jste to vy.</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Připravte se na pořízení selfie</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Pořídit fotku</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Tato stránka se zobrazuje pouze v testovacím režimu.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Aktuálně se nacházíte ve zkušebním režimu</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Zkusit znovu</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Došlo k neočekávané chybě -- zkuste to znovu za několik sekund</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Nahrát fotografii</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Nahrát zadní stranu řidičského průkazu</string>
   <!-- Title of dialog to upload front of driver license -->

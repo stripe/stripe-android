@@ -12,9 +12,20 @@ public final class com/stripe/android/financialconnections/ComposableSingletons$
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/financialconnections/FinancialConnections {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/FinancialConnections;
+	public static final fun clearEventListener ()V
+	public static final fun setEventListener (Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEventListener;)V
+}
+
 public final class com/stripe/android/financialconnections/FinancialConnectionsSheet {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Companion;
+	public static final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
+	public static final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
+	public static final fun createForBankAccountToken (Landroidx/activity/ComponentActivity;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultForTokenCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
+	public static final fun createForBankAccountToken (Landroidx/fragment/app/Fragment;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultForTokenCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
 	public final fun present (Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;)V
 }
 
@@ -203,6 +214,74 @@ public abstract interface class com/stripe/android/financialconnections/Financia
 
 public abstract interface class com/stripe/android/financialconnections/FinancialConnectionsSheetResultForTokenCallback {
 	public abstract fun onFinancialConnectionsSheetResult (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult;)V
+}
+
+public final class com/stripe/android/financialconnections/analytics/FinancialConnectionsEvent {
+	public static final field $stable I
+	public final fun component1 ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public final fun component2 ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;
+	public final fun copy (Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;)Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent;
+	public static synthetic fun copy$default (Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;ILjava/lang/Object;)Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMetadata ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;
+	public final fun getName ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode : java/lang/Enum {
+	public static final field ACCOUNTS_UNAVAILABLE Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field ACCOUNT_NUMBERS_UNAVAILABLE Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field AUTHORIZATION_FAILED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field FAILED_BOT_DETECTION Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field INSTITUTION_TIMEOUT Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field INSTITUTION_UNAVAILABLE_PLANNED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field INSTITUTION_UNAVAILABLE_UNPLANNED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field NO_DEBITABLE_ACCOUNT Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field SESSION_EXPIRED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field UNEXPECTED_ERROR Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field WEB_BROWSER_UNAVAILABLE Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public final fun getValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static fun values ()[Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+}
+
+public final class com/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Boolean;
+	public final fun component3 ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;)Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;
+	public static synthetic fun copy$default (Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;ILjava/lang/Object;)Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getErrorCode ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public final fun getInstitutionName ()Ljava/lang/String;
+	public final fun getManualEntry ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public final fun toMap ()Ljava/util/Map;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name : java/lang/Enum {
+	public static final field ACCOUNTS_SELECTED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field CANCEL Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field CONSENT_ACQUIRED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field ERROR Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field FLOW_LAUNCHED_IN_BROWSER Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field INSTITUTION_AUTHORIZED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field INSTITUTION_SELECTED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field MANUAL_ENTRY_INITIATED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field OPEN Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field SEARCH_INITIATED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field SUCCESS Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public final fun getValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static fun values ()[Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+}
+
+public abstract interface class com/stripe/android/financialconnections/analytics/FinancialConnectionsEventListener {
+	public abstract fun onEvent (Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent;)V
 }
 
 public final class com/stripe/android/financialconnections/exception/AppInitializationError : com/stripe/android/core/exception/StripeException {

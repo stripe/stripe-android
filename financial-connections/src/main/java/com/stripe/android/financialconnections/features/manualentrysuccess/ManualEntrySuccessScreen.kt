@@ -59,7 +59,7 @@ internal fun ManualEntrySuccessScreen(
         microdepositVerificationMethod = Destination.ManualEntrySuccess.microdeposits(backStackEntry),
         last4 = Destination.ManualEntrySuccess.last4(backStackEntry),
         loading = completeAuthSessionAsync.value is Loading,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.MANUAL_ENTRY_SUCCESS) },
+        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.MANUAL_ENTRY_SUCCESS) },
         onDoneClick = viewModel::onSubmit
     )
 }

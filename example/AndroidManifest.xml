@@ -81,6 +81,7 @@
         <activity android:name=".activity.BlikPaymentMethodActivity"/>
         <activity android:name=".activity.RevolutPayActivity"/>
         <activity android:name=".activity.SwishExampleActivity"/>
+        <activity android:name=".activity.MobilePayExampleActivity"/>
     </application>
 
 </manifest>

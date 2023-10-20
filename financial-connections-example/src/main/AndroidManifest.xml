@@ -24,6 +24,9 @@
             android:name="com.stripe.android.financialconnections.example.FinancialConnectionsDataExampleActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name="com.stripe.android.financialconnections.example.FinancialConnectionsDataExampleActivityJava"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name="com.stripe.android.financialconnections.example.FinancialConnectionsBankAccountTokenExampleActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

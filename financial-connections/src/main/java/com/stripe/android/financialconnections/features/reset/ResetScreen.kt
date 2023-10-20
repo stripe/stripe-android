@@ -26,7 +26,7 @@ internal fun ResetScreen() {
     BackHandler(enabled = true) {}
     ResetContent(
         payload = payload.value,
-        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.RESET) },
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.RESET) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }

@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.forms.resources
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
@@ -419,7 +420,7 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `LpmRepository#initializeWithCardSpec initializes the LpmRepository with hard coded card spec`() {
+    fun `LpmRepository#initializeWithPaymentMethods initializes the LpmRepository`() {
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
@@ -428,7 +429,13 @@ class LpmRepositoryTest {
         )
 
         assertThat(lpmRepository.values()).isEmpty()
-        lpmRepository.initializeWithCardSpec()
+        lpmRepository.initializeWithPaymentMethods(
+            mapOf(
+                PaymentMethod.Type.Card.code to LpmRepository.hardcodedCardSpec(
+                    BillingDetailsCollectionConfiguration()
+                )
+            )
+        )
         val card = lpmRepository.fromCode("card")
         assertThat(card).isNotNull()
     }

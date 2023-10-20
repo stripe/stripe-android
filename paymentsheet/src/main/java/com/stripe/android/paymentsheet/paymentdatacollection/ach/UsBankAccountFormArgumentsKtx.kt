@@ -79,5 +79,5 @@ internal fun USBankAccountFormArguments.updateMandateText(
         """.trimIndent()
     }
 
-    onMandateTextChanged(updatedText)
+    onMandateTextChanged(updatedText, false)
 }

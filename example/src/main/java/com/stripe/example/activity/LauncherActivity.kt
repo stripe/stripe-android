@@ -185,6 +185,10 @@ class LauncherActivity : AppCompatActivity() {
                 activity.getString(R.string.swish_example),
                 SwishExampleActivity::class.java
             ),
+            Item(
+                activity.getString(R.string.mobilepay_example),
+                MobilePayExampleActivity::class.java
+            ),
             // This is for internal use so as not to confuse the user.
             Item(
                 "StripeImage Example",

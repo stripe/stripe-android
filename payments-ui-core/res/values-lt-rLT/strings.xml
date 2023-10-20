@@ -4,14 +4,24 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Mokėti <num_installments/> be palūkanų <installment_price/> mokėjimus naudojant <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Atgal</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Sąskaitos numeris</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">Netikslus sąskaitos numeris.</string>
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Banko sąskaita</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Suprantu, kad „Stripe“ atliks tiesioginio debeto nuskaitymus %s vardu ir patvirtinu, kad esu sąskaitos turėtojas ir vienintelis asmuo, galintis leisti atlikti debeto nuskaitymus nuo šios sąskaitos.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Identifikacinis kodas</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">SORT kodas neišsamus.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Atsiskaitymo adresas</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">BLIK kodas</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Tęsdami įgaliojate „%1$s“ nurašyti mokestį nuo jūsų „Cash App“ sąskaitos už šį mokėjimą ir būsimuosius mokėjimus pagal „%2$s“ sąlygas, kol šis įgaliojimas bus atšauktas. Galite bet kada tai pakeisti „Cash App“ nuostatose.</string>
   <!-- Title for the contact information section -->
@@ -59,10 +69,14 @@
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS tiesioginis debetas</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kortelė</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA debetas</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Patvirtindami savo mokėjimą „PayPal“ leidžiate „%s“ nuskaityti mokestį nuo jūsų „PayPal“ sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">Patvirtindami savo mokėjimą „RevolutPay“ leidžiate %s nuskaityti mokestį nuo jūsų „RevolutPay“ sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Išsaugoti vėlesniems %s mokėjimams</string>
   <!-- Button title to open camera to scan credit/debit card -->

@@ -236,7 +236,10 @@ private class FinancialConnectionsManifestRepositoryImpl(
         cachedSynchronizeSessionResponse ?: run {
             // fetch manifest and save it locally
             return requestExecutor.execute(
-                synchronizeRequest(applicationId, clientSecret),
+                synchronizeRequest(
+                    applicationId = applicationId,
+                    clientSecret = clientSecret,
+                ),
                 SynchronizeSessionResponse.serializer()
             ).also { updateCachedSynchronizeSessionResponse("get/fetch", it) }
         }
@@ -246,7 +249,11 @@ private class FinancialConnectionsManifestRepositoryImpl(
         clientSecret: String,
         applicationId: String
     ): SynchronizeSessionResponse = mutex.withLock {
-        val financialConnectionsRequest = synchronizeRequest(applicationId, clientSecret)
+        val financialConnectionsRequest =
+            synchronizeRequest(
+                applicationId = applicationId,
+                clientSecret = clientSecret,
+            )
         return requestExecutor.execute(
             financialConnectionsRequest,
             SynchronizeSessionResponse.serializer()
@@ -255,12 +262,13 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
     private fun synchronizeRequest(
         applicationId: String,
-        clientSecret: String
+        clientSecret: String,
     ): ApiRequest = apiRequestFactory.createPost(
         url = synchronizeSessionUrl,
         options = apiOptions,
         params = mapOf(
             "expand" to listOf("manifest.active_auth_session"),
+            "emit_events" to true,
             "locale" to locale.toLanguageTag(),
             "mobile" to mapOf(
                 PARAMS_FULLSCREEN to true,
@@ -365,7 +373,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
             options = apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "emit_events" to true
             )
         ),
         FinancialConnectionsAuthorizationSession.serializer()

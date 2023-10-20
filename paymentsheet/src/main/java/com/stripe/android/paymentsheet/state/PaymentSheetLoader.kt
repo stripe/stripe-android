@@ -214,18 +214,18 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val paymentMethods = customerRepository.getPaymentMethods(
             customerConfig = customerConfig,
-            types = paymentMethodTypes,
+            types = paymentMethodTypes.filter { paymentMethodType ->
+                paymentMethodType in setOf(
+                    PaymentMethod.Type.Card,
+                    PaymentMethod.Type.USBankAccount,
+                    PaymentMethod.Type.SepaDebit,
+                )
+            },
             silentlyFail = true,
         ).getOrDefault(emptyList())
 
         return paymentMethods.filter { paymentMethod ->
             paymentMethod.hasExpectedDetails()
-        }.filter { paymentMethod ->
-            // PayPal isn't supported yet as a saved payment method (backend limitation).
-            paymentMethod.type != PaymentMethod.Type.PayPal
-        }.filter { paymentMethod ->
-            // CashAppPay isn't supported yet as a saved payment method (backend limitation).
-            paymentMethod.type != PaymentMethod.Type.CashAppPay
         }
     }
 

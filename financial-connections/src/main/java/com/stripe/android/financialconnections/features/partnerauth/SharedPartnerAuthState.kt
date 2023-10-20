@@ -17,11 +17,11 @@ internal data class SharedPartnerAuthState(
      * if one is already active.
      */
     @PersistState
-    val activeAuthSession: String?,
+    val activeAuthSession: String? = null,
     val pane: FinancialConnectionsSessionManifest.Pane,
-    val payload: Async<Payload>,
-    val viewEffect: ViewEffect?,
-    val authenticationStatus: Async<String>
+    val payload: Async<Payload> = Uninitialized,
+    val viewEffect: ViewEffect? = null,
+    val authenticationStatus: Async<String> = Uninitialized,
 ) : MavericksState {
 
     val dataAccess: DataAccessNotice?

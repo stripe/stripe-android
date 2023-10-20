@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">문서 캡처 성공을 의미하는 체크 표시</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">사진 선택</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">테스트 데이터로 완료</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">원하는 결과를 선택하고 해당 결과로 즉시 완료하여 시간을 절약하십시오. 모바일 SDK 흐름이 완료됨 결과와 함께 반환됩니다.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">고품질 이미지를 캡처할 수 없습니다.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">다시 시도하거나 디바이스에 있는 이미지를 업로드하실 수 있습니다.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">이미지를 캡처할 수 없음</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">카메라 아이콘</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">시계 아이콘</string>
   <!-- Content description for close button -->
@@ -129,12 +135,22 @@
   <string name="stripe_selfie_item_description">셀카 1장 캡처됨</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">셀카 이미지가 저장되지 않았습니다. 종료하시겠습니까?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">다음 단계에서 본인임을 확인하기 위해 몇 장의 사진이 자동으로 촬영됩니다.</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">셀카 촬영 준비</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">사진 촬영</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">이 페이지는 테스트 모드에서만 표시됩니다.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">현재 테스트 모드임</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">다시 시도</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">예기치 않은 오류가 발생했습니다. 몇 초 후에 다시 시도하십시오.</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">사진 업로드</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">운전 면허증 뒷면 업로드</string>
   <!-- Title of dialog to upload front of driver license -->

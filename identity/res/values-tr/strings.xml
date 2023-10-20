@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Belge almanın başarılı olduğunu belirten onay işareti</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Fotoğraf Seç</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Test verileriyle tamamlayın</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">İstenen bir sonucu seçerek ve bu sonuçla anında tamamlayarak zaman kazanın. Mobil SDK akışı, Tamamlandı sonucuyla geri dönecektir.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Yüksek kaliteli bir fotoğraf yakalayamadık.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Tekrar deneyebilir veya cihazınızdan bir fotoğraf yükleyebilirsiniz.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Fotoğraf alınamadı</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">kamera simgesi</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Saat simgesi</string>
   <!-- Content description for close button -->
@@ -129,12 +135,22 @@
   <string name="stripe_selfie_item_description">bir özçekim çekildi</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Özçekim görüntüleriniz kaydedilmedi. Çıkmak istiyor musunuz?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">Gerçekten siz olduğunuzu doğrulamak için sonraki adımda otomatik olarak birkaç fotoğraf çekilecek</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Selfie çekmeye hazırlanın</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Fotoğraf Çek</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Bu sayfa yalnızca test modunda gösterilir.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Şu anda test modundasınız</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Tekrar Dene</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Beklenmedik bir hata oluştu -- birazdan tekrar deneyin</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Fotoğraf yükle</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Sürücü belgesinin arka yüzünü yükleyin</string>
   <!-- Title of dialog to upload front of driver license -->

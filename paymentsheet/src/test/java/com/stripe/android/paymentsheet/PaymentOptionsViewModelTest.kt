@@ -192,7 +192,7 @@ internal class PaymentOptionsViewModelTest {
 
         assertThat(viewModel.paymentMethods.value).isEmpty()
         assertThat(viewModel.primaryButtonUiState.value).isNull()
-        assertThat(viewModel.notesText.value).isNull()
+        assertThat(viewModel.mandateText.value?.text).isNull()
     }
 
     @Test

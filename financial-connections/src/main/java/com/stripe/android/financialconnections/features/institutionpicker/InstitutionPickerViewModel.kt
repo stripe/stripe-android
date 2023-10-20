@@ -9,14 +9,16 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.FeaturedInstitutionsLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.InstitutionSelected
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.SearchScroll
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.SearchSucceeded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.FeaturedInstitutionsLoaded
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.InstitutionSelected
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.SearchScroll
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.SearchSucceeded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -64,8 +66,12 @@ internal class InstitutionPickerViewModel @Inject constructor(
                         ).data
                     }
                 }.onFailure {
-                    logger.error("Error fetching featured institutions", it)
-                    eventTracker.track(FinancialConnectionsEvent.Error(Pane.INSTITUTION_PICKER, it))
+                    eventTracker.logError(
+                        extraMessage = "Error fetching featured institutions",
+                        error = it,
+                        pane = Pane.INSTITUTION_PICKER,
+                        logger = logger
+                    )
                 }
 
             val (institutions, duration) = result.getOrNull() ?: Pair(emptyList(), 0L)
@@ -142,6 +148,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                         resultCount = result.data.count()
                     )
                 )
+                FinancialConnections.emitEvent(Name.SEARCH_INITIATED)
                 result
             } else {
                 InstitutionResponse(
@@ -163,6 +170,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
                     fromFeatured = fromFeatured,
                     institutionId = institution.id
                 )
+            )
+            FinancialConnections.emitEvent(
+                name = Name.INSTITUTION_SELECTED,
+                metadata = Metadata(institutionName = institution.name)
             )
             // updates local manifest with active institution and cleans auth session if present.
             updateLocalManifest {

@@ -4,10 +4,16 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ConsentAgree
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.features.consent.ConsentClickableText.DATA
@@ -59,18 +65,23 @@ internal class ConsentViewModel @Inject constructor(
     private fun logErrors() {
         onAsync(
             ConsentState::consent,
-            onSuccess = { eventTracker.track(FinancialConnectionsEvent.PaneLoaded(Pane.CONSENT)) },
+            onSuccess = { eventTracker.track(PaneLoaded(Pane.CONSENT)) },
             onFail = { logger.error("Error retrieving consent content", it) }
         )
         onAsync(ConsentState::acceptConsent, onFail = {
-            eventTracker.track(Error(Pane.CONSENT, it))
-            logger.error("Error accepting consent", it)
+            eventTracker.logError(
+                extraMessage = "Error accepting consent",
+                error = it,
+                logger = logger,
+                pane = Pane.CONSENT
+            )
         })
     }
 
     fun onContinueClick() {
         suspend {
             eventTracker.track(ConsentAgree)
+            FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
             navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = Pane.CONSENT))
         }.execute { copy(acceptConsent = it) }

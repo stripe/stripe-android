@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -102,29 +104,33 @@ internal fun ErrorScreen(
                 )
             }
         }
+        var topButtonState by remember { mutableStateOf(LoadingButtonState.Idle) }
+        var bottomButtonState by remember { mutableStateOf(LoadingButtonState.Idle) }
 
         topButton?.let { (buttonText, onClick) ->
-            OutlinedButton(
-                onClick = onClick,
+            LoadingTextButton(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .testTag(
-                        ErrorTopButtonTag
-                    )
+                    .testTag((ErrorTopButtonTag)),
+                text = buttonText.uppercase(),
+                state = topButtonState
             ) {
-                Text(text = buttonText.uppercase())
+                topButtonState = LoadingButtonState.Loading
+                bottomButtonState = LoadingButtonState.Disabled
+                onClick()
             }
         }
         bottomButton?.let { (buttonText, onClick) ->
-            Button(
-                onClick = onClick,
+            LoadingButton(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .testTag(
-                        ErrorBottomButtonTag
-                    )
+                    .testTag(ErrorBottomButtonTag),
+                text = buttonText.uppercase(),
+                state = bottomButtonState
             ) {
-                Text(text = buttonText.uppercase())
+                topButtonState = LoadingButtonState.Disabled
+                bottomButtonState = LoadingButtonState.Loading
+                onClick()
             }
         }
     }

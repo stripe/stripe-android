@@ -1,6 +1,17 @@
 # CHANGELOG
 
 ## XX.XX.XX - 2023-XX-XX
+* [ADDED][7449](https://github.com/stripe/stripe-android/pull/7449) Added saved payment method support for SEPA family payment methods.
+
+## 20.33.0 - 2023-10-16
+
+### Payments
+* [ADDED][7431](https://github.com/stripe/stripe-android/pull/7431) Added bindings support for MobilePay. See [private beta information](https://stripe.com/docs/payments/mobilepay).
+
+## 20.32.1 - 2023-10-09
+
+### PaymentSheet
+* [FIXED][7387](https://github.com/stripe/stripe-android/pull/7387) Fixed a bug where `AddressLauncher.present` would crash.
 
 Dependencies updated:
 * [7409](https://github.com/stripe/stripe-android/pull/7409) Bumped Kotlin to 1.8.22 and Compose Compiler to 1.4.8.

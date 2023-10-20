@@ -1,14 +1,14 @@
 package com.stripe.android.financialconnections
 
 import com.google.common.truth.Truth
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 
 internal class TestFinancialConnectionsAnalyticsTracker : FinancialConnectionsAnalyticsTracker {
 
-    val sentEvents = mutableListOf<FinancialConnectionsEvent>()
+    val sentEvents = mutableListOf<FinancialConnectionsAnalyticsEvent>()
 
-    override suspend fun track(event: FinancialConnectionsEvent): Result<Unit> {
+    override suspend fun track(event: FinancialConnectionsAnalyticsEvent): Result<Unit> {
         sentEvents += event
         return Result.success(Unit)
     }

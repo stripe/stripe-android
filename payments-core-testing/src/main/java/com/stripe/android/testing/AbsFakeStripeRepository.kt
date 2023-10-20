@@ -20,6 +20,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
+import com.stripe.android.model.MobileCardElementConfig
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -399,6 +400,12 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         cardNumber: String,
         requestOptions: ApiRequest.Options
     ): Result<CardMetadata> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun retrieveCardElementConfig(
+        requestOptions: ApiRequest.Options,
+    ): Result<MobileCardElementConfig> {
         TODO("Not yet implemented")
     }
 

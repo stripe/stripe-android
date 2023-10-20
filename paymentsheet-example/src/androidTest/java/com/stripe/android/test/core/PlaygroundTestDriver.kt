@@ -27,14 +27,18 @@ import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
 import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
+import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.IntegrationType
 import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTypeSettingsDefinition
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
 import kotlinx.coroutines.launch
+import org.junit.Assert.fail
 import org.junit.Assume
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -55,12 +59,16 @@ internal class PlaygroundTestDriver(
     private val device: UiDevice,
     private val composeTestRule: ComposeTestRule,
 ) : ScreenshotTest {
+    @Volatile
     private var resultValue: String? = null
     private lateinit var testParameters: TestParameters
     private lateinit var selectors: Selectors
 
     private val currentActivity = Array<Activity?>(1) { null }
     private var application: Application? = null
+
+    @Volatile
+    private var playgroundState: PlaygroundState? = null
 
     private val activityLifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
@@ -201,6 +209,36 @@ internal class PlaygroundTestDriver(
         teardown()
     }
 
+    fun confirmCustomWithDefaultSavedPaymentMethod(
+        customerId: String?,
+        testParameters: TestParameters,
+        beforeBuyAction: (Selectors) -> Unit = {},
+        afterBuyAction: (Selectors) -> Unit = {},
+    ) {
+        if (customerId == null) {
+            fail("No customer id")
+            return
+        }
+
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings[IntegrationTypeSettingsDefinition] = IntegrationType.FlowController
+                settings[CustomerSettingsDefinition] = CustomerType.Existing(customerId)
+            }
+        )
+        launchCustom(clickMultiStep = false)
+
+        beforeBuyAction(selectors)
+
+        selectors.playgroundBuyButton.click()
+
+        afterBuyAction(selectors)
+
+        doAuthorization()
+
+        teardown()
+    }
+
     private fun pressMultiStepSelect() {
         selectors.multiStepSelect.click()
         waitForNotPlaygroundActivity()
@@ -221,7 +259,7 @@ internal class PlaygroundTestDriver(
         testParameters: TestParameters,
         values: FieldPopulator.Values = FieldPopulator.Values(),
         populateCustomLpmFields: () -> Unit = {},
-    ) {
+    ): PlaygroundState? {
         setup(testParameters)
         launchComplete()
 
@@ -241,11 +279,15 @@ internal class PlaygroundTestDriver(
             testParameters.useBrowser
         )
 
+        val result = playgroundState
+
         pressBuy()
 
         doAuthorization()
 
         teardown()
+
+        return result
     }
 
     /**
@@ -378,16 +420,18 @@ internal class PlaygroundTestDriver(
         waitForNotPlaygroundActivity()
     }
 
-    private fun launchCustom() {
+    private fun launchCustom(clickMultiStep: Boolean = true) {
         selectors.reload.click()
         Espresso.onIdle()
         selectors.composeTestRule.waitForIdle()
 
         selectors.multiStepSelect.waitForEnabled()
-        selectors.multiStepSelect.click()
+        if (clickMultiStep) {
+            selectors.multiStepSelect.click()
 
-        // PaymentOptionsActivity is now on screen
-        waitForNotPlaygroundActivity()
+            // PaymentOptionsActivity is now on screen
+            waitForNotPlaygroundActivity()
+        }
     }
 
     private fun doAuthorization() {
@@ -510,9 +554,16 @@ internal class PlaygroundTestDriver(
             // Observe the result of the PaymentSheet completion
             activity.lifecycleScope.launch {
                 activity.viewModel.status.collect {
-                    resultValue = it
+                    resultValue = it?.message
                 }
             }
+
+            activity.lifecycleScope.launch {
+                activity.viewModel.state.collect { playgroundState ->
+                    this@PlaygroundTestDriver.playgroundState = playgroundState
+                }
+            }
+
             launchPlayground.countDown()
         }
 

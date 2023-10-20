@@ -465,4 +465,13 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod = stripe.createPaymentMethodSynchronous(params)
         assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Swish)
     }
+
+    @Test
+    fun createPaymentMethod_withMobilePay_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.MOBILE_PAY
+        val stripe = Stripe(context, ApiKeyFixtures.MOBILE_PAY_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.MobilePay)
+    }
 }

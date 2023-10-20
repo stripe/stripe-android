@@ -10,6 +10,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.samples.networking.ExamplePublishableKeyResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -25,7 +26,7 @@ internal class AddressElementExampleViewModel(
     val state: StateFlow<AddressElementExampleViewState> = _state
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             loadPublishableKey()
         }
     }

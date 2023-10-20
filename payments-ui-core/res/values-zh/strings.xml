@@ -4,14 +4,24 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[用 <img/> 分 <num_installments/> 支付，无利息，每期 <installment_price/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">返回</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">账号</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">您的账号不完整。</string>
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">银行账户</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">我理解 Stripe 将代表 %s 收取直接扣款，且确认我是该账户持有人，且是唯一一个需要授权该账户扣款的人。</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">分类代码</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">您的分类代码不完整。</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">账单地址</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">BLIK 代码</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">继续操作，即表示您授权 %1$s 按照 %2$s 的条款从您的 Cash App 账户中扣取该款项及未来的款项，直至撤销授权。您可以随时在 Cash App 设置中进行修改。</string>
   <!-- Title for the contact information section -->
@@ -59,10 +69,14 @@
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS 直接借记</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">银行卡</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA 借记</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">确认您的 PayPal 付款，即表示您允许 %s 按照他们的条款从您的 PayPal 扣取未来款项。</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">确认您的 RevolutPay 付款即表示您允许 %s 按照其条款从您的 RevolutPay 账户扣取未来款项。</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">保存以用于未来的 %s 付款</string>
   <!-- Button title to open camera to scan credit/debit card -->

@@ -6,15 +6,22 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.darkColors
@@ -44,6 +51,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_T
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import com.stripe.android.paymentsheet.rememberPaymentSheet
 import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
+import kotlinx.coroutines.flow.update
 
 internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     companion object {
@@ -82,30 +90,42 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             val playgroundSettings by viewModel.playgroundSettingsFlow.collectAsState()
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
 
-            PlaygroundTheme {
-                SettingsUi(playgroundSettings = localPlaygroundSettings)
+            val playgroundState by viewModel.state.collectAsState()
 
-                AppearanceButton()
+            PlaygroundTheme(
+                content = {
+                    SettingsUi(playgroundSettings = localPlaygroundSettings)
 
-                QrCodeButton(playgroundSettings = localPlaygroundSettings)
+                    AppearanceButton()
 
-                ReloadButton(playgroundSettings = localPlaygroundSettings)
+                    QrCodeButton(playgroundSettings = localPlaygroundSettings)
+                },
+                bottomBarContent = {
+                    ReloadButton(playgroundSettings = localPlaygroundSettings)
 
-                val playgroundState by viewModel.state.collectAsState()
-                PlaygroundStateUi(
-                    playgroundState = playgroundState,
-                    paymentSheet = paymentSheet,
-                    flowController = flowController,
-                    addressLauncher = addressLauncher,
-                )
-
-                val status by viewModel.status.collectAsState()
-                val context = LocalContext.current
-                LaunchedEffect(status) {
-                    if (!status.isNullOrEmpty()) {
-                        Toast.makeText(context, status, Toast.LENGTH_LONG).show()
+                    AnimatedContent(
+                        label = PLAYGROUND_BOTTOM_BAR_LABEL,
+                        targetState = playgroundState
+                    ) { playgroundState ->
+                        Column {
+                            PlaygroundStateUi(
+                                playgroundState = playgroundState,
+                                paymentSheet = paymentSheet,
+                                flowController = flowController,
+                                addressLauncher = addressLauncher,
+                            )
+                        }
                     }
+                },
+            )
+
+            val status by viewModel.status.collectAsState()
+            val context = LocalContext.current
+            LaunchedEffect(status) {
+                if (!status?.message.isNullOrEmpty() && status?.hasBeenDisplayed == false) {
+                    Toast.makeText(context, status?.message, Toast.LENGTH_LONG).show()
                 }
+                viewModel.status.value = status?.copy(hasBeenDisplayed = true)
             }
         }
     }
@@ -222,6 +242,17 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         val flowControllerState by viewModel.flowControllerState.collectAsState()
         val localFlowControllerState = flowControllerState
 
+        LaunchedEffect(localFlowControllerState) {
+            if (localFlowControllerState?.shouldFetchPaymentOption == true) {
+                viewModel.flowControllerState.update { previousState ->
+                    previousState?.copy(
+                        selectedPaymentOption = flowController.getPaymentOption(),
+                        shouldFetchPaymentOption = false,
+                    )
+                }
+            }
+        }
+
         LaunchedEffect(localFlowControllerState?.addressDetails) {
             flowController.shippingDetails = localFlowControllerState?.addressDetails
         }
@@ -309,7 +340,10 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 }
 
 @Composable
-private fun PlaygroundTheme(content: @Composable ColumnScope.() -> Unit) {
+private fun PlaygroundTheme(
+    content: @Composable ColumnScope.() -> Unit,
+    bottomBarContent: @Composable ColumnScope.() -> Unit,
+) {
     val colors = if (isSystemInDarkTheme() || AppearanceStore.forceDarkMode) {
         darkColors()
     } else {
@@ -322,16 +356,39 @@ private fun PlaygroundTheme(content: @Composable ColumnScope.() -> Unit) {
         colors = colors,
     ) {
         Surface(
-            color = MaterialTheme.colors.background
+            color = MaterialTheme.colors.background,
         ) {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                content = content,
-            )
+            Scaffold(
+                bottomBar = {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colors.surface)
+                            .animateContentSize()
+                    ) {
+                        Divider()
+                        Column(
+                            content = bottomBarContent,
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                                .fillMaxWidth()
+                        )
+                    }
+                },
+            ) { paddingValues ->
+                Box(modifier = Modifier.padding(paddingValues)) {
+                    Column(
+                        modifier = Modifier
+                            .verticalScroll(rememberScrollState())
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        content = content,
+                    )
+                }
+            }
         }
     }
 }
 
 const val RELOAD_TEST_TAG = "RELOAD"
+private const val PLAYGROUND_BOTTOM_BAR_LABEL = "PlaygroundBottomBar"
