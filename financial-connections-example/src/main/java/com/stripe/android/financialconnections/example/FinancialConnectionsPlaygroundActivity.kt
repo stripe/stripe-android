@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
@@ -113,7 +114,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     @Composable
     private fun FinancialConnectionsContent(
         state: FinancialConnectionsPlaygroundState,
-        onButtonClick: (Merchant, Flow, Pair<String, String>, String) -> Unit
+        onSettingsChanged: (PlaygroundSettings) -> Unit,
+        onButtonClick: () -> Unit
     ) {
         val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
 
@@ -127,6 +129,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 PlaygroundContent(
                     padding = it,
                     state = state,
+                    onSettingsChanged = onSettingsChanged,
                     onButtonClick = onButtonClick
                 )
             }

@@ -7,7 +7,6 @@ import com.stripe.android.financialconnections.example.data.LinkAccountSessionBo
 import com.stripe.android.financialconnections.example.data.PaymentIntentBody
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
 internal data class PlaygroundSettings(
@@ -40,18 +39,19 @@ internal data class PlaygroundSettings(
         return settings[settingsDefinition] as T
     }
 
-    fun lasRequest() = settings.toList().fold(
+    fun lasRequest(): LinkAccountSessionBody = settings.toList().fold(
         LinkAccountSessionBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
     ) { acc, (definition: PlaygroundSettingDefinition<*>, value: Any?) ->
-        definition.lasRequest(acc, value)
+        @Suppress("UNCHECKED_CAST")
+        (definition as PlaygroundSettingDefinition<Any?>).lasRequest(acc, value)
     }
 
-    fun paymentIntentRequest() = settings.toList().fold(
+    fun paymentIntentRequest(): PaymentIntentBody = settings.toList().fold(
         PaymentIntentBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
     ) { acc, (definition: PlaygroundSettingDefinition<*>, value: Any?) ->
-        definition.paymentIntentRequest(acc, value)
+        @Suppress("UNCHECKED_CAST")
+        (definition as PlaygroundSettingDefinition<Any?>).paymentIntentRequest(acc, value)
     }
-
 
     fun asJsonString(): String {
         val settingsMap = settings.map {
@@ -62,7 +62,7 @@ internal data class PlaygroundSettings(
                 null
             }
         }.filterNotNull().toMap()
-        return Json.encodeToString(JsonObject(settingsMap))
+        return Json.encodeToString(kotlinx.serialization.json.JsonObject(settingsMap))
     }
 
     fun saveToSharedPreferences(context: Context) {

@@ -11,16 +11,16 @@ internal object EmailDefinition : PlaygroundSettingDefinition.Displayable<String
 
     override fun lasRequest(
         body: LinkAccountSessionBody,
-        value: Any?
+        value: String?
     ): LinkAccountSessionBody = body.copy(
-        customerEmail = value as String?
+        customerEmail = value
     )
 
     override fun paymentIntentRequest(
         body: PaymentIntentBody,
-        value: Any?
+        value: String?
     ) = body.copy(
-        customerEmail = value as String?
+        customerEmail = value
     )
 
     override val key: String = "customer_email"

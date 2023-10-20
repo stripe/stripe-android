@@ -11,16 +11,16 @@ internal object PublicKeyDefinition : PlaygroundSettingDefinition.Displayable<St
 
     override fun lasRequest(
         body: LinkAccountSessionBody,
-        value: Any?
+        value: String?
     ): LinkAccountSessionBody = body.copy(
-        publishableKey = value as String
+        publishableKey = value
     )
 
     override fun paymentIntentRequest(
         body: PaymentIntentBody,
-        value: Any?
+        value: String?
     ) = body.copy(
-        publishableKey = value as String
+        publishableKey = value
     )
 
     override val key: String = "public_key"

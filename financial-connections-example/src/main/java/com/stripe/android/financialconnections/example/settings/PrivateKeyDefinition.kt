@@ -11,16 +11,16 @@ internal object PrivateKeyDefinition : PlaygroundSettingDefinition.Displayable<S
 
     override fun lasRequest(
         body: LinkAccountSessionBody,
-        value: Any?
+        value: String?
     ): LinkAccountSessionBody = body.copy(
-        secretKey = value as String,
+        secretKey = value,
     )
 
     override fun paymentIntentRequest(
         body: PaymentIntentBody,
-        value: Any?
+        value: String?
     ) = body.copy(
-        secretKey = value as String,
+        secretKey = value,
     )
 
     override val key: String = "sk"

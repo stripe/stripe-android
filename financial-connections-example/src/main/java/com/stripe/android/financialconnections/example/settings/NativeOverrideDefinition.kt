@@ -18,12 +18,12 @@ internal object NativeOverrideDefinition : PlaygroundSettingDefinition.Saveable<
 
     override fun lasRequest(
         body: LinkAccountSessionBody,
-        value: Any?
+        value: NativeOverride?
     ): LinkAccountSessionBody = body
 
     override fun paymentIntentRequest(
         body: PaymentIntentBody,
-        value: Any?
+        value: NativeOverride?
     ): PaymentIntentBody = body
 
     override val key: String = "financial_connections_override_native"

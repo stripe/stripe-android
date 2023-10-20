@@ -13,12 +13,12 @@ internal object FlowDefinition :
 
     override fun lasRequest(
         body: LinkAccountSessionBody,
-        value: Any?
+        value: Flow?
     ): LinkAccountSessionBody = body
 
     override fun paymentIntentRequest(
         body: PaymentIntentBody,
-        value: Any?
+        value: Flow?
     ) = body
 
     override val key: String = "flow"

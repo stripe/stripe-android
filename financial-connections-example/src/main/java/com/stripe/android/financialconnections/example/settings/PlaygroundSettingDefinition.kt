@@ -16,12 +16,12 @@ internal interface PlaygroundSettingDefinition<T> {
 
     fun lasRequest(
         body: LinkAccountSessionBody,
-        value: Any?
+        value: T?
     ): LinkAccountSessionBody
 
     fun paymentIntentRequest(
         body: PaymentIntentBody,
-        value: Any?
+        value: T?
     ): PaymentIntentBody
 
     fun valueUpdated(
