@@ -20,25 +20,25 @@ internal data class PaymentSheetTopBarState(
 internal object PaymentSheetTopBarStateFactory {
 
     fun create(
-        screen: PaymentSheetScreen,
+        backStack: List<PaymentSheetScreen>,
         paymentMethods: List<PaymentMethod>?,
         isLiveMode: Boolean,
         isProcessing: Boolean,
         isEditing: Boolean,
     ): PaymentSheetTopBarState {
-        val icon = if (screen == PaymentSheetScreen.AddAnotherPaymentMethod) {
+        val hasBackStack = backStack.size > 1
+
+        val icon = if (hasBackStack) {
             R.drawable.stripe_ic_paymentsheet_back
         } else {
             R.drawable.stripe_ic_paymentsheet_close
         }
 
-        val contentDescription = if (screen == PaymentSheetScreen.AddAnotherPaymentMethod) {
+        val contentDescription = if (hasBackStack) {
             StripeUiCoreR.string.stripe_back
         } else {
             R.string.stripe_paymentsheet_close
         }
-
-        val showOptionsMenu = screen is PaymentSheetScreen.SelectSavedPaymentMethods
 
         val editMenuLabel = if (isEditing) {
             StripeR.string.stripe_done
@@ -46,11 +46,19 @@ internal object PaymentSheetTopBarStateFactory {
             StripeR.string.stripe_edit
         }
 
+        val screen = backStack.last()
+
+        val showEditMenu = if (screen is PaymentSheetScreen.SelectSavedPaymentMethods) {
+            !paymentMethods.isNullOrEmpty()
+        } else {
+            false
+        }
+
         return PaymentSheetTopBarState(
             icon = icon,
             contentDescription = contentDescription,
             showTestModeLabel = !isLiveMode,
-            showEditMenu = isEditing || showOptionsMenu && !paymentMethods.isNullOrEmpty(),
+            showEditMenu = showEditMenu,
             editMenuLabel = editMenuLabel,
             isEnabled = !isProcessing,
         )
@@ -58,7 +66,7 @@ internal object PaymentSheetTopBarStateFactory {
 
     fun createDefault(): PaymentSheetTopBarState {
         return create(
-            screen = PaymentSheetScreen.Loading,
+            backStack = listOf(PaymentSheetScreen.Loading),
             paymentMethods = emptyList(),
             isLiveMode = true,
             isProcessing = false,

@@ -18,7 +18,7 @@ internal sealed class CustomerSheetViewState(
 
     val topBarState: PaymentSheetTopBarState
         get() = PaymentSheetTopBarStateFactory.create(
-            screen = screen,
+            backStack = listOf(screen), // TODO
             paymentMethods = savedPaymentMethods,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,

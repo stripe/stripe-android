@@ -115,7 +115,7 @@ internal abstract class BaseSheetViewModel(
     private val _amount = MutableStateFlow<Amount?>(null)
     internal val amount: StateFlow<Amount?> = _amount
 
-    protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
+    private val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
         value = listOf(PaymentSheetScreen.Loading),
     )
 
@@ -202,7 +202,7 @@ internal abstract class BaseSheetViewModel(
         )
 
     val topBarState: StateFlow<PaymentSheetTopBarState> = combine(
-        currentScreen,
+        backStack,
         paymentMethods,
         stripeIntent.map { it?.isLiveMode ?: true },
         processing,
@@ -256,22 +256,25 @@ internal abstract class BaseSheetViewModel(
 
     private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
-            PaymentSheetScreen.Loading, AddAnotherPaymentMethod -> {
+            is PaymentSheetScreen.Loading, AddAnotherPaymentMethod -> {
                 // Nothing to do here
             }
-            PaymentSheetScreen.SelectSavedPaymentMethods -> {
+            is PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = stripeIntent.value?.clientSecret == null,
                 )
             }
-            AddFirstPaymentMethod -> {
+            is AddFirstPaymentMethod -> {
                 eventReporter.onShowNewPaymentOptionForm(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = stripeIntent.value?.clientSecret == null,
                 )
+            }
+            is PaymentSheetScreen.EditPaymentMethod -> {
+                // TODO(tillh-stripe) Add reporting
             }
         }
     }
@@ -441,9 +444,8 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
     fun modifyPaymentMethod(paymentMethod: PaymentMethod) {
-        // TODO(samer-stripe): Support item modification
+        transitionTo(PaymentSheetScreen.EditPaymentMethod(paymentMethod))
     }
 
     private fun mapToHeaderTextResource(
