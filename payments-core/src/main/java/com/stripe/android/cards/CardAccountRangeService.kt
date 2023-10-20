@@ -56,12 +56,16 @@ class CardAccountRangeService constructor(
 
         val staticAccountRanges = staticCardAccountRanges.filter(cardNumber)
 
-        if (staticAccountRanges.isEmpty() || shouldQueryRepository(staticAccountRanges)) {
-            // query for AccountRange data
+        if (isCbcEligible) {
             queryAccountRangeRepository(cardNumber)
         } else {
-            // use static AccountRange data
-            updateAccountRangesResult(staticAccountRanges)
+            if (staticAccountRanges.isEmpty() || shouldQueryRepository(staticAccountRanges)) {
+                // query for AccountRange data
+                queryAccountRangeRepository(cardNumber)
+            } else {
+                // use static AccountRange data
+                updateAccountRangesResult(staticAccountRanges)
+            }
         }
     }
 

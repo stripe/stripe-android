@@ -41,24 +41,36 @@ class CardAccountRangeServiceTest {
     private val publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
 
     @Test
-    fun `test the card metadata service is called only for UnionPay cards`() = runTest {
-        val setRemoteCheckedCards =
-            UNIONPAY16_ACCOUNTS
-                .plus(UNIONPAY19_ACCOUNTS)
-        setRemoteCheckedCards.forEach {
-            testIfRemoteCalled(it.binRange.low, true)
-            testIfRemoteCalled(it.binRange.high, true)
+    fun `test the card metadata service is called only for UnionPay cards if not CBC eligible`() = runTest {
+        val unionPayAccounts = UNIONPAY16_ACCOUNTS + UNIONPAY19_ACCOUNTS
+
+        unionPayAccounts.forEach {
+            testIfRemoteCalled(isCbcEligible = false, it.binRange.low, expectedRemoteCall = true)
+            testIfRemoteCalled(isCbcEligible = false, it.binRange.high, expectedRemoteCall = true)
         }
+
         ACCOUNTS
-            .filterNot { setRemoteCheckedCards.contains(it) }
+            .filterNot { unionPayAccounts.contains(it) }
             .forEach {
-                testIfRemoteCalled(it.binRange.low, false)
-                testIfRemoteCalled(it.binRange.high, false)
+                testIfRemoteCalled(isCbcEligible = false, it.binRange.low, expectedRemoteCall = false)
+                testIfRemoteCalled(isCbcEligible = false, it.binRange.high, expectedRemoteCall = false)
             }
     }
 
+    @Test
+    fun `test the card metadata service is always called if CBC eligible`() = runTest {
+        ACCOUNTS.forEach {
+            testIfRemoteCalled(isCbcEligible = true, it.binRange.low, expectedRemoteCall = true)
+            testIfRemoteCalled(isCbcEligible = true, it.binRange.high, expectedRemoteCall = true)
+        }
+    }
+
     @SuppressWarnings("EmptyFunctionBlock")
-    private suspend fun testIfRemoteCalled(cardNumberString: String, expectedRemoteCall: Boolean) {
+    private suspend fun testIfRemoteCalled(
+        isCbcEligible: Boolean,
+        cardNumberString: String,
+        expectedRemoteCall: Boolean,
+    ) {
         val mockRemoteCardAccountRangeSource = mock<CardAccountRangeSource>()
         val serviceMockRemote = CardAccountRangeService(
             createMockRemoteDefaultCardAccountRangeRepository(mockRemoteCardAccountRangeSource),
@@ -68,7 +80,7 @@ class CardAccountRangeServiceTest {
                 override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
                 }
             },
-            isCbcEligible = { false },
+            isCbcEligible = { isCbcEligible },
         )
 
         val cardNumber = CardNumber.Unvalidated(cardNumberString)
