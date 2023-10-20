@@ -307,16 +307,39 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitForIdle()
         device.waitForIdle()
 
+        waitForScreenToLoad(testParameters)
         customOperations()
-
-        composeTestRule.waitForIdle()
-        device.waitForIdle()
 
         currentActivity[0]?.let {
             compareScreenshot(it)
         }
 
         teardown()
+    }
+
+    private fun waitForScreenToLoad(testParameters: TestParameters) {
+        when (testParameters.playgroundSettingsSnapshot[CustomerSettingsDefinition]) {
+            is CustomerType.GUEST, is CustomerType.NEW -> {
+                composeTestRule.waitUntil {
+                    composeTestRule.onAllNodesWithText("Card number")
+                        .fetchSemanticsNodes()
+                        .size == 1
+                }
+
+                composeTestRule.waitUntil {
+                    composeTestRule.onAllNodesWithText("Country or region")
+                        .fetchSemanticsNodes()
+                        .size == 1
+                }
+            }
+            is CustomerType.Existing, is CustomerType.RETURNING -> {
+                composeTestRule.waitUntil {
+                    composeTestRule.onAllNodesWithTag("AddCard")
+                        .fetchSemanticsNodes()
+                        .size == 1
+                }
+            }
+        }
     }
 
     private fun pressBuy() {
