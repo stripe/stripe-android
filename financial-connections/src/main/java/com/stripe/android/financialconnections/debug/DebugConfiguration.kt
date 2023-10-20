@@ -19,7 +19,7 @@ internal class DebugConfiguration @Inject constructor(
         get() = runCatching {
             sharedPreferences.getString("json", null)?.let {
                 val jsonObject = Json.decodeFromString(JsonObject.serializer(), it)
-                when(jsonObject[KEY_OVERRIDE_NATIVE]?.jsonPrimitive?.contentOrNull) {
+                when (jsonObject[KEY_OVERRIDE_NATIVE]?.jsonPrimitive?.contentOrNull) {
                     "Native" -> true
                     "Web" -> false
                     else -> null

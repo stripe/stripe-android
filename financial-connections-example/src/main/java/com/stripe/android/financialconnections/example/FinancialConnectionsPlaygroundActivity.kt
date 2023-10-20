@@ -189,7 +189,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 }
             }
         }
-
     }
 
     @Composable

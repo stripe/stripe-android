@@ -265,6 +265,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
     }
 }
 
+@Suppress("Unused")
 enum class Merchant(val apiValue: String) {
     Test("testmode"),
     PartnerM("partner_m"),
@@ -274,15 +275,32 @@ enum class Merchant(val apiValue: String) {
     App2App("app2app"),
     Networking("networking"),
     NetworkingTestMode("networking_testmode"),
-    Other("other")
+    Other("other");
+
+    companion object {
+        fun fromApiValue(apiValue: String): Merchant =
+            Merchant.values().first { it.apiValue == apiValue }
+    }
 }
 
-enum class Flow {
-    Data, Token, PaymentIntent
+enum class Flow(val apiValue: String) {
+    Data("Data"),
+    Token("Token"),
+    PaymentIntent("PaymentIntent");
+
+    companion object {
+        fun fromApiValue(apiValue: String): Flow =
+            Flow.values().first { it.apiValue == apiValue }
+    }
 }
 
-enum class NativeOverride {
-    None, Native, Web
+enum class NativeOverride(val apiValue: String) {
+    None("none"), Native("native"), Web("web");
+
+    companion object {
+        fun fromApiValue(apiValue: String): NativeOverride =
+            NativeOverride.values().first { it.apiValue == apiValue }
+    }
 }
 
 sealed class FinancialConnectionsPlaygroundViewEffect {

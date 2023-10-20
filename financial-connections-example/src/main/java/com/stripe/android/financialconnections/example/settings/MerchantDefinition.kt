@@ -5,7 +5,8 @@ import com.stripe.android.financialconnections.example.data.LinkAccountSessionBo
 import com.stripe.android.financialconnections.example.data.PaymentIntentBody
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Displayable.Option
 
-internal object MerchantDefinition : PlaygroundSettingDefinition.Displayable<Merchant>,
+internal object MerchantDefinition :
+    PlaygroundSettingDefinition.Displayable<Merchant>,
     PlaygroundSettingDefinition.Saveable<Merchant> {
     override val displayName: String
         get() = "Merchant"
@@ -44,7 +45,7 @@ internal object MerchantDefinition : PlaygroundSettingDefinition.Displayable<Mer
     override val key: String = "merchant"
     override val defaultValue: Merchant = Merchant.Test
 
-    override fun convertToValue(value: String) = Merchant.valueOf(value)
+    override fun convertToValue(value: String) = Merchant.fromApiValue(value)
 
-    override fun convertToString(value: Merchant): String = value.name
+    override fun convertToString(value: Merchant): String = value.apiValue
 }

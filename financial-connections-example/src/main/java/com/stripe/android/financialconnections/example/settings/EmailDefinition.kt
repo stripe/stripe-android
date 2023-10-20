@@ -4,7 +4,8 @@ import com.stripe.android.financialconnections.example.data.LinkAccountSessionBo
 import com.stripe.android.financialconnections.example.data.PaymentIntentBody
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Displayable.Option
 
-internal object EmailDefinition : PlaygroundSettingDefinition.Displayable<String>,
+internal object EmailDefinition :
+    PlaygroundSettingDefinition.Displayable<String>,
     PlaygroundSettingDefinition.Saveable<String> {
     override val displayName: String = "Customer email"
     override val options: List<Option<String>> = emptyList()

@@ -27,7 +27,7 @@ internal interface PlaygroundSettingDefinition<T> {
     fun valueUpdated(
         value: T,
         playgroundSettings: PlaygroundSettings
-    ) : PlaygroundSettings = playgroundSettings
+    ): PlaygroundSettings = playgroundSettings
 
     interface Saveable<T> {
         val key: String

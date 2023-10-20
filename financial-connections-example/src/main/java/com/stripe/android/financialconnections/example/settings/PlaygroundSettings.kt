@@ -21,7 +21,6 @@ internal data class PlaygroundSettings(
             .mapNotNull { (def, value) -> def.displayable()?.let { it to value } }
             .toMap()
 
-
     fun <T> withValue(
         settingsDefinition: PlaygroundSettingDefinition<T>,
         value: T
@@ -104,8 +103,6 @@ internal data class PlaygroundSettings(
                 .getOrNull()
                 ?.let { createFromJsonString(it) }
                 ?: createFromDefaults()
-
-
         }
 
         fun createFromDefaults(): PlaygroundSettings {
@@ -119,7 +116,6 @@ internal data class PlaygroundSettings(
             }.toMap().toMutableMap()
             return PlaygroundSettings(settings)
         }
-
 
         private fun createFromJsonString(jsonString: String): PlaygroundSettings {
             val settings: MutableMap<PlaygroundSettingDefinition<*>, Any?> = mutableMapOf()
@@ -145,5 +141,4 @@ internal data class PlaygroundSettings(
             EmailDefinition,
         )
     }
-
 }

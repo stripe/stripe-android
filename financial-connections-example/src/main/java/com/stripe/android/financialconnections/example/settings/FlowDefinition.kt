@@ -25,7 +25,7 @@ internal object FlowDefinition :
     override val defaultValue: Flow
         get() = Flow.PaymentIntent
 
-    override fun convertToValue(value: String): Flow = Flow.valueOf(value)
+    override fun convertToValue(value: String): Flow = Flow.fromApiValue(value)
 
-    override fun convertToString(value: Flow): String = value.name
+    override fun convertToString(value: Flow): String = value.apiValue
 }
