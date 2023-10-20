@@ -106,7 +106,7 @@ internal data class PlaygroundSettings(
         }
 
         fun createFromDefaults(): PlaygroundSettings {
-            val settings = allSettingDefinitions.mapNotNull {
+            val settings = defaultSettingDefinitions.mapNotNull {
                 val saveable = it.saveable()
                 if (saveable != null) {
                     it to saveable.defaultValue
@@ -127,18 +127,25 @@ internal data class PlaygroundSettings(
                 if (jsonPrimitive?.isString == true) {
                     settings[settingDefinition] = saveable.convertToValue(jsonPrimitive.content)
                 } else {
-                    settings[settingDefinition] = saveable.defaultValue
+                    if (defaultSettingDefinitions.contains(settingDefinition)) {
+                        settings[settingDefinition] = saveable.defaultValue
+                    }
                 }
             }
 
             return PlaygroundSettings(settings)
         }
 
-        private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
+        private val defaultSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             MerchantDefinition,
             NativeOverrideDefinition,
             FlowDefinition,
             EmailDefinition,
+        )
+
+        private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> = defaultSettingDefinitions + listOf(
+            PublicKeyDefinition,
+            PrivateKeyDefinition,
         )
     }
 }
