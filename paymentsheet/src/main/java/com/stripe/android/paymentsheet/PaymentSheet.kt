@@ -526,6 +526,9 @@ class PaymentSheet internal constructor(
                 this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
             }
 
+            /*
+             * TODO(samer-stripe): Make this function public prior to release
+             */
             internal fun preferredNetworks(
                 preferredNetworks: List<CardBrand>
             ) = apply {

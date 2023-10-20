@@ -51,6 +51,10 @@ internal sealed class CardNumberController : TextFieldController, SectionFieldEr
     }
 }
 
+/*
+ * TODO(samer-stripe): There is a lot of merging of card brand logic with `AccountRangeService` &
+ *  `CardBrand.getCardBrands`. Look into merging Account Service and Card Brand logic.
+ */
 internal class DefaultCardNumberController constructor(
     private val cardTextFieldConfig: CardNumberConfig,
     cardAccountRangeRepository: CardAccountRangeRepository,
@@ -99,19 +103,20 @@ internal class DefaultCardNumberController constructor(
 
     /*
      * This flow is keeping track of whatever brand the user had selected from the dropdown menu
-     * regardless of whether their card number has changed.
+     * or from their most recent selection through `initialBrand` regardless of whether their
+     * card number has changed.
      *
      * This will allow us re-reference the previously selected choice if the user changes the card
      * number.
      */
-    private val uncheckedChosenBrand = MutableStateFlow(
+    private val mostRecentUserSelectedBrand = MutableStateFlow(
         when (cardBrandChoiceConfig) {
             is CardBrandChoiceConfig.Eligible -> cardBrandChoiceConfig.initialBrand
             is CardBrandChoiceConfig.Ineligible -> null
         }
     )
 
-    override val selectedCardBrandFlow: Flow<CardBrand> = uncheckedChosenBrand.combine(
+    override val selectedCardBrandFlow: Flow<CardBrand> = mostRecentUserSelectedBrand.combine(
         brandChoices
     ) { previous, choices ->
         when (previous) {
@@ -142,10 +147,7 @@ internal class DefaultCardNumberController constructor(
             brandChoices,
             selectedCardBrandFlow
         ) { choices, selected ->
-            when (choices.size) {
-                1 -> choices.first()
-                else -> selected
-            }
+            choices.singleOrNull() ?: selected
         }
     } else {
         impliedCardBrand
@@ -306,7 +308,7 @@ internal class DefaultCardNumberController constructor(
     }
 
     override fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {
-        uncheckedChosenBrand.value = CardBrand.fromCode(item.id)
+        mostRecentUserSelectedBrand.value = CardBrand.fromCode(item.id)
     }
 
     private companion object {
