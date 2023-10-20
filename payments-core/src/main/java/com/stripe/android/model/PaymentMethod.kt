@@ -739,7 +739,11 @@ constructor(
         @JvmField val wallet: Wallet? = null,
 
         @JvmField
-        val networks: Networks? = null
+        val networks: Networks? = null,
+
+        @JvmField
+        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val displayBrand: DisplayBrand? = null
     ) : TypeData() {
         override val type: Type get() = Type.Card
 
@@ -789,6 +793,12 @@ constructor(
              * [payment_method.card.three_d_secure_usage.supported](https://stripe.com/docs/api/errors#errors-payment_method-card-three_d_secure_usage-supported)
              */
             @JvmField val isSupported: Boolean
+        ) : StripeModel
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayBrand(
+            val type: CardBrand
         ) : StripeModel
 
         @Parcelize

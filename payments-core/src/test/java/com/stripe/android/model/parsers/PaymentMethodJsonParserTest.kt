@@ -2,6 +2,7 @@ package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import kotlin.test.Test
@@ -20,6 +21,20 @@ class PaymentMethodJsonParserTest {
                     available = setOf("network1", "network2"),
                     selectionMandatory = true,
                     preferred = "network1"
+                )
+            )
+    }
+
+    @Test
+    fun parse_withCardWithDisplayBrand_shouldCreateExpectedObject() {
+        val actualDisplayBrand =
+            PaymentMethodJsonParser().parse(PaymentMethodFixtures.CARD_WITH_DISPLAY_BRAND_JSON)
+                .card?.displayBrand
+
+        assertThat(actualDisplayBrand)
+            .isEqualTo(
+                PaymentMethod.Card.DisplayBrand(
+                    type = CardBrand.CartesBancaires
                 )
             )
     }
