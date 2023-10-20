@@ -36,6 +36,18 @@ internal fun USBankAccountEmitters(
     }
 
     LaunchedEffect(Unit) {
+        viewModel.collectBankAccountResult.collect {
+            usBankAccountFormArgs.handleScreenStateChanged(
+                context = context,
+                screenState = screenState,
+                enabled = hasRequiredFields,
+                merchantName = viewModel.formattedMerchantName(),
+                onPrimaryButtonClick = viewModel::handlePrimaryButtonClick,
+            )
+        }
+    }
+
+    LaunchedEffect(Unit) {
         viewModel.saveForFutureUse.filterNot {
             screenState is USBankAccountFormScreenState.BillingDetailsCollection
         }.collect { saved ->
