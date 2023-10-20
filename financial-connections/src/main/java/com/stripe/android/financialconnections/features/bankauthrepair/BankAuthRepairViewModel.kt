@@ -4,11 +4,10 @@ import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.domain.CompleteRepairSession
@@ -228,13 +227,8 @@ internal class BankAuthRepairViewModel @Inject constructor(
     internal companion object :
         MavericksViewModelFactory<BankAuthRepairViewModel, SharedPartnerAuthState> {
 
-        override fun initialState(viewModelContext: ViewModelContext) = SharedPartnerAuthState(
-            payload = Uninitialized,
-            authenticationStatus = Uninitialized,
-            viewEffect = null,
-            activeAuthSession = null,
-            pane = PANE
-        )
+        override fun initialState(viewModelContext: ViewModelContext) =
+            SharedPartnerAuthState(pane = PANE)
 
         override fun create(
             viewModelContext: ViewModelContext,

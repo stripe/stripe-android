@@ -15,7 +15,6 @@ import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Loaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AuthSessionOpened
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AuthSessionRetrieved
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AuthSessionUrlReceived
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PrepaneClickContinue
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
@@ -38,9 +37,6 @@ import com.stripe.android.financialconnections.features.partnerauth.SharedPartne
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenPartnerAuth
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Payload
-import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
-import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenPartnerAuth
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -423,14 +419,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     companion object : MavericksViewModelFactory<PartnerAuthViewModel, SharedPartnerAuthState> {
 
-        override fun initialState(viewModelContext: ViewModelContext) =
-            SharedPartnerAuthState(
-                activeAuthSession = null,
-                pane = PANE,
-                payload = Uninitialized,
-                viewEffect = null,
-                authenticationStatus = Uninitialized
-            )
+        override fun initialState(viewModelContext: ViewModelContext) = SharedPartnerAuthState(pane = PANE,)
 
         override fun create(
             viewModelContext: ViewModelContext,
