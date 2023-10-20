@@ -309,6 +309,9 @@ internal class PlaygroundTestDriver(
 
         customOperations()
 
+        composeTestRule.waitForIdle()
+        device.waitForIdle()
+
         currentActivity[0]?.let {
             compareScreenshot(it)
         }
