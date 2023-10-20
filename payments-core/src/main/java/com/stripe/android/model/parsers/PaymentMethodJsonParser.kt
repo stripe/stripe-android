@@ -140,7 +140,7 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                     NetworksJsonParser().parse(it)
                 },
                 displayBrand = json.optJSONObject(FIELD_DISPLAY_BRAND)?.let {
-                    DisplayBrandParser().parse(it)
+                    DisplayBrandParser.parse(it)
                 }
             )
         }
@@ -177,15 +177,13 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             }
         }
 
-        internal class DisplayBrandParser : ModelJsonParser<PaymentMethod.Card.DisplayBrand> {
+        internal object DisplayBrandParser : ModelJsonParser<PaymentMethod.Card.DisplayBrand> {
+            private const val FIELD_TYPE = "type"
+
             override fun parse(json: JSONObject): PaymentMethod.Card.DisplayBrand {
                 return PaymentMethod.Card.DisplayBrand(
                     type = CardBrand.fromCode(json.getString(FIELD_TYPE))
                 )
-            }
-
-            private companion object {
-                private const val FIELD_TYPE = "type"
             }
         }
 
