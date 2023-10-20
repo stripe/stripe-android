@@ -29,7 +29,6 @@
     <ID>LargeClass:CardMultilineWidgetTest.kt$CardMultilineWidgetTest</ID>
     <ID>LargeClass:CardNumberEditTextTest.kt$CardNumberEditTextTest</ID>
     <ID>LargeClass:CustomerSessionTest.kt$CustomerSessionTest</ID>
-    <ID>LargeClass:ElementsSessionFixtures.kt$ElementsSessionFixtures</ID>
     <ID>LargeClass:PaymentIntentFixtures.kt$PaymentIntentFixtures</ID>
     <ID>LargeClass:SetupIntentFixtures.kt$SetupIntentFixtures</ID>
     <ID>LargeClass:SourceParamsTest.kt$SourceParamsTest</ID>
@@ -37,6 +36,7 @@
     <ID>LargeClass:StripeApiRepository.kt$StripeApiRepository : StripeRepository</ID>
     <ID>LargeClass:StripeApiRepositoryTest.kt$StripeApiRepositoryTest</ID>
     <ID>LargeClass:StripeKtxTest.kt$StripeKtxTest</ID>
+    <ID>LongMethod:CardBrandView.kt$@Composable private fun CardBrand( isLoading: Boolean, currentBrand: CardBrand, possibleBrands: List&lt;CardBrand>, shouldShowCvc: Boolean, shouldShowErrorIcon: Boolean, tintColorInt: Int, isCbcEligible: Boolean, modifier: Modifier = Modifier, onBrandSelected: (CardBrand?) -> Unit, )</ID>
     <ID>LongMethod:CardFormView.kt$CardFormView$private fun setupCardWidget()</ID>
     <ID>LongMethod:CardFormViewTest.kt$CardFormViewTest$@Test fun testCardValidCallback()</ID>
     <ID>LongMethod:CardInputWidget.kt$CardInputWidget$private fun initView(attrs: AttributeSet?)</ID>
@@ -247,6 +247,5 @@
     <ID>UnusedPrivateMember:Stripe3ds2AuthResult.kt$Stripe3ds2AuthResult.Ares$private val sdkTransId: String?</ID>
     <ID>UnusedPrivateMember:Stripe3ds2AuthResult.kt$Stripe3ds2AuthResult.MessageExtension$private val criticalityIndicator: Boolean</ID>
     <ID>UnusedPrivateMember:Stripe3ds2Fixtures.kt$Stripe3ds2Fixtures$private val SDK_TRANSACTION_ID = UUID.randomUUID().toString()</ID>
-    <ID>UnusedPrivateMember:StripeBrowserLauncherActivity.kt$StripeBrowserLauncherActivity$activityResult: ActivityResult</ID>
   </CurrentIssues>
 </SmellBaseline>

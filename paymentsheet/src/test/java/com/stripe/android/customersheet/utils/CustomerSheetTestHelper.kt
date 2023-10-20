@@ -1,4 +1,4 @@
-package com.stripe.android.customersheet
+package com.stripe.android.customersheet.utils
 
 import android.app.Application
 import androidx.activity.result.ActivityResultLauncher
@@ -6,8 +6,15 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.customersheet.CustomerAdapter
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.CustomerSheetLoader
+import com.stripe.android.customersheet.CustomerSheetViewModel
+import com.stripe.android.customersheet.CustomerSheetViewState
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.FakeCustomerAdapter
+import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
-import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
@@ -25,11 +32,12 @@ import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOf
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import javax.inject.Provider
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 object CustomerSheetTestHelper {
@@ -48,28 +56,9 @@ object CustomerSheetTestHelper {
         )
     }
 
-    internal fun createViewModel(
-        lpmRepository: LpmRepository = this.lpmRepository,
-        isLiveMode: Boolean = false,
-        initialBackStack: List<CustomerSheetViewState> = listOf(CustomerSheetViewState.Loading(isLiveMode)),
-        savedPaymentSelection: PaymentSelection? = null,
-        customerAdapter: CustomerAdapter = FakeCustomerAdapter(
-            paymentMethods = CustomerAdapter.Result.success(listOf(CARD_PAYMENT_METHOD))
-        ),
-        stripeRepository: StripeRepository = FakeStripeRepository(),
-        paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
-            publishableKey = "pk_test_123",
-            stripeAccountId = null,
-        ),
-        configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
-            googlePayEnabled = true
-        ),
-        isGooglePayAvailable: Boolean = true,
-        eventReporter: CustomerSheetEventReporter = mock(),
-        intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueCompleteStep(true)
-        }
-    ): CustomerSheetViewModel {
+    private fun mockedFormViewModel(
+        configuration: CustomerSheet.Configuration,
+    ): Provider<FormViewModelSubcomponent.Builder> {
         val formViewModel = FormViewModel(
             context = application,
             formArguments = FormArguments(
@@ -100,12 +89,51 @@ object CustomerSheetTestHelper {
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 
+        return mockFormSubComponentBuilderProvider
+    }
+
+    internal fun createViewModel(
+        lpmRepository: LpmRepository = CustomerSheetTestHelper.lpmRepository,
+        isLiveMode: Boolean = false,
+        workContext: CoroutineContext = EmptyCoroutineContext,
+        initialBackStack: List<CustomerSheetViewState> = listOf(
+            CustomerSheetViewState.Loading(
+                isLiveMode
+            )
+        ),
+        isGooglePayAvailable: Boolean = true,
+        customerPaymentMethods: List<PaymentMethod> = listOf(CARD_PAYMENT_METHOD),
+        savedPaymentSelection: PaymentSelection? = null,
+        stripeRepository: StripeRepository = FakeStripeRepository(),
+        paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
+            publishableKey = "pk_test_123",
+            stripeAccountId = null,
+        ),
+        configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
+            googlePayEnabled = isGooglePayAvailable
+        ),
+        formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder> =
+            mockedFormViewModel(configuration),
+        eventReporter: CustomerSheetEventReporter = mock(),
+        intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+            enqueueCompleteStep(true)
+        },
+        customerAdapter: CustomerAdapter = FakeCustomerAdapter(
+            paymentMethods = CustomerAdapter.Result.success(customerPaymentMethods)
+        ),
+        customerSheetLoader: CustomerSheetLoader = FakeCustomerSheetLoader(
+            customerPaymentMethods = customerPaymentMethods,
+            paymentSelection = savedPaymentSelection,
+            isGooglePayAvailable = isGooglePayAvailable,
+        ),
+    ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
             application = application,
             initialBackStack = initialBackStack,
+            workContext = workContext,
             savedPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
-            formViewModelSubcomponentBuilderProvider = mockFormSubComponentBuilderProvider,
+            formViewModelSubcomponentBuilderProvider = formViewModelSubcomponentBuilderProvider,
             resources = application.resources,
             stripeRepository = stripeRepository,
             customerAdapter = customerAdapter,
@@ -124,13 +152,9 @@ object CustomerSheetTestHelper {
                     return mock()
                 }
             },
-            googlePayRepositoryFactory = {
-                GooglePayRepository {
-                    flowOf(isGooglePayAvailable)
-                }
-            },
             statusBarColor = { null },
             eventReporter = eventReporter,
+            customerSheetLoader = customerSheetLoader,
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
         }

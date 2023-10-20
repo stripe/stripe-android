@@ -6,9 +6,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Stripe
 import com.stripe.android.confirmPaymentIntent
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
 import com.stripe.android.financialconnections.example.settings.FlowDefinition
@@ -38,10 +40,26 @@ internal class FinancialConnectionsPlaygroundViewModel(
 
     init {
         _state.update { it.copy(backendUrl = settings.backendUrl) }
+        FinancialConnections.setEventListener { event: FinancialConnectionsEvent ->
+            _state.update { state ->
+                state.copy(
+                    emittedEvents = state.emittedEvents + buildString {
+                        append(event.name)
+                        append(", ")
+                        append(event.metadata.toMap().filterValues { it != null })
+                    }
+                )
+            }
+        }
     }
 
     fun startFinancialConnectionsSession() = with(state.value.settings) {
-        _state.update { it.copy(status = emptyList()) }
+        _state.update {
+            it.copy(
+                status = emptyList(),
+                emittedEvents = emptyList()
+            )
+        }
         Log.d(
             "FinancialConnections",
             "Starting session with settings: ${asJsonString()}"
@@ -186,10 +204,10 @@ internal class FinancialConnectionsPlaygroundViewModel(
             is CollectBankAccountResult.Completed -> runCatching {
                 _state.update {
                     val session = result.response.financialConnectionsSession
-                    val account = session.accounts.data.first()
+                    val account = session.accounts.data.firstOrNull()
                     it.copy(
                         status = it.status + listOf(
-                            "Session Completed! ${session.id} (account: ${account.id})",
+                            "Session Completed! ${session.id} (account: ${account?.id})",
                             "Confirming Intent: ${result.response.intent.id}",
                         )
                     )
@@ -206,11 +224,11 @@ internal class FinancialConnectionsPlaygroundViewModel(
                         status = it.status + "Intent Confirmed!"
                     )
                 }
-            }.onFailure {
+            }.onFailure { error ->
                 _state.update {
                     it.copy(
                         loading = false,
-                        status = it.status + "Confirming intent Failed!: $it"
+                        status = it.status + "Confirming intent Failed!: $error"
                     )
                 }
             }
@@ -287,7 +305,8 @@ internal data class FinancialConnectionsPlaygroundState(
     val settings: PlaygroundSettings = PlaygroundSettings.createFromDefaults(),
     val loading: Boolean = false,
     val publishableKey: String? = null,
-    val status: List<String> = emptyList()
+    val status: List<String> = emptyList(),
+    val emittedEvents: List<String> = emptyList()
 ) {
     val flow = settings[FlowDefinition]
 }

@@ -109,7 +109,7 @@ internal fun SharedPartnerAuth(
         onClickableTextClick = onClickableTextClick,
         onSelectAnotherBank = onSelectAnotherBank,
         onEnterDetailsManually = onEnterDetailsManually,
-        onCloseClick = { viewModel.onCloseNoConfirmationClick(state.pane) },
+        onCloseClick = { viewModel.onCloseWithConfirmationClick(state.pane) },
         onContinueClick = onContinueClick,
         onCloseFromErrorClick = viewModel::onCloseFromErrorClick
     )

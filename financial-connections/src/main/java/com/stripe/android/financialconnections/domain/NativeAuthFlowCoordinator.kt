@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.domain
 
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,16 +28,12 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
         /**
          * Triggers a termination of the AuthFlow, completing the session in the current state.
          */
-        data class Terminate(
-            val cause: EarlyTerminationCause
+        data class Complete(
+            val cause: EarlyTerminationCause? = null
         ) : Message {
             enum class EarlyTerminationCause(val value: String) {
                 USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY("user_initiated_with_custom_manual_entry")
             }
         }
-
-        data class Finish(
-            val result: FinancialConnectionsSheetActivityResult
-        ) : Message
     }
 }

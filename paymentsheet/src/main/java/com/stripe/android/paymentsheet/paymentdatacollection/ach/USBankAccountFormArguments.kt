@@ -33,7 +33,7 @@ internal class USBankAccountFormArguments(
     val clientSecret: String?,
     val shippingDetails: AddressDetails?,
     val draftPaymentSelection: PaymentSelection?,
-    val onMandateTextChanged: (String?) -> Unit,
+    val onMandateTextChanged: (String?, Boolean) -> Unit,
     val onHandleUSBankAccount: (PaymentSelection.New.USBankAccount) -> Unit,
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
     val onUpdatePrimaryButtonState: (PrimaryButton.State) -> Unit,

@@ -16,8 +16,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
-import com.stripe.android.googlepaylauncher.GooglePayEnvironment
-import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -38,19 +36,19 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
-import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.utils.mapAsStateFlow
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import kotlinx.coroutines.async
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
+import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSheetViewModelScope
@@ -67,11 +65,12 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val lpmRepository: LpmRepository,
     private val statusBarColor: () -> Int?,
     private val eventReporter: CustomerSheetEventReporter,
+    private val workContext: CoroutineContext = Dispatchers.IO,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
-    private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
+    private val customerSheetLoader: CustomerSheetLoader,
 ) : ViewModel() {
 
     private val backStack = MutableStateFlow(initialBackStack)
@@ -84,16 +83,15 @@ internal class CustomerSheetViewModel @Inject constructor(
     private var paymentLauncher: PaymentLauncher? = null
 
     private var unconfirmedPaymentMethod: PaymentMethod? = null
+    private var stripeIntent: StripeIntent? = null
 
     init {
-        lpmRepository.initializeWithCardSpec(
-            configuration.billingDetailsCollectionConfiguration.toInternal()
-        )
-
         configuration.appearance.parseAppearance()
 
         if (viewState.value is CustomerSheetViewState.Loading) {
-            loadPaymentMethods()
+            viewModelScope.launch {
+                loadCustomerSheetState()
+            }
         }
     }
 
@@ -183,60 +181,30 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    private fun loadPaymentMethods() {
-        viewModelScope.launch {
-            val paymentMethodsResult = async {
-                customerAdapter.retrievePaymentMethods()
-            }
-            val selectedPaymentOption = async {
-                customerAdapter.retrieveSelectedPaymentOption()
-            }
+    private suspend fun loadCustomerSheetState() {
+        val result = withContext(workContext) {
+            customerSheetLoader.load(
+                configuration = configuration,
+            )
+        }
 
-            paymentMethodsResult.await().flatMap { paymentMethods ->
-                selectedPaymentOption.await().map { paymentOption ->
-                    Pair(paymentMethods, paymentOption)
-                }
-            }.map {
-                val paymentMethods = it.first
-                val paymentOption = it.second
-                val selection = paymentOption?.toPaymentSelection { id ->
-                    paymentMethods.find { it.id == id }
-                }
-                Pair(paymentMethods, selection)
-            }.onFailure { cause, _ ->
+        result.fold(
+            onSuccess = { state ->
+                savedPaymentSelection = state.paymentSelection
+                isGooglePayReadyAndEnabled = state.isGooglePayReady
+                stripeIntent = state.stripeIntent
+
+                transitionToInitialScreen(
+                    paymentMethods = state.customerPaymentMethods,
+                    paymentSelection = state.paymentSelection
+                )
+            },
+            onFailure = { cause ->
                 _result.update {
                     InternalCustomerSheetResult.Error(exception = cause)
                 }
-            }.onSuccess { result ->
-                var paymentMethods = result.first
-                val paymentSelection = result.second
-
-                paymentSelection?.apply {
-                    val selectedPaymentMethod = (this as? PaymentSelection.Saved)?.paymentMethod
-                    // The order of the payment methods should be selected PM and then any additional PMs
-                    // The carousel always starts with Add and Google Pay (if enabled)
-                    paymentMethods = paymentMethods.sortedWith { left, right ->
-                        // We only care to move the selected payment method, all others stay in the
-                        // order they were before
-                        when {
-                            left.id == selectedPaymentMethod?.id -> -1
-                            right.id == selectedPaymentMethod?.id -> 1
-                            else -> 0
-                        }
-                    }
-                }
-
-                savedPaymentSelection = paymentSelection
-                isGooglePayReadyAndEnabled = configuration.googlePayEnabled && googlePayRepositoryFactory(
-                    if (isLiveModeProvider()) GooglePayEnvironment.Production else GooglePayEnvironment.Test
-                ).isReady().first()
-
-                transitionToInitialScreen(
-                    paymentMethods = paymentMethods,
-                    paymentSelection = paymentSelection
-                )
             }
-        }
+        )
     }
 
     private fun transitionToInitialScreen(paymentMethods: List<PaymentMethod>, paymentSelection: PaymentSelection?) {

@@ -59,7 +59,7 @@ internal fun NetworkingLinkLoginWarmupScreen() {
     val state = viewModel.collectAsState()
     NetworkingLinkLoginWarmupContent(
         state = state.value,
-        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(PANE) },
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onContinueClick = viewModel::onContinueClick,

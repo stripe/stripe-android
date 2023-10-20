@@ -149,20 +149,13 @@ class LpmRepository constructor(
     }
 
     /**
-     * This method can be used to initialize the LpmRepository with the hardcoded card spec.
+     * This method can be used to initialize the LpmRepository with a given map of payment methods.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun initializeWithCardSpec(
-        billingConfiguration: BillingDetailsCollectionConfiguration =
-            BillingDetailsCollectionConfiguration(),
+    fun initializeWithPaymentMethods(
+        paymentMethods: Map<String, SupportedPaymentMethod>
     ) {
-        lpmInitialFormData.putAll(
-            mapOf(
-                PaymentMethod.Type.Card.code to hardcodedCardSpec(
-                    billingDetailsCollectionConfiguration = billingConfiguration
-                )
-            )
-        )
+        lpmInitialFormData.putAll(paymentMethods)
     }
 
     @VisibleForTesting
@@ -740,6 +733,20 @@ class LpmRepository constructor(
                 formSpec = LayoutSpec(specs),
             )
         }
+
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val hardCodedUsBankAccount: SupportedPaymentMethod =
+            SupportedPaymentMethod(
+                code = "us_bank_account",
+                requiresMandate = true,
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
+                iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+                tintIconOnSelection = true,
+                requirement = USBankAccountRequirement,
+                formSpec = LayoutSpec(emptyList())
+            )
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

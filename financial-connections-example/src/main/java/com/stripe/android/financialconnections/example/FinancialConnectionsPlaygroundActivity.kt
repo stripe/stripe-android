@@ -6,23 +6,32 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,6 +53,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         collectBankAccountLauncher = CollectBankAccountLauncher.create(
             this,
             viewModel::onCollectBankAccountLauncherResult
@@ -101,14 +111,44 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     }
 
     @Composable
-    @Suppress("LongMethod")
     private fun FinancialConnectionsContent(
+        state: FinancialConnectionsPlaygroundState,
+        onButtonClick: (Merchant, Flow, Pair<String, String>, String) -> Unit
+    ) {
+        val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
+
+        if (showDialog) {
+            EventsDialog(setShowDialog, state)
+        }
+
+        Scaffold(
+            topBar = { PlaygroundTopBar(setShowDialog) },
+            content = {
+                PlaygroundContent(
+                    padding = it,
+                    state = state,
+                    onButtonClick = onButtonClick
+                )
+            }
+        )
+    }
+
+    @Composable
+    @Suppress("LongMethod")
+    private fun PlaygroundContent(
+        padding: PaddingValues,
         state: FinancialConnectionsPlaygroundState,
         onSettingsChanged: (PlaygroundSettings) -> Unit,
         onButtonClick: () -> Unit
     ) {
+        val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
+
+        if (showDialog) {
+            EventsDialog(setShowDialog, state)
+        }
+
         Scaffold(
-            topBar = { TopAppBar(title = { Text("Connections Playground") }) },
+            topBar = { PlaygroundTopBar(setShowDialog) },
             content = {
                 Column(
                     modifier = Modifier
@@ -154,6 +194,55 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                             }
                         }
                     }
+                }
+            }
+        )
+    }
+
+    @Composable
+    private fun PlaygroundTopBar(
+        setShowDialog: (Boolean) -> Unit,
+    ) {
+        val (showMenu, setShowMenu) = remember { mutableStateOf(false) }
+        TopAppBar(
+            title = { Text("Connections Playground") },
+            actions = {
+                IconButton(onClick = { setShowMenu(true) }) {
+                    Icon(Icons.Default.MoreVert, contentDescription = "More")
+                }
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { setShowMenu(false) }
+                ) {
+                    DropdownMenuItem(onClick = {
+                        setShowMenu(false)
+                        setShowDialog(true)
+                    }) {
+                        Text("See live events")
+                    }
+                }
+            }
+        )
+    }
+
+    @Composable
+    private fun EventsDialog(
+        setShowDialog: (Boolean) -> Unit,
+        state: FinancialConnectionsPlaygroundState
+    ) {
+        AlertDialog(
+            onDismissRequest = { setShowDialog(false) },
+            title = { Text(text = "Emitted events") },
+            text = {
+                LazyColumn {
+                    items(state.emittedEvents) { item ->
+                        Text(text = "- $item")
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = { setShowDialog(false) }) {
+                    Text("Close")
                 }
             }
         )

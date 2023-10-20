@@ -8,13 +8,15 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountSelected
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLearnMoreDataAccess
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLinkAccounts
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PollAccountsSucceeded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.AccountSelected
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLinkAccounts
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAccountsSucceeded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
@@ -214,6 +216,7 @@ internal class AccountPickerViewModel @Inject constructor(
         viewModelScope.launch {
             eventTracker.track(ClickLinkAccounts(PANE))
         }
+        FinancialConnections.emitEvent(name = Name.ACCOUNTS_SELECTED)
         withState { state ->
             state.payload()?.let {
                 submitAccounts(state.selectedIds, updateLocalCache = true)
@@ -273,9 +276,7 @@ internal class AccountPickerViewModel @Inject constructor(
 
     fun onLearnMoreAboutDataAccessClick() {
         viewModelScope.launch {
-            eventTracker.track(
-                FinancialConnectionsEvent.ClickLearnMoreDataAccess(Pane.ACCOUNT_PICKER)
-            )
+            eventTracker.track(ClickLearnMoreDataAccess(Pane.ACCOUNT_PICKER))
         }
     }
 
