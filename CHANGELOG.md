@@ -15,7 +15,7 @@
 
 ### Payments
 * [ADDED][7449](https://github.com/stripe/stripe-android/pull/7449) Added saved payment method support for SEPA family payment methods.
-* [FIXED][7464](https://github.com/stripe/stripe-android/pull/7464) Fixed a bug where a user that cancels the US Bank Account selection flow prevents the user from launching it again.
+* [FIXED][7464](https://github.com/stripe/stripe-android/pull/7464) Fixed a bug where canceling the US Bank Account selection flow prevents the user from launching it again.
 
 ## 20.33.0 - 2023-10-16
 

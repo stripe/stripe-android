@@ -602,23 +602,23 @@ internal class PlaygroundTestDriver(
     }
 
     private fun doUSBankAccountAuthorization() {
-            selectors.apply {
-                if (testParameters.authorizationAction != null) {
-                    if (testParameters.authorizationAction?.requiresBrowser == true) {
-                        // If a specific browser is requested we will use it, otherwise, we will
-                        // select the first browser found
-                        val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
+        selectors.apply {
+            if (testParameters.authorizationAction != null) {
+                if (testParameters.authorizationAction?.requiresBrowser == true) {
+                    // If a specific browser is requested we will use it, otherwise, we will
+                    // select the first browser found
+                    val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
 
-                        // If there are multiple browser there is a browser selector window
-                        selectBrowserPrompt.wait(4000)
-                        if (selectBrowserPrompt.exists()) {
-                            browserIconAtPrompt(selectedBrowser).click()
-                        }
-
-                        assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
-
-                        blockUntilUSBankAccountPageLoaded()
+                    // If there are multiple browser there is a browser selector window
+                    selectBrowserPrompt.wait(4000)
+                    if (selectBrowserPrompt.exists()) {
+                        browserIconAtPrompt(selectedBrowser).click()
                     }
+
+                    assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
+
+                    blockUntilUSBankAccountPageLoaded()
+                }
                 if (testParameters.authorizationAction == AuthorizeAction.Cancel) {
                     selectors.authorizeAction?.click()
                 }
