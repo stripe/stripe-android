@@ -168,12 +168,20 @@ internal class BankAuthRepairViewModel @Inject constructor(
             logger = logger,
             pane = PANE
         )
-        navigationManager.tryNavigateTo(LinkAccountPicker(referrer = PANE))
+        navigationManager.tryNavigateTo(
+            LinkAccountPicker(referrer = PANE),
+            popUpToCurrent = true,
+            inclusive = true
+        )
     }
 
     private fun onAuthCancelled(url: String?) {
         logger.debug("Auth cancelled $url")
-        navigationManager.tryNavigateTo(LinkAccountPicker(referrer = PANE))
+        navigationManager.tryNavigateTo(
+            LinkAccountPicker(referrer = PANE),
+            popUpToCurrent = true,
+            inclusive = true
+        )
     }
 
     private suspend fun completeRepairSession(url: String) = runCatching {
