@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -85,7 +86,7 @@ internal abstract class BaseSheetViewModel(
         ?: application.applicationInfo.loadLabel(application.packageManager).toString()
 
     protected var mostRecentError: Throwable? = null
-    protected var isEligibleForCardBrandChoice: Boolean = false
+    protected var cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible
 
     internal val googlePayState: StateFlow<GooglePayState> = savedStateHandle
         .getStateFlow(SAVE_GOOGLE_PAY_STATE, GooglePayState.Indeterminate)
@@ -477,7 +478,7 @@ internal abstract class BaseSheetViewModel(
         merchantName = merchantName,
         amount = amount.value,
         newLpm = newPaymentSelection,
-        isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+        cbcEligibility = cbcEligibility,
     )
 
     fun handleBackPressed() {

@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -134,7 +135,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         updateSelection(args.state.paymentSelection)
 
-        isEligibleForCardBrandChoice = args.state.isEligibleForCardBrandChoice
+        cbcEligibility = when (args.state.isEligibleForCardBrandChoice) {
+            true -> CardBrandChoiceEligibility.Eligible(
+                preferredNetworks = args.state.config?.preferredNetworks ?: listOf()
+            )
+            false -> CardBrandChoiceEligibility.Ineligible
+        }
 
         transitionToFirstScreen()
     }
