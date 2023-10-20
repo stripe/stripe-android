@@ -32,7 +32,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
     private val settings = Settings(application)
     private val repository = BackendRepository(settings)
 
-    private val _state = MutableStateFlow(FinancialConnectionsPlaygroundState())
+    private val _state = MutableStateFlow(FinancialConnectionsPlaygroundState(application))
     val state: StateFlow<FinancialConnectionsPlaygroundState> = _state
 
     private val _viewEffect = MutableSharedFlow<FinancialConnectionsPlaygroundViewEffect?>()
@@ -265,7 +265,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
     }
 }
 
-enum class Merchant(val flow: String) {
+enum class Merchant(val apiValue: String) {
     Test("testmode"),
     PartnerM("partner_m"),
     PartnerF("partner_f"),
@@ -302,11 +302,16 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
 
 internal data class FinancialConnectionsPlaygroundState(
     val backendUrl: String = "",
-    val settings: PlaygroundSettings = PlaygroundSettings.createFromDefaults(),
+    val settings: PlaygroundSettings,
     val loading: Boolean = false,
     val publishableKey: String? = null,
     val status: List<String> = emptyList(),
     val emittedEvents: List<String> = emptyList()
 ) {
+
+    constructor(application: Application) : this(
+        settings = PlaygroundSettings.createFromSharedPreferences(application)
+    )
+
     val flow = settings[FlowDefinition]
 }

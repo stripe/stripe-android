@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.edit
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -40,12 +39,6 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
             layoutManager = linearLayoutManager
             adapter = ExamplesAdapter(this@FinancialConnectionsLauncherActivity)
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // prevent playground configuration from leaking to example apps.
-        connectionsDebugSharedPrefs.edit { clear() }
     }
 
     private class ExamplesAdapter(

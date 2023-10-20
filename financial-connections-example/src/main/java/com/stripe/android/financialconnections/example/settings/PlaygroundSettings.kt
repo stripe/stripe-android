@@ -1,12 +1,15 @@
 package com.stripe.android.financialconnections.example.settings
 
+import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.core.content.edit
 import com.stripe.android.financialconnections.example.BuildConfig
 import com.stripe.android.financialconnections.example.data.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.PaymentIntentBody
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
 internal data class PlaygroundSettings(
@@ -62,10 +65,10 @@ internal data class PlaygroundSettings(
                 null
             }
         }.filterNotNull().toMap()
-        return Json.encodeToString(kotlinx.serialization.json.JsonObject(settingsMap))
+        return Json.encodeToString(JsonObject(settingsMap))
     }
 
-    fun saveToSharedPreferences(context: Context) {
+    fun saveToSharedPreferences(context: Application) {
         val sharedPreferences = context.getSharedPreferences(
             sharedPreferencesName,
             Context.MODE_PRIVATE
@@ -91,6 +94,20 @@ internal data class PlaygroundSettings(
         private const val sharedPreferencesName = "FINANCIAL_CONNECTIONS_DEBUG"
         private const val sharedPreferencesKey = "json"
 
+        fun createFromSharedPreferences(context: Application): PlaygroundSettings {
+            val sharedPreferences = context.getSharedPreferences(
+                sharedPreferencesName,
+                Context.MODE_PRIVATE
+            )
+            return runCatching { sharedPreferences.getString(sharedPreferencesKey, null) }
+                .onFailure { Log.e("PlaygroundSettings", "Failed to read from shared preferences", it) }
+                .getOrNull()
+                ?.let { createFromJsonString(it) }
+                ?: createFromDefaults()
+
+
+        }
+
         fun createFromDefaults(): PlaygroundSettings {
             val settings = allSettingDefinitions.mapNotNull {
                 val saveable = it.saveable()
@@ -100,6 +117,24 @@ internal data class PlaygroundSettings(
                     null
                 }
             }.toMap().toMutableMap()
+            return PlaygroundSettings(settings)
+        }
+
+
+        private fun createFromJsonString(jsonString: String): PlaygroundSettings {
+            val settings: MutableMap<PlaygroundSettingDefinition<*>, Any?> = mutableMapOf()
+            val jsonObject = Json.decodeFromString(JsonObject.serializer(), jsonString)
+
+            for (settingDefinition in allSettingDefinitions) {
+                val saveable = settingDefinition.saveable() ?: continue
+                val jsonPrimitive = jsonObject[saveable.key] as? JsonPrimitive?
+                if (jsonPrimitive?.isString == true) {
+                    settings[settingDefinition] = saveable.convertToValue(jsonPrimitive.content)
+                } else {
+                    settings[settingDefinition] = saveable.defaultValue
+                }
+            }
+
             return PlaygroundSettings(settings)
         }
 

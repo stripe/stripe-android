@@ -144,62 +144,52 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         onSettingsChanged: (PlaygroundSettings) -> Unit,
         onButtonClick: () -> Unit
     ) {
-        val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
-
-        if (showDialog) {
-            EventsDialog(setShowDialog, state)
-        }
-
-        Scaffold(
-            topBar = { PlaygroundTopBar(setShowDialog) },
-            content = {
-                Column(
-                    modifier = Modifier
-                        .padding(it)
-                        .padding(16.dp)
-                ) {
-                    SettingsUi(
-                        playgroundSettings = state.settings,
-                        onSettingsChanged = onSettingsChanged
-                    )
-                    if (state.loading) {
-                        LinearProgressIndicator(
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                    Divider(Modifier.padding(vertical = 8.dp))
-                    Text(
-                        text = "backend: ${state.backendUrl}",
-                        color = Color.Gray
-                    )
-                    Text(
-                        text = "env: ${BuildConfig.TEST_ENVIRONMENT}",
-                        color = Color.Gray
-                    )
-                    Button(
-                        onClick = { onButtonClick() },
-                    ) {
-                        Text("Connect Accounts!")
-                    }
-                    LazyColumn {
-                        items(state.status) { item ->
-                            Row(Modifier.padding(4.dp), verticalAlignment = Alignment.Top) {
-                                Canvas(
-                                    modifier = Modifier
-                                        .padding(end = 8.dp, top = 6.dp)
-                                        .size(6.dp)
-                                ) {
-                                    drawCircle(Color.Black)
-                                }
-                                SelectionContainer {
-                                    Text(text = item, fontSize = 12.sp)
-                                }
-                            }
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .padding(16.dp)
+        ) {
+            SettingsUi(
+                playgroundSettings = state.settings,
+                onSettingsChanged = onSettingsChanged
+            )
+            if (state.loading) {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            Divider(Modifier.padding(vertical = 8.dp))
+            Text(
+                text = "backend: ${state.backendUrl}",
+                color = Color.Gray
+            )
+            Text(
+                text = "env: ${BuildConfig.TEST_ENVIRONMENT}",
+                color = Color.Gray
+            )
+            Button(
+                onClick = { onButtonClick() },
+            ) {
+                Text("Connect Accounts!")
+            }
+            LazyColumn {
+                items(state.status) { item ->
+                    Row(Modifier.padding(4.dp), verticalAlignment = Alignment.Top) {
+                        Canvas(
+                            modifier = Modifier
+                                .padding(end = 8.dp, top = 6.dp)
+                                .size(6.dp)
+                        ) {
+                            drawCircle(Color.Black)
+                        }
+                        SelectionContainer {
+                            Text(text = item, fontSize = 12.sp)
                         }
                     }
                 }
             }
-        )
+        }
+
     }
 
     @Composable
@@ -256,6 +246,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     fun ContentPreview() {
         FinancialConnectionsContent(
             state = FinancialConnectionsPlaygroundState(
+                settings = PlaygroundSettings.createFromDefaults(),
                 backendUrl = "http://backend.url",
                 loading = false,
                 publishableKey = "pk",

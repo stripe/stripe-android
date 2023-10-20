@@ -16,14 +16,14 @@ internal object MerchantDefinition : PlaygroundSettingDefinition.Displayable<Mer
         body: LinkAccountSessionBody,
         value: Merchant?
     ): LinkAccountSessionBody = body.copy(
-        flow = value?.flow
+        flow = value?.apiValue
     )
 
     override fun paymentIntentRequest(
         body: PaymentIntentBody,
         value: Merchant?
     ) = body.copy(
-        flow = value?.flow
+        flow = value?.apiValue
     )
 
     override fun valueUpdated(
