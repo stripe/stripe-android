@@ -57,3 +57,5 @@ execute_or_fail("git push --force #{push_url}")
 # Print the URL for the fixing pull request
 diff_url = "https://github.com/#{repo}/compare/#{new_branch_name}?expand=1"
 puts "Screenshot tests failed.\n\nMerge the screenshot diff here if it's an intentional change: #{diff_url}"
+
+exit false
