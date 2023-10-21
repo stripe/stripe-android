@@ -20,6 +20,7 @@ import com.stripe.android.utils.injectableActivityScenario
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 import org.robolectric.annotation.Config
 import java.util.Stack
 
@@ -268,7 +269,11 @@ internal class CustomerSheetActivityTest {
     ): CustomerSheetViewState.AddPaymentMethod {
         return CustomerSheetViewState.AddPaymentMethod(
             paymentMethodCode = paymentMethodCode,
+            supportedPaymentMethods = listOf(),
             formViewData = formViewData,
+            formArguments = mock(),
+            usBankAccountFormArguments = mock(),
+            selectedPaymentMethod = mock(),
             enabled = enabled,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,

@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
+import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.addPaymentMethodViewState
+import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.mockedFormViewModel
+import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.selectPaymentMethodViewState
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -19,6 +22,7 @@ import com.stripe.android.utils.screenshots.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetScreenshotTest {
     @get:Rule
     val paparazzi = PaparazziRule(
@@ -30,22 +34,17 @@ class CustomerSheetScreenshotTest {
             .fillMaxWidth(),
     )
 
+    private val configuration = CustomerSheet.Configuration()
+
     @Test
     fun testDefault() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.SelectPaymentMethod(
-                    title = null,
-                    savedPaymentMethods = emptyList(),
-                    paymentSelection = null,
-                    isLiveMode = false,
-                    isProcessing = false,
-                    isEditing = false,
-                    isGooglePayEnabled = false,
-                    primaryButtonVisible = true,
-                    primaryButtonLabel = null,
-                ),
+                viewState = selectPaymentMethodViewState,
                 paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = mockedFormViewModel(
+                    configuration = configuration,
+                ),
             )
         }
     }
@@ -68,24 +67,22 @@ class CustomerSheetScreenshotTest {
             }
             var counter = 0
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.SelectPaymentMethod(
+                viewState = selectPaymentMethodViewState.copy(
                     title = "Screenshot testing",
                     savedPaymentMethods = savedPaymentMethods,
                     paymentSelection = PaymentSelection.Saved(
                         savedPaymentMethods.first()
                     ),
-                    isLiveMode = false,
-                    isProcessing = false,
-                    isEditing = false,
-                    isGooglePayEnabled = true,
-                    primaryButtonVisible = true,
                     primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = {
                     counter++
                     "424$counter"
-                }
+                },
+                formViewModelSubComponentBuilderProvider = mockedFormViewModel(
+                    configuration = configuration,
+                ),
             )
         }
     }
@@ -108,24 +105,24 @@ class CustomerSheetScreenshotTest {
             }
             var counter = 0
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.SelectPaymentMethod(
+                selectPaymentMethodViewState.copy(
                     title = "Screenshot testing",
                     savedPaymentMethods = savedPaymentMethods,
                     paymentSelection = PaymentSelection.Saved(
                         savedPaymentMethods.first()
                     ),
-                    isLiveMode = false,
-                    isProcessing = false,
                     isEditing = true,
                     isGooglePayEnabled = true,
-                    primaryButtonVisible = false,
                     primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = {
                     counter++
                     "424$counter"
-                }
+                },
+                formViewModelSubComponentBuilderProvider = mockedFormViewModel(
+                    configuration = configuration,
+                ),
             )
         }
     }
@@ -134,19 +131,17 @@ class CustomerSheetScreenshotTest {
     fun testGooglePay() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.SelectPaymentMethod(
+                viewState = selectPaymentMethodViewState.copy(
                     title = "Screenshot testing",
-                    savedPaymentMethods = emptyList(),
                     paymentSelection = PaymentSelection.GooglePay,
-                    isLiveMode = false,
-                    isProcessing = false,
-                    isEditing = false,
                     isGooglePayEnabled = true,
-                    primaryButtonVisible = true,
                     primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
-                paymentMethodNameProvider = { it!! }
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = mockedFormViewModel(
+                    configuration = configuration,
+                ),
             )
         }
     }
@@ -155,16 +150,15 @@ class CustomerSheetScreenshotTest {
     fun testAddPaymentMethodDisabled() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.AddPaymentMethod(
+                viewState = addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     formViewData = FormViewModel.ViewData(),
-                    enabled = true,
-                    isLiveMode = false,
-                    isProcessing = false,
                     errorMessage = "This is an error message.",
-                    isFirstPaymentMethod = false
                 ),
-                paymentMethodNameProvider = { it!! }
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = mockedFormViewModel(
+                    configuration = configuration,
+                ),
             )
         }
     }
@@ -173,7 +167,7 @@ class CustomerSheetScreenshotTest {
     fun testAddPaymentMethodEnabled() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.AddPaymentMethod(
+                viewState = addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     formViewData = FormViewModel.ViewData(
                         completeFormValues = FormFieldValues(
@@ -184,12 +178,11 @@ class CustomerSheetScreenshotTest {
                             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                         )
                     ),
-                    enabled = true,
-                    isLiveMode = false,
-                    isProcessing = false,
-                    isFirstPaymentMethod = false
                 ),
-                paymentMethodNameProvider = { it!! }
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = mockedFormViewModel(
+                    configuration = configuration,
+                ),
             )
         }
     }
@@ -198,16 +191,16 @@ class CustomerSheetScreenshotTest {
     fun testAddFirstPaymentMethodDisabled() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.AddPaymentMethod(
+                viewState = addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     formViewData = FormViewModel.ViewData(),
-                    enabled = true,
-                    isLiveMode = false,
-                    isProcessing = false,
                     errorMessage = "This is an error message.",
                     isFirstPaymentMethod = true
                 ),
-                paymentMethodNameProvider = { it!! }
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = mockedFormViewModel(
+                    configuration = configuration,
+                ),
             )
         }
     }
@@ -216,7 +209,7 @@ class CustomerSheetScreenshotTest {
     fun testAddFirstPaymentMethodEnabled() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.AddPaymentMethod(
+                viewState = addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     formViewData = FormViewModel.ViewData(
                         completeFormValues = FormFieldValues(
@@ -227,12 +220,12 @@ class CustomerSheetScreenshotTest {
                             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                         )
                     ),
-                    enabled = true,
-                    isLiveMode = false,
-                    isProcessing = false,
                     isFirstPaymentMethod = true
                 ),
-                paymentMethodNameProvider = { it!! }
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = mockedFormViewModel(
+                    configuration = configuration,
+                ),
             )
         }
     }

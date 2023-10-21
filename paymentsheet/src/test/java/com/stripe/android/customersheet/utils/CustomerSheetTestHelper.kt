@@ -22,10 +22,12 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -57,7 +59,62 @@ object CustomerSheetTestHelper {
         )
     }
 
-    private fun mockedFormViewModel(
+    internal val usBankAccountFormArguments = USBankAccountFormArguments(
+        onBehalfOf = null,
+        isCompleteFlow = false,
+        isPaymentFlow = false,
+        stripeIntentId = null,
+        clientSecret = null,
+        shippingDetails = null,
+        draftPaymentSelection = null,
+        onMandateTextChanged = { _, _ -> },
+        onHandleUSBankAccount = { },
+        onUpdatePrimaryButtonState = { },
+        onUpdatePrimaryButtonUIState = { },
+        onError = { },
+    )
+
+    internal val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(
+        title = null,
+        savedPaymentMethods = listOf(CARD_PAYMENT_METHOD),
+        paymentSelection = null,
+        isLiveMode = false,
+        isProcessing = false,
+        isEditing = false,
+        isGooglePayEnabled = false,
+        primaryButtonVisible = false,
+        primaryButtonLabel = null,
+    )
+
+    internal val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
+        paymentMethodCode = PaymentMethod.Type.Card.code,
+        formViewData = FormViewModel.ViewData(
+            completeFormValues = FormFieldValues(
+                showsMandate = false,
+                userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+            ),
+        ),
+        formArguments = FormArguments(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            showCheckbox = false,
+            showCheckboxControlledFields = false,
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            merchantName = ""
+        ),
+        usBankAccountFormArguments = usBankAccountFormArguments,
+        supportedPaymentMethods = listOf(
+            LpmRepository.HardcodedCard,
+            LpmRepository.hardCodedUsBankAccount,
+        ),
+        selectedPaymentMethod = LpmRepository.HardcodedCard,
+        enabled = true,
+        isLiveMode = false,
+        isProcessing = false,
+        errorMessage = null,
+        isFirstPaymentMethod = false,
+    )
+
+    internal fun mockedFormViewModel(
         configuration: CustomerSheet.Configuration,
     ): Provider<FormViewModelSubcomponent.Builder> {
         val formViewModel = FormViewModel(

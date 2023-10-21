@@ -12,21 +12,27 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.PrimaryButton
+import com.stripe.android.customersheet.CustomerSheetACHV2Flag
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.ErrorMessage
+import com.stripe.android.paymentsheet.ui.PaymentElement
 import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.H4Text
+import kotlinx.coroutines.flow.flowOf
+import javax.inject.Provider
 
 @Composable
 internal fun CustomerSheetScreen(
     viewState: CustomerSheetViewState,
+    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     modifier: Modifier = Modifier,
     viewActionHandler: (CustomerSheetViewAction) -> Unit = {},
     paymentMethodNameProvider: (PaymentMethodCode?) -> String,
@@ -61,10 +67,18 @@ internal fun CustomerSheetScreen(
                         )
                     }
                     is CustomerSheetViewState.AddPaymentMethod -> {
-                        AddCard(
-                            viewState = viewState,
-                            viewActionHandler = viewActionHandler,
-                        )
+                        if (CustomerSheetACHV2Flag) {
+                            AddPaymentMethodWithPaymentElement(
+                                viewState = viewState,
+                                viewActionHandler = viewActionHandler,
+                                formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
+                            )
+                        } else {
+                            AddPaymentMethod(
+                                viewState = viewState,
+                                viewActionHandler = viewActionHandler,
+                            )
+                        }
                     }
                 }
             }
@@ -143,7 +157,7 @@ internal fun SelectPaymentMethod(
 }
 
 @Composable
-internal fun AddCard(
+internal fun AddPaymentMethod(
     viewState: CustomerSheetViewState.AddPaymentMethod,
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
     modifier: Modifier = Modifier,
@@ -181,6 +195,60 @@ internal fun AddCard(
                 viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
             },
             modifier = Modifier.padding(top = 10.dp),
+        )
+    }
+}
+
+@Composable
+internal fun AddPaymentMethodWithPaymentElement(
+    viewState: CustomerSheetViewState.AddPaymentMethod,
+    viewActionHandler: (CustomerSheetViewAction) -> Unit,
+    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
+) {
+    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+
+    Column {
+        H4Text(
+            text = stringResource(id = R.string.stripe_paymentsheet_save_a_new_payment_method),
+            modifier = Modifier
+                .padding(bottom = 20.dp)
+                .padding(horizontal = horizontalPadding)
+        )
+
+        PaymentElement(
+            formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
+            enabled = viewState.enabled,
+            supportedPaymentMethods = viewState.supportedPaymentMethods,
+            selectedItem = viewState.selectedPaymentMethod,
+            showLinkInlineSignup = false,
+            linkConfigurationCoordinator = null,
+            showCheckboxFlow = flowOf(false),
+            onItemSelectedListener = { },
+            onLinkSignupStateChanged = { _, _ -> },
+            formArguments = viewState.formArguments,
+            usBankAccountFormArguments = viewState.usBankAccountFormArguments,
+            onFormFieldValuesChanged = { }
+        )
+
+        AnimatedVisibility(visible = viewState.errorMessage != null) {
+            viewState.errorMessage?.let { error ->
+                ErrorMessage(
+                    error = error,
+                    modifier = Modifier.padding(horizontal = horizontalPadding)
+                )
+            }
+        }
+
+        PrimaryButton(
+            label = stringResource(id = R.string.stripe_paymentsheet_save),
+            isEnabled = viewState.primaryButtonEnabled,
+            isLoading = viewState.isProcessing,
+            onButtonClick = {
+                viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            },
+            modifier = Modifier
+                .padding(top = 10.dp)
+                .padding(horizontal = horizontalPadding),
         )
     }
 }
