@@ -43,7 +43,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-object CustomerSheetTestHelper {
+internal object CustomerSheetTestHelper {
     internal val application = ApplicationProvider.getApplicationContext<Application>()
     internal val lpmRepository = LpmRepository(
         LpmRepository.LpmRepositoryArguments(

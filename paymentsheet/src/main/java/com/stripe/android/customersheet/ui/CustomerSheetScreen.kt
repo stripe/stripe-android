@@ -32,7 +32,7 @@ import javax.inject.Provider
 @Composable
 internal fun CustomerSheetScreen(
     viewState: CustomerSheetViewState,
-    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
+    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>?,
     modifier: Modifier = Modifier,
     viewActionHandler: (CustomerSheetViewAction) -> Unit = {},
     paymentMethodNameProvider: (PaymentMethodCode?) -> String,
@@ -203,8 +203,9 @@ internal fun AddPaymentMethod(
 internal fun AddPaymentMethodWithPaymentElement(
     viewState: CustomerSheetViewState.AddPaymentMethod,
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
-    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
+    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>?,
 ) {
+    requireNotNull(formViewModelSubComponentBuilderProvider)
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     Column {
