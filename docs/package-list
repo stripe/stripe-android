@@ -12,6 +12,7 @@ com.stripe.android.camera.scanui
 com.stripe.android.camera.scanui.util
 module:financial-connections
 com.stripe.android.financialconnections
+com.stripe.android.financialconnections.analytics
 com.stripe.android.financialconnections.exception
 com.stripe.android.financialconnections.features.linkaccountpicker
 com.stripe.android.financialconnections.launcher
@@ -64,6 +65,7 @@ module:payments-ui-core
 com.stripe.android.paymentsheet.forms
 com.stripe.android.ui.core
 com.stripe.android.ui.core.address
+com.stripe.android.ui.core.cbc
 com.stripe.android.ui.core.elements
 com.stripe.android.ui.core.elements.autocomplete
 com.stripe.android.ui.core.elements.autocomplete.model
