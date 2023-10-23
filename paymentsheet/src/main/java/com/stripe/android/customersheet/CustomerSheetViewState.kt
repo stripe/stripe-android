@@ -5,14 +5,25 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 
-internal sealed class CustomerSheetViewState (
+internal sealed class CustomerSheetViewState(
     open val savedPaymentMethods: List<PaymentMethod>,
     open val isLiveMode: Boolean,
     open val isProcessing: Boolean,
     open val isEditing: Boolean,
     open val screen: PaymentSheetScreen,
 ) {
+
+    val topBarState: PaymentSheetTopBarState
+        get() = PaymentSheetTopBarStateFactory.create(
+            screen = screen,
+            paymentMethods = savedPaymentMethods,
+            isLiveMode = isLiveMode,
+            isProcessing = isProcessing,
+            isEditing = isEditing,
+        )
 
     data class Loading(
         override val isLiveMode: Boolean,

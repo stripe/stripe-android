@@ -53,7 +53,6 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                 val bottomSheetState = rememberBottomSheetState()
 
                 val viewState by viewModel.viewState.collectAsState()
-                val topBarState by viewModel.topBarState.collectAsState()
                 val result by viewModel.result.collectAsState()
 
                 LaunchedEffect(result) {
@@ -73,7 +72,6 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                 ) {
                     CustomerSheetScreen(
                         viewState = viewState,
-                        topBarState = topBarState,
                         viewActionHandler = viewModel::handleViewAction,
                         paymentMethodNameProvider = viewModel::providePaymentMethodName,
                     )

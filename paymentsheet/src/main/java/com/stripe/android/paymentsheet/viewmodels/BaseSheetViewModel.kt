@@ -202,8 +202,8 @@ internal abstract class BaseSheetViewModel(
         )
 
     val topBarState: StateFlow<PaymentSheetTopBarState> = combine(
-        backStack,
-        paymentMethods,
+        currentScreen,
+        paymentMethods.map { it.orEmpty() },
         stripeIntent.map { it?.isLiveMode ?: true },
         processing,
         editing,

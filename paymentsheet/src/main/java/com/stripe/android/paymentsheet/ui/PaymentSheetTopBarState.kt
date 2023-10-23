@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -20,13 +21,13 @@ internal data class PaymentSheetTopBarState(
 internal object PaymentSheetTopBarStateFactory {
 
     fun create(
-        backStack: List<PaymentSheetScreen>,
-        paymentMethods: List<PaymentMethod>?,
+        screen: PaymentSheetScreen,
+        paymentMethods: List<PaymentMethod>,
         isLiveMode: Boolean,
         isProcessing: Boolean,
         isEditing: Boolean,
     ): PaymentSheetTopBarState {
-        val hasBackStack = backStack.size > 1
+        val hasBackStack = screen.canNavigateBack
 
         val icon = if (hasBackStack) {
             R.drawable.stripe_ic_paymentsheet_back
@@ -46,13 +47,7 @@ internal object PaymentSheetTopBarStateFactory {
             StripeR.string.stripe_edit
         }
 
-        val screen = backStack.last()
-
-        val showEditMenu = if (screen is PaymentSheetScreen.SelectSavedPaymentMethods) {
-            !paymentMethods.isNullOrEmpty()
-        } else {
-            false
-        }
+        val showEditMenu = screen is SelectSavedPaymentMethods && paymentMethods.isNotEmpty()
 
         return PaymentSheetTopBarState(
             icon = icon,
@@ -66,7 +61,7 @@ internal object PaymentSheetTopBarStateFactory {
 
     fun createDefault(): PaymentSheetTopBarState {
         return create(
-            backStack = listOf(PaymentSheetScreen.Loading),
+            screen = PaymentSheetScreen.Loading,
             paymentMethods = emptyList(),
             isLiveMode = true,
             isProcessing = false,
