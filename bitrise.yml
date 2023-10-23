@@ -34,7 +34,8 @@ stages:
       - build-financial-connections-debug-apk: {}
   stage-run-financial-connections-e2e-tests:
     workflows:
-      - run-financial-connections-e2e-tests: {}
+      - run-financial-connections-e2e-native-tests: {}
+      - run-financial-connections-e2e-web-tests: {}
 workflows:
   check:
     before_run:
@@ -113,7 +114,7 @@ workflows:
       - deploy-to-bitrise-io@2:
           inputs:
             - pipeline_intermediate_files: "$BITRISE_APK_PATH:BITRISE_APK_PATH"
-  run-financial-connections-e2e-tests:
+  run-financial-connections-e2e-native-tests:
     before_run:
       - start_emulator
       - prepare_all
@@ -129,32 +130,37 @@ workflows:
       - script@1:
           title: Execute Maestro tests 1
           inputs:
-            - content: "#!/usr/bin/env bash  \nbash ./scripts/execute_maestro_tests.sh"
+            - content: |-
+                #!/usr/bin/env bash
+                bash ./scripts/execute_maestro_tests.sh maestro/financial-connections/Testmode-Data-TestOauthInstitution.yaml
       - custom-test-results-export@1:
           inputs:
             - search_pattern: "*/maestroReportNative.xml"
             - test_name: Maestro tests native
       - deploy-to-bitrise-io@2: {}
-  maestro-financial-connections-web:
+  run-financial-connections-e2e-web-tests:
     before_run:
       - start_emulator
       - prepare_all
     after_run:
       - conclude_all
     steps:
+      - pull-intermediate-files@1:
+          inputs:
+            - artifact_sources: stage-build-financial-connections-debug-apk.build-financial-connections-debug-apk
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
-      - cache-pull@2: {}
       - script@1:
           title: Execute Maestro tests 1
           inputs:
-            - content: "#!/usr/bin/env bash  \nexport BITRISE_APK_PATH=\"$BITRISE_DEPLOY_DIR/financial-connections-example.apk\"
-          \ \nbash ./scripts/execute_maestro_tests.sh"
+            - content: |-
+                #!/usr/bin/env bash
+                bash ./scripts/execute_maestro_tests.sh maestro/financial-connections/Web-Testmode-Data-TestOauthInstitution.yaml
       - custom-test-results-export@1:
           inputs:
-            - search_pattern: "*/maestroReportWeb.xml"
-            - test_name: Maestro tests web
+            - search_pattern: "*/maestroReportNative.xml"
+            - test_name: Maestro tests native
       - deploy-to-bitrise-io@2: {}
   maestro-paymentsheet:
     before_run:
