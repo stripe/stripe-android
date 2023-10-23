@@ -161,6 +161,7 @@ class CardNumberEditText internal constructor(
     @VisibleForTesting
     val accountRangeService = CardAccountRangeService(
         cardAccountRangeRepository = cardAccountRangeRepository,
+        uiContext = Dispatchers.Main,
         workContext = workContext,
         staticCardAccountRanges = staticCardAccountRanges,
         isCbcEligible = { isCbcEligible },

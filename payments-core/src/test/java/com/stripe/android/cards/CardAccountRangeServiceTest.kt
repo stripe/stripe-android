@@ -16,6 +16,8 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.utils.TestUtils
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -74,6 +76,7 @@ class CardAccountRangeServiceTest {
         val mockRemoteCardAccountRangeSource = mock<CardAccountRangeSource>()
         val serviceMockRemote = CardAccountRangeService(
             createMockRemoteDefaultCardAccountRangeRepository(mockRemoteCardAccountRangeSource),
+            testDispatcher,
             testDispatcher,
             DefaultStaticCardAccountRanges(),
             object : CardAccountRangeService.AccountRangeResultListener {
@@ -138,6 +141,13 @@ class CardAccountRangeServiceTest {
         val accountRanges = testBehavior(
             cardNumber = "4000 0000",
             isCbcEligible = true,
+            mockRemoteCardAccountRangeSource = object : CardAccountRangeSource {
+                override suspend fun getAccountRanges(cardNumber: CardNumber.Unvalidated): List<AccountRange>? {
+                    return listOf(expectedAccountRange)
+                }
+
+                override val loading: Flow<Boolean> = flowOf(false)
+            }
         )
 
         assertThat(accountRanges).containsExactly(expectedAccountRange)
@@ -175,11 +185,17 @@ class CardAccountRangeServiceTest {
     private suspend fun testBehavior(
         cardNumber: String,
         isCbcEligible: Boolean,
+        mockRemoteCardAccountRangeSource: CardAccountRangeSource? = null,
     ): List<AccountRange> {
         val completable = CompletableDeferred<List<AccountRange>>()
 
+        val repository = mockRemoteCardAccountRangeSource?.let {
+            createMockRemoteDefaultCardAccountRangeRepository(it)
+        } ?: createDefaultCardAccountRangeRepository()
+
         val service = CardAccountRangeService(
-            cardAccountRangeRepository = createDefaultCardAccountRangeRepository(),
+            cardAccountRangeRepository = repository,
+            uiContext = testDispatcher,
             workContext = testDispatcher,
             staticCardAccountRanges = DefaultStaticCardAccountRanges(),
             accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
@@ -217,6 +233,7 @@ class CardAccountRangeServiceTest {
         val latch = CountDownLatch(1)
         val serviceMockRemote = CardAccountRangeService(
             createDefaultCardAccountRangeRepository(),
+            testDispatcher,
             testDispatcher,
             DefaultStaticCardAccountRanges(),
             object : CardAccountRangeService.AccountRangeResultListener {

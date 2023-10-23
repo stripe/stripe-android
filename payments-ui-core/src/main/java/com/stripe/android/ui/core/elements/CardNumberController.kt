@@ -55,9 +55,10 @@ internal sealed class CardNumberController : TextFieldController, SectionFieldEr
  * TODO(samer-stripe): There is a lot of merging of card brand logic with `AccountRangeService` &
  *  `CardBrand.getCardBrands`. Look into merging Account Service and Card Brand logic.
  */
-internal class DefaultCardNumberController constructor(
+internal class DefaultCardNumberController(
     private val cardTextFieldConfig: CardNumberConfig,
     cardAccountRangeRepository: CardAccountRangeRepository,
+    uiContext: CoroutineContext,
     workContext: CoroutineContext,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     initialValue: String?,
@@ -72,6 +73,7 @@ internal class DefaultCardNumberController constructor(
     ) : this(
         cardTextFieldConfig,
         DefaultCardAccountRangeRepositoryFactory(context).create(),
+        Dispatchers.Main,
         Dispatchers.IO,
         initialValue = initialValue,
         cardBrandChoiceConfig = cardBrandChoiceConfig,
@@ -158,6 +160,7 @@ internal class DefaultCardNumberController constructor(
     @VisibleForTesting
     val accountRangeService = CardAccountRangeService(
         cardAccountRangeRepository,
+        uiContext,
         workContext,
         staticCardAccountRanges,
         object : CardAccountRangeService.AccountRangeResultListener {

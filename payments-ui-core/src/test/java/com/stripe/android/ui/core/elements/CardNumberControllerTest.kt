@@ -34,6 +34,7 @@ internal class CardNumberControllerTest {
         CardNumberConfig(),
         FakeCardAccountRangeRepository(),
         testDispatcher,
+        testDispatcher,
         initialValue = null
     )
 
@@ -133,6 +134,7 @@ internal class CardNumberControllerTest {
                 override val loading: Flow<Boolean> = flowOf(false)
             },
             testDispatcher,
+            testDispatcher,
             initialValue = null
         )
         cardNumberController.onValueChange("42424242424242424242")
@@ -209,6 +211,7 @@ internal class CardNumberControllerTest {
             CardNumberConfig(),
             FakeCardAccountRangeRepository(),
             testDispatcher,
+            testDispatcher,
             initialValue = null,
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
                 preferredBrands = listOf(),
@@ -254,6 +257,7 @@ internal class CardNumberControllerTest {
             CardNumberConfig(),
             FakeCardAccountRangeRepository(),
             testDispatcher,
+            testDispatcher,
             initialValue = null,
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
                 preferredBrands = listOf(CardBrand.CartesBancaires),
@@ -298,6 +302,7 @@ internal class CardNumberControllerTest {
         val cardNumberController = DefaultCardNumberController(
             CardNumberConfig(),
             FakeCardAccountRangeRepository(),
+            testDispatcher,
             testDispatcher,
             initialValue = null,
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
@@ -350,6 +355,7 @@ internal class CardNumberControllerTest {
         val cardNumberController = DefaultCardNumberController(
             CardNumberConfig(),
             FakeCardAccountRangeRepository(),
+            testDispatcher,
             testDispatcher,
             initialValue = null,
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
