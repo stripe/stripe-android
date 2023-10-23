@@ -257,39 +257,28 @@ private fun CardBrandChoiceDropdown(
     onBrandSelected: (CardBrand?) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val noSelection = CardBrandChoice(
-        label = resolvableString(id = R.string.stripe_card_brand_choice_no_selection),
-        icon = Unknown.icon
-    )
-
-    val allPossibleBrands = listOf(Unknown) + brands
-    val choices = allPossibleBrands.map { brand ->
-        brand.toChoice(noSelection)
-    }
+    val choices = brands.map { it.toChoice() }
 
     SingleChoiceDropdown(
         title = resolvableString(id = R.string.stripe_card_brand_choice_selection_header),
         expanded = expanded,
-        currentChoice = currentBrand.toChoice(noSelection),
+        currentChoice = currentBrand.takeIf { it != Unknown }?.toChoice(),
         choices = choices,
         onChoiceSelected = { choice ->
-            when (val choiceIndex = choices.indexOf(choice)) {
-                -1 -> Unit
-                0 -> onBrandSelected(null)
-                else -> onBrandSelected(allPossibleBrands[choiceIndex])
+            val choiceIndex = choices.indexOf(choice)
+            val brand = brands.getOrNull(choiceIndex)
+
+            if (brand != null) {
+                onBrandSelected(brand)
             }
         },
         onDismiss = onDismiss,
     )
 }
 
-private fun CardBrand.toChoice(noSelection: CardBrandChoice): CardBrandChoice {
-    return if (this == Unknown) {
-        noSelection
-    } else {
-        CardBrandChoice(
-            label = resolvableString(displayName),
-            icon = icon
-        )
-    }
+private fun CardBrand.toChoice(): CardBrandChoice {
+    return CardBrandChoice(
+        label = resolvableString(displayName),
+        icon = icon
+    )
 }

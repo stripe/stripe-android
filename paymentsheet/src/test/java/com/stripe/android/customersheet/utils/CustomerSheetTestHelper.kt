@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.DummyActivityResultCaller
@@ -70,7 +71,7 @@ object CustomerSheetTestHelper {
                     ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
                 billingDetails = configuration.defaultBillingDetails,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-                isEligibleForCardBrandChoice = false,
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible
             ),
             lpmRepository = lpmRepository,
             addressRepository = AddressRepository(

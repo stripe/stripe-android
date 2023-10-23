@@ -75,7 +75,7 @@ internal class PaymentOptionFactory @Inject constructor(
             }
             is PaymentSelection.Saved -> {
                 PaymentOption(
-                    drawableResourceId = selection.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
+                    drawableResourceId = selection.paymentMethod.getSavedPaymentMethodIcon(),
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
                     label = selection.paymentMethod.getLabel(resources).orEmpty(),

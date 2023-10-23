@@ -5,6 +5,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.Capitalization
 import com.stripe.android.ui.core.elements.ContactInformationSpec
 import com.stripe.android.ui.core.elements.CountrySpec
@@ -66,7 +67,7 @@ internal class TransformSpecToElementTest {
                 merchantName = "Merchant, Inc.",
                 context = context,
                 shippingValues = null,
-                isEligibleForCardBrandChoice = false,
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible
             )
     }
 

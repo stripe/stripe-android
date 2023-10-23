@@ -30,6 +30,7 @@ stages:
       - run-example-instrumentation-tests: { }
       - run-financial-connections-instrumentation-tests: { }
       - run-cardscan-instrumentation-tests: { }
+      - run-paymentsheet-end-to-end-tests: { }
   stage-build-financial-connections-debug-apk:
     workflows:
       - build-financial-connections-debug-apk: { }

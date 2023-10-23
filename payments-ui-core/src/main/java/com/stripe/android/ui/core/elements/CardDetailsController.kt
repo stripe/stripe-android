@@ -7,6 +7,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowController
@@ -24,7 +25,7 @@ internal class CardDetailsController constructor(
     context: Context,
     initialValues: Map<IdentifierSpec, String?>,
     collectName: Boolean = false,
-    isEligibleForCardBrandChoice: Boolean = false,
+    cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
 ) : SectionFieldErrorController, SectionFieldComposable {
 
     val nameElement = if (collectName) {
@@ -50,15 +51,16 @@ internal class CardDetailsController constructor(
             CardNumberConfig(),
             context,
             initialValues[IdentifierSpec.CardNumber],
-            when (isEligibleForCardBrandChoice) {
-                true -> CardBrandChoiceConfig.Eligible(
+            when (cbcEligibility) {
+                is CardBrandChoiceEligibility.Eligible -> CardBrandChoiceConfig.Eligible(
+                    preferredBrands = cbcEligibility.preferredNetworks,
                     initialBrand = initialValues[
                         IdentifierSpec.PreferredCardBrand
                     ]?.let { value ->
                         CardBrand.fromCode(value)
                     }
                 )
-                false -> CardBrandChoiceConfig.Ineligible
+                is CardBrandChoiceEligibility.Ineligible -> CardBrandChoiceConfig.Ineligible
             },
         )
     )

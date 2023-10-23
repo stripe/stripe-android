@@ -32,6 +32,7 @@ class PaymentOptionsStateMapperTest {
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
             nameProvider = { it!! },
+            isCbcEligible = { false }
         )
 
         mapper().test {
@@ -60,6 +61,7 @@ class PaymentOptionsStateMapperTest {
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = false,
             nameProvider = { it!! },
+            isCbcEligible = { false }
         )
 
         mapper().test {
@@ -85,6 +87,7 @@ class PaymentOptionsStateMapperTest {
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
             nameProvider = { it!! },
+            isCbcEligible = { false }
         )
 
         mapper().test {

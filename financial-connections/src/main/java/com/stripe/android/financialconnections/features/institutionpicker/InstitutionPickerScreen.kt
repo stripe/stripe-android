@@ -105,7 +105,7 @@ internal fun InstitutionPickerScreen() {
         onQueryChanged = viewModel::onQueryChanged,
         onInstitutionSelected = viewModel::onInstitutionSelected,
         onCancelSearchClick = viewModel::onCancelSearchClick,
-        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.INSTITUTION_PICKER) },
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.INSTITUTION_PICKER) },
         onSearchFocused = viewModel::onSearchFocused,
         onManualEntryClick = viewModel::onManualEntryClick,
         onScrollChanged = viewModel::onScrollChanged
@@ -472,7 +472,8 @@ private fun FeaturedInstitutionsGrid(
         contentPadding = PaddingValues(
             top = 16.dp,
             start = 24.dp,
-            end = 24.dp
+            end = 24.dp,
+            bottom = 16.dp
         ),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),

@@ -100,7 +100,7 @@ internal fun AddPaymentMethod(
                 ?.intentConfiguration
                 ?.onBehalfOf
             PaymentElement(
-                sheetViewModel = sheetViewModel,
+                formViewModelSubComponentBuilderProvider = sheetViewModel.formViewModelSubComponentBuilderProvider,
                 enabled = !processing,
                 supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
                 selectedItem = selectedItem,

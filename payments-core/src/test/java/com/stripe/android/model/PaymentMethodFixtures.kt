@@ -253,6 +253,54 @@ internal object PaymentMethodFixtures {
         """.trimIndent()
     )
 
+    internal val CARD_WITH_DISPLAY_BRAND_JSON = JSONObject(
+        """
+        {
+            "id": "pm_1GDwTNAI5zDH",
+            "object": "payment_method",
+            "billing_details": {
+                "address": {
+                    "city": null,
+                    "country": null,
+                    "line1": null,
+                    "line2": null,
+                    "postal_code": null,
+                    "state": null
+                },
+                "email": null,
+                "name": null,
+                "phone": null
+            },
+            "card": {
+                "brand": "visa",
+                "checks": {
+                    "address_line1_check": null,
+                    "address_postal_code_check": null,
+                    "cvc_check": null
+                },
+                "country": "US",
+                "exp_month": 12,
+                "exp_year": 2024,
+                "funding": "credit",
+                "generated_from": null,
+                "last4": "9999",
+                "display_brand": {
+                    "type": "cartes_bancaires"
+                },
+                "three_d_secure_usage": {
+                    "supported": true
+                },
+                "wallet": null
+            },
+            "created": 15821393,
+            "customer": null,
+            "livemode": false,
+            "metadata": {},
+            "type": "card"
+        }
+        """.trimIndent()
+    )
+
     val IDEAL_JSON = JSONObject(
         """
             {

@@ -6,6 +6,7 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.FormController
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
@@ -42,7 +43,7 @@ class FormControllerTest {
         merchantName = "Merchant",
         context = context,
         shippingValues = null,
-        isEligibleForCardBrandChoice = false,
+        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
     )
 
     @Test

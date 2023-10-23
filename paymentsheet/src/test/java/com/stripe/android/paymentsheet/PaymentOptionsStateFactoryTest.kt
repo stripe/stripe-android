@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.Test
@@ -18,6 +19,7 @@ class PaymentOptionsStateFactoryTest {
             showLink = true,
             currentSelection = PaymentSelection.Saved(paymentMethod),
             nameProvider = { it!! },
+            isCbcEligible = false
         )
 
         val selectedPaymentMethod = state.selectedItem as? PaymentOptionsItem.SavedPaymentMethod
@@ -34,8 +36,39 @@ class PaymentOptionsStateFactoryTest {
             showLink = false,
             currentSelection = PaymentSelection.Link,
             nameProvider = { it!! },
+            isCbcEligible = false
         )
 
         assertThat(state.selectedItem).isNull()
+    }
+
+    @Test
+    fun `'isModifiable' is true when multiple networks are available & is CBC eligible`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(3).toMutableList()
+
+        val lastPaymentMethodWithNetworks = paymentMethods.removeLast().let { paymentMethod ->
+            paymentMethod.copy(
+                card = paymentMethod.card?.copy(
+                    networks = PaymentMethod.Card.Networks(
+                        available = setOf("visa", "cartes_bancaires")
+                    )
+                )
+            )
+        }
+
+        paymentMethods.add(lastPaymentMethodWithNetworks)
+
+        val state = PaymentOptionsStateFactory.create(
+            paymentMethods = paymentMethods,
+            showGooglePay = false,
+            showLink = false,
+            currentSelection = PaymentSelection.Link,
+            nameProvider = { it!! },
+            isCbcEligible = true
+        )
+
+        assertThat(
+            (state.items.last() as PaymentOptionsItem.SavedPaymentMethod).isModifiable
+        ).isTrue()
     }
 }
