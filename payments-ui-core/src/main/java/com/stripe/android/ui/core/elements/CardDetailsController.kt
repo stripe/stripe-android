@@ -21,7 +21,7 @@ import com.stripe.android.uicore.elements.SimpleTextFieldController
 import kotlinx.coroutines.flow.combine
 import java.util.UUID
 
-internal class CardDetailsController constructor(
+internal class CardDetailsController(
     context: Context,
     initialValues: Map<IdentifierSpec, String?>,
     collectName: Boolean = false,

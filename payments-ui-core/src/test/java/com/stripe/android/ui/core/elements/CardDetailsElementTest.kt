@@ -11,7 +11,13 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -19,8 +25,20 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CardDetailsElementTest {
 
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     private val context =
         ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeCardScanDefaultTheme)
+
+    @Before
+    fun before() {
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    @After
+    fun after() {
+        Dispatchers.resetMain()
+    }
 
     @Test
     fun `test form field values returned and expiration date parsing`() = runTest {
@@ -115,7 +133,7 @@ class CardDetailsElementTest {
 
     @Test
     fun `test form field values returned when eligible for card brand choice`() = runTest {
-        val cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf())
+        val cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList())
         val cardController = CardDetailsController(
             context = context,
             initialValues = emptyMap(),
