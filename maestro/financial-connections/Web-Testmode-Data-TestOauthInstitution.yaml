@@ -12,14 +12,15 @@ appId: com.stripe.android.financialconnections.example
 - tapOn:
     id: "Data_checkbox"
 - tapOn: "Connect Accounts!"
+- extendedWaitUntil:
+    notVisible:
+      id: "Data_checkbox"
+    timeout: 30000
 ######## Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
 ################################################
 # Common: web AuthFlow - connect OAuth institution
-- extendedWaitUntil:
-    visible: "Agree and continue"
-    timeout: 30000
 - tapOn: "Agree and continue"
 # SELECT OAUTH INSTITUTION
 - assertVisible: "Test OAuth Institution"

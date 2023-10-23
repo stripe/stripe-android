@@ -5,17 +5,18 @@ appId: com.stripe.android.financialconnections.example
 # Android specific: Navigate to example
 - tapOn: "Playground"
 - tapOn:
-    id: "Web_checkbox"
+    id: "Native_checkbox"
 - tapOn: "Mode_Dropdown_Icon"
 - tapOn:
     id: "Test_checkbox"
 - tapOn:
     id: "Data_checkbox"
 - tapOn: "Connect Accounts!"
-# Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
-    visible: "Agree and continue"
-    timeout: 30000
+      notVisible:
+          id: "Data_checkbox"
+      timeout: 30000
+# Common: web AuthFlow - connect OAuth institution
 - tapOn: "Agree and continue"
 - assertVisible: "Test OAuth Institution"
 # ERRORS
