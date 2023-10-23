@@ -6,7 +6,7 @@ trigger_map:
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
   - pull_request_source_branch: 'carlosmuvi/web-flavor-maestro-tests'
-    workflow: maestro-edge-financial-connections
+    pipeline: pipeline-financial-connections-e2e-tests
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
@@ -15,6 +15,10 @@ pipelines:
   main-trigger-pipeline:
     stages:
       - stage-trigger-run-all: { }
+  pipeline-financial-connections-e2e-tests:
+    stages:
+      - stage-build-financial-connections-debug-apk: { }
+      - stage-run-financial-connections-e2e-tests: { }
 
 stages:
   stage-trigger-run-all:
@@ -26,6 +30,13 @@ stages:
       - run-example-instrumentation-tests: { }
       - run-financial-connections-instrumentation-tests: { }
       - run-cardscan-instrumentation-tests: { }
+  stage-build-financial-connections-debug-apk:
+    workflows:
+      - build-financial-connections-debug-apk: { }
+  stage-run-financial-connections-e2e-tests:
+    workflows:
+      - run-financial-connections-e2e-tests: { }
+
 
 workflows:
   check:
@@ -91,7 +102,7 @@ workflows:
             - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests
       - deploy-to-bitrise-io@2: { }
-  maestro-edge-financial-connections:
+  build-financial-connections-debug-apk:
     before_run:
       - prepare_all
     steps:
@@ -102,41 +113,30 @@ workflows:
             - variant: debug
             - build_type: apk
             - cache_level: all
-      - deploy-to-bitrise-io@2: {}
-      - script@1:
-          title: Rename APK
+      - deploy-to-bitrise-io@2:
           inputs:
-            - content: |-
-                #!/usr/bin/env bash  
-                mv $BITRISE_DEPLOY_DIR/financial-connections-example-debug.apk $BITRISE_DEPLOY_DIR/financial-connections-example.apk
-      - cache-push@2:
-          inputs:
-            - cache_paths: |-
-                $BITRISE_DEPLOY_DIR/financial-connections-example-debug.apk
-      - build-router-start@0.14.6:
-          inputs:
-            - wait_for_builds: true
-            - workflows: |-
-                maestro-financial-connections-native
-                maestro-financial-connections-web
-            - access_token: $BITRISE_ACCESS_TOKEN
-  maestro-financial-connections-native:
+            - pipeline_intermediate_files: |-
+                $BITRISE_APK_PATH:BITRISE_APK_PATH
+                $BITRISE_TEST_APK_PATH:BITRISE_TEST_APK_PATH
+  run-financial-connections-e2e-tests:
     before_run:
       - start_emulator
       - prepare_all
     after_run:
       - conclude_all
     steps:
+      - pull-intermediate-files@1:
+          inputs:
+            - artifact_sources: stage-build-financial-connections-debug-apk.build-financial-connections-debug-apk
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
-      - cache-pull@2: {}
       - script@1:
           title: Execute Maestro tests 1
           inputs:
             - content: |-
                 #!/usr/bin/env bash  
-                export BITRISE_APK_PATH="$BITRISE_DEPLOY_DIR/financial-connections-example.apk"  
+                export BITRISE_APK_PATH="$BITRISE_DEPLOY_DIR/financial-connections-example-debug.apk"  
                 bash ./scripts/execute_maestro_tests.sh
       - custom-test-results-export@1:
           inputs:
@@ -344,14 +344,14 @@ workflows:
             - api_level: 32
             - tag: "google_apis"
             - start_command_flags: >
-               -camera-back none
-               -camera-front none
-               -netdelay none
-               -netspeed full
-               -memory 2048
-               -no-snapshot
-               -no-audio
-               -no-window
+                -camera-back none
+                -camera-front none
+                -netdelay none
+                -netspeed full
+                -memory 2048
+                -no-snapshot
+                -no-audio
+                -no-window
   prepare_all:
     steps:
       - activate-ssh-key@4:
