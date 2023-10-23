@@ -1,44 +1,40 @@
 ---
 format_version: '11'
-default_step_lib_source: 'https://github.com/bitrise-io/bitrise-steplib.git'
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 project_type: android
 trigger_map:
-  - push_branch: 'master'
+  - push_branch: master
     pipeline: main-trigger-pipeline
-  - pull_request_source_branch: 'carlosmuvi/web-flavor-maestro-tests'
+  - pull_request_source_branch: carlosmuvi/web-flavor-maestro-tests
     pipeline: pipeline-financial-connections-e2e-tests
 app:
   envs:
-    - GRADLE_OPTS: -Dkotlin.incremental=false
-
+    - GRADLE_OPTS: "-Dkotlin.incremental=false"
 pipelines:
   main-trigger-pipeline:
     stages:
-      - stage-trigger-run-all: { }
+      - stage-trigger-run-all: {}
   pipeline-financial-connections-e2e-tests:
     stages:
-      - stage-build-financial-connections-debug-apk: { }
-      - stage-run-financial-connections-e2e-tests: { }
-
+      - stage-build-financial-connections-debug-apk: {}
+      - stage-run-financial-connections-e2e-tests: {}
 stages:
   stage-trigger-run-all:
     workflows:
-      - check: { }
-      - test: { }
-      - run-instrumentation-tests: { }
-      - run-paymentsheet-instrumentation-tests: { }
-      - run-example-instrumentation-tests: { }
-      - run-financial-connections-instrumentation-tests: { }
-      - run-cardscan-instrumentation-tests: { }
-      - run-paymentsheet-end-to-end-tests: { }
+      - check: {}
+      - test: {}
+      - run-instrumentation-tests: {}
+      - run-paymentsheet-instrumentation-tests: {}
+      - run-example-instrumentation-tests: {}
+      - run-financial-connections-instrumentation-tests: {}
+      - run-cardscan-instrumentation-tests: {}
+      - run-paymentsheet-end-to-end-tests: {}
   stage-build-financial-connections-debug-apk:
     workflows:
-      - build-financial-connections-debug-apk: { }
+      - build-financial-connections-debug-apk: {}
   stage-run-financial-connections-e2e-tests:
     workflows:
-      - run-financial-connections-e2e-tests: { }
-
-
+      - run-financial-connections-e2e-tests: {}
 workflows:
   check:
     before_run:
@@ -49,7 +45,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources
+            - content: "./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources"
   test:
     envs:
       - opts:
@@ -63,7 +59,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
+            - content: "./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest"
   maestro-financial-connections:
     before_run:
       - start_emulator
@@ -76,7 +72,7 @@ workflows:
             - boot_timeout: 600
       - android-build@1:
           inputs:
-            - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
+            - arguments: "-PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL"
             - module: financial-connections-example
             - variant: release
             - build_type: apk
@@ -90,34 +86,33 @@ workflows:
       - slack@3:
           is_always_run: true
           inputs:
-            - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-            - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+            - webhook_url: "$WEBHOOK_SLACK_CARLOSMUVI_MAESTRO"
+            - webhook_url_on_error: "$WEBHOOK_SLACK_CARLOSMUVI_MAESTRO"
       - pagerduty@0:
           inputs:
             - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
-            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
+            - integration_key: "$AUX_PAGERDUTY_INTEGRATION_KEY"
           is_always_run: true
-          run_if: .IsBuildFailed
+          run_if: ".IsBuildFailed"
       - custom-test-results-export@1:
           inputs:
-            - search_pattern: '*/maestroReport.xml'
+            - search_pattern: "*/maestroReport.xml"
             - test_name: Maestro tests
-      - deploy-to-bitrise-io@2: { }
+      - deploy-to-bitrise-io@2: {}
   build-financial-connections-debug-apk:
     before_run:
       - prepare_all
     steps:
       - android-build@1:
           inputs:
-            - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
+            - arguments: "-PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL"
             - module: financial-connections-example
             - variant: debug
             - build_type: apk
             - cache_level: all
       - deploy-to-bitrise-io@2:
           inputs:
-            - pipeline_intermediate_files: |-
-                $BITRISE_APK_PATH:BITRISE_APK_PATH
+            - pipeline_intermediate_files: "$BITRISE_APK_PATH:BITRISE_APK_PATH"
   run-financial-connections-e2e-tests:
     before_run:
       - start_emulator
@@ -134,14 +129,12 @@ workflows:
       - script@1:
           title: Execute Maestro tests 1
           inputs:
-            - content: |-
-                #!/usr/bin/env bash  
-                bash ./scripts/execute_maestro_tests.sh
+            - content: "#!/usr/bin/env bash  \nbash ./scripts/execute_maestro_tests.sh"
       - custom-test-results-export@1:
           inputs:
-            - search_pattern: '*/maestroReportNative.xml'
+            - search_pattern: "*/maestroReportNative.xml"
             - test_name: Maestro tests native
-      - deploy-to-bitrise-io@2: { }
+      - deploy-to-bitrise-io@2: {}
   maestro-financial-connections-web:
     before_run:
       - start_emulator
@@ -152,19 +145,17 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
-      - cache-pull@2: { }
+      - cache-pull@2: {}
       - script@1:
           title: Execute Maestro tests 1
           inputs:
-            - content: |-
-                #!/usr/bin/env bash  
-                export BITRISE_APK_PATH="$BITRISE_DEPLOY_DIR/financial-connections-example.apk"  
-                bash ./scripts/execute_maestro_tests.sh
+            - content: "#!/usr/bin/env bash  \nexport BITRISE_APK_PATH=\"$BITRISE_DEPLOY_DIR/financial-connections-example.apk\"
+          \ \nbash ./scripts/execute_maestro_tests.sh"
       - custom-test-results-export@1:
           inputs:
-            - search_pattern: '*/maestroReportWeb.xml'
+            - search_pattern: "*/maestroReportWeb.xml"
             - test_name: Maestro tests web
-      - deploy-to-bitrise-io@2: { }
+      - deploy-to-bitrise-io@2: {}
   maestro-paymentsheet:
     before_run:
       - start_emulator
@@ -183,15 +174,15 @@ workflows:
                 bash ./scripts/execute_maestro_elements_tests.sh paymentsheet
       - slack@3:
           is_always_run: true
-          run_if: .IsBuildFailed
+          run_if: ".IsBuildFailed"
           inputs:
-            - webhook_url: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
-            - webhook_url_on_error: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
+            - webhook_url: "$WEBHOOK_SLACK_ELEMENTS_MAESTRO"
+            - webhook_url_on_error: "$WEBHOOK_SLACK_ELEMENTS_MAESTRO"
       - custom-test-results-export@1:
           inputs:
-            - search_pattern: '*/maestroReport.xml'
+            - search_pattern: "*/maestroReport.xml"
             - test_name: Maestro tests
-      - deploy-to-bitrise-io@2: { }
+      - deploy-to-bitrise-io@2: {}
   maestro-customersheet:
     before_run:
       - start_emulator
@@ -210,15 +201,15 @@ workflows:
                 bash ./scripts/execute_maestro_elements_tests.sh customersheet
       - slack@3:
           is_always_run: true
-          run_if: .IsBuildFailed
+          run_if: ".IsBuildFailed"
           inputs:
-            - webhook_url: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
-            - webhook_url_on_error: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
+            - webhook_url: "$WEBHOOK_SLACK_ELEMENTS_MAESTRO"
+            - webhook_url_on_error: "$WEBHOOK_SLACK_ELEMENTS_MAESTRO"
       - custom-test-results-export@1:
           inputs:
-            - search_pattern: '*/maestroReport.xml'
+            - search_pattern: "*/maestroReport.xml"
             - test_name: Maestro tests
-      - deploy-to-bitrise-io@2: { }
+      - deploy-to-bitrise-io@2: {}
   run-instrumentation-tests:
     before_run:
       - start_emulator
@@ -230,7 +221,11 @@ workflows:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - content: ./gradlew assembleAndroidTest -x :paymentsheet-example:assembleAndroidTest -x :paymentsheet:assembleAndroidTest -x :example:assembleAndroidTest -x :financial-connections:assembleAndroidTest -x :financial-connections-example:assembleAndroidTest -x :camera-core:assembleAndroidTest -x :stripecardscan:assembleAndroidTest -x :stripecardscan-example:assembleAndroidTest
+            - content: "./gradlew assembleAndroidTest -x :paymentsheet-example:assembleAndroidTest
+          -x :paymentsheet:assembleAndroidTest -x :example:assembleAndroidTest -x
+          :financial-connections:assembleAndroidTest -x :financial-connections-example:assembleAndroidTest
+          -x :camera-core:assembleAndroidTest -x :stripecardscan:assembleAndroidTest
+          -x :stripecardscan-example:assembleAndroidTest"
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -238,7 +233,11 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest -x :example:connectedAndroidTest -x :financial-connections:connectedAndroidTest -x :financial-connections-example:connectedAndroidTest -x :camera-core:connectedAndroidTest -x :stripecardscan:connectedAndroidTest -x :stripecardscan-example:connectedAndroidTest
+            - content: "./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest
+          -x :paymentsheet:connectedAndroidTest -x :example:connectedAndroidTest
+          -x :financial-connections:connectedAndroidTest -x :financial-connections-example:connectedAndroidTest
+          -x :camera-core:connectedAndroidTest -x :stripecardscan:connectedAndroidTest
+          -x :stripecardscan-example:connectedAndroidTest"
   run-paymentsheet-instrumentation-tests:
     before_run:
       - start_emulator
@@ -250,7 +249,7 @@ workflows:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - content: ./gradlew :paymentsheet:assembleAndroidTest
+            - content: "./gradlew :paymentsheet:assembleAndroidTest"
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -258,7 +257,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :paymentsheet:connectedAndroidTest
+            - content: "./gradlew :paymentsheet:connectedAndroidTest"
   run-example-instrumentation-tests:
     before_run:
       - start_emulator
@@ -270,7 +269,7 @@ workflows:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - content: ./gradlew :example:assembleAndroidTest
+            - content: "./gradlew :example:assembleAndroidTest"
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -278,7 +277,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :example:connectedAndroidTest
+            - content: "./gradlew :example:connectedAndroidTest"
   run-financial-connections-instrumentation-tests:
     before_run:
       - start_emulator
@@ -290,7 +289,7 @@ workflows:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - content: ./gradlew :financial-connections:assembleAndroidTest :financial-connections-example:assembleAndroidTest
+            - content: "./gradlew :financial-connections:assembleAndroidTest :financial-connections-example:assembleAndroidTest"
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -298,7 +297,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest
+            - content: "./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest"
   run-cardscan-instrumentation-tests:
     before_run:
       - start_emulator
@@ -310,7 +309,8 @@ workflows:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - content: ./gradlew :camera-core:assembleAndroidTest :stripecardscan:assembleAndroidTest :stripecardscan-example:assembleAndroidTest
+            - content: "./gradlew :camera-core:assembleAndroidTest :stripecardscan:assembleAndroidTest
+          :stripecardscan-example:assembleAndroidTest"
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -318,7 +318,8 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :camera-core:connectedAndroidTest :stripecardscan:connectedAndroidTest :stripecardscan-example:connectedAndroidTest
+            - content: "./gradlew :camera-core:connectedAndroidTest :stripecardscan:connectedAndroidTest
+          :stripecardscan-example:connectedAndroidTest"
   run-paymentsheet-end-to-end-tests:
     before_run:
       - prepare_all
@@ -327,43 +328,36 @@ workflows:
     steps:
       - script@1:
           inputs:
-            - content: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug
+            - content: "./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug"
       - script@1:
           inputs:
             - content: pip3 install requests_toolbelt requests
       - script@1:
           inputs:
-            - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk
+            - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk
+                --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk
   start_emulator:
     steps:
       - avd-manager@1:
           inputs:
-            - profile: "pixel_3a"
-            - abi: "x86_64"
+            - profile: pixel_3a
+            - abi: x86_64
             - api_level: 32
-            - tag: "google_apis"
-            - start_command_flags: >
-                -camera-back none
-                -camera-front none
-                -netdelay none
-                -netspeed full
-                -memory 2048
-                -no-snapshot
-                -no-audio
-                -no-window
+            - tag: google_apis
+            - start_command_flags: "-camera-back none -camera-front none -netdelay none
+          -netspeed full -memory 2048 -no-snapshot -no-audio -no-window\n"
   prepare_all:
     steps:
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@8: { }
-      - cache-pull@2: { }
-      - restore-gradle-cache@1: { }
+      - git-clone@8: {}
+      - cache-pull@2: {}
+      - restore-gradle-cache@1: {}
       - script-runner@0:
-          # Maven doesn't like java 17, so running it before.
           run_if: '{{getenv "NEEDS_ROBOLECTRIC" | ne ""}}'
           title: Download robolectric dependencies
           inputs:
-            - file_path: ./scripts/download_robolectric.sh
+            - file_path: "./scripts/download_robolectric.sh"
       - set-java-version@1:
           inputs:
             - set_java_version: 17
@@ -372,23 +366,25 @@ workflows:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
       - script@1:
           inputs:
-            - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
+            - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >>
+                ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY"
+                >> ~/.gradle/gradle.properties
   conclude_all:
     steps:
       - script-runner@0:
           is_always_run: true
           title: Copy test results to tmp
           inputs:
-            - file_path: ./scripts/copy_test_results_to_tmp.sh
+            - file_path: "./scripts/copy_test_results_to_tmp.sh"
       - deploy-to-bitrise-io@2:
           inputs:
             - notify_user_groups: none
-            - is_compress: "true"
-            - deploy_path: /tmp/test_results
-            - is_enable_public_page: "false"
+            - is_compress: 'true'
+            - deploy_path: "/tmp/test_results"
+            - is_enable_public_page: 'false'
           title: Deploy test results artifacts
-      - cache-push@2: { }
-      - save-gradle-cache@1: { }
+      - cache-push@2: {}
+      - save-gradle-cache@1: {}
 meta:
   bitrise.io:
     stack: linux-docker-android-20.04
