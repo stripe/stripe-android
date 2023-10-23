@@ -38,7 +38,7 @@ internal sealed interface PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = false
-        override val showsWalletsHeader: Boolean = false
+        override val showsWalletsHeader: Boolean = true
         override val canNavigateBack: Boolean = false
 
         @Composable
