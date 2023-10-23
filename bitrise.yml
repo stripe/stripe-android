@@ -130,7 +130,7 @@ workflows:
           inputs:
             - boot_timeout: 600
       - script@1:
-          title: Execute Maestro tests - Payments
+          title: "Execute Maestro tests - Payments"
           inputs:
             - content: |-
                 #!/usr/bin/env bash
@@ -154,7 +154,7 @@ workflows:
           inputs:
             - boot_timeout: 600
       - script@1:
-          title: Execute Maestro tests - Data
+          title: "Execute Maestro tests - Data"
           inputs:
             - content: |-
                 #!/usr/bin/env bash
