@@ -16,6 +16,13 @@ while getopts ":t:" opt; do
   esac
 done
 
+# Check if tags is empty
+if [ -z "$MAESTRO_TAGS" ]
+then
+  echo "Tags parameter is required."
+  exit 1
+fi
+
 export MAESTRO_VERSION=1.31.0
 
 # Retry mechanism for Maestro installation

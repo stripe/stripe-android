@@ -36,8 +36,8 @@ stages:
       - build-connections-debug: { }
   stage-run-connections-e2e-tests:
     workflows:
-      - run-connections-e2e-native-tests: { }
-      - run-connections-e2e-web-tests: { }
+      - run-connections-e2e-payments-tests: { }
+      - run-connections-e2e-data-tests: { }
 workflows:
   check:
     before_run:
