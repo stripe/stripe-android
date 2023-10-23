@@ -62,6 +62,8 @@ class StringResources
                 if description.start_with?('<!--') && description.end_with?('-->')
                     # Remove the leading <!-- and trailing --> from description
                     description = description.delete_prefix('<!--').delete_suffix('-->').strip
+                else
+                    description = nil
                 end
 
                 key_object = {
