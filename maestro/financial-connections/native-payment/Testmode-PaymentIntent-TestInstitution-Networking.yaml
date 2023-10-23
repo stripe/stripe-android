@@ -30,7 +30,7 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Test Institution"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
-    file: ../common/subflow-skip-chrome-welcome.yaml
+    file: ../../common/subflow-skip-chrome-welcome.yaml
     env:
       APP_ID: com.stripe.android.financialconnections.example
 ###############################################

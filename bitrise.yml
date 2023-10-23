@@ -16,8 +16,8 @@ pipelines:
       - stage-trigger-run-all: {}
   pipeline-financial-connections-e2e-tests:
     stages:
-      - stage-build-financial-connections-debug-apk: {}
-      - stage-run-financial-connections-e2e-tests: {}
+      - stage-build-connections-debug-apk: {}
+      - stage-run-connections-e2e-tests: {}
 stages:
   stage-trigger-run-all:
     workflows:
@@ -29,13 +29,13 @@ stages:
       - run-financial-connections-instrumentation-tests: {}
       - run-cardscan-instrumentation-tests: {}
       - run-paymentsheet-end-to-end-tests: {}
-  stage-build-financial-connections-debug-apk:
+  stage-build-connections-debug-apk:
     workflows:
       - build-financial-connections-debug-apk: {}
-  stage-run-financial-connections-e2e-tests:
+  stage-run-connections-e2e-tests:
     workflows:
-      - run-financial-connections-e2e-native-tests: {}
-      - run-financial-connections-e2e-web-tests: {}
+      - run-connections-e2e-native-tests: {}
+      - run-connections-e2e-web-tests: {}
 workflows:
   check:
     before_run:
@@ -83,7 +83,7 @@ workflows:
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh
+                bash ./scripts/execute_maestro_tests.sh maestro/financial-connections
       - slack@3:
           is_always_run: true
           inputs:
@@ -114,7 +114,7 @@ workflows:
       - deploy-to-bitrise-io@2:
           inputs:
             - pipeline_intermediate_files: "$BITRISE_APK_PATH:BITRISE_APK_PATH"
-  run-financial-connections-e2e-native-tests:
+  run-connections-e2e-native-tests:
     before_run:
       - start_emulator
       - prepare_all
@@ -123,7 +123,7 @@ workflows:
     steps:
       - pull-intermediate-files@1:
           inputs:
-            - artifact_sources: stage-build-financial-connections-debug-apk.build-financial-connections-debug-apk
+            - artifact_sources: stage-build-connections-debug-apk.build-financial-connections-debug-apk
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -132,13 +132,13 @@ workflows:
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh maestro/financial-connections/Testmode-Data-TestOauthInstitution.yaml
+                bash ./scripts/execute_maestro_tests.sh maestro/financial-connections/native-payments
       - custom-test-results-export@1:
           inputs:
-            - search_pattern: "*/maestroReportNative.xml"
+            - search_pattern: "*/maestroReport.xml"
             - test_name: Maestro tests native
       - deploy-to-bitrise-io@2: {}
-  run-financial-connections-e2e-web-tests:
+  run-connections-e2e-web-tests:
     before_run:
       - start_emulator
       - prepare_all
@@ -147,7 +147,7 @@ workflows:
     steps:
       - pull-intermediate-files@1:
           inputs:
-            - artifact_sources: stage-build-financial-connections-debug-apk.build-financial-connections-debug-apk
+            - artifact_sources: stage-build-connections-debug-apk.build-financial-connections-debug-apk
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -156,10 +156,10 @@ workflows:
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh maestro/financial-connections/Web-Testmode-Data-TestOauthInstitution.yaml
+                bash ./scripts/execute_maestro_tests.sh maestro/financial-connections/web-data
       - custom-test-results-export@1:
           inputs:
-            - search_pattern: "*/maestroReportNative.xml"
+            - search_pattern: "*/maestroReport.xml"
             - test_name: Maestro tests native
       - deploy-to-bitrise-io@2: {}
   maestro-paymentsheet:
