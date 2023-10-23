@@ -38,11 +38,9 @@ class CardNumberEditText internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = AppCompatR.attr.editTextStyle,
-
-    // TODO(mshafrir-stripe): make immutable after `CardWidgetViewModel` is integrated in `CardWidget` subclasses
+    uiContext: CoroutineContext,
     @get:VisibleForTesting
     var workContext: CoroutineContext,
-
     private val cardAccountRangeRepository: CardAccountRangeRepository,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
@@ -59,6 +57,7 @@ class CardNumberEditText internal constructor(
         context,
         attrs,
         defStyleAttr,
+        Dispatchers.Main,
         Dispatchers.IO,
         { PaymentConfiguration.getInstance(context).publishableKey }
     )
@@ -67,12 +66,14 @@ class CardNumberEditText internal constructor(
         context: Context,
         attrs: AttributeSet?,
         defStyleAttr: Int,
+        uiContext: CoroutineContext,
         workContext: CoroutineContext,
         publishableKeySupplier: () -> String
     ) : this(
         context,
         attrs,
         defStyleAttr,
+        uiContext,
         workContext,
         DefaultCardAccountRangeRepositoryFactory(context).create(),
         DefaultStaticCardAccountRanges(),
@@ -161,7 +162,7 @@ class CardNumberEditText internal constructor(
     @VisibleForTesting
     val accountRangeService = CardAccountRangeService(
         cardAccountRangeRepository = cardAccountRangeRepository,
-        uiContext = Dispatchers.Main,
+        uiContext = uiContext,
         workContext = workContext,
         staticCardAccountRanges = staticCardAccountRanges,
         isCbcEligible = { isCbcEligible },

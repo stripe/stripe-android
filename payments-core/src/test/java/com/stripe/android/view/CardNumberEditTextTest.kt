@@ -89,6 +89,7 @@ internal class CardNumberEditTextTest {
 
     private val cardNumberEditText = CardNumberEditText(
         context,
+        uiContext = testDispatcher,
         workContext = testDispatcher,
         cardAccountRangeRepository = cardAccountRangeRepository,
         analyticsRequestExecutor = analyticsRequestExecutor,
@@ -257,6 +258,7 @@ internal class CardNumberEditTextTest {
     fun `when 15 digit non-UnionPay PAN is pasted, should call completion callback`() {
         val cardNumberEditText = CardNumberEditText(
             context,
+            uiContext = testDispatcher,
             workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             analyticsRequestExecutor = analyticsRequestExecutor,
@@ -279,6 +281,7 @@ internal class CardNumberEditTextTest {
     fun `when 19 digit PAN is pasted, call completion callback`() {
         val cardNumberEditText = CardNumberEditText(
             context,
+            uiContext = testDispatcher,
             workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             staticCardAccountRanges = object : StaticCardAccountRanges {
@@ -310,6 +313,7 @@ internal class CardNumberEditTextTest {
     fun `when 19 digit PAN is pasted, full PAN is accepted and formatted`() {
         val cardNumberEditText = CardNumberEditText(
             context,
+            uiContext = testDispatcher,
             workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             staticCardAccountRanges = object : StaticCardAccountRanges {
@@ -336,6 +340,7 @@ internal class CardNumberEditTextTest {
     fun `updating text with null account range should format text correctly but not set card brand`() {
         val cardNumberEditText = CardNumberEditText(
             context,
+            uiContext = testDispatcher,
             workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             analyticsRequestExecutor = analyticsRequestExecutor,
@@ -694,6 +699,7 @@ internal class CardNumberEditTextTest {
                 activityScenario.onActivity { activity ->
                     val cardNumberEditText = CardNumberEditText(
                         activity,
+                        uiContext = testDispatcher,
                         workContext = testDispatcher,
                         cardAccountRangeRepository = DelayedCardAccountRangeRepository(),
                         analyticsRequestExecutor = analyticsRequestExecutor,
@@ -721,6 +727,7 @@ internal class CardNumberEditTextTest {
         var repositoryCalls = 0
         val cardNumberEditText = CardNumberEditText(
             context,
+            uiContext = testDispatcher,
             workContext = testDispatcher,
             cardAccountRangeRepository = object : CardAccountRangeRepository {
                 override suspend fun getAccountRange(
@@ -825,6 +832,7 @@ internal class CardNumberEditTextTest {
         var repositoryCalls = 0
         val cardNumberEditText = CardNumberEditText(
             context,
+            uiContext = testDispatcher,
             workContext = testDispatcher,
             cardAccountRangeRepository = object : CardAccountRangeRepository {
                 override suspend fun getAccountRange(
@@ -893,6 +901,7 @@ internal class CardNumberEditTextTest {
         val analyticsRequests = mutableListOf<AnalyticsRequest>()
         val cardNumberEditText = CardNumberEditText(
             context,
+            uiContext = testDispatcher,
             workContext = testDispatcher,
             cardAccountRangeRepository = object : CardAccountRangeRepository {
                 override suspend fun getAccountRange(
@@ -1084,6 +1093,7 @@ internal class CardNumberEditTextTest {
             scenario.onActivity { activity ->
                 val cardNumberEditText = CardNumberEditText(
                     context = activity,
+                    uiContext = testDispatcher,
                     workContext = testDispatcher,
                     cardAccountRangeRepository = DelayedCardAccountRangeRepository(),
                     analyticsRequestExecutor = analyticsRequestExecutor,
