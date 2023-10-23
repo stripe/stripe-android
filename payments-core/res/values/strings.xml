@@ -160,7 +160,6 @@
   <string name="stripe_removed">Removed %s</string>
   <string name="stripe_secure_checkout">Secure Checkout</string>
   <string name="stripe_title_add_a_card">Add a Card</string>
-  <string name="stripe_title_update_card">Update Card</string>
   <!-- Screen title telling users they should add an address -->
   <string name="stripe_title_add_an_address">Set Address</string>
   <!-- Label for Bank Account selection or detail entry form -->
@@ -169,6 +168,8 @@
   <string name="stripe_title_payment_method">Payment Method</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="stripe_title_select_shipping_method">Select Shipping Method</string>
+  <!-- Title of screen to update a card -->
+  <string name="stripe_title_update_card">Update Card</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verify your payment</string>
 </resources>
