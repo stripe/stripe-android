@@ -23,7 +23,7 @@ tags:
     timeout: 30000
 ######## Bypass Chrome on-boarding screen #######
 - runFlow:
-    file: ../../common/subflow-skip-chrome-welcome.yaml
+    file: ../common/subflow-skip-chrome-welcome.yaml
 ################################################
 # Common: web AuthFlow - connect OAuth institution
 - tapOn: "Agree and continue"

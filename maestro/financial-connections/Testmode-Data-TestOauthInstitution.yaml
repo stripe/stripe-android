@@ -32,7 +32,7 @@ tags:
 - tapOn: "Continue"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
-    file: ../../common/subflow-skip-chrome-welcome.yaml
+    file: ../common/subflow-skip-chrome-welcome.yaml
 ###############################################
 # SELECT ALL ACCOUNTS
 - extendedWaitUntil:
