@@ -7,16 +7,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 @Composable
 internal fun EditPaymentMethod(
-    sheetViewModel: BaseSheetViewModel,
     paymentMethod: PaymentMethod,
     modifier: Modifier = Modifier,
 ) {
     Text(
         text = "Editing ${paymentMethod.getLabel(LocalContext.current.resources)}",
-        modifier = Modifier.padding(16.dp),
+        modifier = modifier.padding(16.dp),
     )
 }
