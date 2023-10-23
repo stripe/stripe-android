@@ -472,7 +472,8 @@ private fun FeaturedInstitutionsGrid(
         contentPadding = PaddingValues(
             top = 16.dp,
             start = 24.dp,
-            end = 24.dp
+            end = 24.dp,
+            bottom = 16.dp
         ),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
