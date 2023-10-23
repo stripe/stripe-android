@@ -115,7 +115,7 @@ internal abstract class BaseSheetViewModel(
     private val _amount = MutableStateFlow<Amount?>(null)
     internal val amount: StateFlow<Amount?> = _amount
 
-    private val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
+    protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
         value = listOf(PaymentSheetScreen.Loading),
     )
 
