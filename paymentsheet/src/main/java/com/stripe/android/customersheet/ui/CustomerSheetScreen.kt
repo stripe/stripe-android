@@ -21,12 +21,14 @@ import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.H4Text
 
 @Composable
 internal fun CustomerSheetScreen(
     viewState: CustomerSheetViewState,
+    topBarState: PaymentSheetTopBarState,
     modifier: Modifier = Modifier,
     viewActionHandler: (CustomerSheetViewAction) -> Unit = {},
     paymentMethodNameProvider: (PaymentMethodCode?) -> String,
@@ -36,7 +38,7 @@ internal fun CustomerSheetScreen(
     PaymentSheetScaffold(
         topBar = {
             PaymentSheetTopBar(
-                state = viewState.topBarState,
+                state = topBarState,
                 handleBackPressed = {
                     viewActionHandler(
                         CustomerSheetViewAction.OnBackPressed

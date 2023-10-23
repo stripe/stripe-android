@@ -36,6 +36,8 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.utils.mapAsStateFlow
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -75,6 +77,17 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private val backStack = MutableStateFlow(initialBackStack)
     val viewState: StateFlow<CustomerSheetViewState> = backStack.mapAsStateFlow { it.last() }
+
+    val topBarState: StateFlow<PaymentSheetTopBarState> = backStack.mapAsStateFlow { stack ->
+        val currentScreen = stack.last()
+        PaymentSheetTopBarStateFactory.create(
+            backStack = stack.map { it.screen },
+            paymentMethods = currentScreen.savedPaymentMethods,
+            isLiveMode = currentScreen.isLiveMode,
+            isProcessing = currentScreen.isProcessing,
+            isEditing = currentScreen.isEditing,
+        )
+    }
 
     private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
     val result: StateFlow<InternalCustomerSheetResult?> = _result
