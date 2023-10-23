@@ -101,11 +101,14 @@ internal fun SelectPaymentMethod(
                 showLink = false,
                 currentSelection = viewState.paymentSelection,
                 nameProvider = paymentMethodNameProvider,
+                // TODO(samer-stripe): Add CBC eligibility check to CustomerSheet
+                isCbcEligible = false
             ),
             isEditing = viewState.isEditing,
             isProcessing = viewState.isProcessing,
             onAddCardPressed = { viewActionHandler(CustomerSheetViewAction.OnAddCardPressed) },
             onItemSelected = { viewActionHandler(CustomerSheetViewAction.OnItemSelected(it)) },
+            onModifyItem = { viewActionHandler(CustomerSheetViewAction.OnModifyItem(it)) },
             onItemRemoved = { viewActionHandler(CustomerSheetViewAction.OnItemRemoved(it)) },
             modifier = Modifier.padding(bottom = 2.dp),
         )

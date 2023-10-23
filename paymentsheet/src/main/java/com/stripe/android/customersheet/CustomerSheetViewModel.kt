@@ -102,6 +102,7 @@ internal class CustomerSheetViewModel @Inject constructor(
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
             is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
             is CustomerSheetViewAction.OnItemRemoved -> onItemRemoved(viewAction.paymentMethod)
+            is CustomerSheetViewAction.OnModifyItem -> onModifyItem(viewAction.paymentMethod)
             is CustomerSheetViewAction.OnItemSelected -> onItemSelected(viewAction.selection)
             is CustomerSheetViewAction.OnPrimaryButtonPressed -> onPrimaryButtonPressed()
             is CustomerSheetViewAction.OnFormDataUpdated -> onFormDataUpdated(viewAction.formData)
@@ -314,6 +315,11 @@ internal class CustomerSheetViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onModifyItem(paymentMethod: PaymentMethod) {
+        // TODO(samer-stripe): Link modification to customer sheet
     }
 
     private fun onItemSelected(paymentSelection: PaymentSelection?) {

@@ -57,6 +57,8 @@
   <string name="stripe_paymentsheet_primary_button_processing">Processing…</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Remove bank account</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">Edit %s</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Remove %s</string>
   <!-- A button used for saving a new payment method -->

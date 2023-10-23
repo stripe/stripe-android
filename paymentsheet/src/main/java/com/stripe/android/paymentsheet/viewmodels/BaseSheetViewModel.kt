@@ -188,7 +188,8 @@ internal abstract class BaseSheetViewModel(
                 paymentMethod?.displayNameResource?.let {
                     application.getString(it)
                 }.orEmpty()
-            }
+            },
+            isCbcEligible = { cbcEligibility is CardBrandChoiceEligibility.Eligible }
         )
     }
 
@@ -438,6 +439,11 @@ internal abstract class BaseSheetViewModel(
                 backStack.value = listOf(AddFirstPaymentMethod)
             }
         }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun modifyPaymentMethod(paymentMethod: PaymentMethod) {
+        // TODO(samer-stripe): Support item modification
     }
 
     private fun mapToHeaderTextResource(
