@@ -3,8 +3,18 @@ set -o pipefail
 set -x
 set -e
 
-# Define maestro tests path from command line arg
-MAESTRO_TAGS=$1
+# Maestro tags to be executed. see https://maestro.mobile.dev/cli/tags
+MAESTRO_TAGS=""
+
+while getopts ":t:" opt; do
+  case $opt in
+    t) MAESTRO_TAGS="$OPTARG"
+    ;;
+    \?) echo "Invalid option -$OPTARG" >&2
+    exit 1
+    ;;
+  esac
+done
 
 export MAESTRO_VERSION=1.31.0
 

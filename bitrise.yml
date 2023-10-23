@@ -7,7 +7,7 @@ trigger_map:
     pipeline: main-trigger-pipeline
     #TODO revert
   - pull_request_source_branch: carlosmuvi/web-flavor-maestro-tests
-    pipeline: pipeline-financial-connections-e2e-tests
+    pipeline: pipeline-connections-e2e-tests
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
@@ -16,7 +16,7 @@ pipelines:
   main-trigger-pipeline:
     stages:
       - stage-trigger-run-all: { }
-  pipeline-financial-connections-e2e-tests:
+  pipeline-connections-e2e-tests:
     stages:
       - stage-build-connections-debug: { }
       - stage-run-connections-e2e-tests: { }
@@ -85,7 +85,7 @@ workflows:
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh financial-connections
+                bash ./scripts/execute_maestro_tests.sh -t financial-connections
       - slack@3:
           is_always_run: true
           inputs:
@@ -134,7 +134,7 @@ workflows:
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh payments
+                bash ./scripts/execute_maestro_tests.sh -t payments
       - custom-test-results-export@1:
           inputs:
             - search_pattern: "*/maestroReport.xml"
@@ -158,7 +158,7 @@ workflows:
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh data
+                bash ./scripts/execute_maestro_tests.sh -t data
       - custom-test-results-export@1:
           inputs:
             - search_pattern: "*/maestroReport.xml"
