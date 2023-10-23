@@ -37,19 +37,15 @@ internal sealed interface PaymentSheetScreen {
             val state = viewModel.paymentOptionsState.collectAsState().value
             val isEditing = viewModel.editing.collectAsState().value
             val isProcessing = viewModel.processing.collectAsState().value
-            val onAddCardPressed = viewModel::transitionToAddPaymentScreen
-            val onItemSelected = viewModel::handlePaymentMethodSelected
-            val onModifyItem = viewModel::modifyPaymentMethod
-            val onItemRemoved = viewModel::removePaymentMethod
 
             PaymentOptions(
                 state = state,
                 isEditing = isEditing,
                 isProcessing = isProcessing,
-                onAddCardPressed = onAddCardPressed,
-                onItemSelected = onItemSelected,
-                onModifyItem = onModifyItem,
-                onItemRemoved = onItemRemoved,
+                onAddCardPressed = viewModel::transitionToAddPaymentScreen,
+                onItemSelected = viewModel::handlePaymentMethodSelected,
+                onModifyItem = viewModel::modifyPaymentMethod,
+                onItemRemoved = viewModel::removePaymentMethod,
                 modifier = modifier
             )
         }

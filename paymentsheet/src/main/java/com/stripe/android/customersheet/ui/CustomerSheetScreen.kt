@@ -101,6 +101,7 @@ internal fun SelectPaymentMethod(
                 showLink = false,
                 currentSelection = viewState.paymentSelection,
                 nameProvider = paymentMethodNameProvider,
+                // TODO(samer-stripe): Add CBC eligibility check to CustomerSheet
                 isCbcEligible = false
             ),
             isEditing = viewState.isEditing,

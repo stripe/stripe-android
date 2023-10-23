@@ -122,7 +122,7 @@ internal fun PaymentOptionUi(
             .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
     )
 
-    if (editState is PaymentOptionEditState.Removable && onRemoveListener != null) {
+    if (editState == PaymentOptionEditState.Removable && onRemoveListener != null) {
         SimpleDialogElementUI(
             openDialog = openRemoveDialog,
             titleText = removePmDialogTitle,
@@ -144,17 +144,17 @@ private fun PaymentOptionBadge(
     onModifyAccessibilityDescription: String = ""
 ) {
     when (editState) {
-        is PaymentOptionEditState.Modifiable -> ModifyBadge(
+        PaymentOptionEditState.Modifiable -> ModifyBadge(
             onModifyAccessibilityDescription = onModifyAccessibilityDescription,
             onPressed = { onModifyListener?.invoke() },
             modifier = Modifier.offset(x = (-14).dp, y = 1.dp),
         )
-        is PaymentOptionEditState.Removable -> RemoveBadge(
+        PaymentOptionEditState.Removable -> RemoveBadge(
             onRemoveAccessibilityDescription = onRemoveAccessibilityDescription,
             onPressed = { openRemoveDialog.value = true },
             modifier = Modifier.offset(x = (-14).dp, y = 1.dp),
         )
-        is PaymentOptionEditState.None -> Unit
+        PaymentOptionEditState.None -> Unit
     }
 
     if (isSelected) {
