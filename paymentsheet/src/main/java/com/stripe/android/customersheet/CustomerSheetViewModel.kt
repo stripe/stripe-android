@@ -36,12 +36,17 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.utils.mapAsStateFlow
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -67,7 +72,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val eventReporter: CustomerSheetEventReporter,
     private val workContext: CoroutineContext = Dispatchers.IO,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
-    private val formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
+    val formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val customerSheetLoader: CustomerSheetLoader,
@@ -85,7 +90,22 @@ internal class CustomerSheetViewModel @Inject constructor(
     private var unconfirmedPaymentMethod: PaymentMethod? = null
     private var stripeIntent: StripeIntent? = null
 
+    private val card = LpmRepository.hardcodedCardSpec(
+        billingDetailsCollectionConfiguration =
+        configuration.billingDetailsCollectionConfiguration.toInternal()
+    )
+    private val usBankAccount = LpmRepository.hardCodedUsBankAccount
+
+    private val supportedPaymentMethods = listOf(
+        card,
+        usBankAccount
+    )
+
     init {
+        lpmRepository.initializeWithPaymentMethods(
+            supportedPaymentMethods.associateBy { it.code }
+        )
+
         configuration.appearance.parseAppearance()
 
         if (viewState.value is CustomerSheetViewState.Loading) {
@@ -405,18 +425,47 @@ internal class CustomerSheetViewModel @Inject constructor(
     private fun transitionToAddPaymentMethod(isFirstPaymentMethod: Boolean) {
         val paymentMethodCode = PaymentMethod.Type.Card.code
 
-        val observe = buildFormObserver(
+        val formArguments = FormArguments(
             paymentMethodCode = paymentMethodCode,
-            application = application,
-            configuration = configuration,
+            showCheckbox = false,
+            showCheckboxControlledFields = false,
+            merchantName = configuration.merchantDisplayName
+                ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+            billingDetails = configuration.defaultBillingDetails,
+            billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+            // TODO(tillh-stripe) Determine this based on /wallets-config response
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        )
+
+        val observe = buildFormObserver(
+            formArguments = formArguments,
             formViewModelSubcomponentBuilderProvider = formViewModelSubcomponentBuilderProvider,
             onFormDataUpdated = ::onFormDataUpdated
         )
 
+        val selectedPaymentMethod = requireNotNull(lpmRepository.fromCode(paymentMethodCode))
+
         transition(
             to = CustomerSheetViewState.AddPaymentMethod(
                 paymentMethodCode = paymentMethodCode,
+                supportedPaymentMethods = supportedPaymentMethods,
                 formViewData = FormViewModel.ViewData(),
+                formArguments = formArguments,
+                usBankAccountFormArguments = USBankAccountFormArguments(
+                    onBehalfOf = null,
+                    isCompleteFlow = false,
+                    isPaymentFlow = false,
+                    stripeIntentId = stripeIntent?.id,
+                    clientSecret = stripeIntent?.clientSecret,
+                    shippingDetails = null,
+                    draftPaymentSelection = null,
+                    onMandateTextChanged = { _, _ -> },
+                    onHandleUSBankAccount = { },
+                    onUpdatePrimaryButtonUIState = { },
+                    onUpdatePrimaryButtonState = { },
+                    onError = { }
+                ),
+                selectedPaymentMethod = selectedPaymentMethod,
                 enabled = true,
                 isLiveMode = isLiveModeProvider(),
                 isProcessing = false,
@@ -710,6 +759,26 @@ internal class CustomerSheetViewModel @Inject constructor(
         } else {
             backStack.update { currentStack ->
                 listOf(buildDefaultSelectPaymentMethod(update)) + currentStack
+            }
+        }
+    }
+
+    private fun buildFormObserver(
+        formArguments: FormArguments,
+        formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
+        onFormDataUpdated: (data: FormViewModel.ViewData) -> Unit
+    ): () -> Unit {
+        val formViewModel = formViewModelSubcomponentBuilderProvider.get()
+            .formArguments(formArguments)
+            .showCheckboxFlow(flowOf(false))
+            .build()
+            .viewModel
+
+        return {
+            viewModelScope.launch {
+                formViewModel.viewDataFlow.collect { data ->
+                    onFormDataUpdated(data)
+                }
             }
         }
     }

@@ -5,8 +5,11 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 
 internal sealed class CustomerSheetViewState(
     open val savedPaymentMethods: List<PaymentMethod>,
@@ -60,7 +63,11 @@ internal sealed class CustomerSheetViewState(
 
     data class AddPaymentMethod(
         val paymentMethodCode: PaymentMethodCode,
+        val supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
         val formViewData: FormViewModel.ViewData,
+        val formArguments: FormArguments,
+        val usBankAccountFormArguments: USBankAccountFormArguments,
+        val selectedPaymentMethod: LpmRepository.SupportedPaymentMethod,
         val enabled: Boolean,
         override val isLiveMode: Boolean,
         override val isProcessing: Boolean,

@@ -6,5 +6,3 @@ package com.stripe.android.customersheet
 )
 @Retention(AnnotationRetention.BINARY)
 annotation class ExperimentalCustomerSheetApi
-
-internal var CustomerSheetACHV2Flag = false

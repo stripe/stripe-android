@@ -14,12 +14,15 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 import org.robolectric.annotation.Config
 import java.util.Stack
 
@@ -268,7 +271,17 @@ internal class CustomerSheetActivityTest {
     ): CustomerSheetViewState.AddPaymentMethod {
         return CustomerSheetViewState.AddPaymentMethod(
             paymentMethodCode = paymentMethodCode,
+            supportedPaymentMethods = listOf(),
             formViewData = formViewData,
+            formArguments = FormArguments(
+                paymentMethodCode = PaymentMethod.Type.Card.code,
+                showCheckbox = false,
+                showCheckboxControlledFields = false,
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                merchantName = ""
+            ),
+            usBankAccountFormArguments = mock(),
+            selectedPaymentMethod = mock(),
             enabled = enabled,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,

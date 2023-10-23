@@ -11,7 +11,9 @@ import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
+import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.addPaymentMethodViewState
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
+import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.selectPaymentMethodViewState
 import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -33,33 +35,6 @@ import kotlin.test.assertFailsWith
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetViewModelTest {
-
-    private val selectPaymentMethodViewState = SelectPaymentMethod(
-        title = null,
-        savedPaymentMethods = listOf(CARD_PAYMENT_METHOD),
-        paymentSelection = null,
-        isLiveMode = false,
-        isProcessing = false,
-        isEditing = false,
-        isGooglePayEnabled = false,
-        primaryButtonVisible = false,
-        primaryButtonLabel = null,
-    )
-
-    private val addPaymentMethodViewState = AddPaymentMethod(
-        paymentMethodCode = PaymentMethod.Type.Card.code,
-        formViewData = FormViewModel.ViewData(
-            completeFormValues = FormFieldValues(
-                showsMandate = false,
-                userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
-            ),
-        ),
-        enabled = true,
-        isLiveMode = false,
-        isProcessing = false,
-        isFirstPaymentMethod = false
-    )
-
     @Test
     fun `isLiveMode is true when publishable key is live`() {
         var isLiveMode = CustomerSheetViewModelModule.isLiveMode {

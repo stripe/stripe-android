@@ -35,7 +35,7 @@ internal fun PaymentElement(
     supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
     selectedItem: LpmRepository.SupportedPaymentMethod,
     showLinkInlineSignup: Boolean,
-    linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     showCheckboxFlow: Flow<Boolean>,
     onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit,
     onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
@@ -84,7 +84,7 @@ internal fun PaymentElement(
             }
         }
 
-        if (showLinkInlineSignup) {
+        if (showLinkInlineSignup && linkConfigurationCoordinator != null) {
             LinkInlineSignup(
                 linkConfigurationCoordinator = linkConfigurationCoordinator,
                 enabled = enabled,
