@@ -29,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
@@ -242,7 +243,7 @@ internal class DefaultCardNumberController(
                 animatedIcons = animatedIcons
             )
         }
-    }
+    }.distinctUntilChanged()
 
     private val _fieldState = combine(impliedCardBrand, _fieldValue) { brand, fieldValue ->
         cardTextFieldConfig.determineState(

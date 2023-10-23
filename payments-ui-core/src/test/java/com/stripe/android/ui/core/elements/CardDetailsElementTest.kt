@@ -132,7 +132,7 @@ class CardDetailsElementTest {
     }
 
     @Test
-    fun `test form field values returned when eligible for card brand choice`() = runTest {
+    fun `test form field values returned when eligible for card brand choice`() = runTest(testDispatcher) {
         val cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList())
         val cardController = CardDetailsController(
             context = context,
