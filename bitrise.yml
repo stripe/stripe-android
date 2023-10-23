@@ -134,7 +134,7 @@ workflows:
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh -t payments
+                bash ./scripts/execute_maestro_tests.sh -t payment
       - custom-test-results-export@1:
           inputs:
             - search_pattern: "*/maestroReport.xml"
