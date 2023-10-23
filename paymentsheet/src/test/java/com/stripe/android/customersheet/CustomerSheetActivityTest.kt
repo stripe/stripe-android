@@ -14,6 +14,8 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
@@ -271,7 +273,13 @@ internal class CustomerSheetActivityTest {
             paymentMethodCode = paymentMethodCode,
             supportedPaymentMethods = listOf(),
             formViewData = formViewData,
-            formArguments = mock(),
+            formArguments = FormArguments(
+                paymentMethodCode = PaymentMethod.Type.Card.code,
+                showCheckbox = false,
+                showCheckboxControlledFields = false,
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                merchantName = ""
+            ),
             usBankAccountFormArguments = mock(),
             selectedPaymentMethod = mock(),
             enabled = enabled,

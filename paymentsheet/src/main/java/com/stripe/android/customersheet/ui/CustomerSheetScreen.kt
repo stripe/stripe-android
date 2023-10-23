@@ -12,7 +12,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.PrimaryButton
-import com.stripe.android.customersheet.CustomerSheetACHV2Flag
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.model.PaymentMethodCode
@@ -26,6 +25,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
 import kotlinx.coroutines.flow.flowOf
 import javax.inject.Provider
 
@@ -67,7 +67,7 @@ internal fun CustomerSheetScreen(
                         )
                     }
                     is CustomerSheetViewState.AddPaymentMethod -> {
-                        if (CustomerSheetACHV2Flag) {
+                        if (customerSheetACHv2.isEnabled) {
                             AddPaymentMethodWithPaymentElement(
                                 viewState = viewState,
                                 viewActionHandler = viewActionHandler,
@@ -208,6 +208,7 @@ internal fun AddPaymentMethodWithPaymentElement(
     requireNotNull(formViewModelSubComponentBuilderProvider)
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
+    // TODO (jameswoo) make sure that the spacing is consistent with paymentsheet
     Column {
         H4Text(
             text = stringResource(id = R.string.stripe_paymentsheet_save_a_new_payment_method),

@@ -46,6 +46,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -102,10 +103,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     init {
         lpmRepository.initializeWithPaymentMethods(
-            mapOf(
-                PaymentMethod.Type.Card.code to card,
-                PaymentMethod.Type.USBankAccount.code to usBankAccount
-            )
+            supportedPaymentMethods.associateBy { it.code }
         )
 
         configuration.appearance.parseAppearance()
@@ -761,6 +759,26 @@ internal class CustomerSheetViewModel @Inject constructor(
         } else {
             backStack.update { currentStack ->
                 listOf(buildDefaultSelectPaymentMethod(update)) + currentStack
+            }
+        }
+    }
+
+    private fun buildFormObserver(
+        formArguments: FormArguments,
+        formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
+        onFormDataUpdated: (data: FormViewModel.ViewData) -> Unit
+    ): () -> Unit {
+        val formViewModel = formViewModelSubcomponentBuilderProvider.get()
+            .formArguments(formArguments)
+            .showCheckboxFlow(flowOf(false))
+            .build()
+            .viewModel
+
+        return {
+            viewModelScope.launch {
+                formViewModel.viewDataFlow.collect { data ->
+                    onFormDataUpdated(data)
+                }
             }
         }
     }
