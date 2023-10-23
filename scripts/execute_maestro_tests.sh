@@ -4,7 +4,7 @@ set -x
 set -e
 
 # Define maestro tests path from command line arg
-MAESTRO_PATH=$1
+MAESTRO_TAGS=$1
 
 export MAESTRO_VERSION=1.31.0
 
@@ -35,4 +35,4 @@ mkdir -p /tmp/test_results
 adb install $BITRISE_APK_PATH
 
 # Clear and start collecting logs
-maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml $MAESTRO_PATH
+maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --include-tags=$MAESTRO_TAGS --output maestroReport.xml maestro/financial-connections

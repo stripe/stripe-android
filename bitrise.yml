@@ -85,7 +85,7 @@ workflows:
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh maestro/financial-connections
+                bash ./scripts/execute_maestro_tests.sh financial-connections
       - slack@3:
           is_always_run: true
           inputs:
@@ -116,7 +116,7 @@ workflows:
       - deploy-to-bitrise-io@2:
           inputs:
             - pipeline_intermediate_files: "$BITRISE_APK_PATH:BITRISE_APK_PATH"
-  run-connections-e2e-native-tests:
+  run-connections-e2e-payments-tests:
     before_run:
       - start_emulator
       - prepare_all
@@ -130,17 +130,17 @@ workflows:
           inputs:
             - boot_timeout: 600
       - script@1:
-          title: Execute Maestro tests 1
+          title: Execute Maestro tests - Payments
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh maestro/financial-connections/native-payments
+                bash ./scripts/execute_maestro_tests.sh payments
       - custom-test-results-export@1:
           inputs:
             - search_pattern: "*/maestroReport.xml"
-            - test_name: Maestro tests native
+            - test_name: Maestro tests payments
       - deploy-to-bitrise-io@2: { }
-  run-connections-e2e-web-tests:
+  run-connections-e2e-data-tests:
     before_run:
       - start_emulator
       - prepare_all
@@ -154,15 +154,15 @@ workflows:
           inputs:
             - boot_timeout: 600
       - script@1:
-          title: Execute Maestro tests 1
+          title: Execute Maestro tests - Data
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh maestro/financial-connections/web-data
+                bash ./scripts/execute_maestro_tests.sh data
       - custom-test-results-export@1:
           inputs:
             - search_pattern: "*/maestroReport.xml"
-            - test_name: Maestro tests native
+            - test_name: Maestro tests data
       - deploy-to-bitrise-io@2: { }
   maestro-paymentsheet:
     before_run:

@@ -1,4 +1,9 @@
 appId: com.stripe.android.financialconnections.example
+tags:
+  - financial-connections
+  - testmode
+  - native
+  - data
 ---
 - launchApp
 - startRecording: /tmp/test_results/testmode-data-testoauthinstitution
@@ -13,9 +18,9 @@ appId: com.stripe.android.financialconnections.example
     id: "Data_checkbox"
 - tapOn: "Connect Accounts!"
 - extendedWaitUntil:
-      notVisible:
-          id: "Data_checkbox"
-      timeout: 30000
+    notVisible:
+      id: "Data_checkbox"
+    timeout: 30000
 # Common: web AuthFlow - connect OAuth institution
 - tapOn: "Agree and continue"
 - assertVisible: "Test OAuth Institution"
