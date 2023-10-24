@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,6 +37,7 @@ import com.stripe.android.utils.AppCompatOrMdcTheme
 import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.properties.Delegates
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 internal class CardBrandView @JvmOverloads constructor(
     context: Context,
@@ -236,7 +238,7 @@ private fun CardBrand(
             )
 
             Image(
-                painter = painterResource(R.drawable.stripe_ic_arrow_down),
+                painter = painterResource(StripeUiCoreR.drawable.stripe_ic_chevron_down),
                 contentDescription = null,
                 modifier = Modifier
                     .requiredSize(8.dp)
@@ -274,6 +276,8 @@ private fun CardBrandChoiceDropdown(
         expanded = expanded,
         currentChoice = currentBrand.takeIf { it != Unknown }?.toChoice(),
         choices = choices,
+        headerTextColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
+        optionTextColor = MaterialTheme.colors.onSurface,
         onChoiceSelected = { choice ->
             val choiceIndex = choices.indexOf(choice)
             val brand = brands.getOrNull(choiceIndex)
