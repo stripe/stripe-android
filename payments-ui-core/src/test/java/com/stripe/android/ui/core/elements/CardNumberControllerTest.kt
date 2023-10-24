@@ -217,7 +217,7 @@ internal class CardNumberControllerTest {
         cardNumberController.trailingIcon.asLiveData().observeForever {
             trailingIcons.add(it)
         }
-        cardNumberController.onValueChange("40000025")
+        cardNumberController.onValueChange("4000002500001001")
         idleLooper()
         assertThat(trailingIcons.last() as TextFieldIcon.Dropdown)
             .isEqualTo(
@@ -263,7 +263,7 @@ internal class CardNumberControllerTest {
         cardNumberController.trailingIcon.asLiveData().observeForever {
             trailingIcons.add(it)
         }
-        cardNumberController.onValueChange("40000025")
+        cardNumberController.onValueChange("4000002500001001")
         idleLooper()
         assertThat(trailingIcons.last() as TextFieldIcon.Dropdown)
             .isEqualTo(
@@ -309,7 +309,7 @@ internal class CardNumberControllerTest {
         cardNumberController.trailingIcon.asLiveData().observeForever {
             trailingIcons.add(it)
         }
-        cardNumberController.onValueChange("40000025")
+        cardNumberController.onValueChange("4000002500001001")
         cardNumberController.onDropdownItemClicked(
             TextFieldIcon.Dropdown.Item(
                 id = CardBrand.CartesBancaires.code,
@@ -362,7 +362,7 @@ internal class CardNumberControllerTest {
         cardNumberController.trailingIcon.asLiveData().observeForever {
             trailingIcons.add(it)
         }
-        cardNumberController.onValueChange("40000025")
+        cardNumberController.onValueChange("4000002500001001")
         cardNumberController.onDropdownItemClicked(
             TextFieldIcon.Dropdown.Item(
                 id = CardBrand.CartesBancaires.code,
@@ -370,8 +370,8 @@ internal class CardNumberControllerTest {
                 icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
             )
         )
-        cardNumberController.onValueChange("4000002")
-        cardNumberController.onValueChange("40000025")
+        cardNumberController.onValueChange("400000250000100")
+        cardNumberController.onValueChange("4000002500001001")
         idleLooper()
         assertThat(trailingIcons.last() as TextFieldIcon.Dropdown)
             .isEqualTo(
