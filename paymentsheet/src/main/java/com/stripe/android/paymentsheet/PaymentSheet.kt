@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
@@ -529,7 +530,8 @@ class PaymentSheet internal constructor(
             /*
              * TODO(samer-stripe): Make this function public prior to release
              */
-            internal fun preferredNetworks(
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun preferredNetworks(
                 preferredNetworks: List<CardBrand>
             ) = apply {
                 this.preferredNetworks = preferredNetworks

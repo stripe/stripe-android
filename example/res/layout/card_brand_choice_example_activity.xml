@@ -6,6 +6,12 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/preferred_network_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Set Cartes Bancaires as preferred network" />
+
     <com.stripe.android.view.CardInputWidget
         android:id="@+id/card_input_widget"
         android:layout_width="match_parent"
