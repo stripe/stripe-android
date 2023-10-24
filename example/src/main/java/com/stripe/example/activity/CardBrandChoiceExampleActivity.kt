@@ -24,9 +24,15 @@ class CardBrandChoiceExampleActivity : StripeIntentActivity() {
         viewModel.inProgress.observe(this, this::enableUi)
         viewModel.status.observe(this, viewBinding.status::setText)
 
-        viewBinding.cardInputWidget.setPreferredNetworks(
-            preferredNetworks = listOf(CardBrand.CartesBancaires),
-        )
+        viewBinding.preferredNetworkSwitch.setOnCheckedChangeListener { _, isChecked ->
+            viewBinding.cardInputWidget.setPreferredNetworks(
+                preferredNetworks = if (isChecked) {
+                    listOf(CardBrand.CartesBancaires)
+                } else {
+                    emptyList()
+                },
+            )
+        }
 
         val stripeAccountId = Settings(this).stripeAccountId
 
