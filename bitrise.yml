@@ -5,9 +5,8 @@ project_type: android
 trigger_map:
   - push_branch: master
     pipeline: main-trigger-pipeline
-    #TODO revert
   - pull_request_source_branch: carlosmuvi/web-flavor-maestro-tests
-    pipeline: pipeline-connections-e2e-tests
+    pipeline: pipeline-connections-e2e-release-tests
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
@@ -16,9 +15,13 @@ pipelines:
   main-trigger-pipeline:
     stages:
       - stage-trigger-run-all: { }
-  pipeline-connections-e2e-tests:
+  pipeline-connections-e2e-debug-tests:
     stages:
       - stage-build-connections-debug: { }
+      - stage-run-connections-e2e-tests: { }
+  pipeline-connections-e2e-release-tests:
+    stages:
+      - stage-build-connections-release: { }
       - stage-run-connections-e2e-tests: { }
 stages:
   stage-trigger-run-all:
@@ -34,6 +37,9 @@ stages:
   stage-build-connections-debug:
     workflows:
       - build-connections-debug: { }
+  stage-build-connections-release:
+    workflows:
+      - build-connections-release: { }
   stage-run-connections-e2e-tests:
     workflows:
       - run-connections-e2e-payments-tests: { }
@@ -103,6 +109,16 @@ workflows:
             - test_name: Maestro tests
       - deploy-to-bitrise-io@2: { }
   build-connections-debug:
+    envs:
+      - BUILD_VARIANT: debug
+    before_run:
+      - _build-connections
+  build-connections-release:
+    envs:
+      - BUILD_VARIANT: release
+    before_run:
+      - _build-connections
+  _build-connections:
     before_run:
       - prepare_all
     steps:
@@ -110,7 +126,7 @@ workflows:
           inputs:
             - arguments: "-PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL"
             - module: financial-connections-example
-            - variant: debug
+            - variant: $BUILD_VARIANT
             - build_type: apk
             - cache_level: all
       - deploy-to-bitrise-io@2:
@@ -120,13 +136,13 @@ workflows:
     envs:
       - MAESTRO_TAGS: payment
     before_run:
-      - _run_connections_e2e_tests
+      - _run-connections-e2e-tests
   run-connections-e2e-data-tests:
     envs:
       - MAESTRO_TAGS: data
     before_run:
-      - _run_connections_e2e_tests
-  _run_connections_e2e_tests:
+      - _run-connections-e2e-tests
+  _run-connections-e2e-tests:
     before_run:
       - start_emulator
       - prepare_all
