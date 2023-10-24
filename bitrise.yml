@@ -174,10 +174,11 @@ workflows:
             - test_name: Maestro tests $MAESTRO_TAGS
   notify-connections-e2e-failure:
     steps:
-      - slack@3:
+      - slack@4:
           inputs:
+            - color: warning
+            - pretext: '*Build Failed!*'
             - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-            - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
   #      - pagerduty@0:
   #          inputs:
   #            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
