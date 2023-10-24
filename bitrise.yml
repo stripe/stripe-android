@@ -19,10 +19,12 @@ pipelines:
     stages:
       - stage-build-connections-debug: { }
       - stage-run-connections-e2e-tests: { }
+      - stage-notify-connections-e2e-failure: { }
   pipeline-connections-e2e-release-tests:
     stages:
       - stage-build-connections-release: { }
       - stage-run-connections-e2e-tests: { }
+      - stage-notify-connections-e2e-failure: { }
 stages:
   stage-trigger-run-all:
     workflows:
@@ -44,6 +46,10 @@ stages:
     workflows:
       - run-connections-e2e-payments-tests: { }
       - run-connections-e2e-data-tests: { }
+  stage-notify-connections-e2e-failure:
+    workflows:
+      - notify-connections-e2e-failure:
+          run_if: .IsBuildFailed
 workflows:
   check:
     before_run:
@@ -165,6 +171,16 @@ workflows:
           inputs:
             - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests $MAESTRO_TAGS
+  notify-connections-e2e-failure:
+    steps:
+      - slack@3:
+          inputs:
+            - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+            - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+  #      - pagerduty@0:
+  #          inputs:
+  #            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
+  #            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
   maestro-paymentsheet:
     before_run:
       - start_emulator
