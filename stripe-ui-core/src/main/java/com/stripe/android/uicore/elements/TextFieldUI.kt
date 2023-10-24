@@ -15,10 +15,12 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -276,13 +278,19 @@ fun TextField(
                                     )
 
                                     if (show) {
-                                        TrailingIcon(
-                                            trailingIcon = TextFieldIcon.Trailing(
-                                                R.drawable.stripe_ic_chevron_down,
-                                                isTintable = false
-                                            ),
-                                            loading = false
-                                        )
+                                        CompositionLocalProvider(
+                                            LocalContentColor
+                                                provides
+                                                    MaterialTheme.stripeColors.placeholderText
+                                        ) {
+                                            TrailingIcon(
+                                                trailingIcon = TextFieldIcon.Trailing(
+                                                    R.drawable.stripe_ic_chevron_down,
+                                                    isTintable = true
+                                                ),
+                                                loading = false
+                                            )
+                                        }
                                     }
                                 }
 
