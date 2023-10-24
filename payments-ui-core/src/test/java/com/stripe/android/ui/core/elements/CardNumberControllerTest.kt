@@ -34,6 +34,7 @@ internal class CardNumberControllerTest {
         CardNumberConfig(),
         FakeCardAccountRangeRepository(),
         testDispatcher,
+        testDispatcher,
         initialValue = null
     )
 
@@ -133,6 +134,7 @@ internal class CardNumberControllerTest {
                 override val loading: Flow<Boolean> = flowOf(false)
             },
             testDispatcher,
+            testDispatcher,
             initialValue = null
         )
         cardNumberController.onValueChange("42424242424242424242")
@@ -190,17 +192,11 @@ internal class CardNumberControllerTest {
         idleLooper()
         cardNumberController.onValueChange("")
         idleLooper()
-        assertThat(trailingIcons[0])
-            .isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
-        assertThat(trailingIcons[1] as TextFieldIcon.MultiTrailing)
-            .isEqualTo(
-                TextFieldIcon.MultiTrailing(
-                    staticIcons = listOf(TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false)),
-                    animatedIcons = listOf()
-                )
-            )
-        assertThat(trailingIcons[2])
-            .isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
+
+        assertThat(trailingIcons).hasSize(3)
+        assertThat(trailingIcons[0]).isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
+        assertThat(trailingIcons[1]).isEqualTo(TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false))
+        assertThat(trailingIcons[2]).isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
     }
 
     @Test
@@ -208,6 +204,7 @@ internal class CardNumberControllerTest {
         val cardNumberController = DefaultCardNumberController(
             CardNumberConfig(),
             FakeCardAccountRangeRepository(),
+            testDispatcher,
             testDispatcher,
             initialValue = null,
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
@@ -254,6 +251,7 @@ internal class CardNumberControllerTest {
             CardNumberConfig(),
             FakeCardAccountRangeRepository(),
             testDispatcher,
+            testDispatcher,
             initialValue = null,
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
                 preferredBrands = listOf(CardBrand.CartesBancaires),
@@ -298,6 +296,7 @@ internal class CardNumberControllerTest {
         val cardNumberController = DefaultCardNumberController(
             CardNumberConfig(),
             FakeCardAccountRangeRepository(),
+            testDispatcher,
             testDispatcher,
             initialValue = null,
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
@@ -350,6 +349,7 @@ internal class CardNumberControllerTest {
         val cardNumberController = DefaultCardNumberController(
             CardNumberConfig(),
             FakeCardAccountRangeRepository(),
+            testDispatcher,
             testDispatcher,
             initialValue = null,
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
