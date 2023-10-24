@@ -75,45 +75,6 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
-  maestro-financial-connections:
-    before_run:
-      - start_emulator
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - wait-for-android-emulator@1:
-          inputs:
-            - boot_timeout: 600
-      - android-build@1:
-          inputs:
-            - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
-            - module: financial-connections-example
-            - variant: release
-            - build_type: apk
-            - cache_level: all
-      - script@1:
-          title: Execute Maestro tests
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh -t financial-connections
-      - slack@3:
-          is_always_run: true
-          inputs:
-            - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-            - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-      - pagerduty@0:
-          inputs:
-            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
-            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
-          is_always_run: true
-          run_if: .IsBuildFailed
-      - custom-test-results-export@1:
-          inputs:
-            - search_pattern: '*/maestroReport.xml'
-            - test_name: Maestro tests
-      - deploy-to-bitrise-io@2: { }
   build-connections-debug:
     envs:
       - BUILD_VARIANT: debug
@@ -174,15 +135,47 @@ workflows:
   notify-connections-e2e-failure:
     steps:
       - slack@4:
-          run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
             - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-#      - pagerduty@0:
-#          run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
-#          inputs:
-#            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
-#            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
+      - pagerduty@0:
+          run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
+          inputs:
+            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
+            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
+  maestro-edge-financial-connections:
+    before_run:
+      - start_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - android-build@1:
+          inputs:
+            - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
+            - module: financial-connections-example
+            - variant: debug
+            - build_type: apk
+            - cache_level: all
+      - script@1:
+          title: Execute Maestro tests
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                bash ./scripts/execute_maestro_tests.sh
+      - slack@3:
+          is_always_run: true
+          inputs:
+            - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+            - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+      - custom-test-results-export@1:
+          inputs:
+            - search_pattern: '*/maestroReport.xml'
+            - test_name: Maestro tests
+      - deploy-to-bitrise-io@2: { }
   maestro-paymentsheet:
     before_run:
       - start_emulator
