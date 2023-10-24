@@ -8,7 +8,7 @@ tags:
 - launchApp
 - startRecording: /tmp/test_results/testmode-paymentintent-testinstitution
 # Android specific: Navigate to example
-- tapOn: "Playgrounaaaaad"
+- tapOn: "Playground"
 - tapOn:
     id: "Native_checkbox"
 - tapOn: "Mode_Dropdown_Icon"
