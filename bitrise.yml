@@ -117,30 +117,16 @@ workflows:
           inputs:
             - pipeline_intermediate_files: "$BITRISE_APK_PATH:BITRISE_APK_PATH"
   run-connections-e2e-payments-tests:
+    envs:
+      - MAESTRO_TAGS: payment
     before_run:
-      - start_emulator
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - pull-intermediate-files@1:
-          inputs:
-            - artifact_sources: stage-build-connections-debug.build-connections-debug
-      - wait-for-android-emulator@1:
-          inputs:
-            - boot_timeout: 600
-      - script@1:
-          title: "Execute Maestro tests - Payments"
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh -t payment
-      - custom-test-results-export@1:
-          inputs:
-            - search_pattern: "*/maestroReport.xml"
-            - test_name: Maestro tests payments
-      - deploy-to-bitrise-io@2: { }
+      - _run_connections_e2e_tests
   run-connections-e2e-data-tests:
+    envs:
+      - MAESTRO_TAGS: data
+    before_run:
+      - _run_connections_e2e_tests
+  _run_connections_e2e_tests:
     before_run:
       - start_emulator
       - prepare_all
@@ -149,21 +135,20 @@ workflows:
     steps:
       - pull-intermediate-files@1:
           inputs:
-            - artifact_sources: stage-build-connections-debug.build-connections-debug
+            - artifact_sources: .*
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
       - script@1:
-          title: "Execute Maestro tests - Data"
+          title: Execute Maestro tests
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh -t data
+                bash ./scripts/execute_maestro_tests.sh -t  $MAESTRO_TAGS
       - custom-test-results-export@1:
           inputs:
-            - search_pattern: "*/maestroReport.xml"
-            - test_name: Maestro tests data
-      - deploy-to-bitrise-io@2: { }
+            - search_pattern: '*/maestroReport.xml'
+            - test_name: Maestro tests $MAESTRO_TAGS
   maestro-paymentsheet:
     before_run:
       - start_emulator
@@ -342,14 +327,14 @@ workflows:
             - api_level: 32
             - tag: "google_apis"
             - start_command_flags: >
-               -camera-back none
-               -camera-front none
-               -netdelay none
-               -netspeed full
-               -memory 2048
-               -no-snapshot
-               -no-audio
-               -no-window
+                -camera-back none
+                -camera-front none
+                -netdelay none
+                -netspeed full
+                -memory 2048
+                -no-snapshot
+                -no-audio
+                -no-window
   prepare_all:
     steps:
       - activate-ssh-key@4:
