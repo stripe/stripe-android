@@ -8,7 +8,7 @@ import com.stripe.android.model.BinRange
 object CbcTestCardDelegate {
 
     private val testAccountRanges = mapOf(
-        "40000025" to listOf(
+        "4000002500001001" to listOf(
             AccountRange(
                 BinRange(
                     low = "4000000000000000",
@@ -26,7 +26,7 @@ object CbcTestCardDelegate {
                 brandInfo = AccountRange.BrandInfo.Visa,
             ),
         ),
-        "55555525" to listOf(
+        "5555552500001001" to listOf(
             AccountRange(
                 binRange = BinRange(
                     low = "5100000000000000",
