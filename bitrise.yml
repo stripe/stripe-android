@@ -6,7 +6,7 @@ trigger_map:
   - push_branch: master
     pipeline: main-trigger-pipeline
   - pull_request_source_branch: carlosmuvi/web-flavor-maestro-tests
-    pipeline: pipeline-connections-e2e-release-tests
+    pipeline: pipeline-connections-e2e-debug-tests
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
@@ -49,8 +49,7 @@ stages:
   stage-notify-connections-e2e-failure:
     should_always_run: true
     workflows:
-      - notify-connections-e2e-failure:
-          run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
+      - notify-connections-e2e-failure: { }
 workflows:
   check:
     before_run:
@@ -175,13 +174,15 @@ workflows:
   notify-connections-e2e-failure:
     steps:
       - slack@4:
+          run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
             - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-  #      - pagerduty@0:
-  #          inputs:
-  #            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
-  #            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
+#      - pagerduty@0:
+#          run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
+#          inputs:
+#            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
+#            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
   maestro-paymentsheet:
     before_run:
       - start_emulator
