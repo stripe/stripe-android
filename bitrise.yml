@@ -49,7 +49,7 @@ stages:
   stage-notify-connections-e2e-failure:
     workflows:
       - notify-connections-e2e-failure:
-          run_if: .IsBuildFailed
+          run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
 workflows:
   check:
     before_run:
