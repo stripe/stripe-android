@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## XX.XX.XX - 2023-XX-XX
+## 20.34.1 - 2023-10-24
 
 ### Payments
 * [FIXED][7485](https://github.com/stripe/stripe-android/pull/7485) Fixed a crash when using `CardInputWidget` in an AppCompat theme.
