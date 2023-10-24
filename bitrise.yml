@@ -3,10 +3,10 @@ format_version: '11'
 default_step_lib_source: 'https://github.com/bitrise-io/bitrise-steplib.git'
 project_type: android
 trigger_map:
-  - push_branch: master
+  - push_branch: 'master'
     pipeline: main-trigger-pipeline
-  - pull_request_source_branch: carlosmuvi/web-flavor-maestro-tests
-    pipeline: pipeline-connections-e2e-debug-tests
+  - pull_request_source_branch: '*'
+    pipeline: main-trigger-pipeline
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
@@ -91,7 +91,7 @@ workflows:
     steps:
       - android-build@1:
           inputs:
-            - arguments: "-PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL"
+            - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
             - module: financial-connections-example
             - variant: $BUILD_VARIANT
             - build_type: apk
@@ -354,14 +354,14 @@ workflows:
             - api_level: 32
             - tag: "google_apis"
             - start_command_flags: >
-                -camera-back none
-                -camera-front none
-                -netdelay none
-                -netspeed full
-                -memory 2048
-                -no-snapshot
-                -no-audio
-                -no-window
+               -camera-back none
+               -camera-front none
+               -netdelay none
+               -netspeed full
+               -memory 2048
+               -no-snapshot
+               -no-audio
+               -no-window
   prepare_all:
     steps:
       - activate-ssh-key@4:
@@ -383,9 +383,7 @@ workflows:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
       - script@1:
           inputs:
-            - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >>
-                ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY"
-                >> ~/.gradle/gradle.properties
+            - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
   conclude_all:
     steps:
       - script-runner@0:
