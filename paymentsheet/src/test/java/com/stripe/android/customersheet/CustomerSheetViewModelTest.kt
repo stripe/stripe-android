@@ -21,10 +21,14 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
+import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -35,6 +39,13 @@ import kotlin.test.assertFailsWith
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetViewModelTest {
+
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.customerSheetACHv2,
+        isEnabled = false,
+    )
+
     @Test
     fun `isLiveMode is true when publishable key is live`() {
         var isLiveMode = CustomerSheetViewModelModule.isLiveMode {
@@ -1505,6 +1516,59 @@ class CustomerSheetViewModelTest {
                 style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
             )
             cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `Payment method form can change`() = runTest {
+        featureFlagTestRule.setEnabled(true)
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                addPaymentMethodViewState,
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.selectedPaymentMethod.code)
+                .isEqualTo("card")
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepository.hardCodedUsBankAccount
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.selectedPaymentMethod.code)
+                .isEqualTo("us_bank_account")
+        }
+    }
+
+    @Test
+    fun `When the payment method form is us bank account, the primary button label is continue`() = runTest {
+        featureFlagTestRule.setEnabled(true)
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                addPaymentMethodViewState,
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.primaryButtonLabel).isNull()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepository.hardCodedUsBankAccount
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo("Continue")
         }
     }
 

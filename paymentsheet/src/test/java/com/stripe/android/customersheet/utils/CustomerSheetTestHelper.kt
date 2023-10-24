@@ -112,6 +112,7 @@ internal object CustomerSheetTestHelper {
         isProcessing = false,
         errorMessage = null,
         isFirstPaymentMethod = false,
+        primaryButtonLabel = null,
     )
 
     internal fun mockedFormViewModel(

@@ -225,7 +225,9 @@ internal fun AddPaymentMethodWithPaymentElement(
             showLinkInlineSignup = false,
             linkConfigurationCoordinator = null,
             showCheckboxFlow = flowOf(false),
-            onItemSelectedListener = { },
+            onItemSelectedListener = {
+                viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
+            },
             onLinkSignupStateChanged = { _, _ -> },
             formArguments = viewState.formArguments,
             usBankAccountFormArguments = viewState.usBankAccountFormArguments,
@@ -242,7 +244,9 @@ internal fun AddPaymentMethodWithPaymentElement(
         }
 
         PrimaryButton(
-            label = stringResource(id = R.string.stripe_paymentsheet_save),
+            label = viewState.primaryButtonLabel ?: stringResource(
+                id = R.string.stripe_paymentsheet_save
+            ),
             isEnabled = viewState.primaryButtonEnabled,
             isLoading = viewState.isProcessing,
             onButtonClick = {

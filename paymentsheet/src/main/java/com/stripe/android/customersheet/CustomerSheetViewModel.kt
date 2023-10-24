@@ -126,6 +126,8 @@ internal class CustomerSheetViewModel @Inject constructor(
             is CustomerSheetViewAction.OnItemSelected -> onItemSelected(viewAction.selection)
             is CustomerSheetViewAction.OnPrimaryButtonPressed -> onPrimaryButtonPressed()
             is CustomerSheetViewAction.OnFormDataUpdated -> onFormDataUpdated(viewAction.formData)
+            is CustomerSheetViewAction.OnAddPaymentMethodItemChanged ->
+                onAddPaymentMethodItemChanged(viewAction.paymentMethod)
         }
     }
 
@@ -286,6 +288,20 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
+    private fun onAddPaymentMethodItemChanged(paymentMethod: LpmRepository.SupportedPaymentMethod) {
+        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+            it.copy(
+                formArguments = createFormArguments(paymentMethod),
+                selectedPaymentMethod = paymentMethod,
+                primaryButtonLabel = if (paymentMethod.code == PaymentMethod.Type.USBankAccount.code) {
+                    resources.getString(com.stripe.android.ui.core.R.string.stripe_continue_button_label)
+                } else {
+                    null
+                }
+            )
+        }
+    }
+
     private fun onItemRemoved(paymentMethod: PaymentMethod) {
         viewModelScope.launch {
             customerAdapter.detachPaymentMethod(
@@ -425,17 +441,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private fun transitionToAddPaymentMethod(isFirstPaymentMethod: Boolean) {
         val paymentMethodCode = PaymentMethod.Type.Card.code
 
-        val formArguments = FormArguments(
-            paymentMethodCode = paymentMethodCode,
-            showCheckbox = false,
-            showCheckboxControlledFields = false,
-            merchantName = configuration.merchantDisplayName
-                ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
-            billingDetails = configuration.defaultBillingDetails,
-            billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-            // TODO(tillh-stripe) Determine this based on /wallets-config response
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-        )
+        val formArguments = createFormArguments(card)
 
         val observe = buildFormObserver(
             formArguments = formArguments,
@@ -469,7 +475,8 @@ internal class CustomerSheetViewModel @Inject constructor(
                 enabled = true,
                 isLiveMode = isLiveModeProvider(),
                 isProcessing = false,
-                isFirstPaymentMethod = isFirstPaymentMethod
+                isFirstPaymentMethod = isFirstPaymentMethod,
+                primaryButtonLabel = null
             ),
             reset = isFirstPaymentMethod
         )
@@ -828,6 +835,22 @@ internal class CustomerSheetViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun createFormArguments(
+        paymentMethod: LpmRepository.SupportedPaymentMethod
+    ): FormArguments {
+        return FormArguments(
+            paymentMethodCode = paymentMethod.code,
+            showCheckbox = false,
+            showCheckboxControlledFields = false,
+            merchantName = configuration.merchantDisplayName
+                ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+            billingDetails = configuration.defaultBillingDetails,
+            billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+            // TODO(tillh-stripe) Determine this based on /wallets-config response
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        )
     }
 
     object Factory : ViewModelProvider.Factory {

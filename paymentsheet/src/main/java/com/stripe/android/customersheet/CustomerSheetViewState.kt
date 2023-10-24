@@ -72,7 +72,8 @@ internal sealed class CustomerSheetViewState(
         override val isLiveMode: Boolean,
         override val isProcessing: Boolean,
         val errorMessage: String? = null,
-        val isFirstPaymentMethod: Boolean
+        val isFirstPaymentMethod: Boolean,
+        val primaryButtonLabel: String?,
     ) : CustomerSheetViewState(
         savedPaymentMethods = emptyList(),
         isLiveMode = isLiveMode,
