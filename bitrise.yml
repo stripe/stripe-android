@@ -47,6 +47,7 @@ stages:
       - run-connections-e2e-payments-tests: { }
       - run-connections-e2e-data-tests: { }
   stage-notify-connections-e2e-failure:
+    should_always_run: true
     workflows:
       - notify-connections-e2e-failure:
           run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
