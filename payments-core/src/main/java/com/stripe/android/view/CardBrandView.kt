@@ -131,8 +131,13 @@ internal class CardBrandView @JvmOverloads constructor(
                 val shouldShowErrorIcon by shouldShowErrorIconFlow.collectAsState()
                 val tintColorInt by tintColorFlow.collectAsState()
 
-                LaunchedEffect(userSelectedBrand, possibleBrands, merchantPreferredBrands) {
-                    determineCardBrandToDisplay(userSelectedBrand, possibleBrands, merchantPreferredBrands)
+                LaunchedEffect(userSelectedBrand, currentBrand, possibleBrands, merchantPreferredBrands) {
+                    determineCardBrandToDisplay(
+                        userSelectedBrand = userSelectedBrand,
+                        autoDeterminedBrand = currentBrand,
+                        possibleBrands = possibleBrands,
+                        merchantPreferredBrands = merchantPreferredBrands,
+                    )
                 }
 
                 CardBrand(
@@ -162,11 +167,16 @@ internal class CardBrandView @JvmOverloads constructor(
     }
 
     private fun determineCardBrandToDisplay(
-        currentBrand: CardBrand?,
+        userSelectedBrand: CardBrand?,
+        autoDeterminedBrand: CardBrand,
         possibleBrands: List<CardBrand>,
         merchantPreferredBrands: List<CardBrand>,
     ) {
-        brand = selectCardBrandToDisplay(currentBrand, possibleBrands, merchantPreferredBrands)
+        brand = if (possibleBrands.size > 1) {
+            selectCardBrandToDisplay(userSelectedBrand, possibleBrands, merchantPreferredBrands)
+        } else {
+            autoDeterminedBrand
+        }
     }
 }
 
