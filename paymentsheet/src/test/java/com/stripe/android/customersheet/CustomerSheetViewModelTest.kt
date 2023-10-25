@@ -810,15 +810,13 @@ class CustomerSheetViewModelTest {
             assertThat(awaitViewState<AddPaymentMethod>().primaryButtonEnabled).isFalse()
 
             viewModel.handleViewAction(
-                CustomerSheetViewAction.OnFormDataUpdated(
-                    formData = FormViewModel.ViewData(
-                        completeFormValues = FormFieldValues(
-                            fieldValuePairs = mapOf(
-                                IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
-                            ),
-                            showsMandate = false,
-                            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
-                        )
+                CustomerSheetViewAction.OnFormFieldValuesChanged(
+                    formFieldValues = FormFieldValues(
+                        fieldValuePairs = mapOf(
+                            IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                        ),
+                        showsMandate = false,
+                        userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     )
                 )
             )
