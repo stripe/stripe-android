@@ -31,6 +31,10 @@ import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
+import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
+import com.stripe.android.paymentsheet.ui.PaymentMethodRemoveOperation
+import com.stripe.android.paymentsheet.ui.PaymentMethodUpdateOperation
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -48,6 +52,16 @@ import kotlin.coroutines.EmptyCoroutineContext
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal object CustomerSheetTestHelper {
     internal val application = ApplicationProvider.getApplicationContext<Application>()
+
+    private val editPaymentMethodInteractorFactory = object : ModifiableEditPaymentMethodViewInteractor.Factory {
+        override fun create(
+            initialPaymentMethod: PaymentMethod,
+            removeExecutor: PaymentMethodRemoveOperation,
+            updateExecutor: PaymentMethodUpdateOperation
+        ): ModifiableEditPaymentMethodViewInteractor {
+            return DefaultEditPaymentMethodViewInteractor(initialPaymentMethod, removeExecutor, updateExecutor)
+        }
+    }
 
     internal val usBankAccountFormArguments = USBankAccountFormArguments(
         onBehalfOf = null,
@@ -75,6 +89,7 @@ internal object CustomerSheetTestHelper {
         isGooglePayEnabled = false,
         primaryButtonVisible = false,
         primaryButtonLabel = null,
+        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
     )
 
     internal val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
@@ -108,6 +123,7 @@ internal object CustomerSheetTestHelper {
         customPrimaryButtonUiState = null,
         bankAccountResult = null,
         draftPaymentSelection = null,
+        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
     )
 
     internal fun mockedFormViewModel(
@@ -199,6 +215,7 @@ internal object CustomerSheetTestHelper {
             paymentSelection = savedPaymentSelection,
             isGooglePayAvailable = isGooglePayAvailable,
         ),
+        editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory = editPaymentMethodInteractorFactory,
     ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
             application = application,
@@ -230,6 +247,7 @@ internal object CustomerSheetTestHelper {
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
+            editInteractorFactory = editInteractorFactory,
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
         }

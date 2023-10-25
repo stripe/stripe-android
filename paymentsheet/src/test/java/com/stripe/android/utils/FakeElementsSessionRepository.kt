@@ -11,6 +11,7 @@ internal class FakeElementsSessionRepository(
     private val sessionsError: Throwable? = null,
     private val linkSettings: ElementsSession.LinkSettings?,
     private val isGooglePayEnabled: Boolean = true,
+    private val isCbcEligible: Boolean = false,
 ) : ElementsSessionRepository {
 
     var lastGetParam: PaymentSheet.InitializationMode? = null
@@ -28,7 +29,7 @@ internal class FakeElementsSessionRepository(
                     paymentMethodSpecs = null,
                     stripeIntent = stripeIntent,
                     merchantCountry = null,
-                    isEligibleForCardBrandChoice = true,
+                    isEligibleForCardBrandChoice = isCbcEligible,
                     isGooglePayEnabled = isGooglePayEnabled,
                     sessionsError = sessionsError,
                 )

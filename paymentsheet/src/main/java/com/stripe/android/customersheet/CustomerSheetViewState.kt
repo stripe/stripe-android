@@ -11,9 +11,11 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 
 internal sealed class CustomerSheetViewState(
@@ -22,6 +24,7 @@ internal sealed class CustomerSheetViewState(
     open val isProcessing: Boolean,
     open val isEditing: Boolean,
     open val screen: PaymentSheetScreen,
+    open val cbcEligibility: CardBrandChoiceEligibility,
 ) {
 
     val topBarState: PaymentSheetTopBarState
@@ -51,6 +54,7 @@ internal sealed class CustomerSheetViewState(
         isProcessing = false,
         isEditing = false,
         screen = PaymentSheetScreen.Loading,
+        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
     )
 
     data class SelectPaymentMethod(
@@ -66,12 +70,14 @@ internal sealed class CustomerSheetViewState(
         val errorMessage: String? = null,
         val unconfirmedPaymentMethod: PaymentMethod? = null,
         val mandateText: String? = null,
+        override val cbcEligibility: CardBrandChoiceEligibility,
     ) : CustomerSheetViewState(
         savedPaymentMethods = savedPaymentMethods,
         isLiveMode = isLiveMode,
         isProcessing = isProcessing,
         isEditing = isEditing,
         screen = PaymentSheetScreen.SelectSavedPaymentMethods,
+        cbcEligibility = cbcEligibility,
     ) {
         val primaryButtonEnabled: Boolean
             get() = !isProcessing
@@ -97,6 +103,7 @@ internal sealed class CustomerSheetViewState(
         val showMandateAbovePrimaryButton: Boolean = false,
         val displayDismissConfirmationModal: Boolean = false,
         val bankAccountResult: CollectBankAccountResultInternal?,
+        override val cbcEligibility: CardBrandChoiceEligibility,
     ) : CustomerSheetViewState(
         savedPaymentMethods = emptyList(),
         isLiveMode = isLiveMode,
@@ -107,5 +114,19 @@ internal sealed class CustomerSheetViewState(
         } else {
             PaymentSheetScreen.AddAnotherPaymentMethod
         },
+        cbcEligibility = cbcEligibility,
+    )
+
+    data class EditPaymentMethod constructor(
+        val editPaymentMethodInteractor: ModifiableEditPaymentMethodViewInteractor,
+        override val isLiveMode: Boolean,
+        override val cbcEligibility: CardBrandChoiceEligibility,
+    ) : CustomerSheetViewState(
+        savedPaymentMethods = emptyList(),
+        isLiveMode = isLiveMode,
+        isProcessing = false,
+        isEditing = false,
+        screen = PaymentSheetScreen.EditPaymentMethod(editPaymentMethodInteractor),
+        cbcEligibility = cbcEligibility,
     )
 }

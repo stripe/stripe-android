@@ -46,12 +46,15 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.state.toInternal
+import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.utils.mapAsStateFlow
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -63,6 +66,8 @@ import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.ui.core.R as UiCoreR
+
+private const val TempDelay = 2000L
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSheetViewModelScope
@@ -86,6 +91,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val customerSheetLoader: CustomerSheetLoader,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
+    private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
 ) : ViewModel() {
 
     private val backStack = MutableStateFlow(initialBackStack)
@@ -265,7 +271,8 @@ internal class CustomerSheetViewModel @Inject constructor(
 
                 transitionToInitialScreen(
                     paymentMethods = state.customerPaymentMethods,
-                    paymentSelection = state.paymentSelection
+                    paymentSelection = state.paymentSelection,
+                    cbcEligibility = state.cbcEligibility,
                 )
             },
             onFailure = { cause ->
@@ -276,13 +283,24 @@ internal class CustomerSheetViewModel @Inject constructor(
         )
     }
 
-    private fun transitionToInitialScreen(paymentMethods: List<PaymentMethod>, paymentSelection: PaymentSelection?) {
+    private fun transitionToInitialScreen(
+        paymentMethods: List<PaymentMethod>,
+        paymentSelection: PaymentSelection?,
+        cbcEligibility: CardBrandChoiceEligibility,
+    ) {
         if (paymentMethods.isEmpty() && !isGooglePayReadyAndEnabled) {
-            transitionToAddPaymentMethod(isFirstPaymentMethod = true)
+            transitionToAddPaymentMethod(
+                isFirstPaymentMethod = true,
+                cbcEligibility = cbcEligibility,
+            )
         } else {
             transition(
                 to = buildDefaultSelectPaymentMethod {
-                    it.copy(savedPaymentMethods = paymentMethods, paymentSelection = paymentSelection)
+                    it.copy(
+                        savedPaymentMethods = paymentMethods,
+                        paymentSelection = paymentSelection,
+                        cbcEligibility = cbcEligibility,
+                    )
                 },
                 reset = true
             )
@@ -290,7 +308,10 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onAddCardPressed() {
-        transitionToAddPaymentMethod(isFirstPaymentMethod = false)
+        transitionToAddPaymentMethod(
+            isFirstPaymentMethod = false,
+            cbcEligibility = viewState.value.cbcEligibility,
+        )
     }
 
     private fun onDismissed() {
@@ -349,6 +370,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     configuration = configuration,
                     merchantName = configuration.merchantDisplayName
                         ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+                    cbcEligibility = it.cbcEligibility,
                 ),
                 selectedPaymentMethod = paymentMethod,
                 primaryButtonLabel = if (
@@ -418,7 +440,10 @@ internal class CustomerSheetViewModel @Inject constructor(
                         }
 
                         if (savedPaymentMethods.isEmpty() && !isGooglePayReadyAndEnabled) {
-                            transitionToAddPaymentMethod(isFirstPaymentMethod = true)
+                            transitionToAddPaymentMethod(
+                                isFirstPaymentMethod = true,
+                                cbcEligibility = currentViewState.cbcEligibility,
+                            )
                         }
                     }
                     else -> Unit
@@ -439,9 +464,28 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
     private fun onModifyItem(paymentMethod: PaymentMethod) {
-        // TODO(samer-stripe): Link modification to customer sheet
+        val currentViewState = viewState.value
+
+        transition(
+            to = CustomerSheetViewState.EditPaymentMethod(
+                editPaymentMethodInteractor = editInteractorFactory.create(
+                    initialPaymentMethod = paymentMethod,
+                    removeExecutor = {
+                        // TODO(tillh-stripe): Replace with remove operation
+                        delay(TempDelay)
+                        true
+                    },
+                    updateExecutor = { _, _ ->
+                        // TODO(tillh-stripe): Replace with update operation
+                        delay(TempDelay)
+                        Result.success(paymentMethod)
+                    }
+                ),
+                isLiveMode = currentViewState.isLiveMode,
+                cbcEligibility = currentViewState.cbcEligibility,
+            )
+        )
     }
 
     private fun onItemSelected(paymentSelection: PaymentSelection?) {
@@ -543,13 +587,17 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    private fun transitionToAddPaymentMethod(isFirstPaymentMethod: Boolean) {
+    private fun transitionToAddPaymentMethod(
+        isFirstPaymentMethod: Boolean,
+        cbcEligibility: CardBrandChoiceEligibility,
+    ) {
         val paymentMethodCode = PaymentMethod.Type.Card.code
 
         val formArguments = FormArgumentsFactory.create(
             paymentMethod = card,
             configuration = configuration,
             merchantName = merchantName,
+            cbcEligibility = cbcEligibility,
         )
 
         val observe = buildFormObserver(
@@ -603,6 +651,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 primaryButtonEnabled = false,
                 customPrimaryButtonUiState = null,
                 bankAccountResult = null,
+                cbcEligibility = cbcEligibility,
             ),
             reset = isFirstPaymentMethod
         )
@@ -993,10 +1042,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                 isEditing = false,
                 isGooglePayEnabled = isGooglePayReadyAndEnabled,
                 primaryButtonVisible = false,
-                primaryButtonLabel = resources.getString(
-                    R.string.stripe_paymentsheet_confirm
-                ),
+                primaryButtonLabel = resources.getString(R.string.stripe_paymentsheet_confirm),
                 errorMessage = null,
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             )
         )
     }

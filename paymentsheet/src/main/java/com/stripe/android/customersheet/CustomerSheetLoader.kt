@@ -11,7 +11,9 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.requireValidOrThrow
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.toInternal
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.utils.FeatureFlags
 import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -129,6 +131,10 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
                     isFinancialConnectionsAvailable,
                 )
 
+                // TODO
+                val isCbcEligible = (elementsSession?.isEligibleForCardBrandChoice ?: false) &&
+                    FeatureFlags.cardBrandChoice.isEnabled
+
                 Result.success(
                     CustomerSheetState.Full(
                         config = configuration,
@@ -136,7 +142,14 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
                         supportedPaymentMethods = validSupportedPaymentMethods,
                         customerPaymentMethods = paymentMethods,
                         isGooglePayReady = isGooglePayReadyAndEnabled,
-                        paymentSelection = paymentSelection
+                        paymentSelection = paymentSelection,
+                        cbcEligibility = if (isCbcEligible) {
+                            CardBrandChoiceEligibility.Eligible(
+                                preferredNetworks = configuration?.preferredNetworks.orEmpty(),
+                            )
+                        } else {
+                            CardBrandChoiceEligibility.Ineligible
+                        },
                     )
                 )
             },

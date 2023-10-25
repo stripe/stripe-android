@@ -18,6 +18,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
+import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.paymentsheet.ui.PaymentElement
@@ -26,6 +27,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.FormUI
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.strings.resolve
@@ -85,6 +87,12 @@ internal fun CustomerSheetScreen(
                         }
                         PaymentSheetContentPadding()
                     }
+                    is CustomerSheetViewState.EditPaymentMethod -> {
+                        EditPaymentMethod(
+                            viewState = viewState,
+                        )
+                        PaymentSheetContentPadding()
+                    }
                 }
             }
         },
@@ -120,8 +128,7 @@ internal fun SelectPaymentMethod(
                 showLink = false,
                 currentSelection = viewState.paymentSelection,
                 nameProvider = paymentMethodNameProvider,
-                // TODO(samer-stripe): Add CBC eligibility check to CustomerSheet
-                isCbcEligible = false
+                isCbcEligible = viewState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
             ),
             isEditing = viewState.isEditing,
             isProcessing = viewState.isProcessing,
@@ -306,5 +313,27 @@ internal fun AddPaymentMethodWithPaymentElement(
                     .padding(horizontal = horizontalPadding),
             )
         }
+    }
+}
+
+@Composable
+private fun EditPaymentMethod(
+    viewState: CustomerSheetViewState.EditPaymentMethod,
+    modifier: Modifier = Modifier,
+) {
+    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+
+    Column(modifier) {
+        H4Text(
+            text = stringResource(PaymentsCoreR.string.stripe_title_update_card),
+            modifier = Modifier
+                .padding(bottom = 20.dp)
+                .padding(horizontal = horizontalPadding)
+        )
+
+        EditPaymentMethod(
+            interactor = viewState.editPaymentMethodInteractor,
+            modifier = modifier,
+        )
     }
 }

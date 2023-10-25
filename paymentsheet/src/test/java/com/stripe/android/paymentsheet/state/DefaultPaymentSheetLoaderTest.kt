@@ -831,6 +831,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 sessionsError = fallbackError,
                 linkSettings,
                 isGooglePayEnabledFromBackend,
+                isCbcEligible = false,
             ),
             customerRepository = customerRepo,
             lpmRepository = lpmRepository,
