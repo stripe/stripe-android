@@ -286,7 +286,7 @@ internal class CustomerSheetActivityTest {
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isFirstPaymentMethod = false,
-            primaryButtonLabel = null,
+            primaryButtonLabel = "Save",
         )
     }
 

@@ -13,6 +13,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
@@ -32,6 +33,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -41,7 +43,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.utils.mapAsStateFlow
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,6 +55,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
+import com.stripe.android.ui.core.R as UiCoreR
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSheetViewModelScope
@@ -291,12 +293,21 @@ internal class CustomerSheetViewModel @Inject constructor(
     private fun onAddPaymentMethodItemChanged(paymentMethod: LpmRepository.SupportedPaymentMethod) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
-                formArguments = createFormArguments(paymentMethod),
+                formArguments = FormArgumentsFactory.create(
+                    paymentMethod = paymentMethod,
+                    configuration = configuration,
+                    merchantName = configuration.merchantDisplayName
+                        ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+                ),
                 selectedPaymentMethod = paymentMethod,
                 primaryButtonLabel = if (paymentMethod.code == PaymentMethod.Type.USBankAccount.code) {
-                    resources.getString(com.stripe.android.ui.core.R.string.stripe_continue_button_label)
+                    resolvableString(
+                        id = UiCoreR.string.stripe_continue_button_label
+                    ).resolve(application)
                 } else {
-                    null
+                    resolvableString(
+                        id = R.string.stripe_paymentsheet_save
+                    ).resolve(application)
                 }
             )
         }
@@ -441,7 +452,12 @@ internal class CustomerSheetViewModel @Inject constructor(
     private fun transitionToAddPaymentMethod(isFirstPaymentMethod: Boolean) {
         val paymentMethodCode = PaymentMethod.Type.Card.code
 
-        val formArguments = createFormArguments(card)
+        val formArguments = FormArgumentsFactory.create(
+            paymentMethod = card,
+            configuration = configuration,
+            merchantName = configuration.merchantDisplayName
+                ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+        )
 
         val observe = buildFormObserver(
             formArguments = formArguments,
@@ -476,7 +492,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                 isLiveMode = isLiveModeProvider(),
                 isProcessing = false,
                 isFirstPaymentMethod = isFirstPaymentMethod,
-                primaryButtonLabel = null
+                primaryButtonLabel = resolvableString(
+                    id = R.string.stripe_paymentsheet_save
+                ).resolve(application)
             ),
             reset = isFirstPaymentMethod
         )
@@ -835,22 +853,6 @@ internal class CustomerSheetViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun createFormArguments(
-        paymentMethod: LpmRepository.SupportedPaymentMethod
-    ): FormArguments {
-        return FormArguments(
-            paymentMethodCode = paymentMethod.code,
-            showCheckbox = false,
-            showCheckboxControlledFields = false,
-            merchantName = configuration.merchantDisplayName
-                ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
-            billingDetails = configuration.defaultBillingDetails,
-            billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-            // TODO(tillh-stripe) Determine this based on /wallets-config response
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-        )
     }
 
     object Factory : ViewModelProvider.Factory {

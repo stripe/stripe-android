@@ -1520,7 +1520,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `Payment method form can change`() = runTest {
+    fun `Payment method form changes on user selection`() = runTest {
         featureFlagTestRule.setEnabled(true)
 
         val viewModel = createViewModel(
@@ -1558,7 +1558,8 @@ class CustomerSheetViewModelTest {
 
         viewModel.viewState.test {
             var viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.primaryButtonLabel).isNull()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo("Save")
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(

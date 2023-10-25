@@ -244,9 +244,7 @@ internal fun AddPaymentMethodWithPaymentElement(
         }
 
         PrimaryButton(
-            label = viewState.primaryButtonLabel ?: stringResource(
-                id = R.string.stripe_paymentsheet_save
-            ),
+            label = viewState.primaryButtonLabel,
             isEnabled = viewState.primaryButtonEnabled,
             isLoading = viewState.isProcessing,
             onButtonClick = {

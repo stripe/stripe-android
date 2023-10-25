@@ -96,7 +96,7 @@ internal class CustomerSheetScreenshotTest {
         isProcessing = false,
         errorMessage = null,
         isFirstPaymentMethod = false,
-        primaryButtonLabel = null,
+        primaryButtonLabel = "Save",
     )
 
     @Test
