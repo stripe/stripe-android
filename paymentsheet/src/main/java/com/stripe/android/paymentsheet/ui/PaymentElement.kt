@@ -69,7 +69,6 @@ internal fun PaymentElement(
                 USBankAccountForm(
                     formArgs = formArguments,
                     usBankAccountFormArgs = usBankAccountFormArguments,
-                    isProcessing = !enabled,
                     modifier = Modifier.padding(horizontal = horizontalPadding),
                 )
             } else {

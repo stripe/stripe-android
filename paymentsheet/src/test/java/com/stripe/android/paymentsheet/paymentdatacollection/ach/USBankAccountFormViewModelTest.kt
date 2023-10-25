@@ -261,6 +261,7 @@ class USBankAccountFormViewModelTest {
                         last4 = "6789",
                         primaryButtonText = "Continue",
                         mandateText = null,
+                        isProcessing = false,
                     ),
                 )
             )
@@ -312,6 +313,7 @@ class USBankAccountFormViewModelTest {
                         last4 = "6789",
                         primaryButtonText = "Continue",
                         mandateText = null,
+                        isProcessing = false,
                     ),
                 )
             )
@@ -353,6 +355,7 @@ class USBankAccountFormViewModelTest {
         val screenStates = listOf(
             USBankAccountFormScreenState.BillingDetailsCollection(
                 primaryButtonText = "Continue",
+                isProcessing = false,
             ),
             USBankAccountFormScreenState.MandateCollection(
                 financialConnectionsSessionId = "session_1234",
@@ -366,6 +369,7 @@ class USBankAccountFormViewModelTest {
                 ),
                 primaryButtonText = "Continue",
                 mandateText = null,
+                isProcessing = false,
             ),
             USBankAccountFormScreenState.VerifyWithMicrodeposits(
                 financialConnectionsSessionId = "session_1234",
@@ -376,6 +380,7 @@ class USBankAccountFormViewModelTest {
                 ),
                 primaryButtonText = "Continue",
                 mandateText = null,
+                isProcessing = false,
             ),
             USBankAccountFormScreenState.SavedAccount(
                 financialConnectionsSessionId = "session_1234",
@@ -384,6 +389,7 @@ class USBankAccountFormViewModelTest {
                 last4 = "6789",
                 primaryButtonText = "Continue",
                 mandateText = null,
+                isProcessing = false,
             ),
         )
 
@@ -435,6 +441,7 @@ class USBankAccountFormViewModelTest {
                             last4 = "6789",
                             primaryButtonText = "Continue",
                             mandateText = null,
+                            isProcessing = false,
                         ),
                     )
                 )

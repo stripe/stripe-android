@@ -4,6 +4,7 @@
 
 ### PaymentSheet
 * [FIXED][7499](https://github.com/stripe/stripe-android/pull/7499) Fixed an issue with incorrect error messages when encountering a failure after 3D Secure authentication.
+* [FIXED][7464](https://github.com/stripe/stripe-android/pull/7464) Fixed an issue where canceling the US Bank Account selection flow prevents the user from launching it again.
 * [FIXED][7529](https://github.com/stripe/stripe-android/pull/7529) PaymentSheet no longer displays saved cards that originated from Apple Pay or Google Pay.
 
 ## 20.34.1 - 2023-10-24
@@ -15,7 +16,6 @@
 
 ### Payments
 * [ADDED][7449](https://github.com/stripe/stripe-android/pull/7449) Added saved payment method support for SEPA family payment methods.
-* [FIXED][7464](https://github.com/stripe/stripe-android/pull/7464) Fixed a bug where canceling the US Bank Account selection flow prevents the user from launching it again.
 
 ## 20.33.0 - 2023-10-16
 

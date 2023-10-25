@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.uicore.address.AddressRepository
@@ -190,8 +191,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private val _result = MutableSharedFlow<PaymentSelection.New.USBankAccount?>(replay = 1)
     val result: Flow<PaymentSelection.New.USBankAccount?> = _result
-    private val _collectBankAccountResult = MutableSharedFlow<CollectBankAccountResultInternal>(replay = 1)
-    val collectBankAccountResult: Flow<CollectBankAccountResultInternal?> = _collectBankAccountResult
 
     private val defaultSaveForFutureUse: Boolean =
         args.savedPaymentMethod?.input?.saveForFutureUse ?: false
@@ -264,6 +263,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     @VisibleForTesting
     fun handleCollectBankAccountResult(result: CollectBankAccountResultInternal) {
         hasLaunched = false
+        _collectBankAccountResult.tryEmit(result)
         when (result) {
             is CollectBankAccountResultInternal.Completed -> {
                 when (
