@@ -3,11 +3,32 @@ package com.stripe.android.networking
 import android.content.Context
 import com.stripe.android.R
 import com.stripe.android.core.StripeError
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import java.util.Locale
 import com.stripe.android.uicore.R as UiCoreR
 
-@Suppress("ComplexMethod")
 internal fun StripeError.withLocalizedMessage(context: Context): StripeError {
+    val newMessage = if (shouldFallBackToLocalizedError) {
+        context.mapErrorCodeToLocalizedMessage(code)
+    } else {
+        message ?: context.mapErrorCodeToLocalizedMessage(code)
+    }
+
+    return copy(message = newMessage)
+}
+
+internal fun PaymentIntent.Error.withLocalizedMessage(context: Context): PaymentIntent.Error {
+    val newMessage = if (shouldFallBackToLocalizedError) {
+        context.mapErrorCodeToLocalizedMessage(code)
+    } else {
+        message ?: context.mapErrorCodeToLocalizedMessage(code)
+    }
+
+    return copy(message = newMessage)
+}
+
+internal fun SetupIntent.Error.withLocalizedMessage(context: Context): SetupIntent.Error {
     val newMessage = if (shouldFallBackToLocalizedError) {
         context.mapErrorCodeToLocalizedMessage(code)
     } else {
