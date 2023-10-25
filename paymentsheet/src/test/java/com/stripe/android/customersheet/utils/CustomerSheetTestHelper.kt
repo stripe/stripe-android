@@ -205,6 +205,7 @@ internal object CustomerSheetTestHelper {
                     publishableKey: () -> String,
                     stripeAccountId: () -> String?,
                     statusBarColor: Int?,
+                    includePaymentSheetAuthenticators: Boolean,
                     hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
                 ): StripePaymentLauncher {
                     return mock()

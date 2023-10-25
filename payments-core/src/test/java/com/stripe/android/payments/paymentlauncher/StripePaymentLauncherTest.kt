@@ -15,15 +15,12 @@ class StripePaymentLauncherTest {
     private val mockHostActivityLauncher =
         mock<ActivityResultLauncher<PaymentLauncherContract.Args>>()
     private val paymentLauncher = StripePaymentLauncher(
-        { PUBLISHABLE_KEY },
-        { STRIPE_ACCOUNT_ID },
-        mockHostActivityLauncher,
-        context = mock(),
+        publishableKeyProvider = { PUBLISHABLE_KEY },
+        stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
+        hostActivityLauncher = mockHostActivityLauncher,
         enableLogging = false,
-        ioContext = mock(),
-        uiContext = mock(),
-        paymentAnalyticsRequestFactory = mock(),
         productUsage = mock(),
+        includePaymentSheetAuthenticators = false,
         statusBarColor = Color.RED,
     )
 

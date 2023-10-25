@@ -495,11 +495,12 @@ class PaymentLauncherViewModelTest {
     fun `Factory gets initialized`() = runTest {
         val factory = PaymentLauncherViewModel.Factory {
             PaymentLauncherContract.Args.IntentConfirmationArgs(
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                TEST_STRIPE_ACCOUNT_ID,
-                false,
-                PRODUCT_USAGE,
-                mock<ConfirmPaymentIntentParams>(),
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                enableLogging = false,
+                productUsage = PRODUCT_USAGE,
+                includePaymentSheetAuthenticators = false,
+                confirmStripeIntentParams = mock<ConfirmPaymentIntentParams>(),
                 statusBarColor = Color.RED,
             )
         }

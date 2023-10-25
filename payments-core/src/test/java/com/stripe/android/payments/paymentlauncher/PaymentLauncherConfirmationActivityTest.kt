@@ -35,12 +35,13 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherConfirmationActivity::class.java
             ).putExtras(
                 PaymentLauncherContract.Args.IntentConfirmationArgs(
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    TEST_STRIPE_ACCOUNT_ID,
-                    false,
-                    PRODUCT_USAGE,
-                    mock(),
-                    Color.CYAN
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    enableLogging = false,
+                    productUsage = PRODUCT_USAGE,
+                    includePaymentSheetAuthenticators = false,
+                    confirmStripeIntentParams = mock(),
+                    statusBarColor = Color.CYAN
                 ).toBundle()
             )
         ).use {
@@ -59,11 +60,12 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherConfirmationActivity::class.java
             ).putExtras(
                 PaymentLauncherContract.Args.IntentConfirmationArgs(
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    TEST_STRIPE_ACCOUNT_ID,
-                    false,
-                    PRODUCT_USAGE,
-                    confirmStripeIntentParams,
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    enableLogging = false,
+                    productUsage = PRODUCT_USAGE,
+                    includePaymentSheetAuthenticators = false,
+                    confirmStripeIntentParams = confirmStripeIntentParams,
                     statusBarColor = Color.RED,
                 ).toBundle()
             )
@@ -85,11 +87,12 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherConfirmationActivity::class.java
             ).putExtras(
                 PaymentLauncherContract.Args.IntentConfirmationArgs(
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    TEST_STRIPE_ACCOUNT_ID,
-                    false,
-                    PRODUCT_USAGE,
-                    confirmStripeIntentParams,
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    enableLogging = false,
+                    productUsage = PRODUCT_USAGE,
+                    includePaymentSheetAuthenticators = false,
+                    confirmStripeIntentParams = confirmStripeIntentParams,
                     statusBarColor = Color.RED,
                 ).toBundle()
             )
@@ -128,11 +131,12 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherConfirmationActivity::class.java
             ).putExtras(
                 PaymentLauncherContract.Args.SetupIntentNextActionArgs(
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    TEST_STRIPE_ACCOUNT_ID,
-                    false,
-                    PRODUCT_USAGE,
-                    CLIENT_SECRET,
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    enableLogging = false,
+                    productUsage = PRODUCT_USAGE,
+                    includePaymentSheetAuthenticators = false,
+                    setupIntentClientSecret = CLIENT_SECRET,
                     statusBarColor = Color.RED,
                 ).toBundle()
             )
@@ -180,11 +184,12 @@ class PaymentLauncherConfirmationActivityTest {
         val PRODUCT_USAGE = setOf("TestProductUsage")
         val PAYMENT_INTENT_NEXT_ACTION_ARGS =
             PaymentLauncherContract.Args.PaymentIntentNextActionArgs(
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                TEST_STRIPE_ACCOUNT_ID,
-                false,
-                PRODUCT_USAGE,
-                CLIENT_SECRET,
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                enableLogging = false,
+                productUsage = PRODUCT_USAGE,
+                includePaymentSheetAuthenticators = false,
+                paymentIntentClientSecret = CLIENT_SECRET,
                 statusBarColor = Color.RED,
             )
     }

@@ -34,15 +34,16 @@ class DefaultPaymentAuthenticatorRegistryTest {
     private val dispayOxxoDetailsAuthenticator = mock<PaymentAuthenticator<StripeIntent>>()
 
     private val registry = DefaultPaymentAuthenticatorRegistry(
-        noOpIntentAuthenticator,
-        sourceAuthenticator,
-        mapOf(
+        noOpIntentAuthenticator = noOpIntentAuthenticator,
+        sourceAuthenticator = sourceAuthenticator,
+        paymentAuthenticators = mapOf(
             NextActionData.SdkData.Use3DS1::class.java to threeDs1lAuthenticator,
             NextActionData.SdkData.Use3DS2::class.java to threeDs2lAuthenticator,
             NextActionData.RedirectToUrl::class.java to redirectToUrlAuthenticator,
             NextActionData.AlipayRedirect::class.java to alipayRedirectAuthenticator,
             NextActionData.DisplayOxxoDetails::class.java to dispayOxxoDetailsAuthenticator
-        )
+        ),
+        includePaymentSheetAuthenticators = false,
     )
 
     private val allAuthenticators = setOf(
