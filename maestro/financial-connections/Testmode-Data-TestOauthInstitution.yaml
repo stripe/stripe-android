@@ -1,6 +1,6 @@
 appId: com.stripe.android.financialconnections.example
 tags:
-  - financial-connections
+  - all
   - testmode
   - native
   - data
