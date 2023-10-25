@@ -25,6 +25,13 @@ internal object PaymentMethodFixtures {
         wallet = null
     )
 
+    private val CARD_WITH_NETWORKS = CARD.copy(
+        networks = PaymentMethod.Card.Networks(
+            available = setOf("visa", "cartes_bancaires"),
+            preferred = "cartes_bancaires"
+        )
+    )
+
     @JvmField
     val BILLING_DETAILS = PaymentMethod.BillingDetails(
         address = Address(
@@ -47,6 +54,17 @@ internal object PaymentMethodFixtures {
         billingDetails = BILLING_DETAILS,
         customerId = "cus_AQsHpvKfKwJDrF",
         card = CARD,
+        code = "card"
+    )
+
+    val CARD_WITH_NETWORKS_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_123456789",
+        created = 1550757934255L,
+        liveMode = true,
+        type = PaymentMethod.Type.Card,
+        billingDetails = BILLING_DETAILS,
+        customerId = "cus_AQsHpvKfKwJDrF",
+        card = CARD_WITH_NETWORKS,
         code = "card"
     )
 
