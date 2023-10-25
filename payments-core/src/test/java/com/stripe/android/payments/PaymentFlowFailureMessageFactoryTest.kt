@@ -125,6 +125,10 @@ class PaymentFlowFailureMessageFactoryTest {
 private fun withLocale(locale: Locale, block: () -> Unit) {
     val original = Locale.getDefault()
     Locale.setDefault(locale)
-    block()
-    Locale.setDefault(original)
+
+    try {
+        block()
+    } finally {
+        Locale.setDefault(original)
+    }
 }
