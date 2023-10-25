@@ -72,12 +72,12 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun startWithPaymentIntent(snapshot: PlaygroundSettings) {
+    private fun startWithPaymentIntent(settings: PlaygroundSettings) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
                 repository.createPaymentIntent(
-                    snapshot.paymentIntentRequest()
+                    settings.paymentIntentRequest()
                 )
             }
                 // Success creating session: open the financial connections sheet with received secret
@@ -105,11 +105,11 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun startForData(snapshot: PlaygroundSettings) {
+    private fun startForData(settings: PlaygroundSettings) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
-                repository.createLinkAccountSession(snapshot.lasRequest())
+                repository.createLinkAccountSession(settings.lasRequest())
             }
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
@@ -129,11 +129,11 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun startForToken(snapshot: PlaygroundSettings) {
+    private fun startForToken(settings: PlaygroundSettings) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
-                repository.createLinkAccountSessionForToken(snapshot.lasRequest())
+                repository.createLinkAccountSessionForToken(settings.lasRequest())
             }
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
