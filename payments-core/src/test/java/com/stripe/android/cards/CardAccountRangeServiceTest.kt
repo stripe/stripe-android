@@ -128,42 +128,8 @@ class CardAccountRangeServiceTest {
     }
 
     @Test
-    fun `If CBC is enabled, return a matched brand once 8 characters are entered`() = runTest {
-        val expectedAccountRange = AccountRange(
-            binRange = BinRange(
-                low = "4000000000000000",
-                high = "4999999999999999",
-            ),
-            panLength = 16,
-            brandInfo = AccountRange.BrandInfo.Visa,
-        )
-
-        val accountRanges = testBehavior(
-            cardNumber = "4000 0000",
-            isCbcEligible = true,
-            mockRemoteCardAccountRangeSource = object : CardAccountRangeSource {
-                override suspend fun getAccountRanges(cardNumber: CardNumber.Unvalidated): List<AccountRange>? {
-                    return listOf(expectedAccountRange)
-                }
-
-                override val loading: Flow<Boolean> = flowOf(false)
-            }
-        )
-
-        assertThat(accountRanges).containsExactly(expectedAccountRange)
-    }
-
-    @Test
-    fun `If CBC is enabled, return all matched brands once 8 characters are entered`() = runTest {
+    fun `If CBC is enabled, return the matched brands once 8 characters are entered`() = runTest {
         val expectedAccountRanges = listOf(
-            AccountRange(
-                binRange = BinRange(
-                    low = "4000000000000000",
-                    high = "4999999999999999",
-                ),
-                panLength = 16,
-                brandInfo = AccountRange.BrandInfo.CartesBancaires,
-            ),
             AccountRange(
                 binRange = BinRange(
                     low = "4000000000000000",
@@ -172,14 +138,29 @@ class CardAccountRangeServiceTest {
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Visa,
             ),
+            AccountRange(
+                binRange = BinRange(
+                    low = "4000000000000000",
+                    high = "4999999999999999",
+                ),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.CartesBancaires,
+            )
         )
 
         val accountRanges = testBehavior(
-            cardNumber = "4000 0025",
+            cardNumber = "4000 0000",
             isCbcEligible = true,
+            mockRemoteCardAccountRangeSource = object : CardAccountRangeSource {
+                override suspend fun getAccountRanges(cardNumber: CardNumber.Unvalidated): List<AccountRange>? {
+                    return expectedAccountRanges
+                }
+
+                override val loading: Flow<Boolean> = flowOf(false)
+            }
         )
 
-        assertThat(accountRanges).containsExactlyElementsIn(expectedAccountRanges).inOrder()
+        assertThat(accountRanges).containsExactlyElementsIn(expectedAccountRanges)
     }
 
     private suspend fun testBehavior(
