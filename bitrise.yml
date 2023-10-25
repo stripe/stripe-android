@@ -165,7 +165,7 @@ workflows:
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh
+                bash ./scripts/execute_maestro_tests.sh -t all
       - slack@3:
           is_always_run: true
           inputs:
