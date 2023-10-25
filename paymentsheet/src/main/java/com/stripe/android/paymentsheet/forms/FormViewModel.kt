@@ -252,7 +252,7 @@ internal class FormViewModel @Inject internal constructor(
         )
     }
 
-    internal class ViewData(
+    internal data class ViewData(
         val elements: List<FormElement> = listOf(),
         val completeFormValues: FormFieldValues? = null,
         val hiddenIdentifiers: Set<IdentifierSpec> = setOf(),

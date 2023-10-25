@@ -232,7 +232,9 @@ internal fun AddPaymentMethodWithPaymentElement(
             onLinkSignupStateChanged = { _, _ -> },
             formArguments = viewState.formArguments,
             usBankAccountFormArguments = viewState.usBankAccountFormArguments,
-            onFormFieldValuesChanged = { }
+            onFormFieldValuesChanged = {
+                viewActionHandler(CustomerSheetViewAction.OnFormFieldValuesChanged(it))
+            }
         )
 
         AnimatedVisibility(visible = viewState.errorMessage != null) {

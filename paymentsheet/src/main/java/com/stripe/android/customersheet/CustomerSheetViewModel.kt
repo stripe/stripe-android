@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -127,9 +128,11 @@ internal class CustomerSheetViewModel @Inject constructor(
             is CustomerSheetViewAction.OnModifyItem -> onModifyItem(viewAction.paymentMethod)
             is CustomerSheetViewAction.OnItemSelected -> onItemSelected(viewAction.selection)
             is CustomerSheetViewAction.OnPrimaryButtonPressed -> onPrimaryButtonPressed()
-            is CustomerSheetViewAction.OnFormDataUpdated -> onFormDataUpdated(viewAction.formData)
             is CustomerSheetViewAction.OnAddPaymentMethodItemChanged ->
                 onAddPaymentMethodItemChanged(viewAction.paymentMethod)
+            is CustomerSheetViewAction.OnFormFieldValuesChanged -> {
+                onFormFieldValuesChanged(viewAction.formFieldValues)
+            }
         }
     }
 
@@ -309,6 +312,16 @@ internal class CustomerSheetViewModel @Inject constructor(
                         id = R.string.stripe_paymentsheet_save
                     )
                 }
+            )
+        }
+    }
+
+    private fun onFormFieldValuesChanged(formFieldValues: FormFieldValues?) {
+        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+            it.copy(
+                formViewData = it.formViewData.copy(
+                    completeFormValues = formFieldValues
+                )
             )
         }
     }
