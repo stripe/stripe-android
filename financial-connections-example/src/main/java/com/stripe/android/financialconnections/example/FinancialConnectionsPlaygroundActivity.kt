@@ -168,7 +168,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 color = Color.Gray
             )
             Button(
-                onClick = { onButtonClick() },
+                onClick = onButtonClick,
             ) {
                 Text("Connect Accounts!")
             }
