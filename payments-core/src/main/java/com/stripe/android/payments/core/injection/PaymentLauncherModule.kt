@@ -39,17 +39,19 @@ internal class PaymentLauncherModule {
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
         @Named(PRODUCT_USAGE) productUsage: Set<String>,
-        @Named(IS_INSTANT_APP) isInstantApp: Boolean
+        @Named(IS_INSTANT_APP) isInstantApp: Boolean,
+        @Named("INCLUDE_PAYMENT_SHEET_AUTHENTICATORS") includePaymentSheetAuthenticators: Boolean,
     ): PaymentAuthenticatorRegistry = DefaultPaymentAuthenticatorRegistry.createInstance(
-        context,
-        paymentAnalyticsRequestFactory,
-        enableLogging,
-        workContext,
-        uiContext,
-        threeDs1IntentReturnUrlMap,
-        publishableKeyProvider,
-        productUsage,
-        isInstantApp
+        context = context,
+        paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
+        enableLogging = enableLogging,
+        workContext = workContext,
+        uiContext = uiContext,
+        threeDs1IntentReturnUrlMap = threeDs1IntentReturnUrlMap,
+        publishableKeyProvider = publishableKeyProvider,
+        productUsage = productUsage,
+        isInstantApp = isInstantApp,
+        includePaymentSheetAuthenticators = includePaymentSheetAuthenticators,
     )
 
     @Provides

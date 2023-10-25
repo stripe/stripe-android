@@ -5,7 +5,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -140,7 +139,6 @@ fun rememberPaymentLauncher(
     stripeAccountId: String? = null,
     callback: PaymentLauncher.PaymentResultCallback
 ): PaymentLauncher {
-    val context = LocalContext.current
     val activity = rememberActivityOrNull()
 
     val activityResultLauncher = rememberLauncherForActivityResult(
@@ -150,7 +148,6 @@ fun rememberPaymentLauncher(
 
     return remember(publishableKey, stripeAccountId) {
         PaymentLauncherFactory(
-            context = context,
             hostActivityLauncher = activityResultLauncher,
             statusBarColor = activity?.window?.statusBarColor,
         ).create(publishableKey, stripeAccountId)

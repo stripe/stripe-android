@@ -281,6 +281,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 .publishableKeyProvider { arg.publishableKey }
                 .stripeAccountIdProvider { arg.stripeAccountId }
                 .productUsage(arg.productUsage)
+                .includePaymentSheetAuthenticators(arg.includePaymentSheetAuthenticators)
                 .build().viewModelSubcomponentBuilder
 
             val isPaymentIntent = when (arg) {

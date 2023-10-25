@@ -1,25 +1,17 @@
 package com.stripe.android.payments.paymentlauncher
 
-import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
-import com.stripe.android.core.injection.UIContext
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
-import com.stripe.android.payments.core.injection.DaggerPaymentLauncherComponent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.PaymentLauncherComponent
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import javax.inject.Named
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Implementation of [PaymentLauncher], start an [PaymentLauncherConfirmationActivity] to confirm and
@@ -31,29 +23,10 @@ class StripePaymentLauncher @AssistedInject internal constructor(
     @Assisted(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     @Assisted private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>,
     @Assisted(STATUS_BAR_COLOR) private val statusBarColor: Int?,
-    context: Context,
+    @Assisted(INCLUDE_PAYMENT_SHEET_AUTHENTICATORS) private val includePaymentSheetAuthenticators: Boolean,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
-    @IOContext ioContext: CoroutineContext,
-    @UIContext uiContext: CoroutineContext,
-    paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-    @Named(PRODUCT_USAGE) private val productUsage: Set<String>
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
 ) : PaymentLauncher {
-    private val paymentLauncherComponent: PaymentLauncherComponent =
-        DaggerPaymentLauncherComponent.builder()
-            .context(context)
-            .enableLogging(enableLogging)
-            .ioContext(ioContext)
-            .uiContext(uiContext)
-            .analyticsRequestFactory(paymentAnalyticsRequestFactory)
-            .publishableKeyProvider(publishableKeyProvider)
-            .stripeAccountIdProvider(stripeAccountIdProvider)
-            .productUsage(productUsage)
-            .build()
-
-    val authenticatorRegistry: PaymentAuthenticatorRegistry by lazy {
-        paymentLauncherComponent.authenticatorRegistry
-    }
-
     override fun confirm(params: ConfirmPaymentIntentParams) {
         hostActivityLauncher.launch(
             PaymentLauncherContract.Args.IntentConfirmationArgs(
@@ -62,6 +35,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
                 enableLogging = enableLogging,
                 productUsage = productUsage,
                 confirmStripeIntentParams = params,
+                includePaymentSheetAuthenticators = includePaymentSheetAuthenticators,
                 statusBarColor = statusBarColor,
             )
         )
@@ -74,6 +48,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
                 stripeAccountId = stripeAccountIdProvider(),
                 enableLogging = enableLogging,
                 productUsage = productUsage,
+                includePaymentSheetAuthenticators = includePaymentSheetAuthenticators,
                 confirmStripeIntentParams = params,
                 statusBarColor = statusBarColor,
             )
@@ -87,6 +62,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
                 stripeAccountId = stripeAccountIdProvider(),
                 enableLogging = enableLogging,
                 productUsage = productUsage,
+                includePaymentSheetAuthenticators = includePaymentSheetAuthenticators,
                 paymentIntentClientSecret = clientSecret,
                 statusBarColor = statusBarColor,
             )
@@ -100,6 +76,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
                 stripeAccountId = stripeAccountIdProvider(),
                 enableLogging = enableLogging,
                 productUsage = productUsage,
+                includePaymentSheetAuthenticators = includePaymentSheetAuthenticators,
                 setupIntentClientSecret = clientSecret,
                 statusBarColor = statusBarColor,
             )

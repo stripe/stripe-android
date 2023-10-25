@@ -41,6 +41,11 @@ internal interface PaymentLauncherViewModelFactoryComponent {
         @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
 
+        @BindsInstance
+        fun includePaymentSheetAuthenticators(
+            @Named("INCLUDE_PAYMENT_SHEET_AUTHENTICATORS") includePaymentSheetAuthenticators: Boolean
+        ): Builder
+
         fun build(): PaymentLauncherViewModelFactoryComponent
     }
 }

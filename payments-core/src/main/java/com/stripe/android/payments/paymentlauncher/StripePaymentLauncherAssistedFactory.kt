@@ -22,6 +22,9 @@ interface StripePaymentLauncherAssistedFactory {
         @Assisted(PUBLISHABLE_KEY) publishableKey: () -> String,
         @Assisted(STRIPE_ACCOUNT_ID) stripeAccountId: () -> String?,
         @Assisted(STATUS_BAR_COLOR) statusBarColor: Int?,
+        @Assisted(INCLUDE_PAYMENT_SHEET_AUTHENTICATORS) includePaymentSheetAuthenticators: Boolean,
         hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
     ): StripePaymentLauncher
 }
+
+internal const val INCLUDE_PAYMENT_SHEET_AUTHENTICATORS = "INCLUDE_PAYMENT_SHEET_AUTHENTICATORS"

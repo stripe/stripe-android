@@ -27,61 +27,72 @@ class PaymentLauncherContract :
         return PaymentResult.fromIntent(intent)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class Args(
         open val publishableKey: String,
         open val stripeAccountId: String?,
         open val enableLogging: Boolean,
         open val productUsage: Set<String>,
+        open val includePaymentSheetAuthenticators: Boolean,
         @ColorInt open var statusBarColor: Int? = null,
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class IntentConfirmationArgs internal constructor(
             override val publishableKey: String,
             override val stripeAccountId: String?,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
+            override val includePaymentSheetAuthenticators: Boolean,
             val confirmStripeIntentParams: ConfirmStripeIntentParams,
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
-            publishableKey,
-            stripeAccountId,
-            enableLogging,
-            productUsage,
-            statusBarColor
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+            enableLogging = enableLogging,
+            productUsage = productUsage,
+            includePaymentSheetAuthenticators = includePaymentSheetAuthenticators,
+            statusBarColor = statusBarColor,
         )
 
         @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class PaymentIntentNextActionArgs internal constructor(
             override val publishableKey: String,
             override val stripeAccountId: String?,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
+            override val includePaymentSheetAuthenticators: Boolean,
             val paymentIntentClientSecret: String,
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
-            publishableKey,
-            stripeAccountId,
-            enableLogging,
-            productUsage,
-            statusBarColor
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+            enableLogging = enableLogging,
+            productUsage = productUsage,
+            includePaymentSheetAuthenticators = includePaymentSheetAuthenticators,
+            statusBarColor = statusBarColor,
         )
 
         @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class SetupIntentNextActionArgs internal constructor(
             override val publishableKey: String,
             override val stripeAccountId: String?,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
+            override val includePaymentSheetAuthenticators: Boolean,
             val setupIntentClientSecret: String,
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
-            publishableKey,
-            stripeAccountId,
-            enableLogging,
-            productUsage,
-            statusBarColor
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+            enableLogging = enableLogging,
+            productUsage = productUsage,
+            includePaymentSheetAuthenticators = includePaymentSheetAuthenticators,
+            statusBarColor = statusBarColor,
         )
 
         internal companion object {

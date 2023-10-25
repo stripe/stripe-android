@@ -150,6 +150,7 @@ internal class CustomerSheetViewModel @Inject constructor(
             stripeAccountId = { paymentConfigurationProvider.get().stripeAccountId },
             statusBarColor = statusBarColor(),
             hostActivityLauncher = launcher,
+            includePaymentSheetAuthenticators = true,
         )
 
         lifecycleOwner.lifecycle.addObserver(

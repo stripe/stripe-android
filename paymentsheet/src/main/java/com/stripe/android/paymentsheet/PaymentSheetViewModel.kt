@@ -36,8 +36,6 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
-import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
@@ -469,15 +467,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             hostActivityLauncher = activityResultCaller.registerForActivityResult(
                 PaymentLauncherContract(),
                 ::onPaymentResult
-            )
-        ).also {
-            it.registerPollingAuthenticator()
-        }
+            ),
+            includePaymentSheetAuthenticators = true,
+        )
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    paymentLauncher?.unregisterPollingAuthenticator()
                     paymentLauncher = null
                     linkHandler.unregisterFromActivity()
                     super.onDestroy(owner)
