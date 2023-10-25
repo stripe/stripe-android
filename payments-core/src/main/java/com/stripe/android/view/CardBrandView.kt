@@ -9,7 +9,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -236,6 +238,8 @@ private fun CardBrand(
                 contentDescription = null,
                 modifier = Modifier.requiredSize(width = 32.dp, height = 21.dp),
             )
+
+            Spacer(modifier = Modifier.requiredWidth(1.dp))
 
             Image(
                 painter = painterResource(StripeUiCoreR.drawable.stripe_ic_chevron_down),
