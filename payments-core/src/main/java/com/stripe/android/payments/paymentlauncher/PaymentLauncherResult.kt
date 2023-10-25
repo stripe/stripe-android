@@ -9,17 +9,20 @@ import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class PaymentLauncherResult : Parcelable {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class Completed(val intent: StripeIntent) : PaymentLauncherResult()
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     class Failed(val throwable: Throwable) : PaymentLauncherResult()
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     object Canceled : PaymentLauncherResult()
 
     @JvmSynthetic
-    fun toBundle() = bundleOf(EXTRA to this)
+    internal fun toBundle() = bundleOf(EXTRA to this)
 
     internal companion object {
         private const val EXTRA = "extra_args"

@@ -52,6 +52,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -570,12 +571,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 deferredIntentConfirmationType = null
 
                 /*
-                 * Default future payments to the selected payment method. New payment methods are
-                 * only saved if payment sheet was initialized in
+                 * Sets current selection as default payment method in future payment sheet usage. New payment
+                 * methods are only saved if the payment sheet is in setup mode, is in payment intent with setup
+                 * for usage, or the customer has requested the payment method be saved.
                  */
                 when (val currentSelection = selection.value) {
                     is PaymentSelection.New -> stripeIntent.paymentMethod.takeIf {
-                        currentSelection.canSave()
+                        currentSelection.canSave(args.initializationMode)
                     }?.let { method ->
                         PaymentSelection.Saved(method)
                     }
@@ -602,20 +604,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             is PaymentResult.Canceled -> {
                 resetViewState(userErrorMessage = null)
-            }
-        }
-    }
-
-    private fun PaymentSelection.New.canSave(): Boolean {
-        val initializationMode = args.initializationMode
-        val requestedToSave =
-            customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse
-
-        return when (initializationMode) {
-            is PaymentSheet.InitializationMode.PaymentIntent -> requestedToSave
-            is PaymentSheet.InitializationMode.SetupIntent -> true
-            is PaymentSheet.InitializationMode.DeferredIntent -> {
-                initializationMode.intentConfiguration.mode.setupFutureUse != null || requestedToSave
             }
         }
     }
