@@ -13,13 +13,8 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
 internal data class PlaygroundSettings(
-    private val settings: Map<PlaygroundSettingDefinition<*>, Any?>
+    val settings: Map<PlaygroundSettingDefinition<*>, Any?>
 ) {
-
-    val uiSettings: Map<PlaygroundSettingDefinition.Displayable<*>, Any?>
-        get() = settings
-            .mapNotNull { (def, value) -> def.displayable()?.let { it to value } }
-            .toMap()
 
     fun <T> withValue(
         settingsDefinition: PlaygroundSettingDefinition<T>,
@@ -57,13 +52,9 @@ internal data class PlaygroundSettings(
 
     fun asJsonString(): String {
         val settingsMap = settings.map {
-            val saveable = it.key.saveable()
-            if (saveable != null) {
-                saveable.key to JsonPrimitive(saveable.convertToString(it.value))
-            } else {
-                null
-            }
-        }.filterNotNull().toMap()
+            val saveable = it.key
+            saveable.key to JsonPrimitive(saveable.convertToString(it.value))
+        }.toMap()
         return Json.encodeToString(JsonObject(settingsMap))
     }
 
@@ -81,7 +72,7 @@ internal data class PlaygroundSettings(
         }
     }
 
-    private fun <T> PlaygroundSettingDefinition.Saveable<T>.convertToString(
+    private fun <T> PlaygroundSettingDefinition<T>.convertToString(
         value: Any?,
     ): String {
         @Suppress("UNCHECKED_CAST")
@@ -106,14 +97,9 @@ internal data class PlaygroundSettings(
         }
 
         fun createFromDefaults(): PlaygroundSettings {
-            val settings = defaultSettingDefinitions.mapNotNull {
-                val saveable = it.saveable()
-                if (saveable != null) {
-                    it to saveable.defaultValue
-                } else {
-                    null
-                }
-            }.toMap().toMutableMap()
+            val settings = defaultSettingDefinitions
+                .associateWith { it.defaultValue }
+                .toMutableMap()
             return PlaygroundSettings(settings)
         }
 
@@ -121,14 +107,13 @@ internal data class PlaygroundSettings(
             val settings: MutableMap<PlaygroundSettingDefinition<*>, Any?> = mutableMapOf()
             val jsonObject = Json.decodeFromString(JsonObject.serializer(), jsonString)
 
-            for (settingDefinition in allSettingDefinitions) {
-                val saveable = settingDefinition.saveable() ?: continue
-                val jsonPrimitive = jsonObject[saveable.key] as? JsonPrimitive?
+            for (definition in allSettingDefinitions) {
+                val jsonPrimitive = jsonObject[definition.key] as? JsonPrimitive?
                 if (jsonPrimitive?.isString == true) {
-                    settings[settingDefinition] = saveable.convertToValue(jsonPrimitive.content)
+                    settings[definition] = definition.convertToValue(jsonPrimitive.content)
                 } else {
-                    if (defaultSettingDefinitions.contains(settingDefinition)) {
-                        settings[settingDefinition] = saveable.defaultValue
+                    if (defaultSettingDefinitions.contains(definition)) {
+                        settings[definition] = definition.defaultValue
                     }
                 }
             }

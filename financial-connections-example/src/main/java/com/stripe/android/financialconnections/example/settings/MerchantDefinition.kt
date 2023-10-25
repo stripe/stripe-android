@@ -3,11 +3,9 @@ package com.stripe.android.financialconnections.example.settings
 import com.stripe.android.financialconnections.example.Merchant
 import com.stripe.android.financialconnections.example.data.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.PaymentIntentBody
-import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Displayable.Option
+import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Option
 
-internal object MerchantDefinition :
-    PlaygroundSettingDefinition.Displayable<Merchant>,
-    PlaygroundSettingDefinition.Saveable<Merchant> {
+internal object MerchantDefinition : PlaygroundSettingDefinition<Merchant> {
     override val displayName: String
         get() = "Merchant"
     override val options: List<Option<Merchant>>
@@ -15,16 +13,16 @@ internal object MerchantDefinition :
 
     override fun lasRequest(
         body: LinkAccountSessionBody,
-        value: Merchant?
+        value: Merchant
     ): LinkAccountSessionBody = body.copy(
-        flow = value?.apiValue
+        flow = value.apiValue
     )
 
     override fun paymentIntentRequest(
         body: PaymentIntentBody,
-        value: Merchant?
+        value: Merchant
     ) = body.copy(
-        flow = value?.apiValue
+        flow = value.apiValue
     )
 
     override fun valueUpdated(

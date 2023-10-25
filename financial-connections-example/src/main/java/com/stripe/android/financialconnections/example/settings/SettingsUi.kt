@@ -29,7 +29,7 @@ internal fun SettingsUi(
     onSettingsChanged: (PlaygroundSettings) -> Unit,
 ) {
     Column {
-        for (settingDefinition in playgroundSettings.uiSettings.map { it.key }) {
+        for (settingDefinition in playgroundSettings.settings.map { it.key }) {
             Row(modifier = Modifier.padding(bottom = 16.dp)) {
                 Setting(settingDefinition, playgroundSettings, onSettingsChanged)
             }
@@ -39,7 +39,7 @@ internal fun SettingsUi(
 
 @Composable
 private fun <T> Setting(
-    settingDefinition: PlaygroundSettingDefinition.Displayable<T>,
+    settingDefinition: PlaygroundSettingDefinition<T>,
     playgroundSettings: PlaygroundSettings,
     onSettingsChanged: (PlaygroundSettings) -> Unit
 ) {
@@ -55,7 +55,7 @@ private fun <T> Setting(
 @Composable
 private fun <T> Setting(
     name: String,
-    options: List<PlaygroundSettingDefinition.Displayable.Option<T>>,
+    options: List<PlaygroundSettingDefinition.Option<T>>,
     value: T,
     onOptionChanged: (T) -> Unit,
 ) {
@@ -103,7 +103,7 @@ private fun TextSetting(
 @Composable
 private fun <T> RadioButtonSetting(
     name: String,
-    options: List<PlaygroundSettingDefinition.Displayable.Option<T>>,
+    options: List<PlaygroundSettingDefinition.Option<T>>,
     value: T,
     onOptionChanged: (T) -> Unit,
 ) {
@@ -147,7 +147,7 @@ private fun <T> RadioButtonSetting(
 @Composable
 private fun <T> DropdownSetting(
     name: String,
-    options: List<PlaygroundSettingDefinition.Displayable.Option<T>>,
+    options: List<PlaygroundSettingDefinition.Option<T>>,
     value: T,
     onOptionChanged: (T) -> Unit,
 ) {

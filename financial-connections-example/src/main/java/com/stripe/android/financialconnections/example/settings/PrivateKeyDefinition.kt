@@ -2,24 +2,22 @@ package com.stripe.android.financialconnections.example.settings
 
 import com.stripe.android.financialconnections.example.data.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.PaymentIntentBody
-import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Displayable.Option
+import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Option
 
-internal object PrivateKeyDefinition :
-    PlaygroundSettingDefinition.Displayable<String>,
-    PlaygroundSettingDefinition.Saveable<String> {
+internal object PrivateKeyDefinition : PlaygroundSettingDefinition<String> {
     override val displayName: String = "Secret Key"
     override val options: List<Option<String>> = emptyList()
 
     override fun lasRequest(
         body: LinkAccountSessionBody,
-        value: String?
+        value: String
     ): LinkAccountSessionBody = body.copy(
         secretKey = value,
     )
 
     override fun paymentIntentRequest(
         body: PaymentIntentBody,
-        value: String?
+        value: String
     ) = body.copy(
         secretKey = value,
     )

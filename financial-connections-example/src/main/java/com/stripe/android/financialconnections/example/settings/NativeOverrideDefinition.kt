@@ -3,11 +3,9 @@ package com.stripe.android.financialconnections.example.settings
 import com.stripe.android.financialconnections.example.NativeOverride
 import com.stripe.android.financialconnections.example.data.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.PaymentIntentBody
-import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Displayable.Option
+import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Option
 
-internal object NativeOverrideDefinition :
-    PlaygroundSettingDefinition.Saveable<NativeOverride>,
-    PlaygroundSettingDefinition.Displayable<NativeOverride> {
+internal object NativeOverrideDefinition : PlaygroundSettingDefinition<NativeOverride> {
 
     override val displayName: String = "Native Override"
     override val options: List<Option<NativeOverride>>
@@ -19,12 +17,12 @@ internal object NativeOverrideDefinition :
 
     override fun lasRequest(
         body: LinkAccountSessionBody,
-        value: NativeOverride?
+        value: NativeOverride
     ): LinkAccountSessionBody = body
 
     override fun paymentIntentRequest(
         body: PaymentIntentBody,
-        value: NativeOverride?
+        value: NativeOverride
     ): PaymentIntentBody = body
 
     override val key: String = "financial_connections_override_native"
