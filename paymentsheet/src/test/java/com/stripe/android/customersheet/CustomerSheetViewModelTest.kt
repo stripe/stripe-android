@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
@@ -18,6 +19,7 @@ import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -35,6 +37,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFailsWith
+import com.stripe.android.ui.core.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -1559,7 +1562,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             var viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo("Save")
+                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
@@ -1569,7 +1572,7 @@ class CustomerSheetViewModelTest {
 
             viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
-                .isEqualTo("Continue")
+                .isEqualTo(resolvableString(UiCoreR.string.stripe_continue_button_label))
         }
     }
 

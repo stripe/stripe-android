@@ -8,6 +8,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -286,7 +287,7 @@ internal class CustomerSheetActivityTest {
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isFirstPaymentMethod = false,
-            primaryButtonLabel = "Save",
+            primaryButtonLabel = resolvableString("Save"),
         )
     }
 

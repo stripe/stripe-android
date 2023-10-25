@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -206,6 +207,7 @@ internal fun AddPaymentMethodWithPaymentElement(
     formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>?,
 ) {
     requireNotNull(formViewModelSubComponentBuilderProvider)
+    val context = LocalContext.current
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     // TODO (jameswoo) make sure that the spacing is consistent with paymentsheet
@@ -244,7 +246,7 @@ internal fun AddPaymentMethodWithPaymentElement(
         }
 
         PrimaryButton(
-            label = viewState.primaryButtonLabel,
+            label = viewState.primaryButtonLabel.resolve(context),
             isEnabled = viewState.primaryButtonEnabled,
             isLoading = viewState.isProcessing,
             onButtonClick = {

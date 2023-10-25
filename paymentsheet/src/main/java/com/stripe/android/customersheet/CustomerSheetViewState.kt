@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet
 
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -73,7 +74,7 @@ internal sealed class CustomerSheetViewState(
         override val isProcessing: Boolean,
         val errorMessage: String? = null,
         val isFirstPaymentMethod: Boolean,
-        val primaryButtonLabel: String,
+        val primaryButtonLabel: ResolvableString,
     ) : CustomerSheetViewState(
         savedPaymentMethods = emptyList(),
         isLiveMode = isLiveMode,

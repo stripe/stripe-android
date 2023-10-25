@@ -60,7 +60,7 @@ import com.stripe.android.ui.core.R as UiCoreR
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSheetViewModelScope
 internal class CustomerSheetViewModel @Inject constructor(
-    private val application: Application,
+    private val application: Application, // TODO (jameswoo) remove application
     initialBackStack: @JvmSuppressWildcards List<CustomerSheetViewState>,
     private var savedPaymentSelection: PaymentSelection?,
     private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
@@ -303,11 +303,11 @@ internal class CustomerSheetViewModel @Inject constructor(
                 primaryButtonLabel = if (paymentMethod.code == PaymentMethod.Type.USBankAccount.code) {
                     resolvableString(
                         id = UiCoreR.string.stripe_continue_button_label
-                    ).resolve(application)
+                    )
                 } else {
                     resolvableString(
                         id = R.string.stripe_paymentsheet_save
-                    ).resolve(application)
+                    )
                 }
             )
         }
@@ -494,7 +494,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 isFirstPaymentMethod = isFirstPaymentMethod,
                 primaryButtonLabel = resolvableString(
                     id = R.string.stripe_paymentsheet_save
-                ).resolve(application)
+                )
             ),
             reset = isFirstPaymentMethod
         )
