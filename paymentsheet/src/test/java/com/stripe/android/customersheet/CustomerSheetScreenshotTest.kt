@@ -98,6 +98,8 @@ internal class CustomerSheetScreenshotTest {
         errorMessage = null,
         isFirstPaymentMethod = false,
         primaryButtonLabel = resolvableString("Save"),
+        primaryButtonEnabled = false,
+        customPrimaryButtonUiState = null,
     )
 
     @Test
@@ -232,6 +234,7 @@ internal class CustomerSheetScreenshotTest {
                             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                         )
                     ),
+                    primaryButtonEnabled = true,
                 ),
                 paymentMethodNameProvider = { it!! },
                 formViewModelSubComponentBuilderProvider = null,
@@ -270,7 +273,8 @@ internal class CustomerSheetScreenshotTest {
                             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                         )
                     ),
-                    isFirstPaymentMethod = true
+                    isFirstPaymentMethod = true,
+                    primaryButtonEnabled = true,
                 ),
                 paymentMethodNameProvider = { it!! },
                 formViewModelSubComponentBuilderProvider = null,

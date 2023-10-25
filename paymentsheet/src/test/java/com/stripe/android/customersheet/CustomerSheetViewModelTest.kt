@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -810,7 +811,7 @@ class CustomerSheetViewModelTest {
             assertThat(awaitViewState<AddPaymentMethod>().primaryButtonEnabled).isFalse()
 
             viewModel.handleViewAction(
-                CustomerSheetViewAction.OnFormFieldValuesChanged(
+                CustomerSheetViewAction.OnFormFieldValuesCompleted(
                     formFieldValues = FormFieldValues(
                         fieldValuePairs = mapOf(
                             IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
@@ -1571,6 +1572,38 @@ class CustomerSheetViewModelTest {
             viewState = awaitViewState()
             assertThat(viewState.primaryButtonLabel)
                 .isEqualTo(resolvableString(UiCoreR.string.stripe_continue_button_label))
+        }
+    }
+
+    @Test
+    fun `The custom primary button can be updated`() = runTest {
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                addPaymentMethodViewState,
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.customPrimaryButtonUiState)
+                .isNull()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnUpdateCustomButtonUIState(
+                    callback = {
+                        PrimaryButton.UIState(
+                            label = "Continue",
+                            enabled = true,
+                            lockVisible = false,
+                            onClick = {}
+                        )
+                    }
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.customPrimaryButtonUiState)
+                .isNotNull()
         }
     }
 

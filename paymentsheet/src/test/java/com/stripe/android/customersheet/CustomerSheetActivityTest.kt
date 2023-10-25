@@ -288,6 +288,8 @@ internal class CustomerSheetActivityTest {
             isProcessing = isProcessing,
             isFirstPaymentMethod = false,
             primaryButtonLabel = resolvableString("Save"),
+            primaryButtonEnabled = false,
+            customPrimaryButtonUiState = null,
         )
     }
 

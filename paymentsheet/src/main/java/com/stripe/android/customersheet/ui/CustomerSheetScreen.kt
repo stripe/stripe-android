@@ -233,7 +233,8 @@ internal fun AddPaymentMethodWithPaymentElement(
             formArguments = viewState.formArguments,
             usBankAccountFormArguments = viewState.usBankAccountFormArguments,
             onFormFieldValuesChanged = {
-                viewActionHandler(CustomerSheetViewAction.OnFormFieldValuesChanged(it))
+                // This only gets emitted if form field values are complete
+                viewActionHandler(CustomerSheetViewAction.OnFormFieldValuesCompleted(it))
             }
         )
 
