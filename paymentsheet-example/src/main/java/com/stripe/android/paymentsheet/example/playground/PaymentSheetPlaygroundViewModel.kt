@@ -65,7 +65,15 @@ internal class PaymentSheetPlaygroundViewModel(
             settings
                 .asFlow()
                 .debounce(ReloadDebounceDuration)
-                .collectLatest(this@PaymentSheetPlaygroundViewModel::prepareCheckout)
+                .collectLatest(this@PaymentSheetPlaygroundViewModel::prepareCheckoutInternal)
+        }
+    }
+
+    fun prepareCheckout(
+        playgroundSettings: PlaygroundSettings,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            prepareCheckoutInternal(playgroundSettings)
         }
     }
 
@@ -73,45 +81,44 @@ internal class PaymentSheetPlaygroundViewModel(
      * Calls the backend to prepare for checkout. The server creates a new Payment or Setup Intent
      * that will be confirmed on the client using Payment Sheet.
      */
-    fun prepareCheckout(
+    private suspend fun prepareCheckoutInternal(
         playgroundSettings: PlaygroundSettings,
     ) {
         state.value = null
         flowControllerState.value = null
 
-        viewModelScope.launch(Dispatchers.IO) {
-            // Snapshot before making the network request to not rely on UI staying in sync.
-            val playgroundSettingsSnapshot = playgroundSettings.snapshot()
+        // Snapshot before making the network request to not rely on UI staying in sync.
+        val playgroundSettingsSnapshot = playgroundSettings.snapshot()
 
-            playgroundSettingsSnapshot.saveToSharedPreferences(getApplication())
+        playgroundSettingsSnapshot.saveToSharedPreferences(getApplication())
 
-            val requestBody = playgroundSettingsSnapshot.checkoutRequest()
+        val requestBody = playgroundSettingsSnapshot.checkoutRequest()
 
-            val apiResponse = Fuel.post(settings.playgroundBackendUrl + "checkout")
-                .jsonBody(Json.encodeToString(CheckoutRequest.serializer(), requestBody))
-                .suspendable()
-                .awaitModel(CheckoutResponse.serializer())
-            when (apiResponse) {
-                is Result.Failure -> {
-                    status.value = StatusMessage(
-                        "Preparing checkout failed:\n${apiResponse.getException().message}"
-                    )
-                }
+        val apiResponse = Fuel.post(settings.playgroundBackendUrl + "checkout")
+            .jsonBody(Json.encodeToString(CheckoutRequest.serializer(), requestBody))
+            .suspendable()
+            .awaitModel(CheckoutResponse.serializer())
 
-                is Result.Success -> {
-                    val checkoutResponse = apiResponse.value
+        when (apiResponse) {
+            is Result.Failure -> {
+                status.value = StatusMessage(
+                    "Preparing checkout failed:\n${apiResponse.getException().message}"
+                )
+            }
 
-                    // Init PaymentConfiguration with the publishable key returned from the backend,
-                    // which will be used on all Stripe API calls
-                    PaymentConfiguration.init(
-                        getApplication(),
-                        checkoutResponse.publishableKey
-                    )
+            is Result.Success -> {
+                val checkoutResponse = apiResponse.value
 
-                    state.value = checkoutResponse.asPlaygroundState(
-                        snapshot = playgroundSettingsSnapshot,
-                    )
-                }
+                // Init PaymentConfiguration with the publishable key returned from the backend,
+                // which will be used on all Stripe API calls
+                PaymentConfiguration.init(
+                    getApplication(),
+                    checkoutResponse.publishableKey
+                )
+
+                state.value = checkoutResponse.asPlaygroundState(
+                    snapshot = playgroundSettingsSnapshot,
+                )
             }
         }
     }
