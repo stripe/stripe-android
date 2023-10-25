@@ -2,7 +2,6 @@ package com.stripe.android.customersheet.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -23,6 +22,7 @@ import com.stripe.android.paymentsheet.ui.PaymentElement
 import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
+import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.strings.resolve
@@ -38,8 +38,6 @@ internal fun CustomerSheetScreen(
     viewActionHandler: (CustomerSheetViewAction) -> Unit = {},
     paymentMethodNameProvider: (PaymentMethodCode?) -> String,
 ) {
-    val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
-
     PaymentSheetScaffold(
         topBar = {
             PaymentSheetTopBar(
@@ -55,7 +53,7 @@ internal fun CustomerSheetScreen(
             )
         },
         content = {
-            Box(modifier = Modifier.animateContentSize()) {
+            Column(modifier = Modifier.animateContentSize()) {
                 when (viewState) {
                     is CustomerSheetViewState.Loading -> {
                         BottomSheetLoadingIndicator()
@@ -66,6 +64,7 @@ internal fun CustomerSheetScreen(
                             viewActionHandler = viewActionHandler,
                             paymentMethodNameProvider = paymentMethodNameProvider,
                         )
+                        PaymentSheetContentPadding()
                     }
                     is CustomerSheetViewState.AddPaymentMethod -> {
                         if (customerSheetACHv2.isEnabled) {
@@ -80,11 +79,12 @@ internal fun CustomerSheetScreen(
                                 viewActionHandler = viewActionHandler,
                             )
                         }
+                        PaymentSheetContentPadding()
                     }
                 }
             }
         },
-        modifier = modifier.padding(bottom = bottomPadding)
+        modifier = modifier,
     )
 }
 
