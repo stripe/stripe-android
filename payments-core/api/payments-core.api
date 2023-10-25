@@ -6888,6 +6888,62 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherKt
 	public static final fun rememberPaymentLauncher (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;Landroidx/compose/runtime/Composer;II)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
 }
 
+public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Canceled : com/stripe/android/payments/paymentlauncher/PaymentLauncherResult {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Canceled;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Canceled$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Canceled;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Canceled;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Completed : com/stripe/android/payments/paymentlauncher/PaymentLauncherResult {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Lcom/stripe/android/model/StripeIntent;)V
+	public final fun component1 ()Lcom/stripe/android/model/StripeIntent;
+	public final fun copy (Lcom/stripe/android/model/StripeIntent;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Completed;
+	public static synthetic fun copy$default (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Completed;Lcom/stripe/android/model/StripeIntent;ILjava/lang/Object;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Completed;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIntent ()Lcom/stripe/android/model/StripeIntent;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Completed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Completed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Completed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Failed : com/stripe/android/payments/paymentlauncher/PaymentLauncherResult {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/Throwable;)V
+	public fun describeContents ()I
+	public final fun getThrowable ()Ljava/lang/Throwable;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Failed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Failed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherResult$Failed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public abstract class com/stripe/android/payments/paymentlauncher/PaymentResult : android/os/Parcelable {
 	public static final field $stable I
 	public final synthetic fun toBundle ()Landroid/os/Bundle;

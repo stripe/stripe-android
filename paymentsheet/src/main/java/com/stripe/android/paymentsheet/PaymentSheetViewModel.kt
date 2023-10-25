@@ -30,6 +30,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
+import com.stripe.android.payments.paymentlauncher.PaymentLauncherResult
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -469,7 +470,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             statusBarColor = args.statusBarColor,
             hostActivityLauncher = activityResultCaller.registerForActivityResult(
                 PaymentLauncherContract(),
-                ::onPaymentResult
+                ::onPaymentLauncherResult
             ),
             includePaymentSheetAuthenticators = true,
         )
@@ -530,6 +531,32 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
+    private fun onPaymentLauncherResult(launcherResult: PaymentLauncherResult) {
+        viewModelScope.launch {
+            runCatching {
+                requireNotNull(stripeIntent.value)
+            }.fold(
+                onSuccess = { originalIntent ->
+                    when (launcherResult) {
+                        is PaymentLauncherResult.Completed -> processPayment(
+                            stripeIntent = launcherResult.intent,
+                            paymentResult = PaymentResult.Completed
+                        )
+                        is PaymentLauncherResult.Failed -> processPayment(
+                            stripeIntent = originalIntent,
+                            paymentResult = PaymentResult.Failed(launcherResult.throwable)
+                        )
+                        is PaymentLauncherResult.Canceled -> processPayment(
+                            stripeIntent = originalIntent,
+                            paymentResult = PaymentResult.Canceled
+                        )
+                    }
+                },
+                onFailure = ::onFatal
+            )
+        }
+    }
+
     private fun processPayment(stripeIntent: StripeIntent, paymentResult: PaymentResult) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
@@ -542,11 +569,17 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 // Reset after sending event
                 deferredIntentConfirmationType = null
 
-                // Default future payments to the selected payment method. New payment methods won't
-                // be the default because we don't know if the user selected save for future use.
-                when (selection.value) {
-                    is PaymentSelection.New -> null
-                    else -> selection.value
+                /*
+                 * Default future payments to the selected payment method. New payment methods are
+                 * only saved if payment sheet was initialized in
+                 */
+                when (val currentSelection = selection.value) {
+                    is PaymentSelection.New -> stripeIntent.paymentMethod.takeIf {
+                        currentSelection.canSave()
+                    }?.let { method ->
+                        PaymentSelection.Saved(method)
+                    }
+                    else -> currentSelection
                 }?.let {
                     prefsRepository.savePaymentSelection(it)
                 }
@@ -569,6 +602,20 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             is PaymentResult.Canceled -> {
                 resetViewState(userErrorMessage = null)
+            }
+        }
+    }
+
+    private fun PaymentSelection.New.canSave(): Boolean {
+        val initializationMode = args.initializationMode
+        val requestedToSave =
+            customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse
+
+        return when (initializationMode) {
+            is PaymentSheet.InitializationMode.PaymentIntent -> requestedToSave
+            is PaymentSheet.InitializationMode.SetupIntent -> true
+            is PaymentSheet.InitializationMode.DeferredIntent -> {
+                initializationMode.intentConfiguration.mode.setupFutureUse != null || requestedToSave
             }
         }
     }

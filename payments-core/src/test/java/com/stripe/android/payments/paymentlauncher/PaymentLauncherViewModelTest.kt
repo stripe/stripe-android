@@ -251,7 +251,7 @@ class PaymentLauncherViewModelTest {
             )
 
             assertThat(viewModel.paymentLauncherResult.value)
-                .isEqualTo(PaymentResult.Completed)
+                .isEqualTo(PaymentLauncherResult.Completed(paymentIntent))
         }
 
     @Test
@@ -341,7 +341,7 @@ class PaymentLauncherViewModelTest {
             viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
             assertThat(viewModel.paymentLauncherResult.value)
-                .isInstanceOf(PaymentResult.Failed::class.java)
+                .isInstanceOf(PaymentLauncherResult.Failed::class.java)
         }
 
     @Test
@@ -354,7 +354,7 @@ class PaymentLauncherViewModelTest {
             viewModel.confirmStripeIntent(confirmSetupIntentParams, authHost)
 
             assertThat(viewModel.paymentLauncherResult.value)
-                .isInstanceOf(PaymentResult.Failed::class.java)
+                .isInstanceOf(PaymentLauncherResult.Failed::class.java)
         }
 
     @Test
@@ -385,7 +385,7 @@ class PaymentLauncherViewModelTest {
             viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
 
             assertThat(viewModel.paymentLauncherResult.value)
-                .isInstanceOf(PaymentResult.Failed::class.java)
+                .isInstanceOf(PaymentLauncherResult.Failed::class.java)
         }
 
     @Test
@@ -425,7 +425,7 @@ class PaymentLauncherViewModelTest {
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
             assertThat(viewModel.paymentLauncherResult.value)
-                .isEqualTo(PaymentResult.Completed)
+                .isEqualTo(PaymentLauncherResult.Completed(paymentIntent))
         }
 
     @Test
@@ -439,7 +439,7 @@ class PaymentLauncherViewModelTest {
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
             assertThat(viewModel.paymentLauncherResult.value)
-                .isInstanceOf(PaymentResult.Failed::class.java)
+                .isInstanceOf(PaymentLauncherResult.Failed::class.java)
         }
 
     @Test
@@ -453,7 +453,7 @@ class PaymentLauncherViewModelTest {
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
             assertThat(viewModel.paymentLauncherResult.value)
-                .isEqualTo(PaymentResult.Canceled)
+                .isEqualTo(PaymentLauncherResult.Canceled)
         }
 
     @Test
@@ -467,7 +467,7 @@ class PaymentLauncherViewModelTest {
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
             assertThat(viewModel.paymentLauncherResult.value)
-                .isInstanceOf(PaymentResult.Failed::class.java)
+                .isInstanceOf(PaymentLauncherResult.Failed::class.java)
         }
 
     @Test
@@ -481,7 +481,7 @@ class PaymentLauncherViewModelTest {
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
             assertThat(viewModel.paymentLauncherResult.value)
-                .isInstanceOf(PaymentResult.Failed::class.java)
+                .isInstanceOf(PaymentLauncherResult.Failed::class.java)
         }
 
     @Test

@@ -3,6 +3,7 @@ package com.stripe.android.payments.paymentlauncher
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.fragment.app.Fragment
@@ -43,6 +44,11 @@ interface PaymentLauncher {
         fun onPaymentResult(paymentResult: PaymentResult)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun interface PaymentLauncherResultCallback {
+        fun onPaymentResult(launcherResult: PaymentLauncherResult)
+    }
+
     companion object {
         /**
          * Create a [PaymentLauncher] instance with [ComponentActivity].
@@ -57,7 +63,10 @@ interface PaymentLauncher {
             publishableKey: String,
             stripeAccountId: String? = null,
             callback: PaymentResultCallback
-        ) = PaymentLauncherFactory(activity, callback).create(publishableKey, stripeAccountId)
+        ) = PaymentLauncherFactory(
+            activity,
+            callback.toLauncherResultCallback()
+        ).create(publishableKey, stripeAccountId)
 
         /**
          * Create a [PaymentLauncher] instance with [Fragment].
@@ -72,7 +81,10 @@ interface PaymentLauncher {
             publishableKey: String,
             stripeAccountId: String? = null,
             callback: PaymentResultCallback
-        ) = PaymentLauncherFactory(fragment, callback).create(publishableKey, stripeAccountId)
+        ) = PaymentLauncherFactory(
+            fragment,
+            callback.toLauncherResultCallback()
+        ).create(publishableKey, stripeAccountId)
 
         /**
          * Create a [PaymentLauncher] used for Jetpack Compose.
@@ -141,9 +153,13 @@ fun rememberPaymentLauncher(
 ): PaymentLauncher {
     val activity = rememberActivityOrNull()
 
+    val launcherCallback = remember(callback) {
+        callback.toLauncherResultCallback()
+    }
+
     val activityResultLauncher = rememberLauncherForActivityResult(
         PaymentLauncherContract(),
-        callback::onPaymentResult
+        launcherCallback::onPaymentResult
     )
 
     return remember(publishableKey, stripeAccountId) {

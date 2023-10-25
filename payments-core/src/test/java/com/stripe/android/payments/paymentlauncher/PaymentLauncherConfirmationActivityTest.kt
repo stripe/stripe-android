@@ -161,7 +161,9 @@ class PaymentLauncherConfirmationActivityTest {
             assertThat(activityScenario.state)
                 .isEqualTo(Lifecycle.State.DESTROYED)
             val result =
-                PaymentResult.fromIntent(activityScenario.getResult().resultData) as PaymentResult.Failed
+                PaymentLauncherResult.fromIntent(
+                    activityScenario.getResult().resultData
+                ) as PaymentLauncherResult.Failed
             assertThat(result.throwable.message)
                 .isEqualTo(
                     PaymentLauncherConfirmationActivity.EMPTY_ARG_ERROR

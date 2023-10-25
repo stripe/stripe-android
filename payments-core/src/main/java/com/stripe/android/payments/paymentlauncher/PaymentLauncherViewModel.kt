@@ -70,7 +70,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
     private val hasStarted: Boolean
         get() = savedStateHandle.get(KEY_HAS_STARTED) ?: false
 
-    internal val paymentLauncherResult = MutableStateFlow<PaymentResult?>(null)
+    internal val paymentLauncherResult = MutableStateFlow<PaymentLauncherResult?>(null)
 
     /**
      * Registers the calling activity to listen to payment flow results. Should be called in the
@@ -125,7 +125,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     }
                     if (!intent.requiresAction()) {
                         withContext(uiContext) {
-                            paymentLauncherResult.value = PaymentResult.Completed
+                            paymentLauncherResult.value = PaymentLauncherResult.Completed(intent)
                         }
                     } else {
                         authenticatorRegistry.getAuthenticator(intent).authenticate(
@@ -137,7 +137,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 },
                 onFailure = {
                     withContext(uiContext) {
-                        paymentLauncherResult.value = PaymentResult.Failed(it)
+                        paymentLauncherResult.value = PaymentLauncherResult.Failed(it)
                     }
                 }
             )
@@ -193,7 +193,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 },
                 onFailure = {
                     withContext(uiContext) {
-                        paymentLauncherResult.value = PaymentResult.Failed(it)
+                        paymentLauncherResult.value = PaymentLauncherResult.Failed(it)
                     }
                 }
             )
@@ -217,7 +217,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 },
                 onFailure = {
                     withContext(uiContext) {
-                        paymentLauncherResult.value = PaymentResult.Failed(it)
+                        paymentLauncherResult.value = PaymentLauncherResult.Failed(it)
                     }
                 }
             )
@@ -231,19 +231,19 @@ internal class PaymentLauncherViewModel @Inject constructor(
         paymentLauncherResult.value =
             when (stripeIntentResult.outcome) {
                 StripeIntentResult.Outcome.SUCCEEDED ->
-                    PaymentResult.Completed
+                    PaymentLauncherResult.Completed(stripeIntentResult.intent)
                 StripeIntentResult.Outcome.FAILED ->
-                    PaymentResult.Failed(
+                    PaymentLauncherResult.Failed(
                         LocalStripeException(displayMessage = stripeIntentResult.failureMessage)
                     )
                 StripeIntentResult.Outcome.CANCELED ->
-                    PaymentResult.Canceled
+                    PaymentLauncherResult.Canceled
                 StripeIntentResult.Outcome.TIMEDOUT ->
-                    PaymentResult.Failed(
+                    PaymentLauncherResult.Failed(
                         LocalStripeException(displayMessage = TIMEOUT_ERROR + stripeIntentResult.failureMessage)
                     )
                 else ->
-                    PaymentResult.Failed(
+                    PaymentLauncherResult.Failed(
                         LocalStripeException(displayMessage = UNKNOWN_ERROR + stripeIntentResult.failureMessage)
                     )
             }

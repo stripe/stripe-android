@@ -43,7 +43,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
                 EMPTY_ARG_ERROR
             }
         }.getOrElse {
-            finishWithResult(PaymentResult.Failed(it))
+            finishWithResult(PaymentLauncherResult.Failed(it))
             return
         }
 
@@ -93,7 +93,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
      * After confirmation and next action is handled, finish the activity with
      * corresponding [PaymentResult]
      */
-    private fun finishWithResult(result: PaymentResult) {
+    private fun finishWithResult(result: PaymentLauncherResult) {
         setResult(
             Activity.RESULT_OK,
             Intent()
