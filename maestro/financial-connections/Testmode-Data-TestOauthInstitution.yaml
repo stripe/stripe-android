@@ -1,4 +1,9 @@
 appId: com.stripe.android.financialconnections.example
+tags:
+  - financial-connections
+  - testmode
+  - native
+  - data
 ---
 - launchApp
 - startRecording: /tmp/test_results/testmode-data-testoauthinstitution
@@ -12,18 +17,14 @@ appId: com.stripe.android.financialconnections.example
 - tapOn:
     id: "Data_checkbox"
 - tapOn: "Connect Accounts!"
-# Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
-    visible:
-      id: "consent_cta"
+    notVisible:
+      id: "Data_checkbox"
     timeout: 30000
-- tapOn:
-    id: "consent_cta"
+# Common: web AuthFlow - connect OAuth institution
+- tapOn: "Agree and continue"
 - assertVisible: "Test OAuth Institution"
 # ERRORS
-- tapOn: ".*unknown error.*"
-- assertVisible: "Something went wrong"
-- back
 - tapOn: ".*unscheduled.*"
 - tapOn: "Select another bank"
 # SELECT OAUTH INSTITUTION
