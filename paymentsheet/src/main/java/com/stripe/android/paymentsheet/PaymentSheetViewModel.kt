@@ -200,7 +200,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         googlePayButtonState,
         buttonsEnabled,
         supportedPaymentMethodsFlow,
-    ) { isLinkAvailable, linkEmail, googlePayState, googlePayButtonState, buttonsEnabled, paymentMethodTypes ->
+        backStack,
+    ) { isLinkAvailable, linkEmail, googlePayState, googlePayButtonState, buttonsEnabled, paymentMethodTypes, stack ->
         WalletsState.create(
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
@@ -209,6 +210,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodTypes,
             googlePayLauncherConfig = googlePayLauncherConfig,
+            screen = stack.last(),
         )
     }
 
