@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -96,6 +97,7 @@ internal class CustomerSheetScreenshotTest {
         isProcessing = false,
         errorMessage = null,
         isFirstPaymentMethod = false,
+        primaryButtonLabel = resolvableString("Save"),
     )
 
     @Test

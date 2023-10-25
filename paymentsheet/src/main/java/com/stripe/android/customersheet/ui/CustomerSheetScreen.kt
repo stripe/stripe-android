@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
 import kotlinx.coroutines.flow.flowOf
 import javax.inject.Provider
@@ -225,7 +226,9 @@ internal fun AddPaymentMethodWithPaymentElement(
             showLinkInlineSignup = false,
             linkConfigurationCoordinator = null,
             showCheckboxFlow = flowOf(false),
-            onItemSelectedListener = { },
+            onItemSelectedListener = {
+                viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
+            },
             onLinkSignupStateChanged = { _, _ -> },
             formArguments = viewState.formArguments,
             usBankAccountFormArguments = viewState.usBankAccountFormArguments,
@@ -242,7 +245,7 @@ internal fun AddPaymentMethodWithPaymentElement(
         }
 
         PrimaryButton(
-            label = stringResource(id = R.string.stripe_paymentsheet_save),
+            label = viewState.primaryButtonLabel.resolve(),
             isEnabled = viewState.primaryButtonEnabled,
             isLoading = viewState.isProcessing,
             onButtonClick = {
