@@ -10,12 +10,13 @@ tags:
 # Android specific: Navigate to example
 - tapOn: "Playground"
 - tapOn:
-    id: "Native_checkbox"
-- tapOn: "Mode_Dropdown_Icon"
+    id: "Native option"
 - tapOn:
-    id: "Test_checkbox"
+    id: "Data option"
 - tapOn:
-    id: "Data_checkbox"
+    id: "Merchant setting"
+- tapOn:
+    id: "Test option"
 - tapOn: "Connect Accounts!"
 - extendedWaitUntil:
     notVisible:

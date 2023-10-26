@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.example
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Stripe
@@ -12,6 +13,8 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
+import com.stripe.android.financialconnections.example.settings.FlowDefinition
+import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
@@ -22,13 +25,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class FinancialConnectionsPlaygroundViewModel(
+internal class FinancialConnectionsPlaygroundViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
     private val settings = Settings(application)
     private val repository = BackendRepository(settings)
-    private val _state = MutableStateFlow(FinancialConnectionsPlaygroundState())
+
+    private val _state = MutableStateFlow(FinancialConnectionsPlaygroundState(application))
     val state: StateFlow<FinancialConnectionsPlaygroundState> = _state
 
     private val _viewEffect = MutableSharedFlow<FinancialConnectionsPlaygroundViewEffect?>()
@@ -49,42 +53,31 @@ class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    fun startFinancialConnectionsSession(
-        merchant: Merchant,
-        flow: Flow,
-        keys: Pair<String, String>,
-        email: String
-    ) {
+    fun startFinancialConnectionsSession() = with(state.value.settings) {
         _state.update {
             it.copy(
                 status = emptyList(),
                 emittedEvents = emptyList()
             )
         }
-        when (flow) {
-            Flow.Data -> startForData(merchant, keys, email.takeIf { it.isNotEmpty() })
-            Flow.Token -> startForToken(merchant, keys, email.takeIf { it.isNotEmpty() })
-            Flow.PaymentIntent -> startWithPaymentIntent(
-                merchant,
-                keys,
-                email.takeIf { it.isNotEmpty() }
-            )
+        Log.d(
+            "FinancialConnections",
+            "Starting session with settings: ${asJsonString()}"
+        )
+        saveToSharedPreferences(getApplication())
+        when (state.value.flow) {
+            Flow.Data -> startForData(this)
+            Flow.Token -> startForToken(this)
+            Flow.PaymentIntent -> startWithPaymentIntent(this)
         }
     }
 
-    private fun startWithPaymentIntent(
-        merchant: Merchant,
-        keys: Pair<String, String>,
-        email: String?
-    ) {
+    private fun startWithPaymentIntent(settings: PlaygroundSettings) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
                 repository.createPaymentIntent(
-                    country = "US",
-                    flow = merchant.flow,
-                    keys = keys,
-                    customerEmail = email
+                    settings.paymentIntentRequest()
                 )
             }
                 // Success creating session: open the financial connections sheet with received secret
@@ -112,19 +105,11 @@ class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun startForData(
-        merchant: Merchant,
-        keys: Pair<String, String>,
-        email: String?
-    ) {
+    private fun startForData(settings: PlaygroundSettings) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
-                repository.createLinkAccountSession(
-                    flow = merchant.flow,
-                    keys = keys,
-                    customerEmail = email
-                )
+                repository.createLinkAccountSession(settings.lasRequest())
             }
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
@@ -144,19 +129,11 @@ class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun startForToken(
-        merchant: Merchant,
-        keys: Pair<String, String>,
-        email: String?
-    ) {
+    private fun startForToken(settings: PlaygroundSettings) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
-                repository.createLinkAccountSessionForToken(
-                    flow = merchant.flow,
-                    keys = keys,
-                    customerEmail = email
-                )
+                repository.createLinkAccountSessionForToken(settings.lasRequest())
             }
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
@@ -278,9 +255,18 @@ class FinancialConnectionsPlaygroundViewModel(
         true,
         emptySet()
     )
+
+    fun onSettingsChanged(playgroundSettings: PlaygroundSettings) {
+        _state.update {
+            it.copy(
+                settings = playgroundSettings,
+            )
+        }
+    }
 }
 
-enum class Merchant(val flow: String) {
+@Suppress("Unused")
+enum class Merchant(val apiValue: String) {
     Test("testmode"),
     PartnerM("partner_m"),
     PartnerF("partner_f"),
@@ -289,15 +275,32 @@ enum class Merchant(val flow: String) {
     App2App("app2app"),
     Networking("networking"),
     NetworkingTestMode("networking_testmode"),
-    Other("other")
+    Other("other");
+
+    companion object {
+        fun fromApiValue(apiValue: String): Merchant =
+            Merchant.values().first { it.apiValue == apiValue }
+    }
 }
 
-enum class Flow {
-    Data, Token, PaymentIntent
+enum class Flow(val apiValue: String) {
+    Data("Data"),
+    Token("Token"),
+    PaymentIntent("PaymentIntent");
+
+    companion object {
+        fun fromApiValue(apiValue: String): Flow =
+            Flow.values().first { it.apiValue == apiValue }
+    }
 }
 
-enum class NativeOverride {
-    None, Native, Web
+enum class NativeOverride(val apiValue: String) {
+    None("none"), Native("native"), Web("web");
+
+    companion object {
+        fun fromApiValue(apiValue: String): NativeOverride =
+            NativeOverride.values().first { it.apiValue == apiValue }
+    }
 }
 
 sealed class FinancialConnectionsPlaygroundViewEffect {
@@ -315,10 +318,18 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
     ) : FinancialConnectionsPlaygroundViewEffect()
 }
 
-data class FinancialConnectionsPlaygroundState(
+internal data class FinancialConnectionsPlaygroundState(
     val backendUrl: String = "",
+    val settings: PlaygroundSettings,
     val loading: Boolean = false,
     val publishableKey: String? = null,
     val status: List<String> = emptyList(),
     val emittedEvents: List<String> = emptyList()
-)
+) {
+
+    constructor(application: Application) : this(
+        settings = PlaygroundSettings.createFromSharedPreferences(application)
+    )
+
+    val flow = settings[FlowDefinition]
+}

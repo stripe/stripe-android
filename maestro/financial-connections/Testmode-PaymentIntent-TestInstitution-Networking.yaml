@@ -9,18 +9,16 @@ tags:
 - startRecording: /tmp/test_results/testmode-paymentintent-testinstitution-networking
 # Android specific: Navigate to example
 - tapOn: "Playground"
-###########################################
-# CREATE NEW LINK ACCOUNT
-###########################################
 - tapOn:
-    id: "Native_checkbox"
-- tapOn: "Mode_Dropdown_Icon"
+    id: "Native option"
 - tapOn:
-    id: "NetworkingTestMode_checkbox"
+    id: "PaymentIntent option"
 - tapOn:
-    id: "PaymentIntent_checkbox"
+    id: "Merchant setting"
 - tapOn:
-    id: "email_input"
+    id: "NetworkingTestMode option"
+- tapOn:
+    id: "Customer email setting"
 - inputRandomEmail
 - hideKeyboard
 - tapOn: "Connect Accounts!"
