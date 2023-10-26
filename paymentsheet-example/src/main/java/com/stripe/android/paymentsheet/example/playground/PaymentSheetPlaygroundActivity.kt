@@ -210,8 +210,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 isWaitingForRefresh = isWaitingForRefresh,
             )
 
-
-
             when (playgroundState?.integrationType) {
                 IntegrationType.PaymentSheet -> {
                     PaymentSheetUi(
