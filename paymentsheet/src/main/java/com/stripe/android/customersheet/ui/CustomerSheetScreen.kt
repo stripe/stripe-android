@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.ErrorMessage
+import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.paymentsheet.ui.PaymentElement
 import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
@@ -256,6 +257,12 @@ internal fun AddPaymentMethodWithPaymentElement(
             },
             modifier = Modifier
                 .padding(top = 10.dp)
+                .padding(horizontal = horizontalPadding),
+        )
+
+        Mandate(
+            mandateText = viewState.mandateText,
+            modifier = Modifier
                 .padding(horizontal = horizontalPadding),
         )
     }

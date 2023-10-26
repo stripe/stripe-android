@@ -1607,6 +1607,31 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `The mandate text can be updated`() = runTest {
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                addPaymentMethodViewState,
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.mandateText)
+                .isNull()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnUpdateMandateText(
+                    mandateText = "This is a mandate."
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.mandateText)
+                .isNotNull()
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     private suspend inline fun <R> ReceiveTurbine<*>.awaitViewState(): R {
         return awaitItem() as R
