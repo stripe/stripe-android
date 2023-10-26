@@ -78,6 +78,8 @@ internal sealed class CustomerSheetViewState(
         val primaryButtonLabel: ResolvableString,
         val primaryButtonEnabled: Boolean,
         val customPrimaryButtonUiState: PrimaryButton.UIState?,
+        val mandateText: String? = null,
+        val showMandateAbovePrimaryButton: Boolean = false,
     ) : CustomerSheetViewState(
         savedPaymentMethods = emptyList(),
         isLiveMode = isLiveMode,

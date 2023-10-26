@@ -22,6 +22,7 @@
     <ID>LargeClass:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest</ID>
     <ID>LongMethod:AddPaymentMethod.kt$@Composable internal fun AddPaymentMethod( sheetViewModel: BaseSheetViewModel, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:AutocompleteScreen.kt$@Composable internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel)</ID>
+    <ID>LongMethod:CustomerSheetScreen.kt$@Composable internal fun AddPaymentMethodWithPaymentElement( viewState: CustomerSheetViewState.AddPaymentMethod, viewActionHandler: (CustomerSheetViewAction) -> Unit, formViewModelSubComponentBuilderProvider: Provider&lt;FormViewModelSubcomponent.Builder>?, )</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`()</ID>
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>

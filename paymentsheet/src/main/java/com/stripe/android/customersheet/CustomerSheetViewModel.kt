@@ -137,6 +137,9 @@ internal class CustomerSheetViewModel @Inject constructor(
             is CustomerSheetViewAction.OnUpdateCustomButtonUIState -> {
                 updateCustomButtonUIState(viewAction.callback)
             }
+            is CustomerSheetViewAction.OnUpdateMandateText -> {
+                updateMandateText(viewAction.mandateText, viewAction.showAbovePrimaryButton)
+            }
         }
     }
 
@@ -510,7 +513,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                     clientSecret = stripeIntent?.clientSecret,
                     shippingDetails = null,
                     draftPaymentSelection = null,
-                    onMandateTextChanged = { _, _ -> },
+                    onMandateTextChanged = { mandate, showAbove ->
+                        handleViewAction(CustomerSheetViewAction.OnUpdateMandateText(mandate, showAbove))
+                    },
                     onHandleUSBankAccount = { },
                     onUpdatePrimaryButtonUIState = {
                         handleViewAction(CustomerSheetViewAction.OnUpdateCustomButtonUIState(it))
@@ -551,6 +556,15 @@ internal class CustomerSheetViewModel @Inject constructor(
                     customPrimaryButtonUiState = null,
                 )
             }
+        }
+    }
+
+    private fun updateMandateText(mandateText: String?, showAbove: Boolean) {
+        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+            it.copy(
+                mandateText = mandateText,
+                showMandateAbovePrimaryButton = showAbove,
+            )
         }
     }
 
