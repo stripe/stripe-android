@@ -56,8 +56,10 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
             return
         }
 
-        viewModel.googlePayResult.observe(this) { googlePayResult ->
-            googlePayResult?.let(::finishWithResult)
+        lifecycleScope.launch {
+            viewModel.googlePayResult.collect { googlePayResult ->
+                googlePayResult?.let(::finishWithResult)
+            }
         }
 
         if (!viewModel.hasLaunched) {
