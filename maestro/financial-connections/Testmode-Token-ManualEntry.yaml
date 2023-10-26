@@ -1,4 +1,9 @@
 appId: com.stripe.android.financialconnections.example
+tags:
+  - all
+  - testmode
+  - native
+  - token
 ---
 - launchApp
 # Android specific: Navigate to example

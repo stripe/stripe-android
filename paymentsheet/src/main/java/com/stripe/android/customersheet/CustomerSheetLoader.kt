@@ -32,19 +32,6 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
     private val customerAdapter: CustomerAdapter,
 ) : CustomerSheetLoader {
     override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full> {
-        val card = LpmRepository.hardcodedCardSpec(
-            billingDetailsCollectionConfiguration =
-            configuration?.billingDetailsCollectionConfiguration?.toInternal()
-                ?: BillingDetailsCollectionConfiguration()
-        )
-        val usBankAccount = LpmRepository.hardCodedUsBankAccount
-        lpmRepository.initializeWithPaymentMethods(
-            mapOf(
-                PaymentMethod.Type.Card.code to card,
-                PaymentMethod.Type.USBankAccount.code to usBankAccount
-            )
-        )
-
         val elementsSession = if (customerAdapter.canCreateSetupIntents) {
             retrieveElementsSession(configuration).getOrElse {
                 return Result.failure(it)

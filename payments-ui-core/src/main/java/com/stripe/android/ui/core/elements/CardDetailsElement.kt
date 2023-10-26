@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import android.content.Context
 import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.SectionMultiFieldElement
@@ -21,12 +22,12 @@ internal class CardDetailsElement(
     context: Context,
     initialValues: Map<IdentifierSpec, String?>,
     collectName: Boolean = false,
-    private val isEligibleForCardBrandChoice: Boolean = false,
+    private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     val controller: CardDetailsController = CardDetailsController(
         context,
         initialValues,
         collectName,
-        isEligibleForCardBrandChoice,
+        cbcEligibility,
     )
 ) : SectionMultiFieldElement(identifier) {
     val isCardScanEnabled = controller.numberElement.controller.cardScanEnabled
@@ -72,9 +73,9 @@ internal class CardDetailsElement(
                     IdentifierSpec.CardBrand to FormFieldEntry(it.code, true)
                 }
             )
-            if (isEligibleForCardBrandChoice) {
+            if (cbcEligibility is CardBrandChoiceEligibility.Eligible) {
                 add(
-                    controller.numberElement.controller.cardBrandFlow.map { brand ->
+                    controller.numberElement.controller.selectedCardBrandFlow.map { brand ->
                         IdentifierSpec.PreferredCardBrand to FormFieldEntry(
                             value = brand.code.takeUnless { brand == CardBrand.Unknown },
                             isComplete = true

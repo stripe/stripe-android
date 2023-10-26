@@ -1,4 +1,9 @@
 appId: com.stripe.android.financialconnections.example
+tags:
+  - all
+  - testmode
+  - native
+  - payment
 ---
 - launchApp
 - startRecording: /tmp/test_results/testmode-paymentintent-testinstitution-networking

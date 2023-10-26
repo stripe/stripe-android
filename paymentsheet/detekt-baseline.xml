@@ -5,8 +5,6 @@
     <ID>CyclomaticComplexMethod:PlaceholderHelper.kt$PlaceholderHelper$@VisibleForTesting internal fun specForPlaceholderField( field: PlaceholderField, placeholderOverrideList: List&lt;IdentifierSpec>, requiresMandate: Boolean, configuration: PaymentSheet.BillingDetailsCollectionConfiguration, )</ID>
     <ID>EmptyFunctionBlock:PrimaryButtonAnimator.kt$PrimaryButtonAnimator.&lt;no name provided>${ }</ID>
     <ID>ForbiddenComment:PaymentOptionFactory.kt$PaymentOptionFactory$// TODO: Should use labelResource paymentMethodCreateParams or extension function</ID>
-    <ID>FunctionNaming:PaymentOptionUi.kt$@Preview(name = "Payment option in editing mode") @Composable private fun PaymentOptionUi_Editing()</ID>
-    <ID>FunctionNaming:PaymentOptionUi.kt$@Preview(name = "Selected payment option") @Composable private fun PaymentOptionUi_Selected()</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun PaymentSheetTopBar_Preview()</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun TestModeBadge_Preview()</ID>
     <ID>FunctionOnlyReturningConstant:FlowControllerModule.kt$FlowControllerModule$@Provides @Singleton @Named(IS_FLOW_CONTROLLER) fun provideIsFlowController()</ID>
@@ -47,6 +45,7 @@
     <ID>MagicNumber:StateFlows.kt$3</ID>
     <ID>MagicNumber:StateFlows.kt$4</ID>
     <ID>MagicNumber:StateFlows.kt$5</ID>
+    <ID>MagicNumber:StateFlows.kt$6</ID>
     <ID>MagicNumber:USBankAccountForm.kt$0.5f</ID>
     <ID>MaxLineLength:CustomerAdapterTest.kt$CustomerAdapterTest$fun</ID>
     <ID>MaxLineLength:CustomerRepositoryTest.kt$CustomerRepositoryTest$fun</ID>

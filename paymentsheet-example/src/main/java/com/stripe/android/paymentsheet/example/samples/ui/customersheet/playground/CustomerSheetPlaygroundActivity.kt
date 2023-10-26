@@ -235,7 +235,6 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                     color = MaterialTheme.colors.onBackground,
                     fontSize = 18.sp
                 )
-
                 Icon(
                     imageVector = if (collapsed) {
                         Icons.Rounded.KeyboardArrowRight
@@ -256,25 +255,40 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             }
 
             AnimatedVisibility(visible = !collapsed) {
-                Column {
-                    SetupIntentSwitch(
-                        configurationState = configurationState,
-                        viewActionHandler = viewActionHandler,
-                    )
-                    GooglePaySwitch(
-                        configurationState = configurationState,
-                        viewActionHandler = viewActionHandler,
-                    )
-                    ExistingCustomerSwitch(
-                        configurationState = configurationState,
-                        viewActionHandler = viewActionHandler,
-                    )
-                    BillingDetailsConfiguration(
-                        configurationState = configurationState,
-                        viewActionHandler = viewActionHandler,
-                    )
-                }
+                Switches(
+                    configurationState = configurationState,
+                    viewActionHandler = viewActionHandler,
+                )
             }
+        }
+    }
+
+    @Composable
+    private fun Switches(
+        configurationState: CustomerSheetPlaygroundConfigurationState,
+        viewActionHandler: (CustomerSheetPlaygroundViewAction) -> Unit
+    ) {
+        Column {
+            SetupIntentSwitch(
+                configurationState = configurationState,
+                viewActionHandler = viewActionHandler,
+            )
+            GooglePaySwitch(
+                configurationState = configurationState,
+                viewActionHandler = viewActionHandler,
+            )
+            ExistingCustomerSwitch(
+                configurationState = configurationState,
+                viewActionHandler = viewActionHandler,
+            )
+            AchEnabledSwitch(
+                configurationState = configurationState,
+                viewActionHandler = viewActionHandler,
+            )
+            BillingDetailsConfiguration(
+                configurationState = configurationState,
+                viewActionHandler = viewActionHandler,
+            )
         }
     }
 
@@ -355,6 +369,29 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                 modifier = Modifier
                     .semantics { testTagsAsResourceId = true }
                     .testTag("CUSTOMER_SHEET_PLAYGROUND_EXISTING_CUSTOMER")
+            )
+        }
+    }
+
+    @Composable
+    private fun AchEnabledSwitch(
+        configurationState: CustomerSheetPlaygroundConfigurationState,
+        viewActionHandler: (CustomerSheetPlaygroundViewAction) -> Unit,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "US Bank Accounts",
+                color = MaterialTheme.colors.onBackground,
+            )
+            Switch(
+                checked = configurationState.achEnabled,
+                onCheckedChange = {
+                    viewActionHandler(CustomerSheetPlaygroundViewAction.ToggleAchEnabled)
+                },
             )
         }
     }

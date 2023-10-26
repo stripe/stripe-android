@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -85,7 +86,7 @@ internal abstract class BaseSheetViewModel(
         ?: application.applicationInfo.loadLabel(application.packageManager).toString()
 
     protected var mostRecentError: Throwable? = null
-    protected var isEligibleForCardBrandChoice: Boolean = false
+    protected var cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible
 
     internal val googlePayState: StateFlow<GooglePayState> = savedStateHandle
         .getStateFlow(SAVE_GOOGLE_PAY_STATE, GooglePayState.Indeterminate)
@@ -187,7 +188,8 @@ internal abstract class BaseSheetViewModel(
                 paymentMethod?.displayNameResource?.let {
                     application.getString(it)
                 }.orEmpty()
-            }
+            },
+            isCbcEligible = { cbcEligibility is CardBrandChoiceEligibility.Eligible }
         )
     }
 
@@ -201,7 +203,7 @@ internal abstract class BaseSheetViewModel(
 
     val topBarState: StateFlow<PaymentSheetTopBarState> = combine(
         currentScreen,
-        paymentMethods,
+        paymentMethods.map { it.orEmpty() },
         stripeIntent.map { it?.isLiveMode ?: true },
         processing,
         editing,
@@ -254,22 +256,25 @@ internal abstract class BaseSheetViewModel(
 
     private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
-            PaymentSheetScreen.Loading, AddAnotherPaymentMethod -> {
+            is PaymentSheetScreen.Loading, AddAnotherPaymentMethod -> {
                 // Nothing to do here
             }
-            PaymentSheetScreen.SelectSavedPaymentMethods -> {
+            is PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = stripeIntent.value?.clientSecret == null,
                 )
             }
-            AddFirstPaymentMethod -> {
+            is AddFirstPaymentMethod -> {
                 eventReporter.onShowNewPaymentOptionForm(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = stripeIntent.value?.clientSecret == null,
                 )
+            }
+            is PaymentSheetScreen.EditPaymentMethod -> {
+                // TODO(tillh-stripe) Add reporting
             }
         }
     }
@@ -439,6 +444,10 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
+    fun modifyPaymentMethod(paymentMethod: PaymentMethod) {
+        transitionTo(PaymentSheetScreen.EditPaymentMethod(paymentMethod))
+    }
+
     private fun mapToHeaderTextResource(
         screen: PaymentSheetScreen?,
         isLinkAvailable: Boolean,
@@ -477,7 +486,7 @@ internal abstract class BaseSheetViewModel(
         merchantName = merchantName,
         amount = amount.value,
         newLpm = newPaymentSelection,
-        isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+        cbcEligibility = cbcEligibility,
     )
 
     fun handleBackPressed() {

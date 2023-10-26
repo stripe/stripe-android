@@ -25,7 +25,7 @@ class PaymentOptionScreenshotTest {
             PaymentOptionUi(
                 viewWidth = 160.dp,
                 isSelected = false,
-                isEditing = false,
+                editState = PaymentOptionEditState.None,
                 isEnabled = true,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
                 labelText = "••••4242",
@@ -41,7 +41,7 @@ class PaymentOptionScreenshotTest {
             PaymentOptionUi(
                 viewWidth = 160.dp,
                 isSelected = false,
-                isEditing = false,
+                editState = PaymentOptionEditState.None,
                 isEnabled = false,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
                 labelText = "••••4242",
@@ -57,7 +57,7 @@ class PaymentOptionScreenshotTest {
             PaymentOptionUi(
                 viewWidth = 160.dp,
                 isSelected = true,
-                isEditing = false,
+                editState = PaymentOptionEditState.None,
                 isEnabled = true,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
                 labelText = "••••4242",
@@ -73,7 +73,7 @@ class PaymentOptionScreenshotTest {
             PaymentOptionUi(
                 viewWidth = 160.dp,
                 isSelected = true,
-                isEditing = false,
+                editState = PaymentOptionEditState.None,
                 isEnabled = false,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
                 labelText = "••••4242",
@@ -84,12 +84,28 @@ class PaymentOptionScreenshotTest {
     }
 
     @Test
-    fun testEditing() {
+    fun testRemoving() {
         paparazziRule.snapshot {
             PaymentOptionUi(
                 viewWidth = 160.dp,
                 isSelected = false,
-                isEditing = true,
+                editState = PaymentOptionEditState.Removable,
+                isEnabled = true,
+                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+                labelText = "••••4242",
+                description = "Description",
+                onItemSelectedListener = {},
+            )
+        }
+    }
+
+    @Test
+    fun testModifying() {
+        paparazziRule.snapshot {
+            PaymentOptionUi(
+                viewWidth = 160.dp,
+                isSelected = false,
+                editState = PaymentOptionEditState.Modifiable,
                 isEnabled = true,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
                 labelText = "••••4242",

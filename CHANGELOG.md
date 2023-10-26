@@ -1,6 +1,18 @@
 # CHANGELOG
 
 ## XX.XX.XX - 2023-XX-XX
+
+### PaymentSheet
+* [FIXED][7499](https://github.com/stripe/stripe-android/pull/7499) Fixed an issue with incorrect error messages when encountering a failure after 3D Secure authentication.
+
+## 20.34.1 - 2023-10-24
+
+### Payments
+* [FIXED][7485](https://github.com/stripe/stripe-android/pull/7485) Fixed a crash when using `CardInputWidget` in an AppCompat theme.
+
+## 20.34.0 - 2023-10-23
+
+### Payments
 * [ADDED][7449](https://github.com/stripe/stripe-android/pull/7449) Added saved payment method support for SEPA family payment methods.
 
 ## 20.33.0 - 2023-10-16

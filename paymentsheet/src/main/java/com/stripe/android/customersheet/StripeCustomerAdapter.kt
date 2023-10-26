@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
@@ -51,7 +52,7 @@ internal class StripeCustomerAdapter @Inject constructor(
                 ),
                 types = listOfNotNull(
                     PaymentMethod.Type.Card,
-                    if (CustomerSheetACHV2Flag) {
+                    if (customerSheetACHv2.isEnabled) {
                         PaymentMethod.Type.USBankAccount
                     } else {
                         null

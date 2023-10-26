@@ -55,6 +55,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
@@ -199,7 +200,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         googlePayButtonState,
         buttonsEnabled,
         supportedPaymentMethodsFlow,
-    ) { isLinkAvailable, linkEmail, googlePayState, googlePayButtonState, buttonsEnabled, paymentMethodTypes ->
+        backStack,
+    ) { isLinkAvailable, linkEmail, googlePayState, googlePayButtonState, buttonsEnabled, paymentMethodTypes, stack ->
         WalletsState.create(
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
@@ -208,6 +210,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodTypes,
             googlePayLauncherConfig = googlePayLauncherConfig,
+            screen = stack.last(),
         )
     }
 
@@ -300,7 +303,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
-        isEligibleForCardBrandChoice = state.isEligibleForCardBrandChoice
+        cbcEligibility = when (state.isEligibleForCardBrandChoice) {
+            true -> CardBrandChoiceEligibility.Eligible(
+                preferredNetworks = state.config?.preferredNetworks ?: listOf()
+            )
+            false -> CardBrandChoiceEligibility.Ineligible
+        }
 
         savedStateHandle[SAVE_PAYMENT_METHODS] = state.customerPaymentMethods
         updateSelection(state.paymentSelection)

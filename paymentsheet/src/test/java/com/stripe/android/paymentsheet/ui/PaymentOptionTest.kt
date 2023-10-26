@@ -29,7 +29,7 @@ class PaymentOptionTest {
             PaymentOptionUi(
                 viewWidth = 100.dp,
                 isSelected = false,
-                isEditing = false,
+                editState = PaymentOptionEditState.None,
                 isEnabled = true,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
                 description = label,

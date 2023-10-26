@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import org.mockito.kotlin.mock
 
 internal object PaymentSheetFixtures {
@@ -196,6 +197,6 @@ internal object PaymentSheetFixtures {
                 name = "Jenny Rosen",
                 phone = "+18008675309"
             ),
-            isEligibleForCardBrandChoice = false,
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible
         )
 }

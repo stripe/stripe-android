@@ -4,14 +4,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.FeatureFlags
 import com.stripe.android.utils.screenshots.FontSize
 import com.stripe.android.utils.screenshots.PaparazziRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
@@ -19,7 +27,7 @@ import com.stripe.android.utils.screenshots.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 
-class CustomerSheetScreenshotTest {
+internal class CustomerSheetScreenshotTest {
     @get:Rule
     val paparazzi = PaparazziRule(
         SystemAppearance.values(),
@@ -30,22 +38,77 @@ class CustomerSheetScreenshotTest {
             .fillMaxWidth(),
     )
 
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.customerSheetACHv2,
+        isEnabled = false,
+    )
+
+    private val usBankAccountFormArguments = USBankAccountFormArguments(
+        onBehalfOf = null,
+        isCompleteFlow = false,
+        isPaymentFlow = false,
+        stripeIntentId = null,
+        clientSecret = null,
+        shippingDetails = null,
+        draftPaymentSelection = null,
+        onMandateTextChanged = { _, _ -> },
+        onHandleUSBankAccount = { },
+        onUpdatePrimaryButtonState = { },
+        onUpdatePrimaryButtonUIState = { },
+        onError = { },
+    )
+
+    private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(
+        title = null,
+        savedPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        paymentSelection = null,
+        isLiveMode = false,
+        isProcessing = false,
+        isEditing = false,
+        isGooglePayEnabled = false,
+        primaryButtonVisible = false,
+        primaryButtonLabel = null,
+    )
+
+    private val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
+        paymentMethodCode = PaymentMethod.Type.Card.code,
+        formViewData = FormViewModel.ViewData(
+            completeFormValues = FormFieldValues(
+                showsMandate = false,
+                userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+            ),
+        ),
+        formArguments = FormArguments(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            showCheckbox = false,
+            showCheckboxControlledFields = false,
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            merchantName = ""
+        ),
+        usBankAccountFormArguments = usBankAccountFormArguments,
+        supportedPaymentMethods = listOf(
+            LpmRepository.HardcodedCard,
+            LpmRepository.hardCodedUsBankAccount,
+        ),
+        selectedPaymentMethod = LpmRepository.HardcodedCard,
+        enabled = true,
+        isLiveMode = false,
+        isProcessing = false,
+        errorMessage = null,
+        isFirstPaymentMethod = false,
+        primaryButtonLabel = resolvableString("Save"),
+        primaryButtonEnabled = false,
+        customPrimaryButtonUiState = null,
+    )
+
     @Test
     fun testDefault() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.SelectPaymentMethod(
-                    title = null,
-                    savedPaymentMethods = emptyList(),
-                    paymentSelection = null,
-                    isLiveMode = false,
-                    isProcessing = false,
-                    isEditing = false,
-                    isGooglePayEnabled = false,
-                    primaryButtonVisible = true,
-                    primaryButtonLabel = null,
-                ),
+                viewState = selectPaymentMethodViewState,
                 paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -68,24 +131,20 @@ class CustomerSheetScreenshotTest {
             }
             var counter = 0
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.SelectPaymentMethod(
+                viewState = selectPaymentMethodViewState.copy(
                     title = "Screenshot testing",
                     savedPaymentMethods = savedPaymentMethods,
                     paymentSelection = PaymentSelection.Saved(
                         savedPaymentMethods.first()
                     ),
-                    isLiveMode = false,
-                    isProcessing = false,
-                    isEditing = false,
-                    isGooglePayEnabled = true,
-                    primaryButtonVisible = true,
                     primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = {
                     counter++
                     "424$counter"
-                }
+                },
+                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -108,24 +167,22 @@ class CustomerSheetScreenshotTest {
             }
             var counter = 0
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.SelectPaymentMethod(
+                selectPaymentMethodViewState.copy(
                     title = "Screenshot testing",
                     savedPaymentMethods = savedPaymentMethods,
                     paymentSelection = PaymentSelection.Saved(
                         savedPaymentMethods.first()
                     ),
-                    isLiveMode = false,
-                    isProcessing = false,
                     isEditing = true,
                     isGooglePayEnabled = true,
-                    primaryButtonVisible = false,
                     primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = {
                     counter++
                     "424$counter"
-                }
+                },
+                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -134,19 +191,15 @@ class CustomerSheetScreenshotTest {
     fun testGooglePay() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.SelectPaymentMethod(
+                viewState = selectPaymentMethodViewState.copy(
                     title = "Screenshot testing",
-                    savedPaymentMethods = emptyList(),
                     paymentSelection = PaymentSelection.GooglePay,
-                    isLiveMode = false,
-                    isProcessing = false,
-                    isEditing = false,
                     isGooglePayEnabled = true,
-                    primaryButtonVisible = true,
                     primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
-                paymentMethodNameProvider = { it!! }
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -155,16 +208,13 @@ class CustomerSheetScreenshotTest {
     fun testAddPaymentMethodDisabled() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.AddPaymentMethod(
+                viewState = addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     formViewData = FormViewModel.ViewData(),
-                    enabled = true,
-                    isLiveMode = false,
-                    isProcessing = false,
                     errorMessage = "This is an error message.",
-                    isFirstPaymentMethod = false
                 ),
-                paymentMethodNameProvider = { it!! }
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -173,7 +223,7 @@ class CustomerSheetScreenshotTest {
     fun testAddPaymentMethodEnabled() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.AddPaymentMethod(
+                viewState = addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     formViewData = FormViewModel.ViewData(
                         completeFormValues = FormFieldValues(
@@ -184,12 +234,10 @@ class CustomerSheetScreenshotTest {
                             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                         )
                     ),
-                    enabled = true,
-                    isLiveMode = false,
-                    isProcessing = false,
-                    isFirstPaymentMethod = false
+                    primaryButtonEnabled = true,
                 ),
-                paymentMethodNameProvider = { it!! }
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -198,16 +246,14 @@ class CustomerSheetScreenshotTest {
     fun testAddFirstPaymentMethodDisabled() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.AddPaymentMethod(
+                viewState = addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     formViewData = FormViewModel.ViewData(),
-                    enabled = true,
-                    isLiveMode = false,
-                    isProcessing = false,
                     errorMessage = "This is an error message.",
                     isFirstPaymentMethod = true
                 ),
-                paymentMethodNameProvider = { it!! }
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -216,7 +262,7 @@ class CustomerSheetScreenshotTest {
     fun testAddFirstPaymentMethodEnabled() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.AddPaymentMethod(
+                viewState = addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     formViewData = FormViewModel.ViewData(
                         completeFormValues = FormFieldValues(
@@ -227,12 +273,11 @@ class CustomerSheetScreenshotTest {
                             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                         )
                     ),
-                    enabled = true,
-                    isLiveMode = false,
-                    isProcessing = false,
-                    isFirstPaymentMethod = true
+                    isFirstPaymentMethod = true,
+                    primaryButtonEnabled = true,
                 ),
-                paymentMethodNameProvider = { it!! }
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }

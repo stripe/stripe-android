@@ -36,6 +36,7 @@ class PaymentOptionsScreenshotTest {
                 isProcessing = false,
                 onAddCardPressed = {},
                 onItemSelected = {},
+                onModifyItem = {},
                 onItemRemoved = {},
             )
         }
@@ -68,6 +69,7 @@ class PaymentOptionsScreenshotTest {
                 isProcessing = false,
                 onAddCardPressed = {},
                 onItemSelected = {},
+                onModifyItem = {},
                 onItemRemoved = {},
             )
         }
@@ -100,6 +102,7 @@ class PaymentOptionsScreenshotTest {
                 isProcessing = false,
                 onAddCardPressed = {},
                 onItemSelected = {},
+                onModifyItem = {},
                 onItemRemoved = {},
                 scrollState = LazyListState(firstVisibleItemIndex = 2),
             )

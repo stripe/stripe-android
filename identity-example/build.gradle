@@ -48,7 +48,7 @@ dependencies {
     implementation project(':identity')
     implementation project(':stripe-ui-core')
 
-    implementation libs.accompanist.themeAdapter
+    implementation libs.accompanist.materialThemeAdapter
     implementation libs.androidx.appCompat
     implementation libs.androidx.browser
     implementation libs.androidx.constraintLayout

@@ -1,9 +1,16 @@
 package com.stripe.android.view
 
-import android.app.Activity
+import android.app.Application
 import android.content.Context
+import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.os.Bundle
+import android.os.Parcelable
 import android.view.ViewGroup
+import android.widget.FrameLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.updateLayoutParams
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -15,6 +22,7 @@ import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.R
 import com.stripe.android.cards.AccountRangeFixtures
 import com.stripe.android.cards.DefaultCardAccountRangeStore
 import com.stripe.android.model.Address
@@ -33,6 +41,7 @@ import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.parcelize.Parcelize
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -40,7 +49,9 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import java.util.Calendar
+import kotlin.coroutines.CoroutineContext
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -57,7 +68,6 @@ internal class CardInputWidgetTest {
     private val testDispatcher = StandardTestDispatcher()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     private val cardInputListener = FakeCardInputListener()
     private val accountRangeStore = DefaultCardAccountRangeStore(context)
@@ -1711,7 +1721,6 @@ internal class CardInputWidgetTest {
         featureFlagTestRule.setEnabled(true)
 
         runCardInputWidgetTest(isCbcEligible = true) {
-            featureFlagTestRule.setEnabled(true)
             postalCodeEnabled = false
 
             updateCardNumberAndIdle("4000 0025 0000 1001")
@@ -1734,42 +1743,30 @@ internal class CardInputWidgetTest {
         isCbcEligible: Boolean = false,
         block: CardInputWidget.() -> Unit,
     ) {
-        val viewModelStoreOwner = CardInputWidgetTestHelper.createViewModelStoreOwner(
-            isCbcEligible = isCbcEligible,
+        registerTestActivity()
+
+        val activityScenario = ActivityScenario.launch<CardInputWidgetTestActivity>(
+            Intent(context, CardInputWidgetTestActivity::class.java).apply {
+                putExtra("args", CardInputWidgetTestActivity.Args(isCbcEligible = isCbcEligible))
+            }
         )
 
-        val cardInputWidget = activityScenarioFactory.createView(
-            viewFactory = { activity ->
-                createCardInputWidget(activity)
-            },
-            beforeAttach = { cardInputWidget ->
-                cardInputWidget.cardNumberEditText.viewModelStoreOwner = viewModelStoreOwner
-                cardInputWidget.viewModelStoreOwner = viewModelStoreOwner
-            },
-        )
-        cardInputWidget.setCardInputListener(cardInputListener)
-        cardInputWidget.block()
+        activityScenario.onActivity { activity ->
+            activity.setWorkContext(testDispatcher)
+
+            val widget = activity.findViewById<CardInputWidget>(CardInputWidgetTestActivity.VIEW_ID)
+            widget.setCardInputListener(cardInputListener)
+            widget.block()
+        }
     }
 
-    private fun createCardInputWidget(activity: Activity): CardInputWidget {
-        return CardInputWidget(activity).also {
-            it.layoutWidthCalculator = CardInputWidget.LayoutWidthCalculator { text, _ ->
-                text.length * 10
-            }
-
-            it.frameWidthSupplier = {
-                SCREEN_WIDTH // That's a pretty small screen, but one that we theoretically support.
-            }
-
-            // Set the width of the icon and its margin so that test calculations have
-            // an expected value that is repeatable on all systems.
-            it.cardBrandView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                width = 48
-                marginEnd = 12
-            }
-
-            it.cardNumberEditText.workContext = testDispatcher
+    private fun registerTestActivity() {
+        val application: Application = ApplicationProvider.getApplicationContext()
+        val activityInfo = ActivityInfo().apply {
+            name = CardInputWidgetTestActivity::class.java.name
+            packageName = application.packageName
         }
+        shadowOf(application.packageManager).addOrUpdateActivity(activityInfo)
     }
 
     private fun CardInputWidget.updateCardNumberAndIdle(cardNumber: String) {
@@ -1815,5 +1812,55 @@ internal class CardInputWidgetTest {
 
         private const val SCREEN_WIDTH = 500
         private const val BRAND_ICON_WIDTH = 60
+    }
+}
+
+internal class CardInputWidgetTestActivity : AppCompatActivity() {
+
+    @Parcelize
+    data class Args(
+        val isCbcEligible: Boolean,
+    ) : Parcelable
+
+    private val args: Args by lazy {
+        @Suppress("DEPRECATION")
+        intent.getParcelableExtra("args")!!
+    }
+
+    private val cardInputWidget: CardInputWidget by lazy {
+
+        CardInputWidget(this).apply {
+            id = VIEW_ID
+
+            layoutWidthCalculator = CardInputWidget.LayoutWidthCalculator { text, _ -> text.length * 10 }
+            frameWidthSupplier = { 500 }
+
+            val storeOwner = CardInputWidgetTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
+            viewModelStoreOwner = storeOwner
+            cardNumberEditText.viewModelStoreOwner = storeOwner
+
+            // Set the width of the icon and its margin so that test calculations have
+            // an expected value that is repeatable on all systems.
+            cardBrandView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                width = 48
+                marginEnd = 12
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setTheme(R.style.StripeDefaultTheme)
+
+        val layout = FrameLayout(this).apply { addView(cardInputWidget) }
+        setContentView(layout)
+    }
+
+    fun setWorkContext(workContext: CoroutineContext) {
+        cardInputWidget.cardNumberEditText.workContext = workContext
+    }
+
+    companion object {
+        const val VIEW_ID = 12345
     }
 }

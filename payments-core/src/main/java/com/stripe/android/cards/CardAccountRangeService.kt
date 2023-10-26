@@ -5,7 +5,6 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -15,8 +14,9 @@ import kotlin.coroutines.CoroutineContext
 private const val MIN_CARD_NUMBER_LENGTH = 8
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class CardAccountRangeService constructor(
+class CardAccountRangeService(
     private val cardAccountRangeRepository: CardAccountRangeRepository,
+    private val uiContext: CoroutineContext,
     private val workContext: CoroutineContext,
     val staticCardAccountRanges: StaticCardAccountRanges,
     private val accountRangeResultListener: AccountRangeResultListener,
@@ -56,12 +56,16 @@ class CardAccountRangeService constructor(
 
         val staticAccountRanges = staticCardAccountRanges.filter(cardNumber)
 
-        if (staticAccountRanges.isEmpty() || shouldQueryRepository(staticAccountRanges)) {
-            // query for AccountRange data
+        if (isCbcEligible) {
             queryAccountRangeRepository(cardNumber)
         } else {
-            // use static AccountRange data
-            updateAccountRangesResult(staticAccountRanges)
+            if (staticAccountRanges.isEmpty() || shouldQueryRepository(staticAccountRanges)) {
+                // query for AccountRange data
+                queryAccountRangeRepository(cardNumber)
+            } else {
+                // use static AccountRange data
+                updateAccountRangesResult(staticAccountRanges)
+            }
         }
     }
 
@@ -83,7 +87,7 @@ class CardAccountRangeService constructor(
                     null
                 }
 
-                withContext(Dispatchers.Main) {
+                withContext(uiContext) {
                     updateAccountRangesResult(accountRanges.orEmpty())
                 }
             }

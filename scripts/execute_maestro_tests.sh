@@ -3,6 +3,26 @@ set -o pipefail
 set -x
 set -e
 
+# Maestro tags to be executed. see https://maestro.mobile.dev/cli/tags
+MAESTRO_TAGS=""
+
+while getopts ":t:" opt; do
+  case $opt in
+    t) MAESTRO_TAGS="$OPTARG"
+    ;;
+    \?) echo "Invalid option -$OPTARG" >&2
+    exit 1
+    ;;
+  esac
+done
+
+# Check if tags is empty
+if [ -z "$MAESTRO_TAGS" ]
+then
+  echo "Tags parameter is required."
+  exit 1
+fi
+
 export MAESTRO_VERSION=1.31.0
 
 # Retry mechanism for Maestro installation
@@ -32,4 +52,4 @@ mkdir -p /tmp/test_results
 adb install $BITRISE_APK_PATH
 
 # Clear and start collecting logs
-maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml maestro/financial-connections/
+maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --include-tags=$MAESTRO_TAGS --output maestroReport.xml maestro/financial-connections

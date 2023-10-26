@@ -9,8 +9,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,7 +28,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.themeadapter.material.MdcTheme
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.databinding.StripeCardBrandViewBinding
@@ -33,9 +35,11 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
+import com.stripe.android.utils.AppCompatOrMdcTheme
 import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.properties.Delegates
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 internal class CardBrandView @JvmOverloads constructor(
     context: Context,
@@ -120,7 +124,7 @@ internal class CardBrandView @JvmOverloads constructor(
         isFocusable = false
 
         iconView.setContent {
-            MdcTheme {
+            AppCompatOrMdcTheme {
                 val isCbcEligible by isCbcEligibleFlow.collectAsState()
                 val isLoading by isLoadingFlow.collectAsState()
                 val currentBrand by brandFlow.collectAsState()
@@ -131,8 +135,13 @@ internal class CardBrandView @JvmOverloads constructor(
                 val shouldShowErrorIcon by shouldShowErrorIconFlow.collectAsState()
                 val tintColorInt by tintColorFlow.collectAsState()
 
-                LaunchedEffect(userSelectedBrand, possibleBrands, merchantPreferredBrands) {
-                    determineCardBrandToDisplay(userSelectedBrand, possibleBrands, merchantPreferredBrands)
+                LaunchedEffect(userSelectedBrand, currentBrand, possibleBrands, merchantPreferredBrands) {
+                    determineCardBrandToDisplay(
+                        userSelectedBrand = userSelectedBrand,
+                        autoDeterminedBrand = currentBrand,
+                        possibleBrands = possibleBrands,
+                        merchantPreferredBrands = merchantPreferredBrands,
+                    )
                 }
 
                 CardBrand(
@@ -162,11 +171,16 @@ internal class CardBrandView @JvmOverloads constructor(
     }
 
     private fun determineCardBrandToDisplay(
-        currentBrand: CardBrand?,
+        userSelectedBrand: CardBrand?,
+        autoDeterminedBrand: CardBrand,
         possibleBrands: List<CardBrand>,
         merchantPreferredBrands: List<CardBrand>,
     ) {
-        brand = selectCardBrandToDisplay(currentBrand, possibleBrands, merchantPreferredBrands)
+        brand = if (possibleBrands.size > 1) {
+            selectCardBrandToDisplay(userSelectedBrand, possibleBrands, merchantPreferredBrands)
+        } else {
+            autoDeterminedBrand
+        }
     }
 }
 
@@ -225,8 +239,10 @@ private fun CardBrand(
                 modifier = Modifier.requiredSize(width = 32.dp, height = 21.dp),
             )
 
+            Spacer(modifier = Modifier.requiredWidth(1.dp))
+
             Image(
-                painter = painterResource(R.drawable.stripe_ic_arrow_down),
+                painter = painterResource(StripeUiCoreR.drawable.stripe_ic_chevron_down),
                 contentDescription = null,
                 modifier = Modifier
                     .requiredSize(8.dp)
@@ -257,39 +273,30 @@ private fun CardBrandChoiceDropdown(
     onBrandSelected: (CardBrand?) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val noSelection = CardBrandChoice(
-        label = resolvableString(id = R.string.stripe_card_brand_choice_no_selection),
-        icon = Unknown.icon
-    )
-
-    val allPossibleBrands = listOf(Unknown) + brands
-    val choices = allPossibleBrands.map { brand ->
-        brand.toChoice(noSelection)
-    }
+    val choices = brands.map { it.toChoice() }
 
     SingleChoiceDropdown(
         title = resolvableString(id = R.string.stripe_card_brand_choice_selection_header),
         expanded = expanded,
-        currentChoice = currentBrand.toChoice(noSelection),
+        currentChoice = currentBrand.takeIf { it != Unknown }?.toChoice(),
         choices = choices,
+        headerTextColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
+        optionTextColor = MaterialTheme.colors.onSurface,
         onChoiceSelected = { choice ->
-            when (val choiceIndex = choices.indexOf(choice)) {
-                -1 -> Unit
-                0 -> onBrandSelected(null)
-                else -> onBrandSelected(allPossibleBrands[choiceIndex])
+            val choiceIndex = choices.indexOf(choice)
+            val brand = brands.getOrNull(choiceIndex)
+
+            if (brand != null) {
+                onBrandSelected(brand)
             }
         },
         onDismiss = onDismiss,
     )
 }
 
-private fun CardBrand.toChoice(noSelection: CardBrandChoice): CardBrandChoice {
-    return if (this == Unknown) {
-        noSelection
-    } else {
-        CardBrandChoice(
-            label = resolvableString(displayName),
-            icon = icon
-        )
-    }
+private fun CardBrand.toChoice(): CardBrandChoice {
+    return CardBrandChoice(
+        label = resolvableString(displayName),
+        icon = icon
+    )
 }

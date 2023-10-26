@@ -47,6 +47,7 @@ import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.EditPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.GooglePayButton
@@ -459,7 +460,16 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `handles screen transitions correctly`() = runTest {
-        val viewModel = createViewModel()
+        val card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
+                networks = PaymentMethod.Card.Networks(
+                    available = setOf("visa", "cartes_bancaires"),
+                )
+            )
+        )
+
+        val paymentMethods = listOf(card)
+        val viewModel = createViewModel(paymentMethods = paymentMethods)
         val scenario = activityScenario(viewModel)
 
         viewModel.currentScreen.test {
@@ -468,6 +478,12 @@ internal class PaymentSheetActivityTest {
 
             viewModel.transitionToAddPaymentScreen()
             assertThat(awaitItem()).isEqualTo(AddAnotherPaymentMethod)
+
+            pressBack()
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+
+            viewModel.modifyPaymentMethod(card)
+            assertThat(awaitItem()).isEqualTo(EditPaymentMethod(card))
 
             pressBack()
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)

@@ -5,6 +5,8 @@ import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
 internal interface PlaygroundSettingDefinition<T> {
+    val defaultValue: T
+
     fun configure(
         value: T,
         configurationBuilder: PaymentSheet.Configuration.Builder,

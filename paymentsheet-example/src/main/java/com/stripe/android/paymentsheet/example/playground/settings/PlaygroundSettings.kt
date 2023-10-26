@@ -141,14 +141,9 @@ internal class PlaygroundSettings private constructor(
         private const val sharedPreferencesKey = "json"
 
         fun createFromDefaults(): PlaygroundSettings {
-            val settings = allSettingDefinitions.mapNotNull {
-                val saveable = it.saveable()
-                if (saveable != null) {
-                    it to MutableStateFlow(saveable.defaultValue)
-                } else {
-                    null
-                }
-            }.toMap().toMutableMap()
+            val settings = allSettingDefinitions.associateWith { settingDefinition ->
+                MutableStateFlow(settingDefinition.defaultValue)
+            }.toMutableMap()
             return PlaygroundSettings(settings)
         }
 
@@ -158,13 +153,17 @@ internal class PlaygroundSettings private constructor(
             val jsonObject = Json.decodeFromString(JsonObject.serializer(), jsonString)
 
             for (settingDefinition in allSettingDefinitions) {
-                val saveable = settingDefinition.saveable() ?: continue
-                val jsonPrimitive = jsonObject[saveable.key] as? JsonPrimitive?
-                if (jsonPrimitive?.isString == true) {
-                    settings[settingDefinition] =
-                        MutableStateFlow(saveable.convertToValue(jsonPrimitive.content))
+                val saveable = settingDefinition.saveable()
+                if (saveable != null) {
+                    val jsonPrimitive = jsonObject[saveable.key] as? JsonPrimitive?
+                    if (jsonPrimitive?.isString == true) {
+                        settings[settingDefinition] =
+                            MutableStateFlow(saveable.convertToValue(jsonPrimitive.content))
+                    } else {
+                        settings[settingDefinition] = MutableStateFlow(settingDefinition.defaultValue)
+                    }
                 } else {
-                    settings[settingDefinition] = MutableStateFlow(saveable.defaultValue)
+                    settings[settingDefinition] = MutableStateFlow(settingDefinition.defaultValue)
                 }
             }
 
@@ -201,6 +200,7 @@ internal class PlaygroundSettings private constructor(
             DelayedPaymentMethodsSettingsDefinition,
             AutomaticPaymentMethodsSettingsDefinition,
             PrimaryButtonLabelSettingsDefinition,
+            PreferredNetworkSettingsDefinition,
             IntegrationTypeSettingsDefinition,
         )
 

@@ -7,57 +7,47 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
+import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.addPaymentMethodViewState
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
+import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.selectPaymentMethodViewState
 import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
+import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFailsWith
+import com.stripe.android.ui.core.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetViewModelTest {
 
-    private val selectPaymentMethodViewState = SelectPaymentMethod(
-        title = null,
-        savedPaymentMethods = listOf(CARD_PAYMENT_METHOD),
-        paymentSelection = null,
-        isLiveMode = false,
-        isProcessing = false,
-        isEditing = false,
-        isGooglePayEnabled = false,
-        primaryButtonVisible = false,
-        primaryButtonLabel = null,
-    )
-
-    private val addPaymentMethodViewState = AddPaymentMethod(
-        paymentMethodCode = PaymentMethod.Type.Card.code,
-        formViewData = FormViewModel.ViewData(
-            completeFormValues = FormFieldValues(
-                showsMandate = false,
-                userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
-            ),
-        ),
-        enabled = true,
-        isLiveMode = false,
-        isProcessing = false,
-        isFirstPaymentMethod = false
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.customerSheetACHv2,
+        isEnabled = false,
     )
 
     @Test
@@ -821,15 +811,13 @@ class CustomerSheetViewModelTest {
             assertThat(awaitViewState<AddPaymentMethod>().primaryButtonEnabled).isFalse()
 
             viewModel.handleViewAction(
-                CustomerSheetViewAction.OnFormDataUpdated(
-                    formData = FormViewModel.ViewData(
-                        completeFormValues = FormFieldValues(
-                            fieldValuePairs = mapOf(
-                                IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
-                            ),
-                            showsMandate = false,
-                            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
-                        )
+                CustomerSheetViewAction.OnFormFieldValuesCompleted(
+                    formFieldValues = FormFieldValues(
+                        fieldValuePairs = mapOf(
+                            IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                        ),
+                        showsMandate = false,
+                        userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     )
                 )
             )
@@ -1530,6 +1518,92 @@ class CustomerSheetViewModelTest {
                 style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
             )
             cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `Payment method form changes on user selection`() = runTest {
+        featureFlagTestRule.setEnabled(true)
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                addPaymentMethodViewState,
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.selectedPaymentMethod.code)
+                .isEqualTo("card")
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepository.hardCodedUsBankAccount
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.selectedPaymentMethod.code)
+                .isEqualTo("us_bank_account")
+        }
+    }
+
+    @Test
+    fun `When the payment method form is us bank account, the primary button label is continue`() = runTest {
+        featureFlagTestRule.setEnabled(true)
+
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                addPaymentMethodViewState,
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepository.hardCodedUsBankAccount
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo(resolvableString(UiCoreR.string.stripe_continue_button_label))
+        }
+    }
+
+    @Test
+    fun `The custom primary button can be updated`() = runTest {
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                addPaymentMethodViewState,
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.customPrimaryButtonUiState)
+                .isNull()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnUpdateCustomButtonUIState(
+                    callback = {
+                        PrimaryButton.UIState(
+                            label = "Continue",
+                            enabled = true,
+                            lockVisible = false,
+                            onClick = {}
+                        )
+                    }
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.customPrimaryButtonUiState)
+                .isNotNull()
         }
     }
 

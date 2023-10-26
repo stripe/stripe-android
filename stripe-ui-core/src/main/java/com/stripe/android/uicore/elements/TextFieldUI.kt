@@ -291,6 +291,8 @@ fun TextField(
                                     title = it.title,
                                     currentChoice = it.currentItem,
                                     choices = it.items,
+                                    headerTextColor = MaterialTheme.stripeColors.subtitle,
+                                    optionTextColor = MaterialTheme.stripeColors.onComponent,
                                     onChoiceSelected = { item ->
                                         textFieldController.onDropdownItemClicked(item)
 

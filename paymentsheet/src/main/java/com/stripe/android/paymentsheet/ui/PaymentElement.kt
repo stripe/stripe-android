@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -20,22 +19,23 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentMethodsUI
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountForm
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Provider
 
 @Composable
 internal fun PaymentElement(
-    sheetViewModel: BaseSheetViewModel,
+    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     enabled: Boolean,
     supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
     selectedItem: LpmRepository.SupportedPaymentMethod,
     showLinkInlineSignup: Boolean,
-    linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     showCheckboxFlow: Flow<Boolean>,
     onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit,
     onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
@@ -51,8 +51,6 @@ internal fun PaymentElement(
     val horizontalPadding = dimensionResource(
         id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
     )
-
-    val primaryButtonState = sheetViewModel.primaryButtonState.collectAsState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
         if (supportedPaymentMethods.size > 1) {
@@ -71,7 +69,7 @@ internal fun PaymentElement(
                 USBankAccountForm(
                     formArgs = formArguments,
                     usBankAccountFormArgs = usBankAccountFormArguments,
-                    isProcessing = primaryButtonState.value?.isProcessing == true,
+                    isProcessing = !enabled,
                     modifier = Modifier.padding(horizontal = horizontalPadding),
                 )
             } else {
@@ -80,13 +78,13 @@ internal fun PaymentElement(
                     enabled = enabled,
                     onFormFieldValuesChanged = onFormFieldValuesChanged,
                     showCheckboxFlow = showCheckboxFlow,
-                    formViewModelSubComponentBuilderProvider = sheetViewModel.formViewModelSubComponentBuilderProvider,
+                    formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
                     modifier = Modifier.padding(horizontal = horizontalPadding)
                 )
             }
         }
 
-        if (showLinkInlineSignup) {
+        if (showLinkInlineSignup && linkConfigurationCoordinator != null) {
             LinkInlineSignup(
                 linkConfigurationCoordinator = linkConfigurationCoordinator,
                 enabled = enabled,
