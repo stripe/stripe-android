@@ -14,6 +14,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.injection.DaggerAuthenticationComponent
+import com.stripe.android.payments.core.injection.INCLUDE_PAYMENT_SHEET_AUTHENTICATORS
 import com.stripe.android.payments.core.injection.IntentAuthenticatorMap
 import javax.inject.Inject
 import javax.inject.Named
@@ -32,7 +33,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     private val noOpIntentAuthenticator: NoOpIntentAuthenticator,
     private val sourceAuthenticator: SourceAuthenticator,
     @IntentAuthenticatorMap private val paymentAuthenticators: Map<AuthenticatorKey, Authenticator>,
-    @Named("INCLUDE_PAYMENT_SHEET_AUTHENTICATORS") private val includePaymentSheetAuthenticators: Boolean,
+    @Named(INCLUDE_PAYMENT_SHEET_AUTHENTICATORS) private val includePaymentSheetAuthenticators: Boolean,
 ) : PaymentAuthenticatorRegistry {
 
     private val paymentSheetAuthenticators: Map<AuthenticatorKey, Authenticator> by lazy {

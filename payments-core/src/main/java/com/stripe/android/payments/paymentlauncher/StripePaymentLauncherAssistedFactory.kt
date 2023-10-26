@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.payments.core.injection.INCLUDE_PAYMENT_SHEET_AUTHENTICATORS
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -26,5 +27,3 @@ interface StripePaymentLauncherAssistedFactory {
         hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
     ): StripePaymentLauncher
 }
-
-internal const val INCLUDE_PAYMENT_SHEET_AUTHENTICATORS = "INCLUDE_PAYMENT_SHEET_AUTHENTICATORS"
