@@ -31,4 +31,7 @@ internal sealed class CustomerSheetViewAction {
     class OnUSBankAccountRetrieved(
         val usBankAccount: PaymentSelection.New.USBankAccount,
     ) : CustomerSheetViewAction()
+    class OnFormError(
+        val error: String?,
+    ) : CustomerSheetViewAction()
 }
