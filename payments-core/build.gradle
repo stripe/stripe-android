@@ -3,6 +3,7 @@ apply from: configs.androidLibrary
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'app.cash.paparazzi'
 
 dependencies {
     api project(":stripe-core")

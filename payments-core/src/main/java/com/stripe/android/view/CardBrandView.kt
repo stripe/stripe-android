@@ -211,7 +211,7 @@ internal class CardBrandView @JvmOverloads constructor(
 }
 
 @Composable
-private fun CardBrand(
+internal fun CardBrand(
     isLoading: Boolean,
     currentBrand: CardBrand,
     possibleBrands: List<CardBrand>,
