@@ -1701,6 +1701,31 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When a form error is emitted, screen state is updated`() = runTest {
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                addPaymentMethodViewState,
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.errorMessage)
+                .isNull()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnFormError(
+                    error = "This is an error."
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.errorMessage)
+                .isEqualTo("This is an error.")
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     private suspend inline fun <R> ReceiveTurbine<*>.awaitViewState(): R {
         return awaitItem() as R

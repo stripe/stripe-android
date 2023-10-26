@@ -143,6 +143,9 @@ internal class CustomerSheetViewModel @Inject constructor(
             is CustomerSheetViewAction.OnUSBankAccountRetrieved -> {
                 onUSBankAccountRetrieved(viewAction.usBankAccount)
             }
+            is CustomerSheetViewAction.OnFormError -> {
+                onFormError(viewAction.error)
+            }
         }
     }
 
@@ -524,7 +527,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                         handleViewAction(CustomerSheetViewAction.OnUpdateCustomButtonUIState(it))
                     },
                     onUpdatePrimaryButtonState = { /* no-op, CustomerSheetScreen does not use PrimaryButton.State */ },
-                    onError = { }
+                    onError = { error ->
+                        handleViewAction(CustomerSheetViewAction.OnFormError(error))
+                    }
                 ),
                 selectedPaymentMethod = selectedPaymentMethod,
                 enabled = true,
@@ -573,6 +578,14 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private fun onUSBankAccountRetrieved(usBankAccount: PaymentSelection.New.USBankAccount) {
         createAndAttach(usBankAccount.paymentMethodCreateParams)
+    }
+
+    private fun onFormError(error: String?) {
+        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+            it.copy(
+                errorMessage = error
+            )
+        }
     }
 
     private suspend fun createPaymentMethod(
