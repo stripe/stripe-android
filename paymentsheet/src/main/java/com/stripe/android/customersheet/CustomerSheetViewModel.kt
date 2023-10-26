@@ -140,6 +140,9 @@ internal class CustomerSheetViewModel @Inject constructor(
             is CustomerSheetViewAction.OnUpdateMandateText -> {
                 updateMandateText(viewAction.mandateText, viewAction.showAbovePrimaryButton)
             }
+            is CustomerSheetViewAction.OnUSBankAccountRetrieved -> {
+                onUSBankAccountRetrieved(viewAction.usBankAccount)
+            }
         }
     }
 
@@ -434,10 +437,11 @@ internal class CustomerSheetViewModel @Inject constructor(
                     )
                 }
                 lpmRepository.fromCode(currentViewState.paymentMethodCode)?.let { paymentMethodSpec ->
-                    addPaymentMethod(
-                        paymentMethodSpec = paymentMethodSpec,
-                        formViewData = currentViewState.formViewData,
-                    )
+                    val formData = currentViewState.formViewData
+                    if (formData.completeFormValues == null) error("completeFormValues cannot be null")
+                    val params = formData.completeFormValues
+                        .transformToPaymentMethodCreateParams(paymentMethodSpec)
+                    createAndAttach(params)
                 } ?: error("${currentViewState.paymentMethodCode} is not supported")
             }
             is CustomerSheetViewState.SelectPaymentMethod -> {
@@ -455,20 +459,16 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    private fun addPaymentMethod(
-        paymentMethodSpec: LpmRepository.SupportedPaymentMethod,
-        formViewData: FormViewModel.ViewData,
+    private fun createAndAttach(
+        paymentMethodCreateParams: PaymentMethodCreateParams,
     ) {
         viewModelScope.launch {
-            if (formViewData.completeFormValues == null) error("completeFormValues cannot be null")
-            val params = formViewData.completeFormValues
-                .transformToPaymentMethodCreateParams(paymentMethodSpec)
-            createPaymentMethod(params)
+            createPaymentMethod(paymentMethodCreateParams)
                 .onSuccess { paymentMethod ->
                     attachPaymentMethodToCustomer(paymentMethod)
                 }.onFailure { throwable ->
                     logger.error(
-                        msg = "Failed to create payment method for $paymentMethodSpec",
+                        msg = "Failed to create payment method for ${paymentMethodCreateParams.typeCode}",
                         t = throwable,
                     )
                     updateViewState<CustomerSheetViewState.AddPaymentMethod> {
@@ -517,7 +517,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                     onMandateTextChanged = { mandate, showAbove ->
                         handleViewAction(CustomerSheetViewAction.OnUpdateMandateText(mandate, showAbove))
                     },
-                    onHandleUSBankAccount = { },
+                    onHandleUSBankAccount = {
+                        handleViewAction(CustomerSheetViewAction.OnUSBankAccountRetrieved(it))
+                    },
                     onUpdatePrimaryButtonUIState = {
                         handleViewAction(CustomerSheetViewAction.OnUpdateCustomButtonUIState(it))
                     },
@@ -567,6 +569,10 @@ internal class CustomerSheetViewModel @Inject constructor(
                 showMandateAbovePrimaryButton = showAbove,
             )
         }
+    }
+
+    private fun onUSBankAccountRetrieved(usBankAccount: PaymentSelection.New.USBankAccount) {
+        createAndAttach(usBankAccount.paymentMethodCreateParams)
     }
 
     private suspend fun createPaymentMethod(

@@ -18,11 +18,13 @@ import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.selectPaym
 import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
+import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -1634,6 +1636,68 @@ class CustomerSheetViewModelTest {
                 .isNotNull()
             assertThat(viewState.showMandateAbovePrimaryButton)
                 .isTrue()
+        }
+    }
+
+    @Test
+    fun `US Bank Account can be created and attached`() = runTest {
+        val usBankAccount = PaymentSelection.New.USBankAccount(
+            labelResource = "Test",
+            iconResource = 0,
+            paymentMethodCreateParams = mock(),
+            customerRequestedSave = mock(),
+            input = PaymentSelection.New.USBankAccount.Input(
+                name = "",
+                email = null,
+                phone = null,
+                address = null,
+                saveForFutureUse = false,
+            ),
+            screenState = USBankAccountFormScreenState.SavedAccount(
+                financialConnectionsSessionId = "session_1234",
+                intentId = "intent_1234",
+                bankName = "Stripe Bank",
+                last4 = "6789",
+                primaryButtonText = "Continue",
+                mandateText = null,
+            ),
+        )
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(US_BANK_ACCOUNT),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onSetupIntentClientSecretForCustomerAttach = {
+                    CustomerAdapter.Result.success("seti_123")
+                },
+                canCreateSetupIntents = true,
+            ),
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnUSBankAccountRetrieved(usBankAccount)
+            )
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnPrimaryButtonPressed
+            )
+
+            val viewState = awaitViewState<SelectPaymentMethod>()
+
+            assertThat(viewState.paymentSelection)
+                .isEqualTo(
+                    PaymentSelection.Saved(US_BANK_ACCOUNT)
+                )
+
+            cancelAndIgnoreRemainingEvents()
         }
     }
 

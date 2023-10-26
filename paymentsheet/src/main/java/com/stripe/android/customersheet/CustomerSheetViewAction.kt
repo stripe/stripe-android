@@ -24,9 +24,11 @@ internal sealed class CustomerSheetViewAction {
     class OnUpdateCustomButtonUIState(
         val callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?,
     ) : CustomerSheetViewAction()
-
     class OnUpdateMandateText(
         val mandateText: String?,
         val showAbovePrimaryButton: Boolean,
+    ) : CustomerSheetViewAction()
+    class OnUSBankAccountRetrieved(
+        val usBankAccount: PaymentSelection.New.USBankAccount,
     ) : CustomerSheetViewAction()
 }
