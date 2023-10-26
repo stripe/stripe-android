@@ -109,23 +109,15 @@ internal data class PlaygroundSettings(
 
         private fun createFromJsonString(jsonString: String): PlaygroundSettings {
             val settings: MutableMap<PlaygroundSettingDefinition<*>, Any?> = mutableMapOf()
-            val jsonObject = Json.decodeFromString(JsonObject.serializer(), jsonString)
+            val jsonObject: JsonObject = Json.decodeFromString(JsonObject.serializer(), jsonString)
 
             for (definition in allSettingDefinitions) {
                 val saveable = definition.saveable()
-                if (saveable != null) {
-                    val jsonPrimitive = jsonObject[saveable.key] as? JsonPrimitive?
-                    if (jsonPrimitive?.isString == true) {
-                        settings[definition] = saveable.convertToValue(jsonPrimitive.content)
-                    } else {
-                        definition.defaultValue?.let { defaultValue ->
-                            settings[definition] = defaultValue
-                        }
-                    }
-                } else {
-                    definition.defaultValue?.let { defaultValue ->
-                        settings[definition] = defaultValue
-                    }
+                val savedValue = saveable?.key?.let { jsonObject[it] as? JsonPrimitive }
+                if (savedValue?.isString == true) {
+                    settings[definition] = saveable.convertToValue(savedValue.content)
+                } else if (definition.defaultValue != null) {
+                    settings[definition] = definition.defaultValue
                 }
             }
 
@@ -140,6 +132,5 @@ internal data class PlaygroundSettings(
             PublicKeyDefinition,
             PrivateKeyDefinition,
         )
-
     }
 }

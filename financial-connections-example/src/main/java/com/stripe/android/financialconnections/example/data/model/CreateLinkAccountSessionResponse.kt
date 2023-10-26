@@ -10,4 +10,3 @@ data class CreateLinkAccountSessionResponse(
     @SerialName("client_secret") val clientSecret: String,
     @SerialName("publishable_key") val publishableKey: String
 )
-

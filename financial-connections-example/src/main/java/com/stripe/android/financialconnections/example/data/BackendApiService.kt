@@ -23,4 +23,3 @@ interface BackendApiService {
         @Body params: PaymentIntentBody
     ): CreateIntentResponse
 }
-

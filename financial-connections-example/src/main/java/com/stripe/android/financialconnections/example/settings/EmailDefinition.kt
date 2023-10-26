@@ -22,5 +22,4 @@ internal object EmailDefinition : PlaygroundSettingDefinition<String> {
     ) = body.copy(
         customerEmail = value
     )
-
 }
