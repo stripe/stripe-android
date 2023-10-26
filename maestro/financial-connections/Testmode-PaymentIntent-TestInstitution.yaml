@@ -9,10 +9,14 @@ tags:
 - startRecording: /tmp/test_results/testmode-paymentintent-testinstitution
 # Android specific: Navigate to example
 - tapOn: "Playground"
-- tapOn: "Merchant"
-- tapOn: "Test"
-- tapOn: "Native"
-- tapOn: "PaymentIntent"
+- tapOn:
+    id: "Native option"
+- tapOn:
+    id: "PaymentIntent option"
+- tapOn:
+    id: "Merchant setting"
+- tapOn:
+    id: "Test option"
 - tapOn: "Connect Accounts!"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:

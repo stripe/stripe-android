@@ -19,7 +19,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -83,6 +87,7 @@ private fun <T> Setting(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun TextSetting(
     name: String,
@@ -96,10 +101,13 @@ private fun TextSetting(
         onValueChange = { newValue: String ->
             onOptionChanged(newValue)
         },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
+            .semantics { testTagsAsResourceId = true }
+            .testTag("$name setting"),
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun <T> RadioButtonSetting(
     name: String,
@@ -131,6 +139,9 @@ private fun <T> RadioButtonSetting(
                         .padding(end = 5.dp)
                 ) {
                     RadioButton(
+                        modifier = Modifier
+                            .semantics { testTagsAsResourceId = true }
+                            .testTag("${option.name} option"),
                         selected = (option == selectedOption),
                         onClick = null,
                     )
@@ -143,7 +154,7 @@ private fun <T> RadioButtonSetting(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun <T> DropdownSetting(
     name: String,
@@ -155,6 +166,9 @@ private fun <T> DropdownSetting(
     val selectedOption = remember(value) { options.firstOrNull { it.value == value } }
 
     ExposedDropdownMenuBox(
+        modifier = Modifier
+            .semantics { testTagsAsResourceId = true }
+            .testTag("$name setting"),
         expanded = expanded,
         onExpandedChange = { expanded = it },
     ) {
@@ -173,6 +187,9 @@ private fun <T> DropdownSetting(
         ) {
             for (option in options) {
                 DropdownMenuItem(
+                    modifier = Modifier
+                        .semantics { testTagsAsResourceId = true }
+                        .testTag("${option.name} option"),
                     onClick = {
                         onOptionChanged(option.value)
                         expanded = false

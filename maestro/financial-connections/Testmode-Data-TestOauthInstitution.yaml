@@ -9,10 +9,14 @@ tags:
 - startRecording: /tmp/test_results/testmode-data-testoauthinstitution
 # Android specific: Navigate to example
 - tapOn: "Playground"
-- tapOn: "Merchant"
-- tapOn: "Test"
-- tapOn: "Native"
-- tapOn: "Data"
+- tapOn:
+    id: "Native option"
+- tapOn:
+    id: "Data option"
+- tapOn:
+    id: "Merchant setting"
+- tapOn:
+    id: "Test option"
 - tapOn: "Connect Accounts!"
 - extendedWaitUntil:
     notVisible:
