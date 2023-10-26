@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
@@ -369,7 +370,8 @@ fun TextFieldColors(
 @Composable
 internal fun TrailingIcon(
     trailingIcon: TextFieldIcon.Trailing,
-    loading: Boolean
+    loading: Boolean,
+    modifier: Modifier = Modifier
 ) {
     if (loading) {
         CircularProgressIndicator()
@@ -379,7 +381,7 @@ internal fun TrailingIcon(
             contentDescription = trailingIcon.contentDescription?.let {
                 stringResource(trailingIcon.contentDescription)
             },
-            modifier = Modifier.conditionallyClickable(trailingIcon.onClick),
+            modifier = modifier.conditionallyClickable(trailingIcon.onClick),
         )
     } else {
         Image(
@@ -387,7 +389,7 @@ internal fun TrailingIcon(
             contentDescription = trailingIcon.contentDescription?.let {
                 stringResource(trailingIcon.contentDescription)
             },
-            modifier = Modifier.conditionallyClickable(trailingIcon.onClick),
+            modifier = modifier.conditionallyClickable(trailingIcon.onClick),
         )
     }
 }
@@ -434,7 +436,8 @@ private fun TrailingDropdown(
                             R.drawable.stripe_ic_chevron_down,
                             isTintable = true
                         ),
-                        loading = false
+                        loading = false,
+                        modifier = Modifier.size(8.dp)
                     )
                 }
             }
