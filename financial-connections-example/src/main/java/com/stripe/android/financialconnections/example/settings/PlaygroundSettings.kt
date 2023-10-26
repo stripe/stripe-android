@@ -77,7 +77,7 @@ internal data class PlaygroundSettings(
 
     private fun <T> PlaygroundSettingDefinition.Saveable<T>.convertToString(
         value: Any?,
-    ): String {
+    ): String? {
         @Suppress("UNCHECKED_CAST")
         return convertToString(value as T)
     }
@@ -100,7 +100,8 @@ internal data class PlaygroundSettings(
         }
 
         fun createFromDefaults(): PlaygroundSettings {
-            val settings = defaultSettingDefinitions
+            val settings = allSettingDefinitions
+                .filter { it.defaultValue != null }
                 .associateWith { settingDefinition -> settingDefinition.defaultValue }
                 .toMutableMap()
             return PlaygroundSettings(settings)
@@ -117,28 +118,28 @@ internal data class PlaygroundSettings(
                     if (jsonPrimitive?.isString == true) {
                         settings[definition] = saveable.convertToValue(jsonPrimitive.content)
                     } else {
-                        if (defaultSettingDefinitions.contains(definition)) {
-                            settings[definition] = definition.defaultValue
+                        definition.defaultValue?.let { defaultValue ->
+                            settings[definition] = defaultValue
                         }
                     }
                 } else {
-                    settings[definition] = definition.defaultValue
+                    definition.defaultValue?.let { defaultValue ->
+                        settings[definition] = defaultValue
+                    }
                 }
             }
 
             return PlaygroundSettings(settings)
         }
 
-        private val defaultSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
+        private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             MerchantDefinition,
             NativeOverrideDefinition,
             FlowDefinition,
             EmailDefinition,
-        )
-
-        private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> = defaultSettingDefinitions + listOf(
             PublicKeyDefinition,
             PrivateKeyDefinition,
         )
+
     }
 }

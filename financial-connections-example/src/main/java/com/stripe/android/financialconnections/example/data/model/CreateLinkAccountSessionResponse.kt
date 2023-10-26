@@ -8,7 +8,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CreateLinkAccountSessionResponse(
     @SerialName("client_secret") val clientSecret: String,
-    @SerialName("las_id") val lasId: String,
     @SerialName("publishable_key") val publishableKey: String
 )
 

@@ -4,9 +4,9 @@ appId: com.stripe.android.financialconnections.example
 - startRecording: /tmp/test_results/testmode-paymentintent-testinstitution-networking
 # Android specific: Navigate to example
 - tapOn: "Playground"
-- tapOn: "Native"
 - tapOn: "Merchant"
 - tapOn: "NetworkingTestMode"
+- tapOn: "Native"
 - tapOn: "PaymentIntent"
 - tapOn: "Customer email"
 - inputRandomEmail

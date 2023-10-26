@@ -10,7 +10,6 @@ internal interface PlaygroundSettingDefinition<T> {
     val options: List<Option<T>>
 
     fun saveable(): Saveable<T>? {
-        @Suppress("UNCHECKED_CAST")
         return this as? Saveable<T>?
     }
 
@@ -37,7 +36,7 @@ internal interface PlaygroundSettingDefinition<T> {
 
     interface Saveable<T> : PlaygroundSettingDefinition<T> {
         val key: String
-        fun convertToString(value: T): String
+        fun convertToString(value: T): String?
         fun convertToValue(value: String): T
     }
 }
