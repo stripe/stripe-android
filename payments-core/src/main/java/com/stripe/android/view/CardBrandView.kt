@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.R
@@ -43,6 +44,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.parcelize.Parcelize
 import kotlin.properties.Delegates
 import com.stripe.android.uicore.R as StripeUiCoreR
+
+internal val CardBrandDropdownTestTag = "CardBrandDropdownTestTag"
 
 internal class CardBrandView @JvmOverloads constructor(
     context: Context,
@@ -246,9 +249,9 @@ private fun CardBrand(
     Box(modifier) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable(enabled = showDropdown) {
-                expanded = true
-            },
+            modifier = Modifier
+                .clickable(enabled = showDropdown) { expanded = true }
+                .testTag(CardBrandDropdownTestTag),
         ) {
             val dropdownIconAlpha by animateFloatAsState(
                 targetValue = if (showDropdown) ContentAlpha.medium else 0f,

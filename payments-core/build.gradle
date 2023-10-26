@@ -48,6 +48,7 @@ dependencies {
     testImplementation project(':network-testing')
     testImplementation project(':payments-core-testing')
     testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.fragment
     testImplementation testLibs.androidx.junit
