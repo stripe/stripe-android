@@ -457,6 +457,7 @@ internal class CustomerSheetViewModel @Inject constructor(
             else -> error("${viewState.value} is not supported")
         }
     }
+
     private fun createAndAttach(
         paymentMethodCreateParams: PaymentMethodCreateParams,
     ) {
