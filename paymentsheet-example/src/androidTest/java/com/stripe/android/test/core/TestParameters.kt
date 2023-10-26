@@ -1,6 +1,7 @@
 package com.stripe.android.test.core
 
 import androidx.test.platform.app.InstrumentationRegistry
+import com.stripe.android.paymentsheet.example.playground.settings.AutoRefreshSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.Country
@@ -67,6 +68,7 @@ internal data class TestParameters(
             settings[DefaultShippingAddressSettingsDefinition] = false
             settings[DelayedPaymentMethodsSettingsDefinition] = false
             settings[AutomaticPaymentMethodsSettingsDefinition] = false
+            settings[AutoRefreshSettingsDefinition] = false
             block(settings)
             return settings
         }
