@@ -27,5 +27,6 @@ internal sealed class CustomerSheetViewAction {
 
     class OnUpdateMandateText(
         val mandateText: String?,
+        val showAbovePrimaryButton: Boolean,
     ) : CustomerSheetViewAction()
 }

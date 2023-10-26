@@ -207,7 +207,6 @@ internal fun AddPaymentMethodWithPaymentElement(
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
     formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>?,
 ) {
-    requireNotNull(formViewModelSubComponentBuilderProvider)
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     // TODO (jameswoo) make sure that the spacing is consistent with paymentsheet
@@ -219,25 +218,27 @@ internal fun AddPaymentMethodWithPaymentElement(
                 .padding(horizontal = horizontalPadding)
         )
 
-        PaymentElement(
-            formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
-            enabled = viewState.enabled,
-            supportedPaymentMethods = viewState.supportedPaymentMethods,
-            selectedItem = viewState.selectedPaymentMethod,
-            showLinkInlineSignup = false,
-            linkConfigurationCoordinator = null,
-            showCheckboxFlow = flowOf(false),
-            onItemSelectedListener = {
-                viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
-            },
-            onLinkSignupStateChanged = { _, _ -> },
-            formArguments = viewState.formArguments,
-            usBankAccountFormArguments = viewState.usBankAccountFormArguments,
-            onFormFieldValuesChanged = {
-                // This only gets emitted if form field values are complete
-                viewActionHandler(CustomerSheetViewAction.OnFormFieldValuesCompleted(it))
-            }
-        )
+        formViewModelSubComponentBuilderProvider?.let {
+            PaymentElement(
+                formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
+                enabled = viewState.enabled,
+                supportedPaymentMethods = viewState.supportedPaymentMethods,
+                selectedItem = viewState.selectedPaymentMethod,
+                showLinkInlineSignup = false,
+                linkConfigurationCoordinator = null,
+                showCheckboxFlow = flowOf(false),
+                onItemSelectedListener = {
+                    viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
+                },
+                onLinkSignupStateChanged = { _, _ -> },
+                formArguments = viewState.formArguments,
+                usBankAccountFormArguments = viewState.usBankAccountFormArguments,
+                onFormFieldValuesChanged = {
+                    // This only gets emitted if form field values are complete
+                    viewActionHandler(CustomerSheetViewAction.OnFormFieldValuesCompleted(it))
+                }
+            )
+        }
 
         AnimatedVisibility(visible = viewState.errorMessage != null) {
             viewState.errorMessage?.let { error ->
@@ -246,6 +247,14 @@ internal fun AddPaymentMethodWithPaymentElement(
                     modifier = Modifier.padding(horizontal = horizontalPadding)
                 )
             }
+        }
+
+        if (viewState.showMandateAbovePrimaryButton) {
+            Mandate(
+                mandateText = viewState.mandateText,
+                modifier = Modifier
+                    .padding(horizontal = horizontalPadding),
+            )
         }
 
         PrimaryButton(
@@ -260,10 +269,12 @@ internal fun AddPaymentMethodWithPaymentElement(
                 .padding(horizontal = horizontalPadding),
         )
 
-        Mandate(
-            mandateText = viewState.mandateText,
-            modifier = Modifier
-                .padding(horizontal = horizontalPadding),
-        )
+        if (!viewState.showMandateAbovePrimaryButton) {
+            Mandate(
+                mandateText = viewState.mandateText,
+                modifier = Modifier
+                    .padding(horizontal = horizontalPadding),
+            )
+        }
     }
 }

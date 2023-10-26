@@ -1619,16 +1619,21 @@ class CustomerSheetViewModelTest {
             var viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.mandateText)
                 .isNull()
+            assertThat(viewState.showMandateAbovePrimaryButton)
+                .isFalse()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnUpdateMandateText(
-                    mandateText = "This is a mandate."
+                    mandateText = "This is a mandate.",
+                    showAbovePrimaryButton = true,
                 )
             )
 
             viewState = awaitViewState()
             assertThat(viewState.mandateText)
                 .isNotNull()
+            assertThat(viewState.showMandateAbovePrimaryButton)
+                .isTrue()
         }
     }
 

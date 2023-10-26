@@ -281,4 +281,42 @@ internal class CustomerSheetScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun testMandateAbovePrimaryButton() {
+        featureFlagTestRule.setEnabled(true)
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
+                    formViewData = FormViewModel.ViewData(),
+                    isFirstPaymentMethod = true,
+                    primaryButtonEnabled = false,
+                    mandateText = "This is a mandate.",
+                    showMandateAbovePrimaryButton = true,
+                ),
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = null,
+            )
+        }
+    }
+
+    @Test
+    fun testMandateBelowPrimaryButton() {
+        featureFlagTestRule.setEnabled(true)
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
+                    formViewData = FormViewModel.ViewData(),
+                    isFirstPaymentMethod = true,
+                    primaryButtonEnabled = false,
+                    mandateText = "This is a mandate.",
+                    showMandateAbovePrimaryButton = false,
+                ),
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = null,
+            )
+        }
+    }
 }
