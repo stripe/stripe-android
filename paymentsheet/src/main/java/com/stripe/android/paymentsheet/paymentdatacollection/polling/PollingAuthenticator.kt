@@ -12,7 +12,6 @@ import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.AuthActivityStarterHost
-import javax.inject.Singleton
 
 private const val UPI_TIME_LIMIT_IN_SECONDS = 5 * 60
 private const val UPI_INITIAL_DELAY_IN_SECONDS = 5
@@ -21,7 +20,6 @@ private const val BLIK_TIME_LIMIT_IN_SECONDS = 60
 private const val BLIK_INITIAL_DELAY_IN_SECONDS = 5
 private const val BLIK_MAX_ATTEMPTS = 12
 
-@Singleton
 internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent>() {
 
     private var pollingLauncher: ActivityResultLauncher<PollingContract.Args>? = null

@@ -83,7 +83,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
 import org.mockito.kotlin.isNull
@@ -108,9 +107,7 @@ internal class DefaultFlowControllerTest {
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
 
     private val paymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory>()
-    private val paymentLauncher = mock<StripePaymentLauncher> {
-        on { authenticatorRegistry } doReturn mock()
-    }
+    private val paymentLauncher = mock<StripePaymentLauncher>()
     private val eventReporter = mock<EventReporter>()
 
     private val paymentOptionActivityLauncher =
@@ -200,7 +197,7 @@ internal class DefaultFlowControllerTest {
             )
         ).thenReturn(mock())
 
-        whenever(paymentLauncherAssistedFactory.create(any(), any(), anyOrNull(), any()))
+        whenever(paymentLauncherAssistedFactory.create(any(), any(), anyOrNull(), any(), any()))
             .thenReturn(paymentLauncher)
 
         // set lifecycle to CREATED to trigger creation of payment launcher object within flowController.

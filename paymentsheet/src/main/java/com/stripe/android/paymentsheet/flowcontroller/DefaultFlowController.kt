@@ -43,8 +43,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
-import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.intercept
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
@@ -158,14 +156,12 @@ internal class DefaultFlowController @Inject internal constructor(
                         stripeAccountId = { lazyPaymentConfiguration.get().stripeAccountId },
                         statusBarColor = statusBarColor(),
                         hostActivityLauncher = paymentLauncherActivityResultLauncher,
-                    ).also {
-                        it.registerPollingAuthenticator()
-                    }
+                        includePaymentSheetAuthenticators = true,
+                    )
                 }
 
                 override fun onDestroy(owner: LifecycleOwner) {
                     activityResultLaunchers.forEach { it.unregister() }
-                    paymentLauncher?.unregisterPollingAuthenticator()
                     paymentLauncher = null
                     linkLauncher.unregister()
                 }

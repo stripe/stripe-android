@@ -12,7 +12,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
@@ -112,7 +111,6 @@ class Stripe3ds2TransactionViewModelTest {
         )
 
     private companion object {
-        val INJECTOR_KEY: String = WeakMapInjectorRegistry.nextKey("TestKey")
         const val ENABLE_LOGGING = false
         val PRODUCT_USAGE = setOf("TestProductUsage")
         val ARGS = Stripe3ds2TransactionContract.Args(
@@ -129,7 +127,6 @@ class Stripe3ds2TransactionViewModelTest {
             ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
             enableLogging = ENABLE_LOGGING,
             statusBarColor = null,
-            injectorKey = INJECTOR_KEY,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             PRODUCT_USAGE
         )

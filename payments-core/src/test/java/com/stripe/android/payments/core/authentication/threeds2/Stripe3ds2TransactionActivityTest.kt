@@ -8,7 +8,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
@@ -95,7 +94,6 @@ class Stripe3ds2TransactionActivityTest {
             ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
             enableLogging = false,
             statusBarColor = null,
-            injectorKey = DUMMY_INJECTOR_KEY,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             setOf()
         )

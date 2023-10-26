@@ -4,7 +4,6 @@ import android.content.Context
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -58,9 +57,6 @@ internal interface AuthenticationComponent {
         ): Builder
 
         @BindsInstance
-        fun injectorKey(@InjectorKey id: String): Builder
-
-        @BindsInstance
         fun publishableKeyProvider(
             @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
         ): Builder
@@ -70,6 +66,11 @@ internal interface AuthenticationComponent {
 
         @BindsInstance
         fun isInstantApp(@Named(IS_INSTANT_APP) isInstantApp: Boolean): Builder
+
+        @BindsInstance
+        fun includePaymentSheetAuthenticators(
+            @Named(INCLUDE_PAYMENT_SHEET_AUTHENTICATORS) includePaymentSheetAuthenticators: Boolean
+        ): Builder
 
         fun build(): AuthenticationComponent
     }

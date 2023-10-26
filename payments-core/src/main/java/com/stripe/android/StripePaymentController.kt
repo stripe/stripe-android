@@ -98,15 +98,16 @@ constructor(
 
     private val authenticatorRegistry: PaymentAuthenticatorRegistry =
         DefaultPaymentAuthenticatorRegistry.createInstance(
-            context,
-            paymentAnalyticsRequestFactory,
-            enableLogging,
-            workContext,
-            uiContext,
-            threeDs1IntentReturnUrlMap,
-            publishableKeyProvider,
-            paymentAnalyticsRequestFactory.defaultProductUsageTokens,
-            isInstantApp
+            context = context,
+            paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
+            enableLogging = enableLogging,
+            workContext = workContext,
+            uiContext = uiContext,
+            threeDs1IntentReturnUrlMap = threeDs1IntentReturnUrlMap,
+            publishableKeyProvider = publishableKeyProvider,
+            productUsage = paymentAnalyticsRequestFactory.defaultProductUsageTokens,
+            isInstantApp = isInstantApp,
+            includePaymentSheetAuthenticators = false, // StripePaymentController is not used in PaymentSheet.
         )
 
     override fun registerLaunchersWithActivityResultCaller(
