@@ -1,10 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="16dp">
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/widget_type_toggle_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:checkedButton="@id/single_line_type"
+        app:singleSelection="true">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/single_line_type"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Single-line"
+            style="?attr/materialButtonOutlinedStyle" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/multi_line_type"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Multi-line"
+            android:layout_weight="1"
+            style="?attr/materialButtonOutlinedStyle" />
+
+    </com.google.android.material.button.MaterialButtonToggleGroup>
 
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/preferred_network_switch"
@@ -16,6 +41,12 @@
         android:id="@+id/card_input_widget"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <com.stripe.android.view.CardMultilineWidget
+        android:id="@+id/card_multiline_widget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/confirm_with_new_card_button"

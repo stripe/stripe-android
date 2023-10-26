@@ -1,6 +1,7 @@
 package com.stripe.example.activity
 
 import android.os.Bundle
+import androidx.core.view.isVisible
 import com.stripe.android.Stripe
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -24,14 +25,20 @@ class CardBrandChoiceExampleActivity : StripeIntentActivity() {
         viewModel.inProgress.observe(this, this::enableUi)
         viewModel.status.observe(this, viewBinding.status::setText)
 
+        viewBinding.widgetTypeToggleGroup.addOnButtonCheckedListener { group, _, _ ->
+            viewBinding.cardInputWidget.isVisible = group.checkedButtonId == viewBinding.singleLineType.id
+            viewBinding.cardMultilineWidget.isVisible = group.checkedButtonId == viewBinding.multiLineType.id
+        }
+
         viewBinding.preferredNetworkSwitch.setOnCheckedChangeListener { _, isChecked ->
-            viewBinding.cardInputWidget.setPreferredNetworks(
-                preferredNetworks = if (isChecked) {
-                    listOf(CardBrand.CartesBancaires)
-                } else {
-                    emptyList()
-                },
-            )
+            val networks = if (isChecked) {
+                listOf(CardBrand.CartesBancaires)
+            } else {
+                emptyList()
+            }
+
+            viewBinding.cardInputWidget.setPreferredNetworks(networks)
+            viewBinding.cardMultilineWidget.setPreferredNetworks(networks)
         }
 
         val stripeAccountId = Settings(this).stripeAccountId
@@ -39,7 +46,17 @@ class CardBrandChoiceExampleActivity : StripeIntentActivity() {
         viewBinding.confirmWithNewCardButton.setOnClickListener {
             viewBinding.root.clearFocus()
 
-            viewBinding.cardInputWidget.paymentMethodCreateParams?.let { params ->
+            val params = when (viewBinding.widgetTypeToggleGroup.checkedButtonId) {
+                viewBinding.singleLineType.id -> {
+                    viewBinding.cardInputWidget.paymentMethodCreateParams
+                }
+                viewBinding.multiLineType.id -> {
+                    viewBinding.cardMultilineWidget.paymentMethodCreateParams
+                }
+                else -> error("bla")
+            }
+
+            if (params != null) {
                 createAndConfirmPaymentIntent(
                     country = "fr",
                     paymentMethodCreateParams = params,

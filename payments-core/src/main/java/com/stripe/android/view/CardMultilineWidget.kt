@@ -335,6 +335,12 @@ class CardMultilineWidget @JvmOverloads constructor(
         postalCodeErrorListener = listener
     }
 
+    // TODO(tillh-stripe) Add docs and make public
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun setPreferredNetworks(preferredNetworks: List<CardBrand>) {
+        cardBrandView.merchantPreferredNetworks = preferredNetworks
+    }
+
     init {
         orientation = VERTICAL
 

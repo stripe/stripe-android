@@ -277,14 +277,6 @@ private fun CardBrand(
 
             Spacer(modifier = Modifier.requiredWidth(1.dp))
 
-            Image(
-                painter = painterResource(StripeUiCoreR.drawable.stripe_ic_chevron_down),
-                contentDescription = null,
-                modifier = Modifier
-                    .requiredSize(8.dp)
-                    .graphicsLayer { alpha = dropdownIconAlpha },
-            )
-
             AnimatedVisibility(visible = showDropdown || reserveSpaceForCbcDropdown) {
                 Spacer(modifier = Modifier.requiredWidth(1.dp))
 
