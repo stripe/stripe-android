@@ -12,18 +12,18 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -42,6 +43,7 @@ import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
+import com.stripe.android.paymentsheet.example.playground.settings.AutoRefreshSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.IntegrationType
@@ -92,6 +94,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
 
             val playgroundState by viewModel.state.collectAsState()
+            val isWaitingToRefresh by viewModel.isWaitingToAutoRefresh.collectAsState()
 
             PlaygroundTheme(
                 content = {
@@ -102,19 +105,18 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     QrCodeButton(playgroundSettings = localPlaygroundSettings)
                 },
                 bottomBarContent = {
-                    ReloadButton(
+                    ReloadSection(
                         playgroundSettings = localPlaygroundSettings,
                         isReloading = playgroundState == null,
                     )
 
-                    Column {
-                        PlaygroundStateUi(
-                            playgroundState = playgroundState,
-                            paymentSheet = paymentSheet,
-                            flowController = flowController,
-                            addressLauncher = addressLauncher,
-                        )
-                    }
+                    PlaygroundStateUi(
+                        playgroundState = playgroundState,
+                        paymentSheet = paymentSheet,
+                        flowController = flowController,
+                        addressLauncher = addressLauncher,
+                        isWaitingForRefresh = isWaitingToRefresh,
+                    )
                 },
             )
 
@@ -161,33 +163,35 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     }
 
     @Composable
-    private fun ReloadButton(
+    private fun ReloadSection(
         playgroundSettings: PlaygroundSettings,
         isReloading: Boolean,
     ) {
-        Button(
-            onClick = {
-                viewModel.prepareCheckout(
-                    playgroundSettings = playgroundSettings,
-                )
-            },
-            enabled = !isReloading,
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(RELOAD_TEST_TAG),
-        ) {
-            if (isReloading) {
-                CircularProgressIndicator(
-                    strokeWidth = 1.dp,
-                    modifier = Modifier
-                        .requiredSize(16.dp)
-                        .padding(end = 16.dp),
-                )
+        val autoRefresh by playgroundSettings[AutoRefreshSettingsDefinition].collectAsState()
 
-                Text("Reloading…")
-            } else {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Button(
+                onClick = { viewModel.prepareCheckout(playgroundSettings) },
+                enabled = !isReloading && !autoRefresh,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 16.dp)
+                    .testTag(RELOAD_TEST_TAG),
+            ) {
                 Text("Reload")
             }
+
+            Text(text = "Auto")
+
+            Switch(
+                checked = autoRefresh,
+                onCheckedChange = { isChecked ->
+                    playgroundSettings[AutoRefreshSettingsDefinition] = isChecked
+                },
+            )
         }
     }
 
@@ -196,33 +200,43 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         playgroundState: PlaygroundState?,
         paymentSheet: PaymentSheet,
         flowController: PaymentSheet.FlowController,
-        addressLauncher: AddressLauncher
+        addressLauncher: AddressLauncher,
+        isWaitingForRefresh: Boolean,
     ) {
-        ShippingAddressButton(
-            addressLauncher = addressLauncher,
-            playgroundState = playgroundState,
-        )
+        Column {
+            ShippingAddressButton(
+                addressLauncher = addressLauncher,
+                playgroundState = playgroundState,
+                isWaitingForRefresh = isWaitingForRefresh,
+            )
 
-        when (playgroundState?.integrationType) {
-            IntegrationType.PaymentSheet -> {
-                PaymentSheetUi(
-                    paymentSheet = paymentSheet,
-                    playgroundState = playgroundState,
-                )
-            }
-            IntegrationType.FlowController -> {
-                FlowControllerUi(
-                    flowController = flowController,
-                    playgroundState = playgroundState,
-                )
-            }
-            null -> {
-                Button(
-                    onClick = { /* Nothing to do here */ },
-                    enabled = false,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("Preparing…")
+
+
+            when (playgroundState?.integrationType) {
+                IntegrationType.PaymentSheet -> {
+                    PaymentSheetUi(
+                        paymentSheet = paymentSheet,
+                        playgroundState = playgroundState,
+                        isWaitingForRefresh = isWaitingForRefresh,
+                    )
+                }
+
+                IntegrationType.FlowController -> {
+                    FlowControllerUi(
+                        flowController = flowController,
+                        playgroundState = playgroundState,
+                        isWaitingForRefresh = isWaitingForRefresh,
+                    )
+                }
+
+                null -> {
+                    Button(
+                        onClick = { /* Nothing to do here */ },
+                        enabled = false,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text("Preparing…")
+                    }
                 }
             }
         }
@@ -232,12 +246,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     fun PaymentSheetUi(
         paymentSheet: PaymentSheet,
         playgroundState: PlaygroundState?,
+        isWaitingForRefresh: Boolean,
     ) {
         Button(
             onClick = {
                 presentPaymentSheet(paymentSheet, playgroundState!!)
             },
-            enabled = playgroundState != null,
+            enabled = playgroundState != null && !isWaitingForRefresh,
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag(CHECKOUT_TEST_TAG),
@@ -250,6 +265,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     fun FlowControllerUi(
         flowController: PaymentSheet.FlowController,
         playgroundState: PlaygroundState?,
+        isWaitingForRefresh: Boolean,
     ) {
         if (playgroundState != null) {
             LaunchedEffect(playgroundState) {
@@ -279,13 +295,14 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         PaymentMethodSelector(
-            isEnabled = flowControllerState != null,
+            isEnabled = flowControllerState != null && !isWaitingForRefresh,
             paymentMethodLabel = flowControllerState.paymentMethodLabel(),
             paymentMethodIcon = flowControllerState.paymentMethodIcon(),
             onClick = flowController::presentPaymentOptions
         )
+
         BuyButton(
-            buyButtonEnabled = flowControllerState?.selectedPaymentOption != null,
+            buyButtonEnabled = flowControllerState?.selectedPaymentOption != null && !isWaitingForRefresh,
             onClick = flowController::confirm
         )
     }
@@ -294,12 +311,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private fun ShippingAddressButton(
         addressLauncher: AddressLauncher,
         playgroundState: PlaygroundState?,
+        isWaitingForRefresh: Boolean,
     ) {
         Button(
             onClick = {
                 addressLauncher.present(playgroundState!!.clientSecret)
             },
-            enabled = playgroundState != null,
+            enabled = playgroundState != null && !isWaitingForRefresh,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text("Set Shipping Address")

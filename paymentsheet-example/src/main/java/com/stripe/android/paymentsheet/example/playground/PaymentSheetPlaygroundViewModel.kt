@@ -23,16 +23,18 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
+import com.stripe.android.paymentsheet.example.playground.settings.AutoRefreshSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -41,7 +43,6 @@ import kotlin.time.Duration.Companion.seconds
 
 private val ReloadDebounceDuration = 1.seconds
 
-@OptIn(FlowPreview::class)
 internal class PaymentSheetPlaygroundViewModel(
     application: Application,
     launchUri: Uri?,
@@ -55,6 +56,8 @@ internal class PaymentSheetPlaygroundViewModel(
     val state = MutableStateFlow<PlaygroundState?>(null)
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
 
+    val isWaitingToAutoRefresh = MutableStateFlow(false)
+
     init {
         viewModelScope.launch(Dispatchers.IO) {
             val settings = PaymentSheetPlaygroundUrlHelper.settingsFromUri(launchUri)
@@ -62,8 +65,11 @@ internal class PaymentSheetPlaygroundViewModel(
 
             playgroundSettingsFlow.value = settings
 
+            @Suppress("OPT_IN_USAGE")
             settings
                 .asFlow()
+                .filter { it.snapshot()[AutoRefreshSettingsDefinition] }
+                .onEach { isWaitingToAutoRefresh.value = true }
                 .debounce(ReloadDebounceDuration)
                 .collectLatest(this@PaymentSheetPlaygroundViewModel::prepareCheckoutInternal)
         }
@@ -86,6 +92,7 @@ internal class PaymentSheetPlaygroundViewModel(
     ) {
         state.value = null
         flowControllerState.value = null
+        isWaitingToAutoRefresh.value = false
 
         // Snapshot before making the network request to not rely on UI staying in sync.
         val playgroundSettingsSnapshot = playgroundSettings.snapshot()

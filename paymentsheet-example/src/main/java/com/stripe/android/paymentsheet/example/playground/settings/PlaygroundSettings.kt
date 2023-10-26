@@ -215,6 +215,7 @@ internal class PlaygroundSettings private constructor(
             SupportedPaymentMethodsSettingsDefinition,
             AppearanceSettingsDefinition,
             ShippingAddressSettingsDefinition,
+            AutoRefreshSettingsDefinition,
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =
