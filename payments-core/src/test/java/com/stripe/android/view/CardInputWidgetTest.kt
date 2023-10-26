@@ -9,6 +9,10 @@ import android.os.Parcelable
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.core.view.updateLayoutParams
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -64,6 +68,9 @@ internal class CardInputWidgetTest {
         featureFlag = FeatureFlags.cardBrandChoice,
         isEnabled = false,
     )
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -1739,8 +1746,36 @@ internal class CardInputWidgetTest {
         }
     }
 
+    @Test
+    fun `Restores brand state correctly on activity recreation`() {
+        featureFlagTestRule.setEnabled(true)
+
+        runCardInputWidgetTest(
+            isCbcEligible = true,
+            block = {
+                cardNumberEditText.setText("4000 0025 0000 1001")
+
+                composeTestRule
+                    .onNodeWithTag(CardBrandDropdownTestTag)
+                    .performClick()
+
+                composeTestRule
+                    .onNodeWithText("Cartes Bancaires")
+                    .performClick()
+
+                expiryDateEditText.append("12")
+                expiryDateEditText.append("50")
+                cvcEditText.append("123")
+            },
+            afterRecreation = {
+                assertThat(cardBrandView.brand).isEqualTo(CardBrand.CartesBancaires)
+            },
+        )
+    }
+
     private fun runCardInputWidgetTest(
         isCbcEligible: Boolean = false,
+        afterRecreation: (CardInputWidget.() -> Unit)? = null,
         block: CardInputWidget.() -> Unit,
     ) {
         registerTestActivity()
@@ -1757,6 +1792,18 @@ internal class CardInputWidgetTest {
             val widget = activity.findViewById<CardInputWidget>(CardInputWidgetTestActivity.VIEW_ID)
             widget.setCardInputListener(cardInputListener)
             widget.block()
+        }
+
+        if (afterRecreation != null) {
+            activityScenario.recreate()
+
+            activityScenario.onActivity { activity ->
+                activity.setWorkContext(testDispatcher)
+
+                val widget = activity.findViewById<CardInputWidget>(CardInputWidgetTestActivity.VIEW_ID)
+                widget.setCardInputListener(cardInputListener)
+                widget.afterRecreation()
+            }
         }
     }
 
@@ -1828,7 +1875,6 @@ internal class CardInputWidgetTestActivity : AppCompatActivity() {
     }
 
     private val cardInputWidget: CardInputWidget by lazy {
-
         CardInputWidget(this).apply {
             id = VIEW_ID
 

@@ -7244,6 +7244,22 @@ public final class com/stripe/android/view/BillingAddressFields : java/lang/Enum
 	public static fun values ()[Lcom/stripe/android/view/BillingAddressFields;
 }
 
+public final class com/stripe/android/view/CardBrandView$SavedState$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/view/CardBrandView$SavedState;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/view/CardBrandView$SavedState;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/view/CardBrandView$State$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/view/CardBrandView$State;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/view/CardBrandView$State;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/view/CardFormView : android/widget/LinearLayout {
 	public static final field $stable I
 	public static final field CARD_FORM_VIEW Ljava/lang/String;
@@ -7354,7 +7370,17 @@ public final class com/stripe/android/view/CardNumberEditText : com/stripe/andro
 	public final fun getCardBrand ()Lcom/stripe/android/model/CardBrand;
 	public final fun getWorkContext ()Lkotlin/coroutines/CoroutineContext;
 	public final fun isCardNumberValid ()Z
+	public fun onRestoreInstanceState (Landroid/os/Parcelable;)V
+	public fun onSaveInstanceState ()Landroid/os/Parcelable;
 	public final fun setWorkContext (Lkotlin/coroutines/CoroutineContext;)V
+}
+
+public final class com/stripe/android/view/CardNumberEditText$SavedState$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/view/CardNumberEditText$SavedState;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/view/CardNumberEditText$SavedState;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public abstract interface class com/stripe/android/view/CardValidCallback {

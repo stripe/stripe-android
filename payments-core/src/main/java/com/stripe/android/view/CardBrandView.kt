@@ -1,6 +1,7 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
@@ -26,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.R
@@ -38,8 +40,12 @@ import com.stripe.android.uicore.elements.SingleChoiceDropdown
 import com.stripe.android.utils.AppCompatOrMdcTheme
 import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.parcelize.Parcelize
 import kotlin.properties.Delegates
 import com.stripe.android.uicore.R as StripeUiCoreR
+
+internal const val CardBrandDropdownTestTag = "CardBrandDropdownTestTag"
 
 internal class CardBrandView @JvmOverloads constructor(
     context: Context,
@@ -53,26 +59,37 @@ internal class CardBrandView @JvmOverloads constructor(
     private val iconView = viewBinding.icon
     private val progressView = viewBinding.progress
 
-    private val isCbcEligibleFlow = MutableStateFlow(false)
-    private val isLoadingFlow = MutableStateFlow(false)
-    private val brandFlow = MutableStateFlow(Unknown)
-    private val userSelectedBrandFlow = MutableStateFlow<CardBrand?>(null)
-    private val possibleBrandsFlow = MutableStateFlow(emptyList<CardBrand>())
-    private val merchantPreferredNetworksFlow = MutableStateFlow(emptyList<CardBrand>())
-    private val shouldShowCvcFlow = MutableStateFlow(false)
-    private val shouldShowErrorIconFlow = MutableStateFlow(false)
-    private val tintColorFlow = MutableStateFlow(0)
+    @Parcelize
+    internal data class State(
+        val isCbcEligible: Boolean = false,
+        val isLoading: Boolean = false,
+        val brand: CardBrand = Unknown,
+        val userSelectedBrand: CardBrand? = null,
+        val possibleBrands: List<CardBrand> = emptyList(),
+        val merchantPreferredNetworks: List<CardBrand> = emptyList(),
+        val shouldShowCvc: Boolean = false,
+        val shouldShowErrorIcon: Boolean = false,
+        val tintColor: Int = 0,
+    ) : Parcelable
+
+    private val stateFlow = MutableStateFlow(State())
+
+    private var state: State
+        get() = stateFlow.value
+        set(value) {
+            stateFlow.value = value
+        }
 
     var isCbcEligible: Boolean
-        get() = isCbcEligibleFlow.value
+        get() = state.isCbcEligible
         set(value) {
-            isCbcEligibleFlow.value = value
+            stateFlow.update { it.copy(isCbcEligible = value) }
         }
 
     var isLoading: Boolean by Delegates.observable(
         false
     ) { _, wasLoading, isLoading ->
-        isLoadingFlow.value = isLoading
+        stateFlow.update { it.copy(isLoading = isLoading) }
 
         if (wasLoading != isLoading) {
             if (isLoading) {
@@ -84,39 +101,39 @@ internal class CardBrandView @JvmOverloads constructor(
     }
 
     var brand: CardBrand
-        get() = brandFlow.value
+        get() = state.brand
         set(value) {
-            brandFlow.value = value
+            stateFlow.update { it.copy(brand = value) }
         }
 
     var possibleBrands: List<CardBrand>
-        get() = possibleBrandsFlow.value
+        get() = state.possibleBrands
         set(value) {
-            possibleBrandsFlow.value = value
+            stateFlow.update { it.copy(possibleBrands = value) }
         }
 
     var merchantPreferredNetworks: List<CardBrand>
-        get() = merchantPreferredNetworksFlow.value
+        get() = state.merchantPreferredNetworks
         set(value) {
-            merchantPreferredNetworksFlow.value = value
+            stateFlow.update { it.copy(merchantPreferredNetworks = value) }
         }
 
     var shouldShowCvc: Boolean
-        get() = shouldShowCvcFlow.value
+        get() = state.shouldShowCvc
         set(value) {
-            shouldShowCvcFlow.value = value
+            stateFlow.update { it.copy(shouldShowCvc = value) }
         }
 
     var shouldShowErrorIcon: Boolean
-        get() = shouldShowErrorIconFlow.value
+        get() = state.shouldShowErrorIcon
         set(value) {
-            shouldShowErrorIconFlow.value = value
+            stateFlow.update { it.copy(shouldShowErrorIcon = value) }
         }
 
     internal var tintColorInt: Int
-        get() = tintColorFlow.value
+        get() = state.tintColor
         set(value) {
-            tintColorFlow.value = value
+            stateFlow.update { it.copy(tintColor = value) }
         }
 
     init {
@@ -125,33 +142,25 @@ internal class CardBrandView @JvmOverloads constructor(
 
         iconView.setContent {
             AppCompatOrMdcTheme {
-                val isCbcEligible by isCbcEligibleFlow.collectAsState()
-                val isLoading by isLoadingFlow.collectAsState()
-                val currentBrand by brandFlow.collectAsState()
-                val userSelectedBrand by userSelectedBrandFlow.collectAsState()
-                val possibleBrands by possibleBrandsFlow.collectAsState()
-                val merchantPreferredBrands by merchantPreferredNetworksFlow.collectAsState()
-                val shouldShowCvc by shouldShowCvcFlow.collectAsState()
-                val shouldShowErrorIcon by shouldShowErrorIconFlow.collectAsState()
-                val tintColorInt by tintColorFlow.collectAsState()
+                val state by stateFlow.collectAsState()
 
-                LaunchedEffect(userSelectedBrand, currentBrand, possibleBrands, merchantPreferredBrands) {
+                LaunchedEffect(state) {
                     determineCardBrandToDisplay(
-                        userSelectedBrand = userSelectedBrand,
-                        autoDeterminedBrand = currentBrand,
-                        possibleBrands = possibleBrands,
-                        merchantPreferredBrands = merchantPreferredBrands,
+                        userSelectedBrand = state.userSelectedBrand,
+                        autoDeterminedBrand = state.brand,
+                        possibleBrands = state.possibleBrands,
+                        merchantPreferredBrands = state.merchantPreferredNetworks,
                     )
                 }
 
                 CardBrand(
-                    isLoading = isLoading,
-                    currentBrand = currentBrand,
-                    possibleBrands = possibleBrands,
-                    shouldShowCvc = shouldShowCvc,
-                    shouldShowErrorIcon = shouldShowErrorIcon,
-                    tintColorInt = tintColorInt,
-                    isCbcEligible = isCbcEligible,
+                    isLoading = state.isLoading,
+                    currentBrand = state.brand,
+                    possibleBrands = state.possibleBrands,
+                    shouldShowCvc = state.shouldShowCvc,
+                    shouldShowErrorIcon = state.shouldShowErrorIcon,
+                    tintColorInt = state.tintColor,
+                    isCbcEligible = state.isCbcEligible,
                     onBrandSelected = this::handleBrandSelected,
                 )
             }
@@ -167,7 +176,7 @@ internal class CardBrandView @JvmOverloads constructor(
     }
 
     private fun handleBrandSelected(brand: CardBrand?) {
-        userSelectedBrandFlow.value = brand ?: Unknown
+        stateFlow.update { it.copy(userSelectedBrand = brand) }
     }
 
     private fun determineCardBrandToDisplay(
@@ -182,6 +191,23 @@ internal class CardBrandView @JvmOverloads constructor(
             autoDeterminedBrand
         }
     }
+
+    override fun onSaveInstanceState(): Parcelable {
+        val superState = super.onSaveInstanceState()
+        return SavedState(superState, state)
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        val savedState = state as? SavedState
+        this.state = savedState?.state ?: State()
+        super.onRestoreInstanceState(savedState?.superState ?: state)
+    }
+
+    @Parcelize
+    internal data class SavedState(
+        val superSavedState: Parcelable?,
+        val state: State,
+    ) : BaseSavedState(superSavedState), Parcelable
 }
 
 @Composable
@@ -223,9 +249,9 @@ private fun CardBrand(
     Box(modifier) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable(enabled = showDropdown) {
-                expanded = true
-            },
+            modifier = Modifier
+                .clickable(enabled = showDropdown) { expanded = true }
+                .testTag(CardBrandDropdownTestTag),
         ) {
             val dropdownIconAlpha by animateFloatAsState(
                 targetValue = if (showDropdown) ContentAlpha.medium else 0f,
