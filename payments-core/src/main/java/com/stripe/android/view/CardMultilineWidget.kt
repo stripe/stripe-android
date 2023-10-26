@@ -369,6 +369,13 @@ class CardMultilineWidget @JvmOverloads constructor(
             updateBrandUi()
         }
 
+        cardNumberEditText.implicitCardBrandChangeCallback = { brand ->
+            // With co-branded cards, a card number can belong to multiple brands. Since we still
+            // need do validate based on the card's pan length and expected CVC length, we add this
+            // callback to perform the validations, but don't update the current brand.
+            updateCvc(brand)
+        }
+
         cardNumberEditText.possibleCardBrandsCallback = { brands ->
             val currentBrand = cardBrandView.brand
             cardBrandView.possibleBrands = brands
@@ -377,7 +384,10 @@ class CardMultilineWidget @JvmOverloads constructor(
                 cardBrandView.brand = CardBrand.Unknown
             }
 
-            updateCvc()
+            // We need to use a known card brand to set the correct expected CVC length. Since both
+            // brands of a co-branded card have the same CVC length, we can just choose the first one.
+            val brandForCvcLength = brands.firstOrNull() ?: CardBrand.Unknown
+            updateCvc(brand = brandForCvcLength)
         }
 
         expiryDateEditText.completionCallback = {
@@ -386,6 +396,11 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         cvcEditText.setAfterTextChangedListener { text ->
+            val brand = cardNumberEditText.implicitCardBrandForCbc.takeUnless {
+                it == CardBrand.Unknown
+            } ?: cardNumberEditText.cardBrand
+
+            // TODO
             if (brand.isMaxCvc(text)) {
                 updateBrandUi()
                 if (shouldShowPostalCode) {
@@ -438,7 +453,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         // see https://github.com/stripe/stripe-android/pull/3154
         cvcEditText.hint = null
 
-        doWithCardWidgetViewModel(null) { viewModel ->
+        doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 cardBrandView.isCbcEligible = isCbcEligible
             }
@@ -737,7 +752,7 @@ class CardMultilineWidget @JvmOverloads constructor(
                 }
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.Cvc)
             } else {
-                updateBrandUi()
+                cardBrandView.shouldShowErrorIcon = shouldShowErrorIcon
             }
         }
 
@@ -760,7 +775,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         cardBrandView.shouldShowErrorIcon = shouldShowErrorIcon
     }
 
-    private fun updateCvc() {
+    private fun updateCvc(brand: CardBrand = this.brand) {
         cvcEditText.updateBrand(brand, customCvcLabel, customCvcPlaceholderText, cvcInputLayout)
     }
 
