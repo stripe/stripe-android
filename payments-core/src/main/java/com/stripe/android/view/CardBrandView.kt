@@ -45,7 +45,7 @@ import kotlinx.parcelize.Parcelize
 import kotlin.properties.Delegates
 import com.stripe.android.uicore.R as StripeUiCoreR
 
-internal val CardBrandDropdownTestTag = "CardBrandDropdownTestTag"
+internal const val CardBrandDropdownTestTag = "CardBrandDropdownTestTag"
 
 internal class CardBrandView @JvmOverloads constructor(
     context: Context,
