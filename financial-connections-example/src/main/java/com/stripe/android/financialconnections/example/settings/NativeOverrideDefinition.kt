@@ -7,7 +7,7 @@ import com.stripe.android.financialconnections.example.settings.PlaygroundSettin
 
 internal object NativeOverrideDefinition : PlaygroundSettingDefinition.Saveable<NativeOverride> {
 
-    override val displayName: String = "Native Override"
+    override val displayName: String = "Flavor Override"
     override val options: List<Option<NativeOverride>>
         get() = listOf(
             option("None", NativeOverride.None),
