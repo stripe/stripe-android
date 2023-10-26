@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.example.settings
 
-import com.stripe.android.financialconnections.example.data.LinkAccountSessionBody
-import com.stripe.android.financialconnections.example.data.PaymentIntentBody
+import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
+import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
 internal interface PlaygroundSettingDefinition<T> {
 

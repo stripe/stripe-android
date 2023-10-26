@@ -1,12 +1,13 @@
 package com.stripe.android.financialconnections.example.data
 
-import com.google.gson.GsonBuilder
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.net.SocketTimeoutException
 import java.util.concurrent.TimeUnit
 
@@ -26,12 +27,8 @@ internal class BackendApiFactory(private val settings: Settings) {
             .addInterceptor(RetryOnSocketTimeoutInterceptor())
             .build()
 
-        val gson = GsonBuilder()
-            .setLenient()
-            .create()
-
         return Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create(gson))
+            .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
             .baseUrl(settings.backendUrl)
             .client(httpClient)
             .build()

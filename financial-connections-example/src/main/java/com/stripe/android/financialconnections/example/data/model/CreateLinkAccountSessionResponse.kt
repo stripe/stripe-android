@@ -1,17 +1,20 @@
 package com.stripe.android.financialconnections.example.data.model
 
 import androidx.annotation.Keep
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Keep
+@Serializable
 data class CreateLinkAccountSessionResponse(
-    @SerializedName("client_secret") val clientSecret: String,
-    @SerializedName("las_id") val lasId: String,
-    @SerializedName("publishable_key") val publishableKey: String
+    @SerialName("client_secret") val clientSecret: String,
+    @SerialName("las_id") val lasId: String,
+    @SerialName("publishable_key") val publishableKey: String
 )
 
 @Keep
+@Serializable
 data class CreateIntentResponse(
-    @SerializedName("secret") val intentSecret: String,
-    @SerializedName("publishable_key") val publishableKey: String
+    @SerialName("secret") val intentSecret: String,
+    @SerialName("publishable_key") val publishableKey: String
 )

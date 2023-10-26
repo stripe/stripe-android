@@ -1,8 +1,8 @@
 package com.stripe.android.financialconnections.example.settings
 
 import com.stripe.android.financialconnections.example.Merchant
-import com.stripe.android.financialconnections.example.data.LinkAccountSessionBody
-import com.stripe.android.financialconnections.example.data.PaymentIntentBody
+import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
+import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Option
 
 internal object MerchantDefinition : PlaygroundSettingDefinition<Merchant> {

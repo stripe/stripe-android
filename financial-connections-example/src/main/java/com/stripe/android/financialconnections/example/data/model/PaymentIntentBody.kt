@@ -1,0 +1,24 @@
+package com.stripe.android.financialconnections.example.data.model
+
+import androidx.annotation.Keep
+import kotlinx.serialization.SerialName
+
+@Keep
+data class PaymentIntentBody(
+    @SerialName("flow")
+    val flow: String? = null,
+    @SerialName("country")
+    val country: String? = "US",
+    @SerialName("customer_id")
+    val customerId: String? = null,
+    @SerialName("supported_payment_methods")
+    val supportedPaymentMethods: String? = null,
+    @SerialName("custom_pk")
+    val publishableKey: String? = null,
+    @SerialName("custom_sk")
+    val secretKey: String? = null,
+    @SerialName("customer_email")
+    val customerEmail: String? = null,
+    @SerialName("test_environment")
+    val testEnvironment: String? = null
+)

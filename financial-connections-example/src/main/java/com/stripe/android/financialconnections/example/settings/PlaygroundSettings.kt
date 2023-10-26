@@ -5,8 +5,8 @@ import android.content.Context
 import android.util.Log
 import androidx.core.content.edit
 import com.stripe.android.financialconnections.example.BuildConfig
-import com.stripe.android.financialconnections.example.data.LinkAccountSessionBody
-import com.stripe.android.financialconnections.example.data.PaymentIntentBody
+import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
+import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
