@@ -42,6 +42,7 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.state.toInternal
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.utils.mapAsStateFlow
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -130,8 +131,11 @@ internal class CustomerSheetViewModel @Inject constructor(
             is CustomerSheetViewAction.OnPrimaryButtonPressed -> onPrimaryButtonPressed()
             is CustomerSheetViewAction.OnAddPaymentMethodItemChanged ->
                 onAddPaymentMethodItemChanged(viewAction.paymentMethod)
-            is CustomerSheetViewAction.OnFormFieldValuesChanged -> {
-                onFormFieldValuesChanged(viewAction.formFieldValues)
+            is CustomerSheetViewAction.OnFormFieldValuesCompleted -> {
+                onFormFieldValuesCompleted(viewAction.formFieldValues)
+            }
+            is CustomerSheetViewAction.OnUpdateCustomButtonUIState -> {
+                updateCustomButtonUIState(viewAction.callback)
             }
         }
     }
@@ -177,6 +181,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     it.copy(
                         enabled = true,
                         isProcessing = false,
+                        primaryButtonEnabled = it.formViewData.completeFormValues != null,
                     )
                 }
             }
@@ -202,6 +207,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     it.copy(
                         enabled = true,
                         isProcessing = false,
+                        primaryButtonEnabled = it.formViewData.completeFormValues != null,
                         errorMessage = result.throwable.stripeErrorMessage(application),
                     )
                 }
@@ -289,6 +295,7 @@ internal class CustomerSheetViewModel @Inject constructor(
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
                 formViewData = formData,
+                primaryButtonEnabled = formData.completeFormValues != null && !it.isProcessing,
             )
         }
     }
@@ -311,17 +318,19 @@ internal class CustomerSheetViewModel @Inject constructor(
                     resolvableString(
                         id = R.string.stripe_paymentsheet_save
                     )
-                }
+                },
+                primaryButtonEnabled = it.formViewData.completeFormValues != null && !it.isProcessing,
             )
         }
     }
 
-    private fun onFormFieldValuesChanged(formFieldValues: FormFieldValues?) {
+    private fun onFormFieldValuesCompleted(formFieldValues: FormFieldValues?) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
                 formViewData = it.formViewData.copy(
-                    completeFormValues = formFieldValues
-                )
+                    completeFormValues = formFieldValues,
+                ),
+                primaryButtonEnabled = formFieldValues != null && !it.isProcessing,
             )
         }
     }
@@ -408,9 +417,15 @@ internal class CustomerSheetViewModel @Inject constructor(
     private fun onPrimaryButtonPressed() {
         when (val currentViewState = viewState.value) {
             is CustomerSheetViewState.AddPaymentMethod -> {
+                if (currentViewState.customPrimaryButtonUiState != null) {
+                    currentViewState.customPrimaryButtonUiState.onClick()
+                    return
+                }
+
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
                         isProcessing = true,
+                        primaryButtonEnabled = false,
                         enabled = false,
                     )
                 }
@@ -455,6 +470,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                         it.copy(
                             errorMessage = throwable.stripeErrorMessage(application),
+                            primaryButtonEnabled = it.formViewData.completeFormValues != null,
                             isProcessing = false,
                         )
                     }
@@ -496,8 +512,10 @@ internal class CustomerSheetViewModel @Inject constructor(
                     draftPaymentSelection = null,
                     onMandateTextChanged = { _, _ -> },
                     onHandleUSBankAccount = { },
-                    onUpdatePrimaryButtonUIState = { },
-                    onUpdatePrimaryButtonState = { },
+                    onUpdatePrimaryButtonUIState = {
+                        handleViewAction(CustomerSheetViewAction.OnUpdateCustomButtonUIState(it))
+                    },
+                    onUpdatePrimaryButtonState = { /* no-op, CustomerSheetScreen does not use PrimaryButton.State */ },
                     onError = { }
                 ),
                 selectedPaymentMethod = selectedPaymentMethod,
@@ -507,12 +525,33 @@ internal class CustomerSheetViewModel @Inject constructor(
                 isFirstPaymentMethod = isFirstPaymentMethod,
                 primaryButtonLabel = resolvableString(
                     id = R.string.stripe_paymentsheet_save
-                )
+                ),
+                primaryButtonEnabled = false,
+                customPrimaryButtonUiState = null,
             ),
             reset = isFirstPaymentMethod
         )
 
         observe()
+    }
+
+    private fun updateCustomButtonUIState(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?) {
+        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+            val uiState = callback(it.customPrimaryButtonUiState)
+            if (uiState != null) {
+                it.copy(
+                    primaryButtonLabel = resolvableString(uiState.label),
+                    primaryButtonEnabled = uiState.enabled,
+                    customPrimaryButtonUiState = uiState,
+                )
+            } else {
+                it.copy(
+                    primaryButtonLabel = it.primaryButtonLabel,
+                    primaryButtonEnabled = it.formViewData.completeFormValues != null && !it.isProcessing,
+                    customPrimaryButtonUiState = null,
+                )
+            }
+        }
     }
 
     private suspend fun createPaymentMethod(
@@ -565,6 +604,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     it.copy(
                         errorMessage = displayMessage ?: cause.stripeErrorMessage(application),
                         enabled = true,
+                        primaryButtonEnabled = it.formViewData.completeFormValues != null && !it.isProcessing,
                         isProcessing = false,
                     )
                 }
@@ -614,6 +654,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
                         isProcessing = false,
+                        primaryButtonEnabled = it.formViewData.completeFormValues != null,
                         errorMessage = nextStep.message,
                     )
                 }
@@ -645,6 +686,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
                         isProcessing = false,
+                        primaryButtonEnabled = it.formViewData.completeFormValues != null,
                         errorMessage = throwable.stripeErrorMessage(application),
                     )
                 }
@@ -671,6 +713,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
                         isProcessing = false,
+                        primaryButtonEnabled = it.formViewData.completeFormValues != null,
                         errorMessage = throwable.stripeErrorMessage(application),
                     )
                 }
@@ -706,6 +749,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
                         errorMessage = displayMessage,
+                        primaryButtonEnabled = it.formViewData.completeFormValues != null,
                         isProcessing = false,
                     )
                 }

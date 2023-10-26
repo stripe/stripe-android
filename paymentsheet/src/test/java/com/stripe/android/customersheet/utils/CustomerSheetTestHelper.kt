@@ -115,6 +115,8 @@ internal object CustomerSheetTestHelper {
         errorMessage = null,
         isFirstPaymentMethod = false,
         primaryButtonLabel = resolvableString(R.string.stripe_paymentsheet_save),
+        primaryButtonEnabled = false,
+        customPrimaryButtonUiState = null,
     )
 
     internal fun mockedFormViewModel(

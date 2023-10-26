@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 
 internal sealed class CustomerSheetViewState(
@@ -75,6 +76,8 @@ internal sealed class CustomerSheetViewState(
         val errorMessage: String? = null,
         val isFirstPaymentMethod: Boolean,
         val primaryButtonLabel: ResolvableString,
+        val primaryButtonEnabled: Boolean,
+        val customPrimaryButtonUiState: PrimaryButton.UIState?,
     ) : CustomerSheetViewState(
         savedPaymentMethods = emptyList(),
         isLiveMode = isLiveMode,
@@ -85,8 +88,5 @@ internal sealed class CustomerSheetViewState(
         } else {
             PaymentSheetScreen.AddAnotherPaymentMethod
         },
-    ) {
-        val primaryButtonEnabled: Boolean
-            get() = formViewData.completeFormValues != null && !isProcessing
-    }
+    )
 }

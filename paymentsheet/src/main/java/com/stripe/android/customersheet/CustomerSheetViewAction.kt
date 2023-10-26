@@ -3,6 +3,7 @@ package com.stripe.android.customersheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 
 internal sealed class CustomerSheetViewAction {
@@ -17,7 +18,10 @@ internal sealed class CustomerSheetViewAction {
     class OnAddPaymentMethodItemChanged(
         val paymentMethod: LpmRepository.SupportedPaymentMethod,
     ) : CustomerSheetViewAction()
-    class OnFormFieldValuesChanged(
+    class OnFormFieldValuesCompleted(
         val formFieldValues: FormFieldValues?,
+    ) : CustomerSheetViewAction()
+    class OnUpdateCustomButtonUIState(
+        val callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?,
     ) : CustomerSheetViewAction()
 }
