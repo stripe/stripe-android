@@ -27,8 +27,11 @@ internal class BackendApiFactory(private val settings: Settings) {
             .addInterceptor(RetryOnSocketTimeoutInterceptor())
             .build()
 
+        val json = Json {
+            ignoreUnknownKeys = true
+        }
         return Retrofit.Builder()
-            .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .baseUrl(settings.backendUrl)
             .client(httpClient)
             .build()

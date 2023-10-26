@@ -4,7 +4,7 @@ import com.stripe.android.financialconnections.example.data.model.LinkAccountSes
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Option
 
-internal object PrivateKeyDefinition : PlaygroundSettingDefinition<String> {
+internal object PrivateKeyDefinition : PlaygroundSettingDefinition.Saveable<String> {
     override val displayName: String = "Secret Key"
     override val options: List<Option<String>> = emptyList()
 

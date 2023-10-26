@@ -5,7 +5,7 @@ import com.stripe.android.financialconnections.example.data.model.LinkAccountSes
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Option
 
-internal object FlowDefinition : PlaygroundSettingDefinition<Flow> {
+internal object FlowDefinition : PlaygroundSettingDefinition.Saveable<Flow> {
     override val displayName: String = "Flow"
     override val options: List<Option<Flow>> = Flow.values().map { option(it.name, it) }
 

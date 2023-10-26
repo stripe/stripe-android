@@ -2,8 +2,10 @@ package com.stripe.android.financialconnections.example.data.model
 
 import androidx.annotation.Keep
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Keep
+@Serializable
 data class PaymentIntentBody(
     @SerialName("flow")
     val flow: String? = null,

@@ -15,7 +15,6 @@ import kotlinx.serialization.json.JsonPrimitive
 internal data class PlaygroundSettings(
     val settings: Map<PlaygroundSettingDefinition<*>, Any?>
 ) {
-
     fun <T> withValue(
         settingsDefinition: PlaygroundSettingDefinition<T>,
         value: T
@@ -52,9 +51,13 @@ internal data class PlaygroundSettings(
 
     fun asJsonString(): String {
         val settingsMap = settings.map {
-            val saveable = it.key
-            saveable.key to JsonPrimitive(saveable.convertToString(it.value))
-        }.toMap()
+            val saveable = it.key.saveable()
+            if (saveable != null) {
+                saveable.key to JsonPrimitive(saveable.convertToString(it.value))
+            } else {
+                null
+            }
+        }.filterNotNull().toMap()
         return Json.encodeToString(JsonObject(settingsMap))
     }
 
@@ -72,7 +75,7 @@ internal data class PlaygroundSettings(
         }
     }
 
-    private fun <T> PlaygroundSettingDefinition<T>.convertToString(
+    private fun <T> PlaygroundSettingDefinition.Saveable<T>.convertToString(
         value: Any?,
     ): String {
         @Suppress("UNCHECKED_CAST")
@@ -98,7 +101,7 @@ internal data class PlaygroundSettings(
 
         fun createFromDefaults(): PlaygroundSettings {
             val settings = defaultSettingDefinitions
-                .associateWith { it.defaultValue }
+                .associateWith { settingDefinition -> settingDefinition.defaultValue }
                 .toMutableMap()
             return PlaygroundSettings(settings)
         }
@@ -108,13 +111,18 @@ internal data class PlaygroundSettings(
             val jsonObject = Json.decodeFromString(JsonObject.serializer(), jsonString)
 
             for (definition in allSettingDefinitions) {
-                val jsonPrimitive = jsonObject[definition.key] as? JsonPrimitive?
-                if (jsonPrimitive?.isString == true) {
-                    settings[definition] = definition.convertToValue(jsonPrimitive.content)
-                } else {
-                    if (defaultSettingDefinitions.contains(definition)) {
-                        settings[definition] = definition.defaultValue
+                val saveable = definition.saveable()
+                if (saveable != null) {
+                    val jsonPrimitive = jsonObject[saveable.key] as? JsonPrimitive?
+                    if (jsonPrimitive?.isString == true) {
+                        settings[definition] = saveable.convertToValue(jsonPrimitive.content)
+                    } else {
+                        if (defaultSettingDefinitions.contains(definition)) {
+                            settings[definition] = definition.defaultValue
+                        }
                     }
+                } else {
+                    settings[definition] = definition.defaultValue
                 }
             }
 

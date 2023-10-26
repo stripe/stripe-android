@@ -4,12 +4,15 @@ import com.stripe.android.financialconnections.example.data.model.LinkAccountSes
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
 internal interface PlaygroundSettingDefinition<T> {
+    val defaultValue: T
 
     val displayName: String
     val options: List<Option<T>>
 
-    val key: String
-    val defaultValue: T
+    fun saveable(): Saveable<T>? {
+        @Suppress("UNCHECKED_CAST")
+        return this as? Saveable<T>?
+    }
 
     fun lasRequest(
         body: LinkAccountSessionBody,
@@ -26,12 +29,15 @@ internal interface PlaygroundSettingDefinition<T> {
         playgroundSettings: PlaygroundSettings
     ): PlaygroundSettings = playgroundSettings
 
-    fun convertToString(value: T): String
-    fun convertToValue(value: String): T
-
     fun option(name: String, value: T): Option<T> {
         return Option(name, value)
     }
 
     data class Option<T>(val name: String, val value: T)
+
+    interface Saveable<T> : PlaygroundSettingDefinition<T> {
+        val key: String
+        fun convertToString(value: T): String
+        fun convertToValue(value: String): T
+    }
 }

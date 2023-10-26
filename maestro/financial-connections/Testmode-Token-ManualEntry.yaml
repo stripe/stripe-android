@@ -8,9 +8,6 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Merchant"
 - tapOn: "Test"
 - tapOn: "Token"
-- tapOn: "Customer email"
-- eraseText
-- hideKeyboard
 - tapOn: "Connect Accounts!"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:

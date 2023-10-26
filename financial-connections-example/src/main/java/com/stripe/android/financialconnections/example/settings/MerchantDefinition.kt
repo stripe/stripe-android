@@ -5,7 +5,7 @@ import com.stripe.android.financialconnections.example.data.model.LinkAccountSes
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Option
 
-internal object MerchantDefinition : PlaygroundSettingDefinition<Merchant> {
+internal object MerchantDefinition : PlaygroundSettingDefinition.Saveable<Merchant> {
     override val displayName: String
         get() = "Merchant"
     override val options: List<Option<Merchant>>

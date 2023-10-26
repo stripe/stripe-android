@@ -9,9 +9,7 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "NetworkingTestMode"
 - tapOn: "PaymentIntent"
 - tapOn: "Customer email"
-- eraseText
 - inputRandomEmail
-- hideKeyboard
 - tapOn: "Connect Accounts!"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:

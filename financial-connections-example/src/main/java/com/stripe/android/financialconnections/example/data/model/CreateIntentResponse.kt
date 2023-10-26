@@ -6,9 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Keep
 @Serializable
-data class CreateLinkAccountSessionResponse(
-    @SerialName("client_secret") val clientSecret: String,
-    @SerialName("las_id") val lasId: String,
+data class CreateIntentResponse(
+    @SerialName("secret") val intentSecret: String,
     @SerialName("publishable_key") val publishableKey: String
 )
-
