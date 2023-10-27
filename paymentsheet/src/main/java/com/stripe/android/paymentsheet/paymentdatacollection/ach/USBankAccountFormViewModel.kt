@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
-import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.uicore.address.AddressRepository
@@ -263,7 +262,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     @VisibleForTesting
     fun handleCollectBankAccountResult(result: CollectBankAccountResultInternal) {
         hasLaunched = false
-        _collectBankAccountResult.tryEmit(result)
         when (result) {
             is CollectBankAccountResultInternal.Completed -> {
                 when (
@@ -310,7 +308,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun handlePrimaryButtonClick(screenState: USBankAccountFormScreenState) {
         when (screenState) {
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
-                setProcessingState(PrimaryButton.State.StartProcessing)
+                _currentScreenState.update {
+                    screenState.copy(isProcessing = true)
+                }
                 collectBankAccount(args.clientSecret)
             }
             is USBankAccountFormScreenState.MandateCollection ->
@@ -337,12 +337,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    private fun setProcessingState(primaryButtonState: PrimaryButton.State) {
-        _currentScreenState.update {
-            it.copy(isProcessing = primaryButtonState.isProcessing)
-        }
-    }
-
     fun reset(@StringRes error: Int? = null) {
         hasLaunched = false
         saveForFutureUseElement.controller.onValueChange(true)
@@ -352,13 +346,16 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 primaryButtonText = application.getString(
                     StripeUiCoreR.string.stripe_continue_button_label
                 ),
+                isProcessing = false,
             )
         }
     }
 
     fun onDestroy() {
+        _result.tryEmit(null)
         collectBankAccountLauncher?.unregister()
         collectBankAccountLauncher = null
+        reset()
     }
 
     fun formattedMerchantName(): String {
@@ -373,6 +370,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 primaryButtonText = application.getString(
                     StripeUiCoreR.string.stripe_continue_button_label
                 ),
+                isProcessing = false,
             )
         }
     }

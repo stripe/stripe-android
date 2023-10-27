@@ -1490,7 +1490,6 @@ internal class PaymentSheetViewModelTest {
                 last4 = "6789",
                 primaryButtonText = "Continue",
                 mandateText = null,
-                isProcessing = false,
             ),
         )
 
@@ -1534,7 +1533,6 @@ internal class PaymentSheetViewModelTest {
                 last4 = "6789",
                 primaryButtonText = "Continue",
                 mandateText = null,
-                isProcessing = false,
             ),
         )
         viewModel.updateSelection(usBankAccount)
