@@ -24,6 +24,7 @@ internal class PaymentMethodsViewModel(
 ) : AndroidViewModel(application) {
     private val resources = application.resources
     private val cardDisplayTextFactory = CardDisplayTextFactory(application)
+
     @Volatile
     private var paymentMethodsJob: Job? = null
 

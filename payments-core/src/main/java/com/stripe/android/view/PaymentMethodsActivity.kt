@@ -121,26 +121,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
             }
         }
 
-        lifecycleScope.launch {
-            viewModel.paymentMethodsData.collect { result ->
-                result?.fold(
-                    onSuccess = { adapter.setPaymentMethods(it) },
-                    onFailure = {
-                        alertDisplayer.show(
-                            when (it) {
-                                is StripeException -> {
-                                    TranslatorManager.getErrorMessageTranslator()
-                                        .translate(it.statusCode, it.message, it.stripeError)
-                                }
-                                else -> {
-                                    it.message.orEmpty()
-                                }
-                            }
-                        )
-                    }
-                )
-            }
-        }
+        observePaymentMethodData()
 
         setupRecyclerView()
 
@@ -291,6 +272,29 @@ class PaymentMethodsActivity : AppCompatActivity() {
             footerView
         } else {
             null
+        }
+    }
+
+    private fun observePaymentMethodData() {
+        lifecycleScope.launch {
+            viewModel.paymentMethodsData.collect { result ->
+                result?.fold(
+                    onSuccess = { adapter.setPaymentMethods(it) },
+                    onFailure = {
+                        alertDisplayer.show(
+                            when (it) {
+                                is StripeException -> {
+                                    TranslatorManager.getErrorMessageTranslator()
+                                        .translate(it.statusCode, it.message, it.stripeError)
+                                }
+                                else -> {
+                                    it.message.orEmpty()
+                                }
+                            }
+                        )
+                    }
+                )
+            }
         }
     }
 
