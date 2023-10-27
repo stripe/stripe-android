@@ -1,12 +1,10 @@
 package com.stripe.android.googlepaylauncher
 
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
@@ -22,6 +20,8 @@ import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMeth
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.utils.requireApplication
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 import javax.inject.Inject
@@ -44,8 +44,8 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
         get() = savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY) == true
         set(value) = savedStateHandle.set(HAS_LAUNCHED_KEY, value)
 
-    private val _googleResult = MutableLiveData<GooglePayPaymentMethodLauncher.Result>()
-    internal val googlePayResult = _googleResult.distinctUntilChanged()
+    private val _googleResult = MutableStateFlow<GooglePayPaymentMethodLauncher.Result?>(null)
+    internal val googlePayResult = _googleResult.asStateFlow()
 
     fun updateResult(result: GooglePayPaymentMethodLauncher.Result) {
         _googleResult.value = result

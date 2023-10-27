@@ -1,12 +1,14 @@
 package com.stripe.android.view
 
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.argumentCaptor
@@ -79,27 +81,29 @@ class PaymentMethodsViewModelTest {
     }
 
     @Test
-    fun onPaymentMethodAdded_shouldUpdateSnackbarData() {
-        val values: MutableList<String?> = mutableListOf()
-        viewModel.snackbarData.observeForever { values.add(it) }
-
-        viewModel.onPaymentMethodAdded(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        assertThat(values[0])
-            .isEqualTo("Added Visa ending in 4242")
-        assertThat(values[1])
-            .isNull()
+    fun onPaymentMethodAdded_shouldUpdateSnackbarData() = runTest {
+        viewModel.snackbarData.test {
+            assertThat(awaitItem())
+                .isNull()
+            viewModel.onPaymentMethodAdded(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            assertThat(awaitItem())
+                .isEqualTo("Added Visa ending in 4242")
+            assertThat(awaitItem())
+                .isNull()
+        }
     }
 
     @Test
-    fun onPaymentMethodRemoved_shouldUpdateSnackbarData() {
-        val values: MutableList<String?> = mutableListOf()
-        viewModel.snackbarData.observeForever { values.add(it) }
-
-        viewModel.onPaymentMethodRemoved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        assertThat(values[0])
-            .isEqualTo("Removed Visa ending in 4242")
-        assertThat(values[1])
-            .isNull()
+    fun onPaymentMethodRemoved_shouldUpdateSnackbarData() = runTest {
+        viewModel.snackbarData.test {
+            assertThat(awaitItem())
+                .isNull()
+            viewModel.onPaymentMethodRemoved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            assertThat(awaitItem())
+                .isEqualTo("Removed Visa ending in 4242")
+            assertThat(awaitItem())
+                .isNull()
+        }
     }
 
     @Test

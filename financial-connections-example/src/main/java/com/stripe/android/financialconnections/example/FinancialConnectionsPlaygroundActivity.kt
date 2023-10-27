@@ -48,7 +48,12 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 
 class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
-    private val viewModel by viewModels<FinancialConnectionsPlaygroundViewModel>()
+    private val viewModel by viewModels<FinancialConnectionsPlaygroundViewModel> {
+        FinancialConnectionsPlaygroundViewModel.Factory(
+            applicationSupplier = { application },
+            uriSupplier = { intent.data },
+        )
+    }
 
     private lateinit var collectBankAccountLauncher: CollectBankAccountLauncher
 

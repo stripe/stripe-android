@@ -13,6 +13,7 @@ import com.stripe.android.R
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.model.PaymentMethod
+import kotlinx.coroutines.flow.MutableStateFlow
 
 internal class PaymentMethodsViewModel(
     application: Application,
@@ -28,8 +29,8 @@ internal class PaymentMethodsViewModel(
         PaymentMethodsActivity.PRODUCT_TOKEN
     ).toSet()
 
-    internal val snackbarData: MutableLiveData<String?> = MutableLiveData()
-    internal val progressData: MutableLiveData<Boolean> = MutableLiveData()
+    internal val snackbarData: MutableStateFlow<String?> = MutableStateFlow(null)
+    internal val progressData: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     internal fun onPaymentMethodAdded(paymentMethod: PaymentMethod) {
         createSnackbarText(paymentMethod, R.string.stripe_added)?.let {

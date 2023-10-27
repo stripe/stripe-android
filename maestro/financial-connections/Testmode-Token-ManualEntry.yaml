@@ -4,20 +4,10 @@ tags:
   - edge
   - testmode-data
 ---
-- launchApp
-# Android specific: Navigate to example
 - startRecording: /tmp/test_results/testmode-token_manualentry
-- tapOn: "Playground"
-- tapOn:
-    id: "Native option"
-- tapOn:
-    id: "Token option"
-- tapOn:
-    id: "Merchant setting"
-- tapOn:
-    id: "Test option"
+- openLink: stripeconnectionsexample://playground?flow=Token&financial_connections_override_native=native&merchant=testmode
 - tapOn: "Connect Accounts!"
-# Common: web AuthFlow - connect OAuth institution
+# Wait until the consent button is visible
 - extendedWaitUntil:
     visible:
       id: "consent_cta"

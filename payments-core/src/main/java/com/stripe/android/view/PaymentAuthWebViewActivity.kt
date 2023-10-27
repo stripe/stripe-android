@@ -12,7 +12,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -21,6 +21,8 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.databinding.StripePaymentAuthWebViewActivityBinding
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 class PaymentAuthWebViewActivity : AppCompatActivity() {
 
@@ -79,10 +81,12 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
 
         logger.debug("PaymentAuthWebViewActivity#onCreate() - PaymentAuthWebView init and loadUrl")
 
-        val isPagedLoaded = MutableLiveData(false)
-        isPagedLoaded.observe(this) { shouldHide ->
-            if (shouldHide) {
-                viewBinding.progressBar.isGone = true
+        val isPagedLoaded = MutableStateFlow(false)
+        lifecycleScope.launch {
+            isPagedLoaded.collect { shouldHide ->
+                if (shouldHide) {
+                    viewBinding.progressBar.isGone = true
+                }
             }
         }
 

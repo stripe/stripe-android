@@ -4,24 +4,14 @@ tags:
   - edge
   - testmode-payments
 ---
-- launchApp
 - startRecording: /tmp/test_results/testmode-paymentintent-testinstitution-networking
-# Android specific: Navigate to example
-- tapOn: "Playground"
-- tapOn:
-    id: "Native option"
-- tapOn:
-    id: "PaymentIntent option"
-- tapOn:
-    id: "Merchant setting"
-- tapOn:
-    id: "NetworkingTestMode option"
+- openLink: stripeconnectionsexample://playground?flow=PaymentIntent&financial_connections_override_native=native&merchant=networking_testmode
 - tapOn:
     id: "Customer email setting"
 - inputRandomEmail
 - hideKeyboard
 - tapOn: "Connect Accounts!"
-# Common: web AuthFlow - connect OAuth institution
+# Wait until the consent button is visible
 - extendedWaitUntil:
     visible:
       id: "consent_cta"

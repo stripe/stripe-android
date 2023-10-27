@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.example.settings
 
 import android.app.Application
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.core.content.edit
 import com.stripe.android.financialconnections.example.BuildConfig
@@ -116,6 +117,22 @@ internal data class PlaygroundSettings(
                 val savedValue = saveable?.key?.let { jsonObject[it] as? JsonPrimitive }
                 if (savedValue?.isString == true) {
                     settings[definition] = saveable.convertToValue(savedValue.content)
+                } else if (definition.defaultValue != null) {
+                    settings[definition] = definition.defaultValue
+                }
+            }
+
+            return PlaygroundSettings(settings)
+        }
+
+        fun createFromDeeplinkUri(uri: Uri): PlaygroundSettings {
+            val settings: MutableMap<PlaygroundSettingDefinition<*>, Any?> = mutableMapOf()
+
+            for (definition in allSettingDefinitions) {
+                val saveable = definition.saveable()
+                val savedValue: String? = saveable?.key?.let { uri.getQueryParameter(it) }
+                if (savedValue != null) {
+                    settings[definition] = saveable.convertToValue(savedValue)
                 } else if (definition.defaultValue != null) {
                     settings[definition] = definition.defaultValue
                 }
