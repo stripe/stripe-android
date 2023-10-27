@@ -352,7 +352,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         collectBankAccountLauncher?.unregister()
         collectBankAccountLauncher = null
         reset()
-        onCleared()
     }
 
     fun formattedMerchantName(): String {
