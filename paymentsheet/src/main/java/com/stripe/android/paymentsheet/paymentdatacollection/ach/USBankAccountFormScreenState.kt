@@ -14,17 +14,17 @@ internal sealed class USBankAccountFormScreenState(
     abstract val isProcessing: Boolean
 
     fun copy(
-        error: Int? = null,
-        primaryButtonText: String? = null,
-        mandateText: String? = null,
-        isProcessing: Boolean? = null,
+        error: Int? = this.error,
+        primaryButtonText: String = this.primaryButtonText,
+        mandateText: String? = this.mandateText,
+        isProcessing: Boolean = this.isProcessing,
     ): USBankAccountFormScreenState {
         return when (this) {
             is BillingDetailsCollection -> {
                 BillingDetailsCollection(
-                    error = error ?: this.error,
-                    primaryButtonText = primaryButtonText ?: this.primaryButtonText,
-                    isProcessing = isProcessing ?: this.isProcessing,
+                    error = error,
+                    primaryButtonText = primaryButtonText,
+                    isProcessing = isProcessing,
                 )
             }
             is MandateCollection -> {
@@ -32,9 +32,9 @@ internal sealed class USBankAccountFormScreenState(
                     paymentAccount = paymentAccount,
                     financialConnectionsSessionId = financialConnectionsSessionId,
                     intentId = intentId,
-                    isProcessing = isProcessing ?: this.isProcessing,
-                    primaryButtonText = primaryButtonText ?: this.primaryButtonText,
-                    mandateText = mandateText ?: this.mandateText,
+                    isProcessing = isProcessing,
+                    primaryButtonText = primaryButtonText,
+                    mandateText = mandateText,
                 )
             }
             is VerifyWithMicrodeposits -> {
@@ -42,9 +42,9 @@ internal sealed class USBankAccountFormScreenState(
                     paymentAccount = paymentAccount,
                     financialConnectionsSessionId = financialConnectionsSessionId,
                     intentId = intentId,
-                    isProcessing = isProcessing ?: this.isProcessing,
-                    primaryButtonText = primaryButtonText ?: this.primaryButtonText,
-                    mandateText = mandateText ?: this.mandateText,
+                    isProcessing = isProcessing,
+                    primaryButtonText = primaryButtonText,
+                    mandateText = mandateText,
                 )
             }
             is SavedAccount -> {
@@ -53,9 +53,9 @@ internal sealed class USBankAccountFormScreenState(
                     intentId = intentId,
                     bankName = bankName,
                     last4 = last4,
-                    isProcessing = isProcessing ?: this.isProcessing,
-                    primaryButtonText = primaryButtonText ?: this.primaryButtonText,
-                    mandateText = mandateText ?: this.mandateText,
+                    isProcessing = isProcessing,
+                    primaryButtonText = primaryButtonText,
+                    mandateText = mandateText,
                 )
             }
         }
