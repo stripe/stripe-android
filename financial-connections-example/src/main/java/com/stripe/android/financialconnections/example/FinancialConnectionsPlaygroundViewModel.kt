@@ -1,8 +1,11 @@
 package com.stripe.android.financialconnections.example
 
 import android.app.Application
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Stripe
 import com.stripe.android.confirmPaymentIntent
@@ -13,6 +16,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
+import com.stripe.android.financialconnections.example.settings.FinancialConnectionsPlaygroundUrlHelper
 import com.stripe.android.financialconnections.example.settings.FlowDefinition
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -26,13 +30,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 internal class FinancialConnectionsPlaygroundViewModel(
-    application: Application
+    application: Application,
+    launchUri: Uri?,
 ) : AndroidViewModel(application) {
 
     private val settings = Settings(application)
     private val repository = BackendRepository(settings)
 
-    private val _state = MutableStateFlow(FinancialConnectionsPlaygroundState(application))
+    private val _state = MutableStateFlow(FinancialConnectionsPlaygroundState(application, launchUri))
     val state: StateFlow<FinancialConnectionsPlaygroundState> = _state
 
     private val _viewEffect = MutableSharedFlow<FinancialConnectionsPlaygroundViewEffect?>()
@@ -263,6 +268,16 @@ internal class FinancialConnectionsPlaygroundViewModel(
             )
         }
     }
+
+    internal class Factory(
+        private val applicationSupplier: () -> Application,
+        private val uriSupplier: () -> Uri?,
+    ) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            @Suppress("UNCHECKED_CAST")
+            return FinancialConnectionsPlaygroundViewModel(applicationSupplier(), uriSupplier()) as T
+        }
+    }
 }
 
 @Suppress("Unused")
@@ -327,8 +342,9 @@ internal data class FinancialConnectionsPlaygroundState(
     val emittedEvents: List<String> = emptyList()
 ) {
 
-    constructor(application: Application) : this(
-        settings = PlaygroundSettings.createFromSharedPreferences(application)
+    constructor(application: Application, launchUri: Uri?) : this(
+        settings = FinancialConnectionsPlaygroundUrlHelper.settingsFromUri(launchUri)
+            ?: PlaygroundSettings.createFromSharedPreferences(application)
     )
 
     val flow = settings[FlowDefinition]
