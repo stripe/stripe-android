@@ -65,4 +65,36 @@ class CardBrandScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun testWithErrorAndCbcEligible() {
+        paparazziRule.snapshot {
+            CardBrand(
+                isLoading = false,
+                currentBrand = CardBrand.Unknown,
+                possibleBrands = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
+                shouldShowCvc = false,
+                shouldShowErrorIcon = true,
+                tintColorInt = Color.GRAY,
+                isCbcEligible = true,
+                onBrandSelected = {},
+            )
+        }
+    }
+
+    @Test
+    fun testWithCvcAndCbcEligible() {
+        paparazziRule.snapshot {
+            CardBrand(
+                isLoading = false,
+                currentBrand = CardBrand.Unknown,
+                possibleBrands = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
+                shouldShowCvc = true,
+                shouldShowErrorIcon = false,
+                tintColorInt = Color.GRAY,
+                isCbcEligible = true,
+                onBrandSelected = {},
+            )
+        }
+    }
 }
