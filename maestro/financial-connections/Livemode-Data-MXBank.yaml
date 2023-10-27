@@ -1,12 +1,10 @@
 appId: com.stripe.android.financialconnections.example
 tags:
   - all
-  - edge
-  - testmode-data
+  - livemode-data
 ---
 - launchApp
 - startRecording: /tmp/test_results/testmode-data-testoauthinstitution
-# Android specific: Navigate to example
 - tapOn: "Playground"
 - tapOn:
     id: "Native option"
@@ -15,36 +13,31 @@ tags:
 - tapOn:
     id: "Merchant setting"
 - tapOn:
-    id: "Test option"
+    id: "Livetesting option"
 - tapOn: "Connect Accounts!"
+# Wait until the consent button is visible
 - extendedWaitUntil:
-    notVisible:
-      id: "Data_checkbox"
+    visible:
+      id: "consent_cta"
     timeout: 30000
 # Common: web AuthFlow - connect OAuth institution
 - tapOn: "Agree and continue"
-- assertVisible: "Test OAuth Institution"
-# ERRORS
-- tapOn: ".*unscheduled.*"
-- tapOn: "Select another bank"
-# SELECT OAUTH INSTITUTION
-- tapOn: "Test OAuth Institution"
+# SEARCH AND SELECT FINBANK INSTITUTION
+- tapOn: "Search"
+- inputText: "mx"
+- tapOn: "MX Bank (Oauth)"
 - tapOn: "Continue"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
+# LOG IN WITH TEST FINBANK INSTITUTION
+- tapOn: "Authorize"
 ###############################################
 # SELECT ALL ACCOUNTS
-- extendedWaitUntil:
-    visible: "Select all accounts"
-    timeout: 60000
-- tapOn: "Select all accounts" # select all accounts
-- tapOn:
-    text: "Link accounts"
-    retryTapIfNoChange: false
+# - Mx bank skips account selection
 # CONFIRM AND COMPLETE
 - assertVisible: ".*Success.*"
 - tapOn: "Done"
 - assertVisible: ".*Completed!.*"
-- assertVisible: ".*StripeBank.*"
+- assertVisible: ".*MX Bank.*"
 - stopRecording

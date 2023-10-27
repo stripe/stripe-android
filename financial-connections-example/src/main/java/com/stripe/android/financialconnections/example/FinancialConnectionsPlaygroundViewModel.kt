@@ -275,6 +275,7 @@ enum class Merchant(val apiValue: String) {
     App2App("app2app"),
     Networking("networking"),
     NetworkingTestMode("networking_testmode"),
+    Livetesting("live_testing"),
     Other("other");
 
     companion object {

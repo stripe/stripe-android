@@ -46,6 +46,7 @@ stages:
     workflows:
       - run-connections-e2e-payments-tests: { }
       - run-connections-e2e-data-tests: { }
+      - run-connections-e2e-livemode-tests: { }
   stage-notify-connections-e2e-failure:
     should_always_run: true
     workflows:
@@ -101,12 +102,17 @@ workflows:
             - pipeline_intermediate_files: "$BITRISE_APK_PATH:BITRISE_APK_PATH"
   run-connections-e2e-payments-tests:
     envs:
-      - MAESTRO_TAGS: payment
+      - MAESTRO_TAGS: testmode-payments
     before_run:
       - _run-connections-e2e-tests
   run-connections-e2e-data-tests:
     envs:
-      - MAESTRO_TAGS: data
+      - MAESTRO_TAGS: testmode-data
+    before_run:
+      - _run-connections-e2e-tests
+  run-connections-e2e-livemode-tests:
+    envs:
+      - MAESTRO_TAGS: livemode-data
     before_run:
       - _run-connections-e2e-tests
   _run-connections-e2e-tests:
@@ -165,7 +171,7 @@ workflows:
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh -t all
+                bash ./scripts/execute_maestro_tests.sh -t edge
       - slack@3:
           is_always_run: true
           inputs:
