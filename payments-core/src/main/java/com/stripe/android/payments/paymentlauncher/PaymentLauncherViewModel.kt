@@ -4,7 +4,6 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -34,6 +33,7 @@ import com.stripe.android.payments.core.injection.IS_PAYMENT_INTENT
 import com.stripe.android.utils.requireApplication
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Lazy
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -70,10 +70,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
     private val hasStarted: Boolean
         get() = savedStateHandle.get(KEY_HAS_STARTED) ?: false
 
-    /**
-     * [PaymentResult] live data to be observed.
-     */
-    internal val paymentLauncherResult = MutableLiveData<PaymentResult>()
+    internal val paymentLauncherResult = MutableStateFlow<PaymentResult?>(null)
 
     /**
      * Registers the calling activity to listen to payment flow results. Should be called in the
@@ -127,7 +124,9 @@ internal class PaymentLauncherViewModel @Inject constructor(
                         }
                     }
                     if (!intent.requiresAction()) {
-                        paymentLauncherResult.postValue(PaymentResult.Completed)
+                        withContext(uiContext) {
+                            paymentLauncherResult.value = PaymentResult.Completed
+                        }
                     } else {
                         authenticatorRegistry.getAuthenticator(intent).authenticate(
                             host,
@@ -137,7 +136,9 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     }
                 },
                 onFailure = {
-                    paymentLauncherResult.postValue(PaymentResult.Failed(it))
+                    withContext(uiContext) {
+                        paymentLauncherResult.value = PaymentResult.Failed(it)
+                    }
                 }
             )
         }
@@ -191,7 +192,9 @@ internal class PaymentLauncherViewModel @Inject constructor(
                         )
                 },
                 onFailure = {
-                    paymentLauncherResult.postValue(PaymentResult.Failed(it))
+                    withContext(uiContext) {
+                        paymentLauncherResult.value = PaymentResult.Failed(it)
+                    }
                 }
             )
         }
@@ -214,7 +217,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 },
                 onFailure = {
                     withContext(uiContext) {
-                        paymentLauncherResult.postValue(PaymentResult.Failed(it))
+                        paymentLauncherResult.value = PaymentResult.Failed(it)
                     }
                 }
             )
@@ -225,7 +228,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
      * Parse [StripeIntentResult] into [PaymentResult].
      */
     private fun postResult(stripeIntentResult: StripeIntentResult<StripeIntent>) {
-        paymentLauncherResult.postValue(
+        paymentLauncherResult.value =
             when (stripeIntentResult.outcome) {
                 StripeIntentResult.Outcome.SUCCEEDED ->
                     PaymentResult.Completed
@@ -244,7 +247,6 @@ internal class PaymentLauncherViewModel @Inject constructor(
                         LocalStripeException(displayMessage = UNKNOWN_ERROR + stripeIntentResult.failureMessage)
                     )
             }
-        )
     }
 
     private fun logReturnUrl(returnUrl: String?) {

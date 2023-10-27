@@ -9,8 +9,10 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.AuthActivityStarterHost
+import kotlinx.coroutines.launch
 
 /**
  * Host activity to perform actions for [PaymentLauncher].
@@ -49,7 +51,12 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             // Prevent back presses while confirming payment
         }
 
-        viewModel.paymentLauncherResult.observe(this, ::finishWithResult)
+        lifecycleScope.launch {
+            viewModel.paymentLauncherResult.collect {
+                it?.let(::finishWithResult)
+            }
+        }
+
         viewModel.register(
             activityResultCaller = this,
             lifecycleOwner = this,
