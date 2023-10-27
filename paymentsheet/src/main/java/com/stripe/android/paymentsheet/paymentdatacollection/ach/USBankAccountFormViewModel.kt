@@ -308,6 +308,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     fun handlePrimaryButtonClick(screenState: USBankAccountFormScreenState) {
+        handlePrimaryButtonStateChanged(PrimaryButton.State.StartProcessing)
         when (screenState) {
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
                 collectBankAccount(args.clientSecret)
@@ -333,6 +334,12 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun handlePrimaryButtonStateChanged(primaryButtonState: PrimaryButton.State) {
+        _currentScreenState.update {
+            it.copy(isProcessing = primaryButtonState.isProcessing)
         }
     }
 

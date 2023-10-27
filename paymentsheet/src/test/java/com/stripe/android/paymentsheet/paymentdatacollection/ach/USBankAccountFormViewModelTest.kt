@@ -842,6 +842,21 @@ class USBankAccountFormViewModelTest {
         }
     }
 
+    @Test
+    fun `When the primary button is pressed, the primary button state moves to processing`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem().isProcessing)
+                .isFalse()
+
+            viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
+
+            assertThat(awaitItem().isProcessing)
+                .isTrue()
+        }
+    }
+
     private fun createViewModel(
         args: USBankAccountFormViewModel.Args = defaultArgs
     ): USBankAccountFormViewModel {

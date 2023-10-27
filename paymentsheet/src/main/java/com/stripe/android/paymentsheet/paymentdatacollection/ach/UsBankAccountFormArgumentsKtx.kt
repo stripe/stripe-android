@@ -11,7 +11,6 @@ internal fun USBankAccountFormArguments.handleScreenStateChanged(
     enabled: Boolean,
     merchantName: String,
     onPrimaryButtonClick: (USBankAccountFormScreenState) -> Unit,
-    onPrimaryButtonStateChanged: (PrimaryButton.State) -> Unit,
 ) {
     screenState.error?.let {
         onError(context.getString(it))
@@ -22,7 +21,6 @@ internal fun USBankAccountFormArguments.handleScreenStateChanged(
     updatePrimaryButton(
         text = screenState.primaryButtonText,
         onClick = { onPrimaryButtonClick(screenState) },
-        onStateChanged = { onPrimaryButtonStateChanged(it) },
         enabled = enabled,
         shouldShowProcessingWhenClicked = showProcessingWhenClicked
     )
@@ -38,7 +36,6 @@ internal fun USBankAccountFormArguments.handleScreenStateChanged(
 private fun USBankAccountFormArguments.updatePrimaryButton(
     text: String,
     onClick: () -> Unit,
-    onStateChanged: (PrimaryButton.State) -> Unit,
     shouldShowProcessingWhenClicked: Boolean,
     enabled: Boolean,
 ) {
@@ -47,7 +44,6 @@ private fun USBankAccountFormArguments.updatePrimaryButton(
             label = text,
             onClick = {
                 if (shouldShowProcessingWhenClicked) {
-                    onStateChanged(PrimaryButton.State.StartProcessing)
                     onUpdatePrimaryButtonState(PrimaryButton.State.StartProcessing)
                 }
                 onClick()

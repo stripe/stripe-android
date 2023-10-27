@@ -1666,6 +1666,7 @@ class CustomerSheetViewModelTest {
                 last4 = "6789",
                 primaryButtonText = "Continue",
                 mandateText = null,
+                isProcessing = false,
             ),
         )
         val viewModel = createViewModel(

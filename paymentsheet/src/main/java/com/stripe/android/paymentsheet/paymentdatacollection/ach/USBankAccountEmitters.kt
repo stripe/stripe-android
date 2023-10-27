@@ -61,7 +61,6 @@ internal fun USBankAccountEmitters(
             enabled = hasRequiredFields && !screenState.isProcessing,
             merchantName = viewModel.formattedMerchantName(),
             onPrimaryButtonClick = viewModel::handlePrimaryButtonClick,
-            onPrimaryButtonStateChanged = viewModel::handlePrimaryButtonStateChanged
         )
     }
 
