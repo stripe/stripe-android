@@ -335,7 +335,6 @@ class PaymentSessionTest {
         stripeRepository: StripeRepository = FakeStripeRepository()
     ): CustomerSession {
         return CustomerSession(
-            context,
             stripeRepository,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "acct_abc123",

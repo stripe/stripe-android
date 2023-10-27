@@ -15,6 +15,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -31,12 +32,7 @@ class PaymentMethodsViewModelTest {
     )
 
     @Test
-    fun getPaymentMethods_whenSuccess_returnsExpectedPaymentMethods() {
-        var paymentMethods: List<PaymentMethod> = emptyList()
-        viewModel.getPaymentMethods().observeForever {
-            paymentMethods = it.getOrThrow()
-        }
-
+    fun paymentMethodsData_whenSuccess_returnsExpectedPaymentMethods() = runTest {
         verify(customerSession).getPaymentMethods(
             eq(PaymentMethod.Type.Card),
             isNull(),
@@ -45,22 +41,18 @@ class PaymentMethodsViewModelTest {
             eq(EXPECTED_PRODUCT_USAGE),
             listenerArgumentCaptor.capture()
         )
-
         listenerArgumentCaptor.firstValue.onPaymentMethodsRetrieved(
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
 
-        assertThat(paymentMethods)
-            .isEqualTo(listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+        viewModel.paymentMethodsData.test {
+            assertThat(awaitItem())
+                .isEqualTo(Result.success(listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)))
+        }
     }
 
     @Test
-    fun getPaymentMethods_whenError_returnsExpectedException() {
-        var throwable: Throwable? = null
-        viewModel.getPaymentMethods().observeForever {
-            throwable = it.exceptionOrNull()
-        }
-
+    fun paymentMethodsData_whenError_returnsExpectedException() = runTest {
         verify(customerSession).getPaymentMethods(
             eq(PaymentMethod.Type.Card),
             isNull(),
@@ -76,8 +68,10 @@ class PaymentMethodsViewModelTest {
             null
         )
 
-        assertThat(throwable)
-            .isInstanceOf(APIException::class.java)
+        viewModel.paymentMethodsData.test {
+            assertThat(awaitItem()?.exceptionOrNull())
+                .isInstanceOf(APIException::class.java)
+        }
     }
 
     @Test
@@ -90,6 +84,15 @@ class PaymentMethodsViewModelTest {
                 .isEqualTo("Added Visa ending in 4242")
             assertThat(awaitItem())
                 .isNull()
+            // First time is init, second time is from the onPaymentMethodAdded call.
+            verify(customerSession, times(2)).getPaymentMethods(
+                eq(PaymentMethod.Type.Card),
+                isNull(),
+                isNull(),
+                isNull(),
+                eq(EXPECTED_PRODUCT_USAGE),
+                listenerArgumentCaptor.capture()
+            )
         }
     }
 
@@ -107,19 +110,15 @@ class PaymentMethodsViewModelTest {
     }
 
     @Test
-    fun `getPaymentMethods() with CustomerSession failure should return failure result`() {
-        var result: Result<List<PaymentMethod>>? = null
+    fun `paymentMethodsData with CustomerSession failure should return failure result`() = runTest {
         PaymentMethodsViewModel(
             application = ApplicationProvider.getApplicationContext(),
             customerSession = Result.failure(RuntimeException("failure")),
             startedFromPaymentSession = true
-        ).getPaymentMethods().observeForever {
-            result = it
+        ).paymentMethodsData.test {
+            assertThat(awaitItem()?.isFailure)
+                .isTrue()
         }
-
-        requireNotNull(result)
-        assertThat(result?.isFailure)
-            .isTrue()
     }
 
     private companion object {
