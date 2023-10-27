@@ -5,22 +5,13 @@ tags:
   - native
   - data
 ---
-- launchApp
 - startRecording: /tmp/test_results/testmode-data-testoauthinstitution
-# Android specific: Navigate to example
-- tapOn: "Playground"
-- tapOn:
-    id: "Native option"
-- tapOn:
-    id: "Data option"
-- tapOn:
-    id: "Merchant setting"
-- tapOn:
-    id: "Test option"
+- openLink: stripeconnectionsexample://playground?flow=Data&financial_connections_override_native=native&merchant=testmode
 - tapOn: "Connect Accounts!"
+# Wait until the consent button is visible
 - extendedWaitUntil:
-    notVisible:
-      id: "Data_checkbox"
+    visible:
+      id: "consent_cta"
     timeout: 30000
 # Common: web AuthFlow - connect OAuth institution
 - tapOn: "Agree and continue"

@@ -34,7 +34,19 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name="com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="stripeconnectionsexample"
+                    android:host="playground" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
