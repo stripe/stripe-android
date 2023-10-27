@@ -135,6 +135,24 @@ class PaymentSelectionTest {
     }
 
     @Test
+    fun `Displays the correct mandate for US Bank Account`() {
+        val paymentSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFactory.usBankAccount(),
+        )
+
+        val result = paymentSelection.mandateText(
+            context = context,
+            merchantName = "Merchant",
+            isSaveForFutureUseSelected = false,
+        )
+
+        assertThat(result).isEqualTo(
+            "By continuing, you agree to authorize payments pursuant to " +
+                "<a href=\"https://stripe.com/ach-payments/authorization\">these terms</a>."
+        )
+    }
+
+    @Test
     fun `Doesn't display a mandate for a saved payment method that isn't US bank account`() =
         runAllConfigurations { isSaveForFutureUseSelected ->
             val newPaymentSelection = PaymentSelection.Saved(
