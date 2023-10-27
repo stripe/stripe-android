@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
@@ -794,7 +793,6 @@ internal class CustomerSessionTest {
             createEphemeralKeyManagerFactory(timeSupplier)
     ): CustomerSession {
         return CustomerSession(
-            ApplicationProvider.getApplicationContext(),
             stripeRepository,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "acct_abc123",

@@ -28,7 +28,6 @@ import kotlin.coroutines.CoroutineContext
  * See [Creating ephemeral keys](https://stripe.com/docs/mobile/android/standard#creating-ephemeral-keys)
  */
 class CustomerSession @VisibleForTesting internal constructor(
-    context: Context,
     stripeRepository: StripeRepository,
     publishableKey: String,
     stripeAccountId: String?,
@@ -473,7 +472,6 @@ class CustomerSession @VisibleForTesting internal constructor(
             val config = PaymentConfiguration.getInstance(context)
 
             instance = CustomerSession(
-                context,
                 StripeApiRepository(context, { config.publishableKey }, appInfo),
                 config.publishableKey,
                 config.stripeAccountId,
