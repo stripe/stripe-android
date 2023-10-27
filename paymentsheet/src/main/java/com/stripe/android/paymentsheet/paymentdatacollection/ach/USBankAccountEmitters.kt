@@ -21,7 +21,9 @@ internal fun USBankAccountEmitters(
 
     LaunchedEffect(Unit) {
         viewModel.result.collect { result ->
-            usBankAccountFormArgs.onHandleUSBankAccount(result)
+            result?.let {
+                usBankAccountFormArgs.onHandleUSBankAccount(result)
+            }
         }
     }
 
