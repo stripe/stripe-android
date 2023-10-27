@@ -8,7 +8,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
 import com.stripe.android.financialconnections.R as FinancialConnectionsR
 import com.stripe.android.ui.core.R as StripeUiCoreR
-import com.stripe.payments.model.R as PaymentsModelR
 
 @DrawableRes
 internal fun PaymentMethod.getSavedPaymentMethodIcon(): Int {
@@ -29,7 +28,7 @@ internal fun CardBrand.getCardBrandIcon(): Int = when (this) {
     CardBrand.DinersClub -> R.drawable.stripe_ic_paymentsheet_card_dinersclub
     CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard
     CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay
-    CardBrand.CartesBancaires -> PaymentsModelR.drawable.stripe_ic_cartes_bancaires
+    CardBrand.CartesBancaires -> R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires
     CardBrand.Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
 }
 
