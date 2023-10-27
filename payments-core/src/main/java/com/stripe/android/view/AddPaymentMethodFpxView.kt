@@ -2,8 +2,8 @@ package com.stripe.android.view
 
 import android.util.AttributeSet
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -11,6 +11,7 @@ import com.stripe.android.R
 import com.stripe.android.databinding.StripeBankListPaymentMethodBinding
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.PaymentMethodCreateParams
+import kotlinx.coroutines.launch
 
 internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
     activity: FragmentActivity,
@@ -55,8 +56,9 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         // an id is required for state to be saved
         id = R.id.stripe_payment_methods_add_fpx
 
-        viewModel.getFpxBankStatues()
-            .observe(activity, Observer(::onFpxBankStatusesUpdated))
+        activity.lifecycleScope.launch {
+            viewModel.fpxBankStatues.collect(::onFpxBankStatusesUpdated)
+        }
 
         with(viewBinding.bankList) {
             adapter = fpxAdapter
