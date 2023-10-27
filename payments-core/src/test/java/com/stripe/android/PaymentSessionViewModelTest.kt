@@ -2,11 +2,13 @@ package com.stripe.android
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.view.PaymentMethodsActivityStarter
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -18,7 +20,6 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -32,23 +33,7 @@ class PaymentSessionViewModelTest {
     private val customerRetrievalListenerCaptor =
         argumentCaptor<CustomerSession.CustomerRetrievalListener>()
 
-    private val paymentSessionDatas =
-        mutableListOf<PaymentSessionData>()
-    private val networkStates =
-        mutableListOf<PaymentSessionViewModel.NetworkState>()
-
     private val viewModel: PaymentSessionViewModel = createViewModel()
-
-    @BeforeTest
-    fun before() {
-        viewModel.networkState.observeForever {
-            networkStates.add(it)
-        }
-
-        viewModel.paymentSessionDataLiveData.observeForever {
-            paymentSessionDatas.add(it)
-        }
-    }
 
     @Test
     fun init_shouldGetButNotSetPaymentSessionDataFromSavedStateHandle() {
@@ -64,19 +49,17 @@ class PaymentSessionViewModelTest {
     }
 
     @Test
-    fun init_whenSavedStateHasData_shouldUpdatePaymentSessionData() {
+    fun init_whenSavedStateHasData_shouldUpdatePaymentSessionData() = runTest {
         whenever(
             savedStateHandle.get<PaymentSessionData>(
                 PaymentSessionViewModel.KEY_PAYMENT_SESSION_DATA
             )
         ).thenReturn(UPDATED_DATA)
 
-        createViewModel().paymentSessionDataLiveData.observeForever {
-            paymentSessionDatas.add(it)
+        createViewModel().paymentSessionDataStateFlow.test {
+            assertThat(awaitItem())
+                .isEqualTo(UPDATED_DATA)
         }
-
-        assertThat(paymentSessionDatas)
-            .containsExactly(UPDATED_DATA)
     }
 
     @Test
@@ -130,25 +113,32 @@ class PaymentSessionViewModelTest {
     }
 
     @Test
-    fun settingPaymentSessionData_shouldUpdateLiveData() {
-        viewModel.paymentSessionData = UPDATED_DATA
-        assertThat(paymentSessionDatas)
-            .containsExactly(UPDATED_DATA)
+    fun settingPaymentSessionData_shouldUpdateStateFlow() = runTest {
+        viewModel.paymentSessionDataStateFlow.test {
+            assertThat(awaitItem()).isNull() // Initial Value
+            viewModel.paymentSessionData = UPDATED_DATA
+            assertThat(awaitItem())
+                .isEqualTo(UPDATED_DATA)
+        }
     }
 
     @Test
-    fun onPaymentMethodResult_withGooglePay_shouldUpdateLiveData() {
-        viewModel.onPaymentMethodResult(
-            PaymentMethodsActivityStarter.Result(
-                useGooglePay = true
+    fun onPaymentMethodResult_withGooglePay_shouldUpdateStateFlow() = runTest {
+        viewModel.paymentSessionDataStateFlow.test {
+            assertThat(awaitItem()).isNull() // Initial Value
+
+            viewModel.onPaymentMethodResult(
+                PaymentMethodsActivityStarter.Result(
+                    useGooglePay = true
+                )
             )
-        )
-        assertThat(paymentSessionDatas.last().useGooglePay)
-            .isTrue()
+            assertThat(awaitItem()?.useGooglePay)
+                .isTrue()
+        }
     }
 
     @Test
-    fun onCustomerRetrieved_whenIsInitialFetchAndPreviouslyUsedPaymentMethodExists_shouldUpdatePaymentSessionData() {
+    fun onCustomerRetrieved_whenIsInitialFetchAndPreviouslyUsedPaymentMethodExists_shouldUpdatePaymentSessionData() = runTest {
         val customerPaymentMethods = PaymentMethodFixtures.createCards(20)
         doNothing().whenever(customerSession).getPaymentMethods(
             paymentMethodType = eq(PaymentMethod.Type.Card),
@@ -179,134 +169,152 @@ class PaymentSessionViewModelTest {
             customerPaymentMethods
         )
 
-        assertThat(paymentSessionDatas.last().paymentMethod)
-            .isEqualTo(customerPaymentMethods.last())
+        viewModel.paymentSessionDataStateFlow.test {
+            assertThat(awaitItem()?.paymentMethod)
+                .isEqualTo(customerPaymentMethods.last())
+        }
 
         assertThat(onCompleteCallbackCount)
             .isEqualTo(1)
     }
 
     @Test
-    fun onCustomerRetrieved_whenIsInitialFetchAndPreviouslyUsedPaymentMethodIsNotFoundInList_shouldNotUpdatePaymentSessionData() {
-        val customerPaymentMethods = PaymentMethodFixtures.createCards(20)
-        doNothing().whenever(customerSession).getPaymentMethods(
-            paymentMethodType = eq(PaymentMethod.Type.Card),
-            limit = eq(100),
-            endingBefore = anyOrNull(),
-            startingAfter = anyOrNull(),
-            listener = any()
-        )
-        whenever(paymentSessionPrefs.getPaymentMethod("cus_123"))
-            .thenReturn(PaymentSessionPrefs.SelectedPaymentMethod.Saved("pm_not_in_list"))
+    fun onCustomerRetrieved_whenIsInitialFetchAndPreviouslyUsedPaymentMethodIsNotFoundInList_shouldNotUpdatePaymentSessionData() = runTest {
+        viewModel.paymentSessionDataStateFlow.test {
+            assertThat(awaitItem()).isNull() // Initial Value.
 
-        var onCompleteCallbackCount = 0
-        viewModel.onCustomerRetrieved(
-            customerId = "cus_123",
-            isInitialFetch = true
-        ) {
-            onCompleteCallbackCount++
-        }
+            val customerPaymentMethods = PaymentMethodFixtures.createCards(20)
+            doNothing().whenever(customerSession).getPaymentMethods(
+                paymentMethodType = eq(PaymentMethod.Type.Card),
+                limit = eq(100),
+                endingBefore = anyOrNull(),
+                startingAfter = anyOrNull(),
+                listener = any()
+            )
+            whenever(paymentSessionPrefs.getPaymentMethod("cus_123"))
+                .thenReturn(PaymentSessionPrefs.SelectedPaymentMethod.Saved("pm_not_in_list"))
 
-        verify(customerSession).getPaymentMethods(
-            paymentMethodType = eq(PaymentMethod.Type.Card),
-            limit = eq(100),
-            endingBefore = anyOrNull(),
-            startingAfter = anyOrNull(),
-            listener = paymentMethodsListenerCaptor.capture()
-        )
-        paymentMethodsListenerCaptor.firstValue.onPaymentMethodsRetrieved(
-            customerPaymentMethods
-        )
+            var onCompleteCallbackCount = 0
+            viewModel.onCustomerRetrieved(
+                customerId = "cus_123",
+                isInitialFetch = true
+            ) {
+                onCompleteCallbackCount++
+            }
 
-        assertThat(paymentSessionDatas)
-            .isEmpty()
-
-        assertThat(onCompleteCallbackCount)
-            .isEqualTo(1)
-    }
-
-    @Test
-    fun onCustomerRetrieved_whenIsInitialFetchAndPreviouslyUsedPaymentMethodDoesNotExist_shouldNotFetchPaymentMethods() {
-        whenever(paymentSessionPrefs.getPaymentMethod("cus_123"))
-            .thenReturn(null)
-
-        var onCompleteCallbackCount = 0
-        viewModel.onCustomerRetrieved(
-            customerId = "cus_123",
-            isInitialFetch = true
-        ) {
-            onCompleteCallbackCount++
-        }
-
-        verify(customerSession, never()).getPaymentMethods(
-            paymentMethodType = eq(PaymentMethod.Type.Card),
-            limit = eq(100),
-            endingBefore = anyOrNull(),
-            startingAfter = anyOrNull(),
-            listener = any()
-        )
-
-        assertThat(paymentSessionDatas)
-            .isEmpty()
-
-        assertThat(onCompleteCallbackCount)
-            .isEqualTo(1)
-    }
-
-    @Test
-    fun fetchCustomer_onSuccess_returnsSuccessResult() {
-        doNothing().whenever(customerSession).retrieveCurrentCustomer(
-            listener = any()
-        )
-
-        val results: MutableList<PaymentSessionViewModel.FetchCustomerResult> = mutableListOf()
-        viewModel.fetchCustomer().observeForever {
-            results.add(it)
-        }
-
-        verify(customerSession).retrieveCurrentCustomer(
-            eq(setOf(PaymentSession.PRODUCT_TOKEN)),
-            customerRetrievalListenerCaptor.capture()
-        )
-        customerRetrievalListenerCaptor.firstValue
-            .onCustomerRetrieved(CustomerFixtures.CUSTOMER)
-
-        assertThat(results)
-            .containsExactly(PaymentSessionViewModel.FetchCustomerResult.Success)
-
-        assertThat(networkStates)
-            .isEqualTo(EXPECTED_NETWORK_STATES)
-    }
-
-    @Test
-    fun fetchCustomer_onError_returnsErrorResult() {
-        doNothing().whenever(customerSession).retrieveCurrentCustomer(
-            listener = any()
-        )
-
-        val results: MutableList<PaymentSessionViewModel.FetchCustomerResult> = mutableListOf()
-        viewModel.fetchCustomer().observeForever {
-            results.add(it)
-        }
-
-        verify(customerSession).retrieveCurrentCustomer(
-            eq(setOf(PaymentSession.PRODUCT_TOKEN)),
-            customerRetrievalListenerCaptor.capture()
-        )
-        customerRetrievalListenerCaptor.firstValue
-            .onError(500, "error", StripeErrorFixtures.INVALID_REQUEST_ERROR)
-
-        assertThat(results)
-            .containsExactly(
-                PaymentSessionViewModel.FetchCustomerResult.Error(
-                    500,
-                    "error",
-                    StripeErrorFixtures.INVALID_REQUEST_ERROR
-                )
+            verify(customerSession).getPaymentMethods(
+                paymentMethodType = eq(PaymentMethod.Type.Card),
+                limit = eq(100),
+                endingBefore = anyOrNull(),
+                startingAfter = anyOrNull(),
+                listener = paymentMethodsListenerCaptor.capture()
+            )
+            paymentMethodsListenerCaptor.firstValue.onPaymentMethodsRetrieved(
+                customerPaymentMethods
             )
 
-        assertThat(networkStates)
-            .isEqualTo(EXPECTED_NETWORK_STATES)
+            ensureAllEventsConsumed()
+
+            assertThat(onCompleteCallbackCount)
+                .isEqualTo(1)
+        }
+    }
+
+    @Test
+    fun onCustomerRetrieved_whenIsInitialFetchAndPreviouslyUsedPaymentMethodDoesNotExist_shouldNotFetchPaymentMethods() = runTest {
+        viewModel.paymentSessionDataStateFlow.test {
+            assertThat(awaitItem()).isNull() // Initial Value.
+
+            whenever(paymentSessionPrefs.getPaymentMethod("cus_123"))
+                .thenReturn(null)
+
+            var onCompleteCallbackCount = 0
+            viewModel.onCustomerRetrieved(
+                customerId = "cus_123",
+                isInitialFetch = true
+            ) {
+                onCompleteCallbackCount++
+            }
+
+            verify(customerSession, never()).getPaymentMethods(
+                paymentMethodType = eq(PaymentMethod.Type.Card),
+                limit = eq(100),
+                endingBefore = anyOrNull(),
+                startingAfter = anyOrNull(),
+                listener = any()
+            )
+
+            ensureAllEventsConsumed()
+
+            assertThat(onCompleteCallbackCount)
+                .isEqualTo(1)
+        }
+    }
+
+    @Test
+    fun fetchCustomer_onSuccess_returnsSuccessResult() = runTest {
+        viewModel.networkState.test {
+            assertThat(awaitItem()).isNull() // Initial Value
+
+            doNothing().whenever(customerSession).retrieveCurrentCustomer(
+                listener = any()
+            )
+
+            val results: MutableList<PaymentSessionViewModel.FetchCustomerResult> = mutableListOf()
+            viewModel.fetchCustomer().observeForever {
+                results.add(it)
+            }
+
+            assertThat(awaitItem()).isEqualTo(PaymentSessionViewModel.NetworkState.Active)
+
+            verify(customerSession).retrieveCurrentCustomer(
+                eq(setOf(PaymentSession.PRODUCT_TOKEN)),
+                customerRetrievalListenerCaptor.capture()
+            )
+            customerRetrievalListenerCaptor.firstValue
+                .onCustomerRetrieved(CustomerFixtures.CUSTOMER)
+
+            assertThat(results)
+                .containsExactly(PaymentSessionViewModel.FetchCustomerResult.Success)
+
+            assertThat(awaitItem()).isEqualTo(PaymentSessionViewModel.NetworkState.Inactive)
+        }
+    }
+
+    @Test
+    fun fetchCustomer_onError_returnsErrorResult() = runTest {
+        viewModel.networkState.test {
+            assertThat(awaitItem()).isNull() // Initial Value
+
+            doNothing().whenever(customerSession).retrieveCurrentCustomer(
+                listener = any()
+            )
+
+            val results: MutableList<PaymentSessionViewModel.FetchCustomerResult> = mutableListOf()
+            viewModel.fetchCustomer().observeForever {
+                results.add(it)
+            }
+
+            assertThat(awaitItem()).isEqualTo(PaymentSessionViewModel.NetworkState.Active)
+
+            verify(customerSession).retrieveCurrentCustomer(
+                eq(setOf(PaymentSession.PRODUCT_TOKEN)),
+                customerRetrievalListenerCaptor.capture()
+            )
+            customerRetrievalListenerCaptor.firstValue
+                .onError(500, "error", StripeErrorFixtures.INVALID_REQUEST_ERROR)
+
+            assertThat(results)
+                .containsExactly(
+                    PaymentSessionViewModel.FetchCustomerResult.Error(
+                        500,
+                        "error",
+                        StripeErrorFixtures.INVALID_REQUEST_ERROR
+                    )
+                )
+
+            assertThat(awaitItem()).isEqualTo(PaymentSessionViewModel.NetworkState.Inactive)
+        }
     }
 
     private fun createViewModel() = PaymentSessionViewModel(
@@ -322,10 +330,5 @@ class PaymentSessionViewModelTest {
 
         private val UPDATED_DATA = PaymentSessionFixtures.PAYMENT_SESSION_DATA
             .copy(cartTotal = 999999)
-
-        private val EXPECTED_NETWORK_STATES = listOf(
-            PaymentSessionViewModel.NetworkState.Active,
-            PaymentSessionViewModel.NetworkState.Inactive
-        )
     }
 }

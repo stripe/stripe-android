@@ -15,6 +15,9 @@ import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.utils.requireApplication
 import com.stripe.android.view.PaymentMethodsActivityStarter
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 internal class PaymentSessionViewModel(
     application: Application,
@@ -29,12 +32,12 @@ internal class PaymentSessionViewModel(
             if (value != field) {
                 field = value
                 savedStateHandle.set(KEY_PAYMENT_SESSION_DATA, value)
-                _paymentSessionDataLiveData.value = value
+                _paymentSessionDataStateFlow.value = value
             }
         }
 
-    private val _paymentSessionDataLiveData = MutableLiveData<PaymentSessionData>()
-    val paymentSessionDataLiveData: LiveData<PaymentSessionData> = _paymentSessionDataLiveData
+    private val _paymentSessionDataStateFlow = MutableStateFlow<PaymentSessionData?>(null)
+    val paymentSessionDataStateFlow: StateFlow<PaymentSessionData?> = _paymentSessionDataStateFlow.asStateFlow()
 
     init {
         // read from saved state handle
@@ -43,8 +46,8 @@ internal class PaymentSessionViewModel(
         }
     }
 
-    private val _networkState: MutableLiveData<NetworkState> = MutableLiveData()
-    internal val networkState: LiveData<NetworkState> = _networkState
+    private val _networkState: MutableStateFlow<NetworkState?> = MutableStateFlow(null)
+    internal val networkState: StateFlow<NetworkState?> = _networkState.asStateFlow()
 
     @JvmSynthetic
     fun updateCartTotal(@IntRange(from = 0) cartTotal: Long) {
@@ -217,7 +220,7 @@ internal class PaymentSessionViewModel(
 
     @JvmSynthetic
     fun onListenerAttached() {
-        _paymentSessionDataLiveData.value = paymentSessionData
+        _paymentSessionDataStateFlow.value = paymentSessionData
     }
 
     sealed class FetchCustomerResult {

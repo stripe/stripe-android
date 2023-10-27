@@ -13,12 +13,14 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentSession.PaymentSessionListener
 import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
+import kotlinx.coroutines.launch
 
 /**
  * Represents a single start-to-finish payment operation.
@@ -63,9 +65,9 @@ class PaymentSession @VisibleForTesting internal constructor(
 
     init {
         lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
-        viewModel.networkState.observe(
-            lifecycleOwner,
-            {
+
+        lifecycleOwner.lifecycleScope.launch {
+            viewModel.networkState.collect {
                 it?.let { networkState ->
                     listener?.onCommunicatingStateChanged(
                         when (networkState) {
@@ -75,14 +77,15 @@ class PaymentSession @VisibleForTesting internal constructor(
                     )
                 }
             }
-        )
+        }
 
-        viewModel.paymentSessionDataLiveData.observe(
-            lifecycleOwner,
-            {
-                listener?.onPaymentSessionDataChanged(it)
+        lifecycleOwner.lifecycleScope.launch {
+            viewModel.paymentSessionDataStateFlow.collect { sessionData ->
+                sessionData?.let {
+                    listener?.onPaymentSessionDataChanged(it)
+                }
             }
-        )
+        }
     }
 
     /**
