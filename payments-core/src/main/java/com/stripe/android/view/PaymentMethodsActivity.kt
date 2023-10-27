@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
 import com.stripe.android.R
@@ -24,6 +25,7 @@ import com.stripe.android.databinding.StripePaymentMethodsActivityBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.utils.argsAreInvalid
 import com.stripe.android.view.i18n.TranslatorManager
+import kotlinx.coroutines.launch
 
 /**
  * An activity that allows a customer to select from their attached payment methods,
@@ -105,13 +107,18 @@ class PaymentMethodsActivity : AppCompatActivity() {
             finishWithResult(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
         }
 
-        viewModel.snackbarData.observe(this) { snackbarText ->
-            snackbarText?.let {
-                Snackbar.make(viewBinding.coordinator, it, Snackbar.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            viewModel.snackbarData.collect { snackbarText ->
+                snackbarText?.let {
+                    Snackbar.make(viewBinding.coordinator, it, Snackbar.LENGTH_SHORT).show()
+                }
             }
         }
-        viewModel.progressData.observe(this) {
-            viewBinding.progressBar.isVisible = it
+
+        lifecycleScope.launch {
+            viewModel.progressData.collect {
+                viewBinding.progressBar.isVisible = it
+            }
         }
 
         setupRecyclerView()
