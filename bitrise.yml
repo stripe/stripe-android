@@ -5,8 +5,8 @@ project_type: android
 trigger_map:
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
-  - pull_request_source_branch: '*'
-    pipeline: main-trigger-pipeline
+  - pull_request_source_branch: 'carlosmuvi/BANKCON-8162/fc-add-livetesting-oauth-tests'
+    pipeline: pipeline-connections-e2e-release-tests
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
