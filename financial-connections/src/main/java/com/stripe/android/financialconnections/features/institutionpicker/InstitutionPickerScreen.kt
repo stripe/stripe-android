@@ -24,7 +24,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -43,12 +43,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -319,9 +323,16 @@ private fun SearchInstitutionsList(
                             }
                         }
                     } else {
-                        items(institutions().data, key = { it.id }) { institution ->
-                            InstitutionResultTile({ onInstitutionSelected(it, false) }, institution)
-                        }
+                        itemsIndexed(
+                            items = institutions().data,
+                            key = { _, institution -> institution.id },
+                            itemContent = { index, institution ->
+                                InstitutionResultTile(
+                                    institution = institution,
+                                    index = index
+                                ) { onInstitutionSelected(it, false) }
+                            }
+                        )
                         if (institutions().showManualEntry == true) {
                             item {
                                 Divider(
@@ -413,15 +424,19 @@ private fun ManualEntryRow(onManualEntryClick: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun InstitutionResultTile(
-    onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
-    institution: FinancialConnectionsInstitution
+    institution: FinancialConnectionsInstitution,
+    index: Int,
+    onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxSize()
+            .semantics { testTagsAsResourceId = true }
+            .testTag("search_result_$index")
             .clickableSingle { onInstitutionSelected(institution) }
             .padding(
                 vertical = 8.dp,

@@ -16,7 +16,8 @@ tags:
 # SEARCH AND SELECT FINBANK INSTITUTION
 - tapOn: "Search"
 - inputText: "mx"
-- tapOn: "MX Bank (Oauth)"
+- tapOn:
+    id: "search_result_1"
 - tapOn: "Continue"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:

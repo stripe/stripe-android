@@ -15,8 +15,9 @@ tags:
 - tapOn: "Agree and continue"
 # SEARCH AND SELECT FINBANK INSTITUTION
 - tapOn: "Search"
-- inputText: "fin"
-- tapOn: "FinBank"
+- inputText: "finbank"
+- tapOn:
+    id: "search_result_0"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
@@ -26,9 +27,9 @@ tags:
       text: "Image of FinBank logo"
     timeout: 30000
 - tapOn: "Banking Userid "
-- inputText: "finbank"
+- inputText: "f_i_n"
 - tapOn: "Banking Password "
-- inputText: "finbank"
+- inputText: "b_a_n_k"
 - tapOn: "Submit"
 ###############################################
 # SELECT ALL ACCOUNTS
