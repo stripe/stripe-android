@@ -3,17 +3,8 @@ tags:
   - all
   - livemode-data
 ---
-- launchApp
 - startRecording: /tmp/test_results/testmode-data-testoauthinstitution
-- tapOn: "Playground"
-- tapOn:
-    id: "Native option"
-- tapOn:
-    id: "Data option"
-- tapOn:
-    id: "Merchant setting"
-- tapOn:
-    id: "Livetesting option"
+- openLink: stripeconnectionsexample://playground?flow=Data&financial_connections_override_native=native&merchant=live_testing
 - tapOn: "Connect Accounts!"
 # Wait until the consent button is visible
 - extendedWaitUntil:
