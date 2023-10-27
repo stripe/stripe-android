@@ -127,9 +127,12 @@ class PaymentMethodsActivity : AppCompatActivity() {
             AddPaymentMethodContract(),
             ::onAddPaymentMethodResult
         )
-        adapter.addPaymentMethodArgs.observe(this) { args ->
-            if (args != null) {
-                addPaymentMethodLauncher.launch(args)
+
+        lifecycleScope.launch {
+            adapter.addPaymentMethodArgs.collect { args ->
+                if (args != null) {
+                    addPaymentMethodLauncher.launch(args)
+                }
             }
         }
 
