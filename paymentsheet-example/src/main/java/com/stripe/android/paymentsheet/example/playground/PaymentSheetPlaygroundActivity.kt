@@ -94,7 +94,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
 
             val playgroundState by viewModel.state.collectAsState()
-            val isWaitingToRefresh by viewModel.isWaitingToAutoRefresh.collectAsState()
+            val loadingState by viewModel.loadingState.collectAsState()
 
             PlaygroundTheme(
                 content = {
@@ -107,7 +107,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 bottomBarContent = {
                     ReloadSection(
                         playgroundSettings = localPlaygroundSettings,
-                        isReloading = playgroundState == null,
+                        loadingState = loadingState,
                     )
 
                     PlaygroundStateUi(
@@ -115,7 +115,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                         paymentSheet = paymentSheet,
                         flowController = flowController,
                         addressLauncher = addressLauncher,
-                        isWaitingForRefresh = isWaitingToRefresh,
+                        loadingState = loadingState,
                     )
                 },
             )
@@ -165,7 +165,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     @Composable
     private fun ReloadSection(
         playgroundSettings: PlaygroundSettings,
-        isReloading: Boolean,
+        loadingState: LoadingState,
     ) {
         val autoRefresh by playgroundSettings[AutoRefreshSettingsDefinition].collectAsState()
 
@@ -175,7 +175,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         ) {
             Button(
                 onClick = { viewModel.prepareCheckout(playgroundSettings) },
-                enabled = !isReloading && !autoRefresh,
+                enabled = !autoRefresh && loadingState.isIdle,
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 16.dp)
@@ -201,13 +201,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         paymentSheet: PaymentSheet,
         flowController: PaymentSheet.FlowController,
         addressLauncher: AddressLauncher,
-        isWaitingForRefresh: Boolean,
+        loadingState: LoadingState,
     ) {
         Column {
             ShippingAddressButton(
                 addressLauncher = addressLauncher,
                 playgroundState = playgroundState,
-                isWaitingForRefresh = isWaitingForRefresh,
+                loadingState = loadingState,
             )
 
             when (playgroundState?.integrationType) {
@@ -215,7 +215,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     PaymentSheetUi(
                         paymentSheet = paymentSheet,
                         playgroundState = playgroundState,
-                        isWaitingForRefresh = isWaitingForRefresh,
+                        loadingState = loadingState,
                     )
                 }
 
@@ -223,7 +223,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     FlowControllerUi(
                         flowController = flowController,
                         playgroundState = playgroundState,
-                        isWaitingForRefresh = isWaitingForRefresh,
+                        loadingState = loadingState,
                     )
                 }
 
@@ -244,13 +244,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     fun PaymentSheetUi(
         paymentSheet: PaymentSheet,
         playgroundState: PlaygroundState?,
-        isWaitingForRefresh: Boolean,
+        loadingState: LoadingState,
     ) {
         Button(
             onClick = {
                 presentPaymentSheet(paymentSheet, playgroundState!!)
             },
-            enabled = playgroundState != null && !isWaitingForRefresh,
+            enabled = playgroundState != null && loadingState.isIdle,
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag(CHECKOUT_TEST_TAG),
@@ -263,7 +263,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     fun FlowControllerUi(
         flowController: PaymentSheet.FlowController,
         playgroundState: PlaygroundState?,
-        isWaitingForRefresh: Boolean,
+        loadingState: LoadingState,
     ) {
         if (playgroundState != null) {
             LaunchedEffect(playgroundState) {
@@ -293,14 +293,14 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         PaymentMethodSelector(
-            isEnabled = flowControllerState != null && !isWaitingForRefresh,
+            isEnabled = flowControllerState != null && loadingState.isIdle,
             paymentMethodLabel = flowControllerState.paymentMethodLabel(),
             paymentMethodIcon = flowControllerState.paymentMethodIcon(),
             onClick = flowController::presentPaymentOptions
         )
 
         BuyButton(
-            buyButtonEnabled = flowControllerState?.selectedPaymentOption != null && !isWaitingForRefresh,
+            buyButtonEnabled = flowControllerState?.selectedPaymentOption != null && loadingState.isIdle,
             onClick = flowController::confirm
         )
     }
@@ -309,13 +309,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private fun ShippingAddressButton(
         addressLauncher: AddressLauncher,
         playgroundState: PlaygroundState?,
-        isWaitingForRefresh: Boolean,
+        loadingState: LoadingState,
     ) {
         Button(
             onClick = {
                 addressLauncher.present(playgroundState!!.clientSecret)
             },
-            enabled = playgroundState != null && !isWaitingForRefresh,
+            enabled = playgroundState != null && loadingState.isIdle,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text("Set Shipping Address")

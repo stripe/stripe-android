@@ -55,8 +55,7 @@ internal class PaymentSheetPlaygroundViewModel(
     val status = MutableStateFlow<StatusMessage?>(null)
     val state = MutableStateFlow<PlaygroundState?>(null)
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
-
-    val isWaitingToAutoRefresh = MutableStateFlow(false)
+    val loadingState = MutableStateFlow(LoadingState.None)
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -69,7 +68,7 @@ internal class PaymentSheetPlaygroundViewModel(
             settings
                 .asFlow()
                 .filter { it.snapshot()[AutoRefreshSettingsDefinition] }
-                .onEach { isWaitingToAutoRefresh.value = true }
+                .onEach { loadingState.value = LoadingState.Preparing }
                 .debounce(ReloadDebounceDuration)
                 .collectLatest(this@PaymentSheetPlaygroundViewModel::prepareCheckoutInternal)
         }
@@ -92,7 +91,7 @@ internal class PaymentSheetPlaygroundViewModel(
     ) {
         state.value = null
         flowControllerState.value = null
-        isWaitingToAutoRefresh.value = false
+        loadingState.value = LoadingState.Active
 
         // Snapshot before making the network request to not rely on UI staying in sync.
         val playgroundSettingsSnapshot = playgroundSettings.snapshot()
@@ -105,6 +104,8 @@ internal class PaymentSheetPlaygroundViewModel(
             .jsonBody(Json.encodeToString(CheckoutRequest.serializer(), requestBody))
             .suspendable()
             .awaitModel(CheckoutResponse.serializer())
+
+        loadingState.value = LoadingState.None
 
         when (apiResponse) {
             is Result.Failure -> {
@@ -314,3 +315,12 @@ data class StatusMessage(
     val message: String?,
     val hasBeenDisplayed: Boolean = false
 )
+
+enum class LoadingState {
+    None,
+    Preparing,
+    Active;
+
+    val isIdle: Boolean
+        get() = this == None
+}
