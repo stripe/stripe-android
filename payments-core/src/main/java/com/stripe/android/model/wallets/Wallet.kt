@@ -1,6 +1,7 @@
 package com.stripe.android.model.wallets
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.Address
 import kotlinx.parcelize.Parcelize
@@ -11,11 +12,14 @@ import kotlinx.parcelize.Parcelize
  * [card.wallet](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-wallet)
  */
 sealed class Wallet(
-    internal val walletType: Type
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val walletType: Type
 ) : StripeModel {
 
     @Parcelize
-    data class AmexExpressCheckoutWallet internal constructor(
+    data class AmexExpressCheckoutWallet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         val dynamicLast4: String?
     ) : Wallet(Type.AmexExpressCheckout)
 
@@ -25,7 +29,9 @@ sealed class Wallet(
     ) : Wallet(Type.ApplePay)
 
     @Parcelize
-    data class GooglePayWallet internal constructor(
+    data class GooglePayWallet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         val dynamicLast4: String?
     ) : Wallet(Type.GooglePay), Parcelable
 
@@ -51,7 +57,8 @@ sealed class Wallet(
         val dynamicLast4: String?
     ) : Wallet(Type.VisaCheckout)
 
-    internal enum class Type(val code: String) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class Type(val code: String) {
         AmexExpressCheckout("amex_express_checkout"),
         ApplePay("apple_pay"),
         GooglePay("google_pay"),

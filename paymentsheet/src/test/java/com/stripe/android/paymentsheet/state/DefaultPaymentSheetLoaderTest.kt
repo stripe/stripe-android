@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Status.Canceled
 import com.stripe.android.model.StripeIntent.Status.Succeeded
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -287,6 +288,57 @@ internal class DefaultPaymentSheetLoaderTest {
 
             assertThat(result.customerPaymentMethods)
                 .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        }
+
+    @Test
+    fun `load() with customer should filter out cards attached to a filtered wallet`() =
+        runTest {
+            val result = createPaymentSheetLoader(
+                customerRepo = FakeCustomerRepository(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
+                                wallet = Wallet.GooglePayWallet("3000")
+                            )
+                        )
+                    )
+                )
+            ).load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            ).getOrThrow()
+
+            assertThat(result.customerPaymentMethods)
+                .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        }
+
+    @Test
+    fun `load() with customer should not filter out cards attached to a wallet`() =
+        runTest {
+            val cardWithAmexWallet = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
+                    wallet = Wallet.AmexExpressCheckoutWallet("3000")
+                )
+            )
+            val result = createPaymentSheetLoader(
+                customerRepo = FakeCustomerRepository(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                        cardWithAmexWallet
+                    )
+                )
+            ).load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            ).getOrThrow()
+
+            assertThat(result.customerPaymentMethods)
+                .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD, cardWithAmexWallet)
         }
 
     // PayPal isn't supported as a saved payment method due to issues with on-session.
