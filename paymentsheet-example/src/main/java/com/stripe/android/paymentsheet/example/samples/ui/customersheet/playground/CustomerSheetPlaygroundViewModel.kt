@@ -72,6 +72,8 @@ class CustomerSheetPlaygroundViewModel(
             .defaultBillingDetails(
                 if (it.useDefaultBillingAddress) {
                     PaymentSheet.BillingDetails(
+                        name = "Jenny Rosen",
+                        email = "jenny@example.com",
                         address = PaymentSheet.Address(
                             city = "Seattle",
                             country = "US",
