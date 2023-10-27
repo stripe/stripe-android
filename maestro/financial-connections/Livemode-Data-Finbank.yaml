@@ -43,5 +43,5 @@ tags:
 - assertVisible: ".*Success.*"
 - tapOn: "Done"
 - assertVisible: ".*Completed!.*"
-- assertVisible: ".*StripeBank.*"
+- assertVisible: ".*FinBank.*"
 - stopRecording
