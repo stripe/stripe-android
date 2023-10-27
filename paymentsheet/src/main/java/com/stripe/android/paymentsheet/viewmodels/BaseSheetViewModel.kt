@@ -131,9 +131,9 @@ internal abstract class BaseSheetViewModel(
         currentScreen,
         linkHandler.isLinkEnabled.filterNotNull(),
         googlePayState,
-        stripeIntent.filterNotNull(),
-    ) { screen, isLinkAvailable, googlePay, intent ->
-        mapToHeaderTextResource(screen, isLinkAvailable, googlePay, intent)
+        supportedPaymentMethodsFlow,
+    ) { screen, isLinkAvailable, googlePay, supportedPaymentMethods ->
+        mapToHeaderTextResource(screen, isLinkAvailable, googlePay, supportedPaymentMethods)
     }
 
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
@@ -452,13 +452,13 @@ internal abstract class BaseSheetViewModel(
         screen: PaymentSheetScreen?,
         isLinkAvailable: Boolean,
         googlePayState: GooglePayState,
-        stripeIntent: StripeIntent,
+        supportedPaymentMethods: List<PaymentMethodCode>,
     ): Int? {
         return if (screen != null) {
             headerTextFactory.create(
                 screen = screen,
                 isWalletEnabled = isLinkAvailable || googlePayState is GooglePayState.Available,
-                types = stripeIntent.paymentMethodTypes,
+                types = supportedPaymentMethods,
             )
         } else {
             null
