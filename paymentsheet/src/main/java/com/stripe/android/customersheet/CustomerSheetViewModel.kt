@@ -360,7 +360,6 @@ internal class CustomerSheetViewModel @Inject constructor(
                         updateViewState<CustomerSheetViewState.SelectPaymentMethod> { viewState ->
                             viewState.copy(
                                 savedPaymentMethods = savedPaymentMethods,
-                                isEditing = false,
                                 paymentSelection = viewState.paymentSelection.takeUnless { selection ->
                                     val removedPaymentSelection = selection is PaymentSelection.Saved &&
                                         selection.paymentMethod == paymentMethod
