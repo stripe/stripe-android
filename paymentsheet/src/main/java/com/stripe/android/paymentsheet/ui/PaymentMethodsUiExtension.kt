@@ -4,6 +4,7 @@ import android.content.res.Resources
 import androidx.annotation.DrawableRes
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
 import com.stripe.android.financialconnections.R as FinancialConnectionsR
@@ -45,8 +46,9 @@ internal fun PaymentMethod.getLabel(resources: Resources): String? = when (type)
     else -> null
 }
 
-internal fun PaymentMethod.getLabelIcon(): Int? = when (type) {
-    PaymentMethod.Type.USBankAccount -> FinancialConnectionsR.drawable.stripe_ic_bank
+internal fun PaymentMethod.getLabelIcon(): Int? = when {
+    type == PaymentMethod.Type.USBankAccount &&
+        DefaultIsFinancialConnectionsAvailable()() -> FinancialConnectionsR.drawable.stripe_ic_bank
     else -> null
 }
 

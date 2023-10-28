@@ -26,6 +26,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -80,6 +81,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val customerSheetLoader: CustomerSheetLoader,
+    private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
 ) : ViewModel() {
 
     private val backStack = MutableStateFlow(initialBackStack)
@@ -100,9 +102,9 @@ internal class CustomerSheetViewModel @Inject constructor(
     )
     private val usBankAccount = LpmRepository.hardCodedUsBankAccount
 
-    private val supportedPaymentMethods = listOf(
+    private val supportedPaymentMethods = listOfNotNull(
         card,
-        usBankAccount
+        usBankAccount.takeIf { isFinancialConnectionsAvailable() }
     )
 
     init {

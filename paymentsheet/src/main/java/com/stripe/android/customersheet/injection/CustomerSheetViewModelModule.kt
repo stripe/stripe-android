@@ -22,6 +22,8 @@ import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
@@ -83,6 +85,11 @@ internal interface CustomerSheetViewModelModule {
         @Provides
         fun provideCoroutineContext(): CoroutineContext {
             return Dispatchers.IO
+        }
+
+        @Provides
+        fun providesIsFinancialConnectionsAvailable(): IsFinancialConnectionsAvailable {
+            return DefaultIsFinancialConnectionsAvailable()
         }
 
         @Provides

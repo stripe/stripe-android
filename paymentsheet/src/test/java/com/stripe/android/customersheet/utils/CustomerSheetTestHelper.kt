@@ -19,6 +19,7 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -47,19 +48,6 @@ import kotlin.coroutines.EmptyCoroutineContext
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal object CustomerSheetTestHelper {
     internal val application = ApplicationProvider.getApplicationContext<Application>()
-    internal val lpmRepository = LpmRepository(
-        LpmRepository.LpmRepositoryArguments(
-            resources = application.resources,
-            isFinancialConnectionsAvailable = { true },
-        )
-    ).apply {
-        update(
-            PaymentIntentFactory.create(
-                paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
-            ),
-            null
-        )
-    }
 
     internal val usBankAccountFormArguments = USBankAccountFormArguments(
         onBehalfOf = null,
@@ -121,6 +109,7 @@ internal object CustomerSheetTestHelper {
 
     internal fun mockedFormViewModel(
         configuration: CustomerSheet.Configuration,
+        lpmRepository: LpmRepository,
     ): Provider<FormViewModelSubcomponent.Builder> {
         val formViewModel = FormViewModel(
             context = application,
@@ -156,7 +145,20 @@ internal object CustomerSheetTestHelper {
     }
 
     internal fun createViewModel(
-        lpmRepository: LpmRepository = CustomerSheetTestHelper.lpmRepository,
+        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = IsFinancialConnectionsAvailable { true },
+        lpmRepository: LpmRepository = LpmRepository(
+            LpmRepository.LpmRepositoryArguments(
+                resources = application.resources,
+                isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
+            )
+        ).apply {
+            update(
+                PaymentIntentFactory.create(
+                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                ),
+                null
+            )
+        },
         isLiveMode: Boolean = false,
         workContext: CoroutineContext = EmptyCoroutineContext,
         initialBackStack: List<CustomerSheetViewState> = listOf(
@@ -176,7 +178,7 @@ internal object CustomerSheetTestHelper {
             googlePayEnabled = isGooglePayAvailable
         ),
         formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder> =
-            mockedFormViewModel(configuration),
+            mockedFormViewModel(configuration, lpmRepository),
         eventReporter: CustomerSheetEventReporter = mock(),
         intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
             enqueueCompleteStep(true)
@@ -219,6 +221,7 @@ internal object CustomerSheetTestHelper {
             statusBarColor = { null },
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
+            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
         }

@@ -1732,6 +1732,46 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When FC SDK is not available, support payment methods should not include us bank account`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { false },
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+            ),
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.supportedPaymentMethods.map { it.code })
+                .doesNotContain(PaymentMethod.Type.USBankAccount.code)
+        }
+    }
+
+    @Test
+    fun `When FC SDK is available, support payment methods should be included us bank account`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+            ),
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.supportedPaymentMethods.map { it.code })
+                .contains(PaymentMethod.Type.USBankAccount.code)
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     private suspend inline fun <R> ReceiveTurbine<*>.awaitViewState(): R {
         return awaitItem() as R
