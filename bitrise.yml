@@ -118,9 +118,6 @@ workflows:
   _run-connections-e2e-tests:
     before_run:
       - start_emulator
-      - prepare_all
-    after_run:
-      - conclude_all
     steps:
       - wait-for-android-emulator@1:
           inputs:
@@ -128,19 +125,12 @@ workflows:
       - pull-intermediate-files@1:
           inputs:
             - artifact_sources: .*
-      - npm@1:
-          inputs:
-            - command: install -g junit-report-merger
       - script@1:
           title: Execute Maestro tests
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh -t  $MAESTRO_TAGS
-      - custom-test-results-export@1:
-          inputs:
-            - search_pattern: '*/maestroReport.xml'
-            - test_name: Maestro tests $MAESTRO_TAGS
+                bash ./scripts/execute_maestro_tests.sh -t $MAESTRO_TAGS
   notify-connections-e2e-failure:
     steps:
       - slack@4:
