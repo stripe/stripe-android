@@ -6,7 +6,8 @@ tags:
 ---
 - startRecording: /tmp/test_results/testmode-data-testoauthinstitution
 - openLink: stripeconnectionsexample://playground?flow=Data&financial_connections_override_native=native&merchant=testmode
-- tapOn: "Connect Accounts!"
+- tapOn:
+    id: "connect_accounts"
 # Wait until the consent button is visible
 - extendedWaitUntil:
     visible:

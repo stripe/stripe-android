@@ -10,7 +10,8 @@ tags:
     id: "Customer email setting"
 - inputRandomEmail
 - hideKeyboard
-- tapOn: "Connect Accounts!"
+- tapOn:
+    id: "connect_accounts"
 # Wait until the consent button is visible
 - extendedWaitUntil:
     visible:
