@@ -72,4 +72,4 @@ for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
     fi
 done
 
-jrm $TEST_RESULTS_PATH/maestroReport.xml "$TEST_RESULTS_PATH/*.xml"
+jrm ./maestroReport.xml "./*.xml"
