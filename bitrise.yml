@@ -122,6 +122,7 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
+      - git-clone@8: { }
       - pull-intermediate-files@1:
           inputs:
             - artifact_sources: .*
