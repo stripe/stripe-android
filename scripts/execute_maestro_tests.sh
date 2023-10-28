@@ -63,10 +63,11 @@ for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
             let RETRY_COUNT=RETRY_COUNT+1
             echo "Maestro test attempt $RETRY_COUNT failed. Retrying..."
         done
-        RETRY_COUNT=0
         if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
             echo "Maestro tests failed after $MAX_RETRIES attempts."
             exit 1
+        else
+            RETRY_COUNT=0
         fi
     fi
 done
