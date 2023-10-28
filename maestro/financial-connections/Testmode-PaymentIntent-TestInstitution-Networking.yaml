@@ -48,7 +48,8 @@ tags:
 ###########################################
 # REUSE NEWLY CREATED LINK ACCOUNT
 ###########################################
-- tapOn: "Connect Accounts!"
+- tapOn:
+    id: "connect_accounts"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
     visible:
