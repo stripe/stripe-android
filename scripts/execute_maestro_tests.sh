@@ -26,7 +26,7 @@ fi
 export MAESTRO_VERSION=1.33.1
 
 # Retry mechanism for Maestro installation
-MAX_RETRIES=3
+MAX_RETRIES=5
 RETRY_COUNT=0
 
 while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
@@ -52,4 +52,15 @@ mkdir -p /tmp/test_results
 adb install $BITRISE_APK_PATH
 
 # Clear and start collecting logs
-maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --include-tags=$MAESTRO_TAGS --output maestroReport.xml maestro/financial-connections
+RETRY_COUNT=0
+while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
+    maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --include-tags=$MAESTRO_TAGS --output maestroReport.xml maestro/financial-connections && break
+    let RETRY_COUNT=RETRY_COUNT+1
+    echo "Maestro test attempt $RETRY_COUNT failed. Retrying..."
+    sleep 5
+done
+
+if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
+    echo "Maestro tests failed after $MAX_RETRIES attempts."
+    exit 1
+fi
