@@ -45,22 +45,35 @@ if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
     exit 1
 fi
 
+TEST_DIR_PATH=maestro/financial-connections
+TEST_RESULTS_PATH=/tmp/test_results
+
 # Create test results folder.
-mkdir -p /tmp/test_results
+mkdir -p $TEST_RESULTS_PATH
 
 # install APK.
 adb install $BITRISE_APK_PATH
 
 # Clear and start collecting logs
 RETRY_COUNT=0
-while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
-    maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --include-tags=$MAESTRO_TAGS --output maestroReport.xml maestro/financial-connections && break
-    let RETRY_COUNT=RETRY_COUNT+1
-    echo "Maestro test attempt $RETRY_COUNT failed. Retrying..."
-    sleep 5
+TEST_DIR_PATH=maestro/financial-connections
+
+for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
+   # Check if tags are present in the test file
+    if awk '/tags:/,/---/' "$TEST_FILE_PATH" | grep -q "$MAESTRO_TAGS"; then
+        # Execute Maestro test flow and retries if failed.
+        while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
+            maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output $TEST_FILE_PATH.xml "$TEST_FILE_PATH" && break
+            let RETRY_COUNT=RETRY_COUNT+1
+            echo "Maestro test attempt $RETRY_COUNT failed. Retrying..."
+            sleep 3
+        done
+        RETRY_COUNT=0
+        if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
+            echo "Maestro tests failed after $MAX_RETRIES attempts."
+            exit 1
+        fi
+    fi
 done
 
-if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
-    echo "Maestro tests failed after $MAX_RETRIES attempts."
-    exit 1
-fi
+jrm $TEST_RESULTS_PATH/maestroReport.xml "$TEST_RESULTS_PATH/*.xml"

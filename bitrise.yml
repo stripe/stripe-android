@@ -128,6 +128,9 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
+      - npm@1:
+          inputs:
+            - command: install junit-report-merger
       - script@1:
           title: Execute Maestro tests
           inputs:
@@ -144,11 +147,11 @@ workflows:
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
             - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-      - pagerduty@0:
-          run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
-          inputs:
-            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
-            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
+#      - pagerduty@0:
+#          run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
+#          inputs:
+#            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
+#            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
   maestro-edge-financial-connections:
     before_run:
       - start_emulator
