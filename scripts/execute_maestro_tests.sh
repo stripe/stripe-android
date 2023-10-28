@@ -62,7 +62,6 @@ for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
             maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output $TEST_FILE_PATH.xml "$TEST_FILE_PATH" && break
             let RETRY_COUNT=RETRY_COUNT+1
             echo "Maestro test attempt $RETRY_COUNT failed. Retrying..."
-            sleep 3
         done
         RETRY_COUNT=0
         if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
