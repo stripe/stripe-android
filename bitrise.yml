@@ -122,15 +122,15 @@ workflows:
     after_run:
       - conclude_all
     steps:
-      - pull-intermediate-files@1:
-          inputs:
-            - artifact_sources: .*
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
+      - pull-intermediate-files@1:
+          inputs:
+            - artifact_sources: .*
       - npm@1:
           inputs:
-            - command: install junit-report-merger
+            - command: install -g junit-report-merger
       - script@1:
           title: Execute Maestro tests
           inputs:

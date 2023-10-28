@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -o pipefail
-set -x
 set -e
 
 # Maestro tags to be executed. see https://maestro.mobile.dev/cli/tags
@@ -45,18 +44,15 @@ if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
     exit 1
 fi
 
-TEST_DIR_PATH=maestro/financial-connections
-TEST_RESULTS_PATH=/tmp/test_results
-
-# Create test results folder.
-mkdir -p $TEST_RESULTS_PATH
-
 # install APK.
 adb install $BITRISE_APK_PATH
 
-# Clear and start collecting logs
-RETRY_COUNT=0
 TEST_DIR_PATH=maestro/financial-connections
+TEST_RESULTS_PATH=/tmp/test_results
+RETRY_COUNT=0
+
+# Create test results folder.
+mkdir -p $TEST_RESULTS_PATH
 
 for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
    # Check if tags are present in the test file
