@@ -215,16 +215,16 @@ class SupportedPaymentMethodTest {
                 )
             )
         }
-        val mockIntent = mock<PaymentIntent>()
-        whenever(mockIntent.paymentMethodTypes).thenReturn(listOf("card", "us_bank_account"))
-        whenever(mockIntent.isLiveMode).thenReturn(false)
-        whenever(mockIntent.unactivatedPaymentMethods).thenReturn(listOf("card"))
 
-        val expected = listOf<SupportedPaymentMethod>().plus(card)
+        val paymentIntent = PaymentIntentFactory.create(
+            paymentMethodTypes = listOf("card", "us_bank_account")
+        )
+
+        val expected = listOf(card)
 
         assertThat(
             getPMsToAdd(
-                stripeIntent = mockIntent,
+                stripeIntent = paymentIntent,
                 config = PaymentSheet.Configuration("Test", allowsDelayedPaymentMethods = true),
                 lpmRepository = lpmRepository,
                 isFinancialConnectionsAvailable = { false },
@@ -247,16 +247,16 @@ class SupportedPaymentMethodTest {
                 )
             )
         }
-        val mockIntent = mock<PaymentIntent>()
-        whenever(mockIntent.paymentMethodTypes).thenReturn(listOf("card", "us_bank_account"))
-        whenever(mockIntent.isLiveMode).thenReturn(false)
-        whenever(mockIntent.unactivatedPaymentMethods).thenReturn(listOf("card"))
 
-        val expected = listOf<SupportedPaymentMethod>().plus(card).plus(LpmRepository.hardCodedUsBankAccount)
+        val paymentIntent = PaymentIntentFactory.create(
+            paymentMethodTypes = listOf("card", "us_bank_account")
+        )
+
+        val expected = listOf(card, LpmRepository.hardCodedUsBankAccount)
 
         assertThat(
             getPMsToAdd(
-                stripeIntent = mockIntent,
+                stripeIntent = paymentIntent,
                 config = PaymentSheet.Configuration("Test", allowsDelayedPaymentMethods = true),
                 lpmRepository = lpmRepository,
                 isFinancialConnectionsAvailable = { true },

@@ -8,7 +8,7 @@
 * [FIXED][7499](https://github.com/stripe/stripe-android/pull/7499) Fixed an issue with incorrect error messages when encountering a failure after 3D Secure authentication.
 * [FIXED][7464](https://github.com/stripe/stripe-android/pull/7464) Fixed an issue where canceling the US Bank Account selection flow prevents the user from launching it again.
 * [FIXED][7529](https://github.com/stripe/stripe-android/pull/7529) PaymentSheet no longer displays saved cards that originated from Apple Pay or Google Pay.
-* [FIXED][7530](https://github.com/stripe/stripe-android/pull/7530) Fixed an issue where the Link module included the Financial Connections SDK which caused PaymentSheet to transitively include the Financial Connections SDK. Also fixed an issue where PaymentSheet would show the US Bank Account form when the Financial Connections SDK is not included, which could lead to a crash.
+* [FIXED][7530](https://github.com/stripe/stripe-android/pull/7530) Fixed an issue which caused PaymentSheet to transitively include the Financial Connections SDK even if not requested.
 
 ## 20.34.1 - 2023-10-24
 
