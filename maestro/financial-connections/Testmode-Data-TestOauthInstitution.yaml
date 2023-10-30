@@ -17,9 +17,6 @@ tags:
 # Common: web AuthFlow - connect OAuth institution
 - tapOn: "Agree and continue"
 - assertVisible: "Test OAuth Institution"
-# ERRORS
-- tapOn: ".*unscheduled.*"
-- tapOn: "Select another bank"
 # SELECT OAUTH INSTITUTION
 - tapOn: "Test OAuth Institution"
 - tapOn:
