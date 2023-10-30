@@ -1,4 +1,3 @@
-Project ':stripe-core'
 \--- com.google.dagger:dagger-compiler:2.48
      +--- com.google.dagger:dagger:2.48
      |    \--- javax.inject:javax.inject:1
@@ -91,12 +90,12 @@ Project ':stripe-core'
      +--- net.ltgt.gradle.incap:incap:0.2
      +--- org.checkerframework:checker-compat-qual:2.5.5
      \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.0 (*)
-\--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0
-     +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
-     |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
+\--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22
+     +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
      |    \--- org.jetbrains:annotations:13.0
-     \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0
-          \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
+     \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22
+          \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 \--- com.puppycrawl.tools:checkstyle:9.3
      +--- info.picocli:picocli:4.6.2
      +--- org.antlr:antlr4-runtime:4.9.3
@@ -113,17 +112,17 @@ Project ':stripe-core'
      |    +--- org.javassist:javassist:3.28.0-GA
      |    \--- com.google.code.findbugs:jsr305:3.0.2
      \--- net.sf.saxon:Saxon-HE:10.6
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 +--- project :stripe-core (*)
-+--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 +--- androidx.browser:browser:1.5.0
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.core:core:1.1.0
@@ -145,36 +144,36 @@ Project ':stripe-core'
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
-|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.10
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
+|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0
 |    \--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0
-|         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
 |         +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
 |         \--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0
 |              \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0
-|                   +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+|                   +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
 |                   +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0 (*)
-|                   \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
-+--- org.jetbrains.kotlin:kotlin-parcelize-runtime:{strictly 1.8.0} -> 1.8.0 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:{strictly 1.8.0} -> 1.8.0 (c)
+|                   \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:{strictly 1.8.22} -> 1.8.22 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:{strictly 1.8.22} -> 1.8.22 (c)
 +--- androidx.browser:browser:{strictly 1.5.0} -> 1.5.0 (c)
 +--- com.google.dagger:dagger:{strictly 2.48} -> 2.48 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:{strictly 1.5.0} -> 1.5.0 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib:{strictly 1.8.10} -> 1.8.10 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:{strictly 1.8.0} -> 1.8.0 (c)
-+--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib:{strictly 1.8.22} -> 1.8.22 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:{strictly 1.8.22} -> 1.8.22 (c)
++--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:{strictly 1.8.22} -> 1.8.22 (c)
 +--- androidx.annotation:annotation:{strictly 1.2.0} -> 1.2.0 (c)
 +--- androidx.core:core:{strictly 1.1.0} -> 1.1.0 (c)
 +--- com.google.guava:listenablefuture:{strictly 1.0} -> 1.0 (c)
@@ -182,7 +181,7 @@ Project ':stripe-core'
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:{strictly 1.5.0} -> 1.5.0 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-common:{strictly 1.8.10} -> 1.8.10 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-common:{strictly 1.8.22} -> 1.8.22 (c)
 +--- org.jetbrains:annotations:{strictly 13.0} -> 13.0 (c)
 +--- androidx.lifecycle:lifecycle-runtime:{strictly 2.0.0} -> 2.0.0 (c)
 +--- androidx.versionedparcelable:versionedparcelable:{strictly 1.1.0} -> 1.1.0 (c)
@@ -193,22 +192,22 @@ Project ':stripe-core'
 +--- androidx.arch.core:core-common:{strictly 2.0.0} -> 2.0.0 (c)
 \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:{strictly 1.5.0} -> 1.5.0 (c)
 +--- project :stripe-core (*)
-+--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-+--- org.jetbrains.kotlin:kotlin-parcelize-runtime:{strictly 1.8.0} -> 1.8.0 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:{strictly 1.8.0} -> 1.8.0 (c)
+|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:{strictly 1.8.22} -> 1.8.22 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:{strictly 1.8.22} -> 1.8.22 (c)
 +--- androidx.browser:browser:{strictly 1.5.0} -> 1.5.0 (c)
 +--- com.google.dagger:dagger:{strictly 2.48} -> 2.48 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:{strictly 1.5.0} -> 1.5.0 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib:{strictly 1.8.10} -> 1.8.10 (c)
-+--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:{strictly 1.8.0} -> 1.8.0 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib:{strictly 1.8.22} -> 1.8.22 (c)
++--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:{strictly 1.8.22} -> 1.8.22 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:{strictly 1.8.22} -> 1.8.22 (c)
 +--- androidx.annotation:annotation:{strictly 1.2.0} -> 1.2.0 (c)
 +--- androidx.collection:collection:{strictly 1.1.0} -> 1.1.0 (c)
 +--- androidx.concurrent:concurrent-futures:{strictly 1.0.0} -> 1.0.0 (c)
@@ -218,7 +217,7 @@ Project ':stripe-core'
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:{strictly 1.5.0} -> 1.5.0 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-common:{strictly 1.8.10} -> 1.8.10 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-common:{strictly 1.8.22} -> 1.8.22 (c)
 +--- org.jetbrains:annotations:{strictly 13.0} -> 13.0 (c)
 +--- androidx.lifecycle:lifecycle-runtime:{strictly 2.0.0} -> 2.0.0 (c)
 +--- androidx.versionedparcelable:versionedparcelable:{strictly 1.1.0} -> 1.1.0 (c)
@@ -227,10 +226,10 @@ Project ':stripe-core'
 +--- androidx.lifecycle:lifecycle-common:{strictly 2.0.0} -> 2.0.0 (c)
 +--- androidx.arch.core:core-common:{strictly 2.0.0} -> 2.0.0 (c)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:{strictly 1.5.0} -> 1.5.0 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 +--- androidx.browser:browser:1.5.0
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.collection:collection:1.1.0
@@ -258,38 +257,38 @@ Project ':stripe-core'
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
-|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.10
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
+|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
 \--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0
      \--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0
-          +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+          +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
           +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0
           |    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0 (c)
           |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0 (c)
           |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0 (c)
           |    \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0 (c)
-          +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+          +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
           \--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0
                \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0
-                    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+                    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
                     +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0 (*)
-                    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+                    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-+--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:{strictly 1.8.0} -> 1.8.0 (c)
-+--- org.jetbrains.kotlin:kotlin-parcelize-runtime:{strictly 1.8.0} -> 1.8.0 (c)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:{strictly 1.8.22} -> 1.8.22 (c)
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:{strictly 1.8.22} -> 1.8.22 (c)
 +--- androidx.browser:browser:1.5.0
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.core:core:1.1.0
@@ -311,34 +310,34 @@ Project ':stripe-core'
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
-|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.10
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
+|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0
 |    \--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0
-|         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
 |         +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
 |         \--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0
 |              \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0
-|                   +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+|                   +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
 |                   +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0 (*)
-|                   \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+|                   \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
 +--- androidx.browser:browser:{strictly 1.5.0} -> 1.5.0 (c)
 +--- com.google.dagger:dagger:{strictly 2.48} -> 2.48 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:{strictly 1.5.0} -> 1.5.0 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib:{strictly 1.8.10} -> 1.8.10 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:{strictly 1.8.0} -> 1.8.0 (c)
-+--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib:{strictly 1.8.22} -> 1.8.22 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:{strictly 1.8.22} -> 1.8.22 (c)
++--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:{strictly 1.8.22} -> 1.8.22 (c)
 +--- androidx.annotation:annotation:{strictly 1.2.0} -> 1.2.0 (c)
 +--- androidx.core:core:{strictly 1.1.0} -> 1.1.0 (c)
 +--- com.google.guava:listenablefuture:{strictly 1.0} -> 1.0 (c)
@@ -346,7 +345,7 @@ Project ':stripe-core'
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:{strictly 1.5.0} -> 1.5.0 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-common:{strictly 1.8.10} -> 1.8.10 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-common:{strictly 1.8.22} -> 1.8.22 (c)
 +--- org.jetbrains:annotations:{strictly 13.0} -> 13.0 (c)
 +--- androidx.lifecycle:lifecycle-runtime:{strictly 2.0.0} -> 2.0.0 (c)
 +--- androidx.versionedparcelable:versionedparcelable:{strictly 1.1.0} -> 1.1.0 (c)
@@ -356,16 +355,16 @@ Project ':stripe-core'
 +--- androidx.lifecycle:lifecycle-common:{strictly 2.0.0} -> 2.0.0 (c)
 +--- androidx.arch.core:core-common:{strictly 2.0.0} -> 2.0.0 (c)
 \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:{strictly 1.5.0} -> 1.5.0 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-+--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 +--- androidx.browser:browser:1.5.0
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.collection:collection:1.1.0
@@ -393,37 +392,37 @@ Project ':stripe-core'
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
-|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.10
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
+|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
 \--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0
      \--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0
-          +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+          +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
           +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0
           |    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0 (c)
           |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0 (c)
           |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0 (c)
           |    \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0 (c)
-          +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+          +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
           \--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0
                \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0
-                    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+                    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
                     +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0 (*)
-                    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+                    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 +--- project :stripe-core (*)
-+--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 +--- androidx.browser:browser:1.5.0
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.core:core:1.1.0 -> 1.8.0
@@ -450,30 +449,30 @@ Project ':stripe-core'
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-test-jvm:1.6.4 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
-|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.10
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
+|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0
 |    \--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0
-|         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
 |         +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
 |         \--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0
 |              \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0
-|                   +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+|                   +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
 |                   +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0 (*)
-|                   \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
-+--- org.jetbrains.kotlin:kotlin-parcelize-runtime:{strictly 1.8.0} -> 1.8.0 (c)
+|                   \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:{strictly 1.8.22} -> 1.8.22 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:{strictly 1.6.4} -> 1.6.4 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:{strictly 1.8.22} -> 1.8.22 (c)
 +--- androidx.browser:browser:{strictly 1.5.0} -> 1.5.0 (c)
 +--- com.google.dagger:dagger:{strictly 2.48} -> 2.48 (c)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:{strictly 1.5.0} -> 1.5.0 (c)
@@ -503,7 +502,7 @@ Project ':stripe-core'
 |    +--- androidx.lifecycle:lifecycle-common:2.3.1 -> 2.5.1 (*)
 |    +--- androidx.tracing:tracing:1.0.0
 |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10 -> 1.8.10 (*)
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10 -> 1.8.22 (*)
 |    \--- androidx.concurrent:concurrent-futures:1.1.0
 |         +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
 |         \--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
@@ -516,11 +515,11 @@ Project ':stripe-core'
 |    |    |    |    +--- androidx.lifecycle:lifecycle-runtime:2.5.1 (*)
 |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel:2.5.1
 |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
-|    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel-savedstate:2.5.1
 |    |    |    |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.2.0
 |    |    |    |    |    +--- androidx.core:core-ktx:1.2.0
-|    |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.41 -> 1.8.10 (*)
+|    |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.41 -> 1.8.22 (*)
 |    |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
 |    |    |    |    |    |    \--- androidx.core:core:1.2.0 -> 1.8.0 (*)
 |    |    |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.5.1
@@ -528,27 +527,27 @@ Project ':stripe-core'
 |    |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel:2.5.1 (*)
 |    |    |    |    |    +--- androidx.savedstate:savedstate:1.2.0
 |    |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
-|    |    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.10 (*)
-|    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.22 (*)
+|    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1 -> 1.6.4 (*)
 |    |    |    |    +--- androidx.savedstate:savedstate:1.2.0 (*)
-|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    +--- androidx.core:core-ktx:1.1.0 -> 1.2.0 (*)
 |    |    |    +--- androidx.lifecycle:lifecycle-runtime-ktx:2.5.1
 |    |    |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.2.0
 |    |    |    |    +--- androidx.lifecycle:lifecycle-runtime:2.5.1 (*)
-|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1 -> 1.6.4 (*)
 |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1
 |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel:2.5.1 (*)
-|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1 -> 1.6.4 (*)
 |    |    |    +--- androidx.savedstate:savedstate-ktx:1.2.0
 |    |    |    |    +--- androidx.savedstate:savedstate:1.2.0 (*)
-|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.10 (*)
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.22 (*)
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    +--- androidx.collection:collection-ktx:1.1.0
-|    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.20 -> 1.8.10 (*)
+|    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.20 -> 1.8.22 (*)
 |    |    |    \--- androidx.collection:collection:1.1.0 (*)
 |    |    +--- androidx.core:core-ktx:1.2.0 (*)
 |    |    +--- androidx.fragment:fragment:1.5.5
@@ -575,15 +574,15 @@ Project ':stripe-core'
 |    |    |    |    \--- androidx.customview:customview:1.0.0
 |    |    |    |         +--- androidx.annotation:annotation:1.0.0 -> 1.2.0
 |    |    |    |         \--- androidx.core:core:1.0.0 -> 1.8.0 (*)
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    +--- androidx.lifecycle:lifecycle-livedata-core-ktx:2.5.1
 |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.5.1 (*)
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1 (*)
 |    |    +--- androidx.savedstate:savedstate-ktx:1.2.0 (*)
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    +--- androidx.test:core:1.4.0 -> 1.5.0 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 +--- androidx.test:runner:1.5.2
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.test:annotation:1.0.1 (*)
@@ -593,17 +592,17 @@ Project ':stripe-core'
 |    \--- junit:junit:4.13.2 (*)
 +--- org.json:json:20230227
 +--- junit:junit:4.13.2 (*)
-+--- org.jetbrains.kotlin:kotlin-test-annotations-common:1.8.0
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0 -> 1.8.10
++--- org.jetbrains.kotlin:kotlin-test-annotations-common:1.8.22
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4
 |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-test-jvm:1.6.4
 |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4 (*)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
 |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (*)
-|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.10
-+--- org.jetbrains.kotlin:kotlin-test-junit:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-test:1.8.0
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
+|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
++--- org.jetbrains.kotlin:kotlin-test-junit:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-test:1.8.22
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 |    \--- junit:junit:4.13.2 (*)
 +--- org.mockito:mockito-core:5.2.0 (*)
 +--- org.mockito.kotlin:mockito-kotlin:4.1.0
@@ -612,12 +611,12 @@ Project ':stripe-core'
 |    +--- com.squareup.okhttp3:okhttp:4.11.0
 |    |    +--- com.squareup.okio:okio:3.2.0
 |    |    |    \--- com.squareup.okio:okio-jvm:3.2.0
-|    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.0 (*)
-|    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.20 -> 1.8.10
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.10 (*)
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.0 (*)
+|    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.22 (*)
+|    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.20 -> 1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.22 (*)
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.22 (*)
 |    +--- junit:junit:4.13 -> 4.13.2 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.10 -> 1.8.0 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.10 -> 1.8.22 (*)
 +--- org.robolectric:robolectric:4.10.3
 |    +--- org.robolectric:annotations:4.10.3
 |    +--- org.robolectric:junit:4.10.3
@@ -708,17 +707,17 @@ Project ':stripe-core'
 +--- androidx.test:runner:{strictly 1.5.2} -> 1.5.2 (c)
 +--- org.json:json:{strictly 20230227} -> 20230227 (c)
 +--- junit:junit:{strictly 4.13.2} -> 4.13.2 (c)
-+--- org.jetbrains.kotlin:kotlin-test-annotations-common:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-test-annotations-common:{strictly 1.8.22} -> 1.8.22 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-test:{strictly 1.6.4} -> 1.6.4 (c)
-+--- org.jetbrains.kotlin:kotlin-test-junit:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-test-junit:{strictly 1.8.22} -> 1.8.22 (c)
 +--- org.mockito:mockito-core:{strictly 5.2.0} -> 5.2.0 (c)
 +--- org.mockito.kotlin:mockito-kotlin:{strictly 4.1.0} -> 4.1.0 (c)
 +--- com.squareup.okhttp3:mockwebserver:{strictly 4.11.0} -> 4.11.0 (c)
 +--- org.robolectric:robolectric:{strictly 4.10.3} -> 4.10.3 (c)
 +--- com.google.truth:truth:{strictly 1.1.3} -> 1.1.3 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib:{strictly 1.8.10} -> 1.8.10 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:{strictly 1.8.0} -> 1.8.0 (c)
-+--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib:{strictly 1.8.22} -> 1.8.22 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:{strictly 1.8.22} -> 1.8.22 (c)
++--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:{strictly 1.8.22} -> 1.8.22 (c)
 +--- androidx.annotation:annotation:{strictly 1.2.0} -> 1.2.0 (c)
 +--- androidx.core:core:{strictly 1.8.0} -> 1.8.0 (c)
 +--- com.google.guava:listenablefuture:{strictly 9999.0-empty-to-avoid-conflict-with-guava} -> 9999.0-empty-to-avoid-conflict-with-guava (c)
@@ -735,9 +734,9 @@ Project ':stripe-core'
 +--- androidx.fragment:fragment-ktx:{strictly 1.5.5} -> 1.5.5 (c)
 +--- androidx.test:annotation:{strictly 1.0.1} -> 1.0.1 (c)
 +--- org.hamcrest:hamcrest-core:{strictly 1.3} -> 1.3 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-common:{strictly 1.8.10} -> 1.8.10 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-common:{strictly 1.8.22} -> 1.8.22 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-test-jvm:{strictly 1.6.4} -> 1.6.4 (c)
-+--- org.jetbrains.kotlin:kotlin-test:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-test:{strictly 1.8.22} -> 1.8.22 (c)
 +--- net.bytebuddy:byte-buddy:{strictly 1.14.1} -> 1.14.1 (c)
 +--- net.bytebuddy:byte-buddy-agent:{strictly 1.14.1} -> 1.14.1 (c)
 +--- com.squareup.okhttp3:okhttp:{strictly 4.11.0} -> 4.11.0 (c)
@@ -797,12 +796,12 @@ Project ':stripe-core'
 +--- androidx.lifecycle:lifecycle-livedata:{strictly 2.0.0} -> 2.0.0 (c)
 \--- androidx.customview:customview:{strictly 1.0.0} -> 1.0.0 (c)
 +--- project :stripe-core (*)
-+--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
+|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 +--- androidx.arch.core:core-testing:2.2.0
 |    +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
 |    +--- androidx.arch.core:core-runtime:2.2.0
@@ -833,7 +832,7 @@ Project ':stripe-core'
 |    |    \--- androidx.annotation:annotation:1.1.0 -> 1.2.0
 |    +--- androidx.tracing:tracing:1.0.0 (*)
 |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10 -> 1.8.10 (*)
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10 -> 1.8.22 (*)
 |    \--- androidx.concurrent:concurrent-futures:1.1.0
 |         +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
 |         \--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
@@ -860,12 +859,12 @@ Project ':stripe-core'
 |    |    |    |    +--- androidx.lifecycle:lifecycle-runtime:2.5.1 (*)
 |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel:2.5.1
 |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
-|    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    |    \--- androidx.lifecycle:lifecycle-viewmodel-savedstate:2.5.1 (c)
 |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel-savedstate:2.5.1
 |    |    |    |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.2.0
 |    |    |    |    |    +--- androidx.core:core-ktx:1.2.0
-|    |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.41 -> 1.8.10 (*)
+|    |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.41 -> 1.8.22 (*)
 |    |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
 |    |    |    |    |    |    \--- androidx.core:core:1.2.0 -> 1.8.0 (*)
 |    |    |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.5.1
@@ -877,8 +876,8 @@ Project ':stripe-core'
 |    |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
 |    |    |    |    |    |    +--- androidx.arch.core:core-common:2.1.0 -> 2.2.0 (*)
 |    |    |    |    |    |    +--- androidx.lifecycle:lifecycle-common:2.4.0 -> 2.5.1 (*)
-|    |    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.10 (*)
-|    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.22 (*)
+|    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1 -> 1.6.4
 |    |    |    |    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4
 |    |    |    |    |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4
@@ -888,32 +887,32 @@ Project ':stripe-core'
 |    |    |    |    |         |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (c)
 |    |    |    |    |         |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-test-jvm:1.6.4 (c)
 |    |    |    |    |         |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4 (c)
-|    |    |    |    |         |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0
-|    |    |    |    |         |         |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-|    |    |    |    |         |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0
-|    |    |    |    |         |         |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-|    |    |    |    |         |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.10
+|    |    |    |    |         |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22
+|    |    |    |    |         |         |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    |    |    |    |         |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22
+|    |    |    |    |         |         |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    |    |    |    |         |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
 |    |    |    |    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4 (*)
-|    |    |    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
+|    |    |    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
 |    |    |    |    +--- androidx.savedstate:savedstate:1.2.0 (*)
 |    |    |    |    +--- androidx.tracing:tracing:1.0.0 (*)
-|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    +--- androidx.core:core-ktx:1.1.0 -> 1.2.0 (*)
 |    |    |    +--- androidx.lifecycle:lifecycle-runtime-ktx:2.5.1
 |    |    |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.2.0
 |    |    |    |    +--- androidx.lifecycle:lifecycle-runtime:2.5.1 (*)
-|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1 -> 1.6.4 (*)
 |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1
 |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel:2.5.1 (*)
-|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1 -> 1.6.4 (*)
 |    |    |    +--- androidx.savedstate:savedstate-ktx:1.2.0
 |    |    |    |    +--- androidx.savedstate:savedstate:1.2.0 (*)
-|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.10 (*)
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.22 (*)
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    +--- androidx.collection:collection-ktx:1.1.0
-|    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.20 -> 1.8.10 (*)
+|    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.20 -> 1.8.22 (*)
 |    |    |    \--- androidx.collection:collection:1.1.0 (*)
 |    |    +--- androidx.core:core-ktx:1.2.0 (*)
 |    |    +--- androidx.fragment:fragment:1.5.5
@@ -940,15 +939,15 @@ Project ':stripe-core'
 |    |    |    |    \--- androidx.customview:customview:1.0.0
 |    |    |    |         +--- androidx.annotation:annotation:1.0.0 -> 1.2.0
 |    |    |    |         \--- androidx.core:core:1.0.0 -> 1.8.0 (*)
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    +--- androidx.lifecycle:lifecycle-livedata-core-ktx:2.5.1
 |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.5.1 (*)
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1 (*)
 |    |    +--- androidx.savedstate:savedstate-ktx:1.2.0 (*)
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    +--- androidx.test:core:1.4.0 -> 1.5.0 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 +--- androidx.test:runner:1.5.2
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.test:annotation:1.0.1 (*)
@@ -958,17 +957,17 @@ Project ':stripe-core'
 |    \--- junit:junit:4.13.2 (*)
 +--- org.json:json:20230227
 +--- junit:junit:4.13.2 (*)
-+--- org.jetbrains.kotlin:kotlin-test-annotations-common:1.8.0
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0 -> 1.8.10
++--- org.jetbrains.kotlin:kotlin-test-annotations-common:1.8.22
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4
 |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-test-jvm:1.6.4
 |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4 (*)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
 |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (*)
-|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.10
-+--- org.jetbrains.kotlin:kotlin-test-junit:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-test:1.8.0
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
+|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
++--- org.jetbrains.kotlin:kotlin-test-junit:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-test:1.8.22
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 |    \--- junit:junit:4.13.2 (*)
 +--- org.mockito:mockito-core:5.2.0 (*)
 +--- org.mockito.kotlin:mockito-kotlin:4.1.0
@@ -977,12 +976,12 @@ Project ':stripe-core'
 |    +--- com.squareup.okhttp3:okhttp:4.11.0
 |    |    +--- com.squareup.okio:okio:3.2.0
 |    |    |    \--- com.squareup.okio:okio-jvm:3.2.0
-|    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.0 (*)
-|    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.20 -> 1.8.10
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.10 (*)
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.0 (*)
+|    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.22 (*)
+|    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.20 -> 1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.22 (*)
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.22 (*)
 |    +--- junit:junit:4.13 -> 4.13.2 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.10 -> 1.8.0 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.10 -> 1.8.22 (*)
 +--- org.robolectric:robolectric:4.10.3
 |    +--- org.conscrypt:conscrypt-openjdk-uber:2.5.2
 |    +--- androidx.test.espresso:espresso-idling-resource:3.5.1
@@ -1073,7 +1072,7 @@ Project ':stripe-core'
 |    +--- com.google.auto.value:auto-value-annotations:1.8.1 -> 1.10.1
 |    +--- com.google.errorprone:error_prone_annotations:2.7.1 -> 2.18.0
 |    \--- org.ow2.asm:asm:9.1 -> 9.5
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 (*)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22 (*)
 +--- androidx.browser:browser:1.5.0
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.collection:collection:1.1.0 (*)
@@ -1088,18 +1087,18 @@ Project ':stripe-core'
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 (*)
 \--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0
      \--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0
-          +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+          +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
           +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0
           |    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0 (c)
           |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0 (c)
           |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0 (c)
           |    \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0 (c)
-          +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+          +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
           \--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0
                \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0
-                    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+                    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
                     +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0 (*)
-                    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+                    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
 \--- io.gitlab.arturbosch.detekt:detekt-cli:1.22.0
      +--- com.beust:jcommander:1.82
      +--- io.gitlab.arturbosch.detekt:detekt-tooling:1.22.0
@@ -1993,12 +1992,12 @@ Project ':stripe-core'
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (n)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 (n)
 \--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0 (n)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0 -> 1.8.10
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 +--- androidx.browser:browser:1.5.0
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.core:core:1.1.0
@@ -2015,147 +2014,187 @@ Project ':stripe-core'
 +--- com.google.dagger:dagger:2.48
 |    \--- javax.inject:javax.inject:1
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4
-|    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.10
+|    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
 |    \--- org.jetbrains.kotlinx:atomicfu:0.17.3
-|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.20 -> 1.8.10
+|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.20 -> 1.8.22
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 (c)
 |    |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (c)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
 \--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0
-     +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+     +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
      \--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0
-          \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
-\--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0
-     +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
-     |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
+          \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
+\--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.22
+     +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
      |    \--- org.jetbrains:annotations:13.0
-     +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.0
+     +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.22
      +--- org.jetbrains.kotlin:kotlin-reflect:1.6.10
-     +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.0
+     +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.22
      +--- org.jetbrains.intellij.deps:trove4j:1.0.20200330
      \--- net.java.dev.jna:jna:5.6.0
-+--- org.jetbrains.kotlin:kotlin-serialization:1.8.0
-|    \--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.0
-|         +--- org.jetbrains.kotlin:kotlin-native-utils:1.8.0
-|         |    \--- org.jetbrains.kotlin:kotlin-util-io:1.8.0
-|         +--- org.jetbrains.kotlin:kotlin-project-model:1.8.0
-|         |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.0
-+--- com.google.devtools.ksp:symbol-processing:1.8.0-1.0.9
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
++--- com.google.devtools.ksp:symbol-processing:1.8.22-1.0.11
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    +--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-|    |    +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.0
+|    +--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    |    +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.22
 |    |    +--- org.jetbrains.kotlin:kotlin-reflect:1.6.10
-|    |    +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.0
+|    |    +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.22
 |    |    +--- org.jetbrains.intellij.deps:trove4j:1.0.20200330
 |    |    \--- net.java.dev.jna:jna:5.6.0
-|    \--- com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.9
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-\--- org.jetbrains.kotlin:kotlin-parcelize-compiler:1.8.0
-     \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0 (*)
-+--- org.jetbrains.kotlin:kotlin-serialization:1.8.0
-|    \--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.0
-|         +--- org.jetbrains.kotlin:kotlin-native-utils:1.8.0
-|         |    \--- org.jetbrains.kotlin:kotlin-util-io:1.8.0
-|         +--- org.jetbrains.kotlin:kotlin-project-model:1.8.0
-|         |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.0
-+--- com.google.devtools.ksp:symbol-processing:1.8.0-1.0.9
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
+|    \--- com.google.devtools.ksp:symbol-processing-api:1.8.22-1.0.11
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
++--- org.jetbrains.kotlin:kotlin-parcelize-compiler:1.8.22
+|    \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.22 (*)
+\--- org.jetbrains.kotlin:kotlin-serialization:1.8.22
+     +--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-gradle-plugins-bom:1.8.22
+     |    |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.22 (c)
+     |    |    +--- org.jetbrains.kotlin:kotlin-serialization:1.8.22 (c)
+     |    |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-annotations:1.8.22 (c)
+     |    |    +--- org.jetbrains.kotlin:kotlin-native-utils:1.8.22 (c)
+     |    |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.22 (c)
+     |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-annotations:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-native-utils:1.8.22
+     |    |    \--- org.jetbrains.kotlin:kotlin-util-io:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-project-model:1.8.22
+     |    |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.22
+     |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.22
+     \--- org.jetbrains.kotlin:kotlin-gradle-plugins-bom:1.8.22 (*)
++--- com.google.devtools.ksp:symbol-processing:1.8.22-1.0.11
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    +--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-|    |    +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.0
+|    +--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    |    +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.22
 |    |    +--- org.jetbrains.kotlin:kotlin-reflect:1.6.10
-|    |    +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.0
+|    |    +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.22
 |    |    +--- org.jetbrains.intellij.deps:trove4j:1.0.20200330
 |    |    \--- net.java.dev.jna:jna:5.6.0
-|    \--- com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.9
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-\--- org.jetbrains.kotlin:kotlin-parcelize-compiler:1.8.0
-     \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0 (*)
-+--- org.jetbrains.kotlin:kotlin-serialization:1.8.0
-|    \--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.0
-|         +--- org.jetbrains.kotlin:kotlin-native-utils:1.8.0
-|         |    \--- org.jetbrains.kotlin:kotlin-util-io:1.8.0
-|         +--- org.jetbrains.kotlin:kotlin-project-model:1.8.0
-|         |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.0
-+--- com.google.devtools.ksp:symbol-processing:1.8.0-1.0.9
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
+|    \--- com.google.devtools.ksp:symbol-processing-api:1.8.22-1.0.11
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
++--- org.jetbrains.kotlin:kotlin-parcelize-compiler:1.8.22
+|    \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.22 (*)
+\--- org.jetbrains.kotlin:kotlin-serialization:1.8.22
+     +--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-gradle-plugins-bom:1.8.22
+     |    |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.22 (c)
+     |    |    +--- org.jetbrains.kotlin:kotlin-serialization:1.8.22 (c)
+     |    |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-annotations:1.8.22 (c)
+     |    |    +--- org.jetbrains.kotlin:kotlin-native-utils:1.8.22 (c)
+     |    |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.22 (c)
+     |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-annotations:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-native-utils:1.8.22
+     |    |    \--- org.jetbrains.kotlin:kotlin-util-io:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-project-model:1.8.22
+     |    |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.22
+     |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.22
+     \--- org.jetbrains.kotlin:kotlin-gradle-plugins-bom:1.8.22 (*)
++--- com.google.devtools.ksp:symbol-processing:1.8.22-1.0.11
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    +--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-|    |    +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.0
+|    +--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    |    +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.22
 |    |    +--- org.jetbrains.kotlin:kotlin-reflect:1.6.10
-|    |    +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.0
+|    |    +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.22
 |    |    +--- org.jetbrains.intellij.deps:trove4j:1.0.20200330
 |    |    \--- net.java.dev.jna:jna:5.6.0
-|    \--- com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.9
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-\--- org.jetbrains.kotlin:kotlin-parcelize-compiler:1.8.0
-     \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0 (*)
-+--- org.jetbrains.kotlin:kotlin-serialization:1.8.0
-|    \--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.0
-|         +--- org.jetbrains.kotlin:kotlin-native-utils:1.8.0
-|         |    \--- org.jetbrains.kotlin:kotlin-util-io:1.8.0
-|         +--- org.jetbrains.kotlin:kotlin-project-model:1.8.0
-|         |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.0
-+--- com.google.devtools.ksp:symbol-processing:1.8.0-1.0.9
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
+|    \--- com.google.devtools.ksp:symbol-processing-api:1.8.22-1.0.11
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
++--- org.jetbrains.kotlin:kotlin-parcelize-compiler:1.8.22
+|    \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.22 (*)
+\--- org.jetbrains.kotlin:kotlin-serialization:1.8.22
+     +--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-gradle-plugins-bom:1.8.22
+     |    |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.22 (c)
+     |    |    +--- org.jetbrains.kotlin:kotlin-serialization:1.8.22 (c)
+     |    |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-annotations:1.8.22 (c)
+     |    |    +--- org.jetbrains.kotlin:kotlin-native-utils:1.8.22 (c)
+     |    |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.22 (c)
+     |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-annotations:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-native-utils:1.8.22
+     |    |    \--- org.jetbrains.kotlin:kotlin-util-io:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-project-model:1.8.22
+     |    |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.22
+     |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.22
+     \--- org.jetbrains.kotlin:kotlin-gradle-plugins-bom:1.8.22 (*)
++--- com.google.devtools.ksp:symbol-processing:1.8.22-1.0.11
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    +--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-|    |    +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.0
+|    +--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    |    +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.22
 |    |    +--- org.jetbrains.kotlin:kotlin-reflect:1.6.10
-|    |    +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.0
+|    |    +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.22
 |    |    +--- org.jetbrains.intellij.deps:trove4j:1.0.20200330
 |    |    \--- net.java.dev.jna:jna:5.6.0
-|    \--- com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.9
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-\--- org.jetbrains.kotlin:kotlin-parcelize-compiler:1.8.0
-     \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0 (*)
-+--- org.jetbrains.kotlin:kotlin-serialization:1.8.0
-|    \--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.0
-|         +--- org.jetbrains.kotlin:kotlin-native-utils:1.8.0
-|         |    \--- org.jetbrains.kotlin:kotlin-util-io:1.8.0
-|         +--- org.jetbrains.kotlin:kotlin-project-model:1.8.0
-|         |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.0
-+--- com.google.devtools.ksp:symbol-processing:1.8.0-1.0.9
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
+|    \--- com.google.devtools.ksp:symbol-processing-api:1.8.22-1.0.11
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
++--- org.jetbrains.kotlin:kotlin-parcelize-compiler:1.8.22
+|    \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.22 (*)
+\--- org.jetbrains.kotlin:kotlin-serialization:1.8.22
+     +--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-gradle-plugins-bom:1.8.22
+     |    |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.22 (c)
+     |    |    +--- org.jetbrains.kotlin:kotlin-serialization:1.8.22 (c)
+     |    |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-annotations:1.8.22 (c)
+     |    |    +--- org.jetbrains.kotlin:kotlin-native-utils:1.8.22 (c)
+     |    |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.22 (c)
+     |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-annotations:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-native-utils:1.8.22
+     |    |    \--- org.jetbrains.kotlin:kotlin-util-io:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-project-model:1.8.22
+     |    |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.22
+     |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.22
+     \--- org.jetbrains.kotlin:kotlin-gradle-plugins-bom:1.8.22 (*)
++--- com.google.devtools.ksp:symbol-processing:1.8.22-1.0.11
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    +--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-|    |    +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.0
+|    +--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    |    +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.22
 |    |    +--- org.jetbrains.kotlin:kotlin-reflect:1.6.10
-|    |    +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.0
+|    |    +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.22
 |    |    +--- org.jetbrains.intellij.deps:trove4j:1.0.20200330
 |    |    \--- net.java.dev.jna:jna:5.6.0
-|    \--- com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.9
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-\--- org.jetbrains.kotlin:kotlin-parcelize-compiler:1.8.0
-     \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0 (*)
-\--- org.jetbrains.kotlin:kotlin-klib-commonizer-embeddable:1.8.0
-     +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
-     |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
+|    \--- com.google.devtools.ksp:symbol-processing-api:1.8.22-1.0.11
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
++--- org.jetbrains.kotlin:kotlin-parcelize-compiler:1.8.22
+|    \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.22 (*)
+\--- org.jetbrains.kotlin:kotlin-serialization:1.8.22
+     +--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-gradle-plugins-bom:1.8.22
+     |    |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.22 (c)
+     |    |    +--- org.jetbrains.kotlin:kotlin-serialization:1.8.22 (c)
+     |    |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-annotations:1.8.22 (c)
+     |    |    +--- org.jetbrains.kotlin:kotlin-native-utils:1.8.22 (c)
+     |    |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.22 (c)
+     |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-annotations:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-native-utils:1.8.22
+     |    |    \--- org.jetbrains.kotlin:kotlin-util-io:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-project-model:1.8.22
+     |    |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.22
+     |    \--- org.jetbrains.kotlin:kotlin-tooling-core:1.8.22
+     \--- org.jetbrains.kotlin:kotlin-gradle-plugins-bom:1.8.22 (*)
+\--- org.jetbrains.kotlin:kotlin-klib-commonizer-embeddable:1.8.22
+     +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
      |    \--- org.jetbrains:annotations:13.0
-     \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0
-          +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-          +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.0
+     \--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.22
+          +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+          +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.22
           +--- org.jetbrains.kotlin:kotlin-reflect:1.6.10
-          +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.0
+          +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.22
           +--- org.jetbrains.intellij.deps:trove4j:1.0.20200330
           \--- net.java.dev.jna:jna:5.6.0
 \--- com.google.dagger:dagger-compiler:2.48 (n)
@@ -2297,32 +2336,32 @@ Project ':stripe-core'
      +--- net.ltgt.gradle.incap:incap:0.2
      +--- org.checkerframework:checker-compat-qual:2.5.5
      \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.0 (*)
-+--- com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.9
-|    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
++--- com.google.devtools.ksp:symbol-processing-api:1.8.22-1.0.11
+|    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |         \--- org.jetbrains:annotations:13.0
-\--- com.google.devtools.ksp:symbol-processing:1.8.0-1.0.9
-     +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-     +--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.0
-     |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-     |    +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.0
+\--- com.google.devtools.ksp:symbol-processing:1.8.22-1.0.11
+     +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+     +--- org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+     |    +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.22
      |    +--- org.jetbrains.kotlin:kotlin-reflect:1.6.10
-     |    +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.0
+     |    +--- org.jetbrains.kotlin:kotlin-daemon-embeddable:1.8.22
      |    +--- org.jetbrains.intellij.deps:trove4j:1.0.20200330
      |    \--- net.java.dev.jna:jna:5.6.0
-     \--- com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.9 (*)
-+--- com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.9
-|    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
+     \--- com.google.devtools.ksp:symbol-processing-api:1.8.22-1.0.11 (*)
++--- com.google.devtools.ksp:symbol-processing-api:1.8.22-1.0.11
+|    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |         \--- org.jetbrains:annotations:13.0
-\--- com.google.devtools.ksp:symbol-processing-cmdline:1.8.0-1.0.9
-     +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-     +--- org.jetbrains.kotlin:kotlin-compiler:1.8.0
-     |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 (*)
-     |    +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.0
+\--- com.google.devtools.ksp:symbol-processing-cmdline:1.8.22-1.0.11
+     +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+     +--- org.jetbrains.kotlin:kotlin-compiler:1.8.22
+     |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+     |    +--- org.jetbrains.kotlin:kotlin-script-runtime:1.8.22
      |    +--- org.jetbrains.kotlin:kotlin-reflect:1.6.10
      |    \--- org.jetbrains.intellij.deps:trove4j:1.0.20200330
-     \--- com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.9 (*)
+     \--- com.google.devtools.ksp:symbol-processing-api:1.8.22-1.0.11 (*)
 \--- com.google.dagger:dagger-compiler:2.48
      +--- com.google.dagger:dagger:2.48
      |    \--- javax.inject:javax.inject:1
@@ -2488,12 +2527,12 @@ Project ':stripe-core'
      |    +--- ch.qos.logback:logback-core:1.3.0
      |    \--- org.slf4j:slf4j-api:2.0.0
      \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 (*)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 +--- androidx.browser:browser:1.5.0
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.core:core:1.1.0
@@ -2515,39 +2554,39 @@ Project ':stripe-core'
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
-|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.10
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
+|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0
 |    \--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0
-|         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
 |         +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
 |         \--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0
 |              \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0
-|                   +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+|                   +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
 |                   +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0 (*)
-|                   \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
-+--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:{strictly 1.8.0} -> 1.8.0 (c)
+|                   \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:{strictly 1.8.22} -> 1.8.22 (c)
 +--- androidx.browser:browser:{strictly 1.5.0} -> 1.5.0 (c)
 +--- com.google.dagger:dagger:{strictly 2.48} -> 2.48 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:{strictly 1.5.0} -> 1.5.0 (c)
-+--- org.jetbrains.kotlin:kotlin-parcelize-runtime:{strictly 1.8.0} -> 1.8.0 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib:{strictly 1.8.10} -> 1.8.10 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:{strictly 1.8.22} -> 1.8.22 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib:{strictly 1.8.22} -> 1.8.22 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:{strictly 1.8.22} -> 1.8.22 (c)
 +--- androidx.annotation:annotation:{strictly 1.2.0} -> 1.2.0 (c)
 +--- androidx.core:core:{strictly 1.1.0} -> 1.1.0 (c)
 +--- com.google.guava:listenablefuture:{strictly 1.0} -> 1.0 (c)
@@ -2555,8 +2594,8 @@ Project ':stripe-core'
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:{strictly 1.5.0} -> 1.5.0 (c)
-+--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:{strictly 1.8.0} -> 1.8.0 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-common:{strictly 1.8.10} -> 1.8.10 (c)
++--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:{strictly 1.8.22} -> 1.8.22 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-common:{strictly 1.8.22} -> 1.8.22 (c)
 +--- org.jetbrains:annotations:{strictly 13.0} -> 13.0 (c)
 +--- androidx.lifecycle:lifecycle-runtime:{strictly 2.0.0} -> 2.0.0 (c)
 +--- androidx.versionedparcelable:versionedparcelable:{strictly 1.1.0} -> 1.1.0 (c)
@@ -2566,12 +2605,12 @@ Project ':stripe-core'
 +--- androidx.lifecycle:lifecycle-common:{strictly 2.0.0} -> 2.0.0 (c)
 +--- androidx.arch.core:core-common:{strictly 2.0.0} -> 2.0.0 (c)
 \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:{strictly 1.5.0} -> 1.5.0 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 +--- androidx.browser:browser:1.5.0
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.collection:collection:1.1.0
@@ -2599,36 +2638,36 @@ Project ':stripe-core'
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
-|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.10
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
+|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0
 |    \--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0
-|         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
 |         +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
 |         \--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0
 |              \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0
-|                   +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+|                   +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
 |                   +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0 (*)
-|                   \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
-\--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.0
-     +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-     \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.0
-          \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+|                   \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
+\--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.22
+     +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+     \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.22
+          \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 +--- androidx.browser:browser:1.5.0
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.core:core:1.1.0 -> 1.8.0
@@ -2655,35 +2694,35 @@ Project ':stripe-core'
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-test-jvm:1.6.4 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
-|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.10
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
+|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0
 |    \--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0
-|         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
 |         +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
 |         \--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0
 |              \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0
-|                   +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+|                   +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
 |                   +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0 (*)
-|                   \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+|                   \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
 +--- project :stripe-core (*)
-+--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-+--- org.jetbrains.kotlin:kotlin-parcelize-runtime:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:{strictly 1.8.22} -> 1.8.22 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:{strictly 1.6.4} -> 1.6.4 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:{strictly 1.8.22} -> 1.8.22 (c)
 +--- androidx.browser:browser:{strictly 1.5.0} -> 1.5.0 (c)
 +--- com.google.dagger:dagger:{strictly 2.48} -> 2.48 (c)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:{strictly 1.5.0} -> 1.5.0 (c)
@@ -2713,7 +2752,7 @@ Project ':stripe-core'
 |    +--- androidx.lifecycle:lifecycle-common:2.3.1 -> 2.5.1 (*)
 |    +--- androidx.tracing:tracing:1.0.0
 |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10 -> 1.8.10 (*)
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10 -> 1.8.22 (*)
 |    \--- androidx.concurrent:concurrent-futures:1.1.0
 |         +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
 |         \--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
@@ -2726,11 +2765,11 @@ Project ':stripe-core'
 |    |    |    |    +--- androidx.lifecycle:lifecycle-runtime:2.5.1 (*)
 |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel:2.5.1
 |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
-|    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel-savedstate:2.5.1
 |    |    |    |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.2.0
 |    |    |    |    |    +--- androidx.core:core-ktx:1.2.0
-|    |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.41 -> 1.8.10 (*)
+|    |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.41 -> 1.8.22 (*)
 |    |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
 |    |    |    |    |    |    \--- androidx.core:core:1.2.0 -> 1.8.0 (*)
 |    |    |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.5.1
@@ -2738,27 +2777,27 @@ Project ':stripe-core'
 |    |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel:2.5.1 (*)
 |    |    |    |    |    +--- androidx.savedstate:savedstate:1.2.0
 |    |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
-|    |    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.10 (*)
-|    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.22 (*)
+|    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1 -> 1.6.4 (*)
 |    |    |    |    +--- androidx.savedstate:savedstate:1.2.0 (*)
-|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    +--- androidx.core:core-ktx:1.1.0 -> 1.2.0 (*)
 |    |    |    +--- androidx.lifecycle:lifecycle-runtime-ktx:2.5.1
 |    |    |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.2.0
 |    |    |    |    +--- androidx.lifecycle:lifecycle-runtime:2.5.1 (*)
-|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1 -> 1.6.4 (*)
 |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1
 |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel:2.5.1 (*)
-|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1 -> 1.6.4 (*)
 |    |    |    +--- androidx.savedstate:savedstate-ktx:1.2.0
 |    |    |    |    +--- androidx.savedstate:savedstate:1.2.0 (*)
-|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.10 (*)
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.22 (*)
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    +--- androidx.collection:collection-ktx:1.1.0
-|    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.20 -> 1.8.10 (*)
+|    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.20 -> 1.8.22 (*)
 |    |    |    \--- androidx.collection:collection:1.1.0 (*)
 |    |    +--- androidx.core:core-ktx:1.2.0 (*)
 |    |    +--- androidx.fragment:fragment:1.5.5
@@ -2785,15 +2824,15 @@ Project ':stripe-core'
 |    |    |    |    \--- androidx.customview:customview:1.0.0
 |    |    |    |         +--- androidx.annotation:annotation:1.0.0 -> 1.2.0
 |    |    |    |         \--- androidx.core:core:1.0.0 -> 1.8.0 (*)
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    +--- androidx.lifecycle:lifecycle-livedata-core-ktx:2.5.1
 |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.5.1 (*)
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1 (*)
 |    |    +--- androidx.savedstate:savedstate-ktx:1.2.0 (*)
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    +--- androidx.test:core:1.4.0 -> 1.5.0 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 +--- androidx.test:runner:1.5.2
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.test:annotation:1.0.1 (*)
@@ -2803,17 +2842,17 @@ Project ':stripe-core'
 |    \--- junit:junit:4.13.2 (*)
 +--- org.json:json:20230227
 +--- junit:junit:4.13.2 (*)
-+--- org.jetbrains.kotlin:kotlin-test-annotations-common:1.8.0
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0 -> 1.8.10
++--- org.jetbrains.kotlin:kotlin-test-annotations-common:1.8.22
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4
 |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-test-jvm:1.6.4
 |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4 (*)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
 |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (*)
-|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.10
-+--- org.jetbrains.kotlin:kotlin-test-junit:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-test:1.8.0
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
+|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
++--- org.jetbrains.kotlin:kotlin-test-junit:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-test:1.8.22
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 |    \--- junit:junit:4.13.2 (*)
 +--- org.mockito:mockito-core:5.2.0 (*)
 +--- org.mockito.kotlin:mockito-kotlin:4.1.0
@@ -2822,12 +2861,12 @@ Project ':stripe-core'
 |    +--- com.squareup.okhttp3:okhttp:4.11.0
 |    |    +--- com.squareup.okio:okio:3.2.0
 |    |    |    \--- com.squareup.okio:okio-jvm:3.2.0
-|    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.0 (*)
-|    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.20 -> 1.8.10
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.10 (*)
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.0 (*)
+|    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.22 (*)
+|    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.20 -> 1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.22 (*)
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.22 (*)
 |    +--- junit:junit:4.13 -> 4.13.2 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.10 -> 1.8.0 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.10 -> 1.8.22 (*)
 +--- org.robolectric:robolectric:4.10.3
 |    +--- org.robolectric:annotations:4.10.3
 |    +--- org.robolectric:junit:4.10.3
@@ -2918,16 +2957,16 @@ Project ':stripe-core'
 +--- androidx.test:runner:{strictly 1.5.2} -> 1.5.2 (c)
 +--- org.json:json:{strictly 20230227} -> 20230227 (c)
 +--- junit:junit:{strictly 4.13.2} -> 4.13.2 (c)
-+--- org.jetbrains.kotlin:kotlin-test-annotations-common:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-test-annotations-common:{strictly 1.8.22} -> 1.8.22 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-test:{strictly 1.6.4} -> 1.6.4 (c)
-+--- org.jetbrains.kotlin:kotlin-test-junit:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-test-junit:{strictly 1.8.22} -> 1.8.22 (c)
 +--- org.mockito:mockito-core:{strictly 5.2.0} -> 5.2.0 (c)
 +--- org.mockito.kotlin:mockito-kotlin:{strictly 4.1.0} -> 4.1.0 (c)
 +--- com.squareup.okhttp3:mockwebserver:{strictly 4.11.0} -> 4.11.0 (c)
 +--- org.robolectric:robolectric:{strictly 4.10.3} -> 4.10.3 (c)
 +--- com.google.truth:truth:{strictly 1.1.3} -> 1.1.3 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib:{strictly 1.8.10} -> 1.8.10 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib:{strictly 1.8.22} -> 1.8.22 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:{strictly 1.8.22} -> 1.8.22 (c)
 +--- androidx.annotation:annotation:{strictly 1.2.0} -> 1.2.0 (c)
 +--- androidx.core:core:{strictly 1.8.0} -> 1.8.0 (c)
 +--- com.google.guava:listenablefuture:{strictly 9999.0-empty-to-avoid-conflict-with-guava} -> 9999.0-empty-to-avoid-conflict-with-guava (c)
@@ -2935,7 +2974,7 @@ Project ':stripe-core'
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:{strictly 1.6.4} -> 1.6.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:{strictly 1.5.0} -> 1.5.0 (c)
-+--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:{strictly 1.8.22} -> 1.8.22 (c)
 +--- androidx.arch.core:core-runtime:{strictly 2.2.0} -> 2.2.0 (c)
 +--- androidx.test:monitor:{strictly 1.6.1} -> 1.6.1 (c)
 +--- androidx.test.services:storage:{strictly 1.4.2} -> 1.4.2 (c)
@@ -2945,9 +2984,9 @@ Project ':stripe-core'
 +--- androidx.fragment:fragment-ktx:{strictly 1.5.5} -> 1.5.5 (c)
 +--- androidx.test:annotation:{strictly 1.0.1} -> 1.0.1 (c)
 +--- org.hamcrest:hamcrest-core:{strictly 1.3} -> 1.3 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib-common:{strictly 1.8.10} -> 1.8.10 (c)
++--- org.jetbrains.kotlin:kotlin-stdlib-common:{strictly 1.8.22} -> 1.8.22 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-test-jvm:{strictly 1.6.4} -> 1.6.4 (c)
-+--- org.jetbrains.kotlin:kotlin-test:{strictly 1.8.0} -> 1.8.0 (c)
++--- org.jetbrains.kotlin:kotlin-test:{strictly 1.8.22} -> 1.8.22 (c)
 +--- net.bytebuddy:byte-buddy:{strictly 1.14.1} -> 1.14.1 (c)
 +--- net.bytebuddy:byte-buddy-agent:{strictly 1.14.1} -> 1.14.1 (c)
 +--- com.squareup.okhttp3:okhttp:{strictly 4.11.0} -> 4.11.0 (c)
@@ -3007,12 +3046,12 @@ Project ':stripe-core'
 +--- androidx.lifecycle:lifecycle-livedata:{strictly 2.0.0} -> 2.0.0 (c)
 \--- androidx.customview:customview:{strictly 1.0.0} -> 1.0.0 (c)
 +--- project :stripe-core (*)
-+--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
-|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.0
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
+|    \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.8.22
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 +--- androidx.arch.core:core-testing:2.2.0
 |    +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
 |    +--- androidx.arch.core:core-runtime:2.2.0
@@ -3043,7 +3082,7 @@ Project ':stripe-core'
 |    |    \--- androidx.annotation:annotation:1.1.0 -> 1.2.0
 |    +--- androidx.tracing:tracing:1.0.0 (*)
 |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10 -> 1.8.10 (*)
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10 -> 1.8.22 (*)
 |    \--- androidx.concurrent:concurrent-futures:1.1.0
 |         +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
 |         \--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
@@ -3070,12 +3109,12 @@ Project ':stripe-core'
 |    |    |    |    +--- androidx.lifecycle:lifecycle-runtime:2.5.1 (*)
 |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel:2.5.1
 |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
-|    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    |    \--- androidx.lifecycle:lifecycle-viewmodel-savedstate:2.5.1 (c)
 |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel-savedstate:2.5.1
 |    |    |    |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.2.0
 |    |    |    |    |    +--- androidx.core:core-ktx:1.2.0
-|    |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.41 -> 1.8.10 (*)
+|    |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.41 -> 1.8.22 (*)
 |    |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
 |    |    |    |    |    |    \--- androidx.core:core:1.2.0 -> 1.8.0 (*)
 |    |    |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.5.1
@@ -3087,8 +3126,8 @@ Project ':stripe-core'
 |    |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
 |    |    |    |    |    |    +--- androidx.arch.core:core-common:2.1.0 -> 2.2.0 (*)
 |    |    |    |    |    |    +--- androidx.lifecycle:lifecycle-common:2.4.0 -> 2.5.1 (*)
-|    |    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.10 (*)
-|    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.22 (*)
+|    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1 -> 1.6.4
 |    |    |    |    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4
 |    |    |    |    |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4
@@ -3098,32 +3137,32 @@ Project ':stripe-core'
 |    |    |    |    |         |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (c)
 |    |    |    |    |         |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-test-jvm:1.6.4 (c)
 |    |    |    |    |         |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4 (c)
-|    |    |    |    |         |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0
-|    |    |    |    |         |         |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-|    |    |    |    |         |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0
-|    |    |    |    |         |         |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
-|    |    |    |    |         |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.10
+|    |    |    |    |         |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22
+|    |    |    |    |         |         |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    |    |    |    |         |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22
+|    |    |    |    |         |         |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
+|    |    |    |    |         |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
 |    |    |    |    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4 (*)
-|    |    |    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
+|    |    |    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
 |    |    |    |    +--- androidx.savedstate:savedstate:1.2.0 (*)
 |    |    |    |    +--- androidx.tracing:tracing:1.0.0 (*)
-|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    +--- androidx.core:core-ktx:1.1.0 -> 1.2.0 (*)
 |    |    |    +--- androidx.lifecycle:lifecycle-runtime-ktx:2.5.1
 |    |    |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.2.0
 |    |    |    |    +--- androidx.lifecycle:lifecycle-runtime:2.5.1 (*)
-|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1 -> 1.6.4 (*)
 |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1
 |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel:2.5.1 (*)
-|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    |    |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1 -> 1.6.4 (*)
 |    |    |    +--- androidx.savedstate:savedstate-ktx:1.2.0
 |    |    |    |    +--- androidx.savedstate:savedstate:1.2.0 (*)
-|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.10 (*)
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.22 (*)
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    +--- androidx.collection:collection-ktx:1.1.0
-|    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.20 -> 1.8.10 (*)
+|    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.20 -> 1.8.22 (*)
 |    |    |    \--- androidx.collection:collection:1.1.0 (*)
 |    |    +--- androidx.core:core-ktx:1.2.0 (*)
 |    |    +--- androidx.fragment:fragment:1.5.5
@@ -3150,15 +3189,15 @@ Project ':stripe-core'
 |    |    |    |    \--- androidx.customview:customview:1.0.0
 |    |    |    |         +--- androidx.annotation:annotation:1.0.0 -> 1.2.0
 |    |    |    |         \--- androidx.core:core:1.0.0 -> 1.8.0 (*)
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    +--- androidx.lifecycle:lifecycle-livedata-core-ktx:2.5.1
 |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.5.1 (*)
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1 (*)
 |    |    +--- androidx.savedstate:savedstate-ktx:1.2.0 (*)
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 |    +--- androidx.test:core:1.4.0 -> 1.5.0 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.10 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.8.22 (*)
 +--- androidx.test:runner:1.5.2
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.test:annotation:1.0.1 (*)
@@ -3168,17 +3207,17 @@ Project ':stripe-core'
 |    \--- junit:junit:4.13.2 (*)
 +--- org.json:json:20230227
 +--- junit:junit:4.13.2 (*)
-+--- org.jetbrains.kotlin:kotlin-test-annotations-common:1.8.0
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0 -> 1.8.10
++--- org.jetbrains.kotlin:kotlin-test-annotations-common:1.8.22
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4
 |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-test-jvm:1.6.4
 |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4 (*)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.0 (*)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 1.8.22 (*)
 |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (*)
-|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.10
-+--- org.jetbrains.kotlin:kotlin-test-junit:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-test:1.8.0
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 1.8.10 (*)
+|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
++--- org.jetbrains.kotlin:kotlin-test-junit:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-test:1.8.22
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 (*)
 |    \--- junit:junit:4.13.2 (*)
 +--- org.mockito:mockito-core:5.2.0 (*)
 +--- org.mockito.kotlin:mockito-kotlin:4.1.0
@@ -3187,12 +3226,12 @@ Project ':stripe-core'
 |    +--- com.squareup.okhttp3:okhttp:4.11.0
 |    |    +--- com.squareup.okio:okio:3.2.0
 |    |    |    \--- com.squareup.okio:okio-jvm:3.2.0
-|    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.0 (*)
-|    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.20 -> 1.8.10
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.10 (*)
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.0 (*)
+|    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.22 (*)
+|    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.20 -> 1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.8.22 (*)
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 -> 1.8.22 (*)
 |    +--- junit:junit:4.13 -> 4.13.2 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.10 -> 1.8.0 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.10 -> 1.8.22 (*)
 +--- org.robolectric:robolectric:4.10.3
 |    +--- org.conscrypt:conscrypt-openjdk-uber:2.5.2
 |    +--- androidx.test.espresso:espresso-idling-resource:3.5.1
@@ -3283,7 +3322,7 @@ Project ':stripe-core'
 |    +--- com.google.auto.value:auto-value-annotations:1.8.1 -> 1.10.1
 |    +--- com.google.errorprone:error_prone_annotations:2.7.1 -> 2.18.0
 |    \--- org.ow2.asm:asm:9.1 -> 9.5
-+--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 (*)
++--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22 (*)
 +--- androidx.browser:browser:1.5.0
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.collection:collection:1.1.0 (*)
@@ -3298,27 +3337,27 @@ Project ':stripe-core'
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 (*)
 \--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0
      \--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0
-          +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+          +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
           +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0
           |    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0 (c)
           |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0 (c)
           |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0 (c)
           |    \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0 (c)
-          +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+          +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
           \--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0
                \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.5.0
-                    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 (*)
+                    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.8.22 (*)
                     +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.0 (*)
-                    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10
+                    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10 -> 1.8.22
 +--- androidx.arch.core:core-testing:2.2.0 (n)
 +--- androidx.test:core:1.5.0 (n)
 +--- androidx.fragment:fragment-testing:1.5.5 (n)
 +--- androidx.test:runner:1.5.2 (n)
 +--- org.json:json:20230227 (n)
 +--- junit:junit:4.13.2 (n)
-+--- org.jetbrains.kotlin:kotlin-test-annotations-common:1.8.0 (n)
++--- org.jetbrains.kotlin:kotlin-test-annotations-common:1.8.22 (n)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4 (n)
-+--- org.jetbrains.kotlin:kotlin-test-junit:1.8.0 (n)
++--- org.jetbrains.kotlin:kotlin-test-junit:1.8.22 (n)
 +--- org.mockito:mockito-core:5.2.0 (n)
 +--- org.mockito.kotlin:mockito-kotlin:4.1.0 (n)
 +--- com.squareup.okhttp3:mockwebserver:4.11.0 (n)
@@ -3353,7 +3392,7 @@ Project ':stripe-core'
 |    +--- androidx.tracing:tracing:1.0.0
 |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.7.10 -> 1.8.0
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.7.10 -> 1.8.22
 |    |    \--- org.jetbrains:annotations:13.0
 |    \--- androidx.concurrent:concurrent-futures:1.1.0
 |         +--- androidx.annotation:annotation:1.1.0 -> 1.2.0
@@ -3393,9 +3432,9 @@ Project ':stripe-core'
 |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.21 -> 1.7.10 (*)
 |    |    |    |    |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1
 |    |    |    |    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1 -> 1.6.4
-|    |    |    |    |         |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.0
+|    |    |    |    |         |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
 |    |    |    |    |         |    \--- org.jetbrains.kotlinx:atomicfu:0.17.3
-|    |    |    |    |         |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.20 -> 1.8.0
+|    |    |    |    |         |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.20 -> 1.8.22
 |    |    |    |    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.1
 |    |    |    |    |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1 (c)
 |    |    |    |    |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1 -> 1.6.4 (c)
@@ -3466,17 +3505,17 @@ Project ':stripe-core'
 |    \--- junit:junit:4.13.2 (*)
 +--- org.json:json:20230227
 +--- junit:junit:4.13.2 (*)
-+--- org.jetbrains.kotlin:kotlin-test-annotations-common:1.8.0
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
++--- org.jetbrains.kotlin:kotlin-test-annotations-common:1.8.22
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (*)
-|    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.0
+|    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 1.8.22
 |    \--- org.jetbrains.kotlinx:atomicfu:0.17.3 (*)
-+--- org.jetbrains.kotlin:kotlin-test-junit:1.8.0
-|    +--- org.jetbrains.kotlin:kotlin-test:1.8.0
-|    |    +--- org.jetbrains.kotlin:kotlin-test-common:1.8.0
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0
-|    |    \--- org.jetbrains.kotlin:kotlin-test-annotations-common:1.8.0 (*)
++--- org.jetbrains.kotlin:kotlin-test-junit:1.8.22
+|    +--- org.jetbrains.kotlin:kotlin-test:1.8.22
+|    |    +--- org.jetbrains.kotlin:kotlin-test-common:1.8.22
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22
+|    |    \--- org.jetbrains.kotlin:kotlin-test-annotations-common:1.8.22 (*)
 |    \--- junit:junit:4.13.2 (*)
 +--- org.mockito:mockito-core:5.2.0 (*)
 +--- org.mockito.kotlin:mockito-kotlin:4.1.0
@@ -3484,7 +3523,7 @@ Project ':stripe-core'
 +--- com.squareup.okhttp3:mockwebserver:4.11.0
 |    +--- com.squareup.okhttp3:okhttp:4.11.0
 |    |    +--- com.squareup.okio:okio:3.2.0
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.20 -> 1.8.0
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.20 -> 1.8.22
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.6.20 -> 1.7.10 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20 (*)
 |    +--- junit:junit:4.13 -> 4.13.2 (*)
