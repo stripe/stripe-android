@@ -4,7 +4,7 @@ tags:
   - edge
   - testmode-data
 ---
-- startRecording: /tmp/test_results/testmode-token_manualentry
+- startRecording: ${'/tmp/test_results/testmode-token_manualentry-' + new Date().getTime()}
 - openLink: stripeconnectionsexample://playground?flow=Token&financial_connections_override_native=native&merchant=testmode
 - tapOn:
     id: "connect_accounts"
