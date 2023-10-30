@@ -5,6 +5,7 @@ tags:
   - testmode-data
 ---
 - startRecording: ${'/tmp/test_results/testmode-token_manualentry-' + new Date().getTime()}
+- clearState
 - openLink: stripeconnectionsexample://playground?flow=Token&financial_connections_override_native=native&merchant=testmode
 - tapOn:
     id: "connect_accounts"
