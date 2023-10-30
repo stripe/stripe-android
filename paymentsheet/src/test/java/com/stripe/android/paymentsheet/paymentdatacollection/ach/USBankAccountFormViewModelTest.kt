@@ -851,6 +851,38 @@ class USBankAccountFormViewModelTest {
         }
     }
 
+    @Test
+    fun `When collect bank account is returned from FC SDK, the result is emitted`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.collectBankAccountResult.test {
+            val verifiedAccount = mockVerifiedBankAccount()
+            viewModel.handleCollectBankAccountResult(
+                result = verifiedAccount
+            )
+
+            assertThat(awaitItem())
+                .isEqualTo(verifiedAccount)
+
+            viewModel.handleCollectBankAccountResult(
+                result = CollectBankAccountResultInternal.Cancelled
+            )
+
+            assertThat(awaitItem())
+                .isEqualTo(CollectBankAccountResultInternal.Cancelled)
+
+            val failure = CollectBankAccountResultInternal.Failed(
+                IllegalArgumentException("Failed")
+            )
+            viewModel.handleCollectBankAccountResult(
+                result = failure
+            )
+
+            assertThat(awaitItem())
+                .isEqualTo(failure)
+        }
+    }
+
     private fun createViewModel(
         args: USBankAccountFormViewModel.Args = defaultArgs
     ): USBankAccountFormViewModel {

@@ -50,7 +50,11 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
         setContent {
             StripeTheme {
-                val bottomSheetState = rememberBottomSheetState()
+                val bottomSheetState = rememberBottomSheetState(
+                    confirmValueChange = {
+                        viewModel.bottomSheetConfirmStateChange()
+                    }
+                )
 
                 val viewState by viewModel.viewState.collectAsState()
                 val result by viewModel.result.collectAsState()

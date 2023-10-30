@@ -190,6 +190,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private val _result = MutableSharedFlow<PaymentSelection.New.USBankAccount?>(replay = 1)
     val result: Flow<PaymentSelection.New.USBankAccount?> = _result
+    private val _collectBankAccountResult = MutableSharedFlow<CollectBankAccountResultInternal?>(replay = 1)
+    val collectBankAccountResult: Flow<CollectBankAccountResultInternal?> = _collectBankAccountResult
 
     private val defaultSaveForFutureUse: Boolean =
         args.savedPaymentMethod?.input?.saveForFutureUse ?: false
@@ -262,6 +264,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     @VisibleForTesting
     fun handleCollectBankAccountResult(result: CollectBankAccountResultInternal) {
         hasLaunched = false
+        _collectBankAccountResult.tryEmit(result)
         when (result) {
             is CollectBankAccountResultInternal.Completed -> {
                 when (
@@ -353,6 +356,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun onDestroy() {
         _result.tryEmit(null)
+        _collectBankAccountResult.tryEmit(null)
         collectBankAccountLauncher?.unregister()
         collectBankAccountLauncher = null
         reset()

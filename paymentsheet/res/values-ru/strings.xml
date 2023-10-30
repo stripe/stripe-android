@@ -6,6 +6,10 @@
   <string name="stripe_bank_account_ending_in">Удалить банковский счет, оканчивающийся на %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Подтвердите платеж в вашем банковском приложении в течение %s для оформления покупки.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">Ваши платежные реквизиты не будут сохранены.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Закрыть форму?</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Произошла ошибка. Проверьте подключение и попробуйте еще раз.</string>
   <!-- Text providing link to terms for ACH payments -->

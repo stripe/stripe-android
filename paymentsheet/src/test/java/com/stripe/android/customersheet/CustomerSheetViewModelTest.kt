@@ -20,6 +20,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -1689,7 +1690,7 @@ class CustomerSheetViewModelTest {
             assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
 
             viewModel.handleViewAction(
-                CustomerSheetViewAction.OnUSBankAccountRetrieved(usBankAccount)
+                CustomerSheetViewAction.OnConfirmUSBankAccount(usBankAccount)
             )
 
             viewModel.handleViewAction(
@@ -1770,6 +1771,157 @@ class CustomerSheetViewModelTest {
             assertThat(viewState.supportedPaymentMethods.map { it.code })
                 .contains(PaymentMethod.Type.USBankAccount.code)
         }
+    }
+
+    @Test
+    fun `When adding a US Bank account and user taps on scrim, a confirmation dialog should be visible`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnCollectBankAccountResult(
+                    bankAccountResult = CollectBankAccountResultInternal.Completed(
+                        response = mock(),
+                    ),
+                )
+            )
+
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.displayConfirmationModal)
+                .isFalse()
+
+            viewModel.bottomSheetConfirmStateChange()
+
+            viewState = awaitViewState()
+            assertThat(viewState.displayConfirmationModal)
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `When adding a Card and user taps on scrim, a confirmation dialog should not be visible`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnCollectBankAccountResult(
+                    bankAccountResult = CollectBankAccountResultInternal.Completed(
+                        response = mock(),
+                    ),
+                )
+            )
+
+            val viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.displayConfirmationModal)
+                .isFalse()
+
+            viewModel.bottomSheetConfirmStateChange()
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `When user dismisses the confirmation dialog, the dialog should not be visible`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnCollectBankAccountResult(
+                    bankAccountResult = CollectBankAccountResultInternal.Completed(
+                        response = mock(),
+                    ),
+                )
+            )
+
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.displayConfirmationModal)
+                .isFalse()
+
+            viewModel.bottomSheetConfirmStateChange()
+
+            viewState = awaitViewState()
+            assertThat(viewState.displayConfirmationModal)
+                .isTrue()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnCancelClose
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.displayConfirmationModal)
+                .isFalse()
+        }
+    }
+
+    @Test
+    fun `When user confirms the confirmation dialog, the sheet should close`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                ),
+            ),
+        )
+
+        val viewStateTurbine = viewModel.viewState.testIn(backgroundScope)
+        val resultTurbine = viewModel.result.testIn(backgroundScope)
+
+        assertThat(resultTurbine.awaitItem()).isNull()
+
+        viewModel.handleViewAction(
+            CustomerSheetViewAction.OnCollectBankAccountResult(
+                bankAccountResult = CollectBankAccountResultInternal.Completed(
+                    response = mock(),
+                ),
+            )
+        )
+
+        var viewState = viewStateTurbine.awaitViewState<AddPaymentMethod>()
+        assertThat(viewState.displayConfirmationModal)
+            .isFalse()
+
+        viewModel.bottomSheetConfirmStateChange()
+
+        viewState = viewStateTurbine.awaitViewState()
+        assertThat(viewState.displayConfirmationModal)
+            .isTrue()
+
+        viewModel.handleViewAction(
+            CustomerSheetViewAction.OnDismissed
+        )
+
+        viewStateTurbine.expectNoEvents()
+
+        assertThat(resultTurbine.awaitItem())
+            .isEqualTo(
+                InternalCustomerSheetResult.Canceled(null)
+            )
+
+        resultTurbine.cancel()
+        viewStateTurbine.cancel()
     }
 
     @Suppress("UNCHECKED_CAST")

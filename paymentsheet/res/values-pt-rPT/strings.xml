@@ -6,6 +6,10 @@
   <string name="stripe_bank_account_ending_in">Remover conta bancária que termina em %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Confirme o pagamento na aplicação do seu banco dentro de %s para concluir a compra.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">As suas informações de pagamento não serão guardadas.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Pretende fechar este formulário?</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Ocorreu um erro. Verifique a sua ligação e tente novamente.</string>
   <!-- Text providing link to terms for ACH payments -->

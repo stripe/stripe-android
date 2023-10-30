@@ -126,7 +126,8 @@ internal fun AddPaymentMethod(
                     shippingDetails = sheetViewModel.config?.shippingDetails,
                     draftPaymentSelection = sheetViewModel.newPaymentSelection,
                     onMandateTextChanged = sheetViewModel::updateMandateText,
-                    onHandleUSBankAccount = sheetViewModel::handleConfirmUSBankAccount,
+                    onConfirmUSBankAccount = sheetViewModel::handleConfirmUSBankAccount,
+                    onCollectBankAccountResult = null,
                     onUpdatePrimaryButtonUIState = sheetViewModel::updateCustomPrimaryButtonUiState,
                     onUpdatePrimaryButtonState = sheetViewModel::updatePrimaryButtonState,
                     onError = sheetViewModel::onError

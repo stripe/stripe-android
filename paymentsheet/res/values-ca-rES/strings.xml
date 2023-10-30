@@ -6,6 +6,10 @@
   <string name="stripe_bank_account_ending_in">Elimina el compte bancari que acaba en %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Confirmeu el pagament a l\'aplicació del vostre banc en un termini de %s per completar la compra.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">La informació de pagament no es desarà.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Voleu tancar el formulari?</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">S\'ha produït un error. Comproveu la vostra connexió i torneu-ho a provar.</string>
   <!-- Text providing link to terms for ACH payments -->

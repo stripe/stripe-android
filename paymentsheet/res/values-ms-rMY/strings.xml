@@ -6,6 +6,10 @@
   <string name="stripe_bank_account_ending_in">Alih keluar akaun bank yang berakhir dengan %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Sahkan pembayaran dalam aplikasi bank anda dalam %s untuk menyelesaikan pembelian.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">Maklumat pembayaran anda tidak akan disimpan.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Adakah anda ingin menutup borang ini?</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Ralat berlaku. Periksa sambungan Internet anda dan cuba lagi.</string>
   <!-- Text providing link to terms for ACH payments -->

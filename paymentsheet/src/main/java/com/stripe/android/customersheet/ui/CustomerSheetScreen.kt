@@ -4,8 +4,13 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -209,6 +214,21 @@ internal fun AddPaymentMethodWithPaymentElement(
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
+    if (viewState.displayConfirmationModal) {
+        ConfirmAlertDialog(
+            title = stringResource(id = R.string.stripe_confirm_close_form_title),
+            body = stringResource(id = R.string.stripe_confirm_close_form_body),
+            confirmButtonText = stringResource(id = R.string.stripe_paymentsheet_close),
+            destructive = true,
+            onDismiss = {
+                viewActionHandler(CustomerSheetViewAction.OnCancelClose)
+            },
+            onConfirm = {
+                viewActionHandler(CustomerSheetViewAction.OnDismissed)
+            }
+        )
+    }
+
     // TODO (jameswoo) make sure that the spacing is consistent with paymentsheet
     Column {
         H4Text(
@@ -277,4 +297,53 @@ internal fun AddPaymentMethodWithPaymentElement(
             )
         }
     }
+}
+
+@Composable
+internal fun ConfirmAlertDialog(
+    title: String,
+    body: String,
+    confirmButtonText: String,
+    destructive: Boolean = false,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = {
+            onDismiss()
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismiss()
+                }
+            ) {
+                Text(
+                    text = "Cancel",
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirm()
+                }
+            ) {
+                Text(
+                    text = confirmButtonText,
+                    color = if (destructive) Color.Red else MaterialTheme.colors.onBackground
+                )
+            }
+        },
+        modifier = Modifier.padding(horizontal = 32.dp),
+        title = {
+            Text(text = title)
+        },
+        text = {
+            Text(
+                text = body,
+                style = MaterialTheme.typography.body1,
+            )
+        }
+    )
 }

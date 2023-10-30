@@ -6,6 +6,10 @@
   <string name="stripe_bank_account_ending_in">Fjern bankkontoen som slutter på %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Bekreft betalingen i bankens app innen %s for å fullføre kjøpet.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">Betalingsinformasjonen din lagres ikke.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Vil du lukke dette skjemaet?</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Det oppstod en feil. Kontroller tilkoblingen din og prøv igjen.</string>
   <!-- Text providing link to terms for ACH payments -->
