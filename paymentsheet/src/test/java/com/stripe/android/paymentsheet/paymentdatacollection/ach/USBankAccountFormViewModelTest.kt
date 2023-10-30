@@ -149,7 +149,7 @@ class USBankAccountFormViewModelTest {
             val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)
 
-            assertThat(awaitItem().screenState).isEqualTo(currentScreenState)
+            assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
         }
     }
 
@@ -163,7 +163,7 @@ class USBankAccountFormViewModelTest {
             val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.MandateCollection)
 
-            assertThat(awaitItem().screenState).isEqualTo(currentScreenState)
+            assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
         }
     }
 
@@ -178,7 +178,7 @@ class USBankAccountFormViewModelTest {
             val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)
 
-            assertThat(awaitItem().screenState).isEqualTo(currentScreenState)
+            assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
         }
     }
 
@@ -193,7 +193,7 @@ class USBankAccountFormViewModelTest {
             val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.MandateCollection)
 
-            assertThat(awaitItem().screenState).isEqualTo(currentScreenState)
+            assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
         }
     }
 
@@ -811,6 +811,28 @@ class USBankAccountFormViewModelTest {
             customerId = anyOrNull(),
             onBehalfOf = any(),
         )
+    }
+
+    @Test
+    fun `When form destroyed, collect bank account result is null and reset to billing collection screen`() = runTest {
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                clientSecret = null,
+                isPaymentFlow = false
+            )
+        )
+
+        viewModel.result.test {
+            viewModel.onDestroy()
+
+            assertThat(awaitItem()).isNull()
+
+            val currentScreenState =
+                viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+
+            assertThat(currentScreenState)
+                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+        }
     }
 
     private fun createViewModel(

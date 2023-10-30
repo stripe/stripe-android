@@ -415,6 +415,12 @@ class CustomerSheetViewModelTest {
             viewState = awaitViewState()
             assertThat(viewState.isEditing)
                 .isTrue()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(CARD_PAYMENT_METHOD))
+
+            viewState = awaitViewState()
+            assertThat(viewState.isEditing)
+                .isTrue()
         }
     }
 

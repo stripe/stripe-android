@@ -54,6 +54,7 @@ import androidx.compose.ui.semantics.editableText
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
 import com.stripe.android.uicore.BuildConfig
@@ -138,7 +139,7 @@ fun TextField(
     val placeHolder by textFieldController.placeHolder.collectAsState(null)
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
-    val colors = TextFieldColors(shouldShowError)
+
     val fieldState by textFieldController.fieldState.collectAsState(
         TextFieldStateConstants.Error.Blank
     )
@@ -171,8 +172,9 @@ fun TextField(
         autofillTree += autofillNode
     }
 
-    TextField(
+    TextFieldUi(
         value = value,
+        loading = loading,
         onValueChange = { newValue ->
             val acceptInput = fieldState.canAcceptInput(value, newValue)
 
@@ -184,8 +186,8 @@ fun TextField(
                 }
             }
         },
+        onDropdownItemClicked = textFieldController::onDropdownItemClicked,
         modifier = modifier
-            .fillMaxWidth()
             .onPreviewKeyEvent { event ->
                 if (event.type == KeyEventType.KeyDown &&
                     event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &&
@@ -220,20 +222,68 @@ fun TextField(
             },
         enabled = enabled && textFieldController.enabled,
         label = label?.let {
+            stringResource(it)
+        },
+        showOptionalLabel = textFieldController.showOptionalLabel,
+        placeholder = placeHolder,
+        trailingIcon = trailingIcon,
+        shouldShowError = shouldShowError,
+        visualTransformation = textFieldController.visualTransformation,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = textFieldController.keyboardType,
+            capitalization = textFieldController.capitalization,
+            imeAction = imeAction
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = {
+                focusManager.moveFocus(nextFocusDirection)
+            },
+            onDone = {
+                focusManager.clearFocus(true)
+            }
+        )
+    )
+}
+
+@Composable
+internal fun TextFieldUi(
+    value: String,
+    enabled: Boolean,
+    loading: Boolean,
+    label: String?,
+    placeholder: String?,
+    trailingIcon: TextFieldIcon?,
+    showOptionalLabel: Boolean,
+    shouldShowError: Boolean,
+    modifier: Modifier = Modifier,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions(),
+    onValueChange: (value: String) -> Unit = {},
+    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {}
+) {
+    val colors = TextFieldColors(shouldShowError)
+
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        enabled = enabled,
+        label = label?.let {
             {
                 FormLabel(
-                    text = if (textFieldController.showOptionalLabel) {
+                    text = if (showOptionalLabel) {
                         stringResource(
                             R.string.stripe_form_label_optional,
-                            stringResource(it)
+                            it
                         )
                     } else {
-                        stringResource(it)
+                        it
                     }
                 )
             }
         },
-        placeholder = placeHolder?.let {
+        placeholder = placeholder?.let {
             { Placeholder(text = it) }
         },
         trailingIcon = trailingIcon?.let {
@@ -252,85 +302,20 @@ fun TextField(
                             }
                         }
                         is TextFieldIcon.Dropdown -> {
-                            var expanded by remember {
-                                mutableStateOf(false)
-                            }
-
-                            val show = !loading && !it.hide
-
-                            Box {
-                                Row(
-                                    modifier = Modifier
-                                        .padding(10.dp)
-                                        .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-                                        .clickable(enabled = show) {
-                                            expanded = true
-                                        },
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    TrailingIcon(
-                                        TextFieldIcon.Trailing(
-                                            it.currentItem.icon,
-                                            isTintable = false
-                                        ),
-                                        loading
-                                    )
-
-                                    if (show) {
-                                        CompositionLocalProvider(
-                                            LocalContentColor
-                                                provides
-                                                    MaterialTheme.stripeColors.placeholderText
-                                        ) {
-                                            TrailingIcon(
-                                                trailingIcon = TextFieldIcon.Trailing(
-                                                    R.drawable.stripe_ic_chevron_down,
-                                                    isTintable = true
-                                                ),
-                                                loading = false
-                                            )
-                                        }
-                                    }
-                                }
-
-                                SingleChoiceDropdown(
-                                    expanded = expanded,
-                                    title = it.title,
-                                    currentChoice = it.currentItem,
-                                    choices = it.items,
-                                    headerTextColor = MaterialTheme.stripeColors.subtitle,
-                                    optionTextColor = MaterialTheme.stripeColors.onComponent,
-                                    onChoiceSelected = { item ->
-                                        textFieldController.onDropdownItemClicked(item)
-
-                                        expanded = false
-                                    },
-                                    onDismiss = {
-                                        expanded = false
-                                    }
-                                )
-                            }
+                            TrailingDropdown(
+                                icon = it,
+                                loading = loading,
+                                onDropdownItemClicked = onDropdownItemClicked
+                            )
                         }
                     }
                 }
             }
         },
         isError = shouldShowError,
-        visualTransformation = textFieldController.visualTransformation,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = textFieldController.keyboardType,
-            capitalization = textFieldController.capitalization,
-            imeAction = imeAction
-        ),
-        keyboardActions = KeyboardActions(
-            onNext = {
-                focusManager.moveFocus(nextFocusDirection)
-            },
-            onDone = {
-                focusManager.clearFocus(true)
-            }
-        ),
+        visualTransformation = visualTransformation,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
         singleLine = true,
         colors = colors
     )
@@ -403,6 +388,73 @@ internal fun TrailingIcon(
                 stringResource(trailingIcon.contentDescription)
             },
             modifier = Modifier.conditionallyClickable(trailingIcon.onClick),
+        )
+    }
+}
+
+@Composable
+private fun TrailingDropdown(
+    icon: TextFieldIcon.Dropdown,
+    loading: Boolean,
+    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit
+) {
+    var expanded by remember {
+        mutableStateOf(false)
+    }
+
+    val show = !loading && !icon.hide
+
+    Box {
+        Row(
+            modifier = Modifier
+                .padding(10.dp)
+                .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
+                .clickable(enabled = show) {
+                    expanded = true
+                },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            TrailingIcon(
+                TextFieldIcon.Trailing(
+                    icon.currentItem.icon,
+                    isTintable = false
+                ),
+                loading
+            )
+
+            if (show) {
+                CompositionLocalProvider(
+                    LocalContentColor
+                        provides
+                            MaterialTheme.stripeColors.placeholderText
+                ) {
+                    TrailingIcon(
+                        trailingIcon = TextFieldIcon.Trailing(
+                            R.drawable.stripe_ic_chevron_down,
+                            isTintable = true
+                        ),
+                        loading = false
+                    )
+                }
+            }
+        }
+
+        SingleChoiceDropdown(
+            expanded = expanded,
+            title = icon.title,
+            currentChoice = icon.currentItem,
+            choices = icon.items,
+            headerTextColor = MaterialTheme.stripeColors.subtitle,
+            optionTextColor = MaterialTheme.stripeColors.onComponent,
+            onChoiceSelected = { item ->
+                onDropdownItemClicked(item)
+
+                expanded = false
+            },
+            onDismiss = {
+                expanded = false
+            }
         )
     }
 }

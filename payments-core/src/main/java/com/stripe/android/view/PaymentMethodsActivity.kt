@@ -121,15 +121,20 @@ class PaymentMethodsActivity : AppCompatActivity() {
             }
         }
 
+        observePaymentMethodData()
+
         setupRecyclerView()
 
         val addPaymentMethodLauncher = registerForActivityResult(
             AddPaymentMethodContract(),
             ::onAddPaymentMethodResult
         )
-        adapter.addPaymentMethodArgs.observe(this) { args ->
-            if (args != null) {
-                addPaymentMethodLauncher.launch(args)
+
+        lifecycleScope.launch {
+            adapter.addPaymentMethodArgs.collect { args ->
+                if (args != null) {
+                    addPaymentMethodLauncher.launch(args)
+                }
             }
         }
 
@@ -148,8 +153,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
             viewBinding.footerContainer.addView(footer)
             viewBinding.footerContainer.isVisible = true
         }
-
-        fetchCustomerPaymentMethods()
 
         // This prevents the first click from being eaten by the focus.
         viewBinding.recycler.requestFocusFromTouch()
@@ -215,34 +218,12 @@ class PaymentMethodsActivity : AppCompatActivity() {
     private fun onAddedPaymentMethod(paymentMethod: PaymentMethod) {
         if (paymentMethod.type?.isReusable == true) {
             // Refresh the list of Payment Methods with the new reusable Payment Method.
-            fetchCustomerPaymentMethods()
             viewModel.onPaymentMethodAdded(paymentMethod)
         } else {
             // If the added Payment Method is not reusable, it also can't be attached to a
             // customer, so immediately return to the launching host with the new
             // Payment Method.
             finishWithResult(paymentMethod)
-        }
-    }
-
-    private fun fetchCustomerPaymentMethods() {
-        viewModel.getPaymentMethods().observe(this) { result ->
-            result.fold(
-                onSuccess = { adapter.setPaymentMethods(it) },
-                onFailure = {
-                    alertDisplayer.show(
-                        when (it) {
-                            is StripeException -> {
-                                TranslatorManager.getErrorMessageTranslator()
-                                    .translate(it.statusCode, it.message, it.stripeError)
-                            }
-                            else -> {
-                                it.message.orEmpty()
-                            }
-                        }
-                    )
-                }
-            )
         }
     }
 
@@ -294,6 +275,29 @@ class PaymentMethodsActivity : AppCompatActivity() {
             footerView
         } else {
             null
+        }
+    }
+
+    private fun observePaymentMethodData() {
+        lifecycleScope.launch {
+            viewModel.paymentMethodsData.collect { result ->
+                result?.fold(
+                    onSuccess = { adapter.setPaymentMethods(it) },
+                    onFailure = {
+                        alertDisplayer.show(
+                            when (it) {
+                                is StripeException -> {
+                                    TranslatorManager.getErrorMessageTranslator()
+                                        .translate(it.statusCode, it.message, it.stripeError)
+                                }
+                                else -> {
+                                    it.message.orEmpty()
+                                }
+                            }
+                        )
+                    }
+                )
+            }
         }
     }
 

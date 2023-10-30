@@ -10,7 +10,6 @@ import com.stripe.android.paymentsheet.R
 import org.junit.Test
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
-import com.stripe.payments.model.R as PaymentsModelR
 
 class SavedPaymentMethodIconTest {
     @Test
@@ -50,6 +49,6 @@ class SavedPaymentMethodIconTest {
                     )
                 )
             ).getSavedPaymentMethodIcon()
-        ).isEqualTo(PaymentsModelR.drawable.stripe_ic_cartes_bancaires)
+        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires)
     }
 }
