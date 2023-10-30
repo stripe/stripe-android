@@ -5,8 +5,8 @@ project_type: android
 trigger_map:
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
-  - pull_request_source_branch: 'carlosmuvi/BANKCON-8162/fc-add-livetesting-oauth-tests'
-    pipeline: pipeline-connections-e2e-release-tests
+  - pull_request_source_branch: '*'
+    pipeline: main-trigger-pipeline
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
@@ -140,11 +140,11 @@ workflows:
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
             - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-#      - pagerduty@0:
-#          run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
-#          inputs:
-#            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
-#            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
+      - pagerduty@0:
+          run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
+          inputs:
+            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
+            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
   maestro-edge-financial-connections:
     before_run:
       - start_emulator
