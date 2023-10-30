@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.34.2 - 2023-10-30
+
 ### PaymentSheet
 * [FIXED][7499](https://github.com/stripe/stripe-android/pull/7499) Fixed an issue with incorrect error messages when encountering a failure after 3D Secure authentication.
 * [FIXED][7464](https://github.com/stripe/stripe-android/pull/7464) Fixed an issue where canceling the US Bank Account selection flow prevents the user from launching it again.
