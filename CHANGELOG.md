@@ -47,6 +47,10 @@ Dependencies updated:
 Dependencies updated:
 * [7297](https://github.com/stripe/stripe-android/pull/7297) Bumped Compose Foundation, Compose Material, Compose Runtime, and Compose UI from 1.4.3 to 1.5.1.
 
+Dependencies updated:
+* [7297](https://github.com/stripe/stripe-android/pull/7297) Bumped Compose Foundation, Compose Material, Compose Runtime, and Compose UI from 1.4.3 to 1.5.1.
+* [7328](https://github.com/stripe/stripe-android/pull/7328) Bumped Compose Navigation from 2.5.3 to 2.7.2.
+
 ## 20.31.0 - 2023-09-18
 
 ### PaymentSheet
