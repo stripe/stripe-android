@@ -1,6 +1,11 @@
 #!/usr/bin/env ruby
 
-def generate_dependencies(lines)
+require 'open3'
+
+def generate_dependencies(module_name)
+    output, _, _ = Open3.capture3("./gradlew #{module_name}:dependencies")
+    lines = output.lines.map(&:chomp)
+
     result = []
 
     lines.each do |line|
