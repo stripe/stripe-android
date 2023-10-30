@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## XX.XX.XX - 2023-XX-XX
+* [FIXED][7530](https://github.com/stripe/stripe-android/pull/7530) Fixed an issue which caused PaymentSheet to transitively include the Financial Connections SDK even if not requested.
 
 ## 20.34.2 - 2023-10-30
 
