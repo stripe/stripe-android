@@ -34,8 +34,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -141,6 +145,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         )
     }
 
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     @Suppress("LongMethod")
     private fun PlaygroundContent(
@@ -173,9 +178,12 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 color = Color.Gray
             )
             Button(
+                modifier = Modifier
+                    .semantics { testTagsAsResourceId = true }
+                    .testTag("connect_accounts"),
                 onClick = onButtonClick,
             ) {
-                Text("Connect Accounts!")
+                Text("Connect Accounts")
             }
             LazyColumn {
                 items(state.status) { item ->

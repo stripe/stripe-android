@@ -46,6 +46,7 @@ stages:
     workflows:
       - run-connections-e2e-payments-tests: { }
       - run-connections-e2e-data-tests: { }
+      - run-connections-e2e-livemode-tests: { }
   stage-notify-connections-e2e-failure:
     should_always_run: true
     workflows:
@@ -101,12 +102,17 @@ workflows:
             - pipeline_intermediate_files: "$BITRISE_APK_PATH:BITRISE_APK_PATH"
   run-connections-e2e-payments-tests:
     envs:
-      - MAESTRO_TAGS: payment
+      - MAESTRO_TAGS: testmode-payments
     before_run:
       - _run-connections-e2e-tests
   run-connections-e2e-data-tests:
     envs:
-      - MAESTRO_TAGS: data
+      - MAESTRO_TAGS: testmode-data
+    before_run:
+      - _run-connections-e2e-tests
+  run-connections-e2e-livemode-tests:
+    envs:
+      - MAESTRO_TAGS: livemode-data
     before_run:
       - _run-connections-e2e-tests
   _run-connections-e2e-tests:
@@ -116,22 +122,18 @@ workflows:
     after_run:
       - conclude_all
     steps:
-      - pull-intermediate-files@1:
-          inputs:
-            - artifact_sources: .*
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
+      - pull-intermediate-files@1:
+          inputs:
+            - artifact_sources: .*
       - script@1:
           title: Execute Maestro tests
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh -t  $MAESTRO_TAGS
-      - custom-test-results-export@1:
-          inputs:
-            - search_pattern: '*/maestroReport.xml'
-            - test_name: Maestro tests $MAESTRO_TAGS
+                bash ./scripts/execute_maestro_tests.sh -t $MAESTRO_TAGS
   notify-connections-e2e-failure:
     steps:
       - slack@4:
@@ -165,7 +167,7 @@ workflows:
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh -t all
+                bash ./scripts/execute_maestro_tests.sh -t edge
       - slack@3:
           is_always_run: true
           inputs:

@@ -1,13 +1,13 @@
 appId: com.stripe.android.financialconnections.example
 tags:
   - all
-  - testmode
-  - native
-  - token
+  - edge
+  - testmode-data
 ---
 - startRecording: /tmp/test_results/testmode-token_manualentry
 - openLink: stripeconnectionsexample://playground?flow=Token&financial_connections_override_native=native&merchant=testmode
-- tapOn: "Connect Accounts!"
+- tapOn:
+    id: "connect_accounts"
 # Wait until the consent button is visible
 - extendedWaitUntil:
     visible:

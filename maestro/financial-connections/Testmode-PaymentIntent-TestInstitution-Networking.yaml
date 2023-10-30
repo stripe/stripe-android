@@ -1,9 +1,8 @@
 appId: com.stripe.android.financialconnections.example
 tags:
   - all
-  - testmode
-  - native
-  - payment
+  - edge
+  - testmode-payments
 ---
 - startRecording: /tmp/test_results/testmode-paymentintent-testinstitution-networking
 - openLink: stripeconnectionsexample://playground?flow=PaymentIntent&financial_connections_override_native=native&merchant=networking_testmode
@@ -11,7 +10,8 @@ tags:
     id: "Customer email setting"
 - inputRandomEmail
 - hideKeyboard
-- tapOn: "Connect Accounts!"
+- tapOn:
+    id: "connect_accounts"
 # Wait until the consent button is visible
 - extendedWaitUntil:
     visible:
@@ -48,7 +48,8 @@ tags:
 ###########################################
 # REUSE NEWLY CREATED LINK ACCOUNT
 ###########################################
-- tapOn: "Connect Accounts!"
+- tapOn:
+    id: "connect_accounts"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
     visible:

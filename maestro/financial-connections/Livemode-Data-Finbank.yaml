@@ -1,11 +1,10 @@
 appId: com.stripe.android.financialconnections.example
 tags:
   - all
-  - edge
-  - testmode-data
+  - livemode-data
 ---
-- startRecording: /tmp/test_results/testmode-data-testoauthinstitution
-- openLink: stripeconnectionsexample://playground?flow=Data&financial_connections_override_native=native&merchant=testmode
+- startRecording: /tmp/test_results/livemode-data-finbank
+- openLink: stripeconnectionsexample://playground?flow=Data&financial_connections_override_native=native&merchant=live_testing
 - tapOn:
     id: "connect_accounts"
 # Wait until the consent button is visible
@@ -15,16 +14,24 @@ tags:
     timeout: 30000
 # Common: web AuthFlow - connect OAuth institution
 - tapOn: "Agree and continue"
-- assertVisible: "Test OAuth Institution"
-# ERRORS
-- tapOn: ".*unscheduled.*"
-- tapOn: "Select another bank"
-# SELECT OAUTH INSTITUTION
-- tapOn: "Test OAuth Institution"
-- tapOn: "Continue"
+# SEARCH AND SELECT FINBANK INSTITUTION
+- tapOn: "Search"
+- inputText: "finbank"
+- tapOn:
+    id: "search_result_0"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
+# LOG IN WITH TEST FINBANK INSTITUTION
+- extendedWaitUntil:
+    visible:
+      text: "Image of FinBank logo"
+    timeout: 30000
+- tapOn: "Banking Userid "
+- inputText: "f_i_n"
+- tapOn: "Banking Password "
+- inputText: "b_a_n_k"
+- tapOn: "Submit"
 ###############################################
 # SELECT ALL ACCOUNTS
 - extendedWaitUntil:
@@ -38,5 +45,5 @@ tags:
 - assertVisible: ".*Success.*"
 - tapOn: "Done"
 - assertVisible: ".*Completed!.*"
-- assertVisible: ".*StripeBank.*"
+- assertVisible: ".*FinBank.*"
 - stopRecording
