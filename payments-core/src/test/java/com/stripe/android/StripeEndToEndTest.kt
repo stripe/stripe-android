@@ -50,7 +50,7 @@ internal class StripeEndToEndTest {
                 )
             )
         )
-        assertThat(requireNotNull(token).type)
+        assertThat(token.type)
             .isEqualTo(Token.Type.Account)
     }
 
@@ -61,7 +61,6 @@ internal class StripeEndToEndTest {
                 .createPaymentMethodSynchronous(
                     PaymentMethodCreateParamsFixtures.AU_BECS_DEBIT
                 )
-        requireNotNull(paymentMethod)
         assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.AuBecsDebit)
     }
@@ -115,7 +114,7 @@ internal class StripeEndToEndTest {
             )
         }
 
-        assertThat(createPaymentMethod("4000002500001001")?.card?.networks)
+        assertThat(createPaymentMethod("4000002500001001").card?.networks)
             .isEqualTo(
                 PaymentMethod.Card.Networks(
                     available = setOf("cartes_bancaires", "visa"),
@@ -124,7 +123,7 @@ internal class StripeEndToEndTest {
                 )
             )
 
-        assertThat(createPaymentMethod("5555552500001001")?.card?.networks)
+        assertThat(createPaymentMethod("5555552500001001").card?.networks)
             .isEqualTo(
                 PaymentMethod.Card.Networks(
                     available = setOf("cartes_bancaires", "mastercard"),
@@ -139,7 +138,7 @@ internal class StripeEndToEndTest {
         val source = defaultStripe.createSourceSynchronous(
             SourceParams.createCardParams(CardParamsFixtures.DEFAULT)
         )
-        assertThat(source?.sourceTypeModel)
+        assertThat(source.sourceTypeModel)
             .isEqualTo(
                 SourceTypeModel.Card(
                     addressLine1Check = "unchecked",
@@ -161,7 +160,7 @@ internal class StripeEndToEndTest {
         val token = defaultStripe.createCardTokenSynchronous(
             CardParamsFixtures.DEFAULT
         )
-        val card = requireNotNull(token?.card)
+        val card = requireNotNull(token.card)
 
         assertThat(card)
             .isEqualTo(
@@ -205,7 +204,7 @@ internal class StripeEndToEndTest {
                         number = cardNumber
                     )
                 )
-                token?.card?.brand == cardBrand
+                token.card?.brand == cardBrand
             }
         ).isTrue()
     }

@@ -1,4 +1,4 @@
-package com.stripe.android.test.e2e
+package com.stripe.android.testing
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,13 +15,13 @@ class CoroutineTestRule(
     private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
 ) : TestWatcher() {
 
-    override fun starting(description: Description?) {
+    override fun starting(description: Description) {
         super.starting(description)
         Dispatchers.setMain(testDispatcher)
     }
 
-    override fun finished(description: Description?) {
-        super.finished(description)
+    override fun finished(description: Description) {
         Dispatchers.resetMain()
+        super.finished(description)
     }
 }

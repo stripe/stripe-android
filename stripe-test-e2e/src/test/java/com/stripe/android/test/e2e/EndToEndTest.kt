@@ -19,6 +19,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -32,7 +33,7 @@ import kotlin.test.Test
 @RunWith(AndroidJUnit4::class)
 internal class EndToEndTest {
     @get:Rule
-    var coroutinesTestRule = CoroutineTestRule()
+    val coroutinesTestRule = CoroutineTestRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
