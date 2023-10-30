@@ -47,6 +47,7 @@
                     android:host="playground" />
             </intent-filter>
         </activity>
+        <activity android:name=".QrCodeActivity" />
     </application>
 
 </manifest>

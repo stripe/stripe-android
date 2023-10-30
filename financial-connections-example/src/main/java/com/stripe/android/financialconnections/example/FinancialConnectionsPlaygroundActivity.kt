@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -126,14 +127,17 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         onSettingsChanged: (PlaygroundSettings) -> Unit,
         onButtonClick: () -> Unit
     ) {
-        val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
+        val (showEventsDialog, setShowEventsDialog) = remember { mutableStateOf(false) }
 
-        if (showDialog) {
-            EventsDialog(setShowDialog, state)
+        if (showEventsDialog) {
+            EventsDialog(setShowEventsDialog, state)
         }
 
         Scaffold(
-            topBar = { PlaygroundTopBar(setShowDialog) },
+            topBar = { PlaygroundTopBar(
+                settings = state.settings,
+                setShowEventsDialog = setShowEventsDialog
+            ) },
             content = {
                 PlaygroundContent(
                     padding = it,
@@ -206,9 +210,11 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
     @Composable
     private fun PlaygroundTopBar(
-        setShowDialog: (Boolean) -> Unit,
+        settings: PlaygroundSettings,
+        setShowEventsDialog: (Boolean) -> Unit,
     ) {
         val (showMenu, setShowMenu) = remember { mutableStateOf(false) }
+        val context = LocalContext.current
         TopAppBar(
             title = { Text("Connections Playground") },
             actions = {
@@ -221,9 +227,20 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 ) {
                     DropdownMenuItem(onClick = {
                         setShowMenu(false)
-                        setShowDialog(true)
+                        setShowEventsDialog(true)
                     }) {
                         Text("See live events")
+                    }
+                    DropdownMenuItem(onClick = {
+                        setShowMenu(false)
+                        context.startActivity(
+                            QrCodeActivity.create(
+                                context = context,
+                                settingsUri = settings.asDeeplinkUri().toString(),
+                            )
+                        )
+                    }) {
+                        Text("QR code")
                     }
                 }
             }
