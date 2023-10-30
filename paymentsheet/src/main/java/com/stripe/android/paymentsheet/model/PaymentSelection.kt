@@ -143,6 +143,14 @@ internal sealed class PaymentSelection : Parcelable {
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         ) : New() {
 
+            override fun mandateText(
+                context: Context,
+                merchantName: String,
+                isSaveForFutureUseSelected: Boolean,
+            ): String? {
+                return screenState.mandateText
+            }
+
             @Parcelize
             data class Input(
                 val name: String,

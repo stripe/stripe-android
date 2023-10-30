@@ -353,6 +353,7 @@ class USBankAccountFormViewModelTest {
         val screenStates = listOf(
             USBankAccountFormScreenState.BillingDetailsCollection(
                 primaryButtonText = "Continue",
+                isProcessing = false,
             ),
             USBankAccountFormScreenState.MandateCollection(
                 financialConnectionsSessionId = "session_1234",
@@ -832,6 +833,21 @@ class USBankAccountFormViewModelTest {
 
             assertThat(currentScreenState)
                 .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+        }
+    }
+
+    @Test
+    fun `When the primary button is pressed, the primary button state moves to processing`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem().isProcessing)
+                .isFalse()
+
+            viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
+
+            assertThat(awaitItem().isProcessing)
+                .isTrue()
         }
     }
 

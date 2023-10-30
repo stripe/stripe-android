@@ -308,6 +308,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun handlePrimaryButtonClick(screenState: USBankAccountFormScreenState) {
         when (screenState) {
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
+                _currentScreenState.update {
+                    screenState.copy(isProcessing = true)
+                }
                 collectBankAccount(args.clientSecret)
             }
             is USBankAccountFormScreenState.MandateCollection ->
@@ -343,6 +346,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 primaryButtonText = application.getString(
                     StripeUiCoreR.string.stripe_continue_button_label
                 ),
+                isProcessing = false,
             )
         }
     }
@@ -366,6 +370,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 primaryButtonText = application.getString(
                     StripeUiCoreR.string.stripe_continue_button_label
                 ),
+                isProcessing = false,
             )
         }
     }

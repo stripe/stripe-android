@@ -39,7 +39,6 @@ private fun USBankAccountFormArguments.updatePrimaryButton(
     shouldShowProcessingWhenClicked: Boolean,
     enabled: Boolean,
 ) {
-    onUpdatePrimaryButtonState(PrimaryButton.State.Ready)
     onUpdatePrimaryButtonUIState {
         PrimaryButton.UIState(
             label = text,

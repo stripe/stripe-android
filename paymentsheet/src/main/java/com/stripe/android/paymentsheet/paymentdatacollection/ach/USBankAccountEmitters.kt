@@ -58,7 +58,7 @@ internal fun USBankAccountEmitters(
         usBankAccountFormArgs.handleScreenStateChanged(
             context = context,
             screenState = screenState,
-            enabled = hasRequiredFields,
+            enabled = hasRequiredFields && !screenState.isProcessing,
             merchantName = viewModel.formattedMerchantName(),
             onPrimaryButtonClick = viewModel::handlePrimaryButtonClick,
         )

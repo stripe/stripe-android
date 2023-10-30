@@ -258,6 +258,7 @@ internal class PlaygroundTestDriver(
     fun confirmNewOrGuestComplete(
         testParameters: TestParameters,
         values: FieldPopulator.Values = FieldPopulator.Values(),
+        afterAuthorization: (Selectors) -> Unit = {},
         populateCustomLpmFields: () -> Unit = {},
     ): PlaygroundState? {
         setup(testParameters)
@@ -284,6 +285,46 @@ internal class PlaygroundTestDriver(
         pressBuy()
 
         doAuthorization()
+
+        afterAuthorization(selectors)
+
+        teardown()
+
+        return result
+    }
+
+    fun confirmUSBankAccount(
+        testParameters: TestParameters,
+        values: FieldPopulator.Values = FieldPopulator.Values(),
+        afterAuthorization: (Selectors) -> Unit = {},
+        populateCustomLpmFields: () -> Unit = {},
+    ): PlaygroundState? {
+        setup(testParameters)
+        launchComplete()
+
+        selectors.paymentSelection.click()
+
+        FieldPopulator(
+            selectors,
+            testParameters,
+            populateCustomLpmFields,
+            values = values,
+        ).populateFields()
+
+        // Verify device requirements are met prior to attempting confirmation.  Do this
+        // after we have had the chance to capture a screenshot.
+        verifyDeviceSupportsTestAuthorization(
+            testParameters.authorizationAction,
+            testParameters.useBrowser
+        )
+
+        val result = playgroundState
+
+        pressBuy()
+
+        doUSBankAccountAuthorization()
+
+        afterAuthorization(selectors)
 
         teardown()
 
@@ -557,6 +598,31 @@ internal class PlaygroundTestDriver(
         if (isDone) {
             waitForPlaygroundActivity()
             assertThat(resultValue).isEqualTo("Success")
+        }
+    }
+
+    private fun doUSBankAccountAuthorization() {
+        selectors.apply {
+            if (testParameters.authorizationAction != null) {
+                if (testParameters.authorizationAction?.requiresBrowser == true) {
+                    // If a specific browser is requested we will use it, otherwise, we will
+                    // select the first browser found
+                    val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
+
+                    // If there are multiple browser there is a browser selector window
+                    selectBrowserPrompt.wait(4000)
+                    if (selectBrowserPrompt.exists()) {
+                        browserIconAtPrompt(selectedBrowser).click()
+                    }
+
+                    assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
+
+                    blockUntilUSBankAccountPageLoaded()
+                }
+                if (testParameters.authorizationAction == AuthorizeAction.Cancel) {
+                    selectors.authorizeAction?.click()
+                }
+            }
         }
     }
 

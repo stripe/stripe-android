@@ -53,7 +53,6 @@ import com.stripe.android.ui.core.R as PaymentsUiCoreR
 internal fun USBankAccountForm(
     formArgs: FormArguments,
     usBankAccountFormArgs: USBankAccountFormArguments,
-    isProcessing: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val viewModel = viewModel<USBankAccountFormViewModel>(
@@ -84,7 +83,7 @@ internal fun USBankAccountForm(
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
                 BillingDetailsCollectionScreen(
                     formArgs = formArgs,
-                    isProcessing = isProcessing,
+                    isProcessing = screenState.isProcessing,
                     nameController = viewModel.nameController,
                     emailController = viewModel.emailController,
                     phoneController = viewModel.phoneController,
@@ -96,7 +95,7 @@ internal fun USBankAccountForm(
             is USBankAccountFormScreenState.MandateCollection -> {
                 MandateCollectionScreen(
                     formArgs = formArgs,
-                    isProcessing = isProcessing,
+                    isProcessing = screenState.isProcessing,
                     screenState = screenState,
                     nameController = viewModel.nameController,
                     emailController = viewModel.emailController,
@@ -111,7 +110,7 @@ internal fun USBankAccountForm(
             is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
                 VerifyWithMicrodepositsScreen(
                     formArgs = formArgs,
-                    isProcessing = isProcessing,
+                    isProcessing = screenState.isProcessing,
                     screenState = screenState,
                     nameController = viewModel.nameController,
                     emailController = viewModel.emailController,
@@ -126,7 +125,7 @@ internal fun USBankAccountForm(
             is USBankAccountFormScreenState.SavedAccount -> {
                 SavedAccountScreen(
                     formArgs = formArgs,
-                    isProcessing = isProcessing,
+                    isProcessing = screenState.isProcessing,
                     screenState = screenState,
                     nameController = viewModel.nameController,
                     emailController = viewModel.emailController,
