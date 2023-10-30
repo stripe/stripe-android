@@ -9,7 +9,6 @@ import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT
 import com.stripe.android.paymentsheet.R
 import org.junit.Test
 import com.stripe.android.R as StripeR
-import com.stripe.android.ui.core.R as StripeUiCoreR
 
 class SavedPaymentMethodIconTest {
     @Test
@@ -29,7 +28,7 @@ class SavedPaymentMethodIconTest {
     fun `on SEPA payment method, should return proper SEPA icon`() {
         assertThat(
             SEPA_DEBIT_PAYMENT_METHOD.getSavedPaymentMethodIcon()
-        ).isEqualTo(StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_sepa_debit)
+        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_sepa)
     }
 
     @Test
