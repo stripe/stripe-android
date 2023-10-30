@@ -67,8 +67,6 @@
   <string name="stripe_paymentsheet_remove_pm">Remove %s</string>
   <!-- A button used for saving a new payment method -->
   <string name="stripe_paymentsheet_save">Save</string>
-  <!-- Content shown as a title and button label when modifying a saved payment method. -->
-  <string name="stripe_paymentsheet_update_card">Update card</string>
   <!-- Content shown as a button label when modifying a saved payment method. -->
   <string name="stripe_paymentsheet_remove_card">Remove card</string>
   <!-- Content shown as a text field label when modifying a saved payment method. -->

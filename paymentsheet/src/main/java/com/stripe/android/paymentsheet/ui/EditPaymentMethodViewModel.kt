@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -82,7 +81,7 @@ internal class EditPaymentMethodViewModel(
                 _effect.emit(
                     EditPaymentMethodViewEffect.OnUpdateRequested(
                         paymentMethod = paymentMethod,
-                        brand = CardBrand.fromCode(currentChoice.value.id)
+                        brand = currentChoice.value.brand
                     )
                 )
             }
@@ -94,11 +93,7 @@ internal class EditPaymentMethodViewModel(
     }
 
     private fun CardBrand.toChoice(): EditPaymentViewState.CardBrandChoice {
-        return EditPaymentViewState.CardBrandChoice(
-            id = code,
-            label = resolvableString(displayName),
-            icon = icon
-        )
+        return EditPaymentViewState.CardBrandChoice(brand = this)
     }
 
     class Factory(

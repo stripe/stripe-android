@@ -30,7 +30,7 @@ internal class HeaderTextFactory(
                     }
                 }
                 is PaymentSheetScreen.EditPaymentMethod -> {
-                    R.string.stripe_paymentsheet_update_card
+                    StripeR.string.stripe_title_update_card
                 }
                 is PaymentSheetScreen.Loading,
                 is PaymentSheetScreen.AddAnotherPaymentMethod -> {
@@ -54,7 +54,7 @@ internal class HeaderTextFactory(
                     }
                 }
                 is PaymentSheetScreen.EditPaymentMethod -> {
-                    R.string.stripe_paymentsheet_update_card
+                    StripeR.string.stripe_title_update_card
                 }
             }
         }

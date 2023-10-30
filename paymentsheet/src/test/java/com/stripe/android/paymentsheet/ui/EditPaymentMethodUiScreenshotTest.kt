@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.utils.screenshots.FontSize
 import com.stripe.android.utils.screenshots.PaparazziRule
@@ -41,21 +40,15 @@ class EditPaymentMethodUiScreenshotTest {
         return EditPaymentViewState(
             last4 = "4242",
             selectedBrand = EditPaymentViewState.CardBrandChoice(
-                id = CardBrand.CartesBancaires.code,
-                label = resolvableString(CardBrand.CartesBancaires.displayName),
-                icon = CardBrand.CartesBancaires.icon
+                brand = CardBrand.CartesBancaires
             ),
             canUpdate = canUpdate,
             availableBrands = listOf(
                 EditPaymentViewState.CardBrandChoice(
-                    id = CardBrand.Visa.code,
-                    label = resolvableString(CardBrand.Visa.displayName),
-                    icon = CardBrand.Visa.icon
+                    brand = CardBrand.Visa
                 ),
                 EditPaymentViewState.CardBrandChoice(
-                    id = CardBrand.CartesBancaires.code,
-                    label = resolvableString(CardBrand.CartesBancaires.displayName),
-                    icon = CardBrand.CartesBancaires.icon
+                    brand = CardBrand.CartesBancaires
                 )
             )
         )

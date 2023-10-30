@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.ui
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import kotlinx.coroutines.Dispatchers
@@ -149,15 +148,11 @@ class EditPaymentMethodViewModelTest {
         private val CARD_WITH_NETWORKS_PAYMENT_METHOD = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
 
         val CARTES_BANCAIRES_BRAND_CHOICE = EditPaymentViewState.CardBrandChoice(
-            id = CardBrand.CartesBancaires.code,
-            label = resolvableString(CardBrand.CartesBancaires.displayName),
-            icon = CardBrand.CartesBancaires.icon
+            brand = CardBrand.CartesBancaires
         )
 
         private val VISA_BRAND_CHOICE = EditPaymentViewState.CardBrandChoice(
-            id = CardBrand.Visa.code,
-            label = resolvableString(CardBrand.Visa.displayName),
-            icon = CardBrand.Visa.icon
+            brand = CardBrand.Visa
         )
     }
 }

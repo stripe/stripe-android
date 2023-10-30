@@ -49,6 +49,7 @@ import com.stripe.android.uicore.stripeColors
 import kotlinx.coroutines.flow.collectLatest
 import java.util.UUID
 import com.stripe.android.R as PaymentsCoreR
+import com.stripe.android.R as StripeR
 import com.stripe.android.uicore.R as UiCoreR
 
 @Composable
@@ -107,36 +108,34 @@ internal fun EditPaymentMethodUi(
             end = padding
         )
     ) {
-        SectionCard(
-            content = {
-                val colors = TextFieldColors(false)
+        SectionCard {
+            val colors = TextFieldColors(false)
 
-                TextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = "•••• •••• •••• ${viewState.last4}",
-                    enabled = false,
-                    colors = colors,
-                    label = {
-                        Text(
-                            text = stringResource(id = R.string.stripe_paymentsheet_card_number),
-                            modifier = modifier,
-                            color = MaterialTheme.stripeColors.placeholderText
-                                .copy(alpha = ContentAlpha.disabled),
-                            style = MaterialTheme.typography.subtitle1
-                        )
-                    },
-                    trailingIcon = {
-                        Dropdown(viewState, viewActionHandler)
-                    },
-                    onValueChange = {}
-                )
-            }
-        )
+            TextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = "•••• •••• •••• ${viewState.last4}",
+                enabled = false,
+                colors = colors,
+                label = {
+                    Text(
+                        text = stringResource(id = R.string.stripe_paymentsheet_card_number),
+                        modifier = modifier,
+                        color = MaterialTheme.stripeColors.placeholderText
+                            .copy(alpha = ContentAlpha.disabled),
+                        style = MaterialTheme.typography.subtitle1
+                    )
+                },
+                trailingIcon = {
+                    Dropdown(viewState, viewActionHandler)
+                },
+                onValueChange = {}
+            )
+        }
 
         Spacer(modifier = Modifier.requiredHeight(48.dp))
 
         PrimaryButton(
-            label = stringResource(id = R.string.stripe_paymentsheet_update_card),
+            label = stringResource(id = StripeR.string.stripe_title_update_card),
             isEnabled = viewState.canUpdate,
             onButtonClick = {
                 viewActionHandler.invoke(EditPaymentMethodViewAction.OnUpdatePressed)
@@ -195,6 +194,8 @@ private fun Dropdown(
             ),
             currentChoice = viewState.selectedBrand,
             choices = viewState.availableBrands,
+            headerTextColor = MaterialTheme.stripeColors.subtitle,
+            optionTextColor = MaterialTheme.stripeColors.onComponent,
             onChoiceSelected = { item ->
                 expanded = false
 
@@ -217,21 +218,15 @@ private fun EditPaymentMethodPreview() {
             viewState = EditPaymentViewState(
                 last4 = "4242",
                 selectedBrand = EditPaymentViewState.CardBrandChoice(
-                    id = CardBrand.CartesBancaires.code,
-                    label = resolvableString(CardBrand.CartesBancaires.displayName),
-                    icon = CardBrand.CartesBancaires.icon
+                    brand = CardBrand.CartesBancaires
                 ),
                 canUpdate = true,
                 availableBrands = listOf(
                     EditPaymentViewState.CardBrandChoice(
-                        id = CardBrand.Visa.code,
-                        label = resolvableString(CardBrand.Visa.displayName),
-                        icon = CardBrand.Visa.icon
+                        brand = CardBrand.Visa
                     ),
                     EditPaymentViewState.CardBrandChoice(
-                        id = CardBrand.CartesBancaires.code,
-                        label = resolvableString(CardBrand.CartesBancaires.displayName),
-                        icon = CardBrand.CartesBancaires.icon
+                        brand = CardBrand.CartesBancaires
                     )
                 )
             ),

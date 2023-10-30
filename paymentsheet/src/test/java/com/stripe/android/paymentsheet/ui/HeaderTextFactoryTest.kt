@@ -41,7 +41,7 @@ class HeaderTextFactoryTest {
             types = emptyList(),
         )
 
-        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_update_card)
+        assertThat(resource).isEqualTo(StripeR.string.stripe_title_update_card)
     }
 
     @Test
@@ -90,7 +90,7 @@ class HeaderTextFactoryTest {
 
     @Test
     fun `Shows the correct header when editing a saved payment method is shown in custom flow`() {
-        val resource = HeaderTextFactory(isCompleteFlow = true).create(
+        val resource = HeaderTextFactory(isCompleteFlow = false).create(
             screen = PaymentSheetScreen.EditPaymentMethod(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             ),
@@ -98,7 +98,7 @@ class HeaderTextFactoryTest {
             types = emptyList(),
         )
 
-        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_update_card)
+        assertThat(resource).isEqualTo(StripeR.string.stripe_title_update_card)
     }
 
     @Test
