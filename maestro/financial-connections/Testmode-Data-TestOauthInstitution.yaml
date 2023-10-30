@@ -22,7 +22,8 @@ tags:
 - tapOn: "Select another bank"
 # SELECT OAUTH INSTITUTION
 - tapOn: "Test OAuth Institution"
-- tapOn: "Continue"
+- tapOn:
+    id: "prepane_cta"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml

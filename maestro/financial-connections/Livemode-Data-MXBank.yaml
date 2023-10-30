@@ -20,7 +20,8 @@ tags:
 - inputText: "mx"
 - tapOn:
     id: "search_result_1"
-- tapOn: "Continue"
+- tapOn:
+    id: "prepane_cta"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
