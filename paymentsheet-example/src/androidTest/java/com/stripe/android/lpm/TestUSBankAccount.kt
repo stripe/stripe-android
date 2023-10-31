@@ -37,4 +37,17 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
             }
         )
     }
+
+    @Test
+    fun testUSBankAccountInCustomFlow() {
+        testDriver.confirmCustomUSBankAccount(
+            testParameters = testParameters.copy(
+                authorizationAction = AuthorizeAction.Cancel,
+            ),
+            afterAuthorization = {
+                rules.compose.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                    .assertIsEnabled()
+            }
+        )
+    }
 }

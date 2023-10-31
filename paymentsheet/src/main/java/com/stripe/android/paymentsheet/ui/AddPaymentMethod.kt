@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -120,7 +121,7 @@ internal fun AddPaymentMethod(
                 usBankAccountFormArguments = USBankAccountFormArguments(
                     onBehalfOf = onBehalfOf,
                     isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
-                    isPaymentFlow = initializationMode is PaymentSheet.InitializationMode.PaymentIntent,
+                    isPaymentFlow = stripeIntent.value is PaymentIntent,
                     stripeIntentId = stripeIntent.value?.id,
                     clientSecret = stripeIntent.value?.clientSecret,
                     shippingDetails = sheetViewModel.config?.shippingDetails,
