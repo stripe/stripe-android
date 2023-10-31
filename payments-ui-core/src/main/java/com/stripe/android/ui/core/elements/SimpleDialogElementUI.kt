@@ -5,14 +5,13 @@ import androidx.compose.material.AlertDialog
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.H6Text
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun SimpleDialogElementUI(
-    openDialog: MutableState<Boolean>,
+    openDialog: Boolean,
     titleText: String,
     messageText: String,
     confirmText: String,
@@ -20,11 +19,11 @@ fun SimpleDialogElementUI(
     onConfirmListener: (() -> Unit) = {},
     onDismissListener: (() -> Unit) = {}
 ) {
-    if (openDialog.value) {
+    if (openDialog) {
         StripeTheme {
             AlertDialog(
                 onDismissRequest = {
-                    openDialog.value = false
+                    onDismissListener()
                 },
                 title = {
                     H4Text(text = titleText)
@@ -35,7 +34,6 @@ fun SimpleDialogElementUI(
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            openDialog.value = false
                             onConfirmListener()
                         }
                     ) {
@@ -45,7 +43,6 @@ fun SimpleDialogElementUI(
                 dismissButton = {
                     TextButton(
                         onClick = {
-                            openDialog.value = false
                             onDismissListener()
                         }
                     ) {
