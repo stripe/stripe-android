@@ -320,4 +320,20 @@ internal class CustomerSheetScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun testConfirmCloseDialog() {
+        featureFlagTestRule.setEnabled(true)
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                    formViewData = FormViewModel.ViewData(),
+                    displayConfirmationModal = true,
+                ),
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = null,
+            )
+        }
+    }
 }
