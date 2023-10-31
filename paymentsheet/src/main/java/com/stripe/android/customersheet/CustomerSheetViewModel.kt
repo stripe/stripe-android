@@ -337,6 +337,11 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onAddPaymentMethodItemChanged(paymentMethod: LpmRepository.SupportedPaymentMethod) {
+        (viewState.value as? CustomerSheetViewState.AddPaymentMethod)?.let {
+            if (it.paymentMethodCode == paymentMethod.code) {
+                return
+            }
+        }
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
                 paymentMethodCode = paymentMethod.code,

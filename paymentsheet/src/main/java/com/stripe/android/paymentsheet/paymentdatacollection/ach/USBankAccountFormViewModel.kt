@@ -360,7 +360,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         _collectBankAccountResult.tryEmit(null)
         collectBankAccountLauncher?.unregister()
         collectBankAccountLauncher = null
-        reset()
     }
 
     fun formattedMerchantName(): String {
