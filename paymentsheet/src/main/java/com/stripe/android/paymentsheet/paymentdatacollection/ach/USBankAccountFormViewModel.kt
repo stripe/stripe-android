@@ -343,6 +343,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun reset(@StringRes error: Int? = null) {
         hasLaunched = false
         saveForFutureUseElement.controller.onValueChange(true)
+        _collectBankAccountResult.tryEmit(null)
         _currentScreenState.update {
             USBankAccountFormScreenState.BillingDetailsCollection(
                 error = error,

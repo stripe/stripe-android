@@ -16,8 +16,8 @@ fun SimpleDialogElementUI(
     messageText: String,
     confirmText: String,
     dismissText: String,
-    onConfirmListener: (() -> Unit) = {},
-    onDismissListener: (() -> Unit) = {}
+    onConfirmListener: () -> Unit,
+    onDismissListener: () -> Unit,
 ) {
     if (openDialog) {
         StripeTheme {

@@ -1785,6 +1785,10 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.displayDismissConfirmationModal)
+                .isFalse()
+
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnCollectBankAccountResult(
                     bankAccountResult = CollectBankAccountResultInternal.Completed(
@@ -1793,14 +1797,14 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            var viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.displayConfirmationModal)
+            viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.displayDismissConfirmationModal)
                 .isFalse()
 
             viewModel.bottomSheetConfirmStateChange()
 
             viewState = awaitViewState()
-            assertThat(viewState.displayConfirmationModal)
+            assertThat(viewState.displayDismissConfirmationModal)
                 .isTrue()
         }
     }
@@ -1817,6 +1821,10 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.displayDismissConfirmationModal)
+                .isFalse()
+
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnCollectBankAccountResult(
                     bankAccountResult = CollectBankAccountResultInternal.Completed(
@@ -1825,8 +1833,8 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            val viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.displayConfirmationModal)
+            viewState = awaitViewState()
+            assertThat(viewState.displayDismissConfirmationModal)
                 .isFalse()
 
             viewModel.bottomSheetConfirmStateChange()
@@ -1847,6 +1855,10 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.displayDismissConfirmationModal)
+                .isFalse()
+
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnCollectBankAccountResult(
                     bankAccountResult = CollectBankAccountResultInternal.Completed(
@@ -1855,14 +1867,14 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            var viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.displayConfirmationModal)
+            viewState = awaitViewState()
+            assertThat(viewState.displayDismissConfirmationModal)
                 .isFalse()
 
             viewModel.bottomSheetConfirmStateChange()
 
             viewState = awaitViewState()
-            assertThat(viewState.displayConfirmationModal)
+            assertThat(viewState.displayDismissConfirmationModal)
                 .isTrue()
 
             viewModel.handleViewAction(
@@ -1870,7 +1882,7 @@ class CustomerSheetViewModelTest {
             )
 
             viewState = awaitViewState()
-            assertThat(viewState.displayConfirmationModal)
+            assertThat(viewState.displayDismissConfirmationModal)
                 .isFalse()
         }
     }
@@ -1891,6 +1903,10 @@ class CustomerSheetViewModelTest {
 
         assertThat(resultTurbine.awaitItem()).isNull()
 
+        var viewState = viewStateTurbine.awaitViewState<AddPaymentMethod>()
+        assertThat(viewState.displayDismissConfirmationModal)
+            .isFalse()
+
         viewModel.handleViewAction(
             CustomerSheetViewAction.OnCollectBankAccountResult(
                 bankAccountResult = CollectBankAccountResultInternal.Completed(
@@ -1899,14 +1915,14 @@ class CustomerSheetViewModelTest {
             )
         )
 
-        var viewState = viewStateTurbine.awaitViewState<AddPaymentMethod>()
-        assertThat(viewState.displayConfirmationModal)
+        viewState = viewStateTurbine.awaitViewState<AddPaymentMethod>()
+        assertThat(viewState.displayDismissConfirmationModal)
             .isFalse()
 
         viewModel.bottomSheetConfirmStateChange()
 
         viewState = viewStateTurbine.awaitViewState()
-        assertThat(viewState.displayConfirmationModal)
+        assertThat(viewState.displayDismissConfirmationModal)
             .isTrue()
 
         viewModel.handleViewAction(
@@ -1922,6 +1938,27 @@ class CustomerSheetViewModelTest {
 
         resultTurbine.cancel()
         viewStateTurbine.cancel()
+    }
+
+    @Test
+    fun `When in add flow and us bank account is retrieved, then shouldDisplayConfirmationDialog should be true`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                    bankAccountResult = CollectBankAccountResultInternal.Completed(
+                        response = mock(),
+                    ),
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            val viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.shouldDisplayDismissConfirmationModal)
+                .isTrue()
+        }
     }
 
     @Suppress("UNCHECKED_CAST")

@@ -870,6 +870,9 @@ class USBankAccountFormViewModelTest {
 
             assertThat(awaitItem())
                 .isEqualTo(CollectBankAccountResultInternal.Cancelled)
+            // Reset was called, so the result should be null
+            assertThat(awaitItem())
+                .isNull()
 
             val failure = CollectBankAccountResultInternal.Failed(
                 IllegalArgumentException("Failed")
@@ -880,6 +883,29 @@ class USBankAccountFormViewModelTest {
 
             assertThat(awaitItem())
                 .isEqualTo(failure)
+            // Reset was called, so the result should be null
+            assertThat(awaitItem())
+                .isNull()
+        }
+    }
+
+    @Test
+    fun `When the view model is reset, collect bank account result should be null`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.collectBankAccountResult.test {
+            val verifiedAccount = mockVerifiedBankAccount()
+            viewModel.handleCollectBankAccountResult(
+                result = verifiedAccount
+            )
+
+            assertThat(awaitItem())
+                .isEqualTo(verifiedAccount)
+
+            viewModel.reset()
+
+            assertThat(awaitItem())
+                .isEqualTo(null)
         }
     }
 

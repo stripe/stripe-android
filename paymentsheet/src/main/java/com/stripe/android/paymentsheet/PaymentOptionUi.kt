@@ -129,7 +129,8 @@ internal fun PaymentOptionUi(
             messageText = description,
             confirmText = stringResource(StripeR.string.stripe_remove),
             dismissText = stringResource(StripeR.string.stripe_cancel),
-            onConfirmListener = onRemoveListener
+            onConfirmListener = onRemoveListener,
+            onDismissListener = { openRemoveDialog.value = false }
         )
     }
 }

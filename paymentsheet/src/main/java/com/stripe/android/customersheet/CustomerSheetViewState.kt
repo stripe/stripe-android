@@ -3,6 +3,7 @@ package com.stripe.android.customersheet
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -29,6 +30,11 @@ internal sealed class CustomerSheetViewState(
             isProcessing = isProcessing,
             isEditing = isEditing,
         )
+
+    val shouldDisplayDismissConfirmationModal: Boolean
+        get() = this is AddPaymentMethod &&
+            paymentMethodCode == PaymentMethod.Type.USBankAccount.code &&
+            bankAccountResult is CollectBankAccountResultInternal.Completed
 
     data class Loading(
         override val isLiveMode: Boolean,
@@ -80,7 +86,8 @@ internal sealed class CustomerSheetViewState(
         val customPrimaryButtonUiState: PrimaryButton.UIState?,
         val mandateText: String? = null,
         val showMandateAbovePrimaryButton: Boolean = false,
-        val displayConfirmationModal: Boolean = false,
+        val displayDismissConfirmationModal: Boolean = false,
+        val bankAccountResult: CollectBankAccountResultInternal?,
     ) : CustomerSheetViewState(
         savedPaymentMethods = emptyList(),
         isLiveMode = isLiveMode,

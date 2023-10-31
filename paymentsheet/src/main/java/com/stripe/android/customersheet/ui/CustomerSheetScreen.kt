@@ -212,7 +212,7 @@ internal fun AddPaymentMethodWithPaymentElement(
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     SimpleDialogElementUI(
-        openDialog = viewState.displayConfirmationModal,
+        openDialog = viewState.displayDismissConfirmationModal,
         titleText = stringResource(id = R.string.stripe_confirm_close_form_title),
         messageText = stringResource(id = R.string.stripe_confirm_close_form_body),
         confirmText = stringResource(id = R.string.stripe_paymentsheet_close),

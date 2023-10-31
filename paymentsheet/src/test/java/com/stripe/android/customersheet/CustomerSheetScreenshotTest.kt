@@ -101,6 +101,7 @@ internal class CustomerSheetScreenshotTest {
         primaryButtonLabel = resolvableString("Save"),
         primaryButtonEnabled = false,
         customPrimaryButtonUiState = null,
+        bankAccountResult = null,
     )
 
     @Test
@@ -329,7 +330,7 @@ internal class CustomerSheetScreenshotTest {
                 viewState = addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
                     formViewData = FormViewModel.ViewData(),
-                    displayConfirmationModal = true,
+                    displayDismissConfirmationModal = true,
                 ),
                 paymentMethodNameProvider = { it!! },
                 formViewModelSubComponentBuilderProvider = null,
