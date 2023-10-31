@@ -244,9 +244,11 @@ internal class PlaygroundTestDriver(
         waitForNotPlaygroundActivity()
     }
 
-    private fun pressContinue() {
+    private fun pressContinue(waitForPlayground: Boolean = true) {
         selectors.continueButton.click()
-        waitForPlaygroundActivity()
+        if (waitForPlayground) {
+            waitForPlaygroundActivity()
+        }
     }
 
     /**
@@ -329,6 +331,51 @@ internal class PlaygroundTestDriver(
         teardown()
 
         return result
+    }
+
+    fun confirmCustomUSBankAccount(
+        testParameters: TestParameters,
+        values: FieldPopulator.Values = FieldPopulator.Values(),
+        afterAuthorization: (Selectors) -> Unit = {},
+        populateCustomLpmFields: () -> Unit = {},
+        verifyCustomLpmFields: () -> Unit = {},
+    ) {
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings[IntegrationTypeSettingsDefinition] = IntegrationType.FlowController
+            }
+        )
+        launchCustom()
+
+        if (isSelectPaymentMethodScreen()) {
+            // When Link is enabled we get the select screen, but we want to go to the add screen
+            // and click the payment method.
+            addPaymentMethodNode().performClick()
+        }
+        selectors.paymentSelection.click()
+
+        FieldPopulator(
+            selectors,
+            testParameters,
+            populateCustomLpmFields,
+            verifyCustomLpmFields,
+            values,
+        ).populateFields()
+
+        // Verify device requirements are met prior to attempting confirmation.  Do this
+        // after we have had the chance to capture a screenshot.
+        verifyDeviceSupportsTestAuthorization(
+            testParameters.authorizationAction,
+            testParameters.useBrowser
+        )
+
+        pressContinue(waitForPlayground = false)
+
+        doUSBankAccountAuthorization()
+
+        afterAuthorization(selectors)
+
+        teardown()
     }
 
     /**
