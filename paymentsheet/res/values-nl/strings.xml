@@ -6,6 +6,10 @@
   <string name="stripe_bank_account_ending_in">Bankrekening verwijderen die eindigt op %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Bevestig de betaling in de app van je bank binnen %s om de aankoop af te ronden.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">Je betaalgegevens worden niet opgeslagen.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Wil je dit formulier sluiten?</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Er is iets misgegaan. Controleer je verbinding en probeer het opnieuw.</string>
   <!-- Text providing link to terms for ACH payments -->

@@ -6,6 +6,10 @@
   <string name="stripe_bank_account_ending_in">Neħħi l-kont tal-bank li jispiċċa b\'%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Ikkonferma l-pagament fl-app tal-bank fi żmien %s biex tlesti x-xirja.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">L-informazzjoni tal-pagament tiegħek mhux se tiġi merfugħa.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Trid tagħlaq din il-formola?</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Seħħ żball. Iċċekkja l-konnessjoni tiegħek u erġa\' pprova.</string>
   <!-- Text providing link to terms for ACH payments -->

@@ -53,7 +53,8 @@ internal class CustomerSheetScreenshotTest {
         shippingDetails = null,
         draftPaymentSelection = null,
         onMandateTextChanged = { _, _ -> },
-        onHandleUSBankAccount = { },
+        onConfirmUSBankAccount = { },
+        onCollectBankAccountResult = { },
         onUpdatePrimaryButtonState = { },
         onUpdatePrimaryButtonUIState = { },
         onError = { },
@@ -100,6 +101,7 @@ internal class CustomerSheetScreenshotTest {
         primaryButtonLabel = resolvableString("Save"),
         primaryButtonEnabled = false,
         customPrimaryButtonUiState = null,
+        bankAccountResult = null,
     )
 
     @Test
@@ -313,6 +315,22 @@ internal class CustomerSheetScreenshotTest {
                     primaryButtonEnabled = false,
                     mandateText = "This is a mandate.",
                     showMandateAbovePrimaryButton = false,
+                ),
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = null,
+            )
+        }
+    }
+
+    @Test
+    fun testConfirmCloseDialog() {
+        featureFlagTestRule.setEnabled(true)
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                    formViewData = FormViewModel.ViewData(),
+                    displayDismissConfirmationModal = true,
                 ),
                 paymentMethodNameProvider = { it!! },
                 formViewModelSubComponentBuilderProvider = null,

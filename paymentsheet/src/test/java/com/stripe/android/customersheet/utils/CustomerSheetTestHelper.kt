@@ -58,7 +58,8 @@ internal object CustomerSheetTestHelper {
         shippingDetails = null,
         draftPaymentSelection = null,
         onMandateTextChanged = { _, _ -> },
-        onHandleUSBankAccount = { },
+        onCollectBankAccountResult = { },
+        onConfirmUSBankAccount = { },
         onUpdatePrimaryButtonState = { },
         onUpdatePrimaryButtonUIState = { },
         onError = { },
@@ -105,6 +106,7 @@ internal object CustomerSheetTestHelper {
         primaryButtonLabel = resolvableString(R.string.stripe_paymentsheet_save),
         primaryButtonEnabled = false,
         customPrimaryButtonUiState = null,
+        bankAccountResult = null,
     )
 
     internal fun mockedFormViewModel(

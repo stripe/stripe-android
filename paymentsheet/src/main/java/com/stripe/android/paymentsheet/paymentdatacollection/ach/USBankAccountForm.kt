@@ -487,7 +487,7 @@ private fun AccountDetailsForm(
     }
     last4?.let {
         SimpleDialogElementUI(
-            openDialog = openDialog,
+            openDialog = openDialog.value,
             titleText = stringResource(
                 id = R.string.stripe_paymentsheet_remove_bank_account_title
             ),

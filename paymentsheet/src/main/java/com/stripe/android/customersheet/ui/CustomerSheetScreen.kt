@@ -26,10 +26,12 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
 import kotlinx.coroutines.flow.flowOf
 import javax.inject.Provider
+import com.stripe.android.R as PaymentsCoreR
 
 @Composable
 internal fun CustomerSheetScreen(
@@ -208,6 +210,20 @@ internal fun AddPaymentMethodWithPaymentElement(
     formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>?,
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+
+    SimpleDialogElementUI(
+        openDialog = viewState.displayDismissConfirmationModal,
+        titleText = stringResource(id = R.string.stripe_confirm_close_form_title),
+        messageText = stringResource(id = R.string.stripe_confirm_close_form_body),
+        confirmText = stringResource(id = R.string.stripe_paymentsheet_close),
+        dismissText = stringResource(id = PaymentsCoreR.string.stripe_cancel),
+        onDismissListener = {
+            viewActionHandler(CustomerSheetViewAction.OnCancelClose)
+        },
+        onConfirmListener = {
+            viewActionHandler(CustomerSheetViewAction.OnDismissed)
+        }
+    )
 
     // TODO (jameswoo) make sure that the spacing is consistent with paymentsheet
     Column {

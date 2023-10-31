@@ -26,6 +26,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -142,12 +143,35 @@ internal class CustomerSheetViewModel @Inject constructor(
             is CustomerSheetViewAction.OnUpdateMandateText -> {
                 updateMandateText(viewAction.mandateText, viewAction.showAbovePrimaryButton)
             }
-            is CustomerSheetViewAction.OnUSBankAccountRetrieved -> {
-                onUSBankAccountRetrieved(viewAction.usBankAccount)
+            is CustomerSheetViewAction.OnCollectBankAccountResult -> {
+                onCollectUSBankAccountResult(viewAction.bankAccountResult)
+            }
+            is CustomerSheetViewAction.OnConfirmUSBankAccount -> {
+                onConfirmUSBankAccount(viewAction.usBankAccount)
             }
             is CustomerSheetViewAction.OnFormError -> {
                 onFormError(viewAction.error)
             }
+            is CustomerSheetViewAction.OnCancelClose -> {
+                onCancelCloseForm()
+            }
+        }
+    }
+
+    /**
+     * If true, the bottom sheet will be dismissed, otherwise the sheet will stay open
+     */
+    fun bottomSheetConfirmStateChange(): Boolean {
+        val currentViewState = viewState.value
+        return if (currentViewState.shouldDisplayDismissConfirmationModal) {
+            updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                it.copy(
+                    displayDismissConfirmationModal = true,
+                )
+            }
+            false
+        } else {
+            true
         }
     }
 
@@ -315,6 +339,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private fun onAddPaymentMethodItemChanged(paymentMethod: LpmRepository.SupportedPaymentMethod) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
+                paymentMethodCode = paymentMethod.code,
                 formArguments = FormArgumentsFactory.create(
                     paymentMethod = paymentMethod,
                     configuration = configuration,
@@ -521,8 +546,11 @@ internal class CustomerSheetViewModel @Inject constructor(
                     onMandateTextChanged = { mandate, showAbove ->
                         handleViewAction(CustomerSheetViewAction.OnUpdateMandateText(mandate, showAbove))
                     },
-                    onHandleUSBankAccount = {
-                        handleViewAction(CustomerSheetViewAction.OnUSBankAccountRetrieved(it))
+                    onCollectBankAccountResult = {
+                        handleViewAction(CustomerSheetViewAction.OnCollectBankAccountResult(it))
+                    },
+                    onConfirmUSBankAccount = {
+                        handleViewAction(CustomerSheetViewAction.OnConfirmUSBankAccount(it))
                     },
                     onUpdatePrimaryButtonUIState = {
                         handleViewAction(CustomerSheetViewAction.OnUpdateCustomButtonUIState(it))
@@ -542,6 +570,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 ),
                 primaryButtonEnabled = false,
                 customPrimaryButtonUiState = null,
+                bankAccountResult = null,
             ),
             reset = isFirstPaymentMethod
         )
@@ -577,7 +606,15 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    private fun onUSBankAccountRetrieved(usBankAccount: PaymentSelection.New.USBankAccount) {
+    private fun onCollectUSBankAccountResult(bankAccountResult: CollectBankAccountResultInternal) {
+        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+            it.copy(
+                bankAccountResult = bankAccountResult
+            )
+        }
+    }
+
+    private fun onConfirmUSBankAccount(usBankAccount: PaymentSelection.New.USBankAccount) {
         createAndAttach(usBankAccount.paymentMethodCreateParams)
     }
 
@@ -585,6 +622,14 @@ internal class CustomerSheetViewModel @Inject constructor(
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
                 errorMessage = error
+            )
+        }
+    }
+
+    private fun onCancelCloseForm() {
+        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+            it.copy(
+                displayDismissConfirmationModal = false,
             )
         }
     }

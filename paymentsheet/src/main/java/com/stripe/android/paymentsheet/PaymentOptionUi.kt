@@ -124,12 +124,13 @@ internal fun PaymentOptionUi(
 
     if (editState == PaymentOptionEditState.Removable && onRemoveListener != null) {
         SimpleDialogElementUI(
-            openDialog = openRemoveDialog,
+            openDialog = openRemoveDialog.value,
             titleText = removePmDialogTitle,
             messageText = description,
             confirmText = stringResource(StripeR.string.stripe_remove),
             dismissText = stringResource(StripeR.string.stripe_cancel),
-            onConfirmListener = onRemoveListener
+            onConfirmListener = onRemoveListener,
+            onDismissListener = { openRemoveDialog.value = false }
         )
     }
 }

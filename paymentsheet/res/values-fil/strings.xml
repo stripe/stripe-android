@@ -6,6 +6,10 @@
   <string name="stripe_bank_account_ending_in">Alisin ang account na nagtatapos sa %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Kumpirmahin ang pagbabayad sa app ng iyong bangko sa loob ng %s para kumpletuhin ang pagbili.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">Hindi mase-save ang iyong impormasyon ng pagbabayad.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Gusto mo bang isara ang form na ito?</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">May nangyaring mali. Tingnan ang iyong koneksyon at subukan muli.</string>
   <!-- Text providing link to terms for ACH payments -->

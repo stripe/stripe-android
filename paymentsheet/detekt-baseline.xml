@@ -4,7 +4,6 @@
   <CurrentIssues>
     <ID>CyclomaticComplexMethod:CustomerSheetViewModel.kt$CustomerSheetViewModel$fun handleViewAction(viewAction: CustomerSheetViewAction)</ID>
     <ID>CyclomaticComplexMethod:PlaceholderHelper.kt$PlaceholderHelper$@VisibleForTesting internal fun specForPlaceholderField( field: PlaceholderField, placeholderOverrideList: List&lt;IdentifierSpec>, requiresMandate: Boolean, configuration: PaymentSheet.BillingDetailsCollectionConfiguration, )</ID>
-    <ID>CyclomaticComplexMethod:USBankAccountFormScreenState.kt$USBankAccountFormScreenState$fun copy( error: Int? = null, primaryButtonText: String? = null, mandateText: String? = null, isProcessing: Boolean? = null, ): USBankAccountFormScreenState</ID>
     <ID>EmptyFunctionBlock:PrimaryButtonAnimator.kt$PrimaryButtonAnimator.&lt;no name provided>${ }</ID>
     <ID>ForbiddenComment:PaymentOptionFactory.kt$PaymentOptionFactory$// TODO: Should use labelResource paymentMethodCreateParams or extension function</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun PaymentSheetTopBar_Preview()</ID>
@@ -25,12 +24,14 @@
     <ID>LongMethod:AddPaymentMethod.kt$@Composable internal fun AddPaymentMethod( sheetViewModel: BaseSheetViewModel, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:AutocompleteScreen.kt$@Composable internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel)</ID>
     <ID>LongMethod:CustomerSheetScreen.kt$@Composable internal fun AddPaymentMethodWithPaymentElement( viewState: CustomerSheetViewState.AddPaymentMethod, viewActionHandler: (CustomerSheetViewAction) -> Unit, formViewModelSubComponentBuilderProvider: Provider&lt;FormViewModelSubcomponent.Builder>?, )</ID>
+    <ID>LongMethod:CustomerSheetViewModel.kt$CustomerSheetViewModel$private fun transitionToAddPaymentMethod(isFirstPaymentMethod: Boolean)</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`()</ID>
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
     <ID>LongMethod:PaymentSheetLoader.kt$DefaultPaymentSheetLoader$private suspend fun create( elementsSession: ElementsSession, config: PaymentSheet.Configuration?, isGooglePayReady: Boolean, ): PaymentSheetState.Full</ID>
     <ID>LongMethod:PlaceholderHelperTest.kt$PlaceholderHelperTest$@Test fun `Test correct placeholder is removed for placeholder spec`()</ID>
+    <ID>LongMethod:USBankAccountEmitters.kt$@Composable internal fun USBankAccountEmitters( viewModel: USBankAccountFormViewModel, usBankAccountFormArgs: USBankAccountFormArguments, )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable internal fun USBankAccountForm( formArgs: FormArguments, usBankAccountFormArgs: USBankAccountFormArguments, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable private fun AccountDetailsForm( formArgs: FormArguments, isProcessing: Boolean, bankName: String?, last4: String?, saveForFutureUseElement: SaveForFutureUseElement, onRemoveAccount: () -> Unit, )</ID>
     <ID>LongMethod:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$@Test fun `Restores screen state when re-opening screen`()</ID>
