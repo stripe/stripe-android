@@ -2,6 +2,7 @@
 
 ## XX.XX.XX - 2023-XX-XX
 * [FIXED][7530](https://github.com/stripe/stripe-android/pull/7530) Fixed an issue which caused PaymentSheet to transitively include the Financial Connections SDK even if not requested.
+* [FIXED][7545](https://github.com/stripe/stripe-android/pull/7545) Fixed an issue where the US Bank Account collection flow would not launch when using FlowController with Payment Intents.
 
 ## 20.34.2 - 2023-10-30
 
