@@ -518,6 +518,7 @@ private fun AccountDetailsForm(
             dismissText = stringResource(
                 id = StripeR.string.stripe_cancel
             ),
+            destructive = true,
             onConfirmListener = {
                 openDialog.value = false
                 onRemoveAccount()
