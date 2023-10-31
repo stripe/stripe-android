@@ -105,6 +105,8 @@
     <ID>MaxLineLength:BecsDebitMandateAcceptanceFactoryTest.kt$BecsDebitMandateAcceptanceFactoryTest$.</ID>
     <ID>MaxLineLength:BecsDebitMandateAcceptanceTextViewTest.kt$BecsDebitMandateAcceptanceTextViewTest$.</ID>
     <ID>MaxLineLength:CardFormView.kt$CardFormView$*</ID>
+    <ID>MaxLineLength:CardMultilineWidgetTest.kt$CardMultilineWidgetTest$fun</ID>
+    <ID>MaxLineLength:CardMultilineWidgetTest.kt$CardMultilineWidgetTest$val cardMultilineWidget = activity.findViewById&lt;CardMultilineWidget>(CardMultilineWidgetTestActivity.VIEW_ID)</ID>
     <ID>MaxLineLength:CardNumberEditText.kt$CardNumberEditText.CardNumberTextWatcher$// TODO (michelleb-stripe) Should set error message to incomplete, then in focus change if it isn't complete it will update it.</ID>
     <ID>MaxLineLength:CardNumberEditTextTest.kt$CardNumberEditTextTest$fun</ID>
     <ID>MaxLineLength:ConfirmPaymentIntentParams.kt$ConfirmPaymentIntentParams$*</ID>
