@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach.model
 
+import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 
 internal object FinancialConnectionsAccountFixtures {
@@ -18,5 +19,12 @@ internal object FinancialConnectionsAccountFixtures {
             FinancialConnectionsAccount.SupportedPaymentMethodTypes.US_BANK_ACCOUNT,
             FinancialConnectionsAccount.SupportedPaymentMethodTypes.LINK
         )
+    )
+
+    val BANK_ACCOUNT = BankAccount(
+        id = "1234",
+        last4 = "3456",
+        bankName = "My Bank",
+        routingNumber = "123456789",
     )
 }
