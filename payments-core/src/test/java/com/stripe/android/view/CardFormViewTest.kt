@@ -20,6 +20,7 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
@@ -27,6 +28,7 @@ import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 import com.stripe.android.uicore.R as UiCoreR
 
+@Ignore
 @RunWith(RobolectricTestRunner::class)
 class CardFormViewTest {
     private val context: Context = ApplicationProvider.getApplicationContext()

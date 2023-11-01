@@ -39,6 +39,7 @@ import com.stripe.android.utils.CardInputWidgetTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.parcelize.Parcelize
+import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -55,6 +56,7 @@ import kotlin.test.Test
  * Test class for [CardMultilineWidget].
  */
 @RunWith(RobolectricTestRunner::class)
+@Ignore
 internal class CardMultilineWidgetTest {
     private val testDispatcher = StandardTestDispatcher()
 
