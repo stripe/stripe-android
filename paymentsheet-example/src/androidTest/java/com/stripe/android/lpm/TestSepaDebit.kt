@@ -7,6 +7,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.RunOnPr
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
@@ -106,6 +107,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
     }
 
     @Test
+    @RunOnPr
     fun testSepaDebitDefaultReturningUserFlowWithShowingFlowController() {
         val testParameters = testParameters.copyPlaygroundSettings { settings ->
             settings[AutomaticPaymentMethodsSettingsDefinition] = true

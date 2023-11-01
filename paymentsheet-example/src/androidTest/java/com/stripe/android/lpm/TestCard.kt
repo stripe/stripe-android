@@ -2,6 +2,7 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.RunOnPr
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
@@ -16,6 +17,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 internal class TestCard : BasePlaygroundTest() {
     @Test
+    @RunOnPr
     fun testCard() {
         testDriver.confirmNewOrGuestComplete(
             TestParameters.create(
@@ -28,6 +30,7 @@ internal class TestCard : BasePlaygroundTest() {
     }
 
     @Test
+    @RunOnPr
     fun testCardWithCustomBillingDetailsCollection() {
         testDriver.confirmNewOrGuestComplete(
             TestParameters.create(

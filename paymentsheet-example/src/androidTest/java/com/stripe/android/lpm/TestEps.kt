@@ -2,6 +2,7 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.RunOnPr
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -13,6 +14,7 @@ internal class TestEps : BasePlaygroundTest() {
     )
 
     @Test
+    @RunOnPr
     fun testEps() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters,

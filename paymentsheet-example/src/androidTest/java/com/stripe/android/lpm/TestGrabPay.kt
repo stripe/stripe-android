@@ -2,6 +2,7 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.RunOnPr
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
@@ -22,6 +23,7 @@ internal class TestGrabPay : BasePlaygroundTest() {
     }
 
     @Test
+    @RunOnPr
     fun testGrabPay() {
         testDriver.confirmNewOrGuestComplete(testParameters)
     }

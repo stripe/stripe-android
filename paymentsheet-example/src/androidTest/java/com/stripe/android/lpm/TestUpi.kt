@@ -4,6 +4,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.RunOnPr
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
@@ -24,6 +25,7 @@ internal class TestUpi : BasePlaygroundTest() {
     )
 
     @Test
+    @RunOnPr
     fun testUpi() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters,

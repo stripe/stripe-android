@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.RunOnPr
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
@@ -26,6 +27,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
     }
 
     @Test
+    @RunOnPr
     fun testUSBankAccountCancelAllowsUserToContinue() {
         testDriver.confirmUSBankAccount(
             testParameters = testParameters.copy(
@@ -39,6 +41,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
     }
 
     @Test
+    @RunOnPr
     fun testUSBankAccountInCustomFlow() {
         testDriver.confirmCustomUSBankAccount(
             testParameters = testParameters.copy(

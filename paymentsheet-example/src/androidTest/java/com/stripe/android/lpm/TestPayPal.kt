@@ -2,6 +2,7 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.RunOnPr
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.test.core.TestParameters
@@ -17,6 +18,7 @@ internal class TestPayPal : BasePlaygroundTest() {
     }
 
     @Test
+    @RunOnPr
     fun testPayPal() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters,

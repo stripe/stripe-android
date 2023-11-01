@@ -127,53 +127,6 @@ def uploadEspressoApk(espressoApkFile):
         print("DONE\nRESULT: " + str(response.status_code) + "\n" + str(response.json()))
         return None
 
-def testShards(isNightly):
-    testClassNames = [
-        # Hard coded tests.
-        "com.stripe.android.TestAuthorization",
-        "com.stripe.android.TestBrowsers",
-        "com.stripe.android.TestCustomers",
-        "com.stripe.android.addresselement.AddressElementTest",
-    ]
-
-    # Add LPM tests to testClassNames.
-    lpmFileNames = os.listdir('paymentsheet-example/src/androidTest/java/com/stripe/android/lpm')
-    for fileName in lpmFileNames:
-        if not fileName.endswith(".kt"):
-            continue
-        className = fileName[:-3]
-        testClassNames.append(f"com.stripe.android.lpm.{className}")
-
-    # We only have 25 parallel runs, and we want multiple PRs to run at the same time.
-    numberOfShards = 8.0 if isNightly else 10.0
-    testClassesPerShard = math.ceil(len(testClassNames) / numberOfShards)
-
-    shards = []
-    shardValues = []
-
-    for testClass in testClassNames:
-        shardValues.append(testClass)
-        if len(shardValues) == testClassesPerShard:
-            shards.append(
-                {
-                   "name": f"Shard {len(shards) + 1}",
-                   "strategy": "class",
-                   "values": shardValues
-                },
-            )
-            shardValues = []
-
-    if len(shardValues) > 0:
-        shards.append(
-            {
-               "name": f"Shard {len(shards) + 1}",
-               "strategy": "class",
-               "values": shardValues
-            },
-        )
-
-    return shards
-
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#execute-a-build
 def executeTests(appUrl, testUrl, isNightly):
     print("RUNNING the tests (appUrl: {app}, testUrl: {test})..."
@@ -182,7 +135,6 @@ def executeTests(appUrl, testUrl, isNightly):
     )
     url="https://api-cloud.browserstack.com/app-automate/espresso/v2/build"
     # firefox doesn't work on this samsung: Samsung Galaxy S9 Plus-9.0"]
-    shards = testShards(isNightly)
     devices = []
     if isNightly:
         devices = [
@@ -206,9 +158,10 @@ def executeTests(appUrl, testUrl, isNightly):
          "enableSpoonFramework": False,
          "project": "Mobile Payments",
          "shards": {
-            "numberOfShards": len(shards),
-            "mapping": shards,
-         }
+            "numberOfShards": 6,
+         },
+         "package": ["com.stripe.android.lpm"],
+         "annotation": ["com.stripe.android.RunOnPr"],
       }, auth=(user, authKey))
     jsonResponse = response.json()
 
