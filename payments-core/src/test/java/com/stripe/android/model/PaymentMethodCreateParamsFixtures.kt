@@ -96,13 +96,6 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
-    internal val NETBANKING = PaymentMethodCreateParams.create(
-        netbanking = PaymentMethodCreateParams.Netbanking(
-            bank = "hdfc"
-        ),
-        billingDetails = BILLING_DETAILS
-    )
-
     internal val US_BANK_ACCOUNT = PaymentMethodCreateParams.create(
         usBankAccount = PaymentMethodCreateParams.USBankAccount(
             accountNumber = "000123456789",
