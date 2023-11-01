@@ -91,18 +91,6 @@ internal fun String.routeToScreenName(): String = when (this) {
         IdentityAnalyticsRequestFactory.SCREEN_NAME_CONSENT
     DocSelectionDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_DOC_SELECT
-//    IDScanDestination.ROUTE.route ->
-//        IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_ID
-//    PassportScanDestination.ROUTE.route ->
-//        IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_PASSPORT
-//    DriverLicenseScanDestination.ROUTE.route ->
-//        IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE
-//    IDUploadDestination.ROUTE.route ->
-//        IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD_ID
-//    PassportUploadDestination.ROUTE.route ->
-//        IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD_PASSPORT
-//    DriverLicenseUploadDestination.ROUTE.route ->
-//        IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD_DRIVER_LICENSE
     DocumentScanDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
     DocumentUploadDestination.ROUTE.route ->
