@@ -277,6 +277,7 @@ internal fun AddPaymentMethodWithPaymentElement(
             label = viewState.primaryButtonLabel.resolve(),
             isEnabled = viewState.primaryButtonEnabled,
             isLoading = viewState.isProcessing,
+            displayLockIcon = true,
             onButtonClick = {
                 viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
             },

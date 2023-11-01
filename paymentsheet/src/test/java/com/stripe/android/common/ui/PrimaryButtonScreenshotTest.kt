@@ -39,4 +39,16 @@ class PrimaryButtonScreenshotTest {
             PrimaryButton(isEnabled = false, label = BUTTON_TEXT, onButtonClick = {})
         }
     }
+
+    @Test
+    fun testLock() {
+        paparazziRule.snapshot {
+            PrimaryButton(
+                isEnabled = true,
+                label = BUTTON_TEXT,
+                onButtonClick = {},
+                displayLockIcon = true
+            )
+        }
+    }
 }
