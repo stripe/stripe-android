@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import org.junit.Test
+import org.mockito.Mockito.mock
 import com.stripe.android.R as StripeR
 
 class HeaderTextFactoryTest {
@@ -35,7 +35,7 @@ class HeaderTextFactoryTest {
     fun `Shows the correct header in complete flow and editing payment method`() {
         val resource = HeaderTextFactory(isCompleteFlow = true).create(
             screen = PaymentSheetScreen.EditPaymentMethod(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                interactor = mock()
             ),
             isWalletEnabled = true,
             types = emptyList(),
@@ -92,7 +92,7 @@ class HeaderTextFactoryTest {
     fun `Shows the correct header when editing a saved payment method is shown in custom flow`() {
         val resource = HeaderTextFactory(isCompleteFlow = false).create(
             screen = PaymentSheetScreen.EditPaymentMethod(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                interactor = mock()
             ),
             isWalletEnabled = true,
             types = emptyList(),

@@ -37,6 +37,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
+import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -45,6 +46,7 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -59,6 +61,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.Closeable
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
@@ -80,6 +83,7 @@ internal abstract class BaseSheetViewModel(
     val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val headerTextFactory: HeaderTextFactory,
     val formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
+    private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : AndroidViewModel(application) {
 
     internal val customerConfig = config?.customer
@@ -240,7 +244,7 @@ internal abstract class BaseSheetViewModel(
 
     protected fun transitionToFirstScreen() {
         val initialBackStack = determineInitialBackStack()
-        backStack.value = initialBackStack
+        resetTo(initialBackStack)
         reportPaymentSheetShown(initialBackStack.first())
     }
 
@@ -441,13 +445,30 @@ internal abstract class BaseSheetViewModel(
                 currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
 
             if (shouldResetToAddPaymentMethodForm) {
-                backStack.value = listOf(AddFirstPaymentMethod)
+                resetTo(listOf(AddFirstPaymentMethod))
             }
         }
     }
 
     fun modifyPaymentMethod(paymentMethod: PaymentMethod) {
-        transitionTo(PaymentSheetScreen.EditPaymentMethod(paymentMethod))
+        transitionTo(
+            PaymentSheetScreen.EditPaymentMethod(
+                editInteractorFactory.create(
+                    initialPaymentMethod = paymentMethod,
+                    onRemove = {
+                        // TODO(samer-stripe): Replace with remove operation
+                        delay(TEMP_DELAY)
+                        true
+                    },
+                    onUpdate = { _, _ ->
+                        // TODO(samer-stripe): Replace with update operation
+                        delay(TEMP_DELAY)
+
+                        Result.success(paymentMethod)
+                    }
+                )
+            )
+        )
     }
 
     private fun mapToHeaderTextResource(
@@ -506,11 +527,36 @@ internal abstract class BaseSheetViewModel(
 
     private fun onUserBack() {
         clearErrorMessages()
-        backStack.update { it.dropLast(1) }
+        backStack.update { screens ->
+            val modifiableScreens = screens.toMutableList()
+
+            modifiableScreens.removeLast().onClose()
+
+            modifiableScreens.toList()
+        }
 
         // Reset the selection to the one from before opening the add payment method screen
         val paymentOptionsState = paymentOptionsState.value
         updateSelection(paymentOptionsState.selectedItem?.toPaymentSelection())
+    }
+
+    private fun resetTo(screens: List<PaymentSheetScreen>) {
+        val previousBackStack = backStack.value
+
+        backStack.value = screens
+
+        previousBackStack.forEach { oldScreen ->
+            if (oldScreen !in screens) {
+                oldScreen.onClose()
+            }
+        }
+    }
+
+    private fun PaymentSheetScreen.onClose() {
+        when (this) {
+            is Closeable -> close()
+            else -> Unit
+        }
     }
 
     fun reportAutofillEvent(type: String) {
@@ -532,5 +578,8 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
+
+        // TODO(samer-stripe): Remove after replacing placeholder update and remove payment method operations
+        private const val TEMP_DELAY = 2000L
     }
 }

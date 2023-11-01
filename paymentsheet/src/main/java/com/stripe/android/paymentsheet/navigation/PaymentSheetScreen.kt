@@ -5,11 +5,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
+import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import java.io.Closeable
 
 internal sealed interface PaymentSheetScreen {
 
@@ -87,8 +88,8 @@ internal sealed interface PaymentSheetScreen {
     }
 
     data class EditPaymentMethod(
-        val paymentMethod: PaymentMethod,
-    ) : PaymentSheetScreen {
+        val interactor: ModifiableEditPaymentMethodViewInteractor,
+    ) : PaymentSheetScreen, Closeable {
 
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
@@ -97,7 +98,11 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            EditPaymentMethod(paymentMethod, modifier)
+            EditPaymentMethod(interactor, modifier)
+        }
+
+        override fun close() {
+            interactor.close()
         }
     }
 }

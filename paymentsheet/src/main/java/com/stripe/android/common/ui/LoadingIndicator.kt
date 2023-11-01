@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.dimensionResource
 import com.stripe.android.paymentsheet.R
 
@@ -19,7 +20,9 @@ internal fun BottomSheetLoadingIndicator(
 ) {
     val height = dimensionResource(R.dimen.stripe_paymentsheet_loading_container_height)
     LoadingIndicator(
-        modifier = modifier.fillMaxWidth().height(height),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height),
     )
 }
 
@@ -35,10 +38,23 @@ internal fun LoadingIndicator(
         contentAlignment = Alignment.Center,
         modifier = modifier,
     ) {
-        CircularProgressIndicator(
-            color = color,
-            strokeWidth = strokeWidth,
-            modifier = Modifier.size(indicatorSize),
-        )
+        val indicatorModifier = Modifier.size(indicatorSize)
+
+        if (LocalInspectionMode.current) {
+            CircularProgressIndicator(
+                progress = TEST_PROGRESS,
+                color = color,
+                strokeWidth = strokeWidth,
+                modifier = indicatorModifier
+            )
+        } else {
+            CircularProgressIndicator(
+                color = color,
+                strokeWidth = strokeWidth,
+                modifier = indicatorModifier
+            )
+        }
     }
 }
+
+private const val TEST_PROGRESS = 0.6f

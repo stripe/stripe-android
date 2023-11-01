@@ -20,7 +20,10 @@ class EditPaymentMethodUiScreenshotTest {
     fun testEnabledState() {
         paparazziRule.snapshot {
             EditPaymentMethodUi(
-                viewState = createViewState(canUpdate = true),
+                viewState = createViewState(
+                    status = EditPaymentMethodViewState.Status.Idle,
+                    canUpdate = true
+                ),
                 viewActionHandler = {}
             )
         }
@@ -30,24 +33,57 @@ class EditPaymentMethodUiScreenshotTest {
     fun testDisabledState() {
         paparazziRule.snapshot {
             EditPaymentMethodUi(
-                viewState = createViewState(canUpdate = false),
+                viewState = createViewState(
+                    status = EditPaymentMethodViewState.Status.Idle,
+                    canUpdate = false
+                ),
                 viewActionHandler = {}
             )
         }
     }
 
-    private fun createViewState(canUpdate: Boolean): EditPaymentViewState {
-        return EditPaymentViewState(
+    @Test
+    fun testUpdatingState() {
+        paparazziRule.snapshot {
+            EditPaymentMethodUi(
+                viewState = createViewState(
+                    status = EditPaymentMethodViewState.Status.Updating,
+                    canUpdate = true
+                ),
+                viewActionHandler = {}
+            )
+        }
+    }
+
+    @Test
+    fun testRemovingState() {
+        paparazziRule.snapshot {
+            EditPaymentMethodUi(
+                viewState = createViewState(
+                    status = EditPaymentMethodViewState.Status.Updating,
+                    canUpdate = true
+                ),
+                viewActionHandler = {}
+            )
+        }
+    }
+
+    private fun createViewState(
+        status: EditPaymentMethodViewState.Status,
+        canUpdate: Boolean
+    ): EditPaymentMethodViewState {
+        return EditPaymentMethodViewState(
+            status = status,
             last4 = "4242",
-            selectedBrand = EditPaymentViewState.CardBrandChoice(
+            selectedBrand = EditPaymentMethodViewState.CardBrandChoice(
                 brand = CardBrand.CartesBancaires
             ),
             canUpdate = canUpdate,
             availableBrands = listOf(
-                EditPaymentViewState.CardBrandChoice(
+                EditPaymentMethodViewState.CardBrandChoice(
                     brand = CardBrand.Visa
                 ),
-                EditPaymentViewState.CardBrandChoice(
+                EditPaymentMethodViewState.CardBrandChoice(
                     brand = CardBrand.CartesBancaires
                 )
             )

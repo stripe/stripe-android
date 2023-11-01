@@ -46,8 +46,8 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.EditPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.GooglePayButton
@@ -482,7 +482,7 @@ internal class PaymentSheetActivityTest {
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
 
             viewModel.modifyPaymentMethod(card)
-            assertThat(awaitItem()).isEqualTo(EditPaymentMethod(card))
+            assertThat(awaitItem()).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
 
             pressBack()
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
@@ -1009,6 +1009,7 @@ internal class PaymentSheetActivityTest {
                     context = ApplicationProvider.getApplicationContext(),
                     lpmRepository = lpmRepository,
                 ),
+                editInteractorFactory = FakeEditPaymentMethodInteractor.Factory
             )
         }
     }
@@ -1030,6 +1031,6 @@ internal class PaymentSheetActivityTest {
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-        private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
     }
 }
