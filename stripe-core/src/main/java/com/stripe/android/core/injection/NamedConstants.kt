@@ -37,3 +37,9 @@ const val SHIPPING_VALUES = "shippingValues"
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val IS_LIVE_MODE = "isLiveMode"
+
+/**
+ * Name for applicationName
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val APPLICATION_NAME = "applicationName"

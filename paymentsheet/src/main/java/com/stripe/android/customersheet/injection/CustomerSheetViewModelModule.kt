@@ -6,7 +6,9 @@ import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.APPLICATION_NAME
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
@@ -103,6 +105,21 @@ internal interface CustomerSheetViewModelModule {
         fun provideStripeAccountId(
             paymentConfiguration: Provider<PaymentConfiguration>
         ): () -> String? = { paymentConfiguration.get().stripeAccountId }
+
+        @Provides
+        @Named(APPLICATION_NAME)
+        fun provideApplicationName(
+            application: Application
+        ): String {
+            return application.applicationInfo.loadLabel(application.packageManager).toString()
+        }
+
+        @Provides
+        fun provideStripeErrorMessage(
+            application: Application
+        ): (Throwable) -> String = { throwable ->
+            throwable.stripeErrorMessage(application)
+        }
 
         @Provides
         @Named(IS_LIVE_MODE)

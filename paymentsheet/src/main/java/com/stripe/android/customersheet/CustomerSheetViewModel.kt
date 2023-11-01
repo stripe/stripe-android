@@ -1,6 +1,5 @@
 package com.stripe.android.customersheet
 
-import android.app.Application
 import android.content.res.Resources
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -9,8 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.APPLICATION_NAME
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
@@ -64,7 +63,6 @@ import com.stripe.android.ui.core.R as UiCoreR
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSheetViewModelScope
 internal class CustomerSheetViewModel @Inject constructor(
-    private val application: Application, // TODO (jameswoo) remove application
     initialBackStack: @JvmSuppressWildcards List<CustomerSheetViewState>,
     private var savedPaymentSelection: PaymentSelection?,
     private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
@@ -83,6 +81,8 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val customerSheetLoader: CustomerSheetLoader,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
+    @Named(APPLICATION_NAME) private val applicationName: String,
+    private val stripeErrorMessageProvider: @JvmSuppressWildcards (Throwable) -> String,
 ) : ViewModel() {
 
     private val backStack = MutableStateFlow(initialBackStack)
@@ -244,7 +244,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                         enabled = true,
                         isProcessing = false,
                         primaryButtonEnabled = it.formViewData.completeFormValues != null,
-                        errorMessage = result.throwable.stripeErrorMessage(application),
+                        errorMessage = stripeErrorMessageProvider(result.throwable),
                     )
                 }
             }
@@ -348,8 +348,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 formArguments = FormArgumentsFactory.create(
                     paymentMethod = paymentMethod,
                     configuration = configuration,
-                    merchantName = configuration.merchantDisplayName
-                        ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+                    merchantName = configuration.merchantDisplayName ?: applicationName,
                 ),
                 selectedPaymentMethod = paymentMethod,
                 primaryButtonLabel = if (paymentMethod.code == PaymentMethod.Type.USBankAccount.code) {
@@ -507,7 +506,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     )
                     updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                         it.copy(
-                            errorMessage = throwable.stripeErrorMessage(application),
+                            errorMessage = stripeErrorMessageProvider(throwable),
                             primaryButtonEnabled = it.formViewData.completeFormValues != null,
                             isProcessing = false,
                         )
@@ -522,8 +521,7 @@ internal class CustomerSheetViewModel @Inject constructor(
         val formArguments = FormArgumentsFactory.create(
             paymentMethod = card,
             configuration = configuration,
-            merchantName = configuration.merchantDisplayName
-                ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+            merchantName = configuration.merchantDisplayName ?: applicationName,
         )
 
         val observe = buildFormObserver(
@@ -687,7 +685,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 )
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
-                        errorMessage = displayMessage ?: cause.stripeErrorMessage(application),
+                        errorMessage = displayMessage ?: stripeErrorMessageProvider(cause),
                         enabled = true,
                         primaryButtonEnabled = it.formViewData.completeFormValues != null && !it.isProcessing,
                         isProcessing = false,
@@ -772,7 +770,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     it.copy(
                         isProcessing = false,
                         primaryButtonEnabled = it.formViewData.completeFormValues != null,
-                        errorMessage = throwable.stripeErrorMessage(application),
+                        errorMessage = stripeErrorMessageProvider(throwable),
                     )
                 }
             }
@@ -799,7 +797,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     it.copy(
                         isProcessing = false,
                         primaryButtonEnabled = it.formViewData.completeFormValues != null,
-                        errorMessage = throwable.stripeErrorMessage(application),
+                        errorMessage = stripeErrorMessageProvider(throwable),
                     )
                 }
             }

@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerAdapter
@@ -193,9 +194,9 @@ internal object CustomerSheetTestHelper {
             paymentSelection = savedPaymentSelection,
             isGooglePayAvailable = isGooglePayAvailable,
         ),
+        stripeErrorMessageProvider: (Throwable) -> String = { it.stripeErrorMessage(application) }
     ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
-            application = application,
             initialBackStack = initialBackStack,
             workContext = workContext,
             savedPaymentSelection = savedPaymentSelection,
@@ -223,7 +224,9 @@ internal object CustomerSheetTestHelper {
             statusBarColor = { null },
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
-            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable
+            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
+            applicationName = "Test",
+            stripeErrorMessageProvider = stripeErrorMessageProvider,
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
         }
