@@ -91,18 +91,22 @@ internal fun String.routeToScreenName(): String = when (this) {
         IdentityAnalyticsRequestFactory.SCREEN_NAME_CONSENT
     DocSelectionDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_DOC_SELECT
-    IDScanDestination.ROUTE.route ->
-        IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_ID
-    PassportScanDestination.ROUTE.route ->
-        IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_PASSPORT
-    DriverLicenseScanDestination.ROUTE.route ->
-        IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE
-    IDUploadDestination.ROUTE.route ->
-        IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD_ID
-    PassportUploadDestination.ROUTE.route ->
-        IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD_PASSPORT
-    DriverLicenseUploadDestination.ROUTE.route ->
-        IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD_DRIVER_LICENSE
+//    IDScanDestination.ROUTE.route ->
+//        IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_ID
+//    PassportScanDestination.ROUTE.route ->
+//        IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_PASSPORT
+//    DriverLicenseScanDestination.ROUTE.route ->
+//        IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE
+//    IDUploadDestination.ROUTE.route ->
+//        IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD_ID
+//    PassportUploadDestination.ROUTE.route ->
+//        IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD_PASSPORT
+//    DriverLicenseUploadDestination.ROUTE.route ->
+//        IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD_DRIVER_LICENSE
+    DocumentScanDestination.ROUTE.route ->
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
+    DocumentUploadDestination.ROUTE.route ->
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD
     SelfieDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_SELFIE
     ConfirmationDestination.ROUTE.route ->
@@ -132,17 +136,9 @@ internal fun String.routeToRequirement(): List<Requirement> = when (this) {
         listOf(Requirement.BIOMETRICCONSENT)
     DocSelectionDestination.ROUTE.route ->
         listOf(Requirement.IDDOCUMENTTYPE)
-    IDUploadDestination.ROUTE.route ->
+    DocumentScanDestination.ROUTE.route ->
         listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
-    PassportUploadDestination.ROUTE.route ->
-        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
-    DriverLicenseUploadDestination.ROUTE.route ->
-        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
-    IDScanDestination.ROUTE.route ->
-        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
-    PassportScanDestination.ROUTE.route ->
-        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
-    DriverLicenseScanDestination.ROUTE.route ->
+    DocumentUploadDestination.ROUTE.route ->
         listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
     SelfieDestination.ROUTE.route ->
         listOf(Requirement.FACE)

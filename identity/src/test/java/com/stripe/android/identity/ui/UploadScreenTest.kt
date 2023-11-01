@@ -10,16 +10,14 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
-import com.stripe.android.identity.R
 import com.stripe.android.identity.TestApplication
-import com.stripe.android.identity.navigation.IDUploadDestination
+import com.stripe.android.identity.navigation.DocumentUploadDestination
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
-import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.IdentityImageHandler
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,7 +78,7 @@ class UploadScreenTest {
 
     @Test
     fun `when front is not uploaded, front upload UI is enabled and back UI is not visible`() {
-        testUploadScreen(hasBack = false) {
+        testUploadScreen {
             onNodeWithTag(FRONT_ROW_TAG).assertExists()
             onNodeWithTag(BACK_ROW_TAG).assertDoesNotExist()
             onNodeWithTag(UPLOAD_SCREEN_CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
@@ -138,7 +136,7 @@ class UploadScreenTest {
                 runBlocking {
                     verify(mockIdentityViewModel).navigateToSelfieOrSubmit(
                         same(mockNavController),
-                        eq(IDUploadDestination.ROUTE.route)
+                        eq(DocumentUploadDestination.ROUTE.route)
                     )
                 }
             }
@@ -187,32 +185,12 @@ class UploadScreenTest {
     }
 
     private fun testUploadScreen(
-        hasBack: Boolean = true,
         testBlock: ComposeContentTestRule.() -> Unit
     ) {
         composeTestRule.setContent {
             UploadScreen(
                 navController = mockNavController,
-                identityViewModel = mockIdentityViewModel,
-                collectedDataParamType = CollectedDataParam.Type.IDCARD,
-                route = IDUploadDestination.ROUTE.route,
-                titleRes = R.string.stripe_file_upload,
-                contextRes = R.string.stripe_file_upload_content_dl,
-                frontInfo = DocumentUploadSideInfo(
-                    descriptionRes = R.string.stripe_front_of_dl,
-                    checkmarkContentDescriptionRes = R.string.stripe_front_of_dl_selected,
-                    scanType = FRONT_SCAN_TYPE
-                ),
-                backInfo =
-                if (hasBack) {
-                    DocumentUploadSideInfo(
-                        descriptionRes = R.string.stripe_back_of_dl,
-                        checkmarkContentDescriptionRes = R.string.stripe_back_of_dl_selected,
-                        scanType = BACK_SCAN_TYPE
-                    )
-                } else {
-                    null
-                }
+                identityViewModel = mockIdentityViewModel
             )
         }
         with(composeTestRule, testBlock)
@@ -224,11 +202,7 @@ class UploadScreenTest {
     ) {
         composeTestRule.setContent {
             UploadImageDialog(
-                uploadInfo = DocumentUploadSideInfo(
-                    descriptionRes = R.string.stripe_front_of_dl,
-                    checkmarkContentDescriptionRes = R.string.stripe_front_of_dl_selected,
-                    scanType = FRONT_SCAN_TYPE
-                ),
+                isFront = true,
                 shouldShowTakePhoto = true,
                 shouldShowChoosePhoto = shouldShowChoosePhoto,
                 onPhotoSelected = onPhotoSelected,
@@ -240,8 +214,6 @@ class UploadScreenTest {
     }
 
     private companion object {
-        val FRONT_SCAN_TYPE = IdentityScanState.ScanType.ID_FRONT
-        val BACK_SCAN_TYPE = IdentityScanState.ScanType.ID_BACK
         val UPLOADED_STATE = SingleSideDocumentUploadState(
             highResResult = Resource.success(mock()),
             lowResResult = Resource.success(mock())

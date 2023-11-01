@@ -35,19 +35,13 @@ import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.getDisplayName
-import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.toUploadDestination
-import com.stripe.android.identity.states.IdentityScanState
-import com.stripe.android.identity.states.IdentityScanState.Companion.toScanDestination
-import com.stripe.android.identity.states.IdentityScanState.Companion.toUploadDestination
 import com.stripe.android.identity.ui.BottomSheet
 import com.stripe.android.identity.ui.ConfirmationScreen
 import com.stripe.android.identity.ui.ConsentScreen
 import com.stripe.android.identity.ui.CountryNotListedScreen
 import com.stripe.android.identity.ui.DebugScreen
 import com.stripe.android.identity.ui.DocSelectionScreen
-import com.stripe.android.identity.ui.DocumentScanMessageRes
 import com.stripe.android.identity.ui.DocumentScanScreen
-import com.stripe.android.identity.ui.DocumentUploadSideInfo
 import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
 import com.stripe.android.identity.ui.IdentityTopAppBar
@@ -128,49 +122,17 @@ internal fun IdentityNavGraph(
                     cameraPermissionEnsureable = cameraPermissionEnsureable
                 )
             }
-            screen(IDScanDestination.ROUTE) {
+            screen(DocumentScanDestination.ROUTE) {
                 val identityScanViewModel: IdentityScanViewModel =
                     viewModel(factory = identityScanViewModelFactory)
                 ScanDestinationEffect(
                     lifecycleOwner = it,
                     identityScanViewModel = identityScanViewModel
                 )
-                DocumentScanScreenContent(
+                DocumentScanScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
-                    identityScanViewModel = identityScanViewModel,
-                    backStackEntry = it,
-                    route = IDScanDestination.ROUTE.route
-                )
-            }
-            screen(DriverLicenseScanDestination.ROUTE) {
-                val identityScanViewModel: IdentityScanViewModel =
-                    viewModel(factory = identityScanViewModelFactory)
-                ScanDestinationEffect(
-                    lifecycleOwner = it,
                     identityScanViewModel = identityScanViewModel
-                )
-                DocumentScanScreenContent(
-                    navController = navController,
-                    identityViewModel = identityViewModel,
-                    identityScanViewModel = identityScanViewModel,
-                    backStackEntry = it,
-                    route = DriverLicenseScanDestination.ROUTE.route
-                )
-            }
-            screen(PassportScanDestination.ROUTE) {
-                val identityScanViewModel: IdentityScanViewModel =
-                    viewModel(factory = identityScanViewModelFactory)
-                ScanDestinationEffect(
-                    lifecycleOwner = it,
-                    identityScanViewModel = identityScanViewModel
-                )
-                DocumentScanScreenContent(
-                    navController = navController,
-                    identityViewModel = identityViewModel,
-                    identityScanViewModel = identityScanViewModel,
-                    backStackEntry = it,
-                    route = PassportScanDestination.ROUTE.route
                 )
             }
             screen(SelfieWarmupDestination.ROUTE) {
@@ -192,47 +154,10 @@ internal fun IdentityNavGraph(
                     identityScanViewModel = identityScanViewModel
                 )
             }
-            screen(IDUploadDestination.ROUTE) {
-                LaunchedEffect(Unit) {
-                    identityViewModel.updateImageHandlerScanTypes(
-                        IdentityScanState.ScanType.ID_FRONT,
-                        IdentityScanState.ScanType.ID_BACK
-                    )
-                }
-                DocumentUploadScreenContent(
+            screen(DocumentUploadDestination.ROUTE) {
+                UploadScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
-                    backStackEntry = it,
-                    route = IDUploadDestination.ROUTE.route
-                )
-            }
-            screen(DriverLicenseUploadDestination.ROUTE) {
-                LaunchedEffect(Unit) {
-                    identityViewModel.updateImageHandlerScanTypes(
-                        IdentityScanState.ScanType.DL_FRONT,
-                        IdentityScanState.ScanType.DL_BACK
-                    )
-                }
-                DocumentUploadScreenContent(
-                    navController = navController,
-                    identityViewModel = identityViewModel,
-                    backStackEntry = it,
-                    route = DriverLicenseUploadDestination.ROUTE.route
-                )
-            }
-            screen(PassportUploadDestination.ROUTE) {
-                LaunchedEffect(Unit) {
-                    identityViewModel.updateImageHandlerScanTypes(
-                        IdentityScanState.ScanType.PASSPORT,
-                        null
-                    )
-                }
-                DocumentUploadScreenContent(
-                    navController = navController,
-                    identityViewModel = identityViewModel,
-                    backStackEntry = it,
-                    route = PassportUploadDestination.ROUTE.route,
-                    hasBack = false
                 )
             }
             screen(IndividualDestination.ROUTE) {
@@ -284,7 +209,7 @@ internal fun IdentityNavGraph(
                                 IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
                             )
                             navController.navigateTo(
-                                collectedDataParamType.toUploadDestination()
+                                DocumentUploadDestination
                             )
                         }
                     } else {
@@ -302,20 +227,19 @@ internal fun IdentityNavGraph(
                 )
             }
             screen(CouldNotCaptureDestination.ROUTE) {
-                val scanType = CouldNotCaptureDestination.couldNotCaptureScanType(it)
-                val requireLiveCapture = CouldNotCaptureDestination.requireLiveCapture(it)
+                val fromSelfie = CouldNotCaptureDestination.fromSelfie(it)
                 ErrorScreen(
                     identityViewModel = identityViewModel,
                     title = stringResource(id = R.string.stripe_could_not_capture_title),
                     message1 = stringResource(id = R.string.stripe_could_not_capture_body1),
-                    message2 = if (scanType == IdentityScanState.ScanType.SELFIE) {
+                    message2 = if (fromSelfie) {
                         null
                     } else {
                         stringResource(
                             R.string.stripe_could_not_capture_body2
                         )
                     },
-                    topButton = if (scanType == IdentityScanState.ScanType.SELFIE) {
+                    topButton = if (fromSelfie) {
                         null
                     } else {
                         ErrorScreenButton(
@@ -325,7 +249,7 @@ internal fun IdentityNavGraph(
                                 IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
                             )
                             navController.navigateTo(
-                                scanType.toUploadDestination()
+                                DocumentUploadDestination
                             )
                         }
                     },
@@ -337,7 +261,11 @@ internal fun IdentityNavGraph(
                             IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
                         )
                         navController.navigateTo(
-                            scanType.toScanDestination()
+                            if (fromSelfie) {
+                                SelfieDestination
+                            } else {
+                                DocumentScanDestination
+                            }
                         )
                     }
                 )
@@ -397,76 +325,6 @@ internal fun IdentityNavGraph(
             }
         }
     }
-}
-
-@Composable
-private fun DocumentScanScreenContent(
-    navController: NavController,
-    identityViewModel: IdentityViewModel,
-    identityScanViewModel: IdentityScanViewModel,
-    backStackEntry: NavBackStackEntry,
-    route: String
-) {
-    DocumentScanScreen(
-        navController = navController,
-        identityViewModel = identityViewModel,
-        identityScanViewModel = identityScanViewModel,
-        frontScanType = DocumentScanDestination.frontScanType(backStackEntry),
-        backScanType = DocumentScanDestination.backScanType(backStackEntry),
-        shouldStartFromBack = DocumentScanDestination.shouldStartFromBack(backStackEntry),
-        messageRes = DocumentScanMessageRes(
-            DocumentScanDestination.frontTitleStringRes(backStackEntry),
-            DocumentScanDestination.backTitleStringRes(backStackEntry),
-            DocumentScanDestination.frontMessageStringRes(backStackEntry),
-            DocumentScanDestination.backMessageStringRes(backStackEntry),
-        ),
-        collectedDataParamType = DocumentScanDestination.collectedDataParamType(backStackEntry),
-        route = route,
-    )
-}
-
-@Composable
-private fun DocumentUploadScreenContent(
-    navController: NavController,
-    identityViewModel: IdentityViewModel,
-    backStackEntry: NavBackStackEntry,
-    route: String,
-    hasBack: Boolean = true
-) {
-    UploadScreen(
-        navController = navController,
-        identityViewModel = identityViewModel,
-        collectedDataParamType = DocumentUploadDestination.collectedDataParamType(backStackEntry),
-        route = route,
-        titleRes = DocumentUploadDestination.titleRes(backStackEntry),
-        contextRes = DocumentUploadDestination.contextRes(backStackEntry),
-        frontInfo = DocumentUploadSideInfo(
-            descriptionRes = DocumentUploadDestination.frontDescriptionRes(
-                backStackEntry
-            ),
-            checkmarkContentDescriptionRes =
-            DocumentUploadDestination.frontCheckMarkDescriptionRes(
-                backStackEntry
-            ),
-            scanType = DocumentUploadDestination.frontScanType(backStackEntry)
-        ),
-        backInfo =
-        if (hasBack) {
-            DocumentUploadSideInfo(
-                descriptionRes =
-                DocumentUploadDestination.backDescriptionRes(
-                    backStackEntry
-                ),
-                checkmarkContentDescriptionRes =
-                DocumentUploadDestination.backCheckMarkDescriptionRes(
-                    backStackEntry
-                ),
-                scanType = DocumentUploadDestination.backScanType(backStackEntry)
-            )
-        } else {
-            null
-        }
-    )
 }
 
 @ExperimentalMaterialApi
