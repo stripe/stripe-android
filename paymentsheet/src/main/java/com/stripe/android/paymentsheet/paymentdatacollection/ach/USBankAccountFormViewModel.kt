@@ -521,6 +521,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             context = application,
             merchantName = formattedMerchantName(),
             isSaveForFutureUseSelected = saveForFutureUse.value,
+            isSetupFlow = !args.isPaymentFlow,
         )
     }
 

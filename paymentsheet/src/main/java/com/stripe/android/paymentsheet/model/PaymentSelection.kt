@@ -28,6 +28,7 @@ internal sealed class PaymentSelection : Parcelable {
         context: Context,
         merchantName: String,
         isSaveForFutureUseSelected: Boolean,
+        isSetupFlow: Boolean,
     ): String?
 
     @Parcelize
@@ -40,6 +41,7 @@ internal sealed class PaymentSelection : Parcelable {
             context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
+            isSetupFlow: Boolean,
         ): String? {
             return null
         }
@@ -55,6 +57,7 @@ internal sealed class PaymentSelection : Parcelable {
             context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
+            isSetupFlow: Boolean,
         ): String? {
             return null
         }
@@ -83,10 +86,16 @@ internal sealed class PaymentSelection : Parcelable {
             context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
+            isSetupFlow: Boolean,
         ): String? {
             return when (paymentMethod.type) {
                 USBankAccount -> {
-                    ACHText.getContinueMandateText(context, merchantName, isSaveForFutureUseSelected)
+                    ACHText.getContinueMandateText(
+                        context = context,
+                        merchantName = merchantName,
+                        isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                        isSetupFlow = isSetupFlow,
+                    )
                 }
                 PaymentMethod.Type.SepaDebit -> {
                     context.getString(StripeUiCoreR.string.stripe_sepa_mandate, merchantName)
@@ -117,6 +126,7 @@ internal sealed class PaymentSelection : Parcelable {
             context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
+            isSetupFlow: Boolean,
         ): String? {
             return null
         }
@@ -147,6 +157,7 @@ internal sealed class PaymentSelection : Parcelable {
                 context: Context,
                 merchantName: String,
                 isSaveForFutureUseSelected: Boolean,
+                isSetupFlow: Boolean,
             ): String? {
                 return screenState.mandateText
             }
