@@ -815,7 +815,7 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
-    fun `When form destroyed, collect bank account result is null and reset to billing collection screen`() = runTest {
+    fun `When form destroyed, collect bank account result is null and screen is not reset`() = runTest {
         val viewModel = createViewModel(
             defaultArgs.copy(
                 clientSecret = null,
@@ -824,6 +824,10 @@ class USBankAccountFormViewModelTest {
         )
 
         viewModel.result.test {
+            viewModel.handleCollectBankAccountResult(
+                result = mockVerifiedBankAccount()
+            )
+
             viewModel.onDestroy()
 
             assertThat(awaitItem()).isNull()
@@ -832,7 +836,7 @@ class USBankAccountFormViewModelTest {
                 viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
 
             assertThat(currentScreenState)
-                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+                .isInstanceOf(USBankAccountFormScreenState.MandateCollection::class.java)
         }
     }
 

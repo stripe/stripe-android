@@ -1961,6 +1961,33 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `Selecting the already selected payment method in add flow does nothing`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                    selectedPaymentMethod = LpmRepository.hardCodedUsBankAccount,
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            val viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.selectedPaymentMethod)
+                .isEqualTo(LpmRepository.hardCodedUsBankAccount)
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepository.hardCodedUsBankAccount
+                )
+            )
+
+            expectNoEvents()
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     private suspend inline fun <R> ReceiveTurbine<*>.awaitViewState(): R {
         return awaitItem() as R
