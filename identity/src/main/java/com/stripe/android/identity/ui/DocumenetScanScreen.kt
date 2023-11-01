@@ -1,6 +1,5 @@
 package com.stripe.android.identity.ui
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -61,17 +60,6 @@ internal const val SCAN_TITLE_TAG = "Title"
 internal const val SCAN_MESSAGE_TAG = "Message"
 internal const val CHECK_MARK_TAG = "CheckMark"
 internal const val VIEW_FINDER_ASPECT_RATIO = 1.5f
-
-internal data class DocumentScanMessageRes(
-    @StringRes
-    val frontTitleStringRes: Int,
-    @StringRes
-    val backTitleStringRes: Int,
-    @StringRes
-    val frontMessageStringRes: Int,
-    @StringRes
-    val backMessageStringRes: Int
-)
 
 @Composable
 internal fun DocumentScanScreen(

@@ -1,6 +1,5 @@
 package com.stripe.android.identity.ui
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,7 +54,6 @@ import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.Requirement
-import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.text.dimensionResourceSp
 import kotlinx.coroutines.launch
@@ -70,14 +68,6 @@ internal const val SHOULD_SHOW_CHOOSE_PHOTO_TAG = "shouldShowChoosePhoto"
 internal enum class UploadMethod {
     TAKE_PHOTO, CHOOSE_PHOTO
 }
-
-internal data class DocumentUploadSideInfo(
-    @StringRes
-    val descriptionRes: Int,
-    @StringRes
-    val checkmarkContentDescriptionRes: Int,
-    val scanType: IdentityScanState.ScanType
-)
 
 @Composable
 internal fun UploadScreen(
@@ -184,6 +174,7 @@ internal fun UploadScreen(
                             UploadMethod.TAKE_PHOTO -> {
                                 identityViewModel.imageHandler.takePhotoFront(localContext)
                             }
+
                             UploadMethod.CHOOSE_PHOTO -> {
                                 identityViewModel.imageHandler.chooseImageFront()
                             }
@@ -250,6 +241,7 @@ internal fun UploadScreen(
                                 UploadMethod.TAKE_PHOTO -> {
                                     identityViewModel.imageHandler.takePhotoBack(localContext)
                                 }
+
                                 UploadMethod.CHOOSE_PHOTO -> {
                                     identityViewModel.imageHandler.chooseImageBack()
                                 }
@@ -408,6 +400,7 @@ private fun SingleSideUploadRow(
                     Text(text = stringResource(id = R.string.stripe_select).uppercase())
                 }
             }
+
             DocumentUploadUIState.Loading -> {
                 CircularProgressIndicator(
                     modifier = Modifier
@@ -416,6 +409,7 @@ private fun SingleSideUploadRow(
                     strokeWidth = 3.dp
                 )
             }
+
             DocumentUploadUIState.Done -> {
                 Image(
                     painter = painterResource(id = R.drawable.stripe_check_mark),
