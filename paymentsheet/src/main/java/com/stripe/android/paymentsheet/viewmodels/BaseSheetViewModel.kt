@@ -12,6 +12,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.LinkHandler
@@ -394,6 +395,7 @@ internal abstract class BaseSheetViewModel(
             context = getApplication(),
             merchantName = merchantName,
             isSaveForFutureUseSelected = isRequestingReuse,
+            isSetupFlow = stripeIntent.value is SetupIntent,
         )
 
         val showAbove = (selection as? PaymentSelection.Saved?)

@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.progressSemantics
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
@@ -374,7 +376,9 @@ internal fun TrailingIcon(
     modifier: Modifier = Modifier
 ) {
     if (loading) {
-        CircularProgressIndicator()
+        CircularProgressIndicator(
+            modifier = modifier.progressSemantics().height(LOADING_INDICATOR_SIZE.dp)
+        )
     } else if (trailingIcon.isTintable) {
         Icon(
             painter = painterResource(id = trailingIcon.idRes),
@@ -472,3 +476,6 @@ private fun Modifier.conditionallyClickable(onClick: (() -> Unit)?): Modifier {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val DROPDOWN_MENU_CLICKABLE_TEST_TAG = "dropdown_menu_clickable"
+
+// Default size of Material Theme icons
+private const val LOADING_INDICATOR_SIZE = 24

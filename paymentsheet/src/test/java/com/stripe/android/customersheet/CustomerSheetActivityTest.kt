@@ -290,6 +290,7 @@ internal class CustomerSheetActivityTest {
             primaryButtonLabel = resolvableString("Save"),
             primaryButtonEnabled = false,
             customPrimaryButtonUiState = null,
+            bankAccountResult = null,
         )
     }
 

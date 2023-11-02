@@ -22,7 +22,15 @@ internal fun USBankAccountEmitters(
     LaunchedEffect(Unit) {
         viewModel.result.collect { result ->
             result?.let {
-                usBankAccountFormArgs.onHandleUSBankAccount(result)
+                usBankAccountFormArgs.onConfirmUSBankAccount(result)
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.collectBankAccountResult.collect { result ->
+            result?.let {
+                usBankAccountFormArgs.onCollectBankAccountResult?.invoke(result)
             }
         }
     }
@@ -44,6 +52,7 @@ internal fun USBankAccountEmitters(
                 context = context,
                 merchantName = merchantName,
                 isSaveForFutureUseSelected = saved,
+                isSetupFlow = !usBankAccountFormArgs.isPaymentFlow,
             )
             usBankAccountFormArgs.updateMandateText(
                 context = context,

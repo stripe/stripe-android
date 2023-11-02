@@ -23,6 +23,7 @@ class PaymentSelectionTest {
                 context = context,
                 merchantName = "Merchant",
                 isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                isSetupFlow = false,
             )
             assertThat(result).isNull()
         }
@@ -35,6 +36,7 @@ class PaymentSelectionTest {
                 context = context,
                 merchantName = "Merchant",
                 isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                isSetupFlow = false,
             )
             assertThat(result).isNull()
         }
@@ -69,6 +71,7 @@ class PaymentSelectionTest {
                 context = context,
                 merchantName = "Merchant",
                 isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                isSetupFlow = false,
             )
 
             assertThat(result).isNull()
@@ -80,10 +83,23 @@ class PaymentSelectionTest {
             paymentMethod = PaymentMethodFactory.usBankAccount(),
         )
 
-        val result = newPaymentSelection.mandateText(
+        var result = newPaymentSelection.mandateText(
             context = context,
             merchantName = "Merchant",
             isSaveForFutureUseSelected = true,
+            isSetupFlow = false,
+        )
+
+        assertThat(result).isEqualTo(
+            "By saving your bank account for Merchant you agree to authorize payments pursuant " +
+                "to <a href=\"https://stripe.com/ach-payments/authorization\">these terms</a>."
+        )
+
+        result = newPaymentSelection.mandateText(
+            context = context,
+            merchantName = "Merchant",
+            isSaveForFutureUseSelected = false,
+            isSetupFlow = true,
         )
 
         assertThat(result).isEqualTo(
@@ -102,6 +118,7 @@ class PaymentSelectionTest {
             context = context,
             merchantName = "Merchant",
             isSaveForFutureUseSelected = false,
+            isSetupFlow = false,
         )
 
         assertThat(result).isEqualTo(
@@ -120,6 +137,7 @@ class PaymentSelectionTest {
             context = context,
             merchantName = "Merchant",
             isSaveForFutureUseSelected = false,
+            isSetupFlow = false,
         )
 
         assertThat(result).isEqualTo(
@@ -143,6 +161,7 @@ class PaymentSelectionTest {
             context = context,
             merchantName = "Merchant",
             isSaveForFutureUseSelected = false,
+            isSetupFlow = false,
         )
 
         assertThat(result).isEqualTo(
@@ -162,6 +181,7 @@ class PaymentSelectionTest {
                 context = context,
                 merchantName = "Merchant",
                 isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                isSetupFlow = false,
             )
             assertThat(result).isNull()
         }
