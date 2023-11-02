@@ -33,12 +33,15 @@ import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.injection.IdentityActivitySubcomponent
 import com.stripe.android.identity.ml.BoundingBox
+import com.stripe.android.identity.ml.Category
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.navigation.CameraPermissionDeniedDestination
 import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.DocSelectionDestination
+import com.stripe.android.identity.navigation.DocumentScanDestination
+import com.stripe.android.identity.navigation.DocumentUploadDestination
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.IdentityTopLevelDestination
 import com.stripe.android.identity.navigation.IndividualDestination
@@ -64,8 +67,6 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.clearData
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.collectedRequirements
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.mergeWith
-import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.toScanDestination
-import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.toUploadDestination
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
 import com.stripe.android.identity.networking.models.Requirement
@@ -375,14 +376,6 @@ internal class IdentityViewModel constructor(
     val errorCause = MutableLiveData<Throwable>()
 
     /**
-     * Reset document uploaded state to loading state.
-     */
-    internal fun resetDocumentUploadedState() {
-        _documentFrontUploadedState.updateStateAndSave { SingleSideDocumentUploadState() }
-        _documentBackUploadedState.updateStateAndSave { SingleSideDocumentUploadState() }
-    }
-
-    /**
      * Reset selfie uploaded state to loading state.
      */
     internal fun resetSelfieUploadedState() {
@@ -427,8 +420,7 @@ internal class IdentityViewModel constructor(
      */
     internal fun uploadScanResult(
         result: IdentityAggregator.FinalResult,
-        verificationPage: VerificationPage,
-        targetScanType: IdentityScanState.ScanType?
+        verificationPage: VerificationPage
     ) {
         when (result.result) {
             is IDDetectorOutput -> {
@@ -436,16 +428,28 @@ internal class IdentityViewModel constructor(
                 val boundingBox = result.result.boundingBox
                 val scores = result.result.allScores
 
-                val isFront = when (targetScanType) {
-                    IdentityScanState.ScanType.ID_FRONT -> true
-                    IdentityScanState.ScanType.ID_BACK -> false
-                    IdentityScanState.ScanType.DL_FRONT -> true
-                    IdentityScanState.ScanType.DL_BACK -> false
-                    // passport is always uploaded as front
-                    IdentityScanState.ScanType.PASSPORT -> true
+                val isFront: Boolean
+                val targetScanType: IdentityScanState.ScanType
+
+                when (result.result.category) {
+                    Category.PASSPORT -> {
+                        isFront = true
+                        targetScanType = IdentityScanState.ScanType.DOC_FRONT
+                    }
+
+                    Category.ID_FRONT -> {
+                        isFront = true
+                        targetScanType = IdentityScanState.ScanType.DOC_FRONT
+                    }
+
+                    Category.ID_BACK -> {
+                        isFront = false
+                        targetScanType = IdentityScanState.ScanType.DOC_BACK
+                    }
+
                     else -> {
-                        Log.e(TAG, "incorrect targetScanType: $targetScanType")
-                        throw IllegalStateException("incorrect targetScanType: $targetScanType")
+                        Log.e(TAG, "incorrect category: ${result.result.category}")
+                        throw IllegalStateException("incorrect targetScanType: ${result.result.category}")
                     }
                 }
                 // upload high res
@@ -1308,38 +1312,17 @@ internal class IdentityViewModel constructor(
     fun updateNewScanType(scanType: IdentityScanState.ScanType) {
         updateAnalyticsState { oldState ->
             when (scanType) {
-                IdentityScanState.ScanType.ID_FRONT -> {
+                IdentityScanState.ScanType.DOC_FRONT -> {
                     oldState.copy(
                         docFrontRetryTimes =
                         oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
 
-                IdentityScanState.ScanType.ID_BACK -> {
+                IdentityScanState.ScanType.DOC_BACK -> {
                     oldState.copy(
                         docBackRetryTimes =
                         oldState.docBackRetryTimes?.let { it + 1 } ?: 1
-                    )
-                }
-
-                IdentityScanState.ScanType.DL_FRONT -> {
-                    oldState.copy(
-                        docFrontRetryTimes =
-                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
-                    )
-                }
-
-                IdentityScanState.ScanType.DL_BACK -> {
-                    oldState.copy(
-                        docBackRetryTimes =
-                        oldState.docBackRetryTimes?.let { it + 1 } ?: 1
-                    )
-                }
-
-                IdentityScanState.ScanType.PASSPORT -> {
-                    oldState.copy(
-                        docFrontRetryTimes =
-                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
 
@@ -1367,16 +1350,14 @@ internal class IdentityViewModel constructor(
                 cameraPermissionEnsureable.ensureCameraPermission(
                     onCameraReady = {
                         sendAnalyticsRequest(
-                            identityAnalyticsRequestFactory.cameraPermissionGranted(
-                                type.toAnalyticsScanType()
-                            )
+                            identityAnalyticsRequestFactory.cameraPermissionGranted()
                         )
                         _cameraPermissionGranted.update { true }
                         idDetectorModelFile.observe(viewLifecycleOwner) { modelResource ->
                             when (modelResource.status) {
                                 // model ready, camera permission is granted -> navigate to scan
                                 Status.SUCCESS -> {
-                                    navController.navigateTo(type.toScanDestination())
+                                    navController.navigateTo(DocumentScanDestination)
                                 }
                                 // model not ready, camera permission is granted -> navigate to manual capture
                                 Status.ERROR -> {
@@ -1396,7 +1377,7 @@ internal class IdentityViewModel constructor(
                                             )
                                         } else {
                                             navController.navigateTo(
-                                                type.toUploadDestination()
+                                                DocumentUploadDestination
                                             )
                                         }
                                     }
@@ -1536,22 +1517,15 @@ internal class IdentityViewModel constructor(
         val destinationWhenMissingBack =
             when (failedUploadMethod) {
                 UploadMethod.AUTOCAPTURE -> {
-                    failedDocumentType.toScanDestination(
-                        shouldStartFromBack = true,
-                        shouldPopUpToDocSelection = true
-                    )
+                    DocumentScanDestination
                 }
 
                 UploadMethod.FILEUPLOAD -> {
-                    failedDocumentType.toUploadDestination(
-                        shouldPopUpToDocSelection = true
-                    )
+                    DocumentUploadDestination
                 }
 
                 UploadMethod.MANUALCAPTURE -> {
-                    failedDocumentType.toUploadDestination(
-                        shouldPopUpToDocSelection = true
-                    )
+                    DocumentUploadDestination
                 }
             }
         return collectedDataParamWithForceConfirm to destinationWhenMissingBack
@@ -1592,8 +1566,6 @@ internal class IdentityViewModel constructor(
     suspend fun collectDataForDocumentScanScreen(
         navController: NavController,
         isFront: Boolean,
-        collectedDataParamType: CollectedDataParam.Type,
-        route: String,
         onMissingBack: () -> Unit
     ) {
         if (isFront) {
@@ -1607,17 +1579,16 @@ internal class IdentityViewModel constructor(
                     getApplication()
                 )
             } else if (uploadedState.isUploaded()) {
+                val route = DocumentScanDestination.ROUTE.route
                 postVerificationPageDataAndMaybeNavigate(
                     navController = navController,
                     collectedDataParam = if (isFront) {
                         CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
-                            type = collectedDataParamType,
                             frontHighResResult = requireNotNull(uploadedState.highResResult.data),
                             frontLowResResult = requireNotNull(uploadedState.lowResResult.data)
                         )
                     } else {
                         CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
-                            type = collectedDataParamType,
                             backHighResResult = requireNotNull(uploadedState.highResResult.data),
                             backLowResResult = requireNotNull(uploadedState.lowResResult.data)
                         )
@@ -1641,8 +1612,6 @@ internal class IdentityViewModel constructor(
      */
     suspend fun collectDataForDocumentUploadScreen(
         navController: NavController,
-        collectedDataParamType: CollectedDataParam.Type,
-        route: String,
         isFront: Boolean
     ) {
         if (isFront) {
@@ -1661,10 +1630,9 @@ internal class IdentityViewModel constructor(
                                         "front uploaded file id is null"
                                     },
                                     uploadMethod = requireNotNull(front.uploadMethod)
-                                ),
-                                idDocumentType = collectedDataParamType
+                                )
                             ),
-                            fromRoute = route
+                            fromRoute = DocumentUploadDestination.ROUTE.route
                         )
                     }
                 }
@@ -1685,10 +1653,9 @@ internal class IdentityViewModel constructor(
                                         "back uploaded file id is null"
                                     },
                                     uploadMethod = requireNotNull(back.uploadMethod)
-                                ),
-                                idDocumentType = collectedDataParamType
+                                )
                             ),
-                            fromRoute = route
+                            fromRoute = DocumentUploadDestination.ROUTE.route
                         )
                     }
                 }
@@ -1766,40 +1733,40 @@ internal class IdentityViewModel constructor(
         imageHandler.registerActivityResultCaller(
             activityResultCaller,
             savedStateHandle,
-            onFrontPhotoTaken = { uri, scanType ->
+            onFrontPhotoTaken = { uri ->
                 uploadManualResult(
                     uri = uri,
                     isFront = true,
                     docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
                     uploadMethod = UploadMethod.MANUALCAPTURE,
-                    scanType = requireNotNull(scanType)
+                    scanType = IdentityScanState.ScanType.DOC_FRONT
                 )
             },
-            onBackPhotoTaken = { uri, scanType ->
+            onBackPhotoTaken = { uri ->
                 uploadManualResult(
                     uri = uri,
                     isFront = false,
                     docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
                     uploadMethod = UploadMethod.MANUALCAPTURE,
-                    scanType = requireNotNull(scanType)
+                    scanType = IdentityScanState.ScanType.DOC_BACK
                 )
             },
-            onFrontImageChosen = { uri, scanType ->
+            onFrontImageChosen = { uri ->
                 uploadManualResult(
                     uri = uri,
                     isFront = true,
                     docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
                     uploadMethod = UploadMethod.FILEUPLOAD,
-                    scanType = requireNotNull(scanType)
+                    scanType = IdentityScanState.ScanType.DOC_FRONT
                 )
             },
-            onBackImageChosen = { uri, scanType ->
+            onBackImageChosen = { uri ->
                 uploadManualResult(
                     uri = uri,
                     isFront = false,
                     docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
                     uploadMethod = UploadMethod.FILEUPLOAD,
-                    scanType = requireNotNull(scanType)
+                    scanType = IdentityScanState.ScanType.DOC_BACK
                 )
             }
         )
@@ -1809,19 +1776,10 @@ internal class IdentityViewModel constructor(
         _visitedIndividualWelcomeScreen.updateStateAndSave { true }
     }
 
-    fun updateImageHandlerScanTypes(
-        frontScanType: IdentityScanState.ScanType,
-        backScanType: IdentityScanState.ScanType?
-    ) {
-        savedStateHandle[IdentityImageHandler.FRONT_SCAN_TYPE] = frontScanType
-        savedStateHandle[IdentityImageHandler.BACK_SCAN_TYPE] = backScanType
-        imageHandler.updateScanTypes(frontScanType, backScanType)
-    }
-
     private fun CollectedDataParam.Type.toAnalyticsScanType() = when (this) {
-        CollectedDataParam.Type.DRIVINGLICENSE -> IdentityScanState.ScanType.DL_FRONT
-        CollectedDataParam.Type.IDCARD -> IdentityScanState.ScanType.ID_FRONT
-        CollectedDataParam.Type.PASSPORT -> IdentityScanState.ScanType.PASSPORT
+        CollectedDataParam.Type.DRIVINGLICENSE -> IdentityScanState.ScanType.DOC_FRONT
+        CollectedDataParam.Type.IDCARD -> IdentityScanState.ScanType.DOC_FRONT
+        CollectedDataParam.Type.PASSPORT -> IdentityScanState.ScanType.DOC_FRONT
         else -> throw IllegalStateException("Invalid CollectedDataParam.Type")
     }
 
