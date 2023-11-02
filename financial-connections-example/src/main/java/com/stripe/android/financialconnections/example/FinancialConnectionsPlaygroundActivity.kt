@@ -134,10 +134,12 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         }
 
         Scaffold(
-            topBar = { PlaygroundTopBar(
-                settings = state.settings,
-                setShowEventsDialog = setShowEventsDialog
-            ) },
+            topBar = {
+                PlaygroundTopBar(
+                    settings = state.settings,
+                    setShowEventsDialog = setShowEventsDialog
+                )
+            },
             content = {
                 PlaygroundContent(
                     padding = it,

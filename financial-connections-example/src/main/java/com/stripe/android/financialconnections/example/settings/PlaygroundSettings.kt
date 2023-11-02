@@ -155,7 +155,6 @@ internal data class PlaygroundSettings(
             return PlaygroundSettings(settings)
         }
 
-
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             MerchantDefinition,
             NativeOverrideDefinition,
