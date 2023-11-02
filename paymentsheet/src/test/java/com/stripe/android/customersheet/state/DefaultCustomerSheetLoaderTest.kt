@@ -58,7 +58,7 @@ class DefaultCustomerSheetLoaderTest {
     private val unreadyGooglePayRepository = mock<GooglePayRepository>()
 
     @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(FeatureFlags.customerSheetACHv2, isEnabled = true)
+    val featureFlagTestRule = FeatureFlagTestRule(FeatureFlags.customerSheetACHv2, isEnabled = false)
 
     @Before
     fun setup() {
@@ -79,6 +79,7 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `load with configuration should return expected result`() = runTest {
+        featureFlagTestRule.setEnabled(true)
         val elementsSessionRepository = FakeElementsSessionRepository(
             stripeIntent = STRIPE_INTENT,
             error = null,
@@ -129,7 +130,6 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `load with configuration should load elements sessions with only supported payment method types`() = runTest {
-        featureFlagTestRule.setEnabled(false)
         val elementsSessionRepository = FakeElementsSessionRepository(
             stripeIntent = STRIPE_INTENT,
             error = null,
