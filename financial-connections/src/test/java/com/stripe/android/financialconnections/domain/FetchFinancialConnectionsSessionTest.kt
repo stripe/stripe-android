@@ -35,7 +35,6 @@ class FetchFinancialConnectionsSessionTest {
     fun `invoke - when session with no more accounts, should return unmodified session`() =
         runTest {
             // Given
-            val clientSecret = "clientSecret"
             repository.getFinancialConnectionsSessionResultProvider =
                 { financialConnectionsSessionWithNoMoreAccounts }
 
@@ -50,7 +49,6 @@ class FetchFinancialConnectionsSessionTest {
     fun `invoke - when session with more accounts, should return combined account list`() =
         runTest {
             // Given
-            val clientSecret = "clientSecret"
             repository.getFinancialConnectionsSessionResultProvider = { financialConnectionsSessionWithMoreAccounts }
             repository.getAccountsResultProvider = { moreFinancialConnectionsAccountList }
 
@@ -82,7 +80,6 @@ class FetchFinancialConnectionsSessionTest {
     fun `invoke - when failure fetching more accounts, should return exception`() = runTest {
         // Given
         assertFailsWith<APIException> {
-            val clientSecret = "clientSecret"
             repository.getFinancialConnectionsSessionResultProvider =
                 { financialConnectionsSessionWithMoreAccounts }
             repository.getAccountsResultProvider = { throw APIException() }

@@ -18,9 +18,6 @@ internal data class FinancialConnectionsSheetState(
     val viewEffect: FinancialConnectionsSheetViewEffect? = null
 ) : MavericksState {
 
-    val sessionSecret: String
-        get() = initialArgs.configuration.financialConnectionsSessionClientSecret
-
     enum class AuthFlowStatus {
         /**
          * AuthFlow is happening outside of the SDK (app2app, web browser, etc).
