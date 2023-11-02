@@ -268,10 +268,10 @@ internal class IDDetectorTransitioner(
      * Note: the ML model will output ID_FRONT or ID_BACK for both ID and Driver License.
      */
     private fun Category.matchesScanType(scanType: ScanType): Boolean {
-        return this == Category.ID_BACK && scanType == ScanType.ID_BACK ||
-            this == Category.ID_FRONT && scanType == ScanType.ID_FRONT ||
-            this == Category.ID_BACK && scanType == ScanType.DL_BACK ||
-            this == Category.ID_FRONT && scanType == ScanType.DL_FRONT ||
-            this == Category.PASSPORT && scanType == ScanType.PASSPORT
+        return this == Category.ID_BACK && scanType == ScanType.DOC_BACK ||
+            this == Category.ID_FRONT && scanType == ScanType.DOC_FRONT ||
+            this == Category.ID_BACK && scanType == ScanType.DOC_BACK ||
+            this == Category.ID_FRONT && scanType == ScanType.DOC_FRONT ||
+            this == Category.PASSPORT && scanType == ScanType.DOC_FRONT
     }
 }
