@@ -250,7 +250,7 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify that us_bank_account is not supported when is payment intent and financial connections sdk available`() {
+    fun `Verify that us_bank_account is supported when is payment intent and financial connections sdk available`() {
         lpmRepository.update(
             stripeIntent = PaymentIntentFactory.create(
                 paymentMethodTypes = listOf("us_bank_account")
