@@ -18,15 +18,12 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
-import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
@@ -57,9 +54,6 @@ class DefaultCustomerSheetLoaderTest {
     private val readyGooglePayRepository = mock<GooglePayRepository>()
     private val unreadyGooglePayRepository = mock<GooglePayRepository>()
 
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(FeatureFlags.customerSheetACHv2, isEnabled = false)
-
     @Before
     fun setup() {
         MockitoAnnotations.openMocks(this)
@@ -79,7 +73,6 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `load with configuration should return expected result`() = runTest {
-        featureFlagTestRule.setEnabled(true)
         val elementsSessionRepository = FakeElementsSessionRepository(
             stripeIntent = STRIPE_INTENT,
             error = null,
@@ -125,55 +118,7 @@ class DefaultCustomerSheetLoaderTest {
 
         val mode = elementsSessionRepository.lastGetParam as PaymentSheet.InitializationMode.DeferredIntent
         assertThat(mode.intentConfiguration.paymentMethodTypes)
-            .isEqualTo(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code))
-    }
-
-    @Test
-    fun `load with configuration should load elements sessions with only supported payment method types`() = runTest {
-        val elementsSessionRepository = FakeElementsSessionRepository(
-            stripeIntent = STRIPE_INTENT,
-            error = null,
-            linkSettings = null,
-        )
-
-        val loader = createCustomerSheetLoader(
-            customerAdapter = FakeCustomerAdapter(
-                selectedPaymentOption = CustomerAdapter.Result.success(
-                    CustomerAdapter.PaymentOption.fromId(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
-                    )
-                ),
-                paymentMethods = CustomerAdapter.Result.success(
-                    listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    )
-                ),
-            ),
-            elementsSessionRepository = elementsSessionRepository,
-        )
-
-        val config = CustomerSheet.Configuration(
-            googlePayEnabled = true
-        )
-
-        assertThat(
-            loader.load(config).getOrThrow()
-        ).isEqualTo(
-            CustomerSheetState.Full(
-                config = config,
-                stripeIntent = STRIPE_INTENT,
-                customerPaymentMethods = listOf(
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                ),
-                isGooglePayReady = true,
-                paymentSelection = PaymentSelection.Saved(
-                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                ),
-            )
-        )
-
-        val mode = elementsSessionRepository.lastGetParam as PaymentSheet.InitializationMode.DeferredIntent
-        assertThat(mode.intentConfiguration.paymentMethodTypes).isEqualTo(listOf(PaymentMethod.Type.Card.code))
+            .isEmpty()
     }
 
     @Test

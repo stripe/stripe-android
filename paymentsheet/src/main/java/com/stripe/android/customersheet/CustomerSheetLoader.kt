@@ -4,7 +4,6 @@ import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.requireValidOrThrow
@@ -12,7 +11,6 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -54,10 +52,6 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
             PaymentSheet.InitializationMode.DeferredIntent(
                 PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
-                    paymentMethodTypes = listOfNotNull(
-                        PaymentMethod.Type.Card.code,
-                        PaymentMethod.Type.USBankAccount.code.takeIf { customerSheetACHv2.isEnabled }
-                    )
                 )
             )
         ).mapCatching { elementsSession ->
