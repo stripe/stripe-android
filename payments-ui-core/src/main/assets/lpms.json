@@ -158,6 +158,10 @@
             "api_value": "knab"
           },
           {
+            "display_text": "N26",
+            "api_value": "n26"
+          },
+          {
             "display_text": "Rabobank",
             "api_value": "rabobank"
           },
@@ -180,6 +184,10 @@
           {
             "display_text": "Van Lanschot",
             "api_value": "van_lanschot"
+          },
+          {
+            "display_text": "Yoursafe",
+            "api_value": "yoursafe"
           }
         ],
         "api_path": {
