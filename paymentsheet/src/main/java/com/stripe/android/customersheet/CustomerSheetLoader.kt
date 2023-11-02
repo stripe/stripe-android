@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -53,9 +54,9 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
             PaymentSheet.InitializationMode.DeferredIntent(
                 PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
-                    paymentMethodTypes = listOf(
+                    paymentMethodTypes = listOfNotNull(
                         PaymentMethod.Type.Card.code,
-                        PaymentMethod.Type.USBankAccount.code,
+                        PaymentMethod.Type.USBankAccount.code.takeIf { customerSheetACHv2.isEnabled }
                     )
                 )
             )

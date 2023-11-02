@@ -11,9 +11,12 @@ internal class FakeElementsSessionRepository(
     private val linkSettings: ElementsSession.LinkSettings?,
 ) : ElementsSessionRepository {
 
+    var lastGetParam: PaymentSheet.InitializationMode? = null
+
     override suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
     ): Result<ElementsSession> {
+        lastGetParam = initializationMode
         return if (error != null) {
             Result.failure(error)
         } else {
