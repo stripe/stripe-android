@@ -15,6 +15,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
@@ -215,6 +216,22 @@ internal class StripeEndToEndTest {
         val radarSession = createStripeWithTestScope().createRadarSession()
         assertThat(radarSession.id)
             .startsWith("rse_")
+    }
+
+    @Test
+    fun updatePaymentMethodSynchronous() {
+        val paymentMethod = Stripe(
+            context,
+            ApiKeyFixtures.SWISH_PUBLISHABLE_KEY,
+        ).updatePaymentMethodSynchronous(
+            paymentMethodUpdateParams = PaymentMethodUpdateParams.createCard(
+                paymentMethodId = "pm_1O7lGxKG6vc7r7YCdUWNwi96",
+                expiryYear = 2026,
+            ),
+            publishableKey = "ek_test_YWNjdF8xSnRnZlFLRzZ2YzdyN1lDLEVzaHpSa0x5WEhaNVVtc1h1d0VRQTR2MkFhOVcxeGg_00Yla9abWO",
+        )
+
+        assertThat(paymentMethod.card?.expiryYear).isEqualTo(2026)
     }
 
     private fun createStripeWithTestScope(

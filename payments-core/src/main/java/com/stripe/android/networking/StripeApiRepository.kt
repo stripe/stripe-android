@@ -65,6 +65,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
@@ -539,6 +540,26 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     productUsageTokens = paymentMethodCreateParams.attribution
                 )
             )
+        }
+    }
+
+    override suspend fun updatePaymentMethod(
+        paymentMethodUpdateParams: PaymentMethodUpdateParams,
+        options: ApiRequest.Options,
+    ): Result<PaymentMethod> {
+        fireFraudDetectionDataRequest()
+
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getPaymentMethodUrl(paymentMethodUpdateParams.paymentMethodId),
+                options = options,
+                params = paymentMethodUpdateParams.toParamMap()
+                    .plus(buildPaymentUserAgentPair(paymentMethodUpdateParams.attribution))
+                    .plus(fraudDetectionData?.params.orEmpty())
+            ),
+            jsonParser = PaymentMethodJsonParser()
+        ) {
+            // TODO
         }
     }
 
@@ -1955,6 +1976,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
         @JvmSynthetic
         internal fun getIssuingCardPinUrl(cardId: String): String {
             return getApiUrl("issuing/cards/%s/pin", cardId)
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/setup_intents/:clientSecret/verify_microdeposits`
+         */
+        @JvmSynthetic
+        internal fun getPaymentMethodUrl(
+            paymentMethodId: String,
+        ): String {
+            return getApiUrl("payment_methods/$paymentMethodId")
         }
 
         private fun getApiUrl(path: String, vararg args: Any): String {

@@ -26,6 +26,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
@@ -115,6 +116,12 @@ interface StripeRepository {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
+        options: ApiRequest.Options
+    ): Result<PaymentMethod>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun updatePaymentMethod(
+        paymentMethodUpdateParams: PaymentMethodUpdateParams,
         options: ApiRequest.Options
     ): Result<PaymentMethod>
 
