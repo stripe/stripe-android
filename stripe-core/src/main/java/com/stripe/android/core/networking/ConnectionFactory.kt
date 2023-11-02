@@ -92,7 +92,7 @@ interface ConnectionFactory {
     }
 
     private companion object {
-        private val CONNECT_TIMEOUT = TimeUnit.SECONDS.toMillis(30).toInt()
+        private val CONNECT_TIMEOUT = 1 // TODO revert.
         private val READ_TIMEOUT = TimeUnit.SECONDS.toMillis(80).toInt()
     }
 }

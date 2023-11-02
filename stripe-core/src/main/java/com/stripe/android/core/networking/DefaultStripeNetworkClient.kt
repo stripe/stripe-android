@@ -16,46 +16,54 @@ class DefaultStripeNetworkClient @JvmOverloads constructor(
     private val workContext: CoroutineContext = Dispatchers.IO,
     private val connectionFactory: ConnectionFactory = ConnectionFactory.Default,
     private val retryDelaySupplier: RetryDelaySupplier = RetryDelaySupplier(),
+    private val retryInterceptor: RetryInterceptor = RetryInterceptor(),
     private val maxRetries: Int = DEFAULT_MAX_RETRIES,
     private val logger: Logger = Logger.noop()
 ) : StripeNetworkClient {
     override suspend fun executeRequest(request: StripeRequest): StripeResponse<String> {
-        return executeInternal(maxRetries, request.retryResponseCodes) {
-            makeRequest(request)
-        }
+        return executeInternal(
+            request = request,
+            remainingRetries = maxRetries,
+            requester = ::makeRequest
+        )
     }
 
     override suspend fun executeRequestForFile(
         request: StripeRequest,
         outputFile: File
     ): StripeResponse<File> {
-        return executeInternal(maxRetries, request.retryResponseCodes) {
-            makeRequestForFile(request, outputFile)
-        }
+        return executeInternal(
+            request = request,
+            remainingRetries = maxRetries,
+            requester = { makeRequestForFile(it, outputFile) }
+        )
     }
 
     @VisibleForTesting
     internal suspend fun <BodyType> executeInternal(
+        request: StripeRequest,
         remainingRetries: Int,
-        retryResponseCodes: Iterable<Int>,
-        requester: () -> StripeResponse<BodyType>
+        requester: (StripeRequest) -> StripeResponse<BodyType>
     ): StripeResponse<BodyType> = withContext(workContext) {
-        val stripeResponse = requester()
+        val result = runCatching { requester(request) }
 
-        if (retryResponseCodes.contains(stripeResponse.code) && remainingRetries > 0) {
-            logger.info(
-                "Request failed with code ${stripeResponse.code}. Retrying up to $remainingRetries more time(s)."
-            )
-
+        if (retryInterceptor.shouldRetry(request, result) && remainingRetries > 0) {
+            result
+                .onSuccess { logger.error("Request failed with code ${it.code}. Retrying up to $remainingRetries more time(s).") }
+                .onFailure { logger.error("Request failed with exception ${it.message}. Retrying up to $remainingRetries more time(s).") }
             delay(
                 retryDelaySupplier.getDelayMillis(
                     DEFAULT_MAX_RETRIES,
                     remainingRetries
                 )
             )
-            executeInternal(remainingRetries - 1, retryResponseCodes, requester)
+            executeInternal(
+                request = request,
+                remainingRetries = remainingRetries - 1,
+                requester = requester
+            )
         } else {
-            stripeResponse
+            result.getOrThrow()
         }
     }
 
