@@ -3,6 +3,8 @@ package com.stripe.android.financialconnections.domain
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.financialConnectionsSessionWithMoreAccounts
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
@@ -21,8 +23,12 @@ class FetchFinancialConnectionsSessionTest {
 
     private val repository = FakeFinancialConnectionsRepository()
     private val getFinancialConnectionsSession = FetchFinancialConnectionsSession(
-        FetchPaginatedAccountsForSession(repository),
-        repository
+        fetchPaginatedAccountsForSession = FetchPaginatedAccountsForSession(repository),
+        financialConnectionsRepository = repository,
+        configuration = FinancialConnectionsSheet.Configuration(
+            ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
+            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        ),
     )
 
     @Test
@@ -34,7 +40,7 @@ class FetchFinancialConnectionsSessionTest {
                 { financialConnectionsSessionWithNoMoreAccounts }
 
             // When
-            val result: FinancialConnectionsSession = getFinancialConnectionsSession(clientSecret)
+            val result: FinancialConnectionsSession = getFinancialConnectionsSession()
 
             // Then
             assertThat(result).isEqualTo(financialConnectionsSessionWithNoMoreAccounts)
@@ -49,7 +55,7 @@ class FetchFinancialConnectionsSessionTest {
             repository.getAccountsResultProvider = { moreFinancialConnectionsAccountList }
 
             // When
-            val result: FinancialConnectionsSession = getFinancialConnectionsSession(clientSecret)
+            val result: FinancialConnectionsSession = getFinancialConnectionsSession()
 
             // Then
             val combinedAccounts = listOf(
@@ -82,7 +88,7 @@ class FetchFinancialConnectionsSessionTest {
             repository.getAccountsResultProvider = { throw APIException() }
 
             // When
-            val result: FinancialConnectionsSession = getFinancialConnectionsSession(clientSecret)
+            val result: FinancialConnectionsSession = getFinancialConnectionsSession()
 
             // Then
             val combinedAccounts = listOf(

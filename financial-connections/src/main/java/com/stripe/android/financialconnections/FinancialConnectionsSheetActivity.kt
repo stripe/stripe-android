@@ -91,9 +91,6 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity(), Maverick
                     )
 
                     is FinishWithResult -> {
-                        viewEffect.finishToast?.let {
-                            Toast.makeText(this, it, Toast.LENGTH_LONG).show()
-                        }
                         finishWithResult(viewEffect.result)
                     }
 

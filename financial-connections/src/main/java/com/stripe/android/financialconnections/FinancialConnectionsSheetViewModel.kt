@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.ActivityResult
-import androidx.annotation.StringRes
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
@@ -14,21 +13,17 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
+import com.stripe.android.financialconnections.domain.CloseAuthFlow
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
-import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.exception.AppInitializationError
-import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
-import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForToken
@@ -36,7 +31,6 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
-import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
@@ -53,7 +47,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
     private val synchronizeFinancialConnectionsSession: SynchronizeFinancialConnectionsSession,
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
-    private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
+    private val closeAuthFlow: CloseAuthFlow,
     private val logger: Logger,
     private val browserManager: BrowserManager,
     private val eventReporter: FinancialConnectionsEventReporter,
@@ -87,7 +81,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 kotlin.runCatching {
                     synchronizeFinancialConnectionsSession()
                 }.onFailure {
-                    finishWithResult(state, Failed(it))
+                    fetchSessionAndFinish(state, it)
                 }.onSuccess {
                     openAuthFlow(it)
                 }
@@ -109,10 +103,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(sync.manifest)
         viewModelScope.launch { nativeRouter.logExposure(sync.manifest) }
         if (sync.manifest.hostedAuthUrl == null) {
-            withState {
-                finishWithResult(
-                    state = it,
-                    result = Failed(IllegalArgumentException("hostedAuthUrl is required!"))
+            viewModelScope.launch {
+                fetchSessionAndFinish(
+                    state = awaitState(),
+                    fromNative = nativeAuthFlowEnabled,
+                    error = IllegalArgumentException("hostedAuthUrl is required!")
                 )
             }
         } else {
@@ -191,11 +186,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 val state = awaitState()
                 if (state.activityRecreated.not()) {
                     when (state.webAuthFlowStatus) {
-                        AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> finishWithResult(
-                            state = state,
-                            result = Canceled
-                        )
-
+                        AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> fetchSessionAndFinish(state)
                         AuthFlowStatus.INTERMEDIATE_DEEPLINK -> setState {
                             copy(
                                 webAuthFlowStatus = AuthFlowStatus.ON_EXTERNAL_ACTIVITY
@@ -220,11 +211,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 val state = awaitState()
                 if (state.activityRecreated) {
                     when (state.webAuthFlowStatus) {
-                        AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> finishWithResult(
-                            state = state,
-                            result = Canceled
-                        )
-
+                        AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> fetchSessionAndFinish(state)
                         AuthFlowStatus.INTERMEDIATE_DEEPLINK -> setState {
                             copy(
                                 webAuthFlowStatus = AuthFlowStatus.ON_EXTERNAL_ACTIVITY
@@ -242,78 +229,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         val result: FinancialConnectionsSheetActivityResult? = activityResult.data
             ?.parcelable(FinancialConnectionsSheetNativeActivity.EXTRA_RESULT)
         if (activityResult.resultCode == Activity.RESULT_OK && result != null) {
-            withState { finishWithResult(it, result, fromNative = true) }
+            withState { finishWithResult(it, result) }
         } else {
-            withState { finishWithResult(it, Canceled, fromNative = true) }
-        }
-    }
-
-    /**
-     * For regular connections flows requesting a session:
-     *
-     * On successfully completing the hosted auth flow and receiving the success callback intent,
-     * fetch the updated [FinancialConnectionsSession] model from the API
-     * and return it back as a [Completed] result.
-     */
-    private fun fetchFinancialConnectionsSession(state: FinancialConnectionsSheetState) {
-        viewModelScope.launch {
-            kotlin.runCatching {
-                fetchFinancialConnectionsSession(state.sessionSecret)
-            }.onSuccess {
-                finishWithResult(
-                    state = state,
-                    result = Completed(financialConnectionsSession = it)
-                )
-            }.onFailure { error ->
-                withState { finishWithResult(it, Failed(error)) }
-            }
-        }
-    }
-
-    /**
-     * For connections flows requesting an account [com.stripe.android.model.Token]:
-     *
-     * On successfully completing the hosted auth flow and receiving the success callback intent,
-     * fetch the updated [FinancialConnectionsSession] and the generated [com.stripe.android.model.Token]
-     * and return it back as a [Completed] result.
-     */
-    private fun fetchFinancialConnectionsSessionForToken(state: FinancialConnectionsSheetState) {
-        viewModelScope.launch {
-            kotlin.runCatching {
-                fetchFinancialConnectionsSessionForToken(clientSecret = state.sessionSecret)
-            }.onSuccess { (las, token) ->
-                finishWithResult(
-                    state = state,
-                    result = Completed(financialConnectionsSession = las, token = token)
-                )
-            }.onFailure { error ->
-                withState { finishWithResult(it, Failed(error)) }
-            }
-        }
-    }
-
-    /**
-     * If a user cancels the hosted auth flow either by closing the custom tab with the back button
-     * or clicking a cancel link within the hosted auth flow and the activity received the canceled
-     * URL callback, fetch the current session to check its status, and notify
-     * the [FinancialConnectionsSheetResultCallback] with the corresponding result.
-     */
-    private fun onUserCancel(state: FinancialConnectionsSheetState) {
-        viewModelScope.launch {
-            kotlin.runCatching {
-                fetchFinancialConnectionsSession(clientSecret = state.sessionSecret)
-            }.onSuccess { session ->
-                finishWithResult(
-                    state = state,
-                    result = if (session.isCustomManualEntryError()) {
-                        Failed(CustomManualEntryRequiredError())
-                    } else {
-                        Canceled
-                    }
-                )
-            }.onFailure { error ->
-                withState { finishWithResult(it, Failed(error)) }
-            }
+            withState { finishWithResult(it, Canceled) }
         }
     }
 
@@ -359,10 +277,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
                     else -> {
                         setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
-                        finishWithResult(
-                            state,
-                            Failed(Exception("Error processing FinancialConnectionsSheet intent"))
-                        )
+                        fetchSessionAndFinish(state)
                     }
                 }
             }
@@ -392,24 +307,32 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     private fun onFlowSuccess(state: FinancialConnectionsSheetState, receivedUrl: Uri?) {
-        if (receivedUrl == null) {
-            finishWithResult(
-                state = state,
-                result = Failed(Exception("Intent url received from web flow is null"))
-            )
-        } else {
-            setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
-            when (state.initialArgs) {
-                is ForData -> fetchFinancialConnectionsSession(state)
-                is ForToken -> fetchFinancialConnectionsSessionForToken(state)
-                is ForLink -> onSuccessFromLinkFlow(receivedUrl)
-            }
+        setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
+        when (state.initialArgs) {
+            is ForData, is ForToken -> viewModelScope.launch { fetchSessionAndFinish(state) }
+            is ForLink -> onSuccessFromLinkFlow(receivedUrl)
         }
     }
 
-    private fun onFlowCancelled(state: FinancialConnectionsSheetState) {
+    private suspend fun fetchSessionAndFinish(
+        state: FinancialConnectionsSheetState,
+        error: Throwable? = null,
+        fromNative: Boolean = false,
+    ) {
+        val result = closeAuthFlow(
+            sessionFetcher = { fetchFinancialConnectionsSession() },
+            closeAuthFlowError = error,
+            fromNative = fromNative
+        )
+        finishWithResult(
+            state = state,
+            result = result,
+        )
+    }
+
+    private suspend fun onFlowCancelled(state: FinancialConnectionsSheetState) {
         setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
-        onUserCancel(state)
+        fetchSessionAndFinish(state)
     }
 
     internal fun onViewEffectLaunched() {
@@ -420,9 +343,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * Link flows do not need to fetch the FC session, since the linked account id is
      * appended to the web success url.
      */
-    private fun onSuccessFromLinkFlow(url: Uri) {
+    private fun onSuccessFromLinkFlow(url: Uri?) {
         kotlin.runCatching {
-            requireNotNull(url.getQueryParameter(QUERY_PARAM_LINKED_ACCOUNT))
+            requireNotNull(url?.getQueryParameter(QUERY_PARAM_LINKED_ACCOUNT))
         }.onSuccess { linkedAccountId ->
             withState {
                 finishWithResult(
@@ -448,22 +371,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun finishWithResult(
         state: FinancialConnectionsSheetState,
         result: FinancialConnectionsSheetActivityResult,
-        fromNative: Boolean = false,
-        @StringRes finishMessage: Int? = null,
     ) {
         eventReporter.onResult(state.initialArgs.configuration, result)
-        // Native emits its own events before finishing.
-        if (fromNative.not()) {
-            when (result) {
-                is Completed -> FinancialConnections.emitEvent(Name.SUCCESS)
-                is Canceled -> FinancialConnections.emitEvent(Name.CANCEL)
-                is Failed -> FinancialConnections.emitEvent(
-                    name = Name.ERROR,
-                    metadata = Metadata(errorCode = ErrorCode.UNEXPECTED_ERROR)
-                )
-            }
-        }
-        setState { copy(viewEffect = FinishWithResult(result, finishMessage)) }
+        setState { copy(viewEffect = FinishWithResult(result)) }
     }
 
     companion object :
