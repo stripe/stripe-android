@@ -461,7 +461,7 @@ class DefaultCustomerSheetLoaderTest {
     }
 
     @Test
-    fun `When the FC available, flag enabled, us bank in intent, then us bank account is not available`() = runTest {
+    fun `When the FC available, flag enabled, us bank in intent, then us bank account is available`() = runTest {
         featureFlagTestRule.setEnabled(true)
 
         val loader = createCustomerSheetLoader(

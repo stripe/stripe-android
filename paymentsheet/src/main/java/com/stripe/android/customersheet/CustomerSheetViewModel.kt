@@ -97,8 +97,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private var supportedPaymentMethods = mutableListOf<LpmRepository.SupportedPaymentMethod>()
 
     private val card = LpmRepository.hardcodedCardSpec(
-        billingDetailsCollectionConfiguration =
-        configuration.billingDetailsCollectionConfiguration.toInternal()
+        billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration.toInternal()
     )
 
     init {

@@ -250,9 +250,11 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify that us_bank_account is supported when financial connections sdk available`() {
+    fun `Verify that us_bank_account is not supported when is payment intent and financial connections sdk available`() {
         lpmRepository.update(
-            PaymentIntentFactory.create(paymentMethodTypes = emptyList()).copy(
+            stripeIntent = PaymentIntentFactory.create(
+                paymentMethodTypes = listOf("us_bank_account")
+            ).copy(
                 paymentMethodOptionsJsonString = """
                     {
                         "us_bank_account": {
@@ -261,13 +263,14 @@ class LpmRepositoryTest {
                     }
                 """.trimIndent()
             ),
-            """
+            serverLpmSpecs = """
               [
                 {
                   "type": "us_bank_account"
                 }
               ]
-            """.trimIndent()
+            """.trimIndent(),
+            isDeferred = false,
         )
 
         assertThat(lpmRepository.fromCode("us_bank_account")).isNotNull()
@@ -284,17 +287,56 @@ class LpmRepositoryTest {
         )
 
         lpmRepository.update(
-            PaymentIntentFactory.create(paymentMethodTypes = emptyList()),
-            """
-              [
-                {
-                  "type": "us_bank_account"
-                }
-              ]
-            """.trimIndent()
+            stripeIntent = PaymentIntentFactory.create(
+                paymentMethodTypes = listOf("us_bank_account")
+            ),
+            serverLpmSpecs = null,
+            isDeferred = false,
         )
 
         assertThat(lpmRepository.fromCode("us_bank_account")).isNull()
+    }
+
+    @Test
+    fun `Verify that us_bank_account is not supported when financial connections sdk not available and deferred intent`() {
+        val lpmRepository = LpmRepository(
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                isFinancialConnectionsAvailable = { false }
+            )
+        )
+
+        lpmRepository.update(
+            stripeIntent = PaymentIntentFactory.create(
+                paymentMethodTypes = listOf("us_bank_account")
+            ),
+            serverLpmSpecs = null,
+            isDeferred = true,
+        )
+
+        assertThat(lpmRepository.fromCode("us_bank_account")).isNull()
+    }
+
+    @Test
+    fun `Verify that us_bank_account is supported when financial connections sdk available and deferred intent`() {
+        val lpmRepository = LpmRepository(
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                isFinancialConnectionsAvailable = { true }
+            )
+        )
+
+        lpmRepository.update(
+            stripeIntent = PaymentIntentFactory.create(
+                paymentMethodTypes = listOf("us_bank_account")
+            ),
+            serverLpmSpecs = null,
+            isDeferred = true,
+        )
+
+        assertThat(lpmRepository.fromCode("us_bank_account")).isNotNull()
     }
 
     @Test
@@ -352,10 +394,11 @@ class LpmRepositoryTest {
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                isFinancialConnectionsAvailable = { true }
             ),
         )
 
-        val deferredPaymentIntent = PaymentIntentFactory.create(
+        val paymentIntent = PaymentIntentFactory.create(
             paymentMethodTypes = listOf("card", "us_bank_account", "cashapp"),
         ).copy(
             paymentMethodOptionsJsonString = """
@@ -368,12 +411,45 @@ class LpmRepositoryTest {
         )
 
         lpmRepository.update(
-            stripeIntent = deferredPaymentIntent,
+            stripeIntent = paymentIntent,
             serverLpmSpecs = null,
+            isDeferred = false,
         )
 
         val supportedPaymentMethods = lpmRepository.values().map { it.code }
         assertThat(supportedPaymentMethods).containsExactly(Card.code, USBankAccount.code, CashAppPay.code)
+    }
+
+    @Test
+    fun `Verify LpmRepository does filter out USBankAccount if verification method is not supported`() = runTest {
+        val lpmRepository = LpmRepository(
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                isFinancialConnectionsAvailable = { true }
+            ),
+        )
+
+        val paymentIntent = PaymentIntentFactory.create(
+            paymentMethodTypes = listOf("card", "us_bank_account", "cashapp"),
+        ).copy(
+            paymentMethodOptionsJsonString = """
+                {
+                    "us_bank_account": {
+                        "verification_method": "something else"
+                    }
+                }
+            """.trimIndent()
+        )
+
+        lpmRepository.update(
+            stripeIntent = paymentIntent,
+            serverLpmSpecs = null,
+            isDeferred = false,
+        )
+
+        val supportedPaymentMethods = lpmRepository.values().map { it.code }
+        assertThat(supportedPaymentMethods).containsExactly(Card.code, CashAppPay.code)
     }
 
     @Test
