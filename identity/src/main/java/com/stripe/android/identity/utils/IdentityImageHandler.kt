@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.identity.states.IdentityScanState
 import javax.inject.Inject
 
 /**
@@ -18,53 +17,30 @@ internal class IdentityImageHandler @Inject constructor(
     private lateinit var frontImageChooser: ImageChooser
     private lateinit var backImageChooser: ImageChooser
 
-    // [ScanType] for front and back, might be updated when current screen changes.
-    private var frontScanType: IdentityScanState.ScanType? = null
-    private var backScanType: IdentityScanState.ScanType? = null
-
     fun registerActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
         savedStateHandle: SavedStateHandle,
-        onFrontPhotoTaken: (Uri, IdentityScanState.ScanType?) -> Unit,
-        onBackPhotoTaken: (Uri, IdentityScanState.ScanType?) -> Unit,
-        onFrontImageChosen: (Uri, IdentityScanState.ScanType?) -> Unit,
-        onBackImageChosen: (Uri, IdentityScanState.ScanType?) -> Unit
+        onFrontPhotoTaken: (Uri) -> Unit,
+        onBackPhotoTaken: (Uri) -> Unit,
+        onFrontImageChosen: (Uri) -> Unit,
+        onBackImageChosen: (Uri) -> Unit
     ) {
-        frontScanType = savedStateHandle.get<IdentityScanState.ScanType>(FRONT_SCAN_TYPE)
-        backScanType = savedStateHandle.get<IdentityScanState.ScanType>(BACK_SCAN_TYPE)
-
         frontPhotoTaker = PhotoTaker(
             activityResultCaller,
             identityIO,
-            {
-                onFrontPhotoTaken(it, frontScanType)
-            },
+            onFrontPhotoTaken,
             savedStateHandle,
             FRONT_PHOTO_URI
         )
         backPhotoTaker = PhotoTaker(
             activityResultCaller,
             identityIO,
-            {
-                onBackPhotoTaken(it, backScanType)
-            },
+            onBackPhotoTaken,
             savedStateHandle,
             BACK_PHOTO_URI
         )
-        frontImageChooser = ImageChooser(activityResultCaller) {
-            onFrontImageChosen(it, frontScanType)
-        }
-        backImageChooser = ImageChooser(activityResultCaller) {
-            onBackImageChosen(it, backScanType)
-        }
-    }
-
-    fun updateScanTypes(
-        frontScanType: IdentityScanState.ScanType,
-        backScanType: IdentityScanState.ScanType?
-    ) {
-        this.frontScanType = frontScanType
-        this.backScanType = backScanType
+        frontImageChooser = ImageChooser(activityResultCaller, onFrontImageChosen)
+        backImageChooser = ImageChooser(activityResultCaller, onBackImageChosen)
     }
 
     /**
@@ -102,7 +78,5 @@ internal class IdentityImageHandler @Inject constructor(
     companion object {
         const val FRONT_PHOTO_URI = "front_photo_uri"
         const val BACK_PHOTO_URI = "back_photo_uri"
-        const val FRONT_SCAN_TYPE = "front_scan_type"
-        const val BACK_SCAN_TYPE = "back_scan_type"
     }
 }
