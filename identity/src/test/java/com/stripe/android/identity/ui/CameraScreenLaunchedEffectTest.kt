@@ -188,7 +188,7 @@ class CameraScreenLaunchedEffectTest {
 
     @Test
     fun verifyIDDetectorFrontFinishedResult() {
-        targetScanFlow.update { IdentityScanState.ScanType.ID_FRONT }
+        targetScanFlow.update { IdentityScanState.ScanType.DOC_FRONT }
         finalResult.postValue(
             IdentityAggregator.FinalResult(
                 frame = mock(),
@@ -200,7 +200,7 @@ class CameraScreenLaunchedEffectTest {
                     blurScore = ID_FRONT_BLUR_SCORE
                 ),
                 identityState = IdentityScanState.Finished(
-                    type = IdentityScanState.ScanType.ID_FRONT,
+                    type = IdentityScanState.ScanType.DOC_FRONT,
                     transitioner = mock()
                 )
             )
@@ -225,7 +225,7 @@ class CameraScreenLaunchedEffectTest {
 
     @Test
     fun verifyIDDetectorFrontTimeOutResult() {
-        targetScanFlow.update { IdentityScanState.ScanType.ID_FRONT }
+        targetScanFlow.update { IdentityScanState.ScanType.DOC_FRONT }
         finalResult.postValue(
             IdentityAggregator.FinalResult(
                 frame = mock(),
@@ -237,7 +237,7 @@ class CameraScreenLaunchedEffectTest {
                     blurScore = ID_FRONT_BLUR_SCORE
                 ),
                 identityState = IdentityScanState.TimeOut(
-                    type = IdentityScanState.ScanType.ID_FRONT,
+                    type = IdentityScanState.ScanType.DOC_FRONT,
                     transitioner = mock()
                 )
             )
@@ -251,7 +251,7 @@ class CameraScreenLaunchedEffectTest {
             }
 
             verify(mockIdentityAnalyticsRequestFactory).documentTimeout(
-                eq(IdentityScanState.ScanType.ID_FRONT)
+                eq(IdentityScanState.ScanType.DOC_FRONT)
             )
             verify(mockNavController).navigate(
                 argWhere {
@@ -264,7 +264,7 @@ class CameraScreenLaunchedEffectTest {
 
     @Test
     fun verifyIDDetectorBackFinishedResult() {
-        targetScanFlow.update { IdentityScanState.ScanType.ID_BACK }
+        targetScanFlow.update { IdentityScanState.ScanType.DOC_BACK }
         finalResult.postValue(
             IdentityAggregator.FinalResult(
                 frame = mock(),
@@ -276,7 +276,7 @@ class CameraScreenLaunchedEffectTest {
                     blurScore = ID_BACK_BLUR_SCORE
                 ),
                 identityState = IdentityScanState.Finished(
-                    type = IdentityScanState.ScanType.ID_BACK,
+                    type = IdentityScanState.ScanType.DOC_BACK,
                     transitioner = mock()
                 )
             )
@@ -301,7 +301,7 @@ class CameraScreenLaunchedEffectTest {
 
     @Test
     fun verifyIDDetectorBackTimeOutResult() {
-        targetScanFlow.update { IdentityScanState.ScanType.ID_BACK }
+        targetScanFlow.update { IdentityScanState.ScanType.DOC_BACK }
         finalResult.postValue(
             IdentityAggregator.FinalResult(
                 frame = mock(),
@@ -313,7 +313,7 @@ class CameraScreenLaunchedEffectTest {
                     blurScore = 1.0f
                 ),
                 identityState = IdentityScanState.TimeOut(
-                    type = IdentityScanState.ScanType.ID_BACK,
+                    type = IdentityScanState.ScanType.DOC_BACK,
                     transitioner = mock()
                 )
             )
@@ -327,7 +327,7 @@ class CameraScreenLaunchedEffectTest {
             }
 
             verify(mockIdentityAnalyticsRequestFactory).documentTimeout(
-                eq(IdentityScanState.ScanType.ID_BACK)
+                eq(IdentityScanState.ScanType.DOC_BACK)
             )
             verify(mockNavController).navigate(
                 argWhere {

@@ -94,12 +94,8 @@ internal fun NavController.navigateToFinalErrorScreen(
  * Route of all screens that collect front/back of a document.
  */
 private val DOCUMENT_UPLOAD_ROUTES = setOf(
-    IDUploadDestination.ROUTE.route,
-    DriverLicenseUploadDestination.ROUTE.route,
-    PassportUploadDestination.ROUTE.route,
-    IDScanDestination.ROUTE.route,
-    DriverLicenseScanDestination.ROUTE.route,
-    PassportScanDestination.ROUTE.route
+    DocumentScanDestination.ROUTE.route,
+    DocumentUploadDestination.ROUTE.route
 )
 
 /**
@@ -141,7 +137,9 @@ internal suspend fun NavController.navigateOnVerificationPageData(
         onMissingOtp()
     } else if (verificationPageData.isMissingConsent()) {
         navigateTo(ConsentDestination)
-    } else if (verificationPageData.isMissingDocType()) {
+    }
+    // TODO - remove this when backend removes docType
+    else if (verificationPageData.isMissingDocType()) {
         navigateTo(DocSelectionDestination)
     } else if (verificationPageData.isMissingFront()) {
         onMissingFront()

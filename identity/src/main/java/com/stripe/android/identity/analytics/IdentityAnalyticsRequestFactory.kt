@@ -156,13 +156,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun cameraPermissionGranted(
-        scanType: IdentityScanState.ScanType
-    ) = requestFactory.createRequest(
-        eventName = EVENT_CAMERA_PERMISSION_GRANTED,
-        additionalParams = additionalParamWithEventMetadata(
-            PARAM_SCAN_TYPE to scanType.toParam()
-        )
+    fun cameraPermissionGranted() = requestFactory.createRequest(
+        eventName = EVENT_CAMERA_PERMISSION_GRANTED
     )
 
     fun documentTimeout(
@@ -247,21 +242,15 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
 
     private fun IdentityScanState.ScanType.toParam(): String =
         when (this) {
-            IdentityScanState.ScanType.ID_FRONT -> ID
-            IdentityScanState.ScanType.ID_BACK -> ID
-            IdentityScanState.ScanType.PASSPORT -> PASSPORT
-            IdentityScanState.ScanType.DL_FRONT -> DRIVER_LICENSE
-            IdentityScanState.ScanType.DL_BACK -> DRIVER_LICENSE
+            IdentityScanState.ScanType.DOC_FRONT -> DOC_FRONT
+            IdentityScanState.ScanType.DOC_BACK -> DOC_BACK
             IdentityScanState.ScanType.SELFIE -> SELFIE
         }
 
     private fun IdentityScanState.ScanType.toSide(): String =
         when (this) {
-            IdentityScanState.ScanType.ID_FRONT -> FRONT
-            IdentityScanState.ScanType.ID_BACK -> BACK
-            IdentityScanState.ScanType.PASSPORT -> FRONT
-            IdentityScanState.ScanType.DL_FRONT -> FRONT
-            IdentityScanState.ScanType.DL_BACK -> BACK
+            IdentityScanState.ScanType.DOC_FRONT -> FRONT
+            IdentityScanState.ScanType.DOC_BACK -> BACK
             else -> {
                 throw IllegalArgumentException("Unknown type: $this")
             }
@@ -271,8 +260,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val CLIENT_ID = "mobile-identity-sdk"
         const val ORIGIN = "stripe-identity-android"
         const val ID = "id"
-        const val PASSPORT = "passport"
-        const val DRIVER_LICENSE = "driver_license"
+        const val DOC_FRONT = "doc_front"
+        const val DOC_BACK = "doc_front"
         const val SELFIE = "selfie"
         const val FRONT = "front"
         const val BACK = "back"
@@ -334,14 +323,10 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
 
         const val SCREEN_NAME_CONSENT = "consent"
         const val SCREEN_NAME_DOC_SELECT = "document_select"
-        const val SCREEN_NAME_LIVE_CAPTURE_PASSPORT = "live_capture_passport"
-        const val SCREEN_NAME_LIVE_CAPTURE_ID = "live_capture_id"
-        const val SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE = "live_capture_driver_license"
-        const val SCREEN_NAME_FILE_UPLOAD_PASSPORT = "file_upload_passport"
-        const val SCREEN_NAME_FILE_UPLOAD_ID = "file_upload_id"
-        const val SCREEN_NAME_FILE_UPLOAD_DRIVER_LICENSE = "file_upload_driver_license"
         const val SCREEN_NAME_SELFIE_WARMUP = "selfie_warmup"
         const val SCREEN_NAME_SELFIE = "selfie"
+        const val SCREEN_NAME_LIVE_CAPTURE = "live_capture"
+        const val SCREEN_NAME_FILE_UPLOAD = "file_upload"
         const val SCREEN_NAME_CONFIRMATION = "confirmation"
         const val SCREEN_NAME_ERROR = "error"
         const val SCREEN_NAME_INDIVIDUAL = "individual"
