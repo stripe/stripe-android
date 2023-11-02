@@ -3,7 +3,7 @@
 ## XX.XX.XX - 2023-XX-XX
 
 ### PaymentSheet
-* [FIXED][7570](https://github.com/stripe/stripe-android/pull/7570) Fixed an issue where compiling PaymentSheet with R8 would cause a warning for missing classes from financial connections if the module wasn't included.
+* [FIXED][7570](https://github.com/stripe/stripe-android/pull/7570) Fixed an issue where compiling PaymentSheet with R8 would cause an irrelevant warning for missing classes from Financial Connections if the module wasn't included.
 
 ## 20.34.3 - 2023-10-31
 
