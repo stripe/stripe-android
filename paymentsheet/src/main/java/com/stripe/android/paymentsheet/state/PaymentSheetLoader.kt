@@ -14,7 +14,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -249,6 +248,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
+                isDeferred = initializationMode is DeferredIntent,
             )
 
             if (!didParseServerResponse) {
@@ -393,13 +393,12 @@ private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
     return PaymentSelection.Saved(this)
 }
 
-internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal():
-    BillingDetailsCollectionConfiguration {
+internal fun PaymentSheet.BillingDetailsCollectionConfiguration?.toInternal(): BillingDetailsCollectionConfiguration {
     return BillingDetailsCollectionConfiguration(
-        collectName = name == Always,
-        collectEmail = email == Always,
-        collectPhone = phone == Always,
-        address = when (address) {
+        collectName = this?.name == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+        collectEmail = this?.email == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+        collectPhone = this?.phone == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+        address = when (this?.address) {
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
                 BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
             }
@@ -409,6 +408,7 @@ internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal():
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
                 BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             }
+            else -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
         },
     )
 }

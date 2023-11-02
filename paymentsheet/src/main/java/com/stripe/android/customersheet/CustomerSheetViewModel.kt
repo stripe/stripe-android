@@ -27,7 +27,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -82,7 +81,6 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val customerSheetLoader: CustomerSheetLoader,
-    private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
 ) : ViewModel() {
 
     private val backStack = MutableStateFlow(initialBackStack)
@@ -96,23 +94,13 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private var unconfirmedPaymentMethod: PaymentMethod? = null
     private var stripeIntent: StripeIntent? = null
+    private var supportedPaymentMethods = mutableListOf<LpmRepository.SupportedPaymentMethod>()
 
     private val card = LpmRepository.hardcodedCardSpec(
-        billingDetailsCollectionConfiguration =
-        configuration.billingDetailsCollectionConfiguration.toInternal()
-    )
-    private val usBankAccount = LpmRepository.hardCodedUsBankAccount
-
-    private val supportedPaymentMethods = listOfNotNull(
-        card,
-        usBankAccount.takeIf { isFinancialConnectionsAvailable() }
+        billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration.toInternal()
     )
 
     init {
-        lpmRepository.initializeWithPaymentMethods(
-            supportedPaymentMethods.associateBy { it.code }
-        )
-
         configuration.appearance.parseAppearance()
 
         if (viewState.value is CustomerSheetViewState.Loading) {
@@ -260,6 +248,9 @@ internal class CustomerSheetViewModel @Inject constructor(
 
         result.fold(
             onSuccess = { state ->
+                supportedPaymentMethods.clear()
+                supportedPaymentMethods.addAll(state.supportedPaymentMethods)
+
                 savedPaymentSelection = state.paymentSelection
                 isGooglePayReadyAndEnabled = state.isGooglePayReady
                 stripeIntent = state.stripeIntent
