@@ -15,15 +15,19 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
+import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
@@ -34,6 +38,12 @@ import org.robolectric.RobolectricTestRunner
 @OptIn(ExperimentalCustomerSheetApi::class)
 @RunWith(RobolectricTestRunner::class)
 class DefaultCustomerSheetLoaderTest {
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.customerSheetACHv2,
+        isEnabled = false,
+    )
+
     private val lpmRepository = LpmRepository(
         arguments = LpmRepository.LpmRepositoryArguments(
             resources = ApplicationProvider.getApplicationContext<Application>().resources,
@@ -109,6 +119,9 @@ class DefaultCustomerSheetLoaderTest {
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     PaymentMethodFixtures.US_BANK_ACCOUNT,
                 ),
+                supportedPaymentMethods = listOf(
+                    LpmRepository.HardcodedCard,
+                ),
                 isGooglePayReady = true,
                 paymentSelection = PaymentSelection.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -137,12 +150,35 @@ class DefaultCustomerSheetLoaderTest {
         val config = CustomerSheet.Configuration()
 
         assertThat(
+            loader.load(config).getOrThrow().stripeIntent
+        ).isNull()
+    }
+
+    @Test
+    fun `when setup intent cannot be created, supported payment methods should contain at least card`() = runTest {
+        val loader = createCustomerSheetLoader(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    )
+                ),
+                canCreateSetupIntents = false,
+            )
+        )
+
+        val config = CustomerSheet.Configuration()
+
+        assertThat(
             loader.load(config).getOrThrow()
         ).isEqualTo(
             CustomerSheetState.Full(
                 config = config,
                 stripeIntent = null,
                 customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                supportedPaymentMethods = listOf(
+                    LpmRepository.HardcodedCard,
+                ),
                 isGooglePayReady = false,
                 paymentSelection = null,
             )
@@ -178,6 +214,9 @@ class DefaultCustomerSheetLoaderTest {
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                ),
+                supportedPaymentMethods = listOf(
+                    LpmRepository.HardcodedCard,
                 ),
                 isGooglePayReady = false,
                 paymentSelection = PaymentSelection.Saved(
@@ -215,6 +254,9 @@ class DefaultCustomerSheetLoaderTest {
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
                 ),
+                supportedPaymentMethods = listOf(
+                    LpmRepository.HardcodedCard,
+                ),
                 isGooglePayReady = false,
                 paymentSelection = null,
             )
@@ -243,9 +285,210 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(card).isNotNull()
     }
 
+    @Test
+    fun `When the FC unavailable, flag disabled, us bank not in intent, then us bank account is not available`() = runTest {
+        featureFlagTestRule.setEnabled(false)
+
+        val loader = createCustomerSheetLoader(
+            customerAdapter = FakeCustomerAdapter(
+                canCreateSetupIntents = true,
+            ),
+            isFinancialConnectionsAvailable = { false },
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = STRIPE_INTENT.copy(
+                    paymentMethodTypes = listOf("card")
+                ),
+                error = null,
+                linkSettings = null,
+            )
+        )
+
+        val config = CustomerSheet.Configuration()
+
+        assertThat(
+            loader.load(config).getOrThrow().supportedPaymentMethods
+        ).doesNotContain(LpmRepository.hardCodedUsBankAccount)
+    }
+
+    @Test
+    fun `When the FC unavailable, flag disabled, us bank in intent, then us bank account is not available`() = runTest {
+        featureFlagTestRule.setEnabled(false)
+
+        val loader = createCustomerSheetLoader(
+            customerAdapter = FakeCustomerAdapter(
+                canCreateSetupIntents = true,
+            ),
+            isFinancialConnectionsAvailable = { false },
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = STRIPE_INTENT.copy(
+                    paymentMethodTypes = listOf("card", "us_bank_account")
+                ),
+                error = null,
+                linkSettings = null,
+            )
+        )
+
+        val config = CustomerSheet.Configuration()
+
+        assertThat(
+            loader.load(config).getOrThrow().supportedPaymentMethods
+        ).doesNotContain(LpmRepository.hardCodedUsBankAccount)
+    }
+
+    @Test
+    fun `When the FC unavailable, flag enabled, us bank not in intent, then us bank account is not available`() = runTest {
+        featureFlagTestRule.setEnabled(true)
+
+        val loader = createCustomerSheetLoader(
+            customerAdapter = FakeCustomerAdapter(
+                canCreateSetupIntents = true,
+            ),
+            isFinancialConnectionsAvailable = { false },
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = STRIPE_INTENT.copy(
+                    paymentMethodTypes = listOf("card")
+                ),
+                error = null,
+                linkSettings = null,
+            )
+        )
+
+        val config = CustomerSheet.Configuration()
+
+        assertThat(
+            loader.load(config).getOrThrow().supportedPaymentMethods
+        ).doesNotContain(LpmRepository.hardCodedUsBankAccount)
+    }
+
+    @Test
+    fun `When the FC unavailable, flag enabled, us bank in intent, then us bank account is not available`() = runTest {
+        featureFlagTestRule.setEnabled(true)
+
+        val loader = createCustomerSheetLoader(
+            customerAdapter = FakeCustomerAdapter(
+                canCreateSetupIntents = true,
+            ),
+            isFinancialConnectionsAvailable = { false },
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = STRIPE_INTENT.copy(
+                    paymentMethodTypes = listOf("card", "us_bank_account")
+                ),
+                error = null,
+                linkSettings = null,
+            )
+        )
+
+        val config = CustomerSheet.Configuration()
+
+        assertThat(
+            loader.load(config).getOrThrow().supportedPaymentMethods
+        ).doesNotContain(LpmRepository.hardCodedUsBankAccount)
+    }
+
+    @Test
+    fun `When the FC available, flag disabled, us bank not in intent, then us bank account is not available`() = runTest {
+        featureFlagTestRule.setEnabled(false)
+
+        val loader = createCustomerSheetLoader(
+            customerAdapter = FakeCustomerAdapter(
+                canCreateSetupIntents = true,
+            ),
+            isFinancialConnectionsAvailable = { true },
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = STRIPE_INTENT.copy(
+                    paymentMethodTypes = listOf("card")
+                ),
+                error = null,
+                linkSettings = null,
+            )
+        )
+
+        val config = CustomerSheet.Configuration()
+
+        assertThat(
+            loader.load(config).getOrThrow().supportedPaymentMethods
+        ).doesNotContain(LpmRepository.hardCodedUsBankAccount)
+    }
+
+    @Test
+    fun `When the FC available, flag disabled, us bank in intent, then us bank account is not available`() = runTest {
+        featureFlagTestRule.setEnabled(false)
+
+        val loader = createCustomerSheetLoader(
+            customerAdapter = FakeCustomerAdapter(
+                canCreateSetupIntents = true,
+            ),
+            isFinancialConnectionsAvailable = { true },
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = STRIPE_INTENT.copy(
+                    paymentMethodTypes = listOf("card", "us_bank_account")
+                ),
+                error = null,
+                linkSettings = null,
+            )
+        )
+
+        val config = CustomerSheet.Configuration()
+
+        assertThat(
+            loader.load(config).getOrThrow().supportedPaymentMethods
+        ).doesNotContain(LpmRepository.hardCodedUsBankAccount)
+    }
+
+    @Test
+    fun `When the FC available, flag enabled, us bank not in intent, then us bank account is not available`() = runTest {
+        featureFlagTestRule.setEnabled(true)
+
+        val loader = createCustomerSheetLoader(
+            customerAdapter = FakeCustomerAdapter(
+                canCreateSetupIntents = true,
+            ),
+            isFinancialConnectionsAvailable = { true },
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = STRIPE_INTENT.copy(
+                    paymentMethodTypes = listOf("card")
+                ),
+                error = null,
+                linkSettings = null,
+            )
+        )
+
+        val config = CustomerSheet.Configuration()
+
+        assertThat(
+            loader.load(config).getOrThrow().supportedPaymentMethods
+        ).doesNotContain(LpmRepository.hardCodedUsBankAccount)
+    }
+
+    @Test
+    fun `When the FC available, flag enabled, us bank in intent, then us bank account is not available`() = runTest {
+        featureFlagTestRule.setEnabled(true)
+
+        val loader = createCustomerSheetLoader(
+            customerAdapter = FakeCustomerAdapter(
+                canCreateSetupIntents = true,
+            ),
+            isFinancialConnectionsAvailable = { true },
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = STRIPE_INTENT.copy(
+                    paymentMethodTypes = listOf("card", "us_bank_account")
+                ),
+                error = null,
+                linkSettings = null,
+            )
+        )
+
+        val config = CustomerSheet.Configuration()
+
+        assertThat(
+            loader.load(config).getOrThrow().supportedPaymentMethods
+        ).contains(LpmRepository.hardCodedUsBankAccount)
+    }
+
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
+        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = IsFinancialConnectionsAvailable { false },
         elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
             stripeIntent = STRIPE_INTENT,
             error = null,
@@ -262,6 +505,7 @@ class DefaultCustomerSheetLoaderTest {
             elementsSessionRepository = elementsSessionRepository,
             lpmRepository = lpmRepository,
             customerAdapter = customerAdapter,
+            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         )
     }
 

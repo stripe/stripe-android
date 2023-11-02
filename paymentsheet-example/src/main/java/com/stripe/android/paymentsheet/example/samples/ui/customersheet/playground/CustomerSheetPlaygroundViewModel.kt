@@ -155,7 +155,9 @@ class CustomerSheetPlaygroundViewModel(
     ): Result<PlaygroundCustomerSheetResponse, FuelError> {
         val request = PlaygroundCustomerSheetRequest(
             customerId = customerId,
-            mode = "payment"
+            mode = "payment",
+            merchantCountryCode = "US",
+            currency = "usd",
         )
 
         val requestBody = Json.encodeToString(

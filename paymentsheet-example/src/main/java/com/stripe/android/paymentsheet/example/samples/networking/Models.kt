@@ -185,6 +185,10 @@ data class PlaygroundCustomerSheetRequest(
     val customerId: String,
     @SerialName("mode")
     val mode: String,
+    @SerialName("merchant_country_code")
+    val merchantCountryCode: String,
+    @SerialName("currency")
+    val currency: String,
 )
 
 @Serializable
