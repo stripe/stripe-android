@@ -13,7 +13,6 @@ import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
-import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.navigation.CouldNotCaptureDestination.Companion.COULD_NOT_CAPTURE
@@ -25,8 +24,6 @@ import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
@@ -37,11 +34,9 @@ import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
@@ -57,14 +52,10 @@ class CameraScreenLaunchedEffectTest {
     private val mockVerificationPage = mock<VerificationPage> {
         on { documentCapture } doReturn mockDocumentCapture
     }
-    private val mockIDDetectorFile = mock<File>()
-    private val mockFaceDetectorFile = mock<File>()
     private val mockFpsTracker = mock<FPSTracker>()
-    private val mockCameraManager = mock<IdentityCameraManager>()
     private val mockScreenTracker = mock<ScreenTracker>()
     private val pageAndModel = MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>()
     private val mockIdentityAnalyticsRequestFactory = mock<IdentityAnalyticsRequestFactory>()
-    private val targetScanFlow = MutableStateFlow<IdentityScanState.ScanType?>(null)
     private val interimResults = MutableLiveData<IdentityAggregator.InterimResult>()
     private val finalResult = SingleLiveEvent<IdentityAggregator.FinalResult>()
 
@@ -76,39 +67,11 @@ class CameraScreenLaunchedEffectTest {
         on { screenTracker } doReturn mockScreenTracker
     }
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel> {
-        on { targetScanTypeFlow } doReturn targetScanFlow
         on { interimResults } doReturn interimResults
         on { finalResult } doReturn finalResult
     }
 
     private val mockNavController = mock<NavController>()
-
-    private val mockOnCameraReady = mock<() -> Unit>()
-
-    @Test
-    fun `when pageAndModelFiles is available, identityScanFlow is initialized`() {
-        pageAndModel.postValue(
-            Resource.success(
-                IdentityViewModel.PageAndModelFiles(
-                    mockVerificationPage,
-                    mockIDDetectorFile,
-                    mockFaceDetectorFile
-                )
-            )
-        )
-
-        testCameraScreenLaunchedEffect {
-            verify(mockIdentityScanViewModel).initializeScanFlow(
-                same(mockVerificationPage),
-                same(mockIDDetectorFile),
-                same(mockFaceDetectorFile),
-            )
-
-            verify(mockIdentityScanViewModel).initializeCameraManager(same(mockCameraManager))
-
-            verify(mockOnCameraReady).invoke()
-        }
-    }
 
     @Test
     fun `when interimResults is available, fps is tracked`() {
@@ -121,7 +84,6 @@ class CameraScreenLaunchedEffectTest {
 
     @Test
     fun verifyFaceDetectorFinishedResult() {
-        targetScanFlow.update { IdentityScanState.ScanType.SELFIE }
         finalResult.postValue(
             IdentityAggregator.FinalResult(
                 frame = mock(),
@@ -153,7 +115,6 @@ class CameraScreenLaunchedEffectTest {
 
     @Test
     fun verifyFaceDetectorTimeOutResult() {
-        targetScanFlow.update { IdentityScanState.ScanType.SELFIE }
         finalResult.postValue(
             IdentityAggregator.FinalResult(
                 frame = mock(),
@@ -188,7 +149,6 @@ class CameraScreenLaunchedEffectTest {
 
     @Test
     fun verifyIDDetectorFrontFinishedResult() {
-        targetScanFlow.update { IdentityScanState.ScanType.DOC_FRONT }
         finalResult.postValue(
             IdentityAggregator.FinalResult(
                 frame = mock(),
@@ -225,7 +185,6 @@ class CameraScreenLaunchedEffectTest {
 
     @Test
     fun verifyIDDetectorFrontTimeOutResult() {
-        targetScanFlow.update { IdentityScanState.ScanType.DOC_FRONT }
         finalResult.postValue(
             IdentityAggregator.FinalResult(
                 frame = mock(),
@@ -264,7 +223,6 @@ class CameraScreenLaunchedEffectTest {
 
     @Test
     fun verifyIDDetectorBackFinishedResult() {
-        targetScanFlow.update { IdentityScanState.ScanType.DOC_BACK }
         finalResult.postValue(
             IdentityAggregator.FinalResult(
                 frame = mock(),
@@ -301,7 +259,6 @@ class CameraScreenLaunchedEffectTest {
 
     @Test
     fun verifyIDDetectorBackTimeOutResult() {
-        targetScanFlow.update { IdentityScanState.ScanType.DOC_BACK }
         finalResult.postValue(
             IdentityAggregator.FinalResult(
                 frame = mock(),
@@ -346,9 +303,7 @@ class CameraScreenLaunchedEffectTest {
                 identityViewModel = mockIdentityViewModel,
                 identityScanViewModel = mockIdentityScanViewModel,
                 verificationPage = mockVerificationPage,
-                navController = mockNavController,
-                cameraManager = mockCameraManager,
-                onCameraReady = mockOnCameraReady
+                navController = mockNavController
             )
         }
         with(composeTestRule, testBlock)
