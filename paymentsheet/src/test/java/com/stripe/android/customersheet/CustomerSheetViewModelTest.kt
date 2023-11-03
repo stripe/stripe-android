@@ -1948,6 +1948,100 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When adding a us bank account and the account is retrieved, the primary button should say save`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                    selectedPaymentMethod = LpmRepository.hardCodedUsBankAccount,
+                    bankAccountResult = CollectBankAccountResultInternal.Completed(
+                        response = mock(),
+                    ),
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            val viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+        }
+    }
+
+    @Test
+    fun `When adding a us bank account and the account is cancelled, the primary button should say continue`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                    selectedPaymentMethod = LpmRepository.hardCodedUsBankAccount,
+                    bankAccountResult = null,
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnCollectBankAccountResult(
+                    CollectBankAccountResultInternal.Cancelled
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo(resolvableString(UiCoreR.string.stripe_continue_button_label))
+        }
+    }
+
+    @Test
+    fun `When adding us bank and primary button says save, it should stay as save`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                    selectedPaymentMethod = LpmRepository.hardCodedUsBankAccount,
+                    bankAccountResult = CollectBankAccountResultInternal.Completed(
+                        response = mock(),
+                    ),
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepository.HardcodedCard
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepository.hardCodedUsBankAccount
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     private suspend inline fun <R> ReceiveTurbine<*>.awaitViewState(): R {
         return awaitItem() as R
