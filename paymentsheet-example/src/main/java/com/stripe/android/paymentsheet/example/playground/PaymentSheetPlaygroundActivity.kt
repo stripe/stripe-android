@@ -51,6 +51,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_T
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import com.stripe.android.paymentsheet.rememberPaymentSheet
 import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
+import kotlinx.coroutines.flow.update
 
 internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     companion object {
@@ -121,9 +122,10 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             val status by viewModel.status.collectAsState()
             val context = LocalContext.current
             LaunchedEffect(status) {
-                if (!status.isNullOrEmpty()) {
-                    Toast.makeText(context, status, Toast.LENGTH_LONG).show()
+                if (!status?.message.isNullOrEmpty() && status?.hasBeenDisplayed == false) {
+                    Toast.makeText(context, status?.message, Toast.LENGTH_LONG).show()
                 }
+                viewModel.status.value = status?.copy(hasBeenDisplayed = true)
             }
         }
     }
@@ -239,6 +241,17 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         val flowControllerState by viewModel.flowControllerState.collectAsState()
         val localFlowControllerState = flowControllerState
+
+        LaunchedEffect(localFlowControllerState) {
+            if (localFlowControllerState?.shouldFetchPaymentOption == true) {
+                viewModel.flowControllerState.update { previousState ->
+                    previousState?.copy(
+                        selectedPaymentOption = flowController.getPaymentOption(),
+                        shouldFetchPaymentOption = false,
+                    )
+                }
+            }
+        }
 
         LaunchedEffect(localFlowControllerState?.addressDetails) {
             flowController.shippingDetails = localFlowControllerState?.addressDetails

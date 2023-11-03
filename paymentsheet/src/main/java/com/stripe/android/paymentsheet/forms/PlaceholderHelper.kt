@@ -5,8 +5,10 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.ui.core.elements.AddressSpec
+import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
+import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
@@ -81,7 +83,15 @@ internal object PlaceholderHelper {
             }
         )
 
-        return modifiedSpecs
+        return modifiedSpecs.sortedWith { o1, o2 ->
+            if (o1 is MandateTextSpec || o1 is CashAppPayMandateTextSpec) {
+                1
+            } else if (o2 is MandateTextSpec || o2 is CashAppPayMandateTextSpec) {
+                -1
+            } else {
+                0
+            }
+        }
     }
 
     @VisibleForTesting

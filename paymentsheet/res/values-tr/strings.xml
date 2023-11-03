@@ -6,6 +6,10 @@
   <string name="stripe_bank_account_ending_in">%s ile biten banka hesabını kaldır</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">%s içinde banka uygulamanızda ödemeyi onaylayarak satın almayı tamamlayın.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">Ödeme bilgileriniz kaydedilmeyecek.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Bu formu kapatmak istiyor musunuz?</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Bir hata oluştu. Bağlantınızı kontrol edip tekrar deneyin.</string>
   <!-- Text providing link to terms for ACH payments -->

@@ -61,6 +61,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.ui.SepaMandateContract
+import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
@@ -81,7 +83,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
 import org.mockito.kotlin.isNull
@@ -106,9 +107,7 @@ internal class DefaultFlowControllerTest {
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
 
     private val paymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory>()
-    private val paymentLauncher = mock<StripePaymentLauncher> {
-        on { authenticatorRegistry } doReturn mock()
-    }
+    private val paymentLauncher = mock<StripePaymentLauncher>()
     private val eventReporter = mock<EventReporter>()
 
     private val paymentOptionActivityLauncher =
@@ -123,6 +122,9 @@ internal class DefaultFlowControllerTest {
 
     private val linkActivityResultLauncher =
         mock<ActivityResultLauncher<LinkActivityContract.Args>>()
+
+    private val sepaMandateActivityLauncher =
+        mock<ActivityResultLauncher<SepaMandateContract.Args>>()
 
     private val linkPaymentLauncher = mock<LinkPaymentLauncher>()
 
@@ -182,12 +184,20 @@ internal class DefaultFlowControllerTest {
         whenever(
             activityResultRegistry.register(
                 any(),
+                any<SepaMandateContract>(),
+                any()
+            )
+        ).thenReturn(sepaMandateActivityLauncher)
+
+        whenever(
+            activityResultRegistry.register(
+                any(),
                 any<PaymentLauncherContract>(),
                 any()
             )
         ).thenReturn(mock())
 
-        whenever(paymentLauncherAssistedFactory.create(any(), any(), anyOrNull(), any()))
+        whenever(paymentLauncherAssistedFactory.create(any(), any(), anyOrNull(), any(), any()))
             .thenReturn(paymentLauncher)
 
         // set lifecycle to CREATED to trigger creation of payment launcher object within flowController.
@@ -798,6 +808,111 @@ internal class DefaultFlowControllerTest {
         verify(paymentLauncher).confirm(paramsCaptor.capture())
 
         assertThat(paramsCaptor.firstValue.toParamMap()["shipping"]).isNull()
+    }
+
+    @Test
+    fun `confirm() with default sepa saved payment method should show sepa mandate`() = runTest {
+        val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+        val flowController = createFlowController(
+            paymentSelection = paymentSelection,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+                    .paymentMethodTypes.plus("sepa_debit")
+            )
+        )
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
+                allowsDelayedPaymentMethods = true,
+            )
+        )
+
+        fakeIntentConfirmationInterceptor.enqueueConfirmStep(
+            confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = mock(),
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET
+            )
+        )
+
+        flowController.confirm()
+
+        verify(sepaMandateActivityLauncher).launch(any())
+
+        flowController.onSepaMandateResult(SepaMandateResult.Acknowledged)
+
+        verify(paymentLauncher).confirm(any<ConfirmPaymentIntentParams>())
+        flowController.onPaymentResult(PaymentResult.Completed)
+
+        verify(paymentResultCallback).onPaymentSheetResult(PaymentSheetResult.Completed)
+    }
+
+    @Test
+    fun `confirm() with default sepa saved payment method should cancel after show sepa mandate`() = runTest {
+        val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+        val flowController = createFlowController(
+            paymentSelection = paymentSelection,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+                    .paymentMethodTypes.plus("sepa_debit")
+            )
+        )
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
+                allowsDelayedPaymentMethods = true,
+            )
+        )
+
+        fakeIntentConfirmationInterceptor.enqueueConfirmStep(
+            confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = mock(),
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET
+            )
+        )
+
+        flowController.confirm()
+
+        verify(sepaMandateActivityLauncher).launch(any())
+
+        flowController.onSepaMandateResult(SepaMandateResult.Canceled)
+
+        verify(paymentLauncher, never()).confirm(any<ConfirmPaymentIntentParams>())
+
+        verify(paymentResultCallback).onPaymentSheetResult(PaymentSheetResult.Canceled)
+    }
+
+    @Test
+    fun `confirm() selecting sepa saved payment method`() = runTest {
+        val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+        val flowController = createFlowController(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+                    .paymentMethodTypes.plus("sepa_debit")
+            )
+        )
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
+                allowsDelayedPaymentMethods = true,
+            )
+        )
+
+        fakeIntentConfirmationInterceptor.enqueueConfirmStep(
+            confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = mock(),
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET
+            )
+        )
+
+        flowController.onPaymentOptionResult(PaymentOptionResult.Succeeded(paymentSelection))
+
+        flowController.confirm()
+
+        verify(sepaMandateActivityLauncher, never()).launch(any())
+
+        verify(paymentLauncher).confirm(any<ConfirmPaymentIntentParams>())
+        flowController.onPaymentResult(PaymentResult.Completed)
+        verify(paymentResultCallback).onPaymentSheetResult(PaymentSheetResult.Completed)
     }
 
     private fun verifyPaymentSelection(

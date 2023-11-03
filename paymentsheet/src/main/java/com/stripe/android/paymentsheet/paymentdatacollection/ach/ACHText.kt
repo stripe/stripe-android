@@ -12,8 +12,9 @@ internal object ACHText {
         context: Context,
         merchantName: String,
         isSaveForFutureUseSelected: Boolean,
+        isSetupFlow: Boolean,
     ): String {
-        val text = if (isSaveForFutureUseSelected) {
+        val text = if (isSaveForFutureUseSelected || isSetupFlow) {
             context.getString(R.string.stripe_paymentsheet_ach_save_mandate, merchantName)
         } else {
             context.getString(R.string.stripe_paymentsheet_ach_continue_mandate)

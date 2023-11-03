@@ -67,6 +67,8 @@ internal class Selectors(
         }
     )
 
+    val playgroundBuyButton = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))
+
     val addPaymentMethodButton = AddPaymentMethodButton(device)
 
     val selectBrowserPrompt = UiAutomatorText("Verify your payment", device = device)
@@ -82,6 +84,18 @@ internal class Selectors(
             device.wait(
                 Until.findObject(
                     By.textContains("test ${if (isSetup) "setup" else "payment"} page")
+                ),
+                HOOKS_PAGE_LOAD_TIMEOUT * 1000
+            )
+        ).isNotNull()
+        device.waitForIdle()
+    }
+
+    fun blockUntilUSBankAccountPageLoaded() {
+        assertThat(
+            device.wait(
+                Until.findObject(
+                    By.textContains("Agree and continue")
                 ),
                 HOOKS_PAGE_LOAD_TIMEOUT * 1000
             )

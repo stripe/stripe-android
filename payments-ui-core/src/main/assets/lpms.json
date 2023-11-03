@@ -158,6 +158,10 @@
             "api_value": "knab"
           },
           {
+            "display_text": "N26",
+            "api_value": "n26"
+          },
+          {
             "display_text": "Rabobank",
             "api_value": "rabobank"
           },
@@ -180,6 +184,10 @@
           {
             "display_text": "Van Lanschot",
             "api_value": "van_lanschot"
+          },
+          {
+            "display_text": "Yoursafe",
+            "api_value": "yoursafe"
           }
         ],
         "api_path": {
@@ -750,7 +758,14 @@
   {
     "type": "revolut_pay",
     "async": false,
-    "fields": [],
+    "selector_icon": {
+      "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-revolutpay_short@3x-47e4b480552b0cfd1fed66a5ba3be5d2.png",
+      "dark_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-revolutpay_short_dark@3x-ec3652df1f96643bd4f79d1c2b1661c6.png",
+      "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-revolutpay_short-f46613e58de99e61babba9695c855909.svg",
+      "dark_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-revolutpay_short_dark-1775e3eb78f72f625198c10961b0b00a.svg"
+    },
+    "fields": [
+    ],
     "next_action_spec": {
       "confirm_response_status_specs": {
         "requires_action": {

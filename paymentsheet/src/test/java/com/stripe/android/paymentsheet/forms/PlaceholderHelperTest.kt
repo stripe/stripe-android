@@ -6,7 +6,9 @@ import com.stripe.android.paymentsheet.forms.PlaceholderHelper.removeCorrespondi
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specForPlaceholderField
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
 import com.stripe.android.ui.core.elements.AddressSpec
+import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
@@ -459,6 +461,76 @@ class PlaceholderHelperTest {
             )
         ).isInstanceOf(
             AddressSpec::class.java
+        )
+    }
+
+    @Test
+    fun `Test mandate is moved to the end of the list`() {
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = false,
+        )
+
+        val exampleTextSpec = SimpleTextSpec(
+            apiPath = IdentifierSpec.Generic("dummy"),
+            label = StripeR.string.stripe_affirm_buy_now_pay_later,
+        )
+        val mandateTextSpec = MandateTextSpec(stringResId = 0)
+        val specs = specsForConfiguration(
+            configuration = billingDetailsCollectionConfiguration,
+            placeholderOverrideList = emptyList(),
+            requiresMandate = true,
+            specs = listOf(
+                exampleTextSpec,
+                mandateTextSpec,
+            ),
+        )
+
+        assertThat(specs).containsExactly(
+            exampleTextSpec,
+            NameSpec(),
+            EmailSpec(),
+            PhoneSpec(),
+            AddressSpec(),
+            mandateTextSpec
+        )
+    }
+
+    @Test
+    fun `Test cashapp mandate is moved to the end of the list`() {
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = false,
+        )
+
+        val exampleTextSpec = SimpleTextSpec(
+            apiPath = IdentifierSpec.Generic("dummy"),
+            label = StripeR.string.stripe_affirm_buy_now_pay_later,
+        )
+        val mandateTextSpec = CashAppPayMandateTextSpec()
+        val specs = specsForConfiguration(
+            configuration = billingDetailsCollectionConfiguration,
+            placeholderOverrideList = emptyList(),
+            requiresMandate = true,
+            specs = listOf(
+                exampleTextSpec,
+                mandateTextSpec,
+            ),
+        )
+
+        assertThat(specs).containsExactly(
+            exampleTextSpec,
+            NameSpec(),
+            EmailSpec(),
+            PhoneSpec(),
+            AddressSpec(),
+            mandateTextSpec
         )
     }
 

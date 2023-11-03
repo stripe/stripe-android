@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
@@ -33,7 +32,6 @@ import com.stripe.android.model.PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.StripeIntent.NextActionData
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -73,14 +71,12 @@ import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.robolectric.RobolectricTestRunner
@@ -88,7 +84,6 @@ import java.io.IOException
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.time.Duration
 
 @RunWith(RobolectricTestRunner::class)
@@ -126,11 +121,10 @@ internal class PaymentSheetViewModelTest {
 
     private val prefsRepository = FakePrefsRepository()
 
-    private val paymentLauncher = mock<StripePaymentLauncher> {
-        on { authenticatorRegistry } doReturn mock()
-    }
+    private val paymentLauncher = mock<StripePaymentLauncher>()
+
     private val paymentLauncherFactory = mock<StripePaymentLauncherAssistedFactory> {
-        on { create(any(), any(), anyOrNull(), any()) } doReturn paymentLauncher
+        on { create(any(), any(), anyOrNull(), any(), any()) } doReturn paymentLauncher
     }
     private val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
     private val googlePayLauncherFactory = mock<GooglePayPaymentMethodLauncherFactory> {
@@ -782,11 +776,12 @@ internal class PaymentSheetViewModelTest {
             PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
         )
 
-        assertThat(viewModel.notesText.value)
+        assertThat(viewModel.mandateText.value?.text)
             .isEqualTo(
                 "By continuing, you agree to authorize payments pursuant to " +
                     "<a href=\"https://stripe.com/ach-payments/authorization\">these terms</a>."
             )
+        assertThat(viewModel.mandateText.value?.showAbovePrimaryButton).isFalse()
 
         viewModel.updateSelection(
             PaymentSelection.New.GenericPaymentMethod(
@@ -799,15 +794,41 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        assertThat(viewModel.notesText.value)
-            .isEqualTo(null)
+        assertThat(viewModel.mandateText.value).isNull()
 
         viewModel.updateSelection(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
 
-        assertThat(viewModel.notesText.value)
-            .isEqualTo(null)
+        assertThat(viewModel.mandateText.value).isNull()
+    }
+
+    @Test
+    fun `updateSelection() posts mandate text when selected payment is sepa`() {
+        val viewModel = createViewModel()
+
+        viewModel.updateSelection(
+            PaymentSelection.Saved(SEPA_DEBIT_PAYMENT_METHOD)
+        )
+
+        assertThat(viewModel.mandateText.value?.text)
+            .isEqualTo(
+                "By providing your payment information and confirming this payment, you authorise (A) Merchant, Inc. " +
+                    "and Stripe, our payment service provider, to send instructions to your bank to debit your " +
+                    "account and (B) your bank to debit your account in accordance with those instructions. As part" +
+                    " of your rights, you are entitled to a refund from your bank under the terms and conditions of" +
+                    " your agreement with your bank. A refund must be claimed within 8 weeks starting from the date" +
+                    " on which your account was debited. Your rights are explained in a statement that you can " +
+                    "obtain from your bank. You agree to receive notifications for future debits up to 2 days before" +
+                    " they occur."
+            )
+        assertThat(viewModel.mandateText.value?.showAbovePrimaryButton).isTrue()
+
+        viewModel.updateSelection(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        assertThat(viewModel.mandateText.value).isNull()
     }
 
     @Test
@@ -1359,24 +1380,6 @@ internal class PaymentSheetViewModelTest {
                 deferredIntentConfirmationType = eq(deferredIntentConfirmationType),
             )
         }
-    }
-
-    @Test
-    fun `Invalidates authenticator when lifecycle owner is destroyed`() {
-        val lifecycleOwner = TestLifecycleOwner()
-        val viewModel = createViewModel()
-
-        viewModel.registerFromActivity(DummyActivityResultCaller(), lifecycleOwner)
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-
-        val argumentCaptor = argumentCaptor<Class<out NextActionData>>()
-
-        // unregisterAuthenticator should be called for each call to registerAuthenticator.
-        verify(paymentLauncher.authenticatorRegistry, times(2)).unregisterAuthenticator(argumentCaptor.capture())
-
-        val capturedArguments = argumentCaptor.allValues
-        assertEquals(NextActionData.UpiAwaitNotification::class.java, capturedArguments[0])
-        assertEquals(NextActionData.BlikAuthorize::class.java, capturedArguments[1])
     }
 
     @Test

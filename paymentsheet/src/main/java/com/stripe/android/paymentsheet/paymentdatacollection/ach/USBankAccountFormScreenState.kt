@@ -7,7 +7,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import kotlinx.parcelize.Parcelize
 
 internal sealed class USBankAccountFormScreenState(
-    @StringRes open val error: Int? = null
+    @StringRes open val error: Int? = null,
+    open val isProcessing: Boolean = false
 ) : Parcelable {
     abstract val primaryButtonText: String
     abstract val mandateText: String?
@@ -16,6 +17,7 @@ internal sealed class USBankAccountFormScreenState(
     data class BillingDetailsCollection(
         @StringRes override val error: Int? = null,
         override val primaryButtonText: String,
+        override val isProcessing: Boolean,
     ) : USBankAccountFormScreenState() {
 
         override val mandateText: String?

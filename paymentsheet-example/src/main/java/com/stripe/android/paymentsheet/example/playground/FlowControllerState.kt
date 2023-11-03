@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 internal data class FlowControllerState(
     val selectedPaymentOption: PaymentOption? = null,
     val addressDetails: AddressDetails? = null,
+    val shouldFetchPaymentOption: Boolean = true
 )
 
 internal fun FlowControllerState?.paymentMethodLabel(): String {

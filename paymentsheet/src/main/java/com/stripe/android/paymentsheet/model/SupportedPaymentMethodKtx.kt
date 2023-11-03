@@ -1,8 +1,11 @@
 package com.stripe.android.paymentsheet.model
 
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.paymentsheet.forms.PIRequirement
@@ -199,7 +202,8 @@ internal fun getSupportedSavedCustomerPMs(
 internal fun getPMsToAdd(
     stripeIntent: StripeIntent?,
     config: PaymentSheet.Configuration?,
-    lpmRepository: LpmRepository
+    lpmRepository: LpmRepository,
+    isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable()
 ) = stripeIntent?.paymentMethodTypes?.mapNotNull {
     lpmRepository.fromCode(it)
 }?.filter { supportedPaymentMethod ->
@@ -210,4 +214,7 @@ internal fun getPMsToAdd(
 }?.filterNot { supportedPaymentMethod ->
     stripeIntent.isLiveMode &&
         stripeIntent.unactivatedPaymentMethods.contains(supportedPaymentMethod.code)
+}?.filterNot { supportedPaymentMethod ->
+    !isFinancialConnectionsAvailable() &&
+        supportedPaymentMethod.code == PaymentMethod.Type.USBankAccount.code
 } ?: emptyList()

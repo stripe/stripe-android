@@ -6,6 +6,10 @@
   <string name="stripe_bank_account_ending_in">Ukloni bankovni račun koji završava na %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Potvrdite plaćanje u aplikaciji svoje banke unutar %s da biste dovršili kupnju.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">Vaši podaci o plaćanju neće biti spremljeni.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Želite li zatvoriti ovaj obrazac?</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Došlo je do pogreške. Provjerite vezu i pokušajte ponovno.</string>
   <!-- Text providing link to terms for ACH payments -->

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -16,10 +17,11 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
  * @param draftPaymentSelection the draft payment information before the customer has confirmed it.
  * @param onMandateTextChanged emitted when the mandate text has been updated, this updated text
  * should be displayed to the user.
- * @param onHandleUSBankAccount emitted when the payment selection has been updated. The
+ * @param onConfirmUSBankAccount emitted when the confirm button is pressed. The
  * payment method has not been created at this point. This is emitted after going through the ACH
  * flow but before confirming the account with a [StripeIntent]. Use this callback to attach the
  * account to a [StripeIntent].
+ * @param onCollectBankAccountResult emitted when the bank account has been collected by the FC SDK.
  * @param onUpdatePrimaryButtonUIState emitted when the [PrimaryButton.UIState] should be updated.
  * The caller should keep track of the current [PrimaryButton.UIState] and update the fields.
  * @param onUpdatePrimaryButtonState emitted when the [PrimaryButton.State] should be updated.
@@ -33,8 +35,9 @@ internal class USBankAccountFormArguments(
     val clientSecret: String?,
     val shippingDetails: AddressDetails?,
     val draftPaymentSelection: PaymentSelection?,
-    val onMandateTextChanged: (String?) -> Unit,
-    val onHandleUSBankAccount: (PaymentSelection.New.USBankAccount) -> Unit,
+    val onMandateTextChanged: (mandate: String?, showAbove: Boolean) -> Unit,
+    val onConfirmUSBankAccount: (PaymentSelection.New.USBankAccount) -> Unit,
+    val onCollectBankAccountResult: ((CollectBankAccountResultInternal) -> Unit)?,
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
     val onUpdatePrimaryButtonState: (PrimaryButton.State) -> Unit,
     val onError: (String?) -> Unit,

@@ -16,15 +16,17 @@ class PaymentSelectionTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
-    fun `Doesn't display a mandate for Link`() = runAllConfigurations { isSaveForFutureUseSelected ->
-        val link = PaymentSelection.Link
-        val result = link.mandateText(
-            context = context,
-            merchantName = "Merchant",
-            isSaveForFutureUseSelected = isSaveForFutureUseSelected,
-        )
-        assertThat(result).isNull()
-    }
+    fun `Doesn't display a mandate for Link`() =
+        runAllConfigurations { isSaveForFutureUseSelected ->
+            val link = PaymentSelection.Link
+            val result = link.mandateText(
+                context = context,
+                merchantName = "Merchant",
+                isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                isSetupFlow = false,
+            )
+            assertThat(result).isNull()
+        }
 
     @Test
     fun `Doesn't display a mandate for Google Pay`() =
@@ -34,6 +36,7 @@ class PaymentSelectionTest {
                 context = context,
                 merchantName = "Merchant",
                 isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                isSetupFlow = false,
             )
             assertThat(result).isNull()
         }
@@ -68,6 +71,7 @@ class PaymentSelectionTest {
                 context = context,
                 merchantName = "Merchant",
                 isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                isSetupFlow = false,
             )
 
             assertThat(result).isNull()
@@ -79,10 +83,23 @@ class PaymentSelectionTest {
             paymentMethod = PaymentMethodFactory.usBankAccount(),
         )
 
-        val result = newPaymentSelection.mandateText(
+        var result = newPaymentSelection.mandateText(
             context = context,
             merchantName = "Merchant",
             isSaveForFutureUseSelected = true,
+            isSetupFlow = false,
+        )
+
+        assertThat(result).isEqualTo(
+            "By saving your bank account for Merchant you agree to authorize payments pursuant " +
+                "to <a href=\"https://stripe.com/ach-payments/authorization\">these terms</a>."
+        )
+
+        result = newPaymentSelection.mandateText(
+            context = context,
+            merchantName = "Merchant",
+            isSaveForFutureUseSelected = false,
+            isSetupFlow = true,
         )
 
         assertThat(result).isEqualTo(
@@ -101,6 +118,50 @@ class PaymentSelectionTest {
             context = context,
             merchantName = "Merchant",
             isSaveForFutureUseSelected = false,
+            isSetupFlow = false,
+        )
+
+        assertThat(result).isEqualTo(
+            "By continuing, you agree to authorize payments pursuant to " +
+                "<a href=\"https://stripe.com/ach-payments/authorization\">these terms</a>."
+        )
+    }
+
+    @Test
+    fun `Displays the correct mandate for a sepa family PMs`() {
+        val paymentSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFactory.sepaDebit(),
+        )
+
+        val result = paymentSelection.mandateText(
+            context = context,
+            merchantName = "Merchant",
+            isSaveForFutureUseSelected = false,
+            isSetupFlow = false,
+        )
+
+        assertThat(result).isEqualTo(
+            "By providing your payment information and confirming this payment, you authorise (A) Merchant and" +
+                " Stripe, our payment service provider, to send instructions to your bank to debit your account and" +
+                " (B) your bank to debit your account in accordance with those instructions. As part of your rights," +
+                " you are entitled to a refund from your bank under the terms and conditions of your agreement with" +
+                " your bank. A refund must be claimed within 8 weeks starting from the date on which your account " +
+                "was debited. Your rights are explained in a statement that you can obtain from your bank. You agree" +
+                " to receive notifications for future debits up to 2 days before they occur."
+        )
+    }
+
+    @Test
+    fun `Displays the correct mandate for US Bank Account`() {
+        val paymentSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFactory.usBankAccount(),
+        )
+
+        val result = paymentSelection.mandateText(
+            context = context,
+            merchantName = "Merchant",
+            isSaveForFutureUseSelected = false,
+            isSetupFlow = false,
         )
 
         assertThat(result).isEqualTo(
@@ -120,9 +181,51 @@ class PaymentSelectionTest {
                 context = context,
                 merchantName = "Merchant",
                 isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                isSetupFlow = false,
             )
             assertThat(result).isNull()
         }
+
+    @Test
+    fun `showMandateAbovePrimaryButton is true for sepa family`() {
+        assertThat(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFactory.sepaDebit(),
+            ).showMandateAbovePrimaryButton
+        ).isTrue()
+    }
+
+    @Test
+    fun `showMandateAbovePrimaryButton is false for US Bank Account`() {
+        assertThat(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFactory.usBankAccount(),
+            ).showMandateAbovePrimaryButton
+        ).isFalse()
+    }
+
+    @Test
+    fun `requiresConfirmation is true for US Bank Account and Sepa Family`() {
+        assertThat(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFactory.usBankAccount(),
+            ).requiresConfirmation
+        ).isTrue()
+        assertThat(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFactory.sepaDebit(),
+            ).requiresConfirmation
+        ).isTrue()
+    }
+
+    @Test
+    fun `requiresConfirmation is false for cards`() {
+        assertThat(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFactory.card(),
+            ).requiresConfirmation
+        ).isFalse()
+    }
 
     private fun runAllConfigurations(block: (Boolean) -> Unit) {
         for (isSaveForFutureUseSelected in listOf(true, false)) {

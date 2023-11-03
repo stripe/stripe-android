@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -50,6 +51,7 @@ import com.stripe.android.identity.ui.SelfieWarmupScreen
 import com.stripe.android.identity.ui.UploadScreen
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun IdentityNavGraph(
@@ -65,6 +67,7 @@ internal fun IdentityNavGraph(
     onNavControllerCreated: (NavController) -> Unit
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
         onNavControllerCreated(navController)
     }
@@ -268,10 +271,7 @@ internal fun IdentityNavGraph(
                                 IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
                             )
                             navController.navigateTo(
-                                collectedDataParamType.toUploadDestination(
-                                    shouldShowTakePhoto = false,
-                                    shouldShowChoosePhoto = true
-                                )
+                                collectedDataParamType.toUploadDestination()
                             )
                         }
                     } else {
@@ -312,10 +312,7 @@ internal fun IdentityNavGraph(
                                 IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
                             )
                             navController.navigateTo(
-                                scanType.toUploadDestination(
-                                    shouldShowTakePhoto = true,
-                                    shouldShowChoosePhoto = !requireLiveCapture
-                                )
+                                scanType.toUploadDestination()
                             )
                         }
                     },
@@ -341,6 +338,17 @@ internal fun IdentityNavGraph(
                     identityViewModel = identityViewModel,
                     title = ErrorDestination.errorTitle(it),
                     message1 = ErrorDestination.errorContent(it),
+                    topButton = ErrorDestination.continueButtonContext(it)
+                        ?.let { (topButtonText, topButtonRequirement) ->
+                            ErrorScreenButton(buttonText = topButtonText) {
+                                coroutineScope.launch {
+                                    identityViewModel.postVerificationPageDataForForceConfirm(
+                                        requirementToForceConfirm = topButtonRequirement,
+                                        navController = navController
+                                    )
+                                }
+                            }
+                        },
                     bottomButton = ErrorScreenButton(
                         buttonText = ErrorDestination.backButtonText(it)
                     ) {
@@ -444,9 +452,7 @@ private fun DocumentUploadScreenContent(
             )
         } else {
             null
-        },
-        shouldShowTakePhoto = DocumentUploadDestination.shouldShowTakePhoto(backStackEntry),
-        shouldShowChoosePhoto = DocumentUploadDestination.shouldShowChoosePhoto(backStackEntry)
+        }
     )
 }
 

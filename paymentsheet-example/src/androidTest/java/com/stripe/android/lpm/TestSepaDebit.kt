@@ -1,7 +1,9 @@
 package com.stripe.android.lpm
 
 import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
@@ -34,11 +36,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters,
         ) {
-            rules.compose.onNodeWithText("IBAN").apply {
-                performTextInput(
-                    "DE89370400440532013000"
-                )
-            }
+            fillOutIban()
         }
     }
 
@@ -50,11 +48,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
             }
         ) {
-            rules.compose.onNodeWithText("IBAN").apply {
-                performTextInput(
-                    "DE89370400440532013000"
-                )
-            }
+            fillOutIban()
         }
     }
 
@@ -66,11 +60,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             }
         ) {
-            rules.compose.onNodeWithText("IBAN").apply {
-                performTextInput(
-                    "DE89370400440532013000"
-                )
-            }
+            fillOutIban()
         }
     }
 
@@ -79,11 +69,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
         testDriver.confirmCustom(
             testParameters = testParameters,
             populateCustomLpmFields = {
-                rules.compose.onNodeWithText("IBAN").apply {
-                    performTextInput(
-                        "DE89370400440532013000"
-                    )
-                }
+                fillOutIban()
             },
             verifyCustomLpmFields = {
                 rules.compose.onNodeWithText("IBAN").apply {
@@ -93,5 +79,62 @@ internal class TestSepaDebit : BasePlaygroundTest() {
                 }
             }
         )
+    }
+
+    @Test
+    fun testSepaDebitDefaultReturningUserFlowWithoutShowingFlowController() {
+        val testParameters = testParameters.copyPlaygroundSettings { settings ->
+            settings[AutomaticPaymentMethodsSettingsDefinition] = true
+            settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
+        }
+
+        // Create the payment method and set it as default by going through the whole flow.
+        val playgroundState = testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters,
+        ) {
+            fillOutIban()
+        }
+
+        testDriver.confirmCustomWithDefaultSavedPaymentMethod(
+            customerId = playgroundState?.customerConfig?.id,
+            testParameters = testParameters,
+            afterBuyAction = {
+                rules.compose.onNode(hasTestTag("SEPA_MANDATE_CONTINUE_BUTTON"))
+                    .performClick()
+            }
+        )
+    }
+
+    @Test
+    fun testSepaDebitDefaultReturningUserFlowWithShowingFlowController() {
+        val testParameters = testParameters.copyPlaygroundSettings { settings ->
+            settings[AutomaticPaymentMethodsSettingsDefinition] = true
+            settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
+        }
+
+        // Create the payment method and set it as default by going through the whole flow.
+        val playgroundState = testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters,
+        ) {
+            fillOutIban()
+        }
+
+        testDriver.confirmCustomWithDefaultSavedPaymentMethod(
+            customerId = playgroundState?.customerConfig?.id,
+            testParameters = testParameters,
+            beforeBuyAction = { selectors ->
+                selectors.multiStepSelect.click()
+                selectors.paymentSelection.click()
+                selectors.continueButton.click()
+            }
+        )
+    }
+
+    private fun fillOutIban() {
+        rules.compose.onNodeWithText("IBAN").apply {
+            performTextInput(
+                "DE89370400440532013000"
+            )
+        }
     }
 }

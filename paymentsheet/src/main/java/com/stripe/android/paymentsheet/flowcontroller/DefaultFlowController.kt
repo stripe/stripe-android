@@ -24,6 +24,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -42,14 +43,14 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
-import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.intercept
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.ui.SepaMandateContract
+import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.utils.AnimationConstants
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -88,6 +89,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val googlePayActivityLauncher:
         ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>
+    private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
 
     /**
      * [FlowControllerComponent] is hold to inject into [Activity]s and created
@@ -129,10 +131,16 @@ internal class DefaultFlowController @Inject internal constructor(
             ::onGooglePayResult
         )
 
+        sepaMandateActivityLauncher = activityResultRegistryOwner.register(
+            SepaMandateContract(),
+            ::onSepaMandateResult,
+        )
+
         val activityResultLaunchers = setOf(
             paymentLauncherActivityResultLauncher,
             paymentOptionActivityLauncher,
             googlePayActivityLauncher,
+            sepaMandateActivityLauncher,
         )
 
         linkLauncher.register(
@@ -148,14 +156,12 @@ internal class DefaultFlowController @Inject internal constructor(
                         stripeAccountId = { lazyPaymentConfiguration.get().stripeAccountId },
                         statusBarColor = statusBarColor(),
                         hostActivityLauncher = paymentLauncherActivityResultLauncher,
-                    ).also {
-                        it.registerPollingAuthenticator()
-                    }
+                        includePaymentSheetAuthenticators = true,
+                    )
                 }
 
                 override fun onDestroy(owner: LifecycleOwner) {
                     activityResultLaunchers.forEach { it.unregister() }
-                    paymentLauncher?.unregisterPollingAuthenticator()
                     paymentLauncher = null
                     linkLauncher.unregister()
                 }
@@ -269,8 +275,23 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
             is PaymentSelection.New,
-            is PaymentSelection.Saved,
             null -> confirmPaymentSelection(paymentSelection, state)
+            is PaymentSelection.Saved -> {
+                if (paymentSelection.paymentMethod.type == PaymentMethod.Type.SepaDebit &&
+                    viewModel.paymentSelection?.hasAcknowledgedSepaMandate == false
+                ) {
+                    // We're legally required to show the customer the SEPA mandate before every payment/setup.
+                    // In the edge case where the customer never opened the sheet, and thus never saw the mandate,
+                    // we present the mandate directly.
+                    sepaMandateActivityLauncher.launch(
+                        SepaMandateContract.Args(
+                            merchantName = state.config?.merchantDisplayName ?: ""
+                        )
+                    )
+                } else {
+                    confirmPaymentSelection(paymentSelection, state)
+                }
+            }
         }
     }
 
@@ -450,6 +471,7 @@ internal class DefaultFlowController @Inject internal constructor(
         when (paymentOptionResult) {
             is PaymentOptionResult.Succeeded -> {
                 val paymentSelection = paymentOptionResult.paymentSelection
+                paymentSelection.hasAcknowledgedSepaMandate = true
                 viewModel.paymentSelection = paymentSelection
                 paymentOptionCallback.onPaymentOption(
                     paymentOptionFactory.create(
@@ -484,6 +506,18 @@ internal class DefaultFlowController @Inject internal constructor(
             paymentResultCallback.onPaymentSheetResult(
                 paymentResult.convertToPaymentSheetResult()
             )
+        }
+    }
+
+    internal fun onSepaMandateResult(sepaMandateResult: SepaMandateResult) {
+        when (sepaMandateResult) {
+            SepaMandateResult.Acknowledged -> {
+                viewModel.paymentSelection?.hasAcknowledgedSepaMandate = true
+                confirm()
+            }
+            SepaMandateResult.Canceled -> {
+                paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Canceled)
+            }
         }
     }
 

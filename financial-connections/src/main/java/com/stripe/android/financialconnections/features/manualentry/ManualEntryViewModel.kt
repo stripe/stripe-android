@@ -7,13 +7,13 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate.EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
@@ -88,7 +88,7 @@ internal class ManualEntryViewModel @Inject constructor(
             onSuccess = { payload ->
                 if (payload.customManualEntry) {
                     nativeAuthFlowCoordinator().emit(
-                        Terminate(
+                        Complete(
                             USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY
                         )
                     )
@@ -98,8 +98,12 @@ internal class ManualEntryViewModel @Inject constructor(
         onAsync(
             ManualEntryState::linkPaymentAccount,
             onFail = {
-                logger.error("Error linking payment account", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(PANE, it))
+                eventTracker.logError(
+                    extraMessage = "Error linking payment account",
+                    error = it,
+                    logger = logger,
+                    pane = PANE
+                )
             },
         )
     }

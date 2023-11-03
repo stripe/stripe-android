@@ -44,6 +44,7 @@ internal fun PaymentOptions(
     isProcessing: Boolean,
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
+    onModifyItem: (PaymentMethod) -> Unit,
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
     scrollState: LazyListState = rememberLazyListState(),
@@ -72,6 +73,7 @@ internal fun PaymentOptions(
                     onAddCardPressed = onAddCardPressed,
                     onItemSelected = onItemSelected,
                     onItemRemoved = onItemRemoved,
+                    onModifyItem = onModifyItem,
                     modifier = Modifier
                         .semantics { testTagsAsResourceId = true }
                         .testTag(item.viewType.name)
@@ -113,6 +115,7 @@ private fun PaymentOptionsPreview() {
             isProcessing = false,
             onAddCardPressed = { },
             onItemSelected = { },
+            onModifyItem = { },
             onItemRemoved = { },
         )
     }
@@ -136,6 +139,7 @@ private fun PaymentOption(
     isSelected: Boolean,
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
+    onModifyItem: (PaymentMethod) -> Unit,
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -172,8 +176,10 @@ private fun PaymentOption(
                 width = width,
                 isEnabled = isEnabled,
                 isEditing = isEditing,
+                isModifiable = item.isModifiable,
                 isSelected = isSelected,
                 onItemSelected = onItemSelected,
+                onModifyItem = onModifyItem,
                 onItemRemoved = onItemRemoved,
                 modifier = modifier,
             )
@@ -196,7 +202,7 @@ private fun AddCard(
 
     PaymentOptionUi(
         viewWidth = width,
-        isEditing = false,
+        editState = PaymentOptionEditState.None,
         isSelected = false,
         isEnabled = isEnabled,
         labelText = stringResource(R.string.stripe_paymentsheet_add_payment_method_button_label),
@@ -217,7 +223,7 @@ private fun GooglePay(
 ) {
     PaymentOptionUi(
         viewWidth = width,
-        isEditing = false,
+        editState = PaymentOptionEditState.None,
         isSelected = isSelected,
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_google_pay_mark,
@@ -247,7 +253,7 @@ private fun Link(
 
     PaymentOptionUi(
         viewWidth = width,
-        isEditing = false,
+        editState = PaymentOptionEditState.None,
         isSelected = isSelected,
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_link_mark,
@@ -265,8 +271,10 @@ private fun SavedPaymentMethod(
     width: Dp,
     isEnabled: Boolean,
     isEditing: Boolean,
+    isModifiable: Boolean,
     isSelected: Boolean,
     onItemSelected: (PaymentSelection?) -> Unit,
+    onModifyItem: (PaymentMethod) -> Unit,
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -281,14 +289,20 @@ private fun SavedPaymentMethod(
 
     PaymentOptionUi(
         viewWidth = width,
-        isEditing = isEditing,
+        editState = when {
+            isEditing && isModifiable -> PaymentOptionEditState.Modifiable
+            isEditing -> PaymentOptionEditState.Removable
+            else -> PaymentOptionEditState.None
+        },
         isSelected = isSelected,
         isEnabled = isEnabled,
-        iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
+        iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(),
         labelIcon = labelIcon,
         labelText = labelText,
         removePmDialogTitle = removeTitle,
         description = paymentMethod.getDescription(context.resources),
+        onModifyListener = { onModifyItem(paymentMethod.paymentMethod) },
+        onModifyAccessibilityDescription = paymentMethod.getModifyDescription(context.resources),
         onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },
         onRemoveAccessibilityDescription = paymentMethod.getRemoveDescription(context.resources),
         onItemSelectedListener = { onItemSelected(paymentMethod.toPaymentSelection()) },

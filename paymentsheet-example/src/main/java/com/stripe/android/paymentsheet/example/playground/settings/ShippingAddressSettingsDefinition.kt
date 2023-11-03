@@ -5,6 +5,8 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
 internal object ShippingAddressSettingsDefinition : PlaygroundSettingDefinition<AddressDetails?> {
+    override val defaultValue: AddressDetails? = null
+
     override fun configure(
         value: AddressDetails?,
         configurationBuilder: PaymentSheet.Configuration.Builder,

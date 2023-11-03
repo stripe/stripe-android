@@ -6,6 +6,7 @@ sealed class CustomerSheetPlaygroundViewAction {
     object ToggleExistingCustomer : CustomerSheetPlaygroundViewAction()
     object ToggleUseDefaultBillingAddress : CustomerSheetPlaygroundViewAction()
     object ToggleAttachDefaultBillingAddress : CustomerSheetPlaygroundViewAction()
+    object ToggleAchEnabled : CustomerSheetPlaygroundViewAction()
     data class UpdateBillingNameCollection(val value: String) : CustomerSheetPlaygroundViewAction()
     data class UpdateBillingEmailCollection(val value: String) : CustomerSheetPlaygroundViewAction()
     data class UpdateBillingPhoneCollection(val value: String) : CustomerSheetPlaygroundViewAction()

@@ -1,18 +1,20 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,9 +26,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.themeadapter.material.MdcTheme
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.databinding.StripeCardBrandViewBinding
@@ -34,9 +37,15 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
+import com.stripe.android.utils.AppCompatOrMdcTheme
 import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.parcelize.Parcelize
 import kotlin.properties.Delegates
+import com.stripe.android.uicore.R as StripeUiCoreR
+
+internal const val CardBrandDropdownTestTag = "CardBrandDropdownTestTag"
 
 internal class CardBrandView @JvmOverloads constructor(
     context: Context,
@@ -50,26 +59,37 @@ internal class CardBrandView @JvmOverloads constructor(
     private val iconView = viewBinding.icon
     private val progressView = viewBinding.progress
 
-    private val isCbcEligibleFlow = MutableStateFlow(false)
-    private val isLoadingFlow = MutableStateFlow(false)
-    private val brandFlow = MutableStateFlow(Unknown)
-    private val userSelectedBrandFlow = MutableStateFlow<CardBrand?>(null)
-    private val possibleBrandsFlow = MutableStateFlow(emptyList<CardBrand>())
-    private val merchantPreferredNetworksFlow = MutableStateFlow(emptyList<CardBrand>())
-    private val shouldShowCvcFlow = MutableStateFlow(false)
-    private val shouldShowErrorIconFlow = MutableStateFlow(false)
-    private val tintColorFlow = MutableStateFlow(0)
+    @Parcelize
+    internal data class State(
+        val isCbcEligible: Boolean = false,
+        val isLoading: Boolean = false,
+        val brand: CardBrand = Unknown,
+        val userSelectedBrand: CardBrand? = null,
+        val possibleBrands: List<CardBrand> = emptyList(),
+        val merchantPreferredNetworks: List<CardBrand> = emptyList(),
+        val shouldShowCvc: Boolean = false,
+        val shouldShowErrorIcon: Boolean = false,
+        val tintColor: Int = 0,
+    ) : Parcelable
+
+    private val stateFlow = MutableStateFlow(State())
+
+    private var state: State
+        get() = stateFlow.value
+        set(value) {
+            stateFlow.value = value
+        }
 
     var isCbcEligible: Boolean
-        get() = isCbcEligibleFlow.value
+        get() = state.isCbcEligible
         set(value) {
-            isCbcEligibleFlow.value = value
+            stateFlow.update { it.copy(isCbcEligible = value) }
         }
 
     var isLoading: Boolean by Delegates.observable(
         false
     ) { _, wasLoading, isLoading ->
-        isLoadingFlow.value = isLoading
+        stateFlow.update { it.copy(isLoading = isLoading) }
 
         if (wasLoading != isLoading) {
             if (isLoading) {
@@ -81,39 +101,39 @@ internal class CardBrandView @JvmOverloads constructor(
     }
 
     var brand: CardBrand
-        get() = brandFlow.value
+        get() = state.brand
         set(value) {
-            brandFlow.value = value
+            stateFlow.update { it.copy(brand = value) }
         }
 
     var possibleBrands: List<CardBrand>
-        get() = possibleBrandsFlow.value
+        get() = state.possibleBrands
         set(value) {
-            possibleBrandsFlow.value = value
+            stateFlow.update { it.copy(possibleBrands = value) }
         }
 
     var merchantPreferredNetworks: List<CardBrand>
-        get() = merchantPreferredNetworksFlow.value
+        get() = state.merchantPreferredNetworks
         set(value) {
-            merchantPreferredNetworksFlow.value = value
+            stateFlow.update { it.copy(merchantPreferredNetworks = value) }
         }
 
     var shouldShowCvc: Boolean
-        get() = shouldShowCvcFlow.value
+        get() = state.shouldShowCvc
         set(value) {
-            shouldShowCvcFlow.value = value
+            stateFlow.update { it.copy(shouldShowCvc = value) }
         }
 
     var shouldShowErrorIcon: Boolean
-        get() = shouldShowErrorIconFlow.value
+        get() = state.shouldShowErrorIcon
         set(value) {
-            shouldShowErrorIconFlow.value = value
+            stateFlow.update { it.copy(shouldShowErrorIcon = value) }
         }
 
     internal var tintColorInt: Int
-        get() = tintColorFlow.value
+        get() = state.tintColor
         set(value) {
-            tintColorFlow.value = value
+            stateFlow.update { it.copy(tintColor = value) }
         }
 
     init {
@@ -121,29 +141,26 @@ internal class CardBrandView @JvmOverloads constructor(
         isFocusable = false
 
         iconView.setContent {
-            MdcTheme {
-                val isCbcEligible by isCbcEligibleFlow.collectAsState()
-                val isLoading by isLoadingFlow.collectAsState()
-                val currentBrand by brandFlow.collectAsState()
-                val userSelectedBrand by userSelectedBrandFlow.collectAsState()
-                val possibleBrands by possibleBrandsFlow.collectAsState()
-                val merchantPreferredBrands by merchantPreferredNetworksFlow.collectAsState()
-                val shouldShowCvc by shouldShowCvcFlow.collectAsState()
-                val shouldShowErrorIcon by shouldShowErrorIconFlow.collectAsState()
-                val tintColorInt by tintColorFlow.collectAsState()
+            AppCompatOrMdcTheme {
+                val state by stateFlow.collectAsState()
 
-                LaunchedEffect(userSelectedBrand, possibleBrands, merchantPreferredBrands) {
-                    determineCardBrandToDisplay(userSelectedBrand, possibleBrands, merchantPreferredBrands)
+                LaunchedEffect(state) {
+                    determineCardBrandToDisplay(
+                        userSelectedBrand = state.userSelectedBrand,
+                        autoDeterminedBrand = state.brand,
+                        possibleBrands = state.possibleBrands,
+                        merchantPreferredBrands = state.merchantPreferredNetworks,
+                    )
                 }
 
                 CardBrand(
-                    isLoading = isLoading,
-                    currentBrand = currentBrand,
-                    possibleBrands = possibleBrands,
-                    shouldShowCvc = shouldShowCvc,
-                    shouldShowErrorIcon = shouldShowErrorIcon,
-                    tintColorInt = tintColorInt,
-                    isCbcEligible = isCbcEligible,
+                    isLoading = state.isLoading,
+                    currentBrand = state.brand,
+                    possibleBrands = state.possibleBrands,
+                    shouldShowCvc = state.shouldShowCvc,
+                    shouldShowErrorIcon = state.shouldShowErrorIcon,
+                    tintColorInt = state.tintColor,
+                    isCbcEligible = state.isCbcEligible,
                     onBrandSelected = this::handleBrandSelected,
                 )
             }
@@ -159,16 +176,38 @@ internal class CardBrandView @JvmOverloads constructor(
     }
 
     private fun handleBrandSelected(brand: CardBrand?) {
-        userSelectedBrandFlow.value = brand ?: Unknown
+        stateFlow.update { it.copy(userSelectedBrand = brand) }
     }
 
     private fun determineCardBrandToDisplay(
-        currentBrand: CardBrand?,
+        userSelectedBrand: CardBrand?,
+        autoDeterminedBrand: CardBrand,
         possibleBrands: List<CardBrand>,
         merchantPreferredBrands: List<CardBrand>,
     ) {
-        brand = selectCardBrandToDisplay(currentBrand, possibleBrands, merchantPreferredBrands)
+        brand = if (possibleBrands.size > 1) {
+            selectCardBrandToDisplay(userSelectedBrand, possibleBrands, merchantPreferredBrands)
+        } else {
+            autoDeterminedBrand
+        }
     }
+
+    override fun onSaveInstanceState(): Parcelable {
+        val superState = super.onSaveInstanceState()
+        return SavedState(superState, state)
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        val savedState = state as? SavedState
+        this.state = savedState?.state ?: State()
+        super.onRestoreInstanceState(savedState?.superState ?: state)
+    }
+
+    @Parcelize
+    internal data class SavedState(
+        val superSavedState: Parcelable?,
+        val state: State,
+    ) : BaseSavedState(superSavedState), Parcelable
 }
 
 @Composable
@@ -203,15 +242,22 @@ private fun CardBrand(
         }
     }
 
-    val showDropdown = remember(possibleBrands) { isCbcEligible && possibleBrands.size > 1 }
+    val showDropdown = remember(possibleBrands, shouldShowCvc, shouldShowErrorIcon) {
+        isCbcEligible && possibleBrands.size > 1 && !shouldShowCvc && !shouldShowErrorIcon
+    }
 
     Box(modifier) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable(enabled = showDropdown) {
-                expanded = true
-            },
+            modifier = Modifier
+                .clickable(enabled = showDropdown) { expanded = true }
+                .testTag(CardBrandDropdownTestTag),
         ) {
+            val dropdownIconAlpha by animateFloatAsState(
+                targetValue = if (showDropdown) ContentAlpha.medium else 0f,
+                label = "CbcDropdownIconAlpha",
+            )
+
             Image(
                 painter = painterResource(icon),
                 colorFilter = tint?.let { ColorFilter.tint(it) },
@@ -219,14 +265,15 @@ private fun CardBrand(
                 modifier = Modifier.requiredSize(width = 32.dp, height = 21.dp),
             )
 
-            if (showDropdown) {
-                Image(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = null,
-                    alpha = ContentAlpha.disabled,
-                    modifier = Modifier.padding(end = 4.dp),
-                )
-            }
+            Spacer(modifier = Modifier.requiredWidth(1.dp))
+
+            Image(
+                painter = painterResource(StripeUiCoreR.drawable.stripe_ic_chevron_down),
+                contentDescription = null,
+                modifier = Modifier
+                    .requiredSize(8.dp)
+                    .graphicsLayer { alpha = dropdownIconAlpha },
+            )
         }
 
         if (showDropdown) {
@@ -252,39 +299,30 @@ private fun CardBrandChoiceDropdown(
     onBrandSelected: (CardBrand?) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val noSelection = CardBrandChoice(
-        label = resolvableString(id = R.string.stripe_card_brand_choice_no_selection),
-        icon = Unknown.icon
-    )
-
-    val allPossibleBrands = listOf(Unknown) + brands
-    val choices = allPossibleBrands.map { brand ->
-        brand.toChoice(noSelection)
-    }
+    val choices = brands.map { it.toChoice() }
 
     SingleChoiceDropdown(
         title = resolvableString(id = R.string.stripe_card_brand_choice_selection_header),
         expanded = expanded,
-        currentChoice = currentBrand.toChoice(noSelection),
+        currentChoice = currentBrand.takeIf { it != Unknown }?.toChoice(),
         choices = choices,
+        headerTextColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
+        optionTextColor = MaterialTheme.colors.onSurface,
         onChoiceSelected = { choice ->
-            when (val choiceIndex = choices.indexOf(choice)) {
-                -1 -> Unit
-                0 -> onBrandSelected(null)
-                else -> onBrandSelected(allPossibleBrands[choiceIndex])
+            val choiceIndex = choices.indexOf(choice)
+            val brand = brands.getOrNull(choiceIndex)
+
+            if (brand != null) {
+                onBrandSelected(brand)
             }
         },
         onDismiss = onDismiss,
     )
 }
 
-private fun CardBrand.toChoice(noSelection: CardBrandChoice): CardBrandChoice {
-    return if (this == Unknown) {
-        noSelection
-    } else {
-        CardBrandChoice(
-            label = resolvableString(displayName),
-            icon = icon
-        )
-    }
+private fun CardBrand.toChoice(): CardBrandChoice {
+    return CardBrandChoice(
+        label = resolvableString(displayName),
+        icon = icon
+    )
 }

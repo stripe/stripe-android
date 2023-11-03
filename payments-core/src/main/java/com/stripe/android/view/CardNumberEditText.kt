@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.os.Build
+import android.os.Parcelable
 import android.text.Editable
 import android.text.InputFilter
 import android.util.AttributeSet
@@ -27,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
 import androidx.appcompat.R as AppCompatR
 
@@ -38,11 +40,9 @@ class CardNumberEditText internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = AppCompatR.attr.editTextStyle,
-
-    // TODO(mshafrir-stripe): make immutable after `CardWidgetViewModel` is integrated in `CardWidget` subclasses
+    uiContext: CoroutineContext,
     @get:VisibleForTesting
     var workContext: CoroutineContext,
-
     private val cardAccountRangeRepository: CardAccountRangeRepository,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
@@ -59,6 +59,7 @@ class CardNumberEditText internal constructor(
         context,
         attrs,
         defStyleAttr,
+        Dispatchers.Main,
         Dispatchers.IO,
         { PaymentConfiguration.getInstance(context).publishableKey }
     )
@@ -67,12 +68,14 @@ class CardNumberEditText internal constructor(
         context: Context,
         attrs: AttributeSet?,
         defStyleAttr: Int,
+        uiContext: CoroutineContext,
         workContext: CoroutineContext,
         publishableKeySupplier: () -> String
     ) : this(
         context,
         attrs,
         defStyleAttr,
+        uiContext,
         workContext,
         DefaultCardAccountRangeRepositoryFactory(context).create(),
         DefaultStaticCardAccountRanges(),
@@ -161,6 +164,7 @@ class CardNumberEditText internal constructor(
     @VisibleForTesting
     val accountRangeService = CardAccountRangeService(
         cardAccountRangeRepository = cardAccountRangeRepository,
+        uiContext = uiContext,
         workContext = workContext,
         staticCardAccountRanges = staticCardAccountRanges,
         isCbcEligible = { isCbcEligible },
@@ -299,6 +303,23 @@ class CardNumberEditText internal constructor(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.CardMetadataLoadedTooSlow)
         )
     }
+
+    override fun onSaveInstanceState(): Parcelable {
+        val superState = super.onSaveInstanceState()
+        return SavedState(superState, isCbcEligible)
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        val savedState = state as? SavedState
+        this.isCbcEligible = savedState?.isCbcEligible ?: false
+        super.onRestoreInstanceState(savedState?.superState ?: state)
+    }
+
+    @Parcelize
+    internal data class SavedState(
+        val superSavedState: Parcelable?,
+        val isCbcEligible: Boolean,
+    ) : BaseSavedState(superSavedState), Parcelable
 
     private inner class CardNumberTextWatcher : StripeTextWatcher() {
         private var latestChangeStart: Int = 0

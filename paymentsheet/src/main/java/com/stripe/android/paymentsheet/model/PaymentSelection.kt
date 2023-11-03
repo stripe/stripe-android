@@ -16,8 +16,11 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal sealed class PaymentSelection : Parcelable {
+
+    var hasAcknowledgedSepaMandate: Boolean = false
 
     abstract val requiresConfirmation: Boolean
 
@@ -25,6 +28,7 @@ internal sealed class PaymentSelection : Parcelable {
         context: Context,
         merchantName: String,
         isSaveForFutureUseSelected: Boolean,
+        isSetupFlow: Boolean,
     ): String?
 
     @Parcelize
@@ -37,6 +41,7 @@ internal sealed class PaymentSelection : Parcelable {
             context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
+            isSetupFlow: Boolean,
         ): String? {
             return null
         }
@@ -52,6 +57,7 @@ internal sealed class PaymentSelection : Parcelable {
             context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
+            isSetupFlow: Boolean,
         ): String? {
             return null
         }
@@ -67,18 +73,36 @@ internal sealed class PaymentSelection : Parcelable {
             GooglePay(PaymentSelection.GooglePay), Link(PaymentSelection.Link)
         }
 
+        val showMandateAbovePrimaryButton: Boolean
+            get() {
+                return paymentMethod.type == PaymentMethod.Type.SepaDebit
+            }
+
         override val requiresConfirmation: Boolean
-            get() = paymentMethod.type == USBankAccount
+            get() = paymentMethod.type == USBankAccount ||
+                paymentMethod.type == PaymentMethod.Type.SepaDebit
 
         override fun mandateText(
             context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
+            isSetupFlow: Boolean,
         ): String? {
-            return if (paymentMethod.type == USBankAccount) {
-                ACHText.getContinueMandateText(context, merchantName, isSaveForFutureUseSelected)
-            } else {
-                null
+            return when (paymentMethod.type) {
+                USBankAccount -> {
+                    ACHText.getContinueMandateText(
+                        context = context,
+                        merchantName = merchantName,
+                        isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                        isSetupFlow = isSetupFlow,
+                    )
+                }
+                PaymentMethod.Type.SepaDebit -> {
+                    context.getString(StripeUiCoreR.string.stripe_sepa_mandate, merchantName)
+                }
+                else -> {
+                    null
+                }
             }
         }
     }
@@ -102,6 +126,7 @@ internal sealed class PaymentSelection : Parcelable {
             context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
+            isSetupFlow: Boolean,
         ): String? {
             return null
         }
@@ -127,6 +152,15 @@ internal sealed class PaymentSelection : Parcelable {
             override val customerRequestedSave: CustomerRequestedSave,
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         ) : New() {
+
+            override fun mandateText(
+                context: Context,
+                merchantName: String,
+                isSaveForFutureUseSelected: Boolean,
+                isSetupFlow: Boolean,
+            ): String? {
+                return screenState.mandateText
+            }
 
             @Parcelize
             data class Input(
@@ -160,8 +194,10 @@ internal sealed class PaymentSelection : Parcelable {
             val label = when (paymentDetails) {
                 is ConsumerPaymentDetails.Card ->
                     "····${paymentDetails.last4}"
+
                 is ConsumerPaymentDetails.BankAccount ->
                     "····${paymentDetails.last4}"
+
                 is ConsumerPaymentDetails.Passthrough ->
                     "····${paymentDetails.last4}"
             }

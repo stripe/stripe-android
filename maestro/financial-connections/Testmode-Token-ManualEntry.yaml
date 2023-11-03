@@ -1,18 +1,15 @@
 appId: com.stripe.android.financialconnections.example
+tags:
+  - all
+  - edge
+  - testmode-data
 ---
-- launchApp
-# Android specific: Navigate to example
-- startRecording: /tmp/test_results/testmode-token_manualentry
-- tapOn: "Playground"
+- startRecording: ${'/tmp/test_results/testmode-token_manualentry-' + new Date().getTime()}
+- clearState
+- openLink: stripeconnectionsexample://playground?flow=Token&financial_connections_override_native=native&merchant=testmode
 - tapOn:
-    id: "Native_checkbox"
-- tapOn: "Mode_Dropdown_Icon"
-- tapOn:
-    id: "Test_checkbox"
-- tapOn:
-    id: "Token_checkbox"
-- tapOn: "Connect Accounts!"
-# Common: web AuthFlow - connect OAuth institution
+    id: "connect_accounts"
+# Wait until the consent button is visible
 - extendedWaitUntil:
     visible:
       id: "consent_cta"

@@ -29,12 +29,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
 
 internal sealed class CardNumberController : TextFieldController, SectionFieldErrorController {
     abstract val cardBrandFlow: Flow<CardBrand>
+
+    abstract val selectedCardBrandFlow: Flow<CardBrand>
 
     abstract val cardScanEnabled: Boolean
 
@@ -49,9 +52,14 @@ internal sealed class CardNumberController : TextFieldController, SectionFieldEr
     }
 }
 
-internal class DefaultCardNumberController constructor(
+/*
+ * TODO(samer-stripe): There is a lot of merging of card brand logic with `AccountRangeService` &
+ *  `CardBrand.getCardBrands`. Look into merging Account Service and Card Brand logic.
+ */
+internal class DefaultCardNumberController(
     private val cardTextFieldConfig: CardNumberConfig,
     cardAccountRangeRepository: CardAccountRangeRepository,
+    uiContext: CoroutineContext,
     workContext: CoroutineContext,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     initialValue: String?,
@@ -66,6 +74,7 @@ internal class DefaultCardNumberController constructor(
     ) : this(
         cardTextFieldConfig,
         DefaultCardAccountRangeRepositoryFactory(context).create(),
+        Dispatchers.Main,
         Dispatchers.IO,
         initialValue = initialValue,
         cardBrandChoiceConfig = cardBrandChoiceConfig,
@@ -89,12 +98,40 @@ internal class DefaultCardNumberController constructor(
 
     private val isEligibleForCardBrandChoice = cardBrandChoiceConfig is CardBrandChoiceConfig.Eligible
     private val brandChoices = MutableStateFlow<List<CardBrand>>(listOf())
-    private val chosenBrand = MutableStateFlow(
+
+    private val preferredBrands = when (cardBrandChoiceConfig) {
+        is CardBrandChoiceConfig.Eligible -> cardBrandChoiceConfig.preferredBrands
+        is CardBrandChoiceConfig.Ineligible -> listOf()
+    }
+
+    /*
+     * This flow is keeping track of whatever brand the user had selected from the dropdown menu
+     * or from their most recent selection through `initialBrand` regardless of whether their
+     * card number has changed.
+     *
+     * This will allow us re-reference the previously selected choice if the user changes the card
+     * number.
+     */
+    private val mostRecentUserSelectedBrand = MutableStateFlow(
         when (cardBrandChoiceConfig) {
-            is CardBrandChoiceConfig.Eligible -> cardBrandChoiceConfig.initialBrand ?: CardBrand.Unknown
-            is CardBrandChoiceConfig.Ineligible -> CardBrand.Unknown
+            is CardBrandChoiceConfig.Eligible -> cardBrandChoiceConfig.initialBrand
+            is CardBrandChoiceConfig.Ineligible -> null
         }
     )
+
+    override val selectedCardBrandFlow: Flow<CardBrand> = mostRecentUserSelectedBrand.combine(
+        brandChoices
+    ) { previous, choices ->
+        when (previous) {
+            CardBrand.Unknown -> previous
+            in choices -> previous ?: CardBrand.Unknown
+            else -> {
+                val firstAvailablePreferred = preferredBrands.firstOrNull { it in choices }
+
+                firstAvailablePreferred ?: CardBrand.Unknown
+            }
+        }
+    }
 
     /*
      * In state validation, we check that the card number itself is valid and do not care about
@@ -108,14 +145,15 @@ internal class DefaultCardNumberController constructor(
             ?: CardBrand.Unknown
     }
 
-    override val cardBrandFlow = impliedCardBrand.combine(
-        chosenBrand
-    ) { impliedBrand, chosenBrand ->
-        if (isEligibleForCardBrandChoice) {
-            chosenBrand
-        } else {
-            impliedBrand
+    override val cardBrandFlow = if (isEligibleForCardBrandChoice) {
+        combine(
+            brandChoices,
+            selectedCardBrandFlow
+        ) { choices, selected ->
+            choices.singleOrNull() ?: selected
         }
+    } else {
+        impliedCardBrand
     }
 
     override val cardScanEnabled = true
@@ -123,6 +161,7 @@ internal class DefaultCardNumberController constructor(
     @VisibleForTesting
     val accountRangeService = CardAccountRangeService(
         cardAccountRangeRepository,
+        uiContext,
         workContext,
         staticCardAccountRanges,
         object : CardAccountRangeService.AccountRangeResultListener {
@@ -133,14 +172,9 @@ internal class DefaultCardNumberController constructor(
                         panLength
                 }
 
-                val currentValue = chosenBrand.value
                 val newBrandChoices = accountRanges.map { it.brand }.distinct()
 
                 brandChoices.value = newBrandChoices
-
-                if (currentValue !in newBrandChoices) {
-                    chosenBrand.value = CardBrand.Unknown
-                }
             }
         },
         isCbcEligible = { isEligibleForCardBrandChoice },
@@ -149,7 +183,7 @@ internal class DefaultCardNumberController constructor(
     override val trailingIcon: Flow<TextFieldIcon?> = combine(
         _fieldValue,
         brandChoices,
-        chosenBrand
+        selectedCardBrandFlow
     ) { number, brands, chosen ->
         if (isEligibleForCardBrandChoice && number.isNotEmpty()) {
             val noSelection = TextFieldIcon.Dropdown.Item(
@@ -168,7 +202,7 @@ internal class DefaultCardNumberController constructor(
                 )
             } else {
                 when (chosen) {
-                    CardBrand.Unknown -> noSelection
+                    CardBrand.Unknown -> null
                     else -> TextFieldIcon.Dropdown.Item(
                         id = chosen.code,
                         label = resolvableString(chosen.displayName),
@@ -187,8 +221,8 @@ internal class DefaultCardNumberController constructor(
 
             TextFieldIcon.Dropdown(
                 title = resolvableString(PaymentsCoreR.string.stripe_card_brand_choice_selection_header),
-                currentItem = selected,
-                items = listOf(noSelection) + items,
+                currentItem = selected ?: noSelection,
+                items = items,
                 hide = brands.size < 2
             )
         } else if (accountRangeService.accountRange != null) {
@@ -209,7 +243,7 @@ internal class DefaultCardNumberController constructor(
                 animatedIcons = animatedIcons
             )
         }
-    }
+    }.distinctUntilChanged()
 
     private val _fieldState = combine(impliedCardBrand, _fieldValue) { brand, fieldValue ->
         cardTextFieldConfig.determineState(
@@ -278,7 +312,7 @@ internal class DefaultCardNumberController constructor(
     }
 
     override fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {
-        chosenBrand.value = CardBrand.fromCode(item.id)
+        mostRecentUserSelectedBrand.value = CardBrand.fromCode(item.id)
     }
 
     private companion object {

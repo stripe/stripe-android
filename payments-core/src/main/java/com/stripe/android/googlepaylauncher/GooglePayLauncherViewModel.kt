@@ -2,12 +2,10 @@ package com.stripe.android.googlepaylauncher
 
 import android.content.Intent
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.gms.tasks.Task
@@ -35,8 +33,11 @@ import com.stripe.android.utils.mapResult
 import com.stripe.android.utils.requireApplication
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 @Suppress("LongParameterList")
@@ -59,8 +60,8 @@ internal class GooglePayLauncherViewModel(
         get() = savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY) == true
         set(value) = savedStateHandle.set(HAS_LAUNCHED_KEY, value)
 
-    private val _googleResult = MutableLiveData<GooglePayLauncher.Result>()
-    internal val googlePayResult = _googleResult.distinctUntilChanged()
+    private val _googleResult = MutableStateFlow<GooglePayLauncher.Result?>(null)
+    internal val googlePayResult = _googleResult.asSharedFlow()
 
     fun updateResult(result: GooglePayLauncher.Result) {
         _googleResult.value = result
@@ -198,7 +199,9 @@ internal class GooglePayLauncherViewModel(
     ) {
         viewModelScope.launch {
             val result = getResultFromConfirmation(requestCode, data)
-            _googleResult.postValue(result)
+            withContext(Dispatchers.Main) {
+                _googleResult.value = result
+            }
         }
     }
 

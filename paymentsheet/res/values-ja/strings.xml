@@ -6,6 +6,10 @@
   <string name="stripe_bank_account_ending_in">末尾が %s の銀行口座を削除する</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">購入を完了するには、%s 以内に銀行のアプリで支払いを確定してください。</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">支払い情報は保存されません。</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">このフォームを閉じてもよいですか？</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">エラーが発生しました。接続を確認して、もう一度お試しください。</string>
   <!-- Text providing link to terms for ACH payments -->

@@ -54,7 +54,7 @@ internal data class PopUpToParam(
 internal fun String.toRouteBase() = substringBefore('?')
 
 internal fun IdentityTopLevelDestination.DestinationRoute.withParams(
-    vararg params: Pair<String, Any>
+    vararg params: Pair<String, Any?>
 ): String {
     var ret = this.route
     params.forEach { (key, value) ->

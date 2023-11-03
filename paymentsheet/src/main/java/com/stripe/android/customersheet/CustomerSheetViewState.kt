@@ -1,12 +1,18 @@
 package com.stripe.android.customersheet
 
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
+import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 
 internal sealed class CustomerSheetViewState(
     open val savedPaymentMethods: List<PaymentMethod>,
@@ -24,6 +30,11 @@ internal sealed class CustomerSheetViewState(
             isProcessing = isProcessing,
             isEditing = isEditing,
         )
+
+    val shouldDisplayDismissConfirmationModal: Boolean
+        get() = this is AddPaymentMethod &&
+            paymentMethodCode == PaymentMethod.Type.USBankAccount.code &&
+            bankAccountResult is CollectBankAccountResultInternal.Completed
 
     data class Loading(
         override val isLiveMode: Boolean,
@@ -60,12 +71,23 @@ internal sealed class CustomerSheetViewState(
 
     data class AddPaymentMethod(
         val paymentMethodCode: PaymentMethodCode,
+        val supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
         val formViewData: FormViewModel.ViewData,
+        val formArguments: FormArguments,
+        val usBankAccountFormArguments: USBankAccountFormArguments,
+        val selectedPaymentMethod: LpmRepository.SupportedPaymentMethod,
         val enabled: Boolean,
         override val isLiveMode: Boolean,
         override val isProcessing: Boolean,
         val errorMessage: String? = null,
-        val isFirstPaymentMethod: Boolean
+        val isFirstPaymentMethod: Boolean,
+        val primaryButtonLabel: ResolvableString,
+        val primaryButtonEnabled: Boolean,
+        val customPrimaryButtonUiState: PrimaryButton.UIState?,
+        val mandateText: String? = null,
+        val showMandateAbovePrimaryButton: Boolean = false,
+        val displayDismissConfirmationModal: Boolean = false,
+        val bankAccountResult: CollectBankAccountResultInternal?,
     ) : CustomerSheetViewState(
         savedPaymentMethods = emptyList(),
         isLiveMode = isLiveMode,
@@ -76,8 +98,5 @@ internal sealed class CustomerSheetViewState(
         } else {
             PaymentSheetScreen.AddAnotherPaymentMethod
         },
-    ) {
-        val primaryButtonEnabled: Boolean
-            get() = formViewData.completeFormValues != null && !isProcessing
-    }
+    )
 }

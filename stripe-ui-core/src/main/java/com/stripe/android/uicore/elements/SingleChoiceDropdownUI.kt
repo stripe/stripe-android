@@ -28,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -38,6 +37,8 @@ fun <TDropdownChoice : SingleChoiceDropdownItem> SingleChoiceDropdown(
     currentChoice: TDropdownChoice?,
     choices: List<TDropdownChoice>,
     onChoiceSelected: (TDropdownChoice) -> Unit,
+    headerTextColor: Color,
+    optionTextColor: Color,
     onDismiss: () -> Unit,
 ) {
     DropdownMenu(
@@ -46,7 +47,7 @@ fun <TDropdownChoice : SingleChoiceDropdownItem> SingleChoiceDropdown(
     ) {
         Text(
             text = title.resolve(),
-            color = MaterialTheme.stripeColors.subtitle,
+            color = headerTextColor,
             modifier = Modifier.padding(vertical = 5.dp, horizontal = 13.dp),
         )
 
@@ -55,7 +56,7 @@ fun <TDropdownChoice : SingleChoiceDropdownItem> SingleChoiceDropdown(
                 label = choice.label.resolve(),
                 icon = choice.icon,
                 isSelected = choice == currentChoice,
-                currentTextColor = MaterialTheme.stripeColors.onComponent,
+                currentTextColor = optionTextColor,
                 onClick = {
                     onChoiceSelected(choice)
                 }

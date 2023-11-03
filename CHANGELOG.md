@@ -2,6 +2,37 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.34.4 - 2023-11-02
+
+### PaymentSheet
+* [FIXED][7570](https://github.com/stripe/stripe-android/pull/7570) Fixed an issue where compiling PaymentSheet with R8 would cause an irrelevant warning for missing classes from Financial Connections if the module wasn't included.
+* [FIXED][7571](https://github.com/stripe/stripe-android/pull/7571) Fixed an issue where CustomerSheet would throw an error related to invalid payment_method_types.
+
+## 20.34.3 - 2023-10-31
+
+### PaymentSheet
+* [FIXED][7530](https://github.com/stripe/stripe-android/pull/7530) Fixed an issue which caused PaymentSheet to transitively include the Financial Connections SDK even if not requested.
+* [FIXED][7545](https://github.com/stripe/stripe-android/pull/7545) Fixed an issue where the US Bank Account collection flow would not launch when using FlowController with Payment Intents.
+
+## 20.34.2 - 2023-10-30
+
+### PaymentSheet
+* [FIXED][7499](https://github.com/stripe/stripe-android/pull/7499) Fixed an issue with incorrect error messages when encountering a failure after 3D Secure authentication.
+* [FIXED][7464](https://github.com/stripe/stripe-android/pull/7464) Fixed an issue where canceling the US Bank Account selection flow prevents the user from launching it again.
+* [FIXED][7529](https://github.com/stripe/stripe-android/pull/7529) PaymentSheet no longer displays saved cards that originated from Apple Pay or Google Pay.
+
+## 20.34.1 - 2023-10-24
+
+### Payments
+* [FIXED][7485](https://github.com/stripe/stripe-android/pull/7485) Fixed a crash when using `CardInputWidget` in an AppCompat theme.
+
+## 20.34.0 - 2023-10-23
+
+### Payments
+* [ADDED][7449](https://github.com/stripe/stripe-android/pull/7449) Added saved payment method support for SEPA family payment methods.
+
+## 20.33.0 - 2023-10-16
+
 ### Payments
 * [ADDED][7431](https://github.com/stripe/stripe-android/pull/7431) Added bindings support for MobilePay. See [private beta information](https://stripe.com/docs/payments/mobilepay).
 

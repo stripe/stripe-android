@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateS
 import com.stripe.android.paymentsheet.example.samples.networking.PlaygroundCustomerSheetRequest
 import com.stripe.android.paymentsheet.example.samples.networking.PlaygroundCustomerSheetResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
+import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,6 +72,8 @@ class CustomerSheetPlaygroundViewModel(
             .defaultBillingDetails(
                 if (it.useDefaultBillingAddress) {
                     PaymentSheet.BillingDetails(
+                        name = "Jenny Rosen",
+                        email = "jenny@example.com",
                         address = PaymentSheet.Address(
                             city = "Seattle",
                             country = "US",
@@ -152,7 +155,9 @@ class CustomerSheetPlaygroundViewModel(
     ): Result<PlaygroundCustomerSheetResponse, FuelError> {
         val request = PlaygroundCustomerSheetRequest(
             customerId = customerId,
-            mode = "payment"
+            mode = "payment",
+            merchantCountryCode = "US",
+            currency = "usd",
         )
 
         val requestBody = Json.encodeToString(
@@ -219,6 +224,8 @@ class CustomerSheetPlaygroundViewModel(
                 toggleSetupIntentEnabled()
             is CustomerSheetPlaygroundViewAction.ToggleExistingCustomer ->
                 toggleExistingCustomer()
+            is CustomerSheetPlaygroundViewAction.ToggleAchEnabled ->
+                toggleAchEnabled()
             is CustomerSheetPlaygroundViewAction.ToggleUseDefaultBillingAddress ->
                 toggleUseDefaultBillingAddress()
             is CustomerSheetPlaygroundViewAction.ToggleAttachDefaultBillingAddress ->
@@ -299,6 +306,15 @@ class CustomerSheetPlaygroundViewModel(
                 } else {
                     "new"
                 }
+            )
+        }
+    }
+
+    private fun toggleAchEnabled() {
+        updateConfiguration {
+            customerSheetACHv2.setEnabled(!it.achEnabled)
+            it.copy(
+                achEnabled = !it.achEnabled,
             )
         }
     }

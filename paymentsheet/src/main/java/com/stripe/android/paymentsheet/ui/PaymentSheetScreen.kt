@@ -4,11 +4,12 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,7 +20,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.ui.LinkButton
@@ -29,8 +29,6 @@ import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentSheetPri
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.text.Html
 
 @Composable
 internal fun PaymentSheetScreen(
@@ -82,7 +80,7 @@ internal fun PaymentSheetScreenContent(
     val walletsState by viewModel.walletsState.collectAsState()
     val buyButtonState by viewModel.buyButtonState.collectAsState(initial = null)
     val currentScreen by viewModel.currentScreen.collectAsState()
-    val notes by viewModel.notesText.collectAsState()
+    val mandateText by viewModel.mandateText.collectAsState()
 
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
@@ -104,10 +102,19 @@ internal fun PaymentSheetScreenContent(
             )
         }
 
-        currentScreen.Content(
-            viewModel = viewModel,
-            modifier = Modifier.padding(bottom = 8.dp),
-        )
+        Box(modifier = Modifier.animateContentSize()) {
+            currentScreen.Content(
+                viewModel = viewModel,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+        }
+
+        if (mandateText?.showAbovePrimaryButton == true) {
+            Mandate(
+                mandateText = mandateText?.text,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+            )
+        }
 
         buyButtonState?.errorMessage?.let { error ->
             ErrorMessage(
@@ -121,14 +128,10 @@ internal fun PaymentSheetScreenContent(
             modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
         )
 
-        notes?.let { text ->
-            Html(
-                html = text,
-                color = MaterialTheme.stripeColors.subtitle,
-                style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .padding(horizontal = horizontalPadding),
+        if (mandateText?.showAbovePrimaryButton == false) {
+            Mandate(
+                mandateText = mandateText?.text,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
             )
         }
 

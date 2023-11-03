@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -21,24 +22,24 @@ internal object PaymentSheetTopBarStateFactory {
 
     fun create(
         screen: PaymentSheetScreen,
-        paymentMethods: List<PaymentMethod>?,
+        paymentMethods: List<PaymentMethod>,
         isLiveMode: Boolean,
         isProcessing: Boolean,
         isEditing: Boolean,
     ): PaymentSheetTopBarState {
-        val icon = if (screen == PaymentSheetScreen.AddAnotherPaymentMethod) {
+        val hasBackStack = screen.canNavigateBack
+
+        val icon = if (hasBackStack) {
             R.drawable.stripe_ic_paymentsheet_back
         } else {
             R.drawable.stripe_ic_paymentsheet_close
         }
 
-        val contentDescription = if (screen == PaymentSheetScreen.AddAnotherPaymentMethod) {
+        val contentDescription = if (hasBackStack) {
             StripeUiCoreR.string.stripe_back
         } else {
             R.string.stripe_paymentsheet_close
         }
-
-        val showOptionsMenu = screen is PaymentSheetScreen.SelectSavedPaymentMethods
 
         val editMenuLabel = if (isEditing) {
             StripeR.string.stripe_done
@@ -46,11 +47,13 @@ internal object PaymentSheetTopBarStateFactory {
             StripeR.string.stripe_edit
         }
 
+        val showEditMenu = screen is SelectSavedPaymentMethods && paymentMethods.isNotEmpty()
+
         return PaymentSheetTopBarState(
             icon = icon,
             contentDescription = contentDescription,
             showTestModeLabel = !isLiveMode,
-            showEditMenu = isEditing || showOptionsMenu && !paymentMethods.isNullOrEmpty(),
+            showEditMenu = showEditMenu,
             editMenuLabel = editMenuLabel,
             isEnabled = !isProcessing,
         )

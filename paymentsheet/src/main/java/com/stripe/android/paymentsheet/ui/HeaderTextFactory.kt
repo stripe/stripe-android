@@ -17,38 +17,44 @@ internal class HeaderTextFactory(
     ): Int? {
         return if (isCompleteFlow) {
             when (screen) {
-                PaymentSheetScreen.SelectSavedPaymentMethods -> {
+                is PaymentSheetScreen.SelectSavedPaymentMethods -> {
                     if (isWalletEnabled) {
                         null
                     } else {
                         R.string.stripe_paymentsheet_select_payment_method
                     }
                 }
-                PaymentSheetScreen.AddFirstPaymentMethod -> {
+                is PaymentSheetScreen.AddFirstPaymentMethod -> {
                     R.string.stripe_paymentsheet_add_payment_method_title.takeUnless {
                         isWalletEnabled
                     }
                 }
-                PaymentSheetScreen.Loading,
-                PaymentSheetScreen.AddAnotherPaymentMethod -> {
+                is PaymentSheetScreen.EditPaymentMethod -> {
+                    StripeR.string.stripe_title_update_card
+                }
+                is PaymentSheetScreen.Loading,
+                is PaymentSheetScreen.AddAnotherPaymentMethod -> {
                     null
                 }
             }
         } else {
             when (screen) {
-                PaymentSheetScreen.Loading, -> {
+                is PaymentSheetScreen.Loading, -> {
                     null
                 }
-                PaymentSheetScreen.SelectSavedPaymentMethods -> {
+                is PaymentSheetScreen.SelectSavedPaymentMethods -> {
                     R.string.stripe_paymentsheet_select_payment_method
                 }
-                PaymentSheetScreen.AddFirstPaymentMethod,
-                PaymentSheetScreen.AddAnotherPaymentMethod -> {
+                is PaymentSheetScreen.AddFirstPaymentMethod,
+                is PaymentSheetScreen.AddAnotherPaymentMethod -> {
                     if (types.singleOrNull() == PaymentMethod.Type.Card.code) {
                         StripeR.string.stripe_title_add_a_card
                     } else {
                         R.string.stripe_paymentsheet_choose_payment_method
                     }
+                }
+                is PaymentSheetScreen.EditPaymentMethod -> {
+                    StripeR.string.stripe_title_update_card
                 }
             }
         }

@@ -159,7 +159,7 @@
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="stripe_removed">Removed %s</string>
   <string name="stripe_secure_checkout">Secure Checkout</string>
-  <string name="stripe_title_add_a_card">Add a Card</string>
+  <string name="stripe_title_add_a_card">Add a card</string>
   <!-- Screen title telling users they should add an address -->
   <string name="stripe_title_add_an_address">Set Address</string>
   <!-- Label for Bank Account selection or detail entry form -->

@@ -91,10 +91,14 @@ ext.configs = [
 
 ext.libs = [
         accompanist                         : [
-                flowLayout         : "com.google.accompanist:accompanist-flowlayout:${versions.accompanist}",
-                systemUiController : "com.google.accompanist:accompanist-systemuicontroller:${versions.accompanist}",
-                themeAdapter       : "com.google.accompanist:accompanist-themeadapter-material:${versions.accompanist}",
-                webView            : "com.google.accompanist:accompanist-webview:${versions.accompanist}",
+                appCompatThemeAdapter: "com.google.accompanist:accompanist-themeadapter-appcompat:${versions.accompanist}",
+                flowLayout           : "com.google.accompanist:accompanist-flowlayout:${versions.accompanist}",
+                navigationAnimation  : "com.google.accompanist:accompanist-navigation-animation:${versions.accompanist}",
+                navigationMaterial   : "com.google.accompanist:accompanist-navigation-material:${versions.accompanist}",
+                systemUiController   : "com.google.accompanist:accompanist-systemuicontroller:${versions.accompanist}",
+                materialThemeAdapter : "com.google.accompanist:accompanist-themeadapter-material:${versions.accompanist}",
+                material3ThemeAdapter : "com.google.accompanist:accompanist-themeadapter-material3:${versions.accompanist}",
+                webView              : "com.google.accompanist:accompanist-webview:${versions.accompanist}",
         ],
         alipay                              : "com.alipay.sdk:alipaysdk-android:${versions.alipay}",
         androidx                            : [

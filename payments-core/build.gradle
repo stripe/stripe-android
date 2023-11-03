@@ -10,7 +10,9 @@ dependencies {
     implementation project(":stripe-ui-core")
     compileOnly project(':financial-connections')
 
-    implementation libs.accompanist.themeAdapter
+    implementation libs.accompanist.appCompatThemeAdapter
+    implementation libs.accompanist.materialThemeAdapter
+    implementation libs.accompanist.material3ThemeAdapter
     implementation libs.androidx.activity
     implementation libs.androidx.annotation
     implementation libs.androidx.appCompat
@@ -46,6 +48,7 @@ dependencies {
     testImplementation project(':network-testing')
     testImplementation project(':payments-core-testing')
     testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.fragment
     testImplementation testLibs.androidx.junit
