@@ -4,6 +4,8 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -100,10 +102,12 @@ internal fun PaymentSheetScreenContent(
             )
         }
 
-        currentScreen.Content(
-            viewModel = viewModel,
-            modifier = Modifier.padding(bottom = 8.dp),
-        )
+        Box(modifier = Modifier.animateContentSize()) {
+            currentScreen.Content(
+                viewModel = viewModel,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+        }
 
         if (mandateText?.showAbovePrimaryButton == true) {
             Mandate(
