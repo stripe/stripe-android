@@ -11,7 +11,6 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
@@ -216,23 +215,11 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             PaymentMethod.Type.fromCode(it.code)
         }
 
-        val walletTypesToRemove = setOf(Wallet.Type.ApplePay, Wallet.Type.GooglePay, Wallet.Type.SamsungPay)
-
         val paymentMethods = customerRepository.getPaymentMethods(
             customerConfig = customerConfig,
-            types = paymentMethodTypes.filter { paymentMethodType ->
-                paymentMethodType in setOf(
-                    PaymentMethod.Type.Card,
-                    PaymentMethod.Type.USBankAccount,
-                    PaymentMethod.Type.SepaDebit,
-                )
-            },
+            types = paymentMethodTypes,
             silentlyFail = true,
-        ).getOrDefault(emptyList()).filter { paymentMethod ->
-            val isCardWithWallet = paymentMethod.type == PaymentMethod.Type.Card &&
-                walletTypesToRemove.contains(paymentMethod.card?.wallet?.walletType)
-            !isCardWithWallet
-        }
+        ).getOrDefault(emptyList())
 
         return paymentMethods.filter { paymentMethod ->
             paymentMethod.hasExpectedDetails()
