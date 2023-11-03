@@ -68,7 +68,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration?
     ): Result<PaymentSheetState.Full> = withContext(workContext) {
-        val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
         val isDecoupling = initializationMode is DeferredIntent
 
         eventReporter.onLoadStarted(isDecoupling = isDecoupling)
@@ -80,7 +79,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             create(
                 elementsSession = elementsSession,
                 config = paymentSheetConfiguration,
-                isGooglePayReady = isGooglePayReady,
+                isGooglePayReady = isGooglePayReady(paymentSheetConfiguration, elementsSession),
             )
         }.also {
             reportLoadResult(loaderResult = it, isDecoupling = isDecoupling)
@@ -88,9 +87,14 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 
     private suspend fun isGooglePayReady(
-        paymentSheetConfiguration: PaymentSheet.Configuration?
+        paymentSheetConfiguration: PaymentSheet.Configuration?,
+        elementsSession: ElementsSession,
     ): Boolean {
-        return paymentSheetConfiguration?.googlePay?.environment?.let { environment ->
+        return elementsSession.isGooglePayEnabled && paymentSheetConfiguration.isGooglePayReady()
+    }
+
+    private suspend fun PaymentSheet.Configuration?.isGooglePayReady(): Boolean {
+        return this?.googlePay?.environment?.let { environment ->
             googlePayRepositoryFactory(
                 when (environment) {
                     PaymentSheet.GooglePayConfiguration.Environment.Production ->

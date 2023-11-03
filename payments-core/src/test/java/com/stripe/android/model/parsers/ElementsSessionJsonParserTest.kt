@@ -385,4 +385,25 @@ class ElementsSessionJsonParserTest {
 
         assertThat(session?.isEligibleForCardBrandChoice).isFalse()
     }
+
+    @Test
+    fun parsePaymentIntent_shouldCreateObjectWithCorrectGooglePayEnabled() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret"
+            ),
+            apiKey = "test"
+        )
+
+        fun assertIsGooglePayEnabled(expectedValue: Boolean, jsonTransform: JSONObject.() -> Unit) {
+            val json = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
+            json.jsonTransform()
+            assertThat(parser.parse(json)?.isGooglePayEnabled).isEqualTo(expectedValue)
+        }
+
+        assertIsGooglePayEnabled(true) { remove(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE) }
+        assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "enabled") }
+        assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "unknown") }
+        assertIsGooglePayEnabled(false) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "disabled") }
+    }
 }

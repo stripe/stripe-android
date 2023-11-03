@@ -9,6 +9,7 @@ internal class FakeElementsSessionRepository(
     private val stripeIntent: StripeIntent,
     private val error: Throwable?,
     private val linkSettings: ElementsSession.LinkSettings?,
+    private val isGooglePayEnabled: Boolean = true,
 ) : ElementsSessionRepository {
 
     var lastGetParam: PaymentSheet.InitializationMode? = null
@@ -27,6 +28,7 @@ internal class FakeElementsSessionRepository(
                     stripeIntent = stripeIntent,
                     merchantCountry = null,
                     isEligibleForCardBrandChoice = true,
+                    isGooglePayEnabled = isGooglePayEnabled,
                 )
             )
         }

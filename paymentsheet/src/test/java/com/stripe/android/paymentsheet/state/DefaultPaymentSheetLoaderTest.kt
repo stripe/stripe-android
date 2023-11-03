@@ -138,6 +138,40 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
+    fun `load with google pay kill switch enabled should return expected result`() = runTest {
+        prefsRepository.savePaymentSelection(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            isGooglePayReady = true,
+            isGooglePayEnabledFromBackend = false,
+        )
+
+        assertThat(
+            loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            ).getOrThrow()
+        ).isEqualTo(
+            PaymentSheetState.Full(
+                config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                customerPaymentMethods = PAYMENT_METHODS,
+                isGooglePayReady = false,
+                paymentSelection = PaymentSelection.Saved(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                ),
+                linkState = null,
+                isEligibleForCardBrandChoice = false,
+            )
+        )
+    }
+
+    @Test
     fun `Should default to first payment method if customer has payment methods`() = runTest {
         prefsRepository.savePaymentSelection(null)
 
@@ -809,6 +843,7 @@ internal class DefaultPaymentSheetLoaderTest {
         linkAccountState: AccountStatus = AccountStatus.Verified,
         error: Throwable? = null,
         linkSettings: ElementsSession.LinkSettings? = null,
+        isGooglePayEnabledFromBackend: Boolean = true,
     ): PaymentSheetLoader {
         return DefaultPaymentSheetLoader(
             appName = "App Name",
@@ -820,6 +855,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 stripeIntent = stripeIntent,
                 error = error,
                 linkSettings,
+                isGooglePayEnabledFromBackend,
             ),
             customerRepository = customerRepo,
             lpmRepository = lpmRepository,
