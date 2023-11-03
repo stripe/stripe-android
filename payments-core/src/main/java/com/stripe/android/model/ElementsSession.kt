@@ -12,6 +12,7 @@ data class ElementsSession(
     val stripeIntent: StripeIntent,
     val merchantCountry: String?,
     val isEligibleForCardBrandChoice: Boolean,
+    val isGooglePayEnabled: Boolean,
 ) : StripeModel {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -20,4 +21,18 @@ data class ElementsSession(
         val linkFundingSources: List<String>,
         val linkPassthroughModeEnabled: Boolean,
     ) : StripeModel
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        fun default(stripeIntent: StripeIntent): ElementsSession {
+            return ElementsSession(
+                linkSettings = null,
+                paymentMethodSpecs = null,
+                stripeIntent = stripeIntent,
+                merchantCountry = null,
+                isEligibleForCardBrandChoice = false,
+                isGooglePayEnabled = true,
+            )
+        }
+    }
 }

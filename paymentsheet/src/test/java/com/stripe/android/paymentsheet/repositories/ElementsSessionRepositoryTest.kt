@@ -35,12 +35,8 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository.retrieveElementsSession(any(), any())
         ).thenReturn(
             Result.success(
-                ElementsSession(
-                    linkSettings = null,
-                    paymentMethodSpecs = null,
+                ElementsSession.default(
                     stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
-                    merchantCountry = null,
-                    isEligibleForCardBrandChoice = false,
                 )
             )
         )
@@ -114,12 +110,8 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository.retrieveElementsSession(any(), any())
         ).thenReturn(
             Result.success(
-                ElementsSession(
-                    linkSettings = null,
-                    paymentMethodSpecs = null,
+                ElementsSession.default(
                     stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
-                    merchantCountry = null,
-                    isEligibleForCardBrandChoice = false,
                 )
             )
         )
