@@ -2042,6 +2042,46 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `Mandate is required depending on payment method`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
+                    selectedPaymentMethod = LpmRepository.HardcodedCard,
+                    requiresMandate = false,
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.requiresMandate)
+                .isFalse()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepository.hardCodedUsBankAccount
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.requiresMandate)
+                .isTrue()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepository.HardcodedCard
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.requiresMandate)
+                .isFalse()
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     private suspend inline fun <R> ReceiveTurbine<*>.awaitViewState(): R {
         return awaitItem() as R

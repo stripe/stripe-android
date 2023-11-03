@@ -265,7 +265,7 @@ internal fun AddPaymentMethodWithPaymentElement(
             }
         }
 
-        if (viewState.showMandateAbovePrimaryButton) {
+        if (viewState.showMandateAbovePrimaryButton && viewState.requiresMandate) {
             Mandate(
                 mandateText = viewState.mandateText,
                 modifier = Modifier
@@ -286,7 +286,7 @@ internal fun AddPaymentMethodWithPaymentElement(
                 .padding(horizontal = horizontalPadding),
         )
 
-        if (!viewState.showMandateAbovePrimaryButton) {
+        if (!viewState.showMandateAbovePrimaryButton && viewState.requiresMandate) {
             Mandate(
                 mandateText = viewState.mandateText,
                 modifier = Modifier

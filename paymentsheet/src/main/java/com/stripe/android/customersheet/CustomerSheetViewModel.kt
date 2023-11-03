@@ -355,6 +355,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                         id = R.string.stripe_paymentsheet_save
                     )
                 },
+                requiresMandate = paymentMethod.requiresMandate,
                 primaryButtonEnabled = it.formViewData.completeFormValues != null && !it.isProcessing,
             )
         }

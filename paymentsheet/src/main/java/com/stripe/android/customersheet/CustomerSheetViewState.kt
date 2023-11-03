@@ -85,6 +85,7 @@ internal sealed class CustomerSheetViewState(
         val primaryButtonEnabled: Boolean,
         val customPrimaryButtonUiState: PrimaryButton.UIState?,
         val mandateText: String? = null,
+        val requiresMandate: Boolean = false,
         val showMandateAbovePrimaryButton: Boolean = false,
         val displayDismissConfirmationModal: Boolean = false,
         val bankAccountResult: CollectBankAccountResultInternal?,
