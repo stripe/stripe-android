@@ -1,8 +1,7 @@
 package com.stripe.android.financialconnections
 
-import com.google.common.truth.Truth
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
 import com.google.common.truth.Truth.assertWithMessage
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 
 internal class TestFinancialConnectionsAnalyticsTracker : FinancialConnectionsAnalyticsTracker {
