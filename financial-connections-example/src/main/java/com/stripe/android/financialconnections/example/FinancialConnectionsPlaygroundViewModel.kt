@@ -17,7 +17,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
 import com.stripe.android.financialconnections.example.settings.FinancialConnectionsPlaygroundUrlHelper
-import com.stripe.android.financialconnections.example.settings.FlowDefinition
+import com.stripe.android.financialconnections.example.settings.FlowSetting
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -348,5 +348,5 @@ internal data class FinancialConnectionsPlaygroundState(
             ?: PlaygroundSettings.createFromSharedPreferences(application)
     )
 
-    val flow = settings[FlowDefinition]
+    val flow: Flow = settings.get<FlowSetting>().selectedOption
 }

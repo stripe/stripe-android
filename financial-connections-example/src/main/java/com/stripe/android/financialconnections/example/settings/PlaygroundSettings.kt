@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.core.content.edit
 import com.stripe.android.financialconnections.example.BuildConfig
+import com.stripe.android.financialconnections.example.data.Settings
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 import kotlinx.serialization.encodeToString
@@ -14,52 +15,33 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
 internal data class PlaygroundSettings(
-    val settings: Map<PlaygroundSettingDefinition<*>, Any?>
+    val settings: List<Setting<*>>
 ) {
+
     fun <T> withValue(
-        settingsDefinition: PlaygroundSettingDefinition<T>,
+        settingsDefinition: Setting<T>,
         value: T
-    ): PlaygroundSettings {
-        val newSettings = copy(settings = settings + (settingsDefinition to value))
-        // apply any side effects
-        return settingsDefinition.valueUpdated(value, newSettings)
-    }
+    ): PlaygroundSettings = copy(settings = settingsDefinition.valueUpdated(settings, value))
 
-    fun <T> remove(
-        settingsDefinition: PlaygroundSettingDefinition<T>
-    ): PlaygroundSettings = copy(
-        settings = settings - settingsDefinition
-    )
-
-    operator fun <T> get(settingsDefinition: PlaygroundSettingDefinition<T>): T {
-        @Suppress("UNCHECKED_CAST")
-        return settings[settingsDefinition] as T
+    inline fun <reified T : Setting<*>> get(): T {
+        return settings.find { it is T } as T
     }
 
     fun lasRequest(): LinkAccountSessionBody = settings.toList().fold(
         LinkAccountSessionBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
-    ) { acc, (definition: PlaygroundSettingDefinition<*>, value: Any?) ->
-        @Suppress("UNCHECKED_CAST")
-        (definition as PlaygroundSettingDefinition<Any?>).lasRequest(acc, value)
-    }
+    ) { acc, definition: Setting<*> -> (definition as Setting<Any?>).lasRequest(acc) }
 
     fun paymentIntentRequest(): PaymentIntentBody = settings.toList().fold(
         PaymentIntentBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
-    ) { acc, (definition: PlaygroundSettingDefinition<*>, value: Any?) ->
-        @Suppress("UNCHECKED_CAST")
-        (definition as PlaygroundSettingDefinition<Any?>).paymentIntentRequest(acc, value)
-    }
+    ) { acc, definition: Setting<*> -> (definition as Setting<Any?>).paymentIntentRequest(acc) }
+
 
     fun asJsonString(): String {
-        val settingsMap = settings.map {
-            val saveable = it.key.saveable()
-            if (saveable != null) {
-                saveable.key to JsonPrimitive(saveable.convertToString(it.value))
-            } else {
-                null
-            }
-        }.filterNotNull().toMap()
-        return Json.encodeToString(JsonObject(settingsMap))
+        val json = settings
+            .mapNotNull { setting ->
+                setting.saveable()?.let { it.key to JsonPrimitive(it.convertToString(setting.selectedOption)) }
+            }.toMap()
+        return Json.encodeToString(JsonObject(json))
     }
 
     fun saveToSharedPreferences(context: Application) {
@@ -76,7 +58,7 @@ internal data class PlaygroundSettings(
         }
     }
 
-    private fun <T> PlaygroundSettingDefinition.Saveable<T>.convertToString(
+    private fun <T> Saveable<T>.convertToString(
         value: Any?,
     ): String? {
         @Suppress("UNCHECKED_CAST")
@@ -101,53 +83,54 @@ internal data class PlaygroundSettings(
         }
 
         fun createFromDefaults(): PlaygroundSettings {
-            val settings = allSettingDefinitions
-                .filter { it.defaultValue != null }
-                .associateWith { settingDefinition -> settingDefinition.defaultValue }
-                .toMutableMap()
-            return PlaygroundSettings(settings)
+            return PlaygroundSettings(
+                allSettingDefinitions
+                    .filter { it.selectedOption != null }
+                    .toList())
         }
 
         private fun createFromJsonString(jsonString: String): PlaygroundSettings {
-            val settings: MutableMap<PlaygroundSettingDefinition<*>, Any?> = mutableMapOf()
+            var settings = PlaygroundSettings(emptyList())
             val jsonObject: JsonObject = Json.decodeFromString(JsonObject.serializer(), jsonString)
 
             for (definition in allSettingDefinitions) {
                 val saveable = definition.saveable()
                 val savedValue = saveable?.key?.let { jsonObject[it] as? JsonPrimitive }
                 if (savedValue?.isString == true) {
-                    settings[definition] = saveable.convertToValue(savedValue.content)
-                } else if (definition.defaultValue != null) {
-                    settings[definition] = definition.defaultValue
+                    // add item to mutable list
+                    @Suppress("UNCHECKED_CAST")
+                    settings = settings.withValue(definition, savedValue.content)
+                } else if (definition.selectedOption != null) {
+                    settings = settings.withValue(definition, definition.selectedOption)
                 }
             }
 
-            return PlaygroundSettings(settings)
+            return settings
         }
 
         fun createFromDeeplinkUri(uri: Uri): PlaygroundSettings {
-            val settings: MutableMap<PlaygroundSettingDefinition<*>, Any?> = mutableMapOf()
+            val settings: List<Setting<*>> = mutableListOf()
 
             for (definition in allSettingDefinitions) {
                 val saveable = definition.saveable()
                 val savedValue: String? = saveable?.key?.let { uri.getQueryParameter(it) }
                 if (savedValue != null) {
-                    settings[definition] = saveable.convertToValue(savedValue)
-                } else if (definition.defaultValue != null) {
-                    settings[definition] = definition.defaultValue
+                    settings + saveable.convertToValue(savedValue)
+                } else if (definition.selectedOption != null) {
+                    settings + definition
                 }
             }
 
             return PlaygroundSettings(settings)
         }
 
-        private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
-            MerchantDefinition,
-            NativeOverrideDefinition,
-            FlowDefinition,
-            EmailDefinition,
-            PublicKeyDefinition,
-            PrivateKeyDefinition,
+        private val allSettingDefinitions: List<Setting<*>> = listOf(
+            MerchantSetting(),
+            FlowSetting(),
+            NativeSetting(),
+            PublicKeySetting(),
+            PrivateKeySetting(),
+            EmailDefinition(),
         )
     }
 }

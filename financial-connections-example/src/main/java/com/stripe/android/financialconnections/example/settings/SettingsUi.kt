@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.material.Checkbox
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
@@ -33,7 +34,7 @@ internal fun SettingsUi(
     onSettingsChanged: (PlaygroundSettings) -> Unit,
 ) {
     Column {
-        for (settingDefinition in playgroundSettings.settings.map { it.key }) {
+        for (settingDefinition in playgroundSettings.settings) {
             Row(modifier = Modifier.padding(bottom = 16.dp)) {
                 Setting(settingDefinition, playgroundSettings, onSettingsChanged)
             }
@@ -43,23 +44,30 @@ internal fun SettingsUi(
 
 @Composable
 private fun <T> Setting(
-    settingDefinition: PlaygroundSettingDefinition<T>,
+    settingDefinition: Setting<T>,
     playgroundSettings: PlaygroundSettings,
     onSettingsChanged: (PlaygroundSettings) -> Unit
 ) {
-    Setting(
-        name = settingDefinition.displayName,
-        options = settingDefinition.options,
-        value = playgroundSettings[settingDefinition],
-    ) { newValue ->
-        onSettingsChanged(playgroundSettings.withValue(settingDefinition, newValue))
+    when (settingDefinition) {
+        is SingleChoiceSetting -> Setting(
+            name = settingDefinition.displayName,
+            options = settingDefinition.options,
+            value = settingDefinition.selectedOption
+        ) {
+            onSettingsChanged(
+                playgroundSettings.withValue(settingDefinition, it)
+            )
+        }
+
+        is MultipleChoiceSetting<*> -> TODO()
+
     }
 }
 
 @Composable
 private fun <T> Setting(
     name: String,
-    options: List<PlaygroundSettingDefinition.Option<T>>,
+    options: List<Option<T>>,
     value: T,
     onOptionChanged: (T) -> Unit,
 ) {
@@ -87,6 +95,60 @@ private fun <T> Setting(
     }
 }
 
+@Composable
+private fun <T> MultiSelectSetting(
+    name: String,
+    options: List<Option<T>>,
+    value: T,
+    onOptionChanged: (T) -> Unit
+) {
+    Column {
+        Row {
+            Text(
+                text = name,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 5.dp)
+            )
+        }
+
+        Row {
+            val selectedOptions = remember(value) {
+                options.filter { option -> option.value == value }
+            }
+            options.forEach { option ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .selectable(
+                            selected = selectedOptions.contains(option),
+                            onClick = {
+                                val newOptions = if (selectedOptions.contains(option)) {
+                                    selectedOptions - option
+                                } else {
+                                    selectedOptions + option
+                                }
+                                onOptionChanged(
+                                    newOptions
+                                        .map { it.value }
+                                        .first()
+                                )
+                            }
+                        )
+                        .padding(end = 5.dp)
+                ) {
+                    Checkbox(
+                        checked = selectedOptions.contains(option),
+                        onCheckedChange = null,
+                    )
+                    Text(
+                        text = option.name,
+                    )
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun TextSetting(
@@ -101,7 +163,8 @@ private fun TextSetting(
         onValueChange = { newValue: String ->
             onOptionChanged(newValue)
         },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .semantics { testTagsAsResourceId = true }
             .testTag("$name setting"),
     )
@@ -111,7 +174,7 @@ private fun TextSetting(
 @Composable
 private fun <T> RadioButtonSetting(
     name: String,
-    options: List<PlaygroundSettingDefinition.Option<T>>,
+    options: List<Option<T>>,
     value: T,
     onOptionChanged: (T) -> Unit,
 ) {
@@ -158,7 +221,7 @@ private fun <T> RadioButtonSetting(
 @Composable
 private fun <T> DropdownSetting(
     name: String,
-    options: List<PlaygroundSettingDefinition.Option<T>>,
+    options: List<Option<T>>,
     value: T,
     onOptionChanged: (T) -> Unit,
 ) {
