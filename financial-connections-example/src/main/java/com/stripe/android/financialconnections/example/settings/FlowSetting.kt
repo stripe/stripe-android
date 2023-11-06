@@ -26,5 +26,4 @@ data class FlowSetting(
     override fun convertToValue(value: String): Flow {
         return Flow.fromApiValue(value)
     }
-
 }

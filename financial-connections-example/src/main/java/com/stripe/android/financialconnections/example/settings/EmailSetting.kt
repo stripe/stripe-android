@@ -3,8 +3,8 @@ package com.stripe.android.financialconnections.example.settings
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
-internal data class EmailDefinition(
-    override var selectedOption: String = ""
+internal data class EmailSetting(
+    override val selectedOption: String = ""
 ) : SingleChoiceSetting<String>(
     displayName = "Customer email",
     options = emptyList(),
@@ -25,4 +25,3 @@ internal data class EmailDefinition(
         return replace(currentSettings, this.copy(selectedOption = value))
     }
 }
-

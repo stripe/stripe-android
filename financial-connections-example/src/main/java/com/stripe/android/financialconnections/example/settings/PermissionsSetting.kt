@@ -4,10 +4,10 @@ import com.stripe.android.financialconnections.example.data.model.LinkAccountSes
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
 data class PermissionsSetting(
-    override val selectedOption: List<Permission> = listOf(Permission.Read),
+    override val selectedOption: List<Permission> = listOf(Permission.Balances),
     override val key: String = "permissions",
 ) : Saveable<List<Permission>>, MultipleChoiceSetting<Permission>(
-    displayName = "Flow",
+    displayName = "Permissions",
     options = Permission.values().map { Option(it.name, it) },
     selectedOption = selectedOption
 ) {
@@ -19,16 +19,21 @@ data class PermissionsSetting(
         replace(currentSettings, this.copy(selectedOption = value))
 
     override fun convertToString(value: List<Permission>): String {
-        return value.joinToString(",")
+        return value.joinToString(",") { it.apiValue }
     }
 
     override fun convertToValue(value: String): List<Permission> {
-        return value.split(",").map { Permission.valueOf(it) }.toList()
+        return value.split(",").map { Permission.fromApiValue(it) }.toList()
     }
-
 }
 
-enum class Permission {
-    Read,
-    Write;
+enum class Permission(val apiValue: String) {
+    Balances("balances"),
+    Transactions("transactions"),
+    Ownership("ownership"),
+    PaymentMethod("payment_method");
+
+    companion object {
+        fun fromApiValue(value: String): Permission = values().first { it.apiValue == value }
+    }
 }

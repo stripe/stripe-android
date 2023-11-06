@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.example.settings
 import android.app.Application
 import android.content.Context
 import android.net.Uri
+import android.os.Debug
 import android.util.Log
 import androidx.core.content.edit
 import com.stripe.android.financialconnections.example.BuildConfig
@@ -18,9 +19,9 @@ internal data class PlaygroundSettings(
 ) {
 
     fun <T> withValue(
-        settingsDefinition: Setting<T>,
+        setting: Setting<T>,
         value: T
-    ): PlaygroundSettings = copy(settings = settingsDefinition.valueUpdated(settings, value))
+    ): PlaygroundSettings = copy(settings = setting.valueUpdated(settings, value))
 
     inline fun <reified T : Setting<*>> get(): T {
         return settings.find { it is T } as T
@@ -28,12 +29,11 @@ internal data class PlaygroundSettings(
 
     fun lasRequest(): LinkAccountSessionBody = settings.toList().fold(
         LinkAccountSessionBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
-    ) { acc, definition: Setting<*> -> (definition as Setting<Any?>).lasRequest(acc) }
+    ) { acc, setting: Setting<*> -> (setting as Setting<Any?>).lasRequest(acc) }
 
     fun paymentIntentRequest(): PaymentIntentBody = settings.toList().fold(
         PaymentIntentBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
-    ) { acc, definition: Setting<*> -> (definition as Setting<Any?>).paymentIntentRequest(acc) }
-
+    ) { acc, setting: Setting<*> -> (setting as Setting<Any?>).paymentIntentRequest(acc) }
 
     fun asJsonString(): String {
         val json = settings
@@ -83,25 +83,27 @@ internal data class PlaygroundSettings(
 
         fun createFromDefaults(): PlaygroundSettings {
             return PlaygroundSettings(
-                allSettingDefinitions
+                allSettings
                     .filter { it.selectedOption != null }
-                    .toList())
+                    .toList()
+            )
         }
 
         private fun createFromJsonString(jsonString: String): PlaygroundSettings {
             var settings = PlaygroundSettings(emptyList())
             val jsonObject: JsonObject = Json.decodeFromString(JsonObject.serializer(), jsonString)
 
-            for (definition in allSettingDefinitions) {
-                val saveable = definition.saveable()
-                val savedValue = saveable?.key?.let { jsonObject[it] as? JsonPrimitive }
+            allSettings.map {
                 @Suppress("UNCHECKED_CAST")
-                val settingsDefinition = definition as Setting<Any?>
+                it as Setting<Any?>
+            }.forEach { setting ->
+                val saveable = setting.saveable()
+                val savedValue = saveable?.key?.let { jsonObject[it] as? JsonPrimitive }
                 if (savedValue?.isString == true) {
                     // add item to mutable list
-                    settings = settings.withValue(settingsDefinition, saveable.convertToValue(savedValue.content))
-                } else if (definition.selectedOption != null) {
-                    settings = settings.withValue(settingsDefinition, definition.selectedOption)
+                    settings = settings.withValue(setting, saveable.convertToValue(savedValue.content))
+                } else if (setting.selectedOption != null) {
+                    settings = settings.withValue(setting, setting.selectedOption)
                 }
             }
 
@@ -111,29 +113,31 @@ internal data class PlaygroundSettings(
         fun createFromDeeplinkUri(uri: Uri): PlaygroundSettings {
             var settings = PlaygroundSettings(emptyList())
 
-            for (definition in allSettingDefinitions) {
-                val saveable = definition.saveable()
-                val savedValue: String? = saveable?.key?.let { uri.getQueryParameter(it) }
+            allSettings.map {
                 @Suppress("UNCHECKED_CAST")
-                val settingsDefinition = definition as Setting<Any?>
+                it as Setting<Any?>
+            }.forEach { setting ->
+                val saveable = setting.saveable()
+                val savedValue: String? = saveable?.key?.let { uri.getQueryParameter(it) }
                 if (savedValue != null) {
-                    settings = settings.withValue(settingsDefinition, savedValue)
-                } else if (definition.selectedOption != null) {
-                    settings = settings.withValue(settingsDefinition, definition.selectedOption)
+                    Debug.waitForDebugger()
+                    settings = settings.withValue(setting, saveable.convertToValue(savedValue))
+                } else if (setting.selectedOption != null) {
+                    settings = settings.withValue(setting, setting.selectedOption)
                 }
             }
 
             return settings
         }
 
-        private val allSettingDefinitions: List<Setting<*>> = listOf(
+        private val allSettings: List<Setting<*>> = listOf(
             MerchantSetting(),
-            FlowSetting(),
-            NativeSetting(),
             PublicKeySetting(),
             PrivateKeySetting(),
-            EmailDefinition(),
-            PermissionsSetting()
+            FlowSetting(),
+            NativeSetting(),
+            PermissionsSetting(),
+            EmailSetting(),
         )
     }
 }
