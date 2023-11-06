@@ -19,7 +19,6 @@ sealed class Setting<T> {
     }
 
     abstract val displayName: String
-    abstract val options: List<Option<T>>
     abstract val selectedOption: T
 }
 
@@ -33,15 +32,15 @@ interface Saveable<T> {
 // Single choice settings
 sealed class SingleChoiceSetting<T>(
     override val displayName: String,
-    override val options: List<Option<T>>,
     override val selectedOption: T,
+    open val options: List<Option<T>>,
 ) : Setting<T>()
 
 // Multiple choice settings
 sealed class MultipleChoiceSetting<T>(
     override val displayName: String,
-    override val options: List<Option<List<T>>>,
-    override val selectedOption: List<T>
+    override val selectedOption: List<T>,
+    open val options: List<Option<T>>
 ) : Setting<List<T>>()
 
 // Define the option

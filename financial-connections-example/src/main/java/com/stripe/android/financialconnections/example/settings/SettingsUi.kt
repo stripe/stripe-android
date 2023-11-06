@@ -59,7 +59,15 @@ private fun <T> Setting(
             )
         }
 
-        is MultipleChoiceSetting<*> -> TODO()
+        is MultipleChoiceSetting<*> -> MultiSelectSetting(
+            name = settingDefinition.displayName,
+            options = settingDefinition.options as List<Option<T>>,
+            selectedValues = settingDefinition.selectedOption as List<T>
+        ) {
+            onSettingsChanged(
+                playgroundSettings.withValue(settingDefinition as Setting<T>, it as T)
+            )
+        }
 
     }
 }
@@ -99,8 +107,8 @@ private fun <T> Setting(
 private fun <T> MultiSelectSetting(
     name: String,
     options: List<Option<T>>,
-    value: T,
-    onOptionChanged: (T) -> Unit
+    selectedValues: List<T>,
+    onOptionChanged: (List<T>) -> Unit
 ) {
     Column {
         Row {
@@ -112,33 +120,22 @@ private fun <T> MultiSelectSetting(
         }
 
         Row {
-            val selectedOptions = remember(value) {
-                options.filter { option -> option.value == value }
-            }
             options.forEach { option ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .selectable(
-                            selected = selectedOptions.contains(option),
-                            onClick = {
-                                val newOptions = if (selectedOptions.contains(option)) {
-                                    selectedOptions - option
-                                } else {
-                                    selectedOptions + option
-                                }
-                                onOptionChanged(
-                                    newOptions
-                                        .map { it.value }
-                                        .first()
-                                )
-                            }
-                        )
                         .padding(end = 5.dp)
                 ) {
                     Checkbox(
-                        checked = selectedOptions.contains(option),
-                        onCheckedChange = null,
+                        checked = selectedValues.contains(option.value),
+                        onCheckedChange = {
+                            val newOptions = if (selectedValues.contains(option.value)) {
+                                selectedValues - option.value
+                            } else {
+                                selectedValues + option.value
+                            }
+                            onOptionChanged(newOptions)
+                        },
                     )
                     Text(
                         text = option.name,

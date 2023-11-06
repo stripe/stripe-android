@@ -133,6 +133,7 @@ internal data class PlaygroundSettings(
             PublicKeySetting(),
             PrivateKeySetting(),
             EmailDefinition(),
+            PermissionsSetting()
         )
     }
 }
