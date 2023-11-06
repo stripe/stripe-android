@@ -4,8 +4,9 @@ import com.stripe.android.financialconnections.example.data.model.LinkAccountSes
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
 internal data class PublicKeySetting(
-    override var selectedOption: String? = null
-) : SingleChoiceSetting<String?>(
+    override val selectedOption: String? = null,
+    override val key: String = "pk"
+) : Saveable<String?>, SingleChoiceSetting<String?>(
     displayName = "Publishable Key",
     options = emptyList(),
     selectedOption = selectedOption
@@ -25,4 +26,8 @@ internal data class PublicKeySetting(
     ): List<Setting<*>> {
         return replace(currentSettings, this.copy(selectedOption = value))
     }
+
+    override fun convertToString(value: String?): String? = value
+
+    override fun convertToValue(value: String): String = value
 }

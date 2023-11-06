@@ -5,8 +5,9 @@ import com.stripe.android.financialconnections.example.data.model.LinkAccountSes
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
 data class NativeSetting(
-    override var selectedOption: NativeOverride = NativeOverride.None
-) : SingleChoiceSetting<NativeOverride>(
+    override val selectedOption: NativeOverride = NativeOverride.None,
+    override val key: String = "financial_connections_override_native",
+) : Saveable<NativeOverride>, SingleChoiceSetting<NativeOverride>(
     displayName = "Merchant",
     options = listOf(
         Option("None", NativeOverride.None),
@@ -27,10 +28,7 @@ data class NativeSetting(
         return replace(currentSettings, this.copy(selectedOption = value))
     }
 
-//        override val key: String = "financial_connections_override_native"
-//        override val defaultValue: NativeOverride = NativeOverride.None
-//
-//        override fun convertToValue(value: String): NativeOverride = NativeOverride.fromApiValue(value)
-//
-//        override fun convertToString(value: NativeOverride): String = value.apiValue
+    override fun convertToValue(value: String): NativeOverride = NativeOverride.fromApiValue(value)
+
+    override fun convertToString(value: NativeOverride): String = value.apiValue
 }

@@ -4,12 +4,12 @@ import com.stripe.android.financialconnections.example.data.model.LinkAccountSes
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
 internal data class PrivateKeySetting(
-    override var selectedOption: String? = null
-) : SingleChoiceSetting<String?>(
+    override val selectedOption: String? = null,
+    override val key: String = "sk"
+) : Saveable<String?>, SingleChoiceSetting<String?>(
     displayName = "Private Key",
     options = emptyList(),
     selectedOption = selectedOption
-
 ) {
     override fun lasRequest(body: LinkAccountSessionBody): LinkAccountSessionBody = body.copy(
         secretKey = selectedOption
@@ -25,4 +25,8 @@ internal data class PrivateKeySetting(
     ): List<Setting<*>> {
         return replace(currentSettings, this.copy(selectedOption = value))
     }
+
+    override fun convertToString(value: String?): String? = value
+
+    override fun convertToValue(value: String): String = value
 }

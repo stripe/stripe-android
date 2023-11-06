@@ -6,7 +6,6 @@ import android.net.Uri
 import android.util.Log
 import androidx.core.content.edit
 import com.stripe.android.financialconnections.example.BuildConfig
-import com.stripe.android.financialconnections.example.data.Settings
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 import kotlinx.serialization.encodeToString
@@ -96,12 +95,13 @@ internal data class PlaygroundSettings(
             for (definition in allSettingDefinitions) {
                 val saveable = definition.saveable()
                 val savedValue = saveable?.key?.let { jsonObject[it] as? JsonPrimitive }
+                @Suppress("UNCHECKED_CAST")
+                val settingsDefinition = definition as Setting<Any?>
                 if (savedValue?.isString == true) {
                     // add item to mutable list
-                    @Suppress("UNCHECKED_CAST")
-                    settings = settings.withValue(definition, savedValue.content)
+                    settings = settings.withValue(settingsDefinition, saveable.convertToValue(savedValue.content))
                 } else if (definition.selectedOption != null) {
-                    settings = settings.withValue(definition, definition.selectedOption)
+                    settings = settings.withValue(settingsDefinition, definition.selectedOption)
                 }
             }
 
@@ -109,19 +109,21 @@ internal data class PlaygroundSettings(
         }
 
         fun createFromDeeplinkUri(uri: Uri): PlaygroundSettings {
-            val settings: List<Setting<*>> = mutableListOf()
+            var settings = PlaygroundSettings(emptyList())
 
             for (definition in allSettingDefinitions) {
                 val saveable = definition.saveable()
                 val savedValue: String? = saveable?.key?.let { uri.getQueryParameter(it) }
+                @Suppress("UNCHECKED_CAST")
+                val settingsDefinition = definition as Setting<Any?>
                 if (savedValue != null) {
-                    settings + saveable.convertToValue(savedValue)
+                    settings = settings.withValue(settingsDefinition, savedValue)
                 } else if (definition.selectedOption != null) {
-                    settings + definition
+                    settings = settings.withValue(settingsDefinition, definition.selectedOption)
                 }
             }
 
-            return PlaygroundSettings(settings)
+            return settings
         }
 
         private val allSettingDefinitions: List<Setting<*>> = listOf(

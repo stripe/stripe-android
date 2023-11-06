@@ -4,9 +4,8 @@ import com.stripe.android.financialconnections.example.Merchant
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
-// Define the specific class for MerchantSetting
 data class MerchantSetting(
-    override var selectedOption: Merchant = Merchant.Test,
+    override val selectedOption: Merchant = Merchant.Test,
     override val key: String = "merchant"
 ) : Saveable<Merchant>, SingleChoiceSetting<Merchant>(
     displayName = "Merchant",
@@ -22,15 +21,25 @@ data class MerchantSetting(
     )
 
     override fun valueUpdated(currentSettings: List<Setting<*>>, value: Merchant): List<Setting<*>> {
-        val updatedSettings = replace(currentSettings, this.copy(selectedOption = value))
-        return if (value == Merchant.Other) {
-            updatedSettings + PublicKeySetting("") + PrivateKeySetting("")
-        } else {
-            updatedSettings.filterNot { it is PublicKeySetting || it is PrivateKeySetting }
-        }
+        val merchantSettings = listOfNotNull(
+            copy(selectedOption = value),
+            PublicKeySetting("").takeIf { value == Merchant.Other },
+            PrivateKeySetting("").takeIf { value == Merchant.Other }
+        )
+        val updatedSettings = currentSettings
+            .filter { it !is PublicKeySetting && it !is PrivateKeySetting }
+            .flatMap { setting ->
+                when (setting) {
+                    is MerchantSetting -> merchantSettings
+                    else -> listOf(setting)
+                }
+            }
+
+        return if (currentSettings.none { it is MerchantSetting }) updatedSettings + merchantSettings else updatedSettings
+
     }
 
-    override fun convertToString(value: Merchant): String? = value.apiValue
+    override fun convertToString(value: Merchant): String = value.apiValue
 
     override fun convertToValue(value: String): Merchant = Merchant.fromApiValue(value)
 }

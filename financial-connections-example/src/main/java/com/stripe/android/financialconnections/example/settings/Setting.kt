@@ -9,8 +9,10 @@ sealed class Setting<T> {
 
     abstract fun valueUpdated(currentSettings: List<Setting<*>>, value: T): List<Setting<*>>
 
-    fun replace(currentSettings: List<Setting<*>>, newSetting: Setting<*>): List<Setting<*>> = currentSettings
-        .map { if (it::class == newSetting::class) { newSetting } else { it } }
+    fun replace(currentSettings: List<Setting<*>>, newSetting: Setting<*>): List<Setting<*>> {
+        val settingsReplaced = currentSettings.map { if(it::class == newSetting::class) newSetting else it }
+        return if (settingsReplaced.contains(newSetting)) settingsReplaced else settingsReplaced + newSetting
+    }
 
     fun saveable(): Saveable<T>? {
         return this as? Saveable<T>?
