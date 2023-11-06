@@ -57,6 +57,8 @@
   <string name="stripe_paymentsheet_save">Enregistrer</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_save_a_new_payment_method">Enregistrer un nouveau moyen de paiement</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_save_bank_title">Enregistrez votre compte bancaire en quelques clics.</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Enregistrer pour les prochains achats</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->

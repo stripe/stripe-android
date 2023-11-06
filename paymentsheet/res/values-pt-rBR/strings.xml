@@ -57,6 +57,8 @@
   <string name="stripe_paymentsheet_save">Salvar</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_save_a_new_payment_method">Salvar nova forma de pagamento</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_save_bank_title">Salve sua conta bancária em poucos passos.</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Salvar para pagamentos futuros</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
