@@ -343,7 +343,10 @@ internal class CustomerSheetViewModel @Inject constructor(
                         ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
                 ),
                 selectedPaymentMethod = paymentMethod,
-                primaryButtonLabel = if (paymentMethod.code == PaymentMethod.Type.USBankAccount.code) {
+                primaryButtonLabel = if (
+                    paymentMethod.code == PaymentMethod.Type.USBankAccount.code &&
+                    it.bankAccountResult !is CollectBankAccountResultInternal.Completed
+                ) {
                     resolvableString(
                         id = UiCoreR.string.stripe_continue_button_label
                     )
@@ -579,13 +582,11 @@ internal class CustomerSheetViewModel @Inject constructor(
             val uiState = callback(it.customPrimaryButtonUiState)
             if (uiState != null) {
                 it.copy(
-                    primaryButtonLabel = resolvableString(uiState.label),
                     primaryButtonEnabled = uiState.enabled,
                     customPrimaryButtonUiState = uiState,
                 )
             } else {
                 it.copy(
-                    primaryButtonLabel = it.primaryButtonLabel,
                     primaryButtonEnabled = it.formViewData.completeFormValues != null && !it.isProcessing,
                     customPrimaryButtonUiState = null,
                 )
@@ -605,7 +606,12 @@ internal class CustomerSheetViewModel @Inject constructor(
     private fun onCollectUSBankAccountResult(bankAccountResult: CollectBankAccountResultInternal) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
-                bankAccountResult = bankAccountResult
+                bankAccountResult = bankAccountResult,
+                primaryButtonLabel = if (bankAccountResult is CollectBankAccountResultInternal.Completed) {
+                    resolvableString(id = R.string.stripe_paymentsheet_save)
+                } else {
+                    resolvableString(id = UiCoreR.string.stripe_continue_button_label)
+                },
             )
         }
     }
