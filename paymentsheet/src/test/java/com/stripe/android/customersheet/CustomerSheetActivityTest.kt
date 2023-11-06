@@ -291,6 +291,7 @@ internal class CustomerSheetActivityTest {
             primaryButtonEnabled = false,
             customPrimaryButtonUiState = null,
             bankAccountResult = null,
+            draftPaymentSelection = null,
         )
     }
 

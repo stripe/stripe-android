@@ -2050,15 +2050,14 @@ class CustomerSheetViewModelTest {
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     selectedPaymentMethod = LpmRepository.HardcodedCard,
-                    requiresMandate = false,
                 ),
             ),
         )
 
         viewModel.viewState.test {
             var viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.requiresMandate)
-                .isFalse()
+            assertThat(viewState.mandateText)
+                .isNull()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
@@ -2067,8 +2066,19 @@ class CustomerSheetViewModelTest {
             )
 
             viewState = awaitViewState()
-            assertThat(viewState.requiresMandate)
-                .isTrue()
+            assertThat(viewState.mandateText)
+                .isNull()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnUpdateMandateText(
+                    mandateText = "Mandate",
+                    showAbovePrimaryButton = false
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.mandateText)
+                .isNotNull()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
@@ -2077,8 +2087,8 @@ class CustomerSheetViewModelTest {
             )
 
             viewState = awaitViewState()
-            assertThat(viewState.requiresMandate)
-                .isFalse()
+            assertThat(viewState.mandateText)
+                .isNull()
         }
     }
 

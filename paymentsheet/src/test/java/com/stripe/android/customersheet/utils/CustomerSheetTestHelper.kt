@@ -107,6 +107,7 @@ internal object CustomerSheetTestHelper {
         primaryButtonEnabled = false,
         customPrimaryButtonUiState = null,
         bankAccountResult = null,
+        draftPaymentSelection = null,
     )
 
     internal fun mockedFormViewModel(
