@@ -8,83 +8,50 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.TextField as MaterialTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.VisualTransformation
-import com.stripe.android.uicore.elements.TextFieldColors
-import com.stripe.android.uicore.elements.TextFieldIcon
-import com.stripe.android.uicore.stripeColors
-import androidx.compose.material.TextField as MaterialTextField
 
 @Composable
 fun TextField(
     value: String,
     enabled: Boolean,
-    loading: Boolean,
     label: String?,
     placeholder: String?,
-    trailingIcon: TextFieldIcon?,
-    showOptionalLabel: Boolean,
-    shouldShowError: Boolean,
+    trailingIcon: (@Composable () -> Unit)?,
+    isError: Boolean,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
     onValueChange: (value: String) -> Unit = {},
-    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {}
 ) {
-    val colors = TextFieldColors(shouldShowError)
+    val colors = TextFieldColors(isError)
 
     MaterialTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = Modifier.fillMaxWidth(),
         enabled = enabled,
-        label = label?.let { label ->
+        label = label?.let {
             {
                 Label(
-                    value = label,
+                    value = it,
                     enabled = enabled
                 )
             }
         },
-        placeholder = placeholder?.let { placeholder ->
+        placeholder = placeholder?.let {
             {
                 Label(
-                    value = placeholder,
+                    value = it,
                     enabled = true
                 )
             }
         },
-//        trailingIcon = trailingIcon?.let {
-//            {
-//                Row {
-//                    when (it) {
-//                        is TextFieldIcon.Trailing -> {
-//                            TrailingIcon(it, loading)
-//                        }
-//
-//                        is TextFieldIcon.MultiTrailing -> {
-//                            Row(modifier = Modifier.padding(10.dp)) {
-//                                it.staticIcons.forEach {
-//                                    TrailingIcon(it, loading)
-//                                }
-//                                AnimatedIcons(icons = it.animatedIcons, loading = loading)
-//                            }
-//                        }
-//
-//                        is TextFieldIcon.Dropdown -> {
-//                            TrailingDropdown(
-//                                icon = it,
-//                                loading = loading,
-//                                onDropdownItemClicked = onDropdownItemClicked
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-//        },
-        isError = shouldShowError,
+        trailingIcon = trailingIcon,
+        isError = isError,
         visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
@@ -95,22 +62,22 @@ fun TextField(
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun TextFieldColors(
-    shouldShowError: Boolean = false
+private fun TextFieldColors(
+    isError: Boolean = false
 ) = TextFieldDefaults.textFieldColors(
-    textColor = if (shouldShowError) {
-        MaterialTheme.colors.error
+    textColor = if (isError) {
+        ElementsTheme.colors.error
     } else {
-        MaterialTheme.stripeColors.onComponent
+        ElementsTheme.colors.onComponent
     },
-    unfocusedLabelColor = MaterialTheme.stripeColors.placeholderText,
-    focusedLabelColor = MaterialTheme.stripeColors.placeholderText,
-    placeholderColor = MaterialTheme.stripeColors.placeholderText,
-    backgroundColor = MaterialTheme.stripeColors.component,
+    unfocusedLabelColor = ElementsTheme.colors.placeholder,
+    focusedLabelColor = ElementsTheme.colors.placeholder,
+    placeholderColor = ElementsTheme.colors.placeholder,
+    backgroundColor = ElementsTheme.colors.component,
     focusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = Color.Transparent,
     unfocusedIndicatorColor = Color.Transparent,
-    cursorColor = MaterialTheme.stripeColors.textCursor
+    cursorColor = ElementsTheme.colors.textCursor
 )
 
 @Composable
@@ -118,7 +85,7 @@ internal fun Label(
     value: String,
     enabled: Boolean
 ) {
-    val color = MaterialTheme.stripeColors.placeholderText
+    val color = ElementsTheme.colors.placeholder
 
     Text(
         text = value,

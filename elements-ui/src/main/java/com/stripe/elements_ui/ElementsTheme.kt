@@ -1,9 +1,10 @@
 package com.stripe.elements_ui
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.lightColors
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -85,6 +86,7 @@ data class ElementTypography(
 
 
 @Immutable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class ElementColors(
     val primary: Color,
     val surface: Color,
@@ -100,7 +102,6 @@ data class ElementColors(
     val componentDivider: Color,
     val onComponent: Color,
 ) {
-
     fun toMaterialColors(): Colors {
         return lightColors(
             primary = primary,
@@ -112,10 +113,46 @@ data class ElementColors(
     }
 }
 
-val LocalElementColors = staticCompositionLocalOf<ElementColors> {
-    error("No ElementColors provided")
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val lightElementColors = ElementColors(
+    primary = Color(0xFF007AFF),
+    surface = Color.White,
+    onSurface = Color.Black,
+    onPrimary = Color.White,
+    error = Color.Red,
+    component = Color.White,
+    componentBorder = Color(0x33787880),
+    componentDivider = Color(0x33787880),
+    onComponent = Color.Black,
+    subtitle = Color(0x99000000),
+    textCursor = Color.Black,
+    placeholder = Color(0x993C3C43),
+    appBarIcon = Color(0x99000000)
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val darkElementColors = ElementColors(
+    primary = Color(0xFF0074D4),
+    surface = Color(0xFF2E2E2E),
+    onSurface = Color.White,
+    onPrimary = Color.Black,
+    error = Color.Red,
+    component = Color.DarkGray,
+    componentBorder = Color(0xFF787880),
+    componentDivider = Color(0xFF787880),
+    onComponent = Color.White,
+    subtitle = Color(0x99FFFFFF),
+    textCursor = Color.White,
+    placeholder = Color(0x61FFFFFF),
+    appBarIcon = Color.White,
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalElementColors = staticCompositionLocalOf {
+    lightElementColors
 }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object ElementsTheme {
     val colors: ElementColors
         @Composable
@@ -123,25 +160,12 @@ object ElementsTheme {
 }
 
 @Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun ElementsTheme(
     isDark: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    val colors = ElementColors(
-        primary = Color(0xFF007AFF),
-        surface = Color.White,
-        onSurface = Color.Black,
-        onPrimary = Color.White,
-        component = Color.White,
-        componentBorder = Color(0x33787880),
-        componentDivider = Color(0x33787880),
-        onComponent = Color.Black,
-        error = Color.Red,
-        subtitle = Color(0x99000000),
-        textCursor = Color.Black,
-        placeholder = Color(0x993C3C43),
-        appBarIcon = Color(0x99000000),
-    )
+    val colors = if (isDark) darkElementColors else lightElementColors
 
     CompositionLocalProvider(
         LocalElementColors provides colors,
