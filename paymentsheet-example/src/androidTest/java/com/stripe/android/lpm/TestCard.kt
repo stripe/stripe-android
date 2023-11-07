@@ -1,26 +1,28 @@
 package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.BaseLpmTest
+import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.test.core.Billing
-import com.stripe.android.test.core.Customer
+import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-internal class TestCard : BaseLpmTest() {
+internal class TestCard : BasePlaygroundTest() {
     @Test
     fun testCard() {
         testDriver.confirmNewOrGuestComplete(
-            newUser.copy(
-                customer = Customer.New,
-                billing = Billing.On,
+            TestParameters.create(
                 paymentMethod = LpmRepository.HardcodedCard,
+            ).copy(
                 authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
-                saveCheckboxValue = false,
             )
         )
     }
@@ -28,18 +30,21 @@ internal class TestCard : BaseLpmTest() {
     @Test
     fun testCardWithCustomBillingDetailsCollection() {
         testDriver.confirmNewOrGuestComplete(
-            newUser.copy(
-                customer = Customer.New,
-                billing = Billing.On,
+            TestParameters.create(
                 paymentMethod = LpmRepository.HardcodedCard,
+            ) { settings ->
+                settings[DefaultBillingAddressSettingsDefinition] = true
+                settings[CollectNameSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                settings[CollectEmailSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                settings[CollectPhoneSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                settings[CollectAddressSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            }.copy(
                 authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
-                saveCheckboxValue = false,
-                attachDefaults = false,
-                collectName = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                collectEmail = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                collectPhone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                collectAddress = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             ),
         )
     }
@@ -47,9 +52,10 @@ internal class TestCard : BaseLpmTest() {
     @Test
     fun testCardInCustomFlow() {
         testDriver.confirmCustom(
-            newUser.copy(
+            TestParameters.create(
                 paymentMethod = LpmRepository.HardcodedCard,
-                saveCheckboxValue = true,
+            ).copy(
+                authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
             )
         )

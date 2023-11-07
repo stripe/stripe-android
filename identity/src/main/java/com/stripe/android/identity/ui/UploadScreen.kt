@@ -88,9 +88,7 @@ internal fun UploadScreen(
     @StringRes titleRes: Int,
     @StringRes contextRes: Int,
     frontInfo: DocumentUploadSideInfo,
-    backInfo: DocumentUploadSideInfo?,
-    shouldShowTakePhoto: Boolean,
-    shouldShowChoosePhoto: Boolean
+    backInfo: DocumentUploadSideInfo?
 ) {
     val localContext = LocalContext.current
     val verificationState by identityViewModel.verificationPage.observeAsState(Resource.loading())
@@ -108,6 +106,9 @@ internal fun UploadScreen(
         val backUploadState by identityViewModel.documentBackUploadedState.collectAsState()
         val collectedData by identityViewModel.collectedData.collectAsState()
         val missings by identityViewModel.missingRequirements.collectAsState()
+        val cameraPermissionGranted by identityViewModel.cameraPermissionGranted.collectAsState()
+        val shouldShowChoosePhoto = !it.documentCapture.requireLiveCapture
+
         LaunchedEffect(Unit) {
             launch {
                 identityViewModel.collectDataForDocumentUploadScreen(
@@ -187,7 +188,7 @@ internal fun UploadScreen(
             if (shouldShowFrontDialog) {
                 UploadImageDialog(
                     uploadInfo = frontInfo,
-                    shouldShowTakePhoto = shouldShowTakePhoto,
+                    shouldShowTakePhoto = cameraPermissionGranted,
                     shouldShowChoosePhoto = shouldShowChoosePhoto,
                     onPhotoSelected = { uploadMethod ->
                         when (uploadMethod) {
@@ -254,7 +255,7 @@ internal fun UploadScreen(
                 if (shouldShowBackDialog) {
                     UploadImageDialog(
                         uploadInfo = backInfo,
-                        shouldShowTakePhoto = shouldShowTakePhoto,
+                        shouldShowTakePhoto = cameraPermissionGranted,
                         shouldShowChoosePhoto = shouldShowChoosePhoto,
                         onPhotoSelected = { uploadMethod ->
                             when (uploadMethod) {

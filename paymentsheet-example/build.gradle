@@ -40,8 +40,10 @@ dependencies {
     implementation libs.kotlin.serialization
     implementation libs.loggingInterceptor
     implementation libs.material
+    implementation libs.okio
     implementation libs.places
     implementation libs.retrofitKotlinSerializationConverter
+    implementation libs.zxing
 
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation libs.compose.uiTestManifest
@@ -81,6 +83,8 @@ android {
         versionCode 11
 
         testInstrumentationRunner "com.karumi.shot.ShotTestRunner"
+
+        buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
 
         manifestPlaceholders = [
                 BACKEND_URL: getBackendUrl(),

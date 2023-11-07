@@ -96,13 +96,6 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
-    internal val NETBANKING = PaymentMethodCreateParams.create(
-        netbanking = PaymentMethodCreateParams.Netbanking(
-            bank = "hdfc"
-        ),
-        billingDetails = BILLING_DETAILS
-    )
-
     internal val US_BANK_ACCOUNT = PaymentMethodCreateParams.create(
         usBankAccount = PaymentMethodCreateParams.USBankAccount(
             accountNumber = "000123456789",
@@ -114,6 +107,18 @@ internal object PaymentMethodCreateParamsFixtures {
     )
 
     internal val CASH_APP_PAY = PaymentMethodCreateParams.createCashAppPay(
+        billingDetails = BILLING_DETAILS,
+    )
+
+    internal val REVOLUT_PAY = PaymentMethodCreateParams.createRevolutPay(
+        billingDetails = BILLING_DETAILS,
+    )
+
+    internal val SWISH = PaymentMethodCreateParams.createSwish(
+        billingDetails = BILLING_DETAILS,
+    )
+
+    internal val MOBILE_PAY = PaymentMethodCreateParams.createMobilePay(
         billingDetails = BILLING_DETAILS,
     )
 

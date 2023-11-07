@@ -1,49 +1,49 @@
 lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
-cashapp, true, true, off_session, false, card/cashapp, false, false, not available, false
-cashapp, true, true, off_session, false, card/eps/cashapp, false, false, not available, false
-cashapp, true, false, off_session, false, card/cashapp, false, false, not available, false
-cashapp, true, false, off_session, false, card/eps/cashapp, false, false, not available, false
-cashapp, true, true, on_session, false, card/cashapp, false, false, not available, false
-cashapp, true, true, on_session, false, card/eps/cashapp, false, false, not available, false
-cashapp, true, false, on_session, false, card/cashapp, false, false, not available, false
-cashapp, true, false, on_session, false, card/eps/cashapp, false, false, not available, false
-cashapp, true, true, null, false, card/cashapp, false, true, oneTime, true
-cashapp, true, true, null, false, card/eps/cashapp, false, true, oneTime, true
-cashapp, true, false, null, false, card/cashapp, false, true, oneTime, true
-cashapp, true, false, null, false, card/eps/cashapp, false, true, oneTime, true
-cashapp, false, true, off_session, false, card/cashapp, false, false, not available, false
-cashapp, false, true, off_session, false, card/eps/cashapp, false, false, not available, false
-cashapp, false, false, off_session, false, card/cashapp, false, false, not available, false
-cashapp, false, false, off_session, false, card/eps/cashapp, false, false, not available, false
-cashapp, false, true, on_session, false, card/cashapp, false, false, not available, false
-cashapp, false, true, on_session, false, card/eps/cashapp, false, false, not available, false
-cashapp, false, false, on_session, false, card/cashapp, false, false, not available, false
-cashapp, false, false, on_session, false, card/eps/cashapp, false, false, not available, false
-cashapp, false, true, null, false, card/cashapp, false, true, oneTime, true
-cashapp, false, true, null, false, card/eps/cashapp, false, true, oneTime, true
-cashapp, false, false, null, false, card/cashapp, false, true, oneTime, true
-cashapp, false, false, null, false, card/eps/cashapp, false, true, oneTime, true
-cashapp, true, true, off_session, true, card/cashapp, false, false, not available, false
-cashapp, true, true, off_session, true, card/eps/cashapp, false, false, not available, false
-cashapp, true, false, off_session, true, card/cashapp, false, false, not available, false
-cashapp, true, false, off_session, true, card/eps/cashapp, false, false, not available, false
-cashapp, true, true, on_session, true, card/cashapp, false, false, not available, false
-cashapp, true, true, on_session, true, card/eps/cashapp, false, false, not available, false
-cashapp, true, false, on_session, true, card/cashapp, false, false, not available, false
-cashapp, true, false, on_session, true, card/eps/cashapp, false, false, not available, false
-cashapp, true, true, null, true, card/cashapp, false, true, oneTime, true
-cashapp, true, true, null, true, card/eps/cashapp, false, true, oneTime, true
-cashapp, true, false, null, true, card/cashapp, false, true, oneTime, true
-cashapp, true, false, null, true, card/eps/cashapp, false, true, oneTime, true
-cashapp, false, true, off_session, true, card/cashapp, false, false, not available, false
-cashapp, false, true, off_session, true, card/eps/cashapp, false, false, not available, false
-cashapp, false, false, off_session, true, card/cashapp, false, false, not available, false
-cashapp, false, false, off_session, true, card/eps/cashapp, false, false, not available, false
-cashapp, false, true, on_session, true, card/cashapp, false, false, not available, false
-cashapp, false, true, on_session, true, card/eps/cashapp, false, false, not available, false
-cashapp, false, false, on_session, true, card/cashapp, false, false, not available, false
-cashapp, false, false, on_session, true, card/eps/cashapp, false, false, not available, false
-cashapp, false, true, null, true, card/cashapp, false, true, oneTime, true
-cashapp, false, true, null, true, card/eps/cashapp, false, true, oneTime, true
-cashapp, false, false, null, true, card/cashapp, false, true, oneTime, true
-cashapp, false, false, null, true, card/eps/cashapp, false, true, oneTime, true
+cashapp, true, true, off_session, false, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, true, off_session, false, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, false, off_session, false, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, false, off_session, false, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, true, on_session, false, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, true, on_session, false, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, false, on_session, false, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, false, on_session, false, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, true, null, false, card/cashapp, true, true, userSelectedSave, true
+cashapp, true, true, null, false, card/eps/cashapp, true, true, userSelectedSave, true
+cashapp, true, false, null, false, card/cashapp, true, true, userSelectedSave, true
+cashapp, true, false, null, false, card/eps/cashapp, true, true, userSelectedSave, true
+cashapp, false, true, off_session, false, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, true, off_session, false, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, false, off_session, false, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, false, off_session, false, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, true, on_session, false, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, true, on_session, false, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, false, on_session, false, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, false, on_session, false, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, true, null, false, card/cashapp, true, true, oneTime, true
+cashapp, false, true, null, false, card/eps/cashapp, true, true, oneTime, true
+cashapp, false, false, null, false, card/cashapp, true, true, oneTime, true
+cashapp, false, false, null, false, card/eps/cashapp, true, true, oneTime, true
+cashapp, true, true, off_session, true, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, true, off_session, true, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, false, off_session, true, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, false, off_session, true, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, true, on_session, true, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, true, on_session, true, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, false, on_session, true, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, false, on_session, true, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, true, true, null, true, card/cashapp, true, true, userSelectedSave, true
+cashapp, true, true, null, true, card/eps/cashapp, true, true, userSelectedSave, true
+cashapp, true, false, null, true, card/cashapp, true, true, userSelectedSave, true
+cashapp, true, false, null, true, card/eps/cashapp, true, true, userSelectedSave, true
+cashapp, false, true, off_session, true, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, true, off_session, true, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, false, off_session, true, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, false, off_session, true, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, true, on_session, true, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, true, on_session, true, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, false, on_session, true, card/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, false, on_session, true, card/eps/cashapp, true, true, merchantRequiredSave, true
+cashapp, false, true, null, true, card/cashapp, true, true, oneTime, true
+cashapp, false, true, null, true, card/eps/cashapp, true, true, oneTime, true
+cashapp, false, false, null, true, card/cashapp, true, true, oneTime, true
+cashapp, false, false, null, true, card/eps/cashapp, true, true, oneTime, true

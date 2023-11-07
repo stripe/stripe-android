@@ -25,7 +25,8 @@ sealed class LinkPaymentDetails(
      * A [ConsumerPaymentDetails.PaymentDetails] that is already saved to the consumer's account.
      */
     @Parcelize
-    internal class Saved(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class Saved(
         override val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         override val paymentMethodCreateParams: PaymentMethodCreateParams
     ) : LinkPaymentDetails(paymentDetails, paymentMethodCreateParams)
@@ -36,6 +37,7 @@ sealed class LinkPaymentDetails(
      * fields with the user-entered values.
      */
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class New(
         override val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         override val paymentMethodCreateParams: PaymentMethodCreateParams,

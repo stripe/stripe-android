@@ -35,6 +35,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -158,6 +159,7 @@ class SelfieScreenTest {
             on { transitioner } doReturn faceDetectorTransitioner
         }
         testSelfieScanScreen(finishedState) {
+            verify(mockIdentityScanViewModel).stopScan(any())
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG)
                 .assertTextEquals(context.getString(R.string.stripe_selfie_captures))
 
@@ -188,9 +190,9 @@ class SelfieScreenTest {
         newDisplayState: IdentityScanState?,
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
-        newDisplayState?.let { newDisplayState ->
+        newDisplayState?.let { state ->
             displayStateChangedFlow.update {
-                newDisplayState to mock()
+                state to mock()
             }
         }
         composeTestRule.setContent {

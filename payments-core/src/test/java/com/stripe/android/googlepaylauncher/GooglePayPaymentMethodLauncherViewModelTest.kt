@@ -19,12 +19,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherViewModelSubcomponent
 import com.stripe.android.model.GooglePayFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -34,11 +29,8 @@ import com.stripe.android.testing.fakeCreationExtras
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -143,79 +135,23 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
-    fun `Factory gets initialized by Injector when Injector is available`() {
-        scenario.onFragment { fragment ->
-            val mockBuilder = mock<GooglePayPaymentMethodLauncherViewModelSubcomponent.Builder>()
-            val mockSubcomponent = mock<GooglePayPaymentMethodLauncherViewModelSubcomponent>()
-
-            whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
-            whenever(mockBuilder.savedStateHandle(any())).thenReturn(mockBuilder)
-            whenever(mockBuilder.args(any())).thenReturn(mockBuilder)
-            whenever(mockSubcomponent.viewModel).thenReturn(viewModel)
-
-            val injector = object : Injector {
-                override fun inject(injectable: Injectable<*>) {
-                    val factory = injectable as GooglePayPaymentMethodLauncherViewModel.Factory
-                    factory.subComponentBuilder = mockBuilder
-                }
-            }
-            val injectorKey = "testInjectorKey"
-            WeakMapInjectorRegistry.register(injector, injectorKey)
-
-            val factory = GooglePayPaymentMethodLauncherViewModel.Factory(
-                GooglePayPaymentMethodLauncherContract.Args(
-                    mock(),
-                    "usd",
-                    1099,
-                    null,
-                    GooglePayPaymentMethodLauncherContract.Args.InjectionParams(
-                        injectorKey,
-                        emptySet(),
-                        false,
-                        "key",
-                        null
-                    )
-                )
-            )
-
-            val factorySpy = spy(factory)
-            val createdViewModel = factorySpy.create(
-                modelClass = GooglePayPaymentMethodLauncherViewModel::class.java,
-                extras = fragment.fakeCreationExtras(),
-            )
-
-            verify(factorySpy, times(0)).fallbackInitialize(any())
-            assertThat(createdViewModel).isEqualTo(viewModel)
-
-            WeakMapInjectorRegistry.clear()
-        }
-    }
-
-    @Test
     fun `Factory gets initialized with fallback when no Injector is available`() {
         scenario.onFragment { fragment ->
             val application = ApplicationProvider.getApplicationContext<Application>()
-            val productUsage = setOf("TestProductUsage")
             val publishableKey = "publishable_key"
             PaymentConfiguration.init(application, publishableKey)
 
             val factory = GooglePayPaymentMethodLauncherViewModel.Factory(
-                GooglePayPaymentMethodLauncherContract.Args(
-                    GooglePayPaymentMethodLauncher.Config(
+                GooglePayPaymentMethodLauncherContractV2.Args(
+                    config = GooglePayPaymentMethodLauncher.Config(
                         GooglePayEnvironment.Test,
                         "US",
                         "merchant"
                     ),
-                    "usd",
-                    1099,
-                    null,
-                    GooglePayPaymentMethodLauncherContract.Args.InjectionParams(
-                        DUMMY_INJECTOR_KEY,
-                        productUsage,
-                        false,
-                        publishableKey,
-                        null
-                    )
+                    currencyCode = "usd",
+                    amount = 1099,
+                    label = null,
+                    transactionId = null,
                 )
             )
 
@@ -227,23 +163,15 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     extras = fragment.fakeCreationExtras(),
                 )
             )
-
-            verify(factorySpy).fallbackInitialize(
-                argWhere {
-                    it.application == application &&
-                        it.productUsage == productUsage &&
-                        it.publishableKey == publishableKey
-                }
-            )
         }
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
-            options: ApiRequest.Options
-        ): PaymentMethod {
-            return PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            options: ApiRequest.Options,
+        ): Result<PaymentMethod> {
+            return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
     }
 
@@ -256,7 +184,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     private companion object {
-        val ARGS = GooglePayPaymentMethodLauncherContract.Args(
+        val ARGS = GooglePayPaymentMethodLauncherContractV2.Args(
             GooglePayPaymentMethodLauncher.Config(
                 GooglePayEnvironment.Test,
                 merchantCountryCode = "us",

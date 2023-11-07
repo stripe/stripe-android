@@ -5,7 +5,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 
-internal class FakeCustomerRepository(
+internal open class FakeCustomerRepository(
     private val paymentMethods: List<PaymentMethod> = emptyList(),
     private val customer: Customer? = null,
     private val onDetachPaymentMethod: () -> Result<PaymentMethod> = {
@@ -25,8 +25,9 @@ internal class FakeCustomerRepository(
 
     override suspend fun getPaymentMethods(
         customerConfig: PaymentSheet.CustomerConfiguration,
-        types: List<PaymentMethod.Type>
-    ): List<PaymentMethod> = paymentMethods
+        types: List<PaymentMethod.Type>,
+        silentlyFail: Boolean,
+    ): Result<List<PaymentMethod>> = Result.success(paymentMethods)
 
     override suspend fun detachPaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,

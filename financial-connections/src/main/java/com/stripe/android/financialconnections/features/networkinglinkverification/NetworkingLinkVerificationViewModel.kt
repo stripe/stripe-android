@@ -10,25 +10,28 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.ConsumerNotFoundError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.LookupConsumerSession
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.NetworkedAccountsRetrieveMethodError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.StartVerificationSessionError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationSuccess
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationSuccessNoAccounts
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.ConsumerNotFoundError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.LookupConsumerSession
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.NetworkedAccountsRetrieveMethodError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.StartVerificationSessionError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationSuccess
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationSuccessNoAccounts
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.ConfirmVerification
+import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
-import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.PartnerAccountsList
+import com.stripe.android.financialconnections.model.NetworkedAccountsList
+import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
+import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -45,8 +48,8 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     private val getManifest: GetManifest,
     private val confirmVerification: ConfirmVerification,
     private val markLinkVerified: MarkLinkVerified,
-    private val pollNetworkedAccounts: PollNetworkedAccounts,
-    private val goNext: GoNext,
+    private val fetchNetworkedAccounts: FetchNetworkedAccounts,
+    private val navigationManager: NavigationManager,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
     private val logger: Logger
@@ -64,7 +67,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
                         verificationType = VerificationType.SMS,
                         onConsumerNotFound = {
                             analyticsTracker.track(VerificationError(PANE, ConsumerNotFoundError))
-                            goNext(Pane.INSTITUTION_PICKER)
+                            navigationManager.tryNavigateTo(InstitutionPicker(referrer = PANE))
                         },
                         onLookupError = { error ->
                             analyticsTracker.track(VerificationError(PANE, LookupConsumerSession))
@@ -106,8 +109,12 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
                 }
             },
             onFail = { error ->
-                logger.error("Error starting verification", error)
-                analyticsTracker.track(Error(PANE, error))
+                analyticsTracker.logError(
+                    extraMessage = "Error starting verification",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
             },
         )
     }
@@ -119,7 +126,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
             verificationCode = otp
         )
         val updatedManifest = markLinkVerified()
-        runCatching { pollNetworkedAccounts(payload.consumerSessionClientSecret) }
+        runCatching { fetchNetworkedAccounts(payload.consumerSessionClientSecret) }
             .fold(
                 onSuccess = { onNetworkedAccountsSuccess(it, updatedManifest) },
                 onFailure = { onNetworkedAccountsFailed(it, updatedManifest) }
@@ -130,24 +137,28 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         error: Throwable,
         updatedManifest: FinancialConnectionsSessionManifest
     ) {
-        logger.error("Error fetching networked accounts", error)
-        analyticsTracker.track(Error(PANE, error))
+        analyticsTracker.logError(
+            extraMessage = "Error fetching networked accounts",
+            error = error,
+            logger = logger,
+            pane = PANE
+        )
         analyticsTracker.track(VerificationError(PANE, NetworkedAccountsRetrieveMethodError))
-        goNext(updatedManifest.nextPane)
+        navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = PANE))
     }
 
     private suspend fun onNetworkedAccountsSuccess(
-        accounts: PartnerAccountsList,
+        accounts: NetworkedAccountsList,
         updatedManifest: FinancialConnectionsSessionManifest
     ) {
         if (accounts.data.isEmpty()) {
             // Networked user has no accounts
             analyticsTracker.track(VerificationSuccessNoAccounts(PANE))
-            goNext(updatedManifest.nextPane)
+            navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = PANE))
         } else {
             // Networked user has linked accounts
             analyticsTracker.track(VerificationSuccess(PANE))
-            goNext(Pane.LINK_ACCOUNT_PICKER)
+            navigationManager.tryNavigateTo(Destination.LinkAccountPicker(referrer = PANE))
         }
     }
 

@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.content.ActivityNotFoundException
 import android.content.Context
+import android.graphics.Color
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -96,6 +97,7 @@ internal class PaymentAuthWebViewActivityTest {
             requestCode = REQUEST_CODE,
             clientSecret = CLIENT_SECRET,
             url = "https://example.com",
+            statusBarColor = Color.RED,
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             isInstantApp = false
         )

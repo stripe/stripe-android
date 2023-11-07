@@ -1,6 +1,6 @@
 apply from: configs.androidLibrary
 
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'app.cash.paparazzi'
@@ -29,7 +29,7 @@ dependencies {
 
     // DI
     implementation libs.dagger
-    kapt libs.daggerCompiler
+    ksp libs.daggerCompiler
 
     // Compose
     implementation libs.compose.ui
@@ -39,7 +39,7 @@ dependencies {
     implementation libs.compose.materialIcons
     implementation libs.compose.activity
     implementation libs.compose.navigation
-    implementation libs.accompanist.navigationAnimation
+    implementation libs.accompanist.systemUiController
 
     // Other
     implementation libs.playServicesWallet
@@ -59,7 +59,9 @@ dependencies {
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.fragment
     testImplementation testLibs.androidx.junit
+    testImplementation testLibs.androidx.junitKtx
     testImplementation testLibs.androidx.lifecycle
+    testImplementation testLibs.androidx.testRules
     testImplementation testLibs.hamcrest
     testImplementation testLibs.junit
     testImplementation testLibs.json
@@ -77,6 +79,7 @@ dependencies {
     testImplementation testLibs.espresso.core
 
     androidTestImplementation project(':network-testing')
+    androidTestImplementation project(':payments-core-testing')
 
     androidTestImplementation libs.places
     androidTestImplementation testLibs.androidx.composeUi
@@ -91,6 +94,9 @@ dependencies {
     androidTestImplementation (testLibs.espresso.contrib) {
         exclude group: 'org.checkerframework', module: 'checker'
     }
+    androidTestImplementation testLibs.mockito.core
+    androidTestImplementation testLibs.mockito.inline
+    androidTestImplementation testLibs.mockito.kotlin
     androidTestImplementation testLibs.truth
 
     androidTestUtil testLibs.testOrchestrator
@@ -125,7 +131,10 @@ android {
     }
 
     kotlinOptions {
-        freeCompilerArgs += ["-opt-in=kotlinx.coroutines.FlowPreview"]
+        freeCompilerArgs += [
+                "-opt-in=kotlinx.coroutines.FlowPreview",
+                "-Xcontext-receivers",
+        ]
         if (gradle.ext.isCi) {
             kotlinOptions.allWarningsAsErrors = true
         }

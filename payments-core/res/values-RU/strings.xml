@@ -80,7 +80,7 @@
   <string name="stripe_becs_mandate_acceptance">\n    Предоставляя данные банковского счета и подтверждая платеж, вы принимаете данный запрос прямого списания средств и сервисное\n    соглашение на запрос прямого списания средств, а также уполномочиваете компанию\n    Stripe Payments Australia Pty Ltd, ACN 160 180 343, идентификационный номер пользователя службы прямого списания средств: 507156,\n    (“Stripe”) на списание средств с вашего счета через систему BECS от\n    имени %1$s (\"Продавец\") на суммы, отдельно указанные вам Продавцом.\n    Вы подтверждаете, что являетесь владельцем указанного ниже счета или\n    его уполномоченным представителем\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Номер счета</string>
-  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <!-- Error description for incomplete account number -->
   <string name="stripe_becs_widget_account_number_incomplete">Номер счета введен не полностью.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="stripe_becs_widget_account_number_required">Необходимо указать ваш номер счета.</string>
@@ -102,6 +102,10 @@
   <string name="stripe_becs_widget_name_required">Необходимо указать ваше имя.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">Отмена</string>
+  <!-- Title for a dropdown option when selecting a card brand -->
+  <string name="stripe_card_brand_choice_no_selection">Не выбрано</string>
+  <!-- Title for a dropdown where the customer can select a card brand -->
+  <string name="stripe_card_brand_choice_selection_header">Выберите бренд карты (необязательно)</string>
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">Карта отклонена</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->

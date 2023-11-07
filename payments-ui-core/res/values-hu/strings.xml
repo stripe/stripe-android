@@ -4,14 +4,34 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Fizetés <num_installments/>, egyenként <installment_price/> összegű kamatmentes részletben <img/> használatával]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Vissza</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Számlaszám</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">A számlaszáma hiányos.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Bankszámla</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Tudomásul veszem, hogy a Stripe beszedéseket végez a(z) %s nevében, és megerősítem, hogy én vagyok a számla tulajdonosa és az egyetlen személy, aki a terheléseket engedélyezheti erről a számláról.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Bankazonosító</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">A bankazonosítója hiányos.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Számlázási cím</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">BLIK kód</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Ha folytatja, azzal engedélyezi, hogy a(z) %1$s megterhelje a Cash App számláját ezzel a fizetéssel, és jövőbeli fizetésekkel a(z) %2$s feltételeinek megfelelően, ameddig az engedélyt vissza nem vonja. Ezt bármikor megváltoztathatja a Cash App beállításaiban.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kapcsolattartási adatok</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Folytatás</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">EPS Bank</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">A beírt IBAN-szám hiányos.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -20,6 +40,10 @@
   <string name="stripe_iban_invalid_start">Az IBAN-számának egy kétbetűs országkóddal kell kezdődnie.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">iDEAL bank</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">BLIK kódja hiányos.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">BLIK kódja érvénytelen.</string>
   <string name="stripe_invalid_email_address">Érvénytelen e-mail-cím: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Érvénytelen UPI-azonosító</string>
@@ -27,6 +51,8 @@
   <string name="stripe_klarna_buy_now_pay_later">Megvásárlás most, vagy fizetés később Klarnával.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Fizetés később Klarnával.</string>
+  <!-- Caption for Phone field on address form -->
+  <string name="stripe_konbini_confirmation_number_label">Telefon</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">A kártyán szereplő név</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
@@ -43,10 +69,14 @@
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS-beszedés</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kártya</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA beszedés</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">A fizetés megerősítésével a PayPalon engedélyezi, hogy a(z) %s a feltételeinek megfelelően a jövőbeni kifizetésekkel megterhelje a PayPal számláját.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">A fizetés megerősítésével a RevolutPayen engedélyezi, hogy a(z) %s a feltételeinek megfelelően a későbbi kifizetésekkel megterhelje a RevolutPay számláját.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Mentés a jövőbeni %s fizetésekhez</string>
   <!-- Button title to open camera to scan credit/debit card -->

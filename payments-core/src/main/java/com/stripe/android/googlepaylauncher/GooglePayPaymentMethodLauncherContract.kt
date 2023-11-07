@@ -1,6 +1,5 @@
 package com.stripe.android.googlepaylauncher
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
@@ -10,23 +9,16 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
 
+@Deprecated(
+    message = "This class isn't meant for public use and will be removed in a future release. " +
+        "Use GooglePayPaymentMethodLauncher directly.",
+)
 class GooglePayPaymentMethodLauncherContract :
     ActivityResultContract<GooglePayPaymentMethodLauncherContract.Args, GooglePayPaymentMethodLauncher.Result>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
-        val statusBarColor = when (context) {
-            is Activity -> context.window?.statusBarColor
-            else -> null
-        }
-
-        val extras = input.toBundle().apply {
-            if (statusBarColor != null) {
-                putInt(EXTRA_STATUS_BAR_COLOR, statusBarColor)
-            }
-        }
-
         return Intent(context, GooglePayPaymentMethodLauncherActivity::class.java)
-            .putExtras(extras)
+            .putExtras(input.toV2().toBundle())
     }
 
     override fun parseResult(
@@ -88,6 +80,14 @@ class GooglePayPaymentMethodLauncherContract :
 
     internal companion object {
         internal const val EXTRA_RESULT = "extra_result"
-        internal const val EXTRA_STATUS_BAR_COLOR = "extra_status_bar_color"
     }
+}
+
+private fun GooglePayPaymentMethodLauncherContract.Args.toV2(): GooglePayPaymentMethodLauncherContractV2.Args {
+    return GooglePayPaymentMethodLauncherContractV2.Args(
+        config = config,
+        currencyCode = currencyCode,
+        amount = amount.toLong(),
+        transactionId = transactionId,
+    )
 }

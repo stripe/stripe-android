@@ -16,5 +16,7 @@ internal data class AnalyticsState(
     val docBackUploadType: DocumentUploadParam.UploadMethod? = null,
     val docFrontModelScore: Float? = null,
     val docBackModelScore: Float? = null,
-    val selfieModelScore: Float? = null
+    val selfieModelScore: Float? = null,
+    val docFrontBlurScore: Float? = null,
+    val docBackBlurScore: Float? = null
 ) : Parcelable

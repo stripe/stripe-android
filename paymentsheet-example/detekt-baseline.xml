@@ -2,42 +2,28 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>ConstructorParameterNaming:PlaygroundCheckoutModel.kt$CheckoutRequest$@SerialName("automatic_payment_methods") val automatic_payment_methods: Boolean</ID>
-    <ID>ConstructorParameterNaming:PlaygroundCheckoutModel.kt$CheckoutRequest$@SerialName("merchant_country_code") val merchant_country_code: String</ID>
-    <ID>ConstructorParameterNaming:PlaygroundCheckoutModel.kt$CheckoutRequest$@SerialName("set_shipping_address") val set_shipping_address: Boolean</ID>
-    <ID>ConstructorParameterNaming:PlaygroundCheckoutModel.kt$CheckoutRequest$@SerialName("supported_payment_methods") val supported_payment_methods: List&lt;String>? = null</ID>
-    <ID>ConstructorParameterNaming:PlaygroundCheckoutModel.kt$CheckoutRequest$@SerialName("use_link") val use_link: Boolean</ID>
-    <ID>CyclomaticComplexMethod:PaymentSheetPlaygroundActivity.kt$PaymentSheetPlaygroundActivity$private fun setToggles( initialization: String?, customer: String?, link: Boolean, googlePay: Boolean, currency: String?, merchantCountryCode: String, mode: String?, shippingAddress: String, setDefaultBillingAddress: Boolean, setAutomaticPaymentMethods: Boolean, setDelayedPaymentMethods: Boolean, attachDefaultBillingAddress: Boolean, collectName: String, collectEmail: String, collectPhone: String, collectAddress: String, )</ID>
     <ID>EmptyFunctionBlock:DrawablePainter.kt$EmptyPainter${}</ID>
-    <ID>EmptyFunctionBlock:PaymentSheetPlaygroundActivity.kt$PaymentSheetPlaygroundActivity.&lt;no name provided>${}</ID>
     <ID>FunctionNaming:Receipt.kt$@Preview @Composable fun Receipt_Editable()</ID>
     <ID>FunctionNaming:Receipt.kt$@Preview @Composable fun Receipt_NotEditable()</ID>
-    <ID>LargeClass:PaymentSheetPlaygroundActivity.kt$PaymentSheetPlaygroundActivity : AppCompatActivity</ID>
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun Colors( currentAppearance: PaymentSheet.Appearance, updateAppearance: (PaymentSheet.Appearance) -> Unit, )</ID>
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun PrimaryButton( currentAppearance: PaymentSheet.Appearance, updateAppearance: (PaymentSheet.Appearance) -> Unit, )</ID>
-    <ID>LongMethod:PaymentSheetPlaygroundActivity.kt$PaymentSheetPlaygroundActivity$@OptIn(ExperimentalPaymentSheetDecouplingApi::class) override fun onCreate(savedInstanceState: Bundle?)</ID>
-    <ID>LongMethod:PaymentSheetPlaygroundActivity.kt$PaymentSheetPlaygroundActivity$private fun setToggles( initialization: String?, customer: String?, link: Boolean, googlePay: Boolean, currency: String?, merchantCountryCode: String, mode: String?, shippingAddress: String, setDefaultBillingAddress: Boolean, setAutomaticPaymentMethods: Boolean, setDelayedPaymentMethods: Boolean, attachDefaultBillingAddress: Boolean, collectName: String, collectEmail: String, collectPhone: String, collectAddress: String, )</ID>
-    <ID>LongMethod:PaymentSheetPlaygroundActivity.kt$PaymentSheetPlaygroundActivity$private fun startShippingAddressCollection()</ID>
-    <ID>LongMethod:PaymentSheetPlaygroundViewModel.kt$PaymentSheetPlaygroundViewModel$suspend fun getSavedToggleState(): SavedToggles</ID>
     <ID>LongMethod:Receipt.kt$@Composable fun Receipt( isLoading: Boolean, cartState: CartState, isEditable: Boolean = false, onQuantityChanged: (CartProduct.Id, Int) -> Unit = { _, _ -> }, bottomContent: @Composable () -> Unit, )</ID>
     <ID>MagicNumber:AppearanceBottomSheetDialogFragment.kt$16</ID>
     <ID>MagicNumber:CartProduct.kt$100</ID>
     <ID>MagicNumber:DrawablePainter.kt$DrawablePainter$23</ID>
     <ID>MagicNumber:DrawablePainter.kt$DrawablePainter$255</ID>
     <ID>MagicNumber:Payment.kt$0.5f</ID>
-    <ID>MaxLineLength:PaymentSheetPlaygroundActivity.kt$PaymentSheetPlaygroundActivity$get() = viewBinding.allowsDelayedPaymentMethodsRadioGroup.checkedRadioButtonId == R.id.allowsDelayedPaymentMethods_on_button</ID>
-    <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:147</ID>
-    <ID>PackageNaming:CompleteFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.complete_flow</ID>
-    <ID>PackageNaming:CompleteFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.complete_flow</ID>
-    <ID>PackageNaming:CompleteFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.complete_flow</ID>
-    <ID>PackageNaming:CustomFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.custom_flow</ID>
-    <ID>PackageNaming:CustomFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.custom_flow</ID>
-    <ID>PackageNaming:CustomFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.custom_flow</ID>
-    <ID>PackageNaming:ServerSideConfirmationCompleteFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow</ID>
-    <ID>PackageNaming:ServerSideConfirmationCompleteFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow</ID>
-    <ID>PackageNaming:ServerSideConfirmationCompleteFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow</ID>
-    <ID>PackageNaming:ServerSideConfirmationCustomFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow</ID>
-    <ID>PackageNaming:ServerSideConfirmationCustomFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow</ID>
-    <ID>PackageNaming:ServerSideConfirmationCustomFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow</ID>
+    <ID>PackageNaming:CompleteFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow</ID>
+    <ID>PackageNaming:CompleteFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow</ID>
+    <ID>PackageNaming:CompleteFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow</ID>
+    <ID>PackageNaming:CustomFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow</ID>
+    <ID>PackageNaming:CustomFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow</ID>
+    <ID>PackageNaming:CustomFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow</ID>
+    <ID>PackageNaming:ServerSideConfirmationCompleteFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow</ID>
+    <ID>PackageNaming:ServerSideConfirmationCompleteFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow</ID>
+    <ID>PackageNaming:ServerSideConfirmationCompleteFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow</ID>
+    <ID>PackageNaming:ServerSideConfirmationCustomFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow</ID>
+    <ID>PackageNaming:ServerSideConfirmationCustomFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow</ID>
+    <ID>PackageNaming:ServerSideConfirmationCustomFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow</ID>
   </CurrentIssues>
 </SmellBaseline>

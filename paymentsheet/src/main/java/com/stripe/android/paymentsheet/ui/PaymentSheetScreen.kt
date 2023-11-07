@@ -3,11 +3,13 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,17 +20,15 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentSheetPrimaryButtonBinding
-import com.stripe.android.paymentsheet.state.WalletsContainerState
+import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.text.Html
 
 @Composable
 internal fun PaymentSheetScreen(
@@ -38,32 +38,21 @@ internal fun PaymentSheetScreen(
     val contentVisible by viewModel.contentVisible.collectAsState()
     val processing by viewModel.processing.collectAsState()
 
-    val screen = viewModel.currentScreen.collectAsState().value
-    val paymentMethods = viewModel.paymentMethods.collectAsState().value
-    val isLiveMode = viewModel.stripeIntent.collectAsState().value?.isLiveMode
-    val isProcessing = viewModel.processing.collectAsState().value
-    val isEditing = viewModel.editing.collectAsState().value
+    val topBarState by viewModel.topBarState.collectAsState()
 
     DismissKeyboardOnProcessing(processing)
 
     PaymentSheetScaffold(
         topBar = {
             PaymentSheetTopBar(
-                screen = screen,
-                showEditMenu = !paymentMethods.isNullOrEmpty(),
-                isLiveMode = isLiveMode,
-                isProcessing = isProcessing,
-                isEditing = isEditing,
+                state = topBarState,
                 handleBackPressed = viewModel::handleBackPressed,
                 toggleEditing = viewModel::toggleEditing,
             )
         },
-        content = { scrollModifier ->
-            if (contentVisible) {
-                PaymentSheetScreenContent(
-                    viewModel = viewModel,
-                    modifier = scrollModifier,
-                )
+        content = {
+            AnimatedVisibility(visible = contentVisible) {
+                PaymentSheetScreenContent(viewModel = viewModel)
             }
         },
         modifier = modifier,
@@ -88,20 +77,14 @@ internal fun PaymentSheetScreenContent(
     modifier: Modifier = Modifier,
 ) {
     val headerText by viewModel.headerText.collectAsState(null)
+    val walletsState by viewModel.walletsState.collectAsState()
     val buyButtonState by viewModel.buyButtonState.collectAsState(initial = null)
-
     val currentScreen by viewModel.currentScreen.collectAsState()
-    val notes by viewModel.notesText.collectAsState()
-
-    val bottomPadding = dimensionResource(
-        R.dimen.stripe_paymentsheet_button_container_spacing_bottom
-    )
+    val mandateText by viewModel.mandateText.collectAsState()
 
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    Column(
-        modifier = modifier.padding(bottom = bottomPadding),
-    ) {
+    Column(modifier) {
         headerText?.let { text ->
             H4Text(
                 text = stringResource(text),
@@ -111,12 +94,27 @@ internal fun PaymentSheetScreenContent(
             )
         }
 
-        Wallet(viewModel)
+        walletsState?.let { state ->
+            Wallet(
+                state = state,
+                onGooglePayPressed = viewModel::checkoutWithGooglePay,
+                onLinkPressed = viewModel::handleLinkPressed,
+            )
+        }
 
-        currentScreen.Content(
-            viewModel = viewModel,
-            modifier = Modifier.padding(bottom = 8.dp),
-        )
+        Box(modifier = Modifier.animateContentSize()) {
+            currentScreen.Content(
+                viewModel = viewModel,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+        }
+
+        if (mandateText?.showAbovePrimaryButton == true) {
+            Mandate(
+                mandateText = mandateText?.text,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+            )
+        }
 
         buyButtonState?.errorMessage?.let { error ->
             ErrorMessage(
@@ -130,67 +128,58 @@ internal fun PaymentSheetScreenContent(
             modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
         )
 
-        notes?.let { text ->
-            Html(
-                html = text,
-                color = MaterialTheme.stripeColors.subtitle,
-                style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .padding(horizontal = horizontalPadding),
+        if (mandateText?.showAbovePrimaryButton == false) {
+            Mandate(
+                mandateText = mandateText?.text,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
             )
         }
+
+        PaymentSheetContentPadding()
     }
 }
 
 @Composable
 internal fun Wallet(
-    viewModel: PaymentSheetViewModel,
+    state: WalletsState,
+    onGooglePayPressed: () -> Unit,
+    onLinkPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val containerState by viewModel.walletsContainerState.collectAsState(
-        initial = WalletsContainerState(),
-    )
-
-    val email by viewModel.linkHandler.linkLauncher.emailFlow.collectAsState(initial = null)
-    val googlePayButtonState by viewModel.googlePayButtonState.collectAsState(initial = null)
-    val buttonsEnabled by viewModel.buttonsEnabled.collectAsState(initial = false)
-
     val padding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    if (containerState.shouldShow) {
-        Column(modifier = modifier.padding(horizontal = padding)) {
-            if (containerState.showGooglePay) {
-                GooglePayButton(
-                    state = googlePayButtonState?.convert(),
-                    allowCreditCards = containerState.googlePayAllowCreditCards,
-                    billingAddressParameters = containerState.googlePayBillingAddressParameters,
-                    isEnabled = buttonsEnabled,
-                    onPressed = viewModel::checkoutWithGooglePay,
-                )
-            }
-
-            if (containerState.showLink) {
-                LinkButton(
-                    email = email,
-                    enabled = buttonsEnabled,
-                    onClick = viewModel::handleLinkPressed,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .requiredHeight(48.dp),
-                )
-            }
-
-            googlePayButtonState?.errorMessage?.let { error ->
-                ErrorMessage(
-                    error = error.message,
-                    modifier = Modifier.padding(vertical = 3.dp, horizontal = 1.dp),
-                )
-            }
-
-            val text = stringResource(containerState.dividerTextResource)
-            GooglePayDividerUi(text)
+    Column(modifier = modifier.padding(horizontal = padding)) {
+        state.googlePay?.let { googlePay ->
+            GooglePayButton(
+                state = googlePay.buttonState?.convert(),
+                allowCreditCards = googlePay.allowCreditCards,
+                billingAddressParameters = googlePay.billingAddressParameters,
+                isEnabled = state.buttonsEnabled,
+                onPressed = onGooglePayPressed,
+            )
         }
+
+        state.link?.let {
+            if (state.googlePay != null) {
+                Spacer(modifier = Modifier.requiredHeight(8.dp))
+            }
+
+            LinkButton(
+                email = null,
+                enabled = state.buttonsEnabled,
+                onClick = onLinkPressed,
+            )
+        }
+
+        state.googlePay?.buttonState?.errorMessage?.let { error ->
+            ErrorMessage(
+                error = error.message,
+                modifier = Modifier.padding(vertical = 3.dp, horizontal = 1.dp),
+            )
+        }
+
+        val text = stringResource(state.dividerTextResource)
+        GooglePayDividerUi(text)
     }
 }
 

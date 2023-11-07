@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,8 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,22 +20,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection.New
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
@@ -58,73 +49,42 @@ import com.stripe.android.uicore.stripeColors
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 @Composable
 internal fun USBankAccountForm(
     formArgs: FormArguments,
-    sheetViewModel: BaseSheetViewModel,
-    isProcessing: Boolean,
+    usBankAccountFormArgs: USBankAccountFormArguments,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
-
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory {
-            val initializationMode = (sheetViewModel as? PaymentSheetViewModel)
-                ?.args
-                ?.initializationMode
-            val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
-                ?.intentConfiguration
-                ?.onBehalfOf
-            val stripeIntent = sheetViewModel.stripeIntent.value
             USBankAccountFormViewModel.Args(
                 formArgs = formArgs,
-                isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
-                isPaymentFlow = stripeIntent is PaymentIntent,
-                stripeIntentId = stripeIntent?.id,
-                clientSecret = stripeIntent?.clientSecret,
-                onBehalfOf = onBehalfOf,
-                savedPaymentMethod = sheetViewModel.newPaymentSelection as? New.USBankAccount,
-                shippingDetails = sheetViewModel.config?.shippingDetails,
+                isCompleteFlow = usBankAccountFormArgs.isCompleteFlow,
+                isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
+                stripeIntentId = usBankAccountFormArgs.stripeIntentId,
+                clientSecret = usBankAccountFormArgs.clientSecret,
+                onBehalfOf = usBankAccountFormArgs.onBehalfOf,
+                savedPaymentMethod = usBankAccountFormArgs.draftPaymentSelection as? New.USBankAccount,
+                shippingDetails = usBankAccountFormArgs.shippingDetails,
             )
         },
     )
 
-    SyncViewModels(
-        viewModel = viewModel,
-        sheetViewModel = sheetViewModel,
-    )
-
-    DisposableEffect(Unit) {
-        viewModel.register(activityResultRegistryOwner!!)
-
-        onDispose {
-            sheetViewModel.resetUSBankPrimaryButton()
-            viewModel.onDestroy()
-        }
-    }
-
     val currentScreenState by viewModel.currentScreenState.collectAsState()
-    val hasRequiredFields by viewModel.requiredFields.collectAsState()
     val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState(null)
 
-    LaunchedEffect(currentScreenState, hasRequiredFields) {
-        sheetViewModel.handleScreenStateChanged(
-            context = context,
-            screenState = currentScreenState,
-            enabled = hasRequiredFields,
-            merchantName = viewModel.formattedMerchantName(),
-            onPrimaryButtonClick = viewModel::handlePrimaryButtonClick,
-        )
-    }
+    USBankAccountEmitters(
+        viewModel = viewModel,
+        usBankAccountFormArgs = usBankAccountFormArgs,
+    )
 
     Box(modifier) {
         when (val screenState = currentScreenState) {
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
                 BillingDetailsCollectionScreen(
                     formArgs = formArgs,
-                    isProcessing = isProcessing,
+                    isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
+                    isProcessing = screenState.isProcessing,
                     nameController = viewModel.nameController,
                     emailController = viewModel.emailController,
                     phoneController = viewModel.phoneController,
@@ -136,7 +96,8 @@ internal fun USBankAccountForm(
             is USBankAccountFormScreenState.MandateCollection -> {
                 MandateCollectionScreen(
                     formArgs = formArgs,
-                    isProcessing = isProcessing,
+                    isProcessing = screenState.isProcessing,
+                    isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     screenState = screenState,
                     nameController = viewModel.nameController,
                     emailController = viewModel.emailController,
@@ -151,7 +112,8 @@ internal fun USBankAccountForm(
             is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
                 VerifyWithMicrodepositsScreen(
                     formArgs = formArgs,
-                    isProcessing = isProcessing,
+                    isProcessing = screenState.isProcessing,
+                    isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     screenState = screenState,
                     nameController = viewModel.nameController,
                     emailController = viewModel.emailController,
@@ -166,7 +128,8 @@ internal fun USBankAccountForm(
             is USBankAccountFormScreenState.SavedAccount -> {
                 SavedAccountScreen(
                     formArgs = formArgs,
-                    isProcessing = isProcessing,
+                    isProcessing = screenState.isProcessing,
+                    isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     screenState = screenState,
                     nameController = viewModel.nameController,
                     emailController = viewModel.emailController,
@@ -186,6 +149,7 @@ internal fun USBankAccountForm(
 internal fun BillingDetailsCollectionScreen(
     formArgs: FormArguments,
     isProcessing: Boolean,
+    isPaymentFlow: Boolean,
     nameController: TextFieldController,
     emailController: TextFieldController,
     phoneController: PhoneNumberController,
@@ -197,6 +161,7 @@ internal fun BillingDetailsCollectionScreen(
         BillingDetailsForm(
             formArgs = formArgs,
             isProcessing = isProcessing,
+            isPaymentFlow = isPaymentFlow,
             nameController = nameController,
             emailController = emailController,
             phoneController = phoneController,
@@ -211,6 +176,7 @@ internal fun BillingDetailsCollectionScreen(
 internal fun MandateCollectionScreen(
     formArgs: FormArguments,
     isProcessing: Boolean,
+    isPaymentFlow: Boolean,
     screenState: USBankAccountFormScreenState.MandateCollection,
     nameController: TextFieldController,
     emailController: TextFieldController,
@@ -225,6 +191,7 @@ internal fun MandateCollectionScreen(
         BillingDetailsForm(
             formArgs = formArgs,
             isProcessing = isProcessing,
+            isPaymentFlow = isPaymentFlow,
             nameController = nameController,
             emailController = emailController,
             phoneController = phoneController,
@@ -247,6 +214,7 @@ internal fun MandateCollectionScreen(
 internal fun VerifyWithMicrodepositsScreen(
     formArgs: FormArguments,
     isProcessing: Boolean,
+    isPaymentFlow: Boolean,
     screenState: USBankAccountFormScreenState.VerifyWithMicrodeposits,
     nameController: TextFieldController,
     emailController: TextFieldController,
@@ -261,6 +229,7 @@ internal fun VerifyWithMicrodepositsScreen(
         BillingDetailsForm(
             formArgs = formArgs,
             isProcessing = isProcessing,
+            isPaymentFlow = isPaymentFlow,
             nameController = nameController,
             emailController = emailController,
             phoneController = phoneController,
@@ -283,6 +252,7 @@ internal fun VerifyWithMicrodepositsScreen(
 internal fun SavedAccountScreen(
     formArgs: FormArguments,
     isProcessing: Boolean,
+    isPaymentFlow: Boolean,
     screenState: USBankAccountFormScreenState.SavedAccount,
     nameController: TextFieldController,
     emailController: TextFieldController,
@@ -297,6 +267,7 @@ internal fun SavedAccountScreen(
         BillingDetailsForm(
             formArgs = formArgs,
             isProcessing = isProcessing,
+            isPaymentFlow = isPaymentFlow,
             nameController = nameController,
             emailController = emailController,
             phoneController = phoneController,
@@ -319,6 +290,7 @@ internal fun SavedAccountScreen(
 internal fun BillingDetailsForm(
     formArgs: FormArguments,
     isProcessing: Boolean,
+    isPaymentFlow: Boolean,
     nameController: TextFieldController,
     emailController: TextFieldController,
     phoneController: PhoneNumberController,
@@ -328,7 +300,11 @@ internal fun BillingDetailsForm(
 ) {
     Column(Modifier.fillMaxWidth()) {
         H6Text(
-            text = stringResource(R.string.stripe_paymentsheet_pay_with_bank_title),
+            text = if (isPaymentFlow) {
+                stringResource(R.string.stripe_paymentsheet_pay_with_bank_title)
+            } else {
+                stringResource(R.string.stripe_paymentsheet_save_bank_title)
+            },
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
         )
         if (formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never) {
@@ -528,7 +504,7 @@ private fun AccountDetailsForm(
     }
     last4?.let {
         SimpleDialogElementUI(
-            openDialog = openDialog,
+            openDialog = openDialog.value,
             titleText = stringResource(
                 id = R.string.stripe_paymentsheet_remove_bank_account_title
             ),

@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
       - name: End-to-end tests
         run: ./gradlew :stripe-test-e2e:testDebugUnitTest
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
       - name: Build example projects
         run: ./gradlew :paymentsheet-example:assembleAndroidTest
@@ -46,7 +46,7 @@ jobs:
   payment-sheet-apk-size-analysis:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
       - name: Generate Android release bundle
         run: ./gradlew :paymentsheet-example:bundleRelease
@@ -56,3 +56,23 @@ jobs:
           artifact_path: paymentsheet-example/build/outputs/bundle/release/paymentsheet-example-release.aab
           emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
           build_type: pull_request
+
+  check-for-untranslated-strings:
+    name: Check for untranslated strings
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for untranslated strings
+        run: cd scripts && ruby lokalise/check_untranslated_strings.rb
+        env:
+          LOKALISE_API_TOKEN: ${{ secrets.LOKALISE_API_TOKEN }}
+
+  check-for-transitive-dependency-updates:
+    name: Check for transitive dependency updates
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for transitive dependency updates
+        run: ruby scripts/dependencies/check_transitive_dependencies.rb

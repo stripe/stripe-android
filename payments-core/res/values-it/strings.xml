@@ -80,8 +80,8 @@
   <string name="stripe_becs_mandate_acceptance">\n    Fornendo i dati del tuo conto bancario e confermando il pagamento, accetti la presente\n    richiesta di addebito diretto e il contratto di servizio per la richiesta di addebito diretto e autorizzi\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 con numero ID utente per l\'addebito diretto 507156\n    (“Stripe”) ad addebitare sul tuo conto tramite il Bulk Electronic Clearing System (BECS) per\n    conto di %1$s (\"Esercente\") qualsiasi importo che ti viene comunicato separatamente\n    dall\'Esercente. Dichiari di essere un titolare del conto o un firmatario \n    autorizzato per il conto sopra elencato.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Numero conto</string>
-  <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="stripe_becs_widget_account_number_incomplete">Numero di conto incompleto.</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">Il numero del conto inserito è incompleto.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="stripe_becs_widget_account_number_required">Il tuo numero di conto è obbligatorio.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
@@ -102,6 +102,10 @@
   <string name="stripe_becs_widget_name_required">Il tuo nome è obbligatorio.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">Annulla</string>
+  <!-- Title for a dropdown option when selecting a card brand -->
+  <string name="stripe_card_brand_choice_no_selection">Nessuna selezione</string>
+  <!-- Title for a dropdown where the customer can select a card brand -->
+  <string name="stripe_card_brand_choice_selection_header">Seleziona il circuito della carta (facoltativo)</string>
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">La carta è stata rifiutata</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->

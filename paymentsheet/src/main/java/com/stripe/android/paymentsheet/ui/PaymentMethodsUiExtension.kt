@@ -6,17 +6,16 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
-import com.stripe.android.financialconnections.R as FinancialConnectionsR
 import com.stripe.android.ui.core.R as StripeUiCoreR
-import com.stripe.payments.model.R as PaymentsModelR
 
 @DrawableRes
-internal fun PaymentMethod.getSavedPaymentMethodIcon(): Int? = when (type) {
-    PaymentMethod.Type.Card -> card?.brand?.getCardBrandIcon()
-        ?: R.drawable.stripe_ic_paymentsheet_card_unknown
-    PaymentMethod.Type.SepaDebit -> StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_sepa_debit
-    PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
-    else -> null
+internal fun PaymentMethod.getSavedPaymentMethodIcon(): Int {
+    return when (type) {
+        PaymentMethod.Type.Card -> (card?.displayBrand?.type ?: card?.brand)?.getCardBrandIcon()
+        PaymentMethod.Type.SepaDebit -> StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_sepa_debit
+        PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
+        else -> null
+    } ?: R.drawable.stripe_ic_paymentsheet_card_unknown
 }
 
 @DrawableRes
@@ -28,7 +27,7 @@ internal fun CardBrand.getCardBrandIcon(): Int = when (this) {
     CardBrand.DinersClub -> R.drawable.stripe_ic_paymentsheet_card_dinersclub
     CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard
     CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay
-    CardBrand.CartesBancaires -> PaymentsModelR.drawable.stripe_ic_cartebancaire
+    CardBrand.CartesBancaires -> R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires
     CardBrand.Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
 }
 
@@ -46,7 +45,7 @@ internal fun PaymentMethod.getLabel(resources: Resources): String? = when (type)
 }
 
 internal fun PaymentMethod.getLabelIcon(): Int? = when (type) {
-    PaymentMethod.Type.USBankAccount -> FinancialConnectionsR.drawable.stripe_ic_bank
+    PaymentMethod.Type.USBankAccount -> R.drawable.stripe_ic_paymentsheet_bank
     else -> null
 }
 

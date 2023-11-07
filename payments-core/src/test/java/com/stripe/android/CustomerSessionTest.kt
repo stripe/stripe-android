@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
@@ -103,29 +102,26 @@ internal class CustomerSessionTest {
 
             whenever(
                 stripeRepository.attachPaymentMethod(
-                    any(),
-                    eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                    any(),
-                    any(),
-                    any()
+                    customerId = any(),
+                    productUsageTokens = any(),
+                    paymentMethodId = any(),
+                    requestOptions = any()
                 )
             ).thenReturn(Result.success(PAYMENT_METHOD))
 
             whenever(
                 stripeRepository.detachPaymentMethod(
-                    eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                    any(),
-                    any(),
-                    any()
+                    productUsageTokens = any(),
+                    paymentMethodId = any(),
+                    requestOptions = any()
                 )
             ).thenReturn(Result.success(PAYMENT_METHOD))
 
             whenever(
                 stripeRepository.getPaymentMethods(
-                    any(),
-                    eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                    any(),
-                    any()
+                    listPaymentMethodsParams = any(),
+                    productUsageTokens = any(),
+                    requestOptions = any()
                 )
             ).thenReturn(Result.success(listOf(PAYMENT_METHOD)))
 
@@ -165,11 +161,10 @@ internal class CustomerSessionTest {
         idleLooper()
 
         verify(stripeRepository).attachPaymentMethod(
-            any(),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            eq(DEFAULT_PRODUCT_USAGE),
-            any(),
-            any()
+            customerId = any(),
+            productUsageTokens = eq(DEFAULT_PRODUCT_USAGE),
+            paymentMethodId = any(),
+            requestOptions = any()
         )
     }
 
@@ -569,11 +564,10 @@ internal class CustomerSessionTest {
 
         assertNotNull(FIRST_CUSTOMER.id)
         verify(stripeRepository).attachPaymentMethod(
-            eq(FIRST_CUSTOMER.id.orEmpty()),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            eq(expectedProductUsage),
-            eq("pm_abc123"),
-            requestOptionsArgumentCaptor.capture()
+            customerId = eq(FIRST_CUSTOMER.id.orEmpty()),
+            productUsageTokens = eq(expectedProductUsage),
+            paymentMethodId = eq("pm_abc123"),
+            requestOptions = requestOptionsArgumentCaptor.capture()
         )
         assertEquals(
             EphemeralKeyFixtures.FIRST.secret,
@@ -640,10 +634,9 @@ internal class CustomerSessionTest {
 
         assertNotNull(FIRST_CUSTOMER.id)
         verify(stripeRepository).detachPaymentMethod(
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            eq(expectedProductUsage),
-            eq("pm_abc123"),
-            requestOptionsArgumentCaptor.capture()
+            productUsageTokens = eq(expectedProductUsage),
+            paymentMethodId = eq("pm_abc123"),
+            requestOptions = requestOptionsArgumentCaptor.capture()
         )
         assertEquals(
             EphemeralKeyFixtures.FIRST.secret,
@@ -705,15 +698,14 @@ internal class CustomerSessionTest {
 
         assertNotNull(FIRST_CUSTOMER.id)
         verify(stripeRepository).getPaymentMethods(
-            eq(
+            listPaymentMethodsParams = eq(
                 ListPaymentMethodsParams(
                     customerId = FIRST_CUSTOMER.id.orEmpty(),
                     paymentMethodType = PaymentMethod.Type.Card
                 )
             ),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            eq(expectedProductUsage),
-            requestOptionsArgumentCaptor.capture()
+            productUsageTokens = eq(expectedProductUsage),
+            requestOptions = requestOptionsArgumentCaptor.capture()
         )
         assertEquals(
             EphemeralKeyFixtures.FIRST.secret,
@@ -765,11 +757,10 @@ internal class CustomerSessionTest {
 
         whenever(
             stripeRepository.attachPaymentMethod(
-                any(),
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                any(),
-                any(),
-                any()
+                customerId = any(),
+                productUsageTokens = any(),
+                paymentMethodId = any(),
+                requestOptions = any()
             )
         ).thenReturn(
             Result.failure(APIException(statusCode = 404, message = "The payment method is invalid"))
@@ -777,10 +768,9 @@ internal class CustomerSessionTest {
 
         whenever(
             stripeRepository.detachPaymentMethod(
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                any(),
-                any(),
-                any()
+                productUsageTokens = any(),
+                paymentMethodId = any(),
+                requestOptions = any()
             )
         ).thenReturn(
             Result.failure(APIException(statusCode = 404, message = "The payment method does not exist"))
@@ -788,10 +778,9 @@ internal class CustomerSessionTest {
 
         whenever(
             stripeRepository.getPaymentMethods(
-                any(),
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                any(),
-                any()
+                listPaymentMethodsParams = any(),
+                productUsageTokens = any(),
+                requestOptions = any()
             )
         ).thenReturn(
             Result.failure(APIException(statusCode = 404, message = "The payment method does not exist"))
@@ -804,7 +793,6 @@ internal class CustomerSessionTest {
             createEphemeralKeyManagerFactory(timeSupplier)
     ): CustomerSession {
         return CustomerSession(
-            ApplicationProvider.getApplicationContext(),
             stripeRepository,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "acct_abc123",

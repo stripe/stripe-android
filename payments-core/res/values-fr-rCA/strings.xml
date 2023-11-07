@@ -80,8 +80,8 @@
   <string name="stripe_becs_mandate_acceptance">\n    En fournissant les informations sur votre compte bancaire et en confirmant ce paiement, vous acceptez\n    cette demande de prélèvement automatique et les Conditions d\'utilisation du service de demande de prélèvement automatique et autorisez\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 ID utilisateur du prélèvement automatique 507156\n    (« Stripe ») à débiter votre compte par le biais du Bulk Electronic Clearing System (BECS) en\n    faveur de %1$s (le « marchand ») de tout montant qui vous a été communiqué\n    directement par le marchand. Vous attestez que vous êtes titulaire du compte ou un signataire\n    autorisé du compte désigné ci-dessus.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Numéro de compte</string>
-  <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="stripe_becs_widget_account_number_incomplete">Votre numéro de compte est incomplet.</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">Le numéro de compte saisi est incomplet.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="stripe_becs_widget_account_number_required">Votre numéro de compte est obligatoire.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
@@ -102,6 +102,10 @@
   <string name="stripe_becs_widget_name_required">Votre nom est obligatoire.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">Annuler</string>
+  <!-- Title for a dropdown option when selecting a card brand -->
+  <string name="stripe_card_brand_choice_no_selection">Aucune sélection</string>
+  <!-- Title for a dropdown where the customer can select a card brand -->
+  <string name="stripe_card_brand_choice_selection_header">Sélectionner la marque de la carte (facultatif)</string>
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">Votre carte a été refusée</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->

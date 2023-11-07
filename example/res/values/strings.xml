@@ -33,6 +33,9 @@
     <string name="netbanking_example">Netbanking Confirmation Example</string>
     <string name="manual_us_bank_account_example">"Manual US Bank Account Example"</string>
     <string name="cash_app_pay_example">Cash App Pay</string>
+    <string name="revolut_pay_example">Revolut Pay</string>
+    <string name="swish_example">Swish</string>
+    <string name="mobilepay_example">MobilePay</string>
     <string name="card_brands">Card Brands</string>
     <string name="card_brands_hint">Card number</string>
     <string name="possible_card_brands">Possible Card Brands</string>
@@ -68,6 +71,7 @@
 
     <!-- Payment Confirmation and Authentication example -->
     <string name="payment_auth_example">Payment Intent &amp; Setup Intent Confirmation</string>
+    <string name="card_brand_choice">Card Brand Choice Example</string>
     <string name="auth_payment_intent">Authenticate PaymentIntent</string>
     <string name="auth_setup_intent">Authenticate SetupIntent</string>
     <string name="confirm_with_3ds2_button">Confirm with 3DS2</string>

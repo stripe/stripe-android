@@ -11,6 +11,7 @@ import com.stripe.android.identity.navigation.IDUploadDestination
 import com.stripe.android.identity.navigation.IdentityTopLevelDestination
 import com.stripe.android.identity.navigation.IndividualDestination
 import com.stripe.android.identity.navigation.IndividualWelcomeDestination
+import com.stripe.android.identity.navigation.OTPDestination
 import com.stripe.android.identity.navigation.PassportScanDestination
 import com.stripe.android.identity.navigation.PassportUploadDestination
 import com.stripe.android.identity.navigation.SelfieDestination
@@ -45,7 +46,13 @@ internal enum class Requirement {
     NAME,
 
     @SerialName("address")
-    ADDRESS;
+    ADDRESS,
+
+    @SerialName("phone_number")
+    PHONE_NUMBER,
+
+    @SerialName("phone_otp")
+    PHONE_OTP;
 
     internal companion object {
         private val SCAN_UPLOAD_ROUTE_SET = setOf(
@@ -64,6 +71,11 @@ internal enum class Requirement {
             IDNUMBER
         )
 
+        private val REQUIREMENTS_SUPPORTS_FORCE_CONFIRM = setOf(
+            IDDOCUMENTFRONT,
+            IDDOCUMENTBACK
+        )
+
         /**
          * Checks whether the Requirement matches the route the error occurred from.
          */
@@ -72,24 +84,33 @@ internal enum class Requirement {
                 BIOMETRICCONSENT -> {
                     fromRoute == ConsentDestination.ROUTE.route
                 }
+
                 IDDOCUMENTBACK -> {
                     SCAN_UPLOAD_ROUTE_SET.any {
                         it.route == fromRoute
                     }
                 }
+
                 IDDOCUMENTFRONT -> {
                     SCAN_UPLOAD_ROUTE_SET.any {
                         it.route == fromRoute
                     }
                 }
+
                 IDDOCUMENTTYPE -> {
                     fromRoute == DocSelectionDestination.ROUTE.route
                 }
+
                 FACE -> {
                     fromRoute == SelfieDestination.ROUTE.route
                 }
-                DOB, NAME, IDNUMBER, ADDRESS -> {
+
+                DOB, NAME, IDNUMBER, ADDRESS, PHONE_NUMBER -> {
                     fromRoute == IndividualDestination.ROUTE.route
+                }
+
+                PHONE_OTP -> {
+                    fromRoute == OTPDestination.ROUTE.route
                 }
             }
 
@@ -105,6 +126,7 @@ internal enum class Requirement {
                 contains(BIOMETRICCONSENT) -> {
                     ConsentDestination
                 }
+
                 intersect(listOf(IDDOCUMENTTYPE, IDDOCUMENTFRONT, IDDOCUMENTBACK)).isNotEmpty() -> {
                     DocSelectionDestination
                 }
@@ -121,12 +143,17 @@ internal enum class Requirement {
                 intersect(listOf(IDNUMBER, ADDRESS)).isNotEmpty() -> {
                     IndividualDestination
                 }
+
                 isEmpty() -> {
                     ConfirmationDestination
                 }
+
                 else -> {
                     context.finalErrorDestination()
                 }
             }
+
+        fun Requirement.supportsForceConfirm() =
+            REQUIREMENTS_SUPPORTS_FORCE_CONFIRM.contains(this)
     }
 }

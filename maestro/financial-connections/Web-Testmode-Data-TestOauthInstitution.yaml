@@ -1,0 +1,38 @@
+appId: com.stripe.android.financialconnections.example
+tags:
+  - all
+  - testmode-data
+---
+- startRecording: ${'/tmp/test_results/web-testmode-data-testoauthinstitution-' + new Date().getTime()}
+- clearState
+- openLink: stripeconnectionsexample://playground?flow=Data&financial_connections_override_native=web&merchant=testmode
+- tapOn:
+    id: "connect_accounts"
+- extendedWaitUntil:
+    notVisible:
+      id: "connect_accounts"
+    timeout: 30000
+######## Bypass Chrome on-boarding screen #######
+- runFlow:
+    file: ../common/subflow-skip-chrome-welcome.yaml
+################################################
+# Common: web AuthFlow - connect OAuth institution
+- tapOn: "Agree and continue"
+# SELECT OAUTH INSTITUTION
+- assertVisible: "Test OAuth Institution"
+- tapOn: "Test OAuth Institution"
+- tapOn: "Continue Continue"
+# SELECT ALL ACCOUNTS
+- extendedWaitUntil:
+    visible: "Connect accounts"
+    timeout: 60000
+- tapOn: "Connect accounts" # select all accounts
+- tapOn:
+    text: "Link accounts"
+    retryTapIfNoChange: false
+# CONFIRM AND COMPLETE
+- assertVisible: "Test OAuth Institution"
+- tapOn: "Done"
+- assertVisible: ".*Completed!.*"
+- assertVisible: ".*StripeBank.*"
+- stopRecording

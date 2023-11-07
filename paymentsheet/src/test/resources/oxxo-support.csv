@@ -1,0 +1,49 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+oxxo, true, true, off_session, false, card/oxxo, false, false, not available, false
+oxxo, true, true, off_session, false, card/eps/oxxo, false, false, not available, false
+oxxo, true, false, off_session, false, card/oxxo, false, false, not available, false
+oxxo, true, false, off_session, false, card/eps/oxxo, false, false, not available, false
+oxxo, true, true, on_session, false, card/oxxo, false, false, not available, false
+oxxo, true, true, on_session, false, card/eps/oxxo, false, false, not available, false
+oxxo, true, false, on_session, false, card/oxxo, false, false, not available, false
+oxxo, true, false, on_session, false, card/eps/oxxo, false, false, not available, false
+oxxo, true, true, null, false, card/oxxo, false, true, oneTime, true
+oxxo, true, true, null, false, card/eps/oxxo, false, true, oneTime, true
+oxxo, true, false, null, false, card/oxxo, false, false, not available, false
+oxxo, true, false, null, false, card/eps/oxxo, false, false, not available, false
+oxxo, false, true, off_session, false, card/oxxo, false, false, not available, false
+oxxo, false, true, off_session, false, card/eps/oxxo, false, false, not available, false
+oxxo, false, false, off_session, false, card/oxxo, false, false, not available, false
+oxxo, false, false, off_session, false, card/eps/oxxo, false, false, not available, false
+oxxo, false, true, on_session, false, card/oxxo, false, false, not available, false
+oxxo, false, true, on_session, false, card/eps/oxxo, false, false, not available, false
+oxxo, false, false, on_session, false, card/oxxo, false, false, not available, false
+oxxo, false, false, on_session, false, card/eps/oxxo, false, false, not available, false
+oxxo, false, true, null, false, card/oxxo, false, true, oneTime, true
+oxxo, false, true, null, false, card/eps/oxxo, false, true, oneTime, true
+oxxo, false, false, null, false, card/oxxo, false, false, not available, false
+oxxo, false, false, null, false, card/eps/oxxo, false, false, not available, false
+oxxo, true, true, off_session, true, card/oxxo, false, false, not available, false
+oxxo, true, true, off_session, true, card/eps/oxxo, false, false, not available, false
+oxxo, true, false, off_session, true, card/oxxo, false, false, not available, false
+oxxo, true, false, off_session, true, card/eps/oxxo, false, false, not available, false
+oxxo, true, true, on_session, true, card/oxxo, false, false, not available, false
+oxxo, true, true, on_session, true, card/eps/oxxo, false, false, not available, false
+oxxo, true, false, on_session, true, card/oxxo, false, false, not available, false
+oxxo, true, false, on_session, true, card/eps/oxxo, false, false, not available, false
+oxxo, true, true, null, true, card/oxxo, false, true, oneTime, true
+oxxo, true, true, null, true, card/eps/oxxo, false, true, oneTime, true
+oxxo, true, false, null, true, card/oxxo, false, false, not available, false
+oxxo, true, false, null, true, card/eps/oxxo, false, false, not available, false
+oxxo, false, true, off_session, true, card/oxxo, false, false, not available, false
+oxxo, false, true, off_session, true, card/eps/oxxo, false, false, not available, false
+oxxo, false, false, off_session, true, card/oxxo, false, false, not available, false
+oxxo, false, false, off_session, true, card/eps/oxxo, false, false, not available, false
+oxxo, false, true, on_session, true, card/oxxo, false, false, not available, false
+oxxo, false, true, on_session, true, card/eps/oxxo, false, false, not available, false
+oxxo, false, false, on_session, true, card/oxxo, false, false, not available, false
+oxxo, false, false, on_session, true, card/eps/oxxo, false, false, not available, false
+oxxo, false, true, null, true, card/oxxo, false, true, oneTime, true
+oxxo, false, true, null, true, card/eps/oxxo, false, true, oneTime, true
+oxxo, false, false, null, true, card/oxxo, false, false, not available, false
+oxxo, false, false, null, true, card/eps/oxxo, false, false, not available, false

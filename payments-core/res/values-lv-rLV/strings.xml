@@ -80,8 +80,8 @@
   <string name="stripe_becs_mandate_acceptance">\n    Sniedzot savu bankas konta informāciju un apstiprinot šo maksājumu, jūs\n    piekrītat šim tiešā debeta pieprasījumam un pakalpojuma līgumam, kā arī pilnvarojat uzņēmumu\n    Stripe Payments Australia Pty Ltd ACN 160 180 343, tiešā debeta lietotāja ID numurs 507156\n    (turpmāk — “Stripe”) izmantot lielapjoma elektronisko klīringa sistēmu (BECS),\n    lai uzņēmuma %1$s (turpmāk — “Tirgotājs”) vārdā debitētu jūsu kontu par jebkādām summām,\n    par kurām Tirgotājs jums ir atsevišķi ziņojis. Jūs apliecināt, ka esat vai nu\n    iepriekš minētā konta īpašnieks, vai tā pilnvarota persona ar paraksta tiesībām.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Konta numurs</string>
-  <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="stripe_becs_widget_account_number_incomplete">Konta numurs nav pilnīgs.</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">Jūsu ievadītais konta numurs nav pilnīgs.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="stripe_becs_widget_account_number_required">Jānorāda konta numurs.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
@@ -102,6 +102,10 @@
   <string name="stripe_becs_widget_name_required">Jānorāda vārds/nosaukums.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">Atcelt</string>
+  <!-- Title for a dropdown option when selecting a card brand -->
+  <string name="stripe_card_brand_choice_no_selection">Nav atlases</string>
+  <!-- Title for a dropdown where the customer can select a card brand -->
+  <string name="stripe_card_brand_choice_selection_header">Atlasīt kartes zīmolu (pēc izvēles)</string>
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">Karte tika noraidīta</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->

@@ -21,6 +21,7 @@ internal object PaymentOptionsStateFactory {
         showLink: Boolean,
         currentSelection: PaymentSelection?,
         nameProvider: (PaymentMethodCode?) -> String,
+        isCbcEligible: Boolean
     ): PaymentOptionsState {
         val items = listOfNotNull(
             PaymentOptionsItem.AddCard,
@@ -30,6 +31,7 @@ internal object PaymentOptionsStateFactory {
             PaymentOptionsItem.SavedPaymentMethod(
                 displayName = nameProvider(it.type?.code),
                 paymentMethod = it,
+                isCbcEligible = isCbcEligible
             )
         }
 

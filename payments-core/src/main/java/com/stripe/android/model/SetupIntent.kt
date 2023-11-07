@@ -36,7 +36,7 @@ data class SetupIntent internal constructor(
      * Country code of the user.
      */
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    val countryCode: String?,
+    override val countryCode: String?,
 
     /**
      * The client secret of this SetupIntent. Used for client-side retrieval using a
@@ -125,6 +125,12 @@ data class SetupIntent internal constructor(
             is StripeIntent.NextActionData.DisplayOxxoDetails -> {
                 StripeIntent.NextActionType.DisplayOxxoDetails
             }
+            is StripeIntent.NextActionData.DisplayBoletoDetails -> {
+                StripeIntent.NextActionType.DisplayBoletoDetails
+            }
+            is StripeIntent.NextActionData.DisplayKonbiniDetails -> {
+                StripeIntent.NextActionType.DisplayKonbiniDetails
+            }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }
@@ -135,6 +141,7 @@ data class SetupIntent internal constructor(
             is StripeIntent.NextActionData.BlikAuthorize,
             is StripeIntent.NextActionData.WeChatPayRedirect,
             is StripeIntent.NextActionData.UpiAwaitNotification,
+            is StripeIntent.NextActionData.SwishRedirect,
             null -> {
                 null
             }

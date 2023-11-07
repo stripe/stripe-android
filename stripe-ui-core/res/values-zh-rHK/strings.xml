@@ -58,10 +58,12 @@
   <string name="stripe_email_is_invalid">您的電郵地址無效。</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_expiration_date_hint">月份/年份</string>
+  <!-- String to describe that a form field is required to be completed. -->
+  <string name="stripe_field_required">必填</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="stripe_form_label_optional">%s（可選）</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="stripe_incomplete_expiry_date">您的銀行卡的不完整。</string>
+  <string name="stripe_incomplete_expiry_date">您的銀行卡的有效期不完整。</string>
   <!-- Error description for incomplete phone number -->
   <string name="stripe_incomplete_phone_number">電話號碼不完整</string>
   <!-- String to describe an invalid month in expiry date. -->

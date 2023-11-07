@@ -862,18 +862,6 @@ public class StripeTest {
     }
 
     @Test
-    public void createVisaCheckoutParams_whenUnactivated_throwsException() {
-        final SourceParams sourceParams = SourceParams.createVisaCheckoutParams(
-                UUID.randomUUID().toString()
-        );
-        final InvalidRequestException ex = assertThrows(
-                InvalidRequestException.class,
-                () -> defaultStripe.createSourceSynchronous(sourceParams)
-        );
-        assertEquals("visa_checkout must be activated before use.", ex.getMessage());
-    }
-
-    @Test
     public void createMasterpassParams_whenUnactivated_throwsException() {
         final SourceParams sourceParams = SourceParams.createMasterpassParams(
                 UUID.randomUUID().toString(),
@@ -1038,7 +1026,7 @@ public class StripeTest {
                 CardException.class,
                 () -> defaultStripe.createCardTokenSynchronous(cardParams)
         );
-        assertEquals("Your card's number is invalid.", cardException.getMessage());
+        assertEquals("Your card number is incorrect.", cardException.getMessage());
     }
 
     @Test

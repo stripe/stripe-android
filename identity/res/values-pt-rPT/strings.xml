@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Marca de verificação para indicar que a captura do documento foi bem-sucedida</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Selecionar fotografia</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Preencher com dados de teste</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Poupe tempo escolhendo um resultado desejado e completando instantaneamente com esse resultado. O fluxo SDK dos dispositivos móveis será devolvido com o resultado Concluído.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Não foi possível captar uma imagem de alta qualidade.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Pode tentar novamente ou carregar uma imagem a partir do seu dispositivo.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Não foi possível capturar a imagem</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">ícone da câmara</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Ícone do relógio</string>
   <!-- Content description for close button -->
@@ -101,6 +107,8 @@
   <string name="stripe_passport">Passaporte</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Passaporte selecionado</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Número de telefone</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Vire a sua carta de condução para o outro lado</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -127,12 +135,22 @@
   <string name="stripe_selfie_item_description">uma selfie capturada</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">As suas imagens de selfie não foram guardadas. Pretende sair?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">Serão tiradas algumas fotografias automaticamente no passo seguinte para verificar a sua identidade</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Prepare-se para tirar uma selfie</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Tirar fotografia</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Esta página apenas é apresentada no modo de teste.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Está de momento no modo de teste</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Tentar novamente</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Ocorreu um erro inesperado -- tente novamente dentro de alguns segundos</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Carregar uma fotografia</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Carregar verso da carta de condução</string>
   <!-- Title of dialog to upload front of driver license -->
@@ -145,4 +163,6 @@
   <string name="stripe_upload_dialog_title_passport">Carregar passaporte</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Em alternativa, pode carregar uma fotografia do seu %1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Carregar o seu documento de identificação com fotografia</string>
 </resources>

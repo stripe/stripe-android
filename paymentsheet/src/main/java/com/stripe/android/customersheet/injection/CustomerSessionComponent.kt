@@ -1,22 +1,28 @@
 package com.stripe.android.customersheet.injection
 
-import android.content.Context
+import android.app.Application
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSessionViewModel
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResultCallback
-import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
+import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSessionScope
-@Component(modules = [CustomerSheetViewModelModule::class])
+@Component(
+    modules = [
+        CustomerSheetViewModelModule::class,
+        StripeRepositoryModule::class,
+        GooglePayLauncherModule::class,
+    ]
+)
 internal interface CustomerSessionComponent {
     val customerSheetComponentBuilder: CustomerSheetComponent.Builder
-
-    val customerSheetViewModel: CustomerSheetViewModel
+    val customerSheetViewModelComponentBuilder: CustomerSheetViewModelComponent.Builder
 
     val configuration: CustomerSheet.Configuration
     val customerAdapter: CustomerAdapter
@@ -25,7 +31,7 @@ internal interface CustomerSessionComponent {
     @Component.Builder
     interface Builder {
         @BindsInstance
-        fun appContext(appContext: Context): Builder
+        fun application(application: Application): Builder
 
         @BindsInstance
         fun customerSessionViewModel(viewModel: CustomerSessionViewModel): Builder
@@ -38,6 +44,9 @@ internal interface CustomerSessionComponent {
 
         @BindsInstance
         fun callback(callback: CustomerSheetResultCallback): Builder
+
+        @BindsInstance
+        fun statusBarColor(statusBarColor: () -> Int?): Builder
 
         fun build(): CustomerSessionComponent
     }

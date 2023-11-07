@@ -22,19 +22,19 @@ public final class com/stripe/android/ui/core/Amount$Creator : android/os/Parcel
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/ui/core/BillingDetailsCollectionConfiguration$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/ui/core/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
 	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
 	public fun <init> ()V
-}
-
-public final class com/stripe/android/ui/core/CardBillingDetailsCollectionConfiguration$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/CardBillingDetailsCollectionConfiguration;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/CardBillingDetailsCollectionConfiguration;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/ui/core/FieldValuesToParamsMapConverter$Companion {
@@ -45,6 +45,22 @@ public final class com/stripe/android/ui/core/FormUIKt {
 }
 
 public final class com/stripe/android/ui/core/address/AddressUtilKt {
+}
+
+public final class com/stripe/android/ui/core/cbc/CardBrandChoiceEligibility$Eligible$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/cbc/CardBrandChoiceEligibility$Eligible;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/ui/core/cbc/CardBrandChoiceEligibility$Eligible;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/ui/core/cbc/CardBrandChoiceEligibility$Ineligible$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/cbc/CardBrandChoiceEligibility$Ineligible;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/ui/core/cbc/CardBrandChoiceEligibility$Ineligible;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/ui/core/databinding/StripeActivityCardScanBinding : androidx/viewbinding/ViewBinding {
@@ -100,6 +116,70 @@ public final class com/stripe/android/ui/core/elements/AuBankAccountNumberSpec$C
 public final class com/stripe/android/ui/core/elements/AuBecsDebitMandateElementUIKt {
 }
 
+public final class com/stripe/android/ui/core/elements/BacsDebitBankAccountSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/BacsDebitBankAccountSpec$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/BacsDebitBankAccountSpec;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/BacsDebitBankAccountSpec;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/BacsDebitBankAccountSpec$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/BacsDebitConfirmSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/BacsDebitConfirmSpec$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/BacsDebitConfirmSpec;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/BacsDebitConfirmSpec;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/BacsDebitConfirmSpec$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/BlikSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/BlikSpec$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/BlikSpec;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/BlikSpec;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/BlikSpec$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/BoletoTaxIdSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/BoletoTaxIdSpec$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/BoletoTaxIdSpec;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/BoletoTaxIdSpec;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/BoletoTaxIdSpec$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class com/stripe/android/ui/core/elements/BsbElementUIKt {
 }
 
@@ -149,9 +229,6 @@ public final class com/stripe/android/ui/core/elements/CardBillingSpec$Companion
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/CardDetailsElementKt {
-}
-
 public final class com/stripe/android/ui/core/elements/CardDetailsSectionElementUIKt {
 }
 
@@ -168,6 +245,22 @@ public final class com/stripe/android/ui/core/elements/CardDetailsSectionSpec$$s
 }
 
 public final class com/stripe/android/ui/core/elements/CardDetailsSectionSpec$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/CashAppPayMandateTextSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/CashAppPayMandateTextSpec$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/CashAppPayMandateTextSpec;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/CashAppPayMandateTextSpec;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/CashAppPayMandateTextSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
@@ -208,7 +301,7 @@ public final class com/stripe/android/ui/core/elements/ConfirmResponseStatusSpec
 	public final fun getUrlPath ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs$RedirectNextActionSpec;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs$RedirectNextActionSpec;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class com/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs$RedirectNextActionSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -257,7 +350,7 @@ public final class com/stripe/android/ui/core/elements/ConfirmStatusSpecAssociat
 	public final fun getSucceeded ()Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/ui/core/elements/ConfirmStatusSpecAssociation;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/ui/core/elements/ConfirmStatusSpecAssociation;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class com/stripe/android/ui/core/elements/ConfirmStatusSpecAssociation$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -432,6 +525,22 @@ public final class com/stripe/android/ui/core/elements/KlarnaCountrySpec$Compani
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class com/stripe/android/ui/core/elements/KonbiniConfirmationNumberSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/KonbiniConfirmationNumberSpec$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/KonbiniConfirmationNumberSpec;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/KonbiniConfirmationNumberSpec;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/KonbiniConfirmationNumberSpec$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class com/stripe/android/ui/core/elements/LayoutSpec$Companion {
 	public final fun create ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
 	public final fun create ([Lcom/stripe/android/ui/core/elements/FormItemSpec;)Lcom/stripe/android/ui/core/elements/LayoutSpec;
@@ -488,7 +597,7 @@ public final class com/stripe/android/ui/core/elements/NextActionSpec {
 	public final fun getPostConfirmHandlingPiStatusSpecs ()Lcom/stripe/android/ui/core/elements/PostConfirmStatusSpecAssociation;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/ui/core/elements/NextActionSpec;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/ui/core/elements/NextActionSpec;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class com/stripe/android/ui/core/elements/NextActionSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -602,7 +711,7 @@ public final class com/stripe/android/ui/core/elements/PostConfirmStatusSpecAsso
 	public final fun getSucceeded ()Lcom/stripe/android/ui/core/elements/PostConfirmHandlingPiStatusSpecs;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/ui/core/elements/PostConfirmStatusSpecAssociation;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/ui/core/elements/PostConfirmStatusSpecAssociation;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class com/stripe/android/ui/core/elements/PostConfirmStatusSpecAssociation$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -638,6 +747,22 @@ public final class com/stripe/android/ui/core/elements/SaveForFutureUseSpec$$ser
 }
 
 public final class com/stripe/android/ui/core/elements/SaveForFutureUseSpec$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/SepaMandateTextSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/SepaMandateTextSpec$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/SepaMandateTextSpec;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/SepaMandateTextSpec;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/SepaMandateTextSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
@@ -768,26 +893,6 @@ public final class com/stripe/android/ui/core/forms/resources/LpmRepository$LpmI
 	public final fun values ()Ljava/util/List;
 }
 
-public final class com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState$NoServerSpec : com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState {
-	public static final field $stable I
-	public fun <init> (Ljava/lang/String;)V
-}
-
-public final class com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState$ServerNotParsed : com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState {
-	public static final field $stable I
-	public fun <init> (Ljava/lang/String;)V
-}
-
-public final class com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState$ServerParsed : com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState {
-	public static final field $stable I
-	public fun <init> (Ljava/lang/String;)V
-}
-
-public final class com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState$Uninitialized : com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState$Uninitialized;
-}
-
 public abstract interface class com/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder {
 	public abstract fun build ()Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent;
 	public abstract fun formSpec (Lcom/stripe/android/ui/core/elements/LayoutSpec;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
@@ -796,6 +901,5 @@ public abstract interface class com/stripe/android/ui/core/injection/FormControl
 	public abstract fun shippingValues (Ljava/util/Map;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
 	public abstract fun stripeIntent (Lcom/stripe/android/model/StripeIntent;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
 	public abstract fun viewModelScope (Lkotlinx/coroutines/CoroutineScope;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
-	public abstract fun viewOnlyFields (Ljava/util/Set;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
 }
 

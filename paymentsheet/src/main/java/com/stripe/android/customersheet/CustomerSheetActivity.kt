@@ -2,50 +2,91 @@ package com.stripe.android.customersheet
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.addCallback
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.common.ui.BottomSheet
+import com.stripe.android.common.ui.rememberBottomSheetState
+import com.stripe.android.customersheet.ui.CustomerSheetScreen
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.utils.AnimationConstants
 
 internal class CustomerSheetActivity : AppCompatActivity() {
 
+    // TODO (jameswoo) Figure out how to create real view model in CustomerSheetActivityTest
     @VisibleForTesting
-    internal var viewModelFactory: ViewModelProvider.Factory = CustomerSheetViewModel.Factory
+    internal var viewModelProvider: ViewModelProvider.Factory = CustomerSheetViewModel.Factory
 
     /**
-     * TODO verify that the [viewModels] delegate caches the right dependencies
+     * TODO (jameswoo) verify that the [viewModels] delegate caches the right dependencies
      *
      * The ViewModel lifecycle is cached by this implementation, and the merchant might pass in
      * different dependencies, adapter, result callback, etc. This may require us to recreate our
      * [CustomerSessionScope], which would make it out of sync with what the [viewModels]
      * implementation caches.
      */
-    private val viewModel by viewModels<CustomerSheetViewModel> {
-        viewModelFactory
+    private val viewModel: CustomerSheetViewModel by viewModels {
+        viewModelProvider
     }
 
+    @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        viewModel.registerFromActivity(
+            activityResultCaller = this,
+            lifecycleOwner = this,
+        )
+
         setContent {
-            when (val viewState = viewModel.viewState.collectAsState().value) {
-                is CustomerSheetViewState.Data -> {
-                    Data(viewState.data)
+            StripeTheme {
+                val bottomSheetState = rememberBottomSheetState(
+                    confirmValueChange = {
+                        if (it == ModalBottomSheetValue.Hidden) {
+                            viewModel.bottomSheetConfirmStateChange()
+                        } else {
+                            true
+                        }
+                    }
+                )
+
+                val viewState by viewModel.viewState.collectAsState()
+                val result by viewModel.result.collectAsState()
+
+                LaunchedEffect(result) {
+                    result?.let { result ->
+                        bottomSheetState.hide()
+                        finishWithResult(result)
+                    }
                 }
-                CustomerSheetViewState.Loading -> {
-                    Loading()
+
+                BackHandler {
+                    viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
+                }
+
+                BottomSheet(
+                    state = bottomSheetState,
+                    onDismissed = { viewModel.handleViewAction(CustomerSheetViewAction.OnDismissed) },
+                ) {
+                    CustomerSheetScreen(
+                        viewState = viewState,
+                        viewActionHandler = viewModel::handleViewAction,
+                        paymentMethodNameProvider = viewModel::providePaymentMethodName,
+                        formViewModelSubComponentBuilderProvider = viewModel.formViewModelSubcomponentBuilderProvider,
+                    )
                 }
             }
-        }
-
-        onBackPressedDispatcher.addCallback {
-            finishWithResult(InternalCustomerSheetResult.Canceled)
         }
     }
 
@@ -53,18 +94,9 @@ internal class CustomerSheetActivity : AppCompatActivity() {
         setResult(RESULT_OK, Intent().putExtras(result.toBundle()))
         finish()
     }
-}
 
-@Composable
-private fun Loading() {
-    Column {
-        Text("loading...")
-    }
-}
-
-@Composable
-private fun Data(data: String) {
-    Column {
-        Text(data)
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
     }
 }

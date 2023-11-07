@@ -53,7 +53,6 @@ class DefaultPaymentSheetLauncherTest {
         }
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
         IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
@@ -64,6 +63,7 @@ class DefaultPaymentSheetLauncherTest {
 
         DefaultPaymentSheetLauncher(
             activityResultLauncher = mock(),
+            activity = mock(),
             lifecycleOwner = lifecycleOwner,
             application = ApplicationProvider.getApplicationContext(),
         )

@@ -36,6 +36,8 @@ internal class ElementsSessionJsonParser(
         val linkFundingSources = json.optJSONObject(FIELD_LINK_SETTINGS)?.optJSONArray(
             FIELD_LINK_FUNDING_SOURCES
         )
+        val linkPassthroughModeEnabled = json.optJSONObject(FIELD_LINK_SETTINGS)
+            ?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) ?: false
         val orderedPaymentMethodTypes =
             paymentMethodPreference.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
 
@@ -50,13 +52,26 @@ internal class ElementsSessionJsonParser(
             countryCode = countryCode
         )
 
+        val merchantCountry = json.optString(FIELD_MERCHANT_COUNTRY)
+        val isEligibleForCardBrandChoice = if (params is ElementsSessionParams.PaymentIntentType) {
+            parseCardBrandChoiceEligibility(json)
+        } else {
+            false
+        }
+
+        val googlePayPreference = json.optString(FIELD_GOOGLE_PAY_PREFERENCE)
+
         return if (stripeIntent != null) {
             ElementsSession(
                 linkSettings = ElementsSession.LinkSettings(
                     linkFundingSources = jsonArrayToList(linkFundingSources),
+                    linkPassthroughModeEnabled = linkPassthroughModeEnabled,
                 ),
                 paymentMethodSpecs = paymentMethodSpecs,
                 stripeIntent = stripeIntent,
+                merchantCountry = merchantCountry,
+                isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+                isGooglePayEnabled = googlePayPreference != "disabled",
             )
         } else {
             null
@@ -122,7 +137,12 @@ internal class ElementsSessionJsonParser(
         }
     }
 
-    private companion object {
+    private fun parseCardBrandChoiceEligibility(json: JSONObject): Boolean {
+        val cardBrandChoice = json.optJSONObject(FIELD_CARD_BRAND_CHOICE) ?: return false
+        return cardBrandChoice.optBoolean(FIELD_ELIGIBLE, false)
+    }
+
+    internal companion object {
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ELEMENTS_SESSION_ID = "session_id"
         private const val FIELD_COUNTRY_CODE = "country_code"
@@ -130,8 +150,13 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_ORDERED_PAYMENT_METHOD_TYPES = "ordered_payment_method_types"
         private const val FIELD_LINK_SETTINGS = "link_settings"
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
+        private const val FIELD_LINK_PASSTHROUGH_MODE_ENABLED = "link_passthrough_mode_enabled"
+        private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"
         private const val FIELD_PAYMENT_METHOD_SPECS = "payment_method_specs"
+        private const val FIELD_CARD_BRAND_CHOICE = "card_brand_choice"
+        private const val FIELD_ELIGIBLE = "eligible"
+        const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
     }
 }

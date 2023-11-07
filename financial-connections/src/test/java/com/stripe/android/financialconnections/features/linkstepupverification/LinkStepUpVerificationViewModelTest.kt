@@ -11,7 +11,6 @@ import com.stripe.android.financialconnections.TestFinancialConnectionsAnalytics
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
@@ -19,6 +18,8 @@ import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -39,7 +40,7 @@ class LinkStepUpVerificationViewModelTest {
     val mavericksTestRule = MavericksTestRule()
 
     private val getManifest = mock<GetManifest>()
-    private val goNext = mock<GoNext>()
+    private val navigationManager = TestNavigationManager()
     private val confirmVerification = mock<ConfirmVerification>()
     private val getCachedAccounts = mock<GetCachedAccounts>()
     private val lookupConsumerAndStartVerification = mock<LookupConsumerAndStartVerification>()
@@ -52,8 +53,8 @@ class LinkStepUpVerificationViewModelTest {
     private fun buildViewModel(
         state: LinkStepUpVerificationState = LinkStepUpVerificationState()
     ) = LinkStepUpVerificationViewModel(
-        goNext = goNext,
         getManifest = getManifest,
+        navigationManager = navigationManager,
         eventTracker = eventTracker,
         confirmVerification = confirmVerification,
         markLinkStepUpVerified = markLinkVerified,
@@ -124,7 +125,10 @@ class LinkStepUpVerificationViewModelTest {
         onConsumerNotFoundCaptor.firstValue()
 
         assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
-        verify(goNext).invoke(Pane.INSTITUTION_PICKER)
+        navigationManager.assertNavigatedTo(
+            destination = Destination.InstitutionPicker,
+            pane = Pane.LINK_STEP_UP_VERIFICATION
+        )
         eventTracker.assertContainsEvent(
             "linked_accounts.networking.verification.step_up.error",
             mapOf(
@@ -182,7 +186,10 @@ class LinkStepUpVerificationViewModelTest {
                 consumerSession.clientSecret,
                 selectedAccount.id
             )
-            verify(goNext).invoke(Pane.SUCCESS)
+            navigationManager.assertNavigatedTo(
+                Destination.Success,
+                pane = Pane.LINK_STEP_UP_VERIFICATION
+            )
         }
 
     private suspend fun getManifestReturnsManifestWithEmail(

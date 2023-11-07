@@ -1,6 +1,5 @@
 package com.stripe.android.googlepaylauncher
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
@@ -10,23 +9,15 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import kotlinx.parcelize.Parcelize
 
+@Deprecated(
+    message = "This class isn't meant for public use and will be removed in a future release. " +
+        "Use GooglePayLauncher directly.",
+)
 class GooglePayLauncherContract :
     ActivityResultContract<GooglePayLauncherContract.Args, GooglePayLauncher.Result>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
-        val statusBarColor = when (context) {
-            is Activity -> context.window?.statusBarColor
-            else -> null
-        }
-
-        val extras = input.toBundle().apply {
-            if (statusBarColor != null) {
-                putInt(EXTRA_STATUS_BAR_COLOR, statusBarColor)
-            }
-        }
-
-        return Intent(context, GooglePayLauncherActivity::class.java)
-            .putExtras(extras)
+        return Intent(context, GooglePayLauncherActivity::class.java).putExtras(input.toBundle())
     }
 
     override fun parseResult(
@@ -44,19 +35,22 @@ class GooglePayLauncherContract :
      * Args for launching [GooglePayLauncherContract] to confirm a [PaymentIntent].
      */
     @Parcelize
-    data class PaymentIntentArgs(
+    data class PaymentIntentArgs @JvmOverloads constructor(
         override val clientSecret: String,
-        override val config: GooglePayLauncher.Config
+        override val config: GooglePayLauncher.Config,
+        internal val label: String? = null,
     ) : Args()
 
     /**
      * Args for launching [GooglePayLauncherContract] to confirm a [SetupIntent].
      */
     @Parcelize
-    data class SetupIntentArgs(
+    data class SetupIntentArgs @JvmOverloads constructor(
         override val clientSecret: String,
         override val config: GooglePayLauncher.Config,
-        internal val currencyCode: String
+        internal val currencyCode: String,
+        internal val amount: Long? = null,
+        internal val label: String? = null,
     ) : Args()
 
     sealed class Args : Parcelable {
@@ -76,6 +70,5 @@ class GooglePayLauncherContract :
 
     internal companion object {
         internal const val EXTRA_RESULT = "extra_result"
-        internal const val EXTRA_STATUS_BAR_COLOR = "extra_status_bar_color"
     }
 }

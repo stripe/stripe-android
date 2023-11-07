@@ -20,26 +20,24 @@ internal class CustomerSessionViewModel(
         configuration: CustomerSheet.Configuration,
         customerAdapter: CustomerAdapter,
         callback: CustomerSheetResultCallback,
+        statusBarColor: () -> Int?,
     ): CustomerSessionComponent {
-        val shouldCreateNewComponent = configuration != backingComponent?.configuration &&
-            customerAdapter != backingComponent?.customerAdapter &&
+        val shouldCreateNewComponent = configuration != backingComponent?.configuration ||
+            customerAdapter != backingComponent?.customerAdapter ||
             callback != backingComponent?.callback
         if (shouldCreateNewComponent) {
             backingComponent = DaggerCustomerSessionComponent
                 .builder()
-                .appContext(getApplication())
+                .application(getApplication())
                 .configuration(configuration)
                 .customerAdapter(customerAdapter)
                 .callback(callback)
+                .statusBarColor(statusBarColor)
                 .customerSessionViewModel(this)
                 .build()
         }
 
         return component
-    }
-
-    internal fun clear() {
-        backingComponent = null
     }
 
     override fun onCleared() {
@@ -48,6 +46,10 @@ internal class CustomerSessionViewModel(
     }
 
     internal companion object {
+        internal fun clear() {
+            backingComponent = null
+        }
+
         private var backingComponent: CustomerSessionComponent? = null
         val component: CustomerSessionComponent
             get() = backingComponent ?: error("Component could not be retrieved")

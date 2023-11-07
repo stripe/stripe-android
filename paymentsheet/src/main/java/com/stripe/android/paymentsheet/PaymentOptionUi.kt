@@ -24,6 +24,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -32,6 +33,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -41,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
+import com.stripe.android.paymentsheet.ui.PaymentOptionEditState
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.SectionCard
@@ -50,11 +53,15 @@ import com.stripe.android.R as StripeR
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 const val PAYMENT_OPTION_CARD_TEST_TAG = "PAYMENT_OPTION_CARD_TEST_TAG"
 
+private const val EDIT_ICON_SCALE = 0.6f
+private val editIconColor = Color(0xFF636366)
+private val editIconBackgroundColor = Color(0xFFE5E5EA)
+
 @Composable
 internal fun PaymentOptionUi(
     viewWidth: Dp,
     isSelected: Boolean,
-    isEditing: Boolean,
+    editState: PaymentOptionEditState,
     isEnabled: Boolean,
     iconRes: Int,
     modifier: Modifier = Modifier,
@@ -64,26 +71,23 @@ internal fun PaymentOptionUi(
     removePmDialogTitle: String = "",
     description: String,
     onRemoveListener: (() -> Unit)? = null,
+    onModifyListener: (() -> Unit)? = null,
     onRemoveAccessibilityDescription: String = "",
+    onModifyAccessibilityDescription: String = "",
     onItemSelectedListener: (() -> Unit),
 ) {
     val openRemoveDialog = rememberSaveable { mutableStateOf(false) }
 
     BadgedBox(
         badge = {
-            if (isEditing) {
-                RemoveBadge(
-                    onRemoveAccessibilityDescription = onRemoveAccessibilityDescription,
-                    onPressed = { openRemoveDialog.value = true },
-                    modifier = Modifier.offset(x = (-14).dp, y = 1.dp),
-                )
-            }
-
-            if (isSelected) {
-                SelectedBadge(
-                    modifier = Modifier.offset(x = (-18).dp, y = 58.dp),
-                )
-            }
+            PaymentOptionBadge(
+                isSelected = isSelected,
+                editState = editState,
+                openRemoveDialog = openRemoveDialog,
+                onModifyListener = onModifyListener,
+                onRemoveAccessibilityDescription = onRemoveAccessibilityDescription,
+                onModifyAccessibilityDescription = onModifyAccessibilityDescription
+            )
         },
         content = {
             Column {
@@ -118,14 +122,45 @@ internal fun PaymentOptionUi(
             .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
     )
 
-    if (isEditing && onRemoveListener != null) {
+    if (editState == PaymentOptionEditState.Removable && onRemoveListener != null) {
         SimpleDialogElementUI(
-            openDialog = openRemoveDialog,
+            openDialog = openRemoveDialog.value,
             titleText = removePmDialogTitle,
             messageText = description,
             confirmText = stringResource(StripeR.string.stripe_remove),
             dismissText = stringResource(StripeR.string.stripe_cancel),
-            onConfirmListener = onRemoveListener
+            onConfirmListener = onRemoveListener,
+            onDismissListener = { openRemoveDialog.value = false }
+        )
+    }
+}
+
+@Composable
+private fun PaymentOptionBadge(
+    isSelected: Boolean,
+    editState: PaymentOptionEditState,
+    openRemoveDialog: MutableState<Boolean>,
+    onModifyListener: (() -> Unit)? = null,
+    onRemoveAccessibilityDescription: String = "",
+    onModifyAccessibilityDescription: String = ""
+) {
+    when (editState) {
+        PaymentOptionEditState.Modifiable -> ModifyBadge(
+            onModifyAccessibilityDescription = onModifyAccessibilityDescription,
+            onPressed = { onModifyListener?.invoke() },
+            modifier = Modifier.offset(x = (-14).dp, y = 1.dp),
+        )
+        PaymentOptionEditState.Removable -> RemoveBadge(
+            onRemoveAccessibilityDescription = onRemoveAccessibilityDescription,
+            onPressed = { openRemoveDialog.value = true },
+            modifier = Modifier.offset(x = (-14).dp, y = 1.dp),
+        )
+        PaymentOptionEditState.None -> Unit
+    }
+
+    if (isSelected) {
+        SelectedBadge(
+            modifier = Modifier.offset(x = (-18).dp, y = 58.dp),
         )
     }
 }
@@ -198,6 +233,25 @@ private fun RemoveBadge(
 }
 
 @Composable
+private fun ModifyBadge(
+    onModifyAccessibilityDescription: String,
+    onPressed: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Image(
+        painter = painterResource(R.drawable.stripe_ic_edit_symbol),
+        contentDescription = onModifyAccessibilityDescription,
+        colorFilter = ColorFilter.tint(editIconColor),
+        contentScale = FixedScale(EDIT_ICON_SCALE),
+        modifier = modifier
+            .size(20.dp)
+            .clip(CircleShape)
+            .background(color = editIconBackgroundColor)
+            .clickable(onClick = onPressed),
+    )
+}
+
+@Composable
 private fun SelectedBadge(
     modifier: Modifier = Modifier,
 ) {
@@ -225,12 +279,12 @@ private fun SelectedBadge(
 
 @Preview(name = "Selected payment option")
 @Composable
-private fun PaymentOptionUi_Selected() {
+private fun PaymentOptionUiSelected() {
     StripeTheme {
         PaymentOptionUi(
             viewWidth = 100.dp,
             isSelected = true,
-            isEditing = false,
+            editState = PaymentOptionEditState.None,
             isEnabled = true,
             iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
             labelText = "MasterCard",
@@ -240,14 +294,31 @@ private fun PaymentOptionUi_Selected() {
     }
 }
 
-@Preview(name = "Payment option in editing mode")
+@Preview(name = "Payment option in removable mode")
 @Composable
-private fun PaymentOptionUi_Editing() {
+private fun PaymentOptionUiRemovable() {
     StripeTheme {
         PaymentOptionUi(
             viewWidth = 100.dp,
             isSelected = false,
-            isEditing = true,
+            editState = PaymentOptionEditState.Removable,
+            isEnabled = true,
+            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+            labelText = "MasterCard",
+            description = "MasterCard",
+            onItemSelectedListener = {},
+        )
+    }
+}
+
+@Preview(name = "Payment option in modifiable mode")
+@Composable
+private fun PaymentOptionUiModifiable() {
+    StripeTheme {
+        PaymentOptionUi(
+            viewWidth = 100.dp,
+            isSelected = false,
+            editState = PaymentOptionEditState.Modifiable,
             isEnabled = true,
             iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
             labelText = "MasterCard",

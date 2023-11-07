@@ -6,10 +6,12 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.link.account.CookieStore
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -49,7 +51,6 @@ class PaymentSheet internal constructor(
      * @param paymentResultCallback Called with the result of the payment or setup after
      * [PaymentSheet] is dismissed.
      */
-    @ExperimentalPaymentSheetDecouplingApi
     constructor(
         activity: ComponentActivity,
         createIntentCallback: CreateIntentCallback,
@@ -82,7 +83,6 @@ class PaymentSheet internal constructor(
      * @param paymentResultCallback Called with the result of the payment or setup after
      * [PaymentSheet] is dismissed.
      */
-    @ExperimentalPaymentSheetDecouplingApi
     constructor(
         fragment: Fragment,
         createIntentCallback: CreateIntentCallback,
@@ -139,7 +139,6 @@ class PaymentSheet internal constructor(
      * @param intentConfiguration The [IntentConfiguration] to use.
      * @param configuration An optional [PaymentSheet] configuration.
      */
-    @ExperimentalPaymentSheetDecouplingApi
     @JvmOverloads
     fun presentWithIntentConfiguration(
         intentConfiguration: IntentConfiguration,
@@ -175,7 +174,6 @@ class PaymentSheet internal constructor(
             }
         }
 
-        @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
         @Parcelize
         internal data class DeferredIntent(
             val intentConfiguration: IntentConfiguration,
@@ -200,7 +198,6 @@ class PaymentSheet internal constructor(
      * @param onBehalfOf The account (if any) for which the funds of the intent are intended. See
      * [our docs](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-on_behalf_of) for more info.
      */
-    @ExperimentalPaymentSheetDecouplingApi
     @Parcelize
     class IntentConfiguration @JvmOverloads constructor(
         val mode: Mode,
@@ -211,7 +208,6 @@ class PaymentSheet internal constructor(
         /**
          * Contains information about the desired payment or setup flow.
          */
-        @ExperimentalPaymentSheetDecouplingApi
         sealed class Mode : Parcelable {
 
             internal abstract val setupFutureUse: SetupFutureUse?
@@ -230,7 +226,6 @@ class PaymentSheet internal constructor(
              * @param captureMethod Controls when the funds will be captured from the customer's
              * account. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method) for more info.
              */
-            @ExperimentalPaymentSheetDecouplingApi
             @Parcelize
             class Payment @JvmOverloads constructor(
                 val amount: Long,
@@ -247,7 +242,6 @@ class PaymentSheet internal constructor(
              * @param setupFutureUse Indicates that you intend to make future payments. See
              * [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
              */
-            @ExperimentalPaymentSheetDecouplingApi
             @Parcelize
             class Setup @JvmOverloads constructor(
                 val currency: String? = null,
@@ -263,7 +257,6 @@ class PaymentSheet internal constructor(
          * Indicates that you intend to make future payments with this [PaymentIntent]'s payment
          * method. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
          */
-        @ExperimentalPaymentSheetDecouplingApi
         enum class SetupFutureUse {
 
             /**
@@ -283,7 +276,6 @@ class PaymentSheet internal constructor(
          *
          * See [docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method).
          */
-        @ExperimentalPaymentSheetDecouplingApi
         enum class CaptureMethod {
 
             /**
@@ -328,7 +320,7 @@ class PaymentSheet internal constructor(
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    data class Configuration @JvmOverloads constructor(
+    data class Configuration internal constructor(
         /**
          * Your customer-facing business name.
          *
@@ -427,7 +419,47 @@ class PaymentSheet internal constructor(
          */
         val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration(),
+
+        /**
+         * A list of preferred networks that should be used to process payments
+         * made with a co-branded card if your user hasn't selected a network
+         * themselves.
+         *
+         * The first preferred network that matches any available network will
+         * be used. If no preferred network is applicable, Stripe will select
+         * the network.
+         */
+        val preferredNetworks: List<CardBrand> = listOf(),
     ) : Parcelable {
+        @JvmOverloads
+        constructor(
+            merchantDisplayName: String,
+            customer: CustomerConfiguration? = null,
+            googlePay: GooglePayConfiguration? = null,
+            primaryButtonColor: ColorStateList? = null,
+            defaultBillingDetails: BillingDetails? = null,
+            shippingDetails: AddressDetails? = null,
+            allowsDelayedPaymentMethods: Boolean = false,
+            allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
+            appearance: Appearance = Appearance(),
+            primaryButtonLabel: String? = null,
+            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+                BillingDetailsCollectionConfiguration(),
+        ) : this(
+            merchantDisplayName = merchantDisplayName,
+            customer = customer,
+            googlePay = googlePay,
+            primaryButtonColor = primaryButtonColor,
+            defaultBillingDetails = defaultBillingDetails,
+            shippingDetails = shippingDetails,
+            allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+            appearance = appearance,
+            primaryButtonLabel = primaryButtonLabel,
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            preferredNetworks = listOf()
+        )
+
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */
@@ -443,8 +475,10 @@ class PaymentSheet internal constructor(
             private var allowsDelayedPaymentMethods: Boolean = false
             private var allowsPaymentMethodsRequiringShippingAddress: Boolean = false
             private var appearance: Appearance = Appearance()
+            private var primaryButtonLabel: String? = null
             private var billingDetailsCollectionConfiguration =
                 BillingDetailsCollectionConfiguration()
+            private var preferredNetworks: List<CardBrand> = listOf()
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -484,23 +518,38 @@ class PaymentSheet internal constructor(
             fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
 
+            fun primaryButtonLabel(primaryButtonLabel: String) =
+                apply { this.primaryButtonLabel = primaryButtonLabel }
+
             fun billingDetailsCollectionConfiguration(
                 billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
             ) = apply {
                 this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
             }
 
+            /*
+             * TODO(samer-stripe): Make this function public prior to release
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun preferredNetworks(
+                preferredNetworks: List<CardBrand>
+            ) = apply {
+                this.preferredNetworks = preferredNetworks
+            }
+
             fun build() = Configuration(
-                merchantDisplayName,
-                customer,
-                googlePay,
-                primaryButtonColor,
-                defaultBillingDetails,
-                shippingDetails,
-                allowsDelayedPaymentMethods,
-                allowsPaymentMethodsRequiringShippingAddress,
-                appearance,
+                merchantDisplayName = merchantDisplayName,
+                customer = customer,
+                googlePay = googlePay,
+                primaryButtonColor = primaryButtonColor,
+                defaultBillingDetails = defaultBillingDetails,
+                shippingDetails = shippingDetails,
+                allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+                appearance = appearance,
+                primaryButtonLabel = primaryButtonLabel,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                preferredNetworks = preferredNetworks
             )
         }
     }
@@ -532,6 +581,7 @@ class PaymentSheet internal constructor(
          */
         val primaryButton: PrimaryButton = PrimaryButton()
     ) : Parcelable {
+
         fun getColors(isDark: Boolean): Colors {
             return if (isDark) colorsDark else colorsLight
         }
@@ -543,12 +593,29 @@ class PaymentSheet internal constructor(
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
 
-            fun colorsLight(colors: Colors) = apply { this.colorsLight = colors }
-            fun colorsDark(colors: Colors) = apply { this.colorsDark = colors }
-            fun shapes(shapes: Shapes) = apply { this.shapes = shapes }
-            fun typography(typography: Typography) = apply { this.typography = typography }
-            fun primaryButton(primaryButton: PrimaryButton) =
-                apply { this.primaryButton = primaryButton }
+            fun colorsLight(colors: Colors) = apply {
+                this.colorsLight = colors
+            }
+
+            fun colorsDark(colors: Colors) = apply {
+                this.colorsDark = colors
+            }
+
+            fun shapes(shapes: Shapes) = apply {
+                this.shapes = shapes
+            }
+
+            fun typography(typography: Typography) = apply {
+                this.typography = typography
+            }
+
+            fun primaryButton(primaryButton: PrimaryButton) = apply {
+                this.primaryButton = primaryButton
+            }
+
+            fun build(): Appearance {
+                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton)
+            }
         }
     }
 
@@ -1029,33 +1096,32 @@ class PaymentSheet internal constructor(
         val ephemeralKeySecret: String
     ) : Parcelable
 
+    /**
+     * @param environment The Google Pay environment to use. See
+     * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
+     * for more information.
+     * @param countryCode The two-letter ISO 3166 code of the country of your business, e.g. "US".
+     * See your account's country value [here](https://dashboard.stripe.com/settings/account).
+     * @param currencyCode The three-letter ISO 4217 alphabetic currency code, e.g. "USD" or "EUR".
+     * Required in order to support Google Pay when processing a Setup Intent.
+     * @param amount An optional amount to display for setup intents. Google Pay may or may not
+     * display this amount depending on its own internal logic. Defaults to 0 if none is provided.
+     * @param label An optional label to display with the amount. Google Pay may or may not display
+     * this label depending on its own internal logic. Defaults to a generic label if none is
+     * provided.
+     */
     @Parcelize
-    data class GooglePayConfiguration(
-        /**
-         * The Google Pay environment to use.
-         *
-         * See [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment) for more information.
-         */
+    data class GooglePayConfiguration @JvmOverloads constructor(
         val environment: Environment,
-        /**
-         * The two-letter ISO 3166 code of the country of your business, e.g. "US".
-         * See your account's country value [here](https://dashboard.stripe.com/settings/account).
-         */
         val countryCode: String,
-        /**
-         * The three-letter ISO 4217 alphabetic currency code, e.g. "USD" or "EUR".
-         * Required in order to support Google Pay when processing a Setup Intent.
-         */
-        val currencyCode: String? = null
+        val currencyCode: String? = null,
+        val amount: Long? = null,
+        val label: String? = null,
     ) : Parcelable {
-        constructor(
-            environment: Environment,
-            countryCode: String
-        ) : this(environment, countryCode, null)
 
         enum class Environment {
             Production,
-            Test
+            Test,
         }
     }
 
@@ -1099,7 +1165,6 @@ class PaymentSheet internal constructor(
          * @param configuration An optional [PaymentSheet] configuration.
          * @param callback called with the result of configuring the FlowController.
          */
-        @ExperimentalPaymentSheetDecouplingApi
         fun configureWithIntentConfiguration(
             intentConfiguration: IntentConfiguration,
             configuration: Configuration? = null,
@@ -1175,7 +1240,6 @@ class PaymentSheet internal constructor(
              * @param paymentResultCallback Called with the result of the payment after
              * [PaymentSheet] is dismissed.
              */
-            @ExperimentalPaymentSheetDecouplingApi
             @JvmStatic
             fun create(
                 activity: ComponentActivity,
@@ -1223,7 +1287,6 @@ class PaymentSheet internal constructor(
              * @param paymentResultCallback Called with the result of the payment after
              * [PaymentSheet] is dismissed.
              */
-            @ExperimentalPaymentSheetDecouplingApi
             @JvmStatic
             fun create(
                 fragment: Fragment,

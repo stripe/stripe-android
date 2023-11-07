@@ -1,5 +1,6 @@
 package com.stripe.android.stripecardscan.scanui
 
+import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.PointF
 import android.os.Build
@@ -14,13 +15,13 @@ import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.camera.CameraAdapter
+import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.mlcore.impl.InterpreterInitializerImpl
 import com.stripe.android.stripecardscan.R
-import com.stripe.android.stripecardscan.camera.getCameraAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -69,7 +70,14 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
     protected var isFlashlightOn: Boolean = false
         private set
 
-    internal val cameraAdapter by lazy { buildCameraAdapter() }
+    abstract val cameraAdapterBuilder: (
+        Activity,
+        ViewGroup,
+        Size,
+        CameraErrorListener
+    ) -> CameraAdapter<CameraPreviewImage<Bitmap>>
+
+    internal val cameraAdapter by lazy { buildCameraAdapter(cameraAdapterBuilder) }
     private val cameraErrorListener by lazy {
         DefaultCameraErrorListener(this) { t -> scanFailure(t) }
     }
@@ -282,13 +290,10 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
     /**
      * Generate a camera adapter
      */
-    internal open fun buildCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> =
-        getCameraAdapter(
-            activity = this,
-            previewView = previewFrame,
-            minimumResolution = minimumAnalysisResolution,
-            cameraErrorListener = cameraErrorListener
-        )
+    internal open fun buildCameraAdapter(
+        cameraProvider: (Activity, ViewGroup, Size, CameraErrorListener) -> CameraAdapter<CameraPreviewImage<Bitmap>>
+    ): CameraAdapter<CameraPreviewImage<Bitmap>> =
+        cameraProvider(this, previewFrame, minimumAnalysisResolution, cameraErrorListener)
 
     protected abstract val previewFrame: ViewGroup
 

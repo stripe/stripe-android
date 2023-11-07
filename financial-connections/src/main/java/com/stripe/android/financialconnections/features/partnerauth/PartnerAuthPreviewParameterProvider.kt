@@ -6,20 +6,20 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
-import com.stripe.android.financialconnections.domain.Body
-import com.stripe.android.financialconnections.domain.Cta
-import com.stripe.android.financialconnections.domain.Display
-import com.stripe.android.financialconnections.domain.Entry
-import com.stripe.android.financialconnections.domain.OauthPrepane
-import com.stripe.android.financialconnections.domain.PartnerNotice
-import com.stripe.android.financialconnections.domain.Text
+import com.stripe.android.financialconnections.model.Body
+import com.stripe.android.financialconnections.model.Cta
+import com.stripe.android.financialconnections.model.Display
+import com.stripe.android.financialconnections.model.Entry
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.Image
+import com.stripe.android.financialconnections.model.OauthPrepane
+import com.stripe.android.financialconnections.model.PartnerNotice
+import com.stripe.android.financialconnections.model.TextUpdate
 
 internal class PartnerAuthPreviewParameterProvider :
-    PreviewParameterProvider<PartnerAuthState> {
+    PreviewParameterProvider<SharedPartnerAuthState> {
     override val values = sequenceOf(
         canonical(),
         browserLoading()
@@ -28,9 +28,9 @@ internal class PartnerAuthPreviewParameterProvider :
     override val count: Int
         get() = super.count
 
-    private fun canonical() = PartnerAuthState(
+    private fun canonical() = SharedPartnerAuthState(
         payload = Success(
-            PartnerAuthState.Payload(
+            SharedPartnerAuthState.Payload(
                 institution = FinancialConnectionsInstitution(
                     id = "id",
                     name = "name",
@@ -46,12 +46,14 @@ internal class PartnerAuthPreviewParameterProvider :
             )
         ),
         authenticationStatus = Uninitialized,
-        viewEffect = null
+        viewEffect = null,
+        activeAuthSession = null,
+        pane = Pane.PARTNER_AUTH
     )
 
-    private fun browserLoading() = PartnerAuthState(
+    private fun browserLoading() = SharedPartnerAuthState(
         payload = Success(
-            PartnerAuthState.Payload(
+            SharedPartnerAuthState.Payload(
                 institution = FinancialConnectionsInstitution(
                     id = "id",
                     name = "name",
@@ -68,18 +70,20 @@ internal class PartnerAuthPreviewParameterProvider :
         ),
         // While browser is showing, this Async is loading.
         authenticationStatus = Loading(),
-        viewEffect = null
+        viewEffect = null,
+        activeAuthSession = null,
+        pane = Pane.PARTNER_AUTH
     )
 
     private fun session() =
         FinancialConnectionsAuthorizationSession(
-            flow = FinancialConnectionsAuthorizationSession.Flow.FINICITY_CONNECT_V2_OAUTH,
+            flow = FinancialConnectionsAuthorizationSession.Flow.FINICITY_CONNECT_V2_OAUTH.name,
             showPartnerDisclosure = true,
             _isOAuth = true,
-            nextPane = FinancialConnectionsSessionManifest.Pane.PARTNER_AUTH,
+            nextPane = Pane.PARTNER_AUTH,
             id = "1234",
             display = Display(
-                Text(
+                TextUpdate(
                     oauthPrepane = oauthPrepane()
                 )
             )

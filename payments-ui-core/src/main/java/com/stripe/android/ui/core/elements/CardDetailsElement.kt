@@ -1,7 +1,8 @@
 package com.stripe.android.ui.core.elements
 
 import android.content.Context
-import androidx.annotation.RestrictTo
+import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.SectionMultiFieldElement
@@ -20,13 +21,13 @@ internal class CardDetailsElement(
     identifier: IdentifierSpec,
     context: Context,
     initialValues: Map<IdentifierSpec, String?>,
-    viewOnlyFields: Set<IdentifierSpec> = emptySet(),
-    private val collectName: Boolean = false,
+    collectName: Boolean = false,
+    private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     val controller: CardDetailsController = CardDetailsController(
         context,
         initialValues,
-        viewOnlyFields.contains(IdentifierSpec.CardNumber),
         collectName,
+        cbcEligibility,
     )
 ) : SectionMultiFieldElement(identifier) {
     val isCardScanEnabled = controller.numberElement.controller.cardScanEnabled
@@ -72,6 +73,16 @@ internal class CardDetailsElement(
                     IdentifierSpec.CardBrand to FormFieldEntry(it.code, true)
                 }
             )
+            if (cbcEligibility is CardBrandChoiceEligibility.Eligible) {
+                add(
+                    controller.numberElement.controller.selectedCardBrandFlow.map { brand ->
+                        IdentifierSpec.PreferredCardBrand to FormFieldEntry(
+                            value = brand.code.takeUnless { brand == CardBrand.Unknown },
+                            isComplete = true
+                        )
+                    }
+                )
+            }
             add(
                 controller.expirationDateElement.controller.formFieldValue.map {
                     IdentifierSpec.CardExpMonth to getExpiryMonthFormFieldEntry(it)
@@ -85,16 +96,6 @@ internal class CardDetailsElement(
         }
         return combine(flows) { it.toList() }
     }
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun createExpiryDateFormFieldValues(
-    entry: FormFieldEntry
-): Map<IdentifierSpec, FormFieldEntry> {
-    return mapOf(
-        IdentifierSpec.CardExpMonth to getExpiryMonthFormFieldEntry(entry),
-        IdentifierSpec.CardExpYear to getExpiryYearFormFieldEntry(entry),
-    )
 }
 
 private fun getExpiryMonthFormFieldEntry(entry: FormFieldEntry): FormFieldEntry {

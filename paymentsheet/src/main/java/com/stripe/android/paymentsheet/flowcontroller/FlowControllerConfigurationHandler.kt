@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import com.stripe.android.core.injection.UIContext
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -83,19 +84,21 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             return
         }
 
-        when (val result = paymentSheetLoader.load(initializationMode, configuration)) {
-            is PaymentSheetLoader.Result.Success -> {
+        AnalyticsRequestFactory.regenerateSessionId()
+
+        paymentSheetLoader.load(initializationMode, configuration).fold(
+            onSuccess = { state ->
                 viewModel.previousConfigureRequest = configureRequest
-                onInitSuccess(result.state, configureRequest)
+                onInitSuccess(state, configureRequest)
                 onConfigured()
+            },
+            onFailure = { error ->
+                onConfigured(error = error)
             }
-            is PaymentSheetLoader.Result.Failure -> {
-                onConfigured(error = result.throwable)
-            }
-        }
+        )
     }
 
-    private fun onInitSuccess(
+    private suspend fun onInitSuccess(
         state: PaymentSheetState.Full,
         configureRequest: ConfigureRequest,
     ) {
@@ -112,7 +115,9 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             newState = state,
         )
 
-        viewModel.state = state
+        withContext(uiContext) {
+            viewModel.state = state
+        }
     }
 
     private fun resetJob() {

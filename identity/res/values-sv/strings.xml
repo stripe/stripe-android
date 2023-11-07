@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Bocken anger att handlingen har fotograferats</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Välj foto</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Slutför med testdata</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Spara tid genom att välja önskat resultat och omedelbart slutföra med det resultatet. Det mobila SDK-flödet kommer att returneras med resultatet Slutförd.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Det gick inte att ta en bild av hög kvalitet.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Du kan antingen försöka igen eller ladda upp en bild från din enhet.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Det gick inte att ta bilden</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">kameraikon</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Klockikon</string>
   <!-- Content description for close button -->
@@ -101,6 +107,8 @@
   <string name="stripe_passport">Pass</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Pass är markerat</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Telefonnummer</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Vänd på körkortet</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -127,12 +135,22 @@
   <string name="stripe_selfie_item_description">en tagen selfie</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Dina selfies har inte sparats. Vill du avsluta?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">Ett par foton kommer att tas automatiskt i nästa steg för att verifiera att det är du</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Gör dig redo att ta en selfie</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Ta bild</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Den här sidan visas bara i testläge.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Du är för närvarande i testläge</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Försök igen</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Ett oväntat fel uppstod - försök igen om ett par sekunder</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Ladda upp ett foto</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Ladda upp körkortets baksida</string>
   <!-- Title of dialog to upload front of driver license -->
@@ -145,4 +163,6 @@
   <string name="stripe_upload_dialog_title_passport">Ladda upp pass</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Du kan även manuellt ladda upp ett foto av din/ditt %1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Ladda upp ditt foto-id</string>
 </resources>

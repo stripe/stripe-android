@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.ObjectBuilder
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
@@ -343,6 +342,20 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false
         ),
+        AmazonPay(
+            "amazon_pay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Alma(
+            "alma",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
         MobilePay(
             "mobilepay",
             isReusable = false,
@@ -370,6 +383,27 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
+        ),
+        Boleto(
+            code = "boleto",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = true,
+        ),
+        Konbini(
+            code = "konbini",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = true,
+        ),
+        Swish(
+            code = "swish",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
@@ -389,7 +423,7 @@ constructor(
         }
     }
 
-    class Builder : ObjectBuilder<PaymentMethod> {
+    class Builder {
         private var id: String? = null
         private var created: Long? = null
         private var liveMode: Boolean = false
@@ -486,7 +520,7 @@ constructor(
             this.code = code
         }
 
-        override fun build(): PaymentMethod {
+        fun build(): PaymentMethod {
             return PaymentMethod(
                 id = id,
                 created = created,
@@ -577,7 +611,7 @@ constructor(
                 )
         }
 
-        class Builder : ObjectBuilder<BillingDetails> {
+        class Builder {
             private var address: Address? = null
             private var email: String? = null
             private var name: String? = null
@@ -599,7 +633,7 @@ constructor(
                 this.phone = phone
             }
 
-            override fun build(): BillingDetails {
+            fun build(): BillingDetails {
                 return BillingDetails(address, email, name, phone)
             }
         }
@@ -705,7 +739,11 @@ constructor(
         @JvmField val wallet: Wallet? = null,
 
         @JvmField
-        val networks: Networks? = null
+        val networks: Networks? = null,
+
+        @JvmField
+        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val displayBrand: DisplayBrand? = null
     ) : TypeData() {
         override val type: Type get() = Type.Card
 
@@ -755,6 +793,12 @@ constructor(
              * [payment_method.card.three_d_secure_usage.supported](https://stripe.com/docs/api/errors#errors-payment_method-card-three_d_secure_usage-supported)
              */
             @JvmField val isSupported: Boolean
+        ) : StripeModel
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayBrand(
+            val type: CardBrand
         ) : StripeModel
 
         @Parcelize

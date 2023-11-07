@@ -9,8 +9,10 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.AuthActivityStarterHost
+import kotlinx.coroutines.launch
 
 /**
  * Host activity to perform actions for [PaymentLauncher].
@@ -49,13 +51,22 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             // Prevent back presses while confirming payment
         }
 
-        args.statusBarColor?.let {
-            window.statusBarColor = it
+        lifecycleScope.launch {
+            viewModel.paymentLauncherResult.collect {
+                it?.let(::finishWithResult)
+            }
         }
 
-        viewModel.paymentLauncherResult.observe(this, ::finishWithResult)
-        viewModel.register(this)
-        val host = AuthActivityStarterHost.create(this)
+        viewModel.register(
+            activityResultCaller = this,
+            lifecycleOwner = this,
+        )
+
+        val host = AuthActivityStarterHost.create(
+            activity = this,
+            statusBarColor = args.statusBarColor,
+        )
+
         when (args) {
             is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
                 viewModel.confirmStripeIntent(args.confirmStripeIntentParams, host)
@@ -67,11 +78,6 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
                 viewModel.handleNextActionForStripeIntent(args.setupIntentClientSecret, host)
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.cleanUp()
     }
 
     override fun finish() {

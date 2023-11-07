@@ -2,7 +2,9 @@ package com.stripe.android.link.repositories
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.PaymentDetailsFixtures
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
@@ -139,7 +141,7 @@ class LinkApiRepositoryTest {
                 consentAction = any(),
                 requestOptions = any()
             )
-        ).thenReturn(consumerSession)
+        ).thenReturn(Result.success(consumerSession))
 
         val result = linkRepository.consumerSignUp(
             "email",
@@ -167,7 +169,7 @@ class LinkApiRepositoryTest {
                 consentAction = any(),
                 requestOptions = any()
             )
-        ).thenThrow(RuntimeException("error"))
+        ).thenReturn(Result.failure(RuntimeException("error")))
 
         val result = linkRepository.consumerSignUp(
             "email",
@@ -177,55 +179,6 @@ class LinkApiRepositoryTest {
             "cookie",
             ConsumerSignUpConsentAction.Button
         )
-
-        assertThat(result.isFailure).isTrue()
-    }
-
-    @Test
-    fun `logout sends correct parameters`() = runTest {
-        val secret = "secret"
-        val cookie = "cookie2"
-        val consumerKey = "key2"
-        linkRepository.logout(secret, consumerKey, cookie)
-
-        verify(stripeRepository).logoutConsumer(
-            eq(secret),
-            eq(cookie),
-            eq(ApiRequest.Options(consumerKey))
-        )
-    }
-
-    @Test
-    fun `logout without consumerPublishableKey sends correct parameters`() = runTest {
-        val secret = "secret"
-        val cookie = "cookie2"
-        linkRepository.logout(secret, null, cookie)
-
-        verify(stripeRepository).logoutConsumer(
-            eq(secret),
-            eq(cookie),
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
-        )
-    }
-
-    @Test
-    fun `logout returns successful result`() = runTest {
-        val consumerSession = mock<ConsumerSession>()
-        whenever(stripeRepository.logoutConsumer(any(), any(), any()))
-            .thenReturn(consumerSession)
-
-        val result = linkRepository.logout("secret", "key", "cookie")
-
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).isEqualTo(consumerSession)
-    }
-
-    @Test
-    fun `logout catches exception and returns failure`() = runTest {
-        whenever(stripeRepository.logoutConsumer(any(), any(), any()))
-            .thenThrow(RuntimeException("error"))
-
-        val result = linkRepository.logout("secret", "key", "cookie")
 
         assertThat(result.isFailure).isTrue()
     }
@@ -241,7 +194,8 @@ class LinkApiRepositoryTest {
             userEmail = email,
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = secret,
-            consumerPublishableKey = consumerKey
+            consumerPublishableKey = consumerKey,
+            active = false,
         )
 
         verify(stripeRepository).createPaymentDetails(
@@ -261,7 +215,8 @@ class LinkApiRepositoryTest {
                     )
                 )
             },
-            eq(ApiRequest.Options(consumerKey))
+            eq(ApiRequest.Options(consumerKey)),
+            eq(false),
         )
     }
 
@@ -276,7 +231,8 @@ class LinkApiRepositoryTest {
                 userEmail = email,
                 stripeIntent = paymentIntent,
                 consumerSessionClientSecret = secret,
-                consumerPublishableKey = null
+                consumerPublishableKey = null,
+                active = false,
             )
 
             verify(stripeRepository).createPaymentDetails(
@@ -296,7 +252,8 @@ class LinkApiRepositoryTest {
                         )
                     )
                 },
-                eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+                eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+                eq(false),
             )
         }
 
@@ -307,19 +264,20 @@ class LinkApiRepositoryTest {
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS
         whenever(
             stripeRepository.createPaymentDetails(
-                any(),
-                any<ConsumerPaymentDetailsCreateParams>(),
-                any()
+                consumerSessionClientSecret = any(),
+                paymentDetailsCreateParams = any(),
+                requestOptions = any(),
+                active = any(),
             )
-        )
-            .thenReturn(paymentDetails)
+        ).thenReturn(Result.success(paymentDetails))
 
         val result = linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             userEmail = email,
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = consumerSessionSecret,
-            consumerPublishableKey = null
+            consumerPublishableKey = null,
+            active = false,
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -353,22 +311,57 @@ class LinkApiRepositoryTest {
     fun `createPaymentDetails for card catches exception and returns failure`() = runTest {
         whenever(
             stripeRepository.createPaymentDetails(
-                any(),
-                any<ConsumerPaymentDetailsCreateParams>(),
-                any()
+                consumerSessionClientSecret = any(),
+                paymentDetailsCreateParams = any(),
+                requestOptions = any(),
+                active = any(),
             )
-        )
-            .thenThrow(RuntimeException("error"))
+        ).thenReturn(Result.failure(RuntimeException("error")))
 
         val result = linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             userEmail = "email@stripe.com",
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = "secret",
-            consumerPublishableKey = null
+            consumerPublishableKey = null,
+            active = false,
         )
 
         assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `shareCardPaymentDetails returns LinkPaymentDetails_Saved`() = runTest {
+        val consumerSessionSecret = "consumer_session_secret"
+
+        whenever(
+            stripeRepository.sharePaymentDetails(
+                consumerSessionClientSecret = any(),
+                id = any(),
+                requestOptions = any(),
+            )
+        ).thenReturn(Result.success("pm_123"))
+
+        val result = linkRepository.shareCardPaymentDetails(
+            paymentMethodCreateParams = cardPaymentMethodCreateParams,
+            consumerSessionClientSecret = consumerSessionSecret,
+            id = "csmrpd*AYq4D_sXdAAAAOQ0",
+            last4 = "4242",
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        val savedLinkPaymentDetails = result.getOrThrow() as LinkPaymentDetails.Saved
+
+        assertThat(savedLinkPaymentDetails.paymentDetails)
+            .isEqualTo(ConsumerPaymentDetails.Passthrough(id = "pm_123", last4 = "4242"))
+        assertThat(savedLinkPaymentDetails.paymentMethodCreateParams)
+            .isEqualTo(
+                PaymentMethodCreateParams.createLink(
+                    "pm_123",
+                    consumerSessionSecret,
+                    null
+                )
+            )
     }
 
     private val cardPaymentMethodCreateParams =

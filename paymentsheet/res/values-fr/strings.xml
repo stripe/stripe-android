@@ -4,6 +4,14 @@
   <string name="stripe_add_new_payment_method">Ajouter un moyen de paiement</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_bank_account_ending_in">Supprimer le compte bancaire se terminant par %s</string>
+  <!-- Text for alert message when user needs to confirm payment in their banking app -->
+  <string name="stripe_blik_confirm_payment">Veuillez confirmer le paiement dans votre application bancaire sous %s pour effectuer l\'achat.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">Vos informations de paiement ne seront pas enregistrées.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Voulez-vous vraiment fermer ce formulaire ?</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">Une erreur s\'est produite. Vérifiez votre connexion et réessayez.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[En continuant, vous autorisez les paiements conformément à <terms>ces conditions</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -21,8 +29,12 @@
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Choisir un moyen de paiement</string>
   <string name="stripe_paymentsheet_close">Fermer</string>
+  <!-- A button used to confirm selecting a saved payment method -->
+  <string name="stripe_paymentsheet_confirm">Confirmer</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Saisir l\'adresse manuellement</string>
+  <!-- Title shown above a carousel containing the customer's payment methods -->
+  <string name="stripe_paymentsheet_manage_your_payment_methods">Gérer vos moyens de paiement</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe va effectuer un versement de 0,01 $ sur votre compte sous 1 ou 2 jours ouvrables. Vous recevrez ensuite un e-mail contenant des instructions pour finaliser le paiement en faveur de %s.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
@@ -41,6 +53,12 @@
   <string name="stripe_paymentsheet_remove_bank_account_title">Supprimer le compte bancaire</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Supprimer %s</string>
+  <!-- A button used for saving a new payment method -->
+  <string name="stripe_paymentsheet_save">Enregistrer</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_save_a_new_payment_method">Enregistrer un nouveau moyen de paiement</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_save_bank_title">Enregistrez votre compte bancaire en quelques clics.</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Enregistrer pour de futurs achats</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
@@ -49,6 +67,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Sélectionnez votre moyen de paiement</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total : %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">Un problème est survenu</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Annuler et utiliser un autre moyen de paiement</string>
   <!-- Text on a screen asking the user to approve a payment -->

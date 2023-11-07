@@ -13,23 +13,23 @@ data class ConsumerPaymentDetails internal constructor(
     val paymentDetails: List<PaymentDetails>
 ) : StripeModel {
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class PaymentDetails(
         open val id: String,
-        open val isDefault: Boolean,
         open val type: String
     ) : Parcelable
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Card(
         override val id: String,
-        override val isDefault: Boolean,
         val expiryYear: Int,
         val expiryMonth: Int,
         val brand: CardBrand,
         val last4: String,
         val cvcCheck: CvcCheck,
         val billingAddress: BillingAddress? = null
-    ) : PaymentDetails(id, isDefault, Companion.type) {
+    ) : PaymentDetails(id, Companion.type) {
 
         val requiresCardDetailsRecollection: Boolean
             get() = isExpired || cvcCheck.requiresRecollection
@@ -67,19 +67,27 @@ data class ConsumerPaymentDetails internal constructor(
     }
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Passthrough(
+        override val id: String,
+        val last4: String,
+    ) : PaymentDetails(id, "card")
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class BankAccount(
         override val id: String,
-        override val isDefault: Boolean,
         val bankIconCode: String?,
         val bankName: String,
         val last4: String
-    ) : PaymentDetails(id, isDefault, Companion.type) {
+    ) : PaymentDetails(id, Companion.type) {
         companion object {
             const val type = "bank_account"
         }
     }
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class BillingAddress(
         val countryCode: CountryCode?,
         val postalCode: String?

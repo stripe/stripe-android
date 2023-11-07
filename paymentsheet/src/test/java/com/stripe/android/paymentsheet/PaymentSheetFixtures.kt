@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.content.res.ColorStateList
 import android.graphics.Color
 import androidx.core.graphics.toColorInt
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -12,6 +11,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import org.mockito.kotlin.mock
 
 internal object PaymentSheetFixtures {
@@ -21,10 +21,10 @@ internal object PaymentSheetFixtures {
     internal const val MERCHANT_DISPLAY_NAME = "Merchant, Inc."
     internal const val CLIENT_SECRET = "pi_1234_secret_1234"
     internal const val DIFFERENT_CLIENT_SECRET = "pi_4321_secret_4321"
+    internal const val SETUP_CLIENT_SECRET = "seti_1234_secret_4321"
 
-    internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(
-        CLIENT_SECRET
-    )
+    internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(CLIENT_SECRET)
+    internal val SETUP_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(SETUP_CLIENT_SECRET)
 
     internal val CONFIG_MINIMUM = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME
@@ -110,9 +110,9 @@ internal object PaymentSheetFixtures {
             isGooglePayReady = false,
             paymentSelection = null,
             linkState = null,
+            isEligibleForCardBrandChoice = false,
         ),
         statusBarColor = STATUS_BAR_COLOR,
-        injectorKey = DUMMY_INJECTOR_KEY,
         enableLogging = false,
         productUsage = mock()
     )
@@ -196,6 +196,7 @@ internal object PaymentSheetFixtures {
                 email = "email",
                 name = "Jenny Rosen",
                 phone = "+18008675309"
-            )
+            ),
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible
         )
 }

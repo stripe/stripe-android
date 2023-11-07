@@ -5,6 +5,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
+import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.PaymentAccountParams
@@ -40,7 +41,7 @@ internal interface FinancialConnectionsAccountsRepository {
     suspend fun getNetworkedAccounts(
         clientSecret: String,
         consumerSessionClientSecret: String,
-    ): PartnerAccountsList
+    ): NetworkedAccountsList
 
     suspend fun postLinkAccountSessionPaymentAccount(
         clientSecret: String,
@@ -121,7 +122,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     override suspend fun getNetworkedAccounts(
         clientSecret: String,
         consumerSessionClientSecret: String
-    ): PartnerAccountsList {
+    ): NetworkedAccountsList {
         val request = apiRequestFactory.createGet(
             url = networkedAccountsUrl,
             options = apiOptions,
@@ -133,7 +134,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         )
         return requestExecutor.execute(
             request,
-            PartnerAccountsList.serializer()
+            NetworkedAccountsList.serializer()
         ).also {
             updateCachedAccounts("getNetworkedAccounts", it.data)
         }
@@ -215,19 +216,19 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     }
 
     companion object {
-        internal val accountsSessionUrl: String =
+        internal const val accountsSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/accounts"
 
-        internal val networkedAccountsUrl: String =
+        internal const val networkedAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/networked_accounts"
 
-        internal val shareNetworkedAccountsUrl: String =
+        internal const val shareNetworkedAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/share_networked_account"
 
-        internal val attachPaymentAccountUrl: String =
+        internal const val attachPaymentAccountUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/attach_payment_account"
 
-        internal val authorizationSessionSelectedAccountsUrl: String =
+        internal const val authorizationSessionSelectedAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/selected_accounts"
     }
 }

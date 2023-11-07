@@ -4,8 +4,11 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.R
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,20 +51,22 @@ class CardDetailsControllerTest {
     }
 
     @Test
-    fun `When card number is not view only then CardNumberControllerEditable is used`() {
-        val cardController =
-            CardDetailsController(context, emptyMap())
+    fun `When eligible for card brand choice and preferred card brand is passed, initial value should have been set`() {
+        val cardController = CardDetailsController(
+            context,
+            mapOf(
+                IdentifierSpec.CardNumber to "4000002500001001",
+                IdentifierSpec.PreferredCardBrand to CardBrand.CartesBancaires.code
+            ),
+            cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf())
+        )
 
-        assertThat(cardController.numberElement.controller)
-            .isInstanceOf(CardNumberEditableController::class.java)
-    }
+        val flowValues = mutableListOf<CardBrand?>()
+        cardController.numberElement.controller.cardBrandFlow.asLiveData()
+            .observeForever {
+                flowValues.add(it)
+            }
 
-    @Test
-    fun `When card number is view only then CardNumberControllerViewOnly is used`() {
-        val cardController =
-            CardDetailsController(context, emptyMap(), true)
-
-        assertThat(cardController.numberElement.controller)
-            .isInstanceOf(CardNumberViewOnlyController::class.java)
+        assertThat(flowValues[flowValues.size - 1]).isEqualTo(CardBrand.CartesBancaires)
     }
 }

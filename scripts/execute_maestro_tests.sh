@@ -1,38 +1,73 @@
 #!/usr/bin/env bash
 set -o pipefail
-set -x
+set -e
 
-now=$(date +%F_%H-%M-%S)
-echo $now
+# Maestro tags to be executed. see https://maestro.mobile.dev/cli/tags
+MAESTRO_TAGS=""
 
-# Install Maestro
-export MAESTRO_VERSION=1.21.3; curl -Ls "https://get.maestro.mobile.dev" | bash
-export PATH="$PATH":"$HOME/.maestro/bin"
-maestro -v
+while getopts ":t:" opt; do
+  case $opt in
+    t) MAESTRO_TAGS="$OPTARG"
+    ;;
+    \?) echo "Invalid option -$OPTARG" >&2
+    exit 1
+    ;;
+  esac
+done
 
-# Compile and install APK.
-./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL :financial-connections-example:installDebug
+# Check if tags is empty
+if [ -z "$MAESTRO_TAGS" ]
+then
+  echo "Tags parameter is required."
+  exit 1
+fi
 
-# Start screen record (adb screenrecord has a 3 min limit).
-adb shell "screenrecord /sdcard/$now-1.mp4" &
+export MAESTRO_VERSION=1.33.1
 
-# Store the process ID
-childpid=$!
+# Retry mechanism for Maestro installation
+MAX_RETRIES=5
+RETRY_COUNT=0
 
-# Clear and start collecting logs
-maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml maestro/financial-connections/
-result=$?
+while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
+    curl -Ls "https://get.maestro.mobile.dev" | bash &&
+    export PATH="$PATH:$HOME/.maestro/bin" &&
+    maestro -v &&
+    break
 
-# Wait for the recording process to finish
-kill -2 "$childpid"
-wait "$childpid"
+    let RETRY_COUNT=RETRY_COUNT+1
+    echo "Attempt $RETRY_COUNT failed. Retrying..."
+    sleep 5
+done
 
-# Sleep for a short duration to allow the process to finalize the video file
-sleep 3
+if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
+    echo "Installation failed after $MAX_RETRIES attempts."
+    exit 1
+fi
 
-# Pull the video file from the device
-mkdir -p /tmp/test_results
-cd /tmp/test_results
-adb pull "/sdcard/$now-1.mp4" || true
+# install APK.
+adb install $BITRISE_APK_PATH
 
-exit "$result"
+TEST_DIR_PATH=maestro/financial-connections
+TEST_RESULTS_PATH=/tmp/test_results
+RETRY_COUNT=0
+
+# Create test results folder.
+mkdir -p $TEST_RESULTS_PATH
+
+for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
+   # Check if tags are present in the test file
+    if awk '/tags:/,/---/' "$TEST_FILE_PATH" | grep -q "$MAESTRO_TAGS"; then
+        # Execute Maestro test flow and retries if failed.
+        while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
+            maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output $TEST_FILE_PATH.xml "$TEST_FILE_PATH" && break
+            let RETRY_COUNT=RETRY_COUNT+1
+            echo "Maestro test attempt $RETRY_COUNT failed. Retrying..."
+        done
+        if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
+            echo "Maestro tests failed after $MAX_RETRIES attempts."
+            exit 1
+        else
+            RETRY_COUNT=0
+        fi
+    fi
+done

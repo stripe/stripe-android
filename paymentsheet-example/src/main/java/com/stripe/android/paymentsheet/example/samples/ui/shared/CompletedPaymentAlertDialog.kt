@@ -12,6 +12,8 @@ import com.stripe.android.paymentsheet.example.R
 
 @Composable
 fun CompletedPaymentAlertDialog(
+    title: String? = null,
+    confirmButtonText: String? = null,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -25,7 +27,7 @@ fun CompletedPaymentAlertDialog(
                 }
             ) {
                 Text(
-                    text = stringResource(
+                    text = confirmButtonText ?: stringResource(
                         id = R.string.finish
                     )
                 )
@@ -34,7 +36,7 @@ fun CompletedPaymentAlertDialog(
         modifier = Modifier.padding(horizontal = 32.dp),
         title = {
             Text(
-                text = stringResource(
+                text = title ?: stringResource(
                     id = R.string.success
                 )
             )

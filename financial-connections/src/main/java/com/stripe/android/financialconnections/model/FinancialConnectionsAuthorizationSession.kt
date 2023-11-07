@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
 import com.stripe.android.core.model.serializers.EnumIgnoreUnknownSerializer
-import com.stripe.android.financialconnections.domain.Display
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -31,7 +30,7 @@ internal data class FinancialConnectionsAuthorizationSession(
     val nextPane: FinancialConnectionsSessionManifest.Pane,
 
     @SerialName(value = "flow")
-    val flow: Flow? = null,
+    val flow: String? = null,
 
     @SerialName(value = "institution_skip_account_selection")
     val institutionSkipAccountSelection: Boolean? = null,
@@ -59,7 +58,7 @@ internal data class FinancialConnectionsAuthorizationSession(
         get() = _isOAuth ?: false
 
     @Serializable(with = Flow.Serializer::class)
-    enum class Flow(val value: String?) {
+    enum class Flow(val value: String) {
         @SerialName("direct")
         DIRECT("direct"),
 
@@ -127,3 +126,10 @@ internal data class FinancialConnectionsAuthorizationSession(
             EnumIgnoreUnknownSerializer<Flow>(Flow.values(), UNKNOWN)
     }
 }
+
+@Parcelize
+@Serializable
+internal data class Display(
+    @SerialName("text")
+    val text: TextUpdate?
+) : Parcelable

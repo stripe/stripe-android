@@ -3,13 +3,17 @@ package com.stripe.android.financialconnections.domain
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
+import com.stripe.android.financialconnections.features.common.showManualEntryInErrors
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
+import com.stripe.android.financialconnections.utils.PollTimingOptions
 import com.stripe.android.financialconnections.utils.retryOnException
 import com.stripe.android.financialconnections.utils.shouldRetry
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 internal class PollAttachPaymentAccount @Inject constructor(
     private val repository: FinancialConnectionsAccountsRepository,
@@ -17,7 +21,7 @@ internal class PollAttachPaymentAccount @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        allowManualEntry: Boolean,
+        sync: SynchronizeSessionResponse,
         // null, when attaching via manual entry.
         activeInstitution: FinancialConnectionsInstitution?,
         // null, if account should not be saved to Link user.
@@ -25,8 +29,9 @@ internal class PollAttachPaymentAccount @Inject constructor(
         params: PaymentAccountParams
     ): LinkAccountSessionPaymentAccount {
         return retryOnException(
-            times = MAX_TRIES,
-            delayMilliseconds = POLLING_TIME_MS,
+            PollTimingOptions(
+                initialDelayMs = 1.seconds.inWholeMilliseconds,
+            ),
             retryCondition = { exception -> exception.shouldRetry }
         ) {
             try {
@@ -40,7 +45,7 @@ internal class PollAttachPaymentAccount @Inject constructor(
             ) {
                 throw e.toDomainException(
                     activeInstitution,
-                    allowManualEntry
+                    sync.showManualEntryInErrors()
                 )
             }
         }
@@ -48,21 +53,17 @@ internal class PollAttachPaymentAccount @Inject constructor(
 
     private fun StripeException.toDomainException(
         institution: FinancialConnectionsInstitution?,
-        allowManualEntry: Boolean
+        showManualEntry: Boolean
     ): StripeException =
         when {
             institution == null -> this
             stripeError?.extraFields?.get("reason") == "account_number_retrieval_failed" ->
                 AccountNumberRetrievalError(
-                    allowManualEntry = allowManualEntry,
+                    showManualEntry = showManualEntry,
                     institution = institution,
                     stripeException = this
                 )
+
             else -> this
         }
-
-    private companion object {
-        private const val POLLING_TIME_MS = 250L
-        private const val MAX_TRIES = 180
-    }
 }

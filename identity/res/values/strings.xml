@@ -19,22 +19,44 @@
   <string name="stripe_check_mark">Check mark to indicate document capture success</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Choose Photo</string>
+  <!-- Close button text -->
+  <string name="stripe_close_button_text">close</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Complete with test data</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Save time by choosing a desired result and completing instantly with that outcome. The mobile SDK flow will return with result Completed.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">We could not capture a high-quality image.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">You can either try again or upload an image from your device.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Could not capture image</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">camera icon</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Clock icon</string>
   <!-- Content description for close button -->
   <string name="stripe_description_close">close verification page</string>
+  <!-- Content description for cloud icon -->
+  <string name="stripe_description_cloud">cloud icon</string>
+  <!-- Content description for create_identity_verification icon -->
+  <string name="stripe_description_create_identity_verification">create_identity_verification icon</string>
+  <!-- Content description for dispute_protection icon -->
+  <string name="stripe_description_dispute_protection">dispute_protection icon</string>
+  <!-- Content description for document icon -->
+  <string name="stripe_description_document">document icon</string>
   <!-- Content description for exclamation icon -->
   <string name="stripe_description_exclamation">exclamation icon</string>
   <!-- Content description for back button -->
   <string name="stripe_description_go_back">go back to the previous screen</string>
+  <!-- Content description for lock icon -->
+  <string name="stripe_description_lock">lock icon</string>
   <!-- Content description for merchant logo -->
   <string name="stripe_description_merchant_logo">merchant logo</string>
+  <!-- Content description for moved icon -->
+  <string name="stripe_description_moved">moved icon</string>
+  <!-- Content description for phone icon -->
+  <string name="stripe_description_phone">phone icon</string>
   <!-- Content description for plus icon -->
   <string name="stripe_description_plus">plus icon</string>
   <!-- Content description for the icon for privacy policy -->
@@ -43,6 +65,8 @@
   <string name="stripe_description_stripe_logo">stripe logo</string>
   <!-- Content description for the icon for estimated time to complete verification -->
   <string name="stripe_description_time_estimate">estimated time to complete verification icon</string>
+  <!-- Content description for wallet icon -->
+  <string name="stripe_description_wallet">wallet icon</string>
   <!-- Label for Date of birth field -->
   <string name="stripe_dob">Date of birth</string>
   <!-- Label of the driver's license option for document type selection -->
@@ -101,6 +125,8 @@
   <string name="stripe_passport">Passport</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Passport is selected</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Phone Number</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Flip your driver\'s license over to the other side</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -127,12 +153,22 @@
   <string name="stripe_selfie_item_description">one selfie captured</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Your selfie images have not been saved. Do you want to leave?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">A few photos will be taken automatically on the next step to verify it\'s you</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Get ready to take a selfie</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Take Photo</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">This page is only shown in testmode.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">You\'re currently in testmode</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Try Again</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">There was an unexpected error -- try again in a few seconds</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Upload a photo</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Upload back of driver\'s license</string>
   <!-- Title of dialog to upload front of driver license -->
@@ -145,4 +181,6 @@
   <string name="stripe_upload_dialog_title_passport">Upload passport</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Alternatively, you may manually upload a photo of your %1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Upload your photo ID</string>
 </resources>

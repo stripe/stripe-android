@@ -145,6 +145,7 @@ class PaymentBrowserAuthStarterTest {
             clientSecret = "pi_1EceMnCRMbs6FrXfCXdF8dnx_secret_vew0L3IGaO0x9o0eyRMGzKr0k",
             url = "https://hooks.stripe.com/",
             returnUrl = "stripe://payment-auth",
+            statusBarColor = Color.RED,
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             isInstantApp = false
         )

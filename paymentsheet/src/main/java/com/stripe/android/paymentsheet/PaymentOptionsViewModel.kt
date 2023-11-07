@@ -10,15 +10,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.NonFallbackInjector
-import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
-import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -30,6 +27,7 @@ import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -55,6 +53,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     lpmRepository: LpmRepository,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
+    linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
 ) : BaseSheetViewModel(
     application = application,
     config = args.state.config,
@@ -66,7 +66,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
     lpmRepository = lpmRepository,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
+    linkConfigurationCoordinator = linkConfigurationCoordinator,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = false),
+    formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
@@ -78,7 +80,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
         amountFlow = amount,
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
-        onClick = this::onUserSelection,
+        onClick = {
+            reportConfirmButtonPressed()
+            onUserSelection()
+        },
     )
 
     private val _paymentOptionResult = MutableSharedFlow<PaymentOptionResult>(replay = 1)
@@ -130,7 +135,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         updateSelection(args.state.paymentSelection)
 
-        lpmServerSpec = lpmRepository.serverSpecLoadingState.serverLpmSpecs
+        cbcEligibility = when (args.state.isEligibleForCardBrandChoice) {
+            true -> CardBrandChoiceEligibility.Eligible(
+                preferredNetworks = args.state.config?.preferredNetworks ?: listOf()
+            )
+            false -> CardBrandChoiceEligibility.Ineligible
+        }
 
         transitionToFirstScreen()
     }
@@ -142,29 +152,21 @@ internal class PaymentOptionsViewModel @Inject constructor(
             LinkHandler.ProcessingState.Cancelled -> {
                 onPaymentResult(PaymentResult.Canceled)
             }
-            LinkHandler.ProcessingState.Completed -> {
-                eventReporter.onPaymentSuccess(
-                    paymentSelection = PaymentSelection.Link,
-                    currency = stripeIntent.value?.currency,
-                    isDecoupling = isDecoupling,
-                )
-                prefsRepository.savePaymentSelection(PaymentSelection.Link)
-                onPaymentResult(PaymentResult.Completed)
+            is LinkHandler.ProcessingState.PaymentMethodCollected -> {
+                TODO("This can't happen. Will follow up to remodel the states better.")
             }
             is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
-                setContentVisible(true)
                 onPaymentResult(processingState.result)
             }
             is LinkHandler.ProcessingState.Error -> {
                 onError(processingState.message)
             }
             LinkHandler.ProcessingState.Launched -> {
-                setContentVisible(false)
             }
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
-                processingState.details?.let {
+                processingState.paymentSelection?.let {
                     // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-                    updateSelection(PaymentSelection.New.LinkInline(it))
+                    updateSelection(it)
                     onUserSelection()
                 } ?: run {
                     // Creating Link PaymentDetails failed, fallback to regular checkout.
@@ -177,6 +179,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
             LinkHandler.ProcessingState.Started -> {
                 updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
+            }
+            LinkHandler.ProcessingState.CompleteWithoutLink -> {
+                onUserSelection()
             }
         }
     }
@@ -192,6 +197,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onUserCancel() {
+        reportDismiss(isDecoupling)
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Canceled(
                 mostRecentError = mostRecentError,
@@ -264,6 +270,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount) {
         updateSelection(paymentSelection)
+        reportConfirmButtonPressed()
         onUserSelection()
     }
 
@@ -291,14 +298,14 @@ internal class PaymentOptionsViewModel @Inject constructor(
         )
     }
 
-    override fun transitionToFirstScreen() {
+    override fun determineInitialBackStack(): List<PaymentSheetScreen> {
         val target = if (args.state.hasPaymentOptions) {
             SelectSavedPaymentMethods
         } else {
             AddFirstPaymentMethod
         }
 
-        val initialBackStack = buildList {
+        return buildList {
             add(target)
 
             if (target is SelectSavedPaymentMethods && newPaymentSelection != null) {
@@ -308,22 +315,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 add(PaymentSheetScreen.AddAnotherPaymentMethod)
             }
         }
-
-        backStack.value = initialBackStack
-        reportNavigationEvent(initialBackStack.last())
     }
 
     internal class Factory(
         private val starterArgsSupplier: () -> PaymentOptionContract.Args,
-    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
-        internal data class FallbackInitializeParam(
-            val application: Application,
-            val productUsage: Set<String>
-        )
-
-        @Inject
-        lateinit var subComponentBuilderProvider:
-            Provider<PaymentOptionsViewModelSubcomponent.Builder>
+    ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -331,29 +327,17 @@ internal class PaymentOptionsViewModel @Inject constructor(
             val savedStateHandle = extras.createSavedStateHandle()
             val starterArgs = starterArgsSupplier()
 
-            val injector = injectWithFallback(
-                starterArgs.injectorKey,
-                FallbackInitializeParam(application, starterArgs.productUsage)
-            )
-
-            val subcomponent = subComponentBuilderProvider.get()
+            val component = DaggerPaymentOptionsViewModelFactoryComponent.builder()
+                .context(application)
+                .productUsage(starterArgs.productUsage)
+                .build()
+                .paymentOptionsViewModelSubcomponentBuilder
                 .application(application)
                 .args(starterArgs)
                 .savedStateHandle(savedStateHandle)
                 .build()
 
-            val viewModel = subcomponent.viewModel
-            viewModel.injector = requireNotNull(injector as NonFallbackInjector)
-            return viewModel as T
-        }
-
-        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector {
-            val component = DaggerPaymentOptionsViewModelFactoryComponent.builder()
-                .context(arg.application)
-                .productUsage(arg.productUsage)
-                .build()
-            component.inject(this)
-            return component
+            return component.viewModel as T
         }
     }
 }

@@ -14,37 +14,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Result
-import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherComponent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.StripeApiRepository
-import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.util.Locale
-import javax.inject.Named
-import kotlin.coroutines.CoroutineContext
 
 /**
  * A drop-in class that presents a Google Pay sheet to collect a customer's payment details.
@@ -59,62 +42,18 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     @Assisted lifecycleScope: CoroutineScope,
     @Assisted private val config: Config,
     @Assisted private val readyCallback: ReadyCallback,
-    @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+    @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
     @Assisted private val skipReadyCheck: Boolean,
     context: Context,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
-    @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
-    @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
-    // Default value for the following parameters is used only when instantiating from the public
-    // constructors instead of dependency injection.
-    @Named(ENABLE_LOGGING) private val enableLogging: Boolean = BuildConfig.DEBUG,
-    @IOContext private val ioContext: CoroutineContext = Dispatchers.IO,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context,
         PaymentConfiguration.getInstance(context).publishableKey,
         setOf(PRODUCT_USAGE_TOKEN)
     ),
     analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
-    stripeRepository: StripeRepository = StripeApiRepository(
-        context,
-        publishableKeyProvider,
-        logger = Logger.getInstance(enableLogging),
-        workContext = ioContext,
-        productUsageTokens = setOf(PRODUCT_USAGE_TOKEN),
-        paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory
-    )
 ) {
     private var isReady = false
-
-    private val launcherComponent = DaggerGooglePayPaymentMethodLauncherComponent.builder()
-        .context(context)
-        .ioContext(ioContext)
-        .analyticsRequestFactory(paymentAnalyticsRequestFactory)
-        .stripeRepository(stripeRepository)
-        .googlePayConfig(config)
-        .enableLogging(enableLogging)
-        .publishableKeyProvider(publishableKeyProvider)
-        .stripeAccountIdProvider(stripeAccountIdProvider)
-        .build()
-
-    @InjectorKey
-    private val injectorKey: String = WeakMapInjectorRegistry.nextKey(
-        requireNotNull(GooglePayPaymentMethodLauncher::class.simpleName)
-    )
-
-    private val injector = object : Injector {
-        override fun inject(injectable: Injectable<*>) {
-            when (injectable) {
-                is GooglePayPaymentMethodLauncherViewModel.Factory -> {
-                    launcherComponent.inject(injectable)
-                }
-                else -> {
-                    throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
-                }
-            }
-        }
-    }
 
     /**
      * Constructor to be used when launching [GooglePayPaymentMethodLauncher] from an Activity.
@@ -136,7 +75,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         activity,
         activity.lifecycleScope,
         activity.registerForActivityResult(
-            GooglePayPaymentMethodLauncherContract()
+            GooglePayPaymentMethodLauncherContractV2()
         ) {
             resultCallback.onResult(it)
         },
@@ -164,7 +103,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         fragment.requireContext(),
         fragment.viewLifecycleOwner.lifecycleScope,
         fragment.registerForActivityResult(
-            GooglePayPaymentMethodLauncherContract()
+            GooglePayPaymentMethodLauncherContractV2()
         ) {
             resultCallback.onResult(it)
         },
@@ -172,10 +111,10 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         readyCallback
     )
 
-    private constructor (
+    internal constructor(
         context: Context,
         lifecycleScope: CoroutineScope,
-        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         config: Config,
         readyCallback: ReadyCallback
     ) : this(
@@ -194,14 +133,9 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 allowCreditCards = config.allowCreditCards
             )
         },
-        productUsage = setOf(PRODUCT_USAGE_TOKEN),
-        publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
-        stripeAccountIdProvider = { PaymentConfiguration.getInstance(context).stripeAccountId }
     )
 
     init {
-        WeakMapInjectorRegistry.register(injector, injectorKey)
-
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.GooglePayPaymentMethodLauncherInit)
         )
@@ -231,29 +165,55 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
      * existing ID or generate a specific one for Google Pay transaction attempts.
      * This field is required when you send callbacks to the Google Transaction Events API.
      */
+    @Deprecated(
+        message = "Use the present method that takes a Long as the amount instead.",
+        replaceWith = ReplaceWith(
+            expression = "present(currencyCode, amount.toLong(), transactionId)",
+        ),
+    )
     @JvmOverloads
     fun present(
         currencyCode: String,
-        amount: Int = 0,
+        amount: Int,
         transactionId: String? = null
+    ) {
+        present(currencyCode, amount.toLong(), transactionId)
+    }
+
+    /**
+     * Present the Google Pay UI.
+     *
+     * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
+     *
+     * @param currencyCode ISO 4217 alphabetic currency code. (e.g. "USD", "EUR")
+     * @param amount Amount intended to be collected. A positive integer representing how much to
+     * charge in the smallest currency unit (e.g., 100 cents to charge $1.00 or 100 to charge ¥100,
+     * a zero-decimal currency). If the amount is not yet known, use 0.
+     * @param transactionId A unique ID that identifies a transaction attempt. Merchants may use an
+     * existing ID or generate a specific one for Google Pay transaction attempts.
+     * This field is required when you send callbacks to the Google Transaction Events API.
+     * @param label An optional label to display with the amount. Google Pay may or may not display
+     * this label depending on its own internal logic. Defaults to a generic label if none is
+     * provided.
+     */
+    @JvmOverloads
+    fun present(
+        currencyCode: String,
+        amount: Long = 0L,
+        transactionId: String? = null,
+        label: String? = null,
     ) {
         check(skipReadyCheck || isReady) {
             "present() may only be called when Google Pay is available on this device."
         }
 
         activityResultLauncher.launch(
-            GooglePayPaymentMethodLauncherContract.Args(
+            GooglePayPaymentMethodLauncherContractV2.Args(
                 config = config,
                 currencyCode = currencyCode,
                 amount = amount,
+                label = label,
                 transactionId = transactionId,
-                injectionParams = GooglePayPaymentMethodLauncherContract.Args.InjectionParams(
-                    injectorKey,
-                    productUsage,
-                    enableLogging,
-                    publishableKeyProvider(),
-                    stripeAccountIdProvider()
-                )
             )
         )
     }
@@ -393,32 +353,57 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          * The GooglePayPaymentMethodLauncher created is remembered across recompositions.
          * Recomposition will always return the value produced by composition.
          */
+        @Deprecated(
+            message = "Use rememberGooglePayPaymentMethodLauncher() instead",
+            replaceWith = ReplaceWith(
+                expression = "rememberGooglePayPaymentMethodLauncher(config, readyCallback, resultCallback)",
+            ),
+        )
         @Composable
         fun rememberLauncher(
             config: Config,
             readyCallback: ReadyCallback,
             resultCallback: ResultCallback
         ): GooglePayPaymentMethodLauncher {
-            val currentReadyCallback by rememberUpdatedState(readyCallback)
-
-            val context = LocalContext.current
-            val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
-            val activityResultLauncher = rememberLauncherForActivityResult(
-                GooglePayPaymentMethodLauncherContract(),
-                resultCallback::onResult
-            )
-
-            return remember(config) {
-                GooglePayPaymentMethodLauncher(
-                    context = context,
-                    lifecycleScope = lifecycleScope,
-                    activityResultLauncher = activityResultLauncher,
-                    config = config,
-                    readyCallback = {
-                        currentReadyCallback.onReady(it)
-                    }
-                )
-            }
+            return rememberGooglePayPaymentMethodLauncher(config, readyCallback, resultCallback)
         }
+    }
+}
+
+/**
+ * Creates a [GooglePayPaymentMethodLauncher] that is remembered across compositions.
+ *
+ * This *must* be called unconditionally, as part of the initialization path.
+ *
+ * @param config The [GooglePayPaymentMethodLauncher.Config] used to configure the integration.
+ * @param readyCallback Called after determining whether Google Pay is available and ready to use.
+ * [GooglePayPaymentMethodLauncher.present] may only be called if Google Pay is ready.
+ * @param resultCallback Called with the result of the [GooglePayPaymentMethodLauncher] operation
+ */
+@Composable
+fun rememberGooglePayPaymentMethodLauncher(
+    config: GooglePayPaymentMethodLauncher.Config,
+    readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
+    resultCallback: GooglePayPaymentMethodLauncher.ResultCallback
+): GooglePayPaymentMethodLauncher {
+    val currentReadyCallback by rememberUpdatedState(readyCallback)
+
+    val context = LocalContext.current
+    val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        GooglePayPaymentMethodLauncherContractV2(),
+        resultCallback::onResult
+    )
+
+    return remember(config) {
+        GooglePayPaymentMethodLauncher(
+            context = context,
+            lifecycleScope = lifecycleScope,
+            activityResultLauncher = activityResultLauncher,
+            config = config,
+            readyCallback = {
+                currentReadyCallback.onReady(it)
+            }
+        )
     }
 }

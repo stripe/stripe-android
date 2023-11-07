@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.example.R
@@ -47,7 +48,7 @@ fun PaymentMethodSelector(
             modifier = Modifier.clickable(
                 enabled = isEnabled,
                 onClick = onClick
-            ),
+            ).testTag(PAYMENT_METHOD_SELECTOR_TEST_TAG),
         ) {
             if (paymentMethodIcon != null) {
                 Icon(
@@ -83,7 +84,8 @@ fun BuyButton(
         enabled = buyButtonEnabled,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 4.dp),
+            .padding(top = 4.dp)
+            .testTag(CHECKOUT_TEST_TAG),
         onClick = onClick,
         colors = ButtonDefaults.textButtonColors(
             backgroundColor = MaterialTheme.colors.primary,
@@ -93,7 +95,10 @@ fun BuyButton(
         Text(
             stringResource(R.string.buy),
             modifier = Modifier.padding(vertical = 2.dp),
-            fontSize = MAIN_FONT_SIZE
+            fontSize = MAIN_FONT_SIZE,
         )
     }
 }
+
+const val PAYMENT_METHOD_SELECTOR_TEST_TAG = "PAYMENT_METHOD_SELECTOR"
+const val CHECKOUT_TEST_TAG = "CHECKOUT"

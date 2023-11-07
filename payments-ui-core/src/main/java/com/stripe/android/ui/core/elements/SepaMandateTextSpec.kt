@@ -14,7 +14,7 @@ import kotlinx.serialization.Transient
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
-internal data class SepaMandateTextSpec(
+data class SepaMandateTextSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("sepa_mandate"),
     @StringRes

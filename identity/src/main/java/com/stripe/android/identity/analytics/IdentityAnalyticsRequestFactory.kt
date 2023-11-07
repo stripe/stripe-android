@@ -63,7 +63,9 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         docBackUploadType: DocumentUploadParam.UploadMethod? = null,
         docFrontModelScore: Float? = null,
         docBackModelScore: Float? = null,
-        selfieModelScore: Float? = null
+        selfieModelScore: Float? = null,
+        docFrontBlurScore: Float? = null,
+        docBackBlurScore: Float? = null
     ) = requestFactory.createRequest(
         eventName = EVENT_VERIFICATION_SUCCEEDED,
         additionalParams = additionalParamWithEventMetadata(
@@ -77,7 +79,9 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
             PARAM_DOC_BACK_UPLOAD_TYPE to docBackUploadType?.name,
             PARAM_DOC_FRONT_MODEL_SCORE to docFrontModelScore,
             PARAM_DOC_BACK_MODEL_SCORE to docBackModelScore,
-            PARAM_SELFIE_MODEL_SCORE to selfieModelScore
+            PARAM_SELFIE_MODEL_SCORE to selfieModelScore,
+            PARAM_DOC_FRONT_BLUR_SCORE to docFrontBlurScore,
+            PARAM_DOC_BACK_BLUR_SCORE to docBackBlurScore
         )
     )
 
@@ -304,6 +308,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_DOC_FRONT_MODEL_SCORE = "doc_front_model_score"
         const val PARAM_DOC_BACK_MODEL_SCORE = "doc_back_model_score"
         const val PARAM_SELFIE_MODEL_SCORE = "selfie_model_score"
+        const val PARAM_DOC_FRONT_BLUR_SCORE = "doc_front_blur_score"
+        const val PARAM_DOC_BACK_BLUR_SCORE = "doc_back_blur_score"
         const val PARAM_LAST_SCREEN_NAME = "last_screen_name"
         const val PARAM_ERROR = "error"
         const val PARAM_EXCEPTION = "exception"
@@ -334,6 +340,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val SCREEN_NAME_FILE_UPLOAD_PASSPORT = "file_upload_passport"
         const val SCREEN_NAME_FILE_UPLOAD_ID = "file_upload_id"
         const val SCREEN_NAME_FILE_UPLOAD_DRIVER_LICENSE = "file_upload_driver_license"
+        const val SCREEN_NAME_SELFIE_WARMUP = "selfie_warmup"
         const val SCREEN_NAME_SELFIE = "selfie"
         const val SCREEN_NAME_CONFIRMATION = "confirmation"
         const val SCREEN_NAME_ERROR = "error"
@@ -341,6 +348,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val SCREEN_NAME_INDIVIDUAL_WELCOME = "individual_welcome"
         const val SCREEN_NAME_COUNTRY_NOT_LISTED = "country_not_listed"
         const val SCREEN_NAME_DEBUG = "debug"
+        const val SCREEN_NAME_PHONE_OTP = "phone_otp"
         const val SCREEN_NAME_UNKNOWN = "unknown"
         const val TYPE_SELFIE = "selfie"
         const val TYPE_DOCUMENT = "document"

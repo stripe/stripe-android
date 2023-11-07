@@ -1,30 +1,23 @@
 package com.stripe.android.payments.core.authentication
 
-import android.app.Activity
 import android.content.Context
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.ViewModel
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionViewModelFactory
-import com.stripe.android.payments.core.injection.AuthenticationComponent
 import com.stripe.android.payments.core.injection.DaggerAuthenticationComponent
+import com.stripe.android.payments.core.injection.INCLUDE_PAYMENT_SHEET_AUTHENTICATORS
 import com.stripe.android.payments.core.injection.IntentAuthenticatorMap
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -39,10 +32,13 @@ private typealias Authenticator = @JvmSuppressWildcards PaymentAuthenticator<Str
 internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     private val noOpIntentAuthenticator: NoOpIntentAuthenticator,
     private val sourceAuthenticator: SourceAuthenticator,
-    @IntentAuthenticatorMap private val paymentAuthenticators: Map<AuthenticatorKey, Authenticator>
-) : PaymentAuthenticatorRegistry, Injector {
+    @IntentAuthenticatorMap private val paymentAuthenticators: Map<AuthenticatorKey, Authenticator>,
+    @Named(INCLUDE_PAYMENT_SHEET_AUTHENTICATORS) private val includePaymentSheetAuthenticators: Boolean,
+) : PaymentAuthenticatorRegistry {
 
-    private val additionalAuthenticators = mutableMapOf<AuthenticatorKey, Authenticator>()
+    private val paymentSheetAuthenticators: Map<AuthenticatorKey, Authenticator> by lazy {
+        paymentSheetAuthenticators(includePaymentSheetAuthenticators)
+    }
 
     @VisibleForTesting
     internal val allAuthenticators: Set<PaymentAuthenticator<out StripeModel>>
@@ -50,22 +46,8 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
             add(noOpIntentAuthenticator)
             add(sourceAuthenticator)
             addAll(paymentAuthenticators.values)
-            addAll(additionalAuthenticators.values)
+            addAll(paymentSheetAuthenticators.values)
         }
-
-    override fun registerAuthenticator(key: AuthenticatorKey, authenticator: Authenticator) {
-        additionalAuthenticators[key] = authenticator
-    }
-
-    override fun unregisterAuthenticator(key: AuthenticatorKey) {
-        additionalAuthenticators.remove(key)
-    }
-
-    /**
-     * [AuthenticationComponent] instance is hold to inject into [Activity]s and [ViewModel]s
-     * started by the [PaymentAuthenticator]s.
-     */
-    lateinit var authenticationComponent: AuthenticationComponent
 
     /**
      * [paymentRelayLauncher] is mutable and might be updated through [onNewActivityResultCaller]
@@ -89,7 +71,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
                     return noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
                 }
 
-                val allAuthenticators = paymentAuthenticators + additionalAuthenticators
+                val allAuthenticators = paymentAuthenticators + paymentSheetAuthenticators
                 val authenticator = authenticatable.nextActionData?.let {
                     allAuthenticators[it::class.java]
                 } ?: noOpIntentAuthenticator
@@ -132,20 +114,9 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
         paymentBrowserAuthLauncher = null
     }
 
-    override fun inject(injectable: Injectable<*>) {
-        when (injectable) {
-            is Stripe3ds2TransactionViewModelFactory -> authenticationComponent.inject(injectable)
-            else -> {
-                throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
-            }
-        }
-    }
-
     companion object {
         fun createInstance(
             context: Context,
-            stripeRepository: StripeRepository,
-            analyticsRequestExecutor: AnalyticsRequestExecutor,
             paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
             enableLogging: Boolean,
             workContext: CoroutineContext,
@@ -153,28 +124,40 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
             threeDs1IntentReturnUrlMap: MutableMap<String, String>,
             publishableKeyProvider: () -> String,
             productUsage: Set<String>,
-            isInstantApp: Boolean
+            isInstantApp: Boolean,
+            includePaymentSheetAuthenticators: Boolean,
         ): PaymentAuthenticatorRegistry {
-            val injectorKey =
-                WeakMapInjectorRegistry.nextKey(requireNotNull(PaymentAuthenticatorRegistry::class.simpleName))
             val component = DaggerAuthenticationComponent.builder()
                 .context(context)
-                .stripeRepository(stripeRepository)
-                .analyticsRequestExecutor(analyticsRequestExecutor)
                 .analyticsRequestFactory(paymentAnalyticsRequestFactory)
                 .enableLogging(enableLogging)
                 .workContext(workContext)
                 .uiContext(uiContext)
                 .threeDs1IntentReturnUrlMap(threeDs1IntentReturnUrlMap)
-                .injectorKey(injectorKey)
                 .publishableKeyProvider(publishableKeyProvider)
                 .productUsage(productUsage)
                 .isInstantApp(isInstantApp)
+                .includePaymentSheetAuthenticators(includePaymentSheetAuthenticators)
                 .build()
-            val registry = component.registry
-            registry.authenticationComponent = component
-            WeakMapInjectorRegistry.register(registry, injectorKey)
-            return registry
+            return component.registry
         }
+    }
+}
+
+private fun paymentSheetAuthenticators(
+    includePaymentSheetAuthenticators: Boolean
+): Map<AuthenticatorKey, Authenticator> {
+    return try {
+        if (includePaymentSheetAuthenticators) {
+            val className = "com.stripe.android.paymentsheet.PaymentSheetAuthenticators"
+            val authenticatorsObject = Class.forName(className).getDeclaredField("INSTANCE").get(null)
+            val getMethod = authenticatorsObject.javaClass.getDeclaredMethod("get")
+            @Suppress("UNCHECKED_CAST")
+            return getMethod.invoke(authenticatorsObject) as Map<AuthenticatorKey, Authenticator>
+        } else {
+            emptyMap()
+        }
+    } catch (e: Exception) {
+        emptyMap()
     }
 }

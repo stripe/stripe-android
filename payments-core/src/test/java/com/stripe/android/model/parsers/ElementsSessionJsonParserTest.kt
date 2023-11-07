@@ -34,6 +34,7 @@ class ElementsSessionJsonParserTest {
         assertThat(elementsSession?.stripeIntent?.paymentMethodTypes)
             .containsExactlyElementsIn(orderedPaymentMethods)
             .inOrder()
+        assertThat(elementsSession?.linkSettings?.linkPassthroughModeEnabled).isFalse()
     }
 
     @Test
@@ -71,8 +72,9 @@ class ElementsSessionJsonParserTest {
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
         )!!
 
-        assertThat(elementsSession.stripeIntent?.linkFundingSources)
+        assertThat(elementsSession.stripeIntent.linkFundingSources)
             .containsExactly("card", "bank_account")
+        assertThat(elementsSession.linkSettings?.linkPassthroughModeEnabled).isTrue()
     }
 
     @Test
@@ -86,8 +88,9 @@ class ElementsSessionJsonParserTest {
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
         )!!
 
-        assertThat(elementsSession.stripeIntent?.linkFundingSources)
+        assertThat(elementsSession.stripeIntent.linkFundingSources)
             .containsExactly("card", "bank_account")
+        assertThat(elementsSession.linkSettings?.linkPassthroughModeEnabled).isFalse()
     }
 
     @Test
@@ -248,7 +251,7 @@ class ElementsSessionJsonParserTest {
                     mode = DeferredIntentParams.Mode.Payment(
                         amount = 2000,
                         currency = "usd",
-                        captureMethod = DeferredIntentParams.CaptureMethod.Automatic,
+                        captureMethod = PaymentIntent.CaptureMethod.Automatic,
                         setupFutureUsage = null,
                     ),
                     paymentMethodTypes = emptyList(),
@@ -323,5 +326,84 @@ class ElementsSessionJsonParserTest {
                 linkFundingSources = listOf("card")
             )
         )
+    }
+
+    @Test
+    fun `Is eligible for CBC if response says so`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret"
+            ),
+            apiKey = "test",
+        )
+
+        val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_CBC_ELIGIBLE
+        val session = parser.parse(intent)
+
+        assertThat(session?.isEligibleForCardBrandChoice).isTrue()
+    }
+
+    @Test
+    fun `Is not eligible for CBC if response says so`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret"
+            ),
+            apiKey = "test",
+        )
+
+        val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_CBC_NOT_ELIGIBLE
+        val session = parser.parse(intent)
+
+        assertThat(session?.isEligibleForCardBrandChoice).isFalse()
+    }
+
+    @Test
+    fun `Is not eligible for CBC if no info in the response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret"
+            ),
+            apiKey = "test",
+        )
+
+        val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
+        val session = parser.parse(intent)
+
+        assertThat(session?.isEligibleForCardBrandChoice).isFalse()
+    }
+
+    @Test
+    fun `Is not eligible for CBC if not client-side payment intent`() {
+        val parser = ElementsSessionJsonParser(
+            params = ElementsSessionParams.SetupIntentType(clientSecret = "secret"),
+            apiKey = "test",
+        )
+
+        val intent = ElementsSessionFixtures.EXPANDED_SETUP_INTENT_JSON_WITH_CBC_ELIGIBLE
+        val session = parser.parse(intent)
+
+        assertThat(session?.isEligibleForCardBrandChoice).isFalse()
+    }
+
+    @Test
+    fun parsePaymentIntent_shouldCreateObjectWithCorrectGooglePayEnabled() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret"
+            ),
+            apiKey = "test"
+        )
+
+        fun assertIsGooglePayEnabled(expectedValue: Boolean, jsonTransform: JSONObject.() -> Unit) {
+            val json = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
+            json.jsonTransform()
+            assertThat(parser.parse(json)?.isGooglePayEnabled).isEqualTo(expectedValue)
+        }
+
+        assertIsGooglePayEnabled(true) { remove(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE) }
+        assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "enabled") }
+        assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "unknown") }
+        assertIsGooglePayEnabled(false) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "disabled") }
     }
 }

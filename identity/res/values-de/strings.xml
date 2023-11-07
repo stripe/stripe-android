@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Das Häkchen gibt an, dass die Dokumentenerfassung erfolgreich war</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Foto auswählen</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Mit Testdaten ausfüllen</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Sparen Sie Zeit, indem Sie ein gewünschtes Ergebnis auswählen und den Ausfüllvorgang automatisch entsprechend abschließen. Der mobile SDK-Ablauf liefert Ihnen das fertige Ergebnis.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Wir konnten kein qualitativ hochwertiges Bild aufnehmen.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Sie können es noch einmal versuchen oder ein Bild von Ihrem Endgerät hochladen.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Aufnahme nicht möglich</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">Kamerasymbol</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Uhr-Symbol</string>
   <!-- Content description for close button -->
@@ -101,6 +107,8 @@
   <string name="stripe_passport">Reisepass</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Reisepass wurde ausgewählt</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Telefonnummer</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Drehen Sie Ihren Führerschein um</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -127,12 +135,22 @@
   <string name="stripe_selfie_item_description">Ein Selfie wurde aufgenommen</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Ihre Selfie-Aufnahmen wurden nicht gespeichert. Möchten Sie die Seite verlassen?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">Im nächsten Schritt werden automatisch einige Fotos gemacht, um Ihre Identität zu verifizieren</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Machen Sie sich für ein Selfie bereit</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Aufnahme machen</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Diese Seite wird nur im Test-Modus angezeigt.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Sie befinden sich derzeit im Test-Modus.</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Erneut versuchen</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Unerwarteter Fehler – versuchen Sie es in ein paar Sekunden noch einmal.</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Foto hochladen</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Rückseite des Führerscheins hochladen</string>
   <!-- Title of dialog to upload front of driver license -->
@@ -145,4 +163,6 @@
   <string name="stripe_upload_dialog_title_passport">Reisepass hochladen</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Alternativ können Sie manuell ein Foto Ihres %1$s hochladen.</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Lichtbildausweis hochladen</string>
 </resources>

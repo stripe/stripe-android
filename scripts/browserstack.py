@@ -133,7 +133,7 @@ def testShards(isNightly):
         "com.stripe.android.TestAuthorization",
         "com.stripe.android.TestBrowsers",
         "com.stripe.android.TestCustomers",
-        "com.stripe.android.TestFieldPopulation",
+        "com.stripe.android.addresselement.AddressElementTest",
     ]
 
     # Add LPM tests to testClassNames.

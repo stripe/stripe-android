@@ -2,6 +2,7 @@ package com.stripe.android.test.core.ui
 
 import android.content.pm.PackageManager
 import androidx.annotation.StringRes
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -13,124 +14,45 @@ import androidx.test.uiautomator.UiObject
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.model.CountryCode
-import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.model.PaymentMethod.Type.Blik
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.paymentsheet.example.playground.model.InitializationType
+import com.stripe.android.paymentsheet.example.playground.RELOAD_TEST_TAG
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
+import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
-import com.stripe.android.test.core.Automatic
-import com.stripe.android.test.core.Billing
-import com.stripe.android.test.core.Currency
-import com.stripe.android.test.core.Customer
-import com.stripe.android.test.core.DelayedPMs
-import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
-import com.stripe.android.test.core.IntentType
-import com.stripe.android.test.core.LinkState
-import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
-import java.util.Locale
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.R as UiCoreR
 
 /**
  * This contains the Android specific code such as for accessing UI elements, detecting
  * the installed browsers.  It also abstracts away the testing platform, espresso vs. compose.
  */
-class Selectors(
+internal class Selectors(
     val device: UiDevice,
     val composeTestRule: ComposeTestRule,
     testParameters: TestParameters
 ) {
-    val reset = EspressoIdButton(R.id.reset_button)
     val continueButton = BuyButton(composeTestRule)
-    val complete = EspressoIdButton(R.id.complete_checkout_button)
-    val reload = EspressoLabelIdButton(R.string.reload_paymentsheet)
-    val multiStepSelect = EspressoIdButton(R.id.payment_method)
+    val complete = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))
+    val reload = ComposeButton(composeTestRule, hasTestTag(RELOAD_TEST_TAG))
+    val multiStepSelect = ComposeButton(
+        composeTestRule,
+        hasTestTag(PAYMENT_METHOD_SELECTOR_TEST_TAG)
+    )
     val saveForFutureCheckbox = composeTestRule
         .onNodeWithTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
-
-    val customer = when (testParameters.customer) {
-        Customer.Guest -> EspressoLabelIdButton(R.string.customer_guest)
-        Customer.New -> EspressoLabelIdButton(R.string.customer_new)
-        Customer.Returning -> EspressoLabelIdButton(R.string.customer_returning)
-    }
-
-    val linkState = when (testParameters.linkState) {
-        LinkState.Off -> EspressoIdButton(R.id.link_off_button)
-        LinkState.On -> EspressoIdButton(R.id.link_on_button)
-    }
-
-    val googlePayState = when (testParameters.googlePayState) {
-        GooglePayState.Off -> EspressoIdButton(R.id.google_pay_off_button)
-        GooglePayState.On -> EspressoIdButton(R.id.google_pay_on_button)
-    }
-
-    val checkout = when (testParameters.intentType) {
-        IntentType.Pay -> EspressoLabelIdButton(R.string.payment)
-        IntentType.PayWithSetup -> EspressoLabelIdButton(R.string.payment_with_setup)
-        IntentType.Setup -> EspressoLabelIdButton(R.string.setup)
-    }
-    val billing = when (testParameters.billing) {
-        Billing.Off -> EspressoIdButton(R.id.default_billing_off_button)
-        Billing.On -> EspressoIdButton(R.id.default_billing_on_button)
-    }
-
-    val shipping = when (testParameters.shipping) {
-        Shipping.Off -> EspressoIdButton(R.id.shipping_off_button)
-        Shipping.On -> EspressoIdButton(R.id.shipping_on_button)
-        Shipping.OnWithDefaults -> EspressoIdButton(R.id.shipping_on_with_defaults_button)
-    }
-
-    val delayed = when (testParameters.delayed) {
-        DelayedPMs.Off -> EspressoIdButton(R.id.allowsDelayedPaymentMethods_off_button)
-        DelayedPMs.On -> EspressoIdButton(R.id.allowsDelayedPaymentMethods_on_button)
-    }
-
-    val automatic = when (testParameters.automatic) {
-        Automatic.Off -> EspressoIdButton(R.id.automatic_pm_off_button)
-        Automatic.On -> EspressoIdButton(R.id.automatic_pm_on_button)
-    }
 
     val paymentSelection = PaymentSelection(
         composeTestRule,
         testParameters.paymentMethod.displayNameResource
     )
-
-    val attachDefaults = if (testParameters.attachDefaults) {
-        EspressoIdButton(R.id.attach_defaults_on_button)
-    } else {
-        EspressoIdButton(R.id.attach_defaults_off_button)
-    }
-
-    val collectName = when (testParameters.collectName) {
-        PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic -> EspressoIdButton(R.id.collect_name_radio_auto)
-        PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always -> EspressoIdButton(R.id.collect_name_radio_always)
-        PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never -> EspressoIdButton(R.id.collect_name_radio_never)
-    }
-
-    val collectEmail = when (testParameters.collectEmail) {
-        PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic -> EspressoIdButton(R.id.collect_email_radio_auto)
-        PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always -> EspressoIdButton(R.id.collect_email_radio_always)
-        PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never -> EspressoIdButton(R.id.collect_email_radio_never)
-    }
-
-    val collectPhone = when (testParameters.collectPhone) {
-        PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic -> EspressoIdButton(R.id.collect_phone_radio_auto)
-        PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always -> EspressoIdButton(R.id.collect_phone_radio_always)
-        PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never -> EspressoIdButton(R.id.collect_phone_radio_never)
-    }
-
-    val collectAddress = when (testParameters.collectAddress) {
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> EspressoIdButton(R.id.collect_address_radio_auto)
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> EspressoIdButton(R.id.collect_address_radio_full)
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> EspressoIdButton(R.id.collect_address_radio_never)
-    }
 
     val buyButton = BuyButton(
         composeTestRule = composeTestRule,
@@ -138,10 +60,14 @@ class Selectors(
             // We're using a longer timeout for Cash App Pay until we fix an issue where we
             // needlessly poll after a canceled payment attempt.
             15.seconds
+        } else if (testParameters.paymentMethod.code == Blik.code) {
+            30.seconds
         } else {
             5.seconds
         }
     )
+
+    val playgroundBuyButton = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))
 
     val addPaymentMethodButton = AddPaymentMethodButton(device)
 
@@ -151,11 +77,25 @@ class Selectors(
 
     fun browserWindow(browser: BrowserUI): UiObject? = browserWindow(device, browser)
 
-    fun blockUntilAuthorizationPageLoaded() {
+    val closeQrCodeButton = UiAutomatorText("Close", device = device)
+
+    fun blockUntilAuthorizationPageLoaded(isSetup: Boolean) {
         assertThat(
             device.wait(
                 Until.findObject(
-                    By.textContains("test payment page")
+                    By.textContains("test ${if (isSetup) "setup" else "payment"} page")
+                ),
+                HOOKS_PAGE_LOAD_TIMEOUT * 1000
+            )
+        ).isNotNull()
+        device.waitForIdle()
+    }
+
+    fun blockUntilUSBankAccountPageLoaded() {
+        assertThat(
+            device.wait(
+                Until.findObject(
+                    By.textContains("Agree and continue")
                 ),
                 HOOKS_PAGE_LOAD_TIMEOUT * 1000
             )
@@ -179,10 +119,13 @@ class Selectors(
         .packageManager
         .getInstalledApplications(PackageManager.GET_META_DATA)
 
+    private val checkoutMode =
+        testParameters.playgroundSettingsSnapshot[CheckoutModeSettingsDefinition]
+
     val authorizeAction = when (testParameters.authorizationAction) {
-        is AuthorizeAction.Authorize -> {
+        is AuthorizeAction.AuthorizePayment -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text,
+                label = testParameters.authorizationAction.text(checkoutMode),
                 className = "android.widget.Button",
                 device = device
             ) {
@@ -199,9 +142,10 @@ class Selectors(
                 }
             }
         }
+
         is AuthorizeAction.Cancel -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text,
+                label = testParameters.authorizationAction.text(checkoutMode),
                 className = "android.widget.Button",
                 device = device
             ) {
@@ -210,13 +154,15 @@ class Selectors(
                 }
             }
         }
+
         is AuthorizeAction.Fail -> {
             object : UiAutomatorText(
-                label = testParameters.authorizationAction.text,
+                label = testParameters.authorizationAction.text(checkoutMode),
                 className = "android.widget.Button",
                 device = device
             ) {}
         }
+
         else -> null
     }
 
@@ -255,12 +201,20 @@ class Selectors(
         getResourceString(CoreR.string.stripe_address_label_zip_code)
     )
 
+    fun getPostalCode() = composeTestRule.onNodeWithText(
+        getResourceString(CoreR.string.stripe_address_label_postal_code)
+    )
+
     fun getAuBsb() = composeTestRule.onNodeWithText(
         getResourceString(StripeR.string.stripe_becs_widget_bsb)
     )
 
     fun getAuAccountNumber() = composeTestRule.onNodeWithText(
         getResourceString(StripeR.string.stripe_becs_widget_account_number)
+    )
+
+    fun getBoletoTaxId() = composeTestRule.onNodeWithText(
+        getResourceString(PaymentsUiCoreR.string.stripe_boleto_tax_id_label)
     )
 
     fun getGoogleDividerText() = composeTestRule.onNodeWithText(
@@ -286,27 +240,6 @@ class Selectors(
             StripeR.string.stripe_cvc_number_hint
         )
     )
-
-    fun setInitializationType(initializationType: InitializationType) {
-        EspressoIdButton(R.id.initialization_type_spinner).click()
-        EspressoText(initializationType.value).click()
-    }
-
-    fun setCurrency(currency: Currency) {
-        EspressoIdButton(R.id.currency_spinner).click()
-        EspressoText(currency.name).click()
-    }
-
-    fun setMerchantCountry(merchantCountryCode: String) {
-        EspressoIdButton(R.id.merchant_country_spinner).click()
-        EspressoText(
-            CountryUtils.getDisplayCountry(CountryCode(merchantCountryCode), Locale.getDefault())
-        ).click()
-    }
-
-    fun enterCustomPrimaryButtonLabel(text: String) {
-        EspressoEditText(id = R.id.custom_label_text_field).enter(text)
-    }
 
     companion object {
         fun browserWindow(device: UiDevice, browser: BrowserUI): UiObject? =

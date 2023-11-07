@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 55
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
       - name: 'Build'
         run: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug
@@ -38,9 +38,12 @@ jobs:
   screenshot-regression-tests:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
       - name: run tests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 28
@@ -50,7 +53,7 @@ jobs:
           disable-animations: true
           sdcard-path-or-size: 512M
           profile: Nexus 6
-          script: ./gradlew paymentsheet-example:executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot
+          script: ruby scripts/check_payment_sheet_screenshots.rb
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
@@ -59,12 +62,18 @@ jobs:
             **/build/reports/shot/debug/verification/
             **/tmp/shot/screenshot/
             **/build/reports/androidTests/connected/
-#       - name: Notify failure endpoint
-#         id: notifyFailureEndpoint
-#         if: failure()
-#         run: |
-#           ./scripts/notify_failure_endpoint.rb \
-#           ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
-#           ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
-#           "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}" \
-#           RUN_MOBILESDK
+      - uses: peter-evans/create-or-update-comment@v2
+        if: steps.failed-screenshots.outputs.PR_COMMENT
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: ${{ steps.failed-screenshots.outputs.PR_COMMENT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Notify failure endpoint
+        id: notifyFailureEndpoint
+        if: failure()
+        run: |
+          ./scripts/notify_failure_endpoint.rb \
+          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
+          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
+          "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}" \
+          RUN_MOBILESDK

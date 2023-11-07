@@ -21,6 +21,7 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
 
     abstract fun create(
         createParams: PaymentMethodCreateParams,
+        optionsParams: PaymentMethodOptionsParams? = null,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
     ): T
 
@@ -76,6 +77,7 @@ internal class ConfirmPaymentIntentParamsFactory(
 
     override fun create(
         createParams: PaymentMethodCreateParams,
+        optionsParams: PaymentMethodOptionsParams?,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -97,6 +99,12 @@ internal class ConfirmPaymentIntentParamsFactory(
                 PaymentMethod.Type.USBankAccount.code -> {
                     PaymentMethodOptionsParams.USBankAccount(setupFutureUsage = setupFutureUsage)
                 }
+                PaymentMethod.Type.Blik.code -> {
+                    optionsParams
+                }
+                PaymentMethod.Type.Konbini.code -> {
+                    optionsParams
+                }
                 PaymentMethod.Type.Link.code -> {
                     null
                 }
@@ -112,7 +120,6 @@ internal class ConfirmPaymentIntentParamsFactory(
 internal class ConfirmSetupIntentParamsFactory(
     private val clientSecret: String,
 ) : ConfirmStripeIntentParamsFactory<ConfirmSetupIntentParams>() {
-
     override fun create(paymentMethod: PaymentMethod): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
             paymentMethodId = paymentMethod.id.orEmpty(),
@@ -125,6 +132,7 @@ internal class ConfirmSetupIntentParamsFactory(
 
     override fun create(
         createParams: PaymentMethodCreateParams,
+        optionsParams: PaymentMethodOptionsParams?,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(

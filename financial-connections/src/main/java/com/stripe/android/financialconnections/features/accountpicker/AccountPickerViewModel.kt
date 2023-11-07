@@ -8,15 +8,17 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountSelected
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLearnMoreDataAccess
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLinkAccounts
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PollAccountsSucceeded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLinkAccounts
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAccountsSucceeded
-import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
+import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
@@ -25,8 +27,10 @@ import com.stripe.android.financialconnections.features.consent.FinancialConnect
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
+import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -38,8 +42,7 @@ internal class AccountPickerViewModel @Inject constructor(
     initialState: AccountPickerState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val selectAccounts: SelectAccounts,
-    private val getManifest: GetManifest,
-    private val goNext: GoNext,
+    private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
@@ -54,11 +57,12 @@ internal class AccountPickerViewModel @Inject constructor(
     private fun loadAccounts() {
         suspend {
             val state = awaitState()
-            val manifest = getManifest()
+            val sync = getOrFetchSync()
+            val manifest = sync.manifest
             val activeAuthSession = requireNotNull(manifest.activeAuthSession)
             val (partnerAccountList, millis) = measureTimeMillis {
                 pollAuthorizationSessionAccounts(
-                    manifest = manifest,
+                    sync = sync,
                     canRetry = state.canRetry
                 )
             }
@@ -99,7 +103,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 businessName = manifest.businessName,
                 stripeDirect = manifest.isStripeDirect ?: false
             ).also {
-                eventTracker.track(PaneLoaded(Pane.ACCOUNT_PICKER))
+                eventTracker.track(PaneLoaded(PANE))
             }
         }.execute { copy(payload = it) }
     }
@@ -119,6 +123,15 @@ internal class AccountPickerViewModel @Inject constructor(
                     selectedIds = setOf(payload.accounts.first().id),
                     updateLocalCache = true
                 )
+
+                // Auto-select the first selectable account.
+                payload.selectionMode == SelectionMode.RADIO -> setState {
+                    copy(
+                        selectedIds = setOfNotNull(
+                            payload.selectableAccounts.firstOrNull()?.id
+                        )
+                    )
+                }
             }
         })
     }
@@ -127,47 +140,83 @@ internal class AccountPickerViewModel @Inject constructor(
         onAsync(
             AccountPickerState::payload,
             onFail = {
-                eventTracker.track(Error(Pane.ACCOUNT_PICKER, it))
-                logger.error("Error retrieving accounts", it)
+                eventTracker.logError(
+                    logger = logger,
+                    pane = PANE,
+                    extraMessage = "Error retrieving accounts",
+                    error = it
+                )
             },
         )
         onAsync(
             AccountPickerState::selectAccounts,
             onFail = {
-                eventTracker.track(Error(Pane.ACCOUNT_PICKER, it))
-                logger.error("Error selecting accounts", it)
+                eventTracker.logError(
+                    logger = logger,
+                    pane = PANE,
+                    extraMessage = "Error selecting accounts",
+                    error = it
+                )
             }
         )
     }
 
-    fun onAccountClicked(account: PartnerAccount) {
-        withState { state ->
-            state.payload()?.let { payload ->
-                when (payload.selectionMode) {
-                    SelectionMode.RADIO -> setState {
-                        copy(selectedIds = setOf(account.id))
-                    }
-
-                    SelectionMode.CHECKBOXES -> if (state.selectedIds.contains(account.id)) {
-                        setState {
-                            copy(selectedIds = selectedIds - account.id)
-                        }
-                    } else {
-                        setState {
-                            copy(selectedIds = selectedIds + account.id)
-                        }
-                    }
+    fun onAccountClicked(account: PartnerAccount) = withState { state ->
+        state.payload()?.let { payload ->
+            val selectedIds = state.selectedIds
+            val newSelectedIds = when (payload.selectionMode) {
+                SelectionMode.RADIO -> setOf(account.id)
+                SelectionMode.CHECKBOXES -> if (selectedIds.contains(account.id)) {
+                    selectedIds - account.id
+                } else {
+                    selectedIds + account.id
                 }
-            } ?: run {
-                logger.error("account clicked without available payload.")
+            }
+            setState { copy(selectedIds = newSelectedIds) }
+            logAccountSelectionChanges(
+                idsBefore = selectedIds,
+                idsAfter = newSelectedIds,
+                isSingleAccount = payload.singleAccount
+            )
+        } ?: run {
+            logger.error("account clicked without available payload.")
+        }
+    }
+
+    private fun logAccountSelectionChanges(
+        idsBefore: Set<String>,
+        idsAfter: Set<String>,
+        isSingleAccount: Boolean
+    ) {
+        viewModelScope.launch {
+            val newIds = idsAfter - idsBefore
+            val removedIds = idsBefore - idsAfter
+            if (newIds.size == 1) {
+                eventTracker.track(
+                    AccountSelected(
+                        isSingleAccount = isSingleAccount,
+                        selected = true,
+                        accountId = newIds.first()
+                    )
+                )
+            }
+            if (removedIds.size == 1) {
+                eventTracker.track(
+                    AccountSelected(
+                        isSingleAccount = isSingleAccount,
+                        selected = false,
+                        accountId = removedIds.first()
+                    )
+                )
             }
         }
     }
 
     fun onSubmit() {
         viewModelScope.launch {
-            eventTracker.track(ClickLinkAccounts(Pane.ACCOUNT_PICKER))
+            eventTracker.track(ClickLinkAccounts(PANE))
         }
+        FinancialConnections.emitEvent(name = Name.ACCOUNTS_SELECTED)
         withState { state ->
             state.payload()?.let {
                 submitAccounts(state.selectedIds, updateLocalCache = true)
@@ -182,50 +231,52 @@ internal class AccountPickerViewModel @Inject constructor(
         updateLocalCache: Boolean
     ) {
         suspend {
-            val manifest = getManifest()
+            val manifest = getOrFetchSync().manifest
             val accountsList: PartnerAccountsList = selectAccounts(
                 selectedAccountIds = selectedIds,
                 sessionId = requireNotNull(manifest.activeAuthSession).id,
                 updateLocalCache = updateLocalCache
             )
-            goNext(accountsList.nextPane)
+            navigationManager.tryNavigateTo(accountsList.nextPane.destination(referrer = PANE))
             accountsList
         }.execute {
             copy(selectAccounts = it)
         }
     }
 
-    fun selectAnotherBank() = navigationManager.navigate(NavigationDirections.reset)
+    fun selectAnotherBank() =
+        navigationManager.tryNavigateTo(Reset(referrer = PANE))
 
-    fun onEnterDetailsManually() = navigationManager.navigate(NavigationDirections.manualEntry)
+    fun onEnterDetailsManually() =
+        navigationManager.tryNavigateTo(ManualEntry(referrer = PANE))
 
     fun onLoadAccountsAgain() {
         setState { copy(canRetry = false) }
         loadAccounts()
     }
 
-    fun onSelectAllAccountsClicked() {
-        withState { state ->
-            state.payload()?.let { payload ->
-                if (state.allAccountsSelected) {
-                    // unselect all accounts
-                    setState { copy(selectedIds = emptySet()) }
-                } else {
-                    // select all accounts
-                    setState {
-                        val ids = payload.selectableAccounts.map { it.id }.toSet()
-                        copy(selectedIds = ids)
-                    }
-                }
+    fun onSelectAllAccountsClicked() = withState { state ->
+        state.payload()?.let { payload ->
+            val selectedIds = state.selectedIds
+            val newIds = if (state.allAccountsSelected) {
+                // unselect all accounts
+                emptySet()
+            } else {
+                // select all accounts
+                payload.selectableAccounts.map { it.id }.toSet()
             }
+            setState { copy(selectedIds = newIds) }
+            logAccountSelectionChanges(
+                idsBefore = selectedIds,
+                idsAfter = newIds,
+                isSingleAccount = payload.singleAccount
+            )
         }
     }
 
     fun onLearnMoreAboutDataAccessClick() {
         viewModelScope.launch {
-            eventTracker.track(
-                FinancialConnectionsEvent.ClickLearnMoreDataAccess(Pane.ACCOUNT_PICKER)
-            )
+            eventTracker.track(ClickLearnMoreDataAccess(Pane.ACCOUNT_PICKER))
         }
     }
 
@@ -244,6 +295,8 @@ internal class AccountPickerViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        private val PANE = Pane.ACCOUNT_PICKER
     }
 }
 

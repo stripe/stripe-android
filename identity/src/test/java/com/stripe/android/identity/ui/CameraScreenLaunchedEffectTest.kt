@@ -142,7 +142,6 @@ class CameraScreenLaunchedEffectTest {
                     eq(IdentityAnalyticsRequestFactory.TYPE_SELFIE)
                 )
             }
-            verify(mockIdentityScanViewModel).stopScan(any())
 
             verify(mockIdentityViewModel).updateAnalyticsState(
                 argWhere { block ->
@@ -175,7 +174,6 @@ class CameraScreenLaunchedEffectTest {
                     eq(IdentityAnalyticsRequestFactory.TYPE_SELFIE)
                 )
             }
-            verify(mockIdentityScanViewModel).stopScan(any())
 
             verify(mockIdentityAnalyticsRequestFactory).selfieTimeout()
 
@@ -197,8 +195,9 @@ class CameraScreenLaunchedEffectTest {
                 result = IDDetectorOutput(
                     boundingBox = mock(),
                     category = mock(),
-                    resultScore = ID_FRONT_SCORE,
-                    allScores = mock()
+                    resultScore = ID_FRONT_MODEL_SCORE,
+                    allScores = mock(),
+                    blurScore = ID_FRONT_BLUR_SCORE
                 ),
                 identityState = IdentityScanState.Finished(
                     type = IdentityScanState.ScanType.ID_FRONT,
@@ -213,11 +212,12 @@ class CameraScreenLaunchedEffectTest {
                     eq(IdentityAnalyticsRequestFactory.TYPE_DOCUMENT)
                 )
             }
-            verify(mockIdentityScanViewModel).stopScan(any())
 
             verify(mockIdentityViewModel).updateAnalyticsState(
                 argWhere { block ->
-                    block(AnalyticsState()).docFrontModelScore == ID_FRONT_SCORE
+                    val state = block(AnalyticsState())
+                    state.docFrontModelScore == ID_FRONT_MODEL_SCORE &&
+                        state.docFrontBlurScore == ID_FRONT_BLUR_SCORE
                 }
             )
         }
@@ -232,8 +232,9 @@ class CameraScreenLaunchedEffectTest {
                 result = IDDetectorOutput(
                     boundingBox = mock(),
                     category = mock(),
-                    resultScore = ID_FRONT_SCORE,
-                    allScores = mock()
+                    resultScore = ID_FRONT_MODEL_SCORE,
+                    allScores = mock(),
+                    blurScore = ID_FRONT_BLUR_SCORE
                 ),
                 identityState = IdentityScanState.TimeOut(
                     type = IdentityScanState.ScanType.ID_FRONT,
@@ -248,7 +249,6 @@ class CameraScreenLaunchedEffectTest {
                     eq(IdentityAnalyticsRequestFactory.TYPE_DOCUMENT)
                 )
             }
-            verify(mockIdentityScanViewModel).stopScan(any())
 
             verify(mockIdentityAnalyticsRequestFactory).documentTimeout(
                 eq(IdentityScanState.ScanType.ID_FRONT)
@@ -271,8 +271,9 @@ class CameraScreenLaunchedEffectTest {
                 result = IDDetectorOutput(
                     boundingBox = mock(),
                     category = mock(),
-                    resultScore = ID_BACK_SCORE,
-                    allScores = mock()
+                    resultScore = ID_BACK_MODEL_SCORE,
+                    allScores = mock(),
+                    blurScore = ID_BACK_BLUR_SCORE
                 ),
                 identityState = IdentityScanState.Finished(
                     type = IdentityScanState.ScanType.ID_BACK,
@@ -287,11 +288,12 @@ class CameraScreenLaunchedEffectTest {
                     eq(IdentityAnalyticsRequestFactory.TYPE_DOCUMENT)
                 )
             }
-            verify(mockIdentityScanViewModel).stopScan(any())
 
             verify(mockIdentityViewModel).updateAnalyticsState(
                 argWhere { block ->
-                    block(AnalyticsState()).docBackModelScore == ID_BACK_SCORE
+                    val state = block(AnalyticsState())
+                    state.docBackModelScore == ID_BACK_MODEL_SCORE &&
+                        state.docBackBlurScore == ID_BACK_BLUR_SCORE
                 }
             )
         }
@@ -306,8 +308,9 @@ class CameraScreenLaunchedEffectTest {
                 result = IDDetectorOutput(
                     boundingBox = mock(),
                     category = mock(),
-                    resultScore = ID_BACK_SCORE,
-                    allScores = mock()
+                    resultScore = ID_BACK_MODEL_SCORE,
+                    allScores = mock(),
+                    blurScore = 1.0f
                 ),
                 identityState = IdentityScanState.TimeOut(
                     type = IdentityScanState.ScanType.ID_BACK,
@@ -322,7 +325,6 @@ class CameraScreenLaunchedEffectTest {
                     eq(IdentityAnalyticsRequestFactory.TYPE_DOCUMENT)
                 )
             }
-            verify(mockIdentityScanViewModel).stopScan(any())
 
             verify(mockIdentityAnalyticsRequestFactory).documentTimeout(
                 eq(IdentityScanState.ScanType.ID_BACK)
@@ -354,7 +356,9 @@ class CameraScreenLaunchedEffectTest {
 
     private companion object {
         const val FACE_SCORE = 123f
-        const val ID_FRONT_SCORE = 456f
-        const val ID_BACK_SCORE = 789f
+        const val ID_FRONT_MODEL_SCORE = 456f
+        const val ID_BACK_MODEL_SCORE = 789f
+        const val ID_FRONT_BLUR_SCORE = 0.1f
+        const val ID_BACK_BLUR_SCORE = 0.2f
     }
 }

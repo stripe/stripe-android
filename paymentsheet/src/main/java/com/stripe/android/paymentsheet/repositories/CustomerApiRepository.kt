@@ -7,6 +7,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -33,7 +34,7 @@ internal class CustomerApiRepository @Inject constructor(
 
     override suspend fun retrieveCustomer(
         customerId: String,
-        ephemeralKeySecret: String
+        ephemeralKeySecret: String,
     ): Customer? {
         return stripeRepository.retrieveCustomer(
             customerId,
@@ -47,16 +48,22 @@ internal class CustomerApiRepository @Inject constructor(
 
     override suspend fun getPaymentMethods(
         customerConfig: PaymentSheet.CustomerConfiguration,
-        types: List<PaymentMethod.Type>
-    ): List<PaymentMethod> = withContext(workContext) {
-        val requests = types.map { paymentMethodType ->
+        types: List<PaymentMethod.Type>,
+        silentlyFail: Boolean,
+    ): Result<List<PaymentMethod>> = withContext(workContext) {
+        val requests = types.filter { paymentMethodType ->
+            paymentMethodType in setOf(
+                PaymentMethod.Type.Card,
+                PaymentMethod.Type.USBankAccount,
+                PaymentMethod.Type.SepaDebit,
+            )
+        }.map { paymentMethodType ->
             async {
                 stripeRepository.getPaymentMethods(
                     listPaymentMethodsParams = ListPaymentMethodsParams(
                         customerId = customerConfig.id,
                         paymentMethodType = paymentMethodType,
                     ),
-                    publishableKey = lazyPaymentConfig.get().publishableKey,
                     productUsageTokens = productUsageTokens,
                     requestOptions = ApiRequest.Options(
                         apiKey = customerConfig.ephemeralKeySecret,
@@ -68,9 +75,28 @@ internal class CustomerApiRepository @Inject constructor(
             }
         }
 
-        requests.awaitAll().flatMap {
-            it.getOrElse { emptyList() }
+        val paymentMethods = mutableListOf<PaymentMethod>()
+        requests.awaitAll().forEach {
+            it.fold(
+                onFailure = {
+                    if (!silentlyFail) {
+                        return@withContext Result.failure(it)
+                    }
+                },
+                onSuccess = { customerPaymentMethods ->
+                    val walletTypesToRemove = setOf(Wallet.Type.ApplePay, Wallet.Type.GooglePay, Wallet.Type.SamsungPay)
+                    paymentMethods.addAll(
+                        customerPaymentMethods.filter { paymentMethod ->
+                            val isCardWithWallet = paymentMethod.type == PaymentMethod.Type.Card &&
+                                walletTypesToRemove.contains(paymentMethod.card?.wallet?.walletType)
+                            !isCardWithWallet
+                        }
+                    )
+                }
+            )
         }
+
+        Result.success(paymentMethods)
     }
 
     override suspend fun detachPaymentMethod(
@@ -78,7 +104,6 @@ internal class CustomerApiRepository @Inject constructor(
         paymentMethodId: String
     ): Result<PaymentMethod> =
         stripeRepository.detachPaymentMethod(
-            publishableKey = lazyPaymentConfig.get().publishableKey,
             productUsageTokens = productUsageTokens,
             paymentMethodId = paymentMethodId,
             requestOptions = ApiRequest.Options(
@@ -95,7 +120,6 @@ internal class CustomerApiRepository @Inject constructor(
     ): Result<PaymentMethod> =
         stripeRepository.attachPaymentMethod(
             customerId = customerConfig.id,
-            publishableKey = lazyPaymentConfig.get().publishableKey,
             productUsageTokens = productUsageTokens,
             paymentMethodId = paymentMethodId,
             requestOptions = ApiRequest.Options(

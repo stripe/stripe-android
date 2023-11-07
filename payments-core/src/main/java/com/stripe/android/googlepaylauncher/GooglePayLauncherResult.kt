@@ -38,9 +38,6 @@ internal sealed class GooglePayLauncherResult : ActivityStarter.Result {
         }
     }
 
-    /**
-     * See [StripeGooglePayContract.Args]
-     */
     @Parcelize
     internal data class PaymentData(
         val paymentMethod: PaymentMethod,

@@ -31,19 +31,20 @@ internal class FakePaymentSheetLoader(
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration?
-    ): PaymentSheetLoader.Result {
+    ): Result<PaymentSheetState.Full> {
         delay(delay)
         return if (shouldFail) {
-            PaymentSheetLoader.Result.Failure(IllegalStateException("oh no"))
+            Result.failure(IllegalStateException("oh no"))
         } else {
-            PaymentSheetLoader.Result.Success(
-                state = PaymentSheetState.Full(
+            Result.success(
+                PaymentSheetState.Full(
                     config = paymentSheetConfiguration,
                     stripeIntent = stripeIntent,
                     customerPaymentMethods = customerPaymentMethods,
                     isGooglePayReady = isGooglePayAvailable,
                     linkState = linkState,
                     paymentSelection = paymentSelection,
+                    isEligibleForCardBrandChoice = false,
                 )
             )
         }

@@ -116,6 +116,11 @@ internal interface FinancialConnectionsManifestRepository {
         sessionId: String
     ): FinancialConnectionsAuthorizationSession
 
+    suspend fun retrieveAuthorizationSession(
+        clientSecret: String,
+        sessionId: String
+    ): FinancialConnectionsAuthorizationSession
+
     /**
      * Save the authorized bank accounts to Link.
      *
@@ -218,7 +223,10 @@ private class FinancialConnectionsManifestRepositoryImpl(
         cachedSynchronizeSessionResponse ?: run {
             // fetch manifest and save it locally
             return requestExecutor.execute(
-                synchronizeRequest(applicationId, clientSecret),
+                synchronizeRequest(
+                    applicationId = applicationId,
+                    clientSecret = clientSecret,
+                ),
                 SynchronizeSessionResponse.serializer()
             ).also { updateCachedSynchronizeSessionResponse("get/fetch", it) }
         }
@@ -228,7 +236,11 @@ private class FinancialConnectionsManifestRepositoryImpl(
         clientSecret: String,
         applicationId: String
     ): SynchronizeSessionResponse = mutex.withLock {
-        val financialConnectionsRequest = synchronizeRequest(applicationId, clientSecret)
+        val financialConnectionsRequest =
+            synchronizeRequest(
+                applicationId = applicationId,
+                clientSecret = clientSecret,
+            )
         return requestExecutor.execute(
             financialConnectionsRequest,
             SynchronizeSessionResponse.serializer()
@@ -237,12 +249,13 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
     private fun synchronizeRequest(
         applicationId: String,
-        clientSecret: String
+        clientSecret: String,
     ): ApiRequest = apiRequestFactory.createPost(
         url = synchronizeSessionUrl,
         options = apiOptions,
         params = mapOf(
             "expand" to listOf("manifest.active_auth_session"),
+            "emit_events" to true,
             "locale" to locale.toLanguageTag(),
             "mobile" to mapOf(
                 PARAMS_FULLSCREEN to true,
@@ -336,6 +349,24 @@ private class FinancialConnectionsManifestRepositoryImpl(
         ).also {
             updateCachedActiveAuthSession("cancelAuthorizationSession", it)
         }
+    }
+
+    override suspend fun retrieveAuthorizationSession(
+        clientSecret: String,
+        sessionId: String
+    ): FinancialConnectionsAuthorizationSession = requestExecutor.execute(
+        request = apiRequestFactory.createPost(
+            url = retrieveAuthSessionUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_ID to sessionId,
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "emit_events" to true
+            )
+        ),
+        FinancialConnectionsAuthorizationSession.serializer()
+    ).also {
+        updateCachedActiveAuthSession("retrieveAuthorizationSession", it)
     }
 
     override suspend fun completeAuthorizationSession(
@@ -518,31 +549,34 @@ private class FinancialConnectionsManifestRepositoryImpl(
         internal const val PARAMS_FULLSCREEN = "fullscreen"
         internal const val PARAMS_HIDE_CLOSE_BUTTON = "hide_close_button"
 
-        internal val synchronizeSessionUrl: String =
+        internal const val synchronizeSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
 
-        internal val cancelAuthSessionUrl: String =
+        internal const val cancelAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/cancel"
 
-        internal val eventsAuthSessionUrl: String =
+        internal const val retrieveAuthSessionUrl: String =
+            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/retrieve"
+
+        internal const val eventsAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/events"
 
-        internal val consentAcquiredUrl: String =
+        internal const val consentAcquiredUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/consent_acquired"
 
-        internal val linkMoreAccountsUrl: String =
+        internal const val linkMoreAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_more_accounts"
 
-        internal val saveAccountToLinkUrl: String =
+        internal const val saveAccountToLinkUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/save_accounts_to_link"
 
-        internal val linkVerifiedUrl: String =
+        internal const val linkVerifiedUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_verified"
 
-        internal val linkStepUpVerifiedUrl: String =
+        internal const val linkStepUpVerifiedUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_step_up_authentication_verified"
 
-        internal val disableNetworking: String =
+        internal const val disableNetworking: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/disable_networking"
     }
 }

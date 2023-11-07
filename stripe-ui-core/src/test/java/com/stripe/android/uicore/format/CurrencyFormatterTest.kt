@@ -35,7 +35,8 @@ class CurrencyFormatterTest {
         assertThat(
             CurrencyFormatter.format(
                 123412L,
-                Currency.getInstance("USD")
+                Currency.getInstance("USD"),
+                Locale.US,
             )
         ).isEqualTo("$1,234.12")
     }
@@ -227,6 +228,20 @@ class CurrencyFormatterTest {
         val currency = Currency.getInstance("MMK")
         val formattedAmount = CurrencyFormatter.format(5099L, currency)
         assertThat(formattedAmount).isEqualTo("MMK50.99")
+    }
+
+    @Test
+    fun `Treats LAK as a two-decimal currency`() {
+        val currency = Currency.getInstance("LAK")
+        val formattedAmount = CurrencyFormatter.format(5099L, currency)
+        assertThat(formattedAmount).isEqualTo("LAK50.99")
+    }
+
+    @Test
+    fun `Treats RSD as a two-decimal currency`() {
+        val currency = Currency.getInstance("RSD")
+        val formattedAmount = CurrencyFormatter.format(5099L, currency)
+        assertThat(formattedAmount).isEqualTo("RSD50.99")
     }
 
     companion object {

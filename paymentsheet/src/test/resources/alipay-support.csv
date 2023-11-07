@@ -1,0 +1,49 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+alipay, true, true, off_session, false, card/alipay, false, false, not available, false
+alipay, true, true, off_session, false, card/eps/alipay, false, false, not available, false
+alipay, true, false, off_session, false, card/alipay, false, false, not available, false
+alipay, true, false, off_session, false, card/eps/alipay, false, false, not available, false
+alipay, true, true, on_session, false, card/alipay, false, false, not available, false
+alipay, true, true, on_session, false, card/eps/alipay, false, false, not available, false
+alipay, true, false, on_session, false, card/alipay, false, false, not available, false
+alipay, true, false, on_session, false, card/eps/alipay, false, false, not available, false
+alipay, true, true, null, false, card/alipay, false, true, oneTime, true
+alipay, true, true, null, false, card/eps/alipay, false, true, oneTime, true
+alipay, true, false, null, false, card/alipay, false, true, oneTime, true
+alipay, true, false, null, false, card/eps/alipay, false, true, oneTime, true
+alipay, false, true, off_session, false, card/alipay, false, false, not available, false
+alipay, false, true, off_session, false, card/eps/alipay, false, false, not available, false
+alipay, false, false, off_session, false, card/alipay, false, false, not available, false
+alipay, false, false, off_session, false, card/eps/alipay, false, false, not available, false
+alipay, false, true, on_session, false, card/alipay, false, false, not available, false
+alipay, false, true, on_session, false, card/eps/alipay, false, false, not available, false
+alipay, false, false, on_session, false, card/alipay, false, false, not available, false
+alipay, false, false, on_session, false, card/eps/alipay, false, false, not available, false
+alipay, false, true, null, false, card/alipay, false, true, oneTime, true
+alipay, false, true, null, false, card/eps/alipay, false, true, oneTime, true
+alipay, false, false, null, false, card/alipay, false, true, oneTime, true
+alipay, false, false, null, false, card/eps/alipay, false, true, oneTime, true
+alipay, true, true, off_session, true, card/alipay, false, false, not available, false
+alipay, true, true, off_session, true, card/eps/alipay, false, false, not available, false
+alipay, true, false, off_session, true, card/alipay, false, false, not available, false
+alipay, true, false, off_session, true, card/eps/alipay, false, false, not available, false
+alipay, true, true, on_session, true, card/alipay, false, false, not available, false
+alipay, true, true, on_session, true, card/eps/alipay, false, false, not available, false
+alipay, true, false, on_session, true, card/alipay, false, false, not available, false
+alipay, true, false, on_session, true, card/eps/alipay, false, false, not available, false
+alipay, true, true, null, true, card/alipay, false, true, oneTime, true
+alipay, true, true, null, true, card/eps/alipay, false, true, oneTime, true
+alipay, true, false, null, true, card/alipay, false, true, oneTime, true
+alipay, true, false, null, true, card/eps/alipay, false, true, oneTime, true
+alipay, false, true, off_session, true, card/alipay, false, false, not available, false
+alipay, false, true, off_session, true, card/eps/alipay, false, false, not available, false
+alipay, false, false, off_session, true, card/alipay, false, false, not available, false
+alipay, false, false, off_session, true, card/eps/alipay, false, false, not available, false
+alipay, false, true, on_session, true, card/alipay, false, false, not available, false
+alipay, false, true, on_session, true, card/eps/alipay, false, false, not available, false
+alipay, false, false, on_session, true, card/alipay, false, false, not available, false
+alipay, false, false, on_session, true, card/eps/alipay, false, false, not available, false
+alipay, false, true, null, true, card/alipay, false, true, oneTime, true
+alipay, false, true, null, true, card/eps/alipay, false, true, oneTime, true
+alipay, false, false, null, true, card/alipay, false, true, oneTime, true
+alipay, false, false, null, true, card/eps/alipay, false, true, oneTime, true

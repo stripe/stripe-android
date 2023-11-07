@@ -10,18 +10,17 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpError.Error.ConsumerNotFoundError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpError.Error.LookupConsumerSession
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpError.Error.MarkLinkVerifiedError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpError.Error.StartVerificationError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpSuccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationStepUpError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationStepUpError.Error.ConsumerNotFoundError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationStepUpError.Error.LookupConsumerSession
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationStepUpError.Error.MarkLinkVerifiedError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationStepUpError.Error.StartVerificationError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationStepUpSuccess
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
@@ -29,6 +28,9 @@ import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
+import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -50,7 +52,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     private val updateLocalManifest: UpdateLocalManifest,
     private val markLinkStepUpVerified: MarkLinkStepUpVerified,
     private val updateCachedAccounts: UpdateCachedAccounts,
-    private val goNext: GoNext,
+    private val navigationManager: NavigationManager,
     private val logger: Logger
 ) : MavericksViewModel<LinkStepUpVerificationState>(initialState) {
 
@@ -71,7 +73,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
                 verificationType = VerificationType.EMAIL,
                 onConsumerNotFound = {
                     eventTracker.track(VerificationStepUpError(PANE, ConsumerNotFoundError))
-                    goNext(Pane.INSTITUTION_PICKER)
+                    navigationManager.tryNavigateTo(InstitutionPicker(referrer = PANE))
                 },
                 onLookupError = { error ->
                     eventTracker.track(VerificationStepUpError(PANE, LookupConsumerSession))
@@ -108,8 +110,12 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
                 }
             },
             onFail = { error ->
-                logger.error("Error fetching payload", error)
-                eventTracker.track(Error(Pane.NETWORKING_LINK_VERIFICATION, error))
+                eventTracker.logError(
+                    extraMessage = "Error fetching payload",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
             },
         )
     }
@@ -148,8 +154,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
         updateLocalManifest { it.copy(activeInstitution = activeInstitution.data.firstOrNull()) }
         // Updates cached accounts with the one selected.
         updateCachedAccounts { listOf(selectedAccount) }
-        goNext(Pane.SUCCESS)
-        Unit
+        navigationManager.tryNavigateTo(Destination.Success(referrer = PANE))
     }.execute { copy(confirmVerification = it) }
 
     fun onClickableTextClick(text: String) {
@@ -171,7 +176,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
                 verificationType = VerificationType.EMAIL,
                 onConsumerNotFound = {
                     eventTracker.track(VerificationStepUpError(PANE, ConsumerNotFoundError))
-                    goNext(Pane.INSTITUTION_PICKER)
+                    navigationManager.tryNavigateTo(InstitutionPicker(referrer = PANE))
                 },
                 onLookupError = { error ->
                     eventTracker.track(VerificationStepUpError(PANE, LookupConsumerSession))

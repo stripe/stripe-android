@@ -1,10 +1,8 @@
 package com.stripe.android.core.networking
 
-import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.exception.APIException
@@ -14,11 +12,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import java.util.Locale
 
 @RunWith(RobolectricTestRunner::class)
 class AnalyticsRequestFactoryTest : TestCase() {
-
-    private val context = ApplicationProvider.getApplicationContext<Context>()
 
     private val packageManager = mock<PackageManager>()
     private val packageName = "com.stripe.android.test"
@@ -28,15 +25,6 @@ class AnalyticsRequestFactoryTest : TestCase() {
         override val eventName: String = "randomEvent"
     }
 
-    val factory = AnalyticsRequestFactory(
-        context.applicationContext.packageManager,
-        runCatching {
-            context.applicationContext.packageManager.getPackageInfo(packageName, 0)
-        }.getOrNull(),
-        context.applicationContext.packageName.orEmpty(),
-        { apiKey }
-    )
-
     @Test
     fun `when publishable key is unavailable, create params with undefined key`() {
         val exception = APIException(RuntimeException())
@@ -44,7 +32,8 @@ class AnalyticsRequestFactoryTest : TestCase() {
             mock(),
             null,
             packageName,
-            { throw exception }
+            { throw exception },
+            { "5G" },
         )
 
         val params = factory.createRequest(mockEvent, emptyMap()).params
@@ -68,7 +57,8 @@ class AnalyticsRequestFactoryTest : TestCase() {
             packageManager,
             packageInfo,
             packageName,
-            { apiKey }
+            { apiKey },
+            { "5G" },
         )
         val params = factory.createRequest(mockEvent, emptyMap()).params
 
@@ -92,7 +82,8 @@ class AnalyticsRequestFactoryTest : TestCase() {
             mock(),
             null,
             packageName,
-            { apiKey }
+            { apiKey },
+            { "5G" },
         )
         assertThat(factory.appDataParams()).isEmpty()
     }
@@ -103,7 +94,8 @@ class AnalyticsRequestFactoryTest : TestCase() {
             null,
             null,
             "",
-            { apiKey }
+            { apiKey },
+            { "5G" },
         )
         assertThat(factory.appDataParams()).isEmpty()
     }
@@ -113,4 +105,38 @@ class AnalyticsRequestFactoryTest : TestCase() {
         assertThat(AnalyticsRequestFactory.ANALYTICS_UA)
             .isEqualTo("analytics.stripe_android-1.0")
     }
+
+    @Test
+    fun `Adds correct locale to request`() {
+        val locales = listOf(Locale.US, Locale.CANADA, Locale.GERMANY)
+
+        val factory = AnalyticsRequestFactory(
+            packageManager = null,
+            packageInfo = null,
+            packageName = "",
+            publishableKeyProvider = { apiKey },
+            networkTypeProvider = { "5G" },
+        )
+
+        val event = object : AnalyticsEvent {
+            override val eventName: String = "test_event"
+        }
+
+        for (locale in locales) {
+            withLocale(locale) {
+                val request = factory.createRequest(
+                    event = event,
+                    additionalParams = emptyMap(),
+                )
+                assertThat(request.params).containsEntry("locale", locale.toString())
+            }
+        }
+    }
+}
+
+private fun withLocale(locale: Locale, block: () -> Unit) {
+    val original = Locale.getDefault()
+    Locale.setDefault(locale)
+    block()
+    Locale.setDefault(original)
 }

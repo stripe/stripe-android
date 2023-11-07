@@ -6,7 +6,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 
 internal suspend fun IntentConfirmationInterceptor.intercept(
-    clientSecret: String?,
+    initializationMode: PaymentSheet.InitializationMode,
     paymentSelection: PaymentSelection?,
     shippingValues: ConfirmPaymentIntentParams.Shipping?,
 ): IntentConfirmationInterceptor.NextStep {
@@ -19,7 +19,8 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
             }
 
             intercept(
-                clientSecret = clientSecret,
+                initializationMode = initializationMode,
+                paymentMethodOptionsParams = paymentSelection.paymentMethodOptionsParams,
                 paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
                 shippingValues = shippingValues,
                 setupForFutureUsage = setupFutureUsage,
@@ -27,7 +28,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
         }
         is PaymentSelection.Saved -> {
             intercept(
-                clientSecret = clientSecret,
+                initializationMode = initializationMode,
                 paymentMethod = paymentSelection.paymentMethod,
                 shippingValues = shippingValues,
                 setupForFutureUsage = null,

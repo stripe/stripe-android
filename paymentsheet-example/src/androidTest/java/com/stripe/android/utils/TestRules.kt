@@ -2,6 +2,7 @@ package com.stripe.android.utils
 
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
@@ -39,9 +40,13 @@ class TestRules private constructor(
                     } else {
                         chain
                     }
-                }
-                .around(RetryRule(retryCount))
-                .around(Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS))
+                }.let { chain ->
+                    if (BuildConfig.IS_RUNNING_IN_CI) {
+                        chain.around(RetryRule(retryCount))
+                    } else {
+                        chain
+                    }
+                }.around(Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS))
                 .around(CleanupChromeRule)
 
             return TestRules(chain, composeTestRule)

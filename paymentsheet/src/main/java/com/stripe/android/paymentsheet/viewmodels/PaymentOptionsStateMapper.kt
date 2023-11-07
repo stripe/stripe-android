@@ -17,6 +17,7 @@ internal class PaymentOptionsStateMapper(
     private val currentSelection: StateFlow<PaymentSelection?>,
     private val nameProvider: (PaymentMethodCode?) -> String,
     private val isNotPaymentFlow: Boolean,
+    private val isCbcEligible: () -> Boolean
 ) {
 
     operator fun invoke(): Flow<PaymentOptionsState?> {
@@ -51,6 +52,7 @@ internal class PaymentOptionsStateMapper(
             showLink = isLinkEnabled && isNotPaymentFlow,
             currentSelection = currentSelection,
             nameProvider = nameProvider,
+            isCbcEligible = isCbcEligible()
         )
     }
 }

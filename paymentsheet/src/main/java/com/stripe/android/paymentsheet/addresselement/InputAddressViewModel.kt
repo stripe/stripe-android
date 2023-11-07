@@ -4,8 +4,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.core.injection.NonFallbackInjectable
-import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
@@ -60,7 +58,6 @@ internal class InputAddressViewModel @Inject constructor(
                     ?.toIdentifierMap()
                     ?: emptyMap()
                 _formController.value = formControllerProvider.get()
-                    .viewOnlyFields(emptySet())
                     .viewModelScope(viewModelScope)
                     .stripeIntent(null)
                     .merchantName("")
@@ -161,17 +158,13 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val injector: NonFallbackInjector
-    ) : ViewModelProvider.Factory, NonFallbackInjectable {
-
-        @Inject
-        lateinit var subComponentBuilderProvider:
+        private val inputAddressViewModelSubcomponentBuilderProvider:
             Provider<InputAddressViewModelSubcomponent.Builder>
+    ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            injector.inject(this)
-            return subComponentBuilderProvider.get()
+            return inputAddressViewModelSubcomponentBuilderProvider.get()
                 .build().inputAddressViewModel as T
         }
     }

@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
@@ -25,6 +26,7 @@ import com.stripe.android.databinding.StripeCardMultilineWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.DelicateCardDetailsApi
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -152,11 +154,14 @@ class CardMultilineWidget @JvmOverloads constructor(
     private fun isPostalRequired() =
         (postalCodeRequired || usZipCodeRequired) && shouldShowPostalCode
 
+    internal var viewModelStoreOwner: ViewModelStoreOwner? = null
+
     /**
      * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
      * otherwise `null`
      */
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
+        @OptIn(DelicateCardDetailsApi::class)
         get() {
             return cardParams?.let {
                 PaymentMethodCreateParams.Card(

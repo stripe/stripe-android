@@ -80,8 +80,8 @@
   <string name="stripe_becs_mandate_acceptance">\n    Ved å angje detaljar for bankkonto og stadfeste betalinga, godtek du denne\n    førespurnaden om direktedebitering og tenesteavtalen for førespurnaden om direktedebitering, og gjev\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 brukar-ID-nummer for direktedebitering 507156\n    (“Stripe”) løyve til å debitere kontoen din gjennom Bulk Electronic Clearing System (BECS)\n    på vegner av %1$s (\"forhandlaren\") for eitkvart beløp forhandlaren har\n    kommunisert separat til deg. Du attesterer at du anten er kontoinnehavar\n    eller har signaturrett på den oppgjevne kontoen.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Kontonummer</string>
-  <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="stripe_becs_widget_account_number_incomplete">Kontonummeret ditt er ufullstendig.</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">Kontonummeret du skrev inn, er ufullstendig.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="stripe_becs_widget_account_number_required">Kontonummer er påkravd.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
@@ -102,6 +102,10 @@
   <string name="stripe_becs_widget_name_required">Namn er påkravd.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">Avbryt</string>
+  <!-- Title for a dropdown option when selecting a card brand -->
+  <string name="stripe_card_brand_choice_no_selection">Inkje val</string>
+  <!-- Title for a dropdown where the customer can select a card brand -->
+  <string name="stripe_card_brand_choice_selection_header">Vel kortmerkje (valfritt)</string>
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">Kortet vart avvist</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->

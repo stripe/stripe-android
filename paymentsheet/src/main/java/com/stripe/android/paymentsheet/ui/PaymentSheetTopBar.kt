@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -28,7 +29,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.stripeColors
@@ -36,25 +36,15 @@ import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
+internal const val SHEET_NAVIGATION_BUTTON_TAG = "SHEET_NAVIGATION_BUTTON_TAG"
+
 @Composable
 internal fun PaymentSheetTopBar(
-    screen: PaymentSheetScreen,
-    showEditMenu: Boolean,
-    isLiveMode: Boolean?,
-    isProcessing: Boolean,
-    isEditing: Boolean,
+    state: PaymentSheetTopBarState,
     handleBackPressed: () -> Unit,
     toggleEditing: () -> Unit,
     elevation: Dp = 0.dp,
 ) {
-    val state = rememberPaymentSheetTopBarState(
-        screen = screen,
-        showEditMenu = showEditMenu,
-        isLiveMode = isLiveMode ?: true,
-        isProcessing = isProcessing,
-        isEditing = isEditing,
-    )
-
     PaymentSheetTopBar(
         state = state,
         elevation = elevation,
@@ -87,6 +77,7 @@ internal fun PaymentSheetTopBar(
                     keyboardController?.hide()
                     onNavigationIconPressed()
                 },
+                modifier = Modifier.testTag(SHEET_NAVIGATION_BUTTON_TAG)
             ) {
                 Icon(
                     painter = painterResource(state.icon),

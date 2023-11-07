@@ -5,16 +5,11 @@ import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionViewModelFactory
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
 import javax.inject.Singleton
 
-/**
- * Component to inject [Stripe3ds2TransactionViewModelFactory] when the app process is killed and
- * there is no [Injector] available.
- */
 @Singleton
 @Component(
     modules = [
@@ -25,7 +20,7 @@ import javax.inject.Singleton
     ]
 )
 internal interface Stripe3ds2TransactionViewModelFactoryComponent {
-    fun inject(stripe3ds2TransactionViewModelFactory: Stripe3ds2TransactionViewModelFactory)
+    val subcomponentBuilder: Stripe3ds2TransactionViewModelSubcomponent.Builder
 
     @Component.Builder
     interface Builder {

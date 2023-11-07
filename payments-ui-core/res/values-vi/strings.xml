@@ -4,14 +4,34 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Trả bằng <num_installments/> khoản thanh toán không lãi suất là <installment_price/> bằng <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Quay lại</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Số tài khoản</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Số tài khoản của bạn chưa đầy đủ.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Tài khoản ngân hàng</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Tôi hiểu rằng Stripe sẽ thu Ghi nợ Trực tiếp thay mặt %s và tôi xác nhận rằng tôi là chủ tài khoản và là người duy nhất cần có để ủy quyền ghi nợ từ tài khoản này.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Mã sắp xếp</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">Mã sắp xếp chưa đầy đủ.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Địa chỉ thanh toán</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">Mã BLIK</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Bằng cách tiếp tục, quý vị ủy quyền cho %1$s ghi nợ tài khoản Cash App của quý vị cho khoản thanh toán này và các khoản thanh toán trong tương lai theo các điều khoản của %2$s, cho đến khi ủy quyền này bị thu hồi. Quý vị có thể thay đổi điều này bất cứ lúc nào trong mục Cài đặt của Cash App.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Thông tin liên lạc</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Tiếp tục</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">Ngân hàng EPS</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">Ngân hàng FPX</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">IBAN quý vị đã nhập chưa đầy đủ.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -20,6 +40,10 @@
   <string name="stripe_iban_invalid_start">IBAN của quý vị phải bắt đầu bằng mã quốc gia gồm hai chữ cái.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">Ngân hàng iDEAL</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Mã BLIK của quý vị chưa đầy đủ.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Mã BLIK của quý vị không hợp lệ.</string>
   <string name="stripe_invalid_email_address">Địa chỉ email không hợp lệ: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Số ID UPI không hợp lệ</string>
@@ -27,6 +51,8 @@
   <string name="stripe_klarna_buy_now_pay_later">Mua ngay hoặc thanh toán sau bằng Klarna.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Thanh toán sau bằng Klarna.</string>
+  <!-- Caption for Phone field on address form -->
+  <string name="stripe_konbini_confirmation_number_label">Điện thoại</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Tên trên thẻ</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
@@ -43,10 +69,14 @@
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Ghi nợ trực tiếp AU Becs</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Thẻ</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Ghi nợ SEPA</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Bằng cách xác nhận thanh toán của quý vị với PayPal, quý vị cho phép %s tính phí tài khoản PayPal của quý vị cho các khoản thanh toán trong tương lai theo các điều khoản của họ.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">Khi xác nhận khoản thanh toán với RevolutPay, bạn cho phép %s tính phí vào tài khoản RevolutPay của bạn cho các khoản thanh toán trong tương lai căn cứ theo các điều khoản của họ.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Lưu để thanh toán %s sau này</string>
   <!-- Button title to open camera to scan credit/debit card -->

@@ -1,46 +1,75 @@
 package com.stripe.android.lpm
 
 import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.BaseLpmTest
-import com.stripe.android.test.core.DelayedPMs
+import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Country
+import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
+import com.stripe.android.test.core.TestParameters
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-internal class TestSepaDebit : BaseLpmTest() {
+internal class TestSepaDebit : BasePlaygroundTest() {
 
-    private val sepaDebit = newUser.copy(
-        paymentMethod = lpmRepository.fromCode("sepa_debit")!!,
-        delayed = DelayedPMs.On,
-        authorizationAction = null
+    private val testParameters = TestParameters.create(
+        paymentMethodCode = "sepa_debit",
+    ) { settings ->
+        settings[CountrySettingsDefinition] = Country.FR
+        settings[DelayedPaymentMethodsSettingsDefinition] = true
+        settings[GooglePaySettingsDefinition] = false
+    }.copy(
+        authorizationAction = null,
     )
 
     @Test
     fun testSepaDebit() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters = sepaDebit,
+            testParameters = testParameters,
         ) {
-            rules.compose.onNodeWithText("IBAN").apply {
-                performTextInput(
-                    "DE89370400440532013000"
-                )
+            fillOutIban()
+        }
+    }
+
+    @Test
+    fun testSepaDebitSfu() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[AutomaticPaymentMethodsSettingsDefinition] = true
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
             }
+        ) {
+            fillOutIban()
+        }
+    }
+
+    @Test
+    fun testSepaDebitSetup() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[AutomaticPaymentMethodsSettingsDefinition] = true
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
+            }
+        ) {
+            fillOutIban()
         }
     }
 
     @Test
     fun testSepaDebitInCustomFlow() {
         testDriver.confirmCustom(
-            testParameters = sepaDebit,
+            testParameters = testParameters,
             populateCustomLpmFields = {
-                rules.compose.onNodeWithText("IBAN").apply {
-                    performTextInput(
-                        "DE89370400440532013000"
-                    )
-                }
+                fillOutIban()
             },
             verifyCustomLpmFields = {
                 rules.compose.onNodeWithText("IBAN").apply {
@@ -50,5 +79,62 @@ internal class TestSepaDebit : BaseLpmTest() {
                 }
             }
         )
+    }
+
+    @Test
+    fun testSepaDebitDefaultReturningUserFlowWithoutShowingFlowController() {
+        val testParameters = testParameters.copyPlaygroundSettings { settings ->
+            settings[AutomaticPaymentMethodsSettingsDefinition] = true
+            settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
+        }
+
+        // Create the payment method and set it as default by going through the whole flow.
+        val playgroundState = testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters,
+        ) {
+            fillOutIban()
+        }
+
+        testDriver.confirmCustomWithDefaultSavedPaymentMethod(
+            customerId = playgroundState?.customerConfig?.id,
+            testParameters = testParameters,
+            afterBuyAction = {
+                rules.compose.onNode(hasTestTag("SEPA_MANDATE_CONTINUE_BUTTON"))
+                    .performClick()
+            }
+        )
+    }
+
+    @Test
+    fun testSepaDebitDefaultReturningUserFlowWithShowingFlowController() {
+        val testParameters = testParameters.copyPlaygroundSettings { settings ->
+            settings[AutomaticPaymentMethodsSettingsDefinition] = true
+            settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
+        }
+
+        // Create the payment method and set it as default by going through the whole flow.
+        val playgroundState = testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters,
+        ) {
+            fillOutIban()
+        }
+
+        testDriver.confirmCustomWithDefaultSavedPaymentMethod(
+            customerId = playgroundState?.customerConfig?.id,
+            testParameters = testParameters,
+            beforeBuyAction = { selectors ->
+                selectors.multiStepSelect.click()
+                selectors.paymentSelection.click()
+                selectors.continueButton.click()
+            }
+        )
+    }
+
+    private fun fillOutIban() {
+        rules.compose.onNodeWithText("IBAN").apply {
+            performTextInput(
+                "DE89370400440532013000"
+            )
+        }
     }
 }

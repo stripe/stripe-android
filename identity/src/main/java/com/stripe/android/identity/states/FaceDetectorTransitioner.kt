@@ -235,7 +235,6 @@ internal class FaceDetectorTransitioner(
 
     private fun isFaceValid(analyzerOutput: FaceDetectorOutput) =
         isFaceCentered(analyzerOutput.boundingBox) &&
-            isFaceFocused() &&
             isFaceAwayFromEdges(analyzerOutput.boundingBox) &&
             isFaceCoverageOK(analyzerOutput.boundingBox) &&
             isFaceScoreOverThreshold(analyzerOutput.resultScore)
@@ -249,13 +248,6 @@ internal class FaceDetectorTransitioner(
             selfieCapturePage.maxCenteredThresholdY &&
             abs(1 - (boundingBox.left + boundingBox.left + boundingBox.width)) <
                 selfieCapturePage.maxCenteredThresholdX
-    }
-
-    /**
-     * TODO(ccen) Decide blur detection algorithm
-     */
-    private fun isFaceFocused(): Boolean {
-        return true
     }
 
     private fun isFaceAwayFromEdges(boundingBox: BoundingBox): Boolean {

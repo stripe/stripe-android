@@ -100,6 +100,19 @@ internal class DefaultPrefsRepositoryTest {
 
     @Test
     fun `setSavedSelection null should return none`() = runTest {
+        prefsRepository.setSavedSelection(
+            PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            ).toSavedSelection()
+        )
+        assertThat(
+            prefsRepository.getSavedSelection(isGooglePayReady, isLinkAvailable)
+        ).isEqualTo(
+            SavedSelection.PaymentMethod(
+                id = "pm_123456789"
+            )
+        )
+
         prefsRepository.setSavedSelection(null)
         assertThat(
             prefsRepository.getSavedSelection(isGooglePayReady, isLinkAvailable)

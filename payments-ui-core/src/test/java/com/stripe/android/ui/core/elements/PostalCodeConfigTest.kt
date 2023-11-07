@@ -1,5 +1,7 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth
 import com.stripe.android.core.R
 import com.stripe.android.uicore.elements.PostalCodeConfig
@@ -7,6 +9,29 @@ import com.stripe.android.uicore.elements.TextFieldState
 import org.junit.Test
 
 class PostalCodeConfigTest {
+    @Test
+    fun `verify US config uses proper keyboard capitalization & keyboard type`() {
+        with(createConfigForCountry("US")) {
+            Truth.assertThat(capitalization).isEqualTo(KeyboardCapitalization.None)
+            Truth.assertThat(keyboard).isEqualTo(KeyboardType.NumberPassword)
+        }
+    }
+
+    @Test
+    fun `verify CA config uses proper keyboard capitalization & keyboard type`() {
+        with(createConfigForCountry("CA")) {
+            Truth.assertThat(capitalization).isEqualTo(KeyboardCapitalization.Characters)
+            Truth.assertThat(keyboard).isEqualTo(KeyboardType.Text)
+        }
+    }
+
+    @Test
+    fun `verify Other config uses proper keyboard capitalization & keyboard type`() {
+        with(createConfigForCountry("UK")) {
+            Truth.assertThat(capitalization).isEqualTo(KeyboardCapitalization.Characters)
+            Truth.assertThat(keyboard).isEqualTo(KeyboardType.Text)
+        }
+    }
 
     @Test
     fun `verify US postal codes`() {
@@ -16,7 +41,7 @@ class PostalCodeConfigTest {
             Truth.assertThat(determineStateForInput("12345").isValid()).isTrue()
             Truth.assertThat(determineStateForInput("12345").isFull()).isTrue()
             Truth.assertThat(determineStateForInput("abcde").isValid()).isFalse()
-            Truth.assertThat(determineStateForInput("abcde").isFull()).isTrue()
+            Truth.assertThat(determineStateForInput("abcde").isFull()).isFalse()
         }
     }
 
@@ -51,11 +76,20 @@ class PostalCodeConfigTest {
     }
 
     @Test
-    fun `invalid postal codes emit error`() {
+    fun `invalid US postal codes emit error`() {
         with(createConfigForCountry("US")) {
             Truth.assertThat(determineStateForInput("").getError()).isNull()
             Truth.assertThat(determineStateForInput("1234").getError()).isNotNull()
             Truth.assertThat(determineStateForInput("12345").getError()).isNull()
+        }
+    }
+
+    @Test
+    fun `invalid CA postal codes emit error`() {
+        with(createConfigForCountry("CA")) {
+            Truth.assertThat(determineStateForInput("").getError()).isNull()
+            Truth.assertThat(determineStateForInput("1N8E8R").getError()).isNotNull()
+            Truth.assertThat(determineStateForInput("141124").getError()).isNotNull()
         }
     }
 

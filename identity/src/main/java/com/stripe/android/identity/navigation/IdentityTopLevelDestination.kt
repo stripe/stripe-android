@@ -54,7 +54,7 @@ internal data class PopUpToParam(
 internal fun String.toRouteBase() = substringBefore('?')
 
 internal fun IdentityTopLevelDestination.DestinationRoute.withParams(
-    vararg params: Pair<String, Any>
+    vararg params: Pair<String, Any?>
 ): String {
     var ret = this.route
     params.forEach { (key, value) ->
@@ -121,6 +121,8 @@ internal fun String.routeToScreenName(): String = when (this) {
         IdentityAnalyticsRequestFactory.SCREEN_NAME_INDIVIDUAL_WELCOME
     DebugDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_DEBUG
+    OTPDestination.ROUTE.route ->
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_PHONE_OTP
     else ->
         throw IllegalArgumentException("Invalid route: $this")
 }
@@ -145,7 +147,9 @@ internal fun String.routeToRequirement(): List<Requirement> = when (this) {
     SelfieDestination.ROUTE.route ->
         listOf(Requirement.FACE)
     IndividualDestination.ROUTE.route ->
-        listOf(Requirement.NAME, Requirement.DOB, Requirement.ADDRESS, Requirement.IDNUMBER)
+        listOf(Requirement.NAME, Requirement.DOB, Requirement.ADDRESS, Requirement.IDNUMBER, Requirement.PHONE_NUMBER)
+    OTPDestination.ROUTE.route ->
+        listOf(Requirement.PHONE_OTP)
     else ->
         emptyList()
 }

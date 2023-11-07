@@ -56,20 +56,15 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
             return
         }
 
-        val statusColor = intent.getIntExtra(GooglePayLauncherContract.EXTRA_STATUS_BAR_COLOR, -1)
-        if (statusColor != -1) {
-            window.statusBarColor = statusColor
-        }
-
-        viewModel.googlePayResult.observe(this) { googlePayResult ->
-            googlePayResult?.let(::finishWithResult)
+        lifecycleScope.launch {
+            viewModel.googlePayResult.collect { googlePayResult ->
+                googlePayResult?.let(::finishWithResult)
+            }
         }
 
         if (!viewModel.hasLaunched) {
             lifecycleScope.launch {
-                runCatching {
-                    viewModel.createLoadPaymentDataTask()
-                }.fold(
+                viewModel.createLoadPaymentDataTask().fold(
                     onSuccess = {
                         payWithGoogle(it)
                         viewModel.hasLaunched = true

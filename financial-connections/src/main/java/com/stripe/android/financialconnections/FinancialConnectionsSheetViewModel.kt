@@ -14,13 +14,16 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
+import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
-import com.stripe.android.financialconnections.domain.IsBrowserAvailable
 import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.exception.AppInitializationError
@@ -42,8 +45,6 @@ import com.stripe.android.financialconnections.utils.parcelable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -54,9 +55,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val logger: Logger,
+    private val browserManager: BrowserManager,
     private val eventReporter: FinancialConnectionsEventReporter,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
-    private val isBrowserAvailable: IsBrowserAvailable,
     private val nativeRouter: NativeAuthFlowRouter,
     initialState: FinancialConnectionsSheetState
 ) : MavericksViewModel<FinancialConnectionsSheetState>(initialState) {
@@ -101,7 +102,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      *
      */
     private fun openAuthFlow(sync: SynchronizeSessionResponse) {
-        if (isBrowserAvailable().not()) {
+        if (browserManager.canOpenHttpsUrl().not()) {
             logNoBrowserAvailableAndFinish()
             return
         }
@@ -115,21 +116,24 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 )
             }
         } else {
-            val authFlowStatus = if (nativeAuthFlowEnabled) {
-                AuthFlowStatus.NONE
+            FinancialConnections.emitEvent(name = Name.OPEN)
+            if (nativeAuthFlowEnabled) {
+                setState {
+                    copy(
+                        manifest = sync.manifest,
+                        webAuthFlowStatus = AuthFlowStatus.NONE,
+                        viewEffect = OpenNativeAuthFlow(initialArgs.configuration, sync)
+                    )
+                }
             } else {
-                AuthFlowStatus.ON_EXTERNAL_ACTIVITY
-            }
-            setState {
-                copy(
-                    manifest = sync.manifest,
-                    webAuthFlowStatus = authFlowStatus,
-                    viewEffect = if (nativeAuthFlowEnabled) {
-                        OpenNativeAuthFlow(initialArgs.configuration, sync)
-                    } else {
-                        OpenAuthFlowWithUrl(sync.manifest.hostedAuthUrl)
-                    }
-                )
+                FinancialConnections.emitEvent(name = Name.FLOW_LAUNCHED_IN_BROWSER)
+                setState {
+                    copy(
+                        manifest = sync.manifest,
+                        webAuthFlowStatus = AuthFlowStatus.ON_EXTERNAL_ACTIVITY,
+                        viewEffect = OpenAuthFlowWithUrl(sync.manifest.hostedAuthUrl)
+                    )
+                }
             }
         }
     }
@@ -137,11 +141,15 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun logNoBrowserAvailableAndFinish() {
         viewModelScope.launch {
             val error = AppInitializationError("No Web browser available to launch AuthFlow")
-            analyticsTracker.track(Error(Pane.UNEXPECTED_ERROR, error))
+            analyticsTracker.logError(
+                "error Launching the Auth Flow",
+                logger = logger,
+                pane = Pane.UNEXPECTED_ERROR,
+                error = error
+            )
             finishWithResult(
                 state = awaitState(),
-                result = Failed(error),
-                finishMessage = R.string.stripe_no_browser_installed
+                result = Failed(error)
             )
         }
     }
@@ -234,9 +242,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         val result: FinancialConnectionsSheetActivityResult? = activityResult.data
             ?.parcelable(FinancialConnectionsSheetNativeActivity.EXTRA_RESULT)
         if (activityResult.resultCode == Activity.RESULT_OK && result != null) {
-            withState { finishWithResult(it, result) }
+            withState { finishWithResult(it, result, fromNative = true) }
         } else {
-            withState { finishWithResult(it, Canceled) }
+            withState { finishWithResult(it, Canceled, fromNative = true) }
         }
     }
 
@@ -440,9 +448,21 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun finishWithResult(
         state: FinancialConnectionsSheetState,
         result: FinancialConnectionsSheetActivityResult,
+        fromNative: Boolean = false,
         @StringRes finishMessage: Int? = null,
     ) {
         eventReporter.onResult(state.initialArgs.configuration, result)
+        // Native emits its own events before finishing.
+        if (fromNative.not()) {
+            when (result) {
+                is Completed -> FinancialConnections.emitEvent(Name.SUCCESS)
+                is Canceled -> FinancialConnections.emitEvent(Name.CANCEL)
+                is Failed -> FinancialConnections.emitEvent(
+                    name = Name.ERROR,
+                    metadata = Metadata(errorCode = ErrorCode.UNEXPECTED_ERROR)
+                )
+            }
+        }
         setState { copy(viewEffect = FinishWithResult(result, finishMessage)) }
     }
 

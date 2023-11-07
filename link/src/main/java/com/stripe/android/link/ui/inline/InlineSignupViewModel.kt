@@ -5,12 +5,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.core.injection.NonFallbackInjectable
-import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.model.CountryCode
-import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.link.ui.signup.SignUpState
@@ -30,17 +29,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class InlineSignupViewModel @Inject constructor(
-    private val config: LinkPaymentLauncher.Configuration,
+    private val config: LinkConfiguration,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger
 ) : ViewModel() {
 
-    private val isLoggedOut = linkAccountManager.hasUserLoggedOut(config.customerEmail)
-
-    private val prefilledEmail = config.customerEmail.takeUnless { isLoggedOut }
-    private val prefilledPhone = config.customerPhone?.takeUnless { isLoggedOut }.orEmpty()
-    private val prefilledName = config.customerName?.takeUnless { isLoggedOut }
+    private val prefilledEmail = config.customerEmail
+    private val prefilledPhone = config.customerPhone.orEmpty()
+    private val prefilledName = config.customerName
 
     val emailController = EmailConfig.createController(prefilledEmail)
 
@@ -87,8 +84,6 @@ internal class InlineSignupViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
     val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
 
-    val accountEmail = linkAccountManager.linkAccount.map { it?.email }
-
     val requiresNameCollection: Boolean
         get() {
             val countryCode = when (val stripeIntent = config.stripeIntent) {
@@ -100,7 +95,7 @@ internal class InlineSignupViewModel @Inject constructor(
 
     private var hasExpanded = false
 
-    private var debouncer = Debouncer(prefilledEmail)
+    private var debouncer = Debouncer()
 
     fun toggleExpanded() {
         _viewState.update { oldState ->
@@ -114,12 +109,6 @@ internal class InlineSignupViewModel @Inject constructor(
         }
     }
 
-    fun logout() {
-        viewModelScope.launch {
-            linkAccountManager.logout()
-        }
-    }
-
     private fun watchUserInput() {
         debouncer.startWatching(
             coroutineScope = viewModelScope,
@@ -130,7 +119,7 @@ internal class InlineSignupViewModel @Inject constructor(
                     oldState.copy(
                         signUpState = signUpState,
                         userInput = when (signUpState) {
-                            SignUpState.InputtingEmail, SignUpState.VerifyingEmail -> null
+                            SignUpState.InputtingEmail, SignUpState.VerifyingEmail -> oldState.userInput
                             SignUpState.InputtingPhoneOrName ->
                                 mapToUserInput(
                                     email = consumerEmail.value,
@@ -181,7 +170,6 @@ internal class InlineSignupViewModel @Inject constructor(
 
     private suspend fun lookupConsumerEmail(email: String) {
         clearError()
-        linkAccountManager.logout()
         linkAccountManager.lookupConsumer(email, startSession = false).fold(
             onSuccess = {
                 if (it != null) {
@@ -195,7 +183,6 @@ internal class InlineSignupViewModel @Inject constructor(
                 } else {
                     _viewState.update { oldState ->
                         oldState.copy(
-                            userInput = null,
                             signUpState = SignUpState.InputtingPhoneOrName,
                             apiFailed = false
                         )
@@ -206,7 +193,6 @@ internal class InlineSignupViewModel @Inject constructor(
             onFailure = {
                 _viewState.update { oldState ->
                     oldState.copy(
-                        userInput = null,
                         signUpState = SignUpState.InputtingEmail,
                         apiFailed = it is APIConnectionException
                     )
@@ -228,16 +214,11 @@ internal class InlineSignupViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val injector: NonFallbackInjector
-    ) : ViewModelProvider.Factory, NonFallbackInjectable {
-
-        @Inject
-        lateinit var viewModel: InlineSignupViewModel
-
+        private val linkComponent: LinkComponent
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            injector.inject(this)
-            return viewModel as T
+            return linkComponent.inlineSignupViewModel as T
         }
     }
 }

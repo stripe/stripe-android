@@ -2,8 +2,10 @@ package com.stripe.android.ui.core
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 
@@ -34,6 +36,31 @@ class FieldValuesToParamsMapConverter {
                     productUsage = setOf("PaymentSheet")
                 )
             }
+
+        /**
+         * This function will convert fieldValuePairs to PaymentMethodOptionsParams.
+         */
+        @Suppress("ReturnCount")
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun transformToPaymentMethodOptionsParams(
+            fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
+            code: PaymentMethodCode,
+        ): PaymentMethodOptionsParams? {
+            if (code == PaymentMethod.Type.Blik.code) {
+                val blikCode = fieldValuePairs[IdentifierSpec.BlikCode]?.value
+                if (blikCode != null) {
+                    return PaymentMethodOptionsParams.Blik(
+                        blikCode
+                    )
+                }
+            } else if (code == PaymentMethod.Type.Konbini.code) {
+                val confirmationNumber = fieldValuePairs[IdentifierSpec.KonbiniConfirmationNumber]?.value
+                if (confirmationNumber != null) {
+                    return PaymentMethodOptionsParams.Konbini(confirmationNumber)
+                }
+            }
+            return null
+        }
 
         /**
          * This function will put the field values as defined in the fieldValuePairs into a map

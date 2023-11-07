@@ -5,9 +5,8 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.Capitalization
-import com.stripe.android.ui.core.elements.CardDetailsSectionElement
-import com.stripe.android.ui.core.elements.CardNumberViewOnlyController
 import com.stripe.android.ui.core.elements.ContactInformationSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownItemSpec
@@ -25,7 +24,6 @@ import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.elements.TranslationId
 import com.stripe.android.ui.core.elements.UpiElement
 import com.stripe.android.ui.core.elements.UpiSpec
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailConfig
@@ -68,7 +66,8 @@ internal class TransformSpecToElementTest {
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
                 context = context,
-                shippingValues = null
+                shippingValues = null,
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible
             )
     }
 
@@ -186,31 +185,6 @@ internal class TransformSpecToElementTest {
         assertThat(staticTextElement.controller).isNull()
         assertThat(staticTextElement.stringResId).isEqualTo(staticText.stringResId)
         assertThat(staticTextElement.identifier).isEqualTo(staticText.apiPath)
-    }
-
-    @Test
-    fun `Setting card number to view only returns the correct elements`() {
-        transformSpecToElements =
-            TransformSpecToElements(
-                addressRepository = mock(),
-                initialValues = mapOf(),
-                amount = null,
-                saveForFutureUseInitialValue = true,
-                merchantName = "Merchant, Inc.",
-                context = context,
-                viewOnlyFields = setOf(IdentifierSpec.CardNumber),
-                shippingValues = null
-            )
-
-        val formElements = transformSpecToElements.transform(
-            LpmRepository.HardcodedCard.formSpec.items
-        )
-        val cardDetailsSection = formElements.first() as CardDetailsSectionElement
-        val cardNumberElement =
-            cardDetailsSection.controller.cardDetailsElement.controller.numberElement
-
-        assertThat(cardNumberElement.controller)
-            .isInstanceOf(CardNumberViewOnlyController::class.java)
     }
 
     @Test

@@ -207,35 +207,21 @@ class DefaultIdentityRepositoryTest {
 
     @Test
     fun `postVerificationPageData returns VerificationPageData`() {
-        runBlocking {
-            whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
-                StripeResponse(
-                    code = HTTP_OK,
-                    body = VERIFICATION_PAGE_DATA_JSON_STRING
+        val collectedDataParam = CollectedDataParam(
+            biometricConsent = false
+        )
+        val clearDataParam = ClearDataParam()
+        verifyPostVerificationPageData(
+            targetPath = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$DATA",
+            apiCall = {
+                identityRepository.postVerificationPageData(
+                    TEST_ID,
+                    TEST_EPHEMERAL_KEY,
+                    collectedDataParam,
+                    clearDataParam
                 )
-            )
-            val collectedDataParam = CollectedDataParam(
-                biometricConsent = false
-            )
-
-            val clearDataParam = ClearDataParam()
-
-            val verificationPage = identityRepository.postVerificationPageData(
-                TEST_ID,
-                TEST_EPHEMERAL_KEY,
-                collectedDataParam,
-                clearDataParam
-            )
-
-            assertThat(verificationPage).isInstanceOf(VerificationPageData::class.java)
-            verify(mockStripeNetworkClient).executeRequest(requestCaptor.capture())
-
-            val request = requestCaptor.firstValue
-
-            assertThat(request).isInstanceOf(ApiRequest::class.java)
-            assertThat(request.method).isEqualTo(StripeRequest.Method.POST)
-            assertThat(request.url).isEqualTo("$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$DATA")
-            assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
+            }
+        ) { request ->
             assertThat((request as ApiRequest).params).isEqualTo(
                 mapOf(
                     collectedDataParam.createCollectedDataParamEntry(identityRepository.json),
@@ -247,27 +233,15 @@ class DefaultIdentityRepositoryTest {
 
     @Test
     fun `postVerificationPageSubmit returns VerificationPageData`() {
-        runBlocking {
-            whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
-                StripeResponse(
-                    code = HTTP_OK,
-                    body = VERIFICATION_PAGE_DATA_JSON_STRING
+        verifyPostVerificationPageData(
+            targetPath = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$SUBMIT",
+            apiCall = {
+                identityRepository.postVerificationPageSubmit(
+                    TEST_ID,
+                    TEST_EPHEMERAL_KEY
                 )
-            )
-            val verificationPage = identityRepository.postVerificationPageSubmit(
-                TEST_ID,
-                TEST_EPHEMERAL_KEY
-            )
-
-            assertThat(verificationPage).isInstanceOf(VerificationPageData::class.java)
-            verify(mockStripeNetworkClient).executeRequest(requestCaptor.capture())
-
-            val request = requestCaptor.firstValue
-
-            assertThat(request).isInstanceOf(ApiRequest::class.java)
-            assertThat(request.method).isEqualTo(StripeRequest.Method.POST)
-            assertThat(request.url).isEqualTo("$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$SUBMIT")
-            assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
+            }
+        ) { request ->
             assertThat((request as ApiRequest).params).isNull()
         }
     }
@@ -301,6 +275,33 @@ class DefaultIdentityRepositoryTest {
         testVerifyEndpoint(
             verify = false,
             simulateDelay = true
+        )
+    }
+
+    @Test
+    fun testGeneratePhoneOtpEndpoint() {
+        verifyPostVerificationPageData(
+            targetPath = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$PHONE_OTP/$GENERATE",
+            apiCall = {
+                identityRepository.generatePhoneOtp(
+                    id = TEST_ID,
+                    ephemeralKey = TEST_EPHEMERAL_KEY
+                )
+            }
+        )
+    }
+
+    @Test
+    fun testCannotVerifyPhoneOtpEndpoint() {
+        verifyPostVerificationPageData(
+            targetPath = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$PHONE_OTP/$CANNOT_VERIFY",
+            apiCall =
+            {
+                identityRepository.cannotVerifyPhoneOtp(
+                    id = TEST_ID,
+                    ephemeralKey = TEST_EPHEMERAL_KEY
+                )
+            }
         )
     }
 
@@ -513,14 +514,13 @@ class DefaultIdentityRepositoryTest {
         verify: Boolean,
         simulateDelay: Boolean
     ) {
-        runBlocking {
-            whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
-                StripeResponse(
-                    code = HTTP_OK,
-                    body = VERIFICATION_PAGE_DATA_JSON_STRING
-                )
-            )
-            val verificationPage =
+        verifyPostVerificationPageData(
+            targetPath = if (verify) {
+                "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$TESTING/$VERIFY"
+            } else {
+                "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$TESTING/$UNVERIFY"
+            },
+            apiCall = {
                 if (verify) {
                     identityRepository.verifyTestVerificationSession(
                         id = TEST_ID,
@@ -534,6 +534,29 @@ class DefaultIdentityRepositoryTest {
                         simulateDelay = simulateDelay
                     )
                 }
+            }
+        ) { request ->
+            assertThat((request as ApiRequest).params).isEqualTo(
+                mapOf(
+                    SIMULATE_DELAY to simulateDelay
+                )
+            )
+        }
+    }
+
+    private fun verifyPostVerificationPageData(
+        targetPath: String,
+        apiCall: suspend () -> VerificationPageData,
+        additionalChecks: (StripeRequest) -> Unit = {}
+    ) {
+        runBlocking {
+            whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
+                StripeResponse(
+                    code = HTTP_OK,
+                    body = VERIFICATION_PAGE_DATA_JSON_STRING
+                )
+            )
+            val verificationPage = apiCall()
 
             assertThat(verificationPage).isInstanceOf(VerificationPageData::class.java)
             verify(mockStripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -542,17 +565,10 @@ class DefaultIdentityRepositoryTest {
 
             assertThat(request).isInstanceOf(ApiRequest::class.java)
             assertThat(request.method).isEqualTo(StripeRequest.Method.POST)
-            if (verify) {
-                assertThat(request.url).isEqualTo("$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$TESTING/$VERIFY")
-            } else {
-                assertThat(request.url).isEqualTo("$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$TESTING/$UNVERIFY")
-            }
+            assertThat(request.url).isEqualTo(targetPath)
+
             assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
-            assertThat((request as ApiRequest).params).isEqualTo(
-                mapOf(
-                    SIMULATE_DELAY to simulateDelay
-                )
-            )
+            additionalChecks(request)
         }
     }
 

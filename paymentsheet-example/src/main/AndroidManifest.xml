@@ -37,12 +37,30 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.complete_flow.CompleteFlowActivity" />
-        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.custom_flow.CustomFlowActivity" />
-        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity" />
-        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity" />
-        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.customer.CustomerSheetActivity" />
-        <activity android:name="com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity" />
+        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow.CompleteFlowActivity" />
+        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow.CustomFlowActivity" />
+        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity" />
+        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity" />
+        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetExampleActivity" />
+        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.customersheet.playground.CustomerSheetPlaygroundActivity" />
+        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity" />
+        <activity android:name="com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity" />
+        <activity
+            android:name="com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity"
+            android:exported="true"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="stripepaymentsheetexample"
+                    android:host="paymentsheetplayground"
+                    />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

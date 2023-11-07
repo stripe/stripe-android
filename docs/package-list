@@ -1,6 +1,6 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
-$dokka.location:com.stripe.android.link.confirmation////PointingToDeclaration/link/com.stripe.android.link.confirmation.html
+
 module:camera-core
 com.stripe.android.camera
 com.stripe.android.camera.framework
@@ -12,21 +12,23 @@ com.stripe.android.camera.scanui
 com.stripe.android.camera.scanui.util
 module:financial-connections
 com.stripe.android.financialconnections
+com.stripe.android.financialconnections.analytics
 com.stripe.android.financialconnections.exception
-com.stripe.android.financialconnections.features.partnerauth
+com.stripe.android.financialconnections.features.linkaccountpicker
 com.stripe.android.financialconnections.launcher
 com.stripe.android.financialconnections.model
 module:identity
 com.stripe.android.identity
+com.stripe.android.identity.navigation
 com.stripe.android.identity.utils
 module:link
 com.stripe.android.link
 com.stripe.android.link.account
-com.stripe.android.link.confirmation
+com.stripe.android.link.analytics
+com.stripe.android.link.injection
 com.stripe.android.link.model
 com.stripe.android.link.ui
 com.stripe.android.link.ui.inline
-com.stripe.android.link.ui.verification
 module:network-testing
 com.stripe.android.networktesting
 module:payments-core
@@ -63,6 +65,7 @@ module:payments-ui-core
 com.stripe.android.paymentsheet.forms
 com.stripe.android.ui.core
 com.stripe.android.ui.core.address
+com.stripe.android.ui.core.cbc
 com.stripe.android.ui.core.elements
 com.stripe.android.ui.core.elements.autocomplete
 com.stripe.android.ui.core.elements.autocomplete.model
@@ -74,6 +77,7 @@ module:paymentsheet
 com.stripe.android.customersheet
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.addresselement
+com.stripe.android.paymentsheet.injection
 com.stripe.android.paymentsheet.model
 com.stripe.android.paymentsheet.ui
 module:stripe-core
@@ -86,6 +90,8 @@ com.stripe.android.core.model.parsers
 com.stripe.android.core.model.serializers
 com.stripe.android.core.networking
 com.stripe.android.core.storage
+com.stripe.android.core.strings
+com.stripe.android.core.strings.transformations
 com.stripe.android.core.utils
 com.stripe.android.core.version
 module:stripe-ui-core
@@ -96,6 +102,7 @@ com.stripe.android.uicore.elements.menu
 com.stripe.android.uicore.format
 com.stripe.android.uicore.forms
 com.stripe.android.uicore.image
+com.stripe.android.uicore.strings
 com.stripe.android.uicore.text
 module:stripecardscan
 com.stripe.android.stripecardscan.cardimageverification

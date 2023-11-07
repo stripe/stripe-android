@@ -59,7 +59,7 @@ data class PaymentMethodRequirements(
 
     /**
      * This indicates if the payment method can be confirmed when attached to a customer
-     * and only the Payment Method id is available.  This also implies that the PaymentMethod
+     * and only the Payment Method id is available. This also implies that the PaymentMethod
      * is internally supported in the SDK so it can be parsed in the customer repository requests.
      *  - Null means that it is not supported, or that it is attached as a different type
      *  - false means that it is supported by the payment method, but not currently enabled
@@ -82,132 +82,54 @@ internal val CardRequirement = PaymentMethodRequirements(
 
 internal val BancontactRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
+    siRequirements = setOf(Delayed),
 
     /**
-     * Currently we will not support this PaymentMethod for use with PI w/SFU,
-     * or SI until there is a way of retrieving valid mandates associated with a customer PM.
-     *
-     * The reason we are excluding it is because after PI w/SFU set or PI
-     * is used, the payment method appears as a SEPA payment method attached
-     * to a customer.  Without this block the SEPA payment method would
-     * show in PaymentSheet.  If the user used this save payment method
-     * we would have no way to know if the existing mandate was valid or how
-     * to request the user to re-accept the mandate.
-     *
-     * SEPA Debit does support PI w/SFU and SI (both with and without a customer),
-     * and it is Delayed in this configuration.
+     * PM will be attached as a SEPA Debit payment method and have the requirements
+     * of that PaymentMethod.
      */
-    siRequirements = null,
-
-    /**
-     * This PM cannot be attached to a customer, it should be noted that it
-     * will be attached as a SEPA Debit payment method and have the requirements
-     * of that PaymentMethod, but for now SEPA is not supported either so we will
-     * call it false.
-     */
-    confirmPMFromCustomer = false
+    confirmPMFromCustomer = true,
 )
 
 internal val SofortRequirement = PaymentMethodRequirements(
     piRequirements = setOf(Delayed),
+    siRequirements = setOf(Delayed),
 
     /**
-     * Currently we will not support this PaymentMethod for use with PI w/SFU,
-     * or SI until there is a way of retrieving valid mandates associated with a customer PM.
-     *
-     * The reason we are excluding it is because after PI w/SFU set or PI
-     * is used, the payment method appears as a SEPA payment method attached
-     * to a customer.  Without this block the SEPA payment method would
-     * show in PaymentSheet.  If the user used this save payment method
-     * we would have no way to know if the existing mandate was valid or how
-     * to request the user to re-accept the mandate.
-     *
-     * SEPA Debit does support PI w/SFU and SI (both with and without a customer),
-     * and it is Delayed in this configuration.
+     * PM will be attached as a SEPA Debit payment method and have the requirements
+     * of that PaymentMethod.
      */
-    siRequirements = null,
-
-    /**
-     * This PM cannot be attached to a customer, it should be noted that it
-     * will be attached as a SEPA Debit payment method and have the requirements
-     * of that PaymentMethod, but for now SEPA is not supported either so we will
-     * call it false.
-     */
-    confirmPMFromCustomer = false
+    confirmPMFromCustomer = true,
 )
 
 internal val IdealRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
+    siRequirements = setOf(Delayed),
 
     /**
-     * Currently we will not support this PaymentMethod for use with PI w/SFU,
-     * or SI until there is a way of retrieving valid mandates associated with a customer PM.
-     *
-     * The reason we are excluding it is because after PI w/SFU set or PI
-     * is used, the payment method appears as a SEPA payment method attached
-     * to a customer.  Without this block the SEPA payment method would
-     * show in PaymentSheet.  If the user used this save payment method
-     * we would have no way to know if the existing mandate was valid or how
-     * to request the user to re-accept the mandate.
-     *
-     * SEPA Debit does support PI w/SFU and SI (both with and without a customer),
-     * and it is Delayed in this configuration.
+     * PM will be attached as a SEPA Debit payment method and have the requirements
+     * of that PaymentMethod.
      */
-    siRequirements = null,
-
-    /**
-     * This PM cannot be attached to a customer, it should be noted that it
-     * will be attached as a SEPA Debit payment method and have the requirements
-     * of that PaymentMethod, but for now SEPA is not supported either so we will
-     * call it false.
-     */
-    confirmPMFromCustomer = false
+    confirmPMFromCustomer = true,
 )
 
 internal val SepaDebitRequirement = PaymentMethodRequirements(
     piRequirements = setOf(Delayed),
+    siRequirements = setOf(Delayed),
 
     /**
-     * Currently we will not support this PaymentMethod for use with PI w/SFU,
-     * or SI until there is a way of retrieving valid mandates associated with a customer PM.
-     *
-     * The reason we are excluding it is because after PI w/SFU set or PI
-     * is used, the payment method appears as a SEPA payment method attached
-     * to a customer.  Without this block the SEPA payment method would
-     * show in PaymentSheet.  If the user used this save payment method
-     * we would have no way to know if the existing mandate was valid or how
-     * to request the user to re-accept the mandate.
-     *
-     * SEPA Debit does support PI w/SFU and SI (both with and without a customer),
-     * and it is Delayed in this configuration.
-     */
-    siRequirements = null,
-
-    /**
-     * This PM is blocked for use from a customer PM.  Once it is possible to retrieve a
-     * mandate from a customer PM for use on confirm the SDK will be able to support this
-     * scenario.
-     *
      * Here we explain the details
      * - if PI w/SFU set or SI with a customer, or
-     * - if PI w/SFU set or SI with/out a customer and later attached when used with
-     * a webhook
+     * - if PI w/SFU set or SI with/out a customer and later attached when used with a webhook
      * (Note: from the client there is no way to detect if a PI or SI is associated with a customer)
      *
      * then, this payment method would be attached to the customer as a SEPA payment method.
      * (Note: Bancontact, iDEAL, and Sofort require authentication, but SEPA does not.
      * also Bancontact, iDEAL are not delayed, but Sofort and SEPA are delayed.)
      *
-     * The SEPA payment method requires a mandate when confirmed. Currently there is no
-     * way with just a client_secret and public key to get a valid mandate associated with
-     * a customers payment method that can be used on confirmation.
-     *
-     * Even with mandate support, in order to make sure that any payment method added can
-     * also be used when attached to a customer, this LPM will require
-     * [PaymentSheet.Configuration].allowsDelayedPaymentMethods support as indicated in
-     * the configuration.
+     * The SEPA payment method requires a mandate when confirmed.
      */
-    confirmPMFromCustomer = false
+    confirmPMFromCustomer = true
 )
 
 internal val EpsRequirement = PaymentMethodRequirements(
@@ -274,6 +196,18 @@ internal val AffirmRequirement = PaymentMethodRequirements(
 
 internal val RevolutPayRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
+    siRequirements = emptySet(),
+    confirmPMFromCustomer = true
+)
+
+internal val AmazonPayRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = null
+)
+
+internal val AlmaRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
     siRequirements = null,
     confirmPMFromCustomer = null
 )
@@ -289,8 +223,8 @@ internal val MobilePayRequirement = PaymentMethodRequirements(
  */
 internal val AuBecsDebitRequirement = PaymentMethodRequirements(
     piRequirements = setOf(Delayed),
-    siRequirements = null,
-    confirmPMFromCustomer = null
+    siRequirements = setOf(Delayed),
+    confirmPMFromCustomer = true
 )
 
 internal val ZipRequirement = PaymentMethodRequirements(
@@ -314,7 +248,55 @@ internal val UpiRequirement = PaymentMethodRequirements(
     confirmPMFromCustomer = null
 )
 
+internal val BlikRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = null
+)
+
 internal val CashAppPayRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = emptySet(),
+    confirmPMFromCustomer = true,
+)
+
+internal val GrabPayRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = false,
+)
+
+internal val FpxRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = false,
+)
+
+internal val AlipayRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = false,
+)
+
+internal val OxxoRequirement = PaymentMethodRequirements(
+    piRequirements = setOf(Delayed),
+    siRequirements = null,
+    confirmPMFromCustomer = false,
+)
+
+internal val BoletoRequirement = PaymentMethodRequirements(
+    piRequirements = setOf(Delayed),
+    siRequirements = setOf(Delayed),
+    confirmPMFromCustomer = true,
+)
+
+internal val KonbiniRequirement = PaymentMethodRequirements(
+    piRequirements = setOf(Delayed),
+    siRequirements = null,
+    confirmPMFromCustomer = null,
+)
+
+internal val SwishRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
     siRequirements = null,
     confirmPMFromCustomer = false,

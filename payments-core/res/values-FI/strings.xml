@@ -80,8 +80,8 @@
   <string name="stripe_becs_mandate_acceptance">\n    Antamalla pankkitilisi tiedot ja vahvistamalla tämän maksun hyväksyt tämän\n    suoraveloituspyynnön ja suoraveloituspyyntöpalvelusopimuksen ja valtuutat\n    Stripe Payments Australia Pty Ltd:n ACN, 160 180 343 suoraveloituksen käyttäjätunnus 507156,\n     veloittamaan tililtäsi BECS:n kautta (\"Kauppias\")\n     kohteen %1$s puolesta kaikista kauppiaan erikseen ilmoittamista summista.\n     Vakuutat, että olet joko tilinomistaja tai valtuutettu allekirjoittaja\n     yllä mainitulla tilillä.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Tilinumero</string>
-  <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="stripe_becs_widget_account_number_incomplete">Tilinumerosi on puutteellinen.</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">Antamasi tilinumero on puutteellinen.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="stripe_becs_widget_account_number_required">Tilinumerosi vaaditaan.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
@@ -102,6 +102,10 @@
   <string name="stripe_becs_widget_name_required">Nimesi vaaditaan.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">Peruuta</string>
+  <!-- Title for a dropdown option when selecting a card brand -->
+  <string name="stripe_card_brand_choice_no_selection">Ei valintaa</string>
+  <!-- Title for a dropdown where the customer can select a card brand -->
+  <string name="stripe_card_brand_choice_selection_header">Valitse korttimerkki (valinnainen)</string>
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">Korttiasi ei hyväksytty</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->

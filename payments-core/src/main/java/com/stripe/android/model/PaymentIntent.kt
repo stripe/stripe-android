@@ -87,7 +87,7 @@ constructor(
      * Country code of the user.
      */
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    val countryCode: String?,
+    override val countryCode: String?,
 
     /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.
@@ -171,6 +171,12 @@ constructor(
             is StripeIntent.NextActionData.DisplayOxxoDetails -> {
                 StripeIntent.NextActionType.DisplayOxxoDetails
             }
+            is StripeIntent.NextActionData.DisplayBoletoDetails -> {
+                StripeIntent.NextActionType.DisplayBoletoDetails
+            }
+            is StripeIntent.NextActionData.DisplayKonbiniDetails -> {
+                StripeIntent.NextActionType.DisplayKonbiniDetails
+            }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }
@@ -182,6 +188,9 @@ constructor(
             }
             is StripeIntent.NextActionData.BlikAuthorize -> {
                 StripeIntent.NextActionType.BlikAuthorize
+            }
+            is StripeIntent.NextActionData.SwishRedirect -> {
+                StripeIntent.NextActionType.SwishRedirect
             }
             is StripeIntent.NextActionData.AlipayRedirect,
             is StripeIntent.NextActionData.WeChatPayRedirect,
@@ -389,7 +398,10 @@ constructor(
     /**
      * Controls when the funds will be captured from the customer’s account.
      */
-    enum class CaptureMethod(private val code: String) {
+    enum class CaptureMethod(
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val code: String,
+    ) {
         /**
          * (Default) Stripe automatically captures funds when the customer authorizes the payment.
          */

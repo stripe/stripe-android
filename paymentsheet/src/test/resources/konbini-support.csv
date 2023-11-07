@@ -1,0 +1,49 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+konbini, true, true, off_session, false, card/konbini, false, false, not available, false
+konbini, true, true, off_session, false, card/eps/konbini, false, false, not available, false
+konbini, true, false, off_session, false, card/konbini, false, false, not available, false
+konbini, true, false, off_session, false, card/eps/konbini, false, false, not available, false
+konbini, true, true, on_session, false, card/konbini, false, false, not available, false
+konbini, true, true, on_session, false, card/eps/konbini, false, false, not available, false
+konbini, true, false, on_session, false, card/konbini, false, false, not available, false
+konbini, true, false, on_session, false, card/eps/konbini, false, false, not available, false
+konbini, true, true, null, false, card/konbini, false, true, oneTime, true
+konbini, true, true, null, false, card/eps/konbini, false, true, oneTime, true
+konbini, true, false, null, false, card/konbini, false, false, not available, false
+konbini, true, false, null, false, card/eps/konbini, false, false, not available, false
+konbini, false, true, off_session, false, card/konbini, false, false, not available, false
+konbini, false, true, off_session, false, card/eps/konbini, false, false, not available, false
+konbini, false, false, off_session, false, card/konbini, false, false, not available, false
+konbini, false, false, off_session, false, card/eps/konbini, false, false, not available, false
+konbini, false, true, on_session, false, card/konbini, false, false, not available, false
+konbini, false, true, on_session, false, card/eps/konbini, false, false, not available, false
+konbini, false, false, on_session, false, card/konbini, false, false, not available, false
+konbini, false, false, on_session, false, card/eps/konbini, false, false, not available, false
+konbini, false, true, null, false, card/konbini, false, true, oneTime, true
+konbini, false, true, null, false, card/eps/konbini, false, true, oneTime, true
+konbini, false, false, null, false, card/konbini, false, false, not available, false
+konbini, false, false, null, false, card/eps/konbini, false, false, not available, false
+konbini, true, true, off_session, true, card/konbini, false, false, not available, false
+konbini, true, true, off_session, true, card/eps/konbini, false, false, not available, false
+konbini, true, false, off_session, true, card/konbini, false, false, not available, false
+konbini, true, false, off_session, true, card/eps/konbini, false, false, not available, false
+konbini, true, true, on_session, true, card/konbini, false, false, not available, false
+konbini, true, true, on_session, true, card/eps/konbini, false, false, not available, false
+konbini, true, false, on_session, true, card/konbini, false, false, not available, false
+konbini, true, false, on_session, true, card/eps/konbini, false, false, not available, false
+konbini, true, true, null, true, card/konbini, false, true, oneTime, true
+konbini, true, true, null, true, card/eps/konbini, false, true, oneTime, true
+konbini, true, false, null, true, card/konbini, false, false, not available, false
+konbini, true, false, null, true, card/eps/konbini, false, false, not available, false
+konbini, false, true, off_session, true, card/konbini, false, false, not available, false
+konbini, false, true, off_session, true, card/eps/konbini, false, false, not available, false
+konbini, false, false, off_session, true, card/konbini, false, false, not available, false
+konbini, false, false, off_session, true, card/eps/konbini, false, false, not available, false
+konbini, false, true, on_session, true, card/konbini, false, false, not available, false
+konbini, false, true, on_session, true, card/eps/konbini, false, false, not available, false
+konbini, false, false, on_session, true, card/konbini, false, false, not available, false
+konbini, false, false, on_session, true, card/eps/konbini, false, false, not available, false
+konbini, false, true, null, true, card/konbini, false, true, oneTime, true
+konbini, false, true, null, true, card/eps/konbini, false, true, oneTime, true
+konbini, false, false, null, true, card/konbini, false, false, not available, false
+konbini, false, false, null, true, card/eps/konbini, false, false, not available, false

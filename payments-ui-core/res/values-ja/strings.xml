@@ -4,14 +4,34 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[<img/> で毎回 <installment_price/> ずつ、無利息の <num_installments/> 回の分割払いで支払う]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">戻る</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">口座番号</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">口座番号に不備があります。</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">銀行口座</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">私は、Stripe が %s の代理として口座引き落としによる回収を行うことを理解しています。また、私が当該口座を保有しており、この口座からの引き落としを承認すべき唯一の人間であることを認めます。</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">ソートコード</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">ソートコードの入力に不備があります。</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">請求先住所</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">BLIK コード</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">続行すると、%2$s の利用規約に従って、この許可が取り消されない限り、お客様は今回の支払いおよび今後の支払いを、Cash App のアカウントから引き落とすことを %1$s に許可したものとみなされます。これは、Cash App の設定でいつでも変更することができます。</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">連絡先情報</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">続ける</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">EPS Bank</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX 銀行</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">入力した IBAN に不備があります。</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -20,6 +40,10 @@
   <string name="stripe_iban_invalid_start">IBANコードの先頭には 2 文字の国コードを入力してください。</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">iDEAL銀行</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">BLIK コードの入力に不備があります。</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">BLIK コードが無効です。</string>
   <string name="stripe_invalid_email_address">メールアドレスが無効です: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">UPI ID が無効です</string>
@@ -27,6 +51,8 @@
   <string name="stripe_klarna_buy_now_pay_later">Klarna で後払いします。</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Klarna での後払いにします。</string>
+  <!-- Caption for Phone field on address form -->
+  <string name="stripe_konbini_confirmation_number_label">電話番号</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">カード名義人</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
@@ -43,10 +69,14 @@
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">BECS ダイレクトデビット (オーストラリア)</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">クレジットカード番号</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">コンビニ決済</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA デビット</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">PayPal による支払いを確定すると、%s が規約に従って今後の支払いをお客様の PayPal アカウントに請求することを許可することになります。</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">RevolutPay による支払いを確定すると、%s が規約に従って今後の支払いをお客様の RevolutPay アカウントに請求することを許可することになります。</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">今後の %s の支払いのために保存する</string>
   <!-- Button title to open camera to scan credit/debit card -->

@@ -80,8 +80,8 @@
   <string name="stripe_becs_mandate_acceptance">\n    Dengan memberikan detail rekening bank Anda dan mengonfirmasi pembayaran ini, berarti Anda setuju dengan\n    Permintaan Debit Langsung ini dan perjanjian layanan Permintaan Debit Langsung, serta mengotorisasi\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 dengan nomor Identifikasi Pengguna Debit Langsung 507156\n    (“Stripe”) untuk mendebit rekening Anda melalui Bulk Electronic Clearing System (BECS) atas nama\n    %1$s (\"Merchant\") sejumlah yang dikomunikasikan secara terpisah kepada Anda\n    oleh Merchant. Anda menyatakan diri sebagai pemilik akun atau\n    penandatangan yang diotorisasi atas akun yang tercantum di atas.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Nomor rekening</string>
-  <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="stripe_becs_widget_account_number_incomplete">Nomor rekening Anda tidak lengkap.</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">Nomor rekening yang Anda masukkan tidak lengkap.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="stripe_becs_widget_account_number_required">Nomor rekening Anda harus diisi.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
@@ -102,6 +102,10 @@
   <string name="stripe_becs_widget_name_required">Nama Anda harus diisi.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">Batalkan</string>
+  <!-- Title for a dropdown option when selecting a card brand -->
+  <string name="stripe_card_brand_choice_no_selection">Tidak ada pilihan</string>
+  <!-- Title for a dropdown where the customer can select a card brand -->
+  <string name="stripe_card_brand_choice_selection_header">Pilih brand kartu (opsional)</string>
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">Kartu Anda ditolak</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->

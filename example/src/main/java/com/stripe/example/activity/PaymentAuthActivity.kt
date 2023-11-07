@@ -8,6 +8,7 @@ import com.stripe.android.Stripe
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.utils.FeatureFlags
 import com.stripe.example.Settings
 import com.stripe.example.databinding.PaymentAuthActivityBinding
 
@@ -26,6 +27,8 @@ class PaymentAuthActivity : StripeIntentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
+
+        FeatureFlags.cardBrandChoice.setEnabled(false)
 
         viewModel.inProgress.observe(this, { enableUi(!it) })
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
@@ -88,6 +91,11 @@ class PaymentAuthActivity : StripeIntentActivity() {
         viewBinding.confirmWith3ds1Button.isEnabled = enable
         viewBinding.confirmWithNewCardButton.isEnabled = enable
         viewBinding.setupButton.isEnabled = enable
+    }
+
+    override fun onDestroy() {
+        FeatureFlags.cardBrandChoice.reset()
+        super.onDestroy()
     }
 
     private companion object {

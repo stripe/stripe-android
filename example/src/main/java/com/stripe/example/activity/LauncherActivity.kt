@@ -41,6 +41,10 @@ class LauncherActivity : AppCompatActivity() {
                 PaymentAuthActivity::class.java
             ),
             Item(
+                activity.getString(R.string.card_brand_choice),
+                CardBrandChoiceExampleActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.create_card_token),
                 CreateCardTokenActivity::class.java
             ),
@@ -172,6 +176,18 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 "BLIK",
                 BlikPaymentMethodActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.revolut_pay_example),
+                RevolutPayActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.swish_example),
+                SwishExampleActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.mobilepay_example),
+                MobilePayExampleActivity::class.java
             ),
             // This is for internal use so as not to confuse the user.
             Item(

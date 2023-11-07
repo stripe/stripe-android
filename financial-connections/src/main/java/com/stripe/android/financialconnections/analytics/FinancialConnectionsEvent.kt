@@ -1,307 +1,145 @@
 package com.stripe.android.financialconnections.analytics
 
-import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
-import com.stripe.android.financialconnections.exception.FinancialConnectionsError
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.utils.filterNotNullValues
-
-/**
- * Event definitions for Financial Connections.
- */
-internal sealed class FinancialConnectionsEvent(
-    private val name: String,
-    val params: Map<String, String>? = null,
-    private val includePrefix: Boolean = true
+data class FinancialConnectionsEvent internal constructor(
+    val name: Name,
+    val metadata: Metadata
 ) {
 
-    val eventName = if (includePrefix) "$EVENT_PREFIX.$name" else name
+    /**
+     * Metadata for the event
+     */
+    data class Metadata internal constructor(
+        val institutionName: String? = null,
+        val manualEntry: Boolean? = null,
+        val errorCode: ErrorCode? = null
+    ) {
 
-    class PaneLaunched(
-        pane: Pane,
-    ) : FinancialConnectionsEvent(
-        "pane.launched",
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
-
-    class PaneLoaded(
-        pane: Pane,
-    ) : FinancialConnectionsEvent(
-        "pane.loaded",
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
-
-    class ClickNavBarBack(
-        pane: Pane,
-    ) : FinancialConnectionsEvent(
-        name = "click.nav_bar.back",
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
-
-    class ClickNavBarClose(
-        pane: Pane,
-    ) : FinancialConnectionsEvent(
-        name = "click.nav_bar.close",
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
-
-    class Complete(
-        exception: Throwable?,
-        connectedAccounts: Int?
-    ) : FinancialConnectionsEvent(
-        name = "complete",
-        mapOf(
-            "num_linked_accounts" to connectedAccounts?.toString(),
-            "type" to if (exception == null) "object" else "error"
+        fun toMap(): Map<String, Any?> = mapOf(
+            "institution_name" to institutionName,
+            "error_code" to errorCode?.value,
+            "manual_entry" to manualEntry
         )
-            .plus(exception?.toEventParams() ?: emptyMap())
-            .filterNotNullValues()
-    )
-
-    class ClickLearnMoreDataAccess(
-        pane: Pane
-    ) : FinancialConnectionsEvent(
-        name = "click.data_access.learn_more",
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
-
-    class ClickDisconnectLink(
-        pane: Pane
-    ) : FinancialConnectionsEvent(
-        name = "click.disconnect_link",
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
-
-    class Click(
-        eventName: String,
-        pane: Pane
-    ) : FinancialConnectionsEvent(
-        name = eventName,
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
-
-    class InstitutionSelected(
-        pane: Pane,
-        fromFeatured: Boolean,
-        institutionId: String
-    ) : FinancialConnectionsEvent(
-        name = if (fromFeatured) "search.featured_institution_selected" else "search.search_result_selected",
-        mapOf(
-            "pane" to pane.value,
-            "institution_id" to institutionId
-        ).filterNotNullValues()
-    )
-
-    class SearchSucceeded(
-        pane: Pane,
-        query: String,
-        duration: Long,
-        resultCount: Int
-    ) : FinancialConnectionsEvent(
-        name = "search.succeeded",
-        mapOf(
-            "pane" to pane.value,
-            "query" to query,
-            "duration" to duration.toString(),
-            "result_count" to resultCount.toString()
-        ).filterNotNullValues()
-    )
-
-    class PollAccountsSucceeded(
-        authSessionId: String,
-        duration: Long
-    ) : FinancialConnectionsEvent(
-        name = "polling.accounts.success",
-        mapOf(
-            "authSessionId" to authSessionId,
-            "duration" to duration.toString(),
-        ).filterNotNullValues()
-    )
-
-    class PollAttachPaymentsSucceeded(
-        authSessionId: String,
-        duration: Long
-    ) : FinancialConnectionsEvent(
-        name = "polling.attachPayment.success",
-        mapOf(
-            "authSessionId" to authSessionId,
-            "duration" to duration.toString(),
-        ).filterNotNullValues()
-    )
-
-    class ClickLinkAccounts(
-        pane: Pane,
-    ) : FinancialConnectionsEvent(
-        name = "click.link_accounts",
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
-
-    class NetworkingNewConsumer(
-        pane: Pane,
-    ) : FinancialConnectionsEvent(
-        name = "networking.new_consumer",
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
-
-    class NetworkingReturningConsumer(
-        pane: Pane,
-    ) : FinancialConnectionsEvent(
-        name = "networking.returning_consumer",
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
-
-    class VerificationSuccess(
-        pane: Pane,
-    ) : FinancialConnectionsEvent(
-        name = "networking.verification.success",
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
-
-    class VerificationSuccessNoAccounts(
-        pane: Pane,
-    ) : FinancialConnectionsEvent(
-        name = "networking.verification.success_no_accounts",
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
-
-    class VerificationError(
-        pane: Pane,
-        error: Error
-    ) : FinancialConnectionsEvent(
-        name = "networking.verification.error",
-        mapOf(
-            "pane" to pane.value,
-            "error" to error.value,
-        ).filterNotNullValues()
-    ) {
-        enum class Error(val value: String) {
-            ConsumerNotFoundError("ConsumerNotFoundError"),
-            LookupConsumerSession("LookupConsumerSession"),
-            StartVerificationSessionError("StartVerificationSessionError"),
-            ConfirmVerificationSessionError("ConfirmVerificationSessionError"),
-            NetworkedAccountsRetrieveMethodError("NetworkedAccountsRetrieveMethodError"),
-        }
     }
 
-    class VerificationStepUpSuccess(
-        pane: Pane,
-    ) : FinancialConnectionsEvent(
-        name = "networking.verification.step_up.success",
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
+    /**
+     * Enum representing the name of the event
+     */
+    enum class Name(val value: String) {
+        /**
+         * Event when the modal successfully opens
+         */
+        OPEN("open"),
 
-    class VerificationStepUpError(
-        pane: Pane,
-        error: Error
-    ) : FinancialConnectionsEvent(
-        name = "networking.verification.step_up.error",
-        mapOf(
-            "pane" to pane.value,
-            "error" to error.value,
-        ).filterNotNullValues()
-    ) {
-        enum class Error(val value: String) {
-            ConsumerNotFoundError("ConsumerNotFoundError"),
-            LookupConsumerSession("LookupConsumerSession"),
-            StartVerificationError("StartVerificationSessionError"),
-            MarkLinkVerifiedError("MarkLinkStepUpAuthenticationVerifiedError"),
-        }
+        /**
+         * Event when the modal is launched on an external browser. After receiving this event,
+         * no other events will be sent until the browser session is completed with
+         * either a [SUCCESS], [CANCEL] or [ERROR].
+         */
+        FLOW_LAUNCHED_IN_BROWSER("flow_launched_in_browser"),
+
+        /**
+         * Event when manual entry flow is initiated
+         */
+        MANUAL_ENTRY_INITIATED("manual_entry_initiated"),
+
+        /**
+         * Event when “Agree and continue” is selected on consent pane
+         */
+        CONSENT_ACQUIRED("consent_acquired"),
+
+        /**
+         * Event when the search bar is selected, the user types some search terms and gets an API response
+         */
+        SEARCH_INITIATED("search_initiated"),
+
+        /**
+         * Event when an institution is selected, either from featured institutions or search results
+         */
+        INSTITUTION_SELECTED("institution_selected"),
+
+        /**
+         * Event when successful authorization is completed
+         */
+        INSTITUTION_AUTHORIZED("institution_authorized"),
+
+        /**
+         * Event when accounts are selected and “confirm” is selected
+         */
+        ACCOUNTS_SELECTED("accounts_selected"),
+
+        /**
+         * Event when the flow is completed and selected accounts are correctly attached to the payment instrument
+         */
+        SUCCESS("success"),
+
+        /**
+         * Event when an error is encountered; see error codes for more
+         */
+        ERROR("error"),
+
+        /**
+         * Event when the modal is closed by the user, either by clicking the "X" or clicking outside the modal
+         */
+        CANCEL("cancel")
     }
 
-    class ClickDone(
-        pane: Pane,
-    ) : FinancialConnectionsEvent(
-        name = "click.done",
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
+    /**
+     * Enum representing the error code when an error event is encountered
+     */
+    enum class ErrorCode(val value: String) {
+        /**
+         * Error when account numbers cannot be retrieved for selected accounts.
+         */
+        ACCOUNT_NUMBERS_UNAVAILABLE("account_numbers_unavailable"),
 
-    class Error(
-        pane: Pane,
-        exception: Throwable
-    ) : FinancialConnectionsEvent(
-        name = when (exception) {
-            is FinancialConnectionsError,
-            is OTPError -> "error.expected"
-            else -> "error.unexpected"
-        },
-        params = (
-            mapOf("pane" to pane.value)
-                .plus(exception.toEventParams())
-                .filterNotNullValues()
-            )
-    )
+        /**
+         * Error when accounts cannot be retrieved for the selected institution.
+         */
+        ACCOUNTS_UNAVAILABLE("accounts_unavailable"),
 
-    class Exposure(
-        experimentName: String,
-        assignmentEventId: String,
-        accountHolderId: String
-    ) : FinancialConnectionsEvent(
-        name = "preloaded_experiment_retrieved",
-        params = mapOf(
-            "experiment_retrieved" to experimentName,
-            "arb_id" to assignmentEventId,
-            "account_holder_id" to accountHolderId
-        ).filterNotNullValues(),
-        includePrefix = false,
-    )
+        /**
+         * Error when no debitable account is available at the selected institution for payments flows.
+         */
+        NO_DEBITABLE_ACCOUNT("no_debitable_account"),
 
-    object ConsentAgree : FinancialConnectionsEvent(
-        name = "click.agree",
-        mapOf("pane" to Pane.CONSENT.value)
-    )
+        /**
+         * Error when authorizing with the selected institution failed.
+         */
+        AUTHORIZATION_FAILED("authorization_failed"),
 
-    override fun toString(): String {
-        return "FinancialConnectionsEvent(name='$name', params=$params)"
-    }
+        /**
+         * Error when the institution the user selects is down for expected maintenance.
+         */
+        INSTITUTION_UNAVAILABLE_PLANNED("institution_unavailable_planned"),
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        /**
+         * Error when the institution the user selects is unexpectedly down.
+         */
+        INSTITUTION_UNAVAILABLE_UNPLANNED("institution_unavailable_unplanned"),
 
-        other as FinancialConnectionsEvent
+        /**
+         * Error when there's a timeout while communication with downstream institution.
+         */
+        INSTITUTION_TIMEOUT("institution_timeout"),
 
-        if (name != other.name) return false
-        if (params != other.params) return false
-        if (includePrefix != other.includePrefix) return false
-        if (eventName != other.eventName) return false
+        /**
+         * Error when unexpected issues occur, either in an API call or on the client side.
+         */
+        UNEXPECTED_ERROR("unexpected_error"),
 
-        return true
-    }
+        /**
+         * Error when client secret powering the session has expired.
+         */
+        SESSION_EXPIRED("session_expired"),
 
-    override fun hashCode(): Int {
-        var result = name.hashCode()
-        result = 31 * result + (params?.hashCode() ?: 0)
-        result = 31 * result + includePrefix.hashCode()
-        result = 31 * result + eventName.hashCode()
-        return result
+        /**
+         * Error when hCaptcha challenge is not passed successfully.
+         */
+        FAILED_BOT_DETECTION("failed_bot_detection"),
+
+        /**
+         * No web browser is installed on the user's device, so the Auth Flow cannot be initiated.
+         */
+        WEB_BROWSER_UNAVAILABLE("web_browser_unavailable"),
     }
 }
-
-private const val EVENT_PREFIX = "linked_accounts"

@@ -4,14 +4,34 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Payer en <num_installments/> versements sans intérêts de <installment_price/> avec <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Retour</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Numéro de compte</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Votre numéro de compte est incomplet.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Compte bancaire</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Je comprends que Stripe effectuera des prélèvements automatiques pour le compte de %s et je confirme que je suis le titulaire du compte et la seule personne habilitée à autoriser des prélèvements sur ce compte.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Code guichet</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">Votre code guichet est incomplet.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Adresse de facturation</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">Code BLIK</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">En continuant, vous autorisez %1$s à débiter votre compte Cash App pour ce paiement et les prochains paiements, conformément aux conditions de %2$s, jusqu\'à la révocation de cette autorisation. Vous pouvez modifier ceci à tout moment dans les paramètres de Cash App.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Coordonnées</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Continuer</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">Banque EPS</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">Banque FPX</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">L\'IBAN que vous avez saisi est incomplet.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -20,6 +40,10 @@
   <string name="stripe_iban_invalid_start">Votre IBAN doit commencer par un code pays à deux lettres.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">Banque iDEAL</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Votre code BLIK est incomplet.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Votre code BLIK n\'est pas valide.</string>
   <string name="stripe_invalid_email_address">Adresse de courriel non valide : %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">ID d\'UPI non valide</string>
@@ -27,6 +51,8 @@
   <string name="stripe_klarna_buy_now_pay_later">Payez maintenant ou plus tard avec Klarna.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Payez plus tard avec Klarna.</string>
+  <!-- Caption for Phone field on address form -->
+  <string name="stripe_konbini_confirmation_number_label">Téléphone</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Nom du titulaire de la carte</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
@@ -43,10 +69,14 @@
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Prélèvement automatique BECS (Australie)</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Carte</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Prélèvement SEPA</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">En confirmant votre paiement via PayPal, vous autorisez %s à débiter votre compte PayPal pour les paiements à venir, conformément à ses conditions.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">En confirmant votre paiement avec Revolut Pay, vous autorisez %s à débiter votre compte Revolut Pay pour les paiements à venir, conformément à ses conditions.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Enregistrer pour mes prochains paiements auprès de %s</string>
   <!-- Button title to open camera to scan credit/debit card -->

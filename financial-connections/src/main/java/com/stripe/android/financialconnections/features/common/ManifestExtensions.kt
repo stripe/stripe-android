@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.common
 
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 
 /**
  * Get the business name from the manifest.
@@ -23,5 +24,13 @@ internal fun FinancialConnectionsSessionManifest.getRedactedEmail(): String? =
             content.substring(0, EMAIL_LENGTH) + "•••@" + domain
         }
     }
+
+internal fun FinancialConnectionsSessionManifest.enableRetrieveAuthSession(): Boolean =
+    features
+        ?.get("bank_connections_disable_defensive_auth_session_retrieval_on_complete") != true
+
+internal fun SynchronizeSessionResponse.showManualEntryInErrors(): Boolean {
+    return manifest.allowManualEntry && visual.reducedManualEntryProminenceInErrors.not()
+}
 
 private const val EMAIL_LENGTH = 15

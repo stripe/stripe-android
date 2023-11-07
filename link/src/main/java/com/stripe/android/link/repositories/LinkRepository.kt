@@ -33,15 +33,6 @@ internal interface LinkRepository {
     ): Result<ConsumerSession>
 
     /**
-     * Logs out the current consumer.
-     */
-    suspend fun logout(
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
-        authSessionCookie: String?
-    ): Result<ConsumerSession>
-
-    /**
      * Create a new card payment method in the consumer account.
      */
     suspend fun createCardPaymentDetails(
@@ -49,6 +40,14 @@ internal interface LinkRepository {
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
+        consumerPublishableKey: String?,
+        active: Boolean,
     ): Result<LinkPaymentDetails.New>
+
+    suspend fun shareCardPaymentDetails(
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        id: String,
+        last4: String,
+        consumerSessionClientSecret: String,
+    ): Result<LinkPaymentDetails>
 }

@@ -4,14 +4,34 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Betala av genom <num_installments/> räntefria delbetalningar på <installment_price/> med <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Tillbaka</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Kontonummer</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Kontonumret är ofullständigt.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Bankkonto</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Jag är införstådd med att Stripe samlar in autogireringar på uppdrag av %s och bekräftar att jag är kontoinnehavaren och den enda person som krävs för att godkänna debiteringar från detta konto.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Clearingnummer (sort code)</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">Sort code (clearingnummer) är ofullständigt.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Faktureringsadress</string>
+  <!-- Label for BLIK code number field on form -->
+  <string name="stripe_blik_code">BLIK-kod</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Genom att fortsätta godkänner du att %1$s debiterar ditt Cash App-konto för den här betalningen och framtida betalningar i enlighet med %2$ss villkor, tills detta godkännande återkallas. Du kan när som helst ändra detta i dina Cash App-inställningar.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kontaktinformation</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Fortsätt</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">EPS Bank</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">FPX Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Angivet IBAN är ofullständigt.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -20,6 +40,10 @@
   <string name="stripe_iban_invalid_start">Ditt IBAN ska börja med en landskod (två bokstäver).</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_ideal_bank">iDEAL Bank</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_incomplete_blik_code">Din BLIK-kod är ofullständig.</string>
+  <!-- Error message when BLIK code is invalid -->
+  <string name="stripe_invalid_blik_code">Din BLIK-kod är ogiltig.</string>
   <string name="stripe_invalid_email_address">Ogiltig e-postadress: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Ogiltigt UPI ID</string>
@@ -27,6 +51,8 @@
   <string name="stripe_klarna_buy_now_pay_later">Köp nu eller betala senare med Klarna.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Betala senare med Klarna.</string>
+  <!-- Caption for Phone field on address form -->
+  <string name="stripe_konbini_confirmation_number_label">Telefonnummer</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Namn på kortet</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
@@ -43,10 +69,14 @@
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS Direct Debit</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kort</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Genom att bekräfta betalningen med PayPal tillåter du %s att debitera ditt PayPal-konto för framtida betalningar i enlighet med deras villkor.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">Genom att bekräfta betalningen med RevolutPay tillåter du %s att debitera ditt RevolutPay-konto för framtida betalningar i enlighet med deras villkor.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Spara för framtida %s-betalningar</string>
   <!-- Button title to open camera to scan credit/debit card -->

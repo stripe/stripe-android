@@ -3,4 +3,6 @@
     <color name="stripe_plus_icon_tint">#F7FAFC</color>
     <color name="stripe_privacy_policy_icon_tint">#F7FAFC</color>
     <color name="stripe_time_estimate_icon_tint">#F7FAFC</color>
+
+    <color name="stripe_selfie_warmup_icon_tint">#F7FAFC</color>
 </resources>

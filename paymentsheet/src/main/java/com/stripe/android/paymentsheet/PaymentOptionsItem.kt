@@ -30,9 +30,18 @@ internal sealed class PaymentOptionsItem {
     data class SavedPaymentMethod(
         val displayName: String,
         val paymentMethod: PaymentMethod,
+        val isCbcEligible: Boolean = false
     ) : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.SavedPaymentMethod
         override val isEnabledDuringEditing: Boolean = true
+
+        val isModifiable: Boolean by lazy {
+            val hasMultipleNetworks = paymentMethod.card?.networks?.available?.let { available ->
+                available.size > 1
+            } ?: false
+
+            isCbcEligible && hasMultipleNetworks
+        }
 
         fun getDescription(resources: Resources) = when (paymentMethod.type) {
             PaymentMethod.Type.Card -> resources.getString(
@@ -51,6 +60,11 @@ internal sealed class PaymentOptionsItem {
             else -> ""
         }
 
+        fun getModifyDescription(resources: Resources) = resources.getString(
+            R.string.stripe_paymentsheet_modify_pm,
+            getDescription(resources)
+        )
+
         fun getRemoveDescription(resources: Resources) = resources.getString(
             R.string.stripe_paymentsheet_remove_pm,
             getDescription(resources)
@@ -61,6 +75,12 @@ internal sealed class PaymentOptionsItem {
         SavedPaymentMethod,
         AddCard,
         GooglePay,
-        Link
+        Link,
     }
 }
+
+internal val PaymentOptionsItem.key: String
+    get() {
+        val paymentMethodId = (this as? PaymentOptionsItem.SavedPaymentMethod)?.paymentMethod?.id
+        return listOfNotNull(viewType, paymentMethodId).joinToString("-")
+    }

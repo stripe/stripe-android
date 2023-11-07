@@ -226,6 +226,7 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanFragment :
 	public fun changeScanState (Lcom/stripe/android/stripecardscan/cardscan/CardScanState;)Z
 	public synthetic fun displayState (Lcom/stripe/android/camera/scanui/ScanState;Lcom/stripe/android/camera/scanui/ScanState;)V
 	public fun displayState (Lcom/stripe/android/stripecardscan/cardscan/CardScanState;Lcom/stripe/android/stripecardscan/cardscan/CardScanState;)V
+	public fun getCameraAdapterBuilder ()Lkotlin/jvm/functions/Function4;
 	public synthetic fun getResultListener$stripecardscan_release ()Lcom/stripe/android/stripecardscan/scanui/ScanResultListener;
 	public fun getScanErrorListener ()Lcom/stripe/android/camera/scanui/ScanErrorListener;
 	public synthetic fun getScanState ()Lcom/stripe/android/camera/scanui/ScanState;

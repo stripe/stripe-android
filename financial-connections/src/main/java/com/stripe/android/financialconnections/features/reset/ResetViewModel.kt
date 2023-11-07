@@ -7,14 +7,15 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
-import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.LinkMoreAccounts
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.ClearPartnerWebAuth
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
@@ -23,7 +24,7 @@ internal class ResetViewModel @Inject constructor(
     private val linkMoreAccounts: LinkMoreAccounts,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val goNext: GoNext,
+    private val navigationManager: NavigationManager,
     private val logger: Logger
 ) : MavericksViewModel<ResetState>(initialState) {
 
@@ -32,9 +33,12 @@ internal class ResetViewModel @Inject constructor(
         suspend {
             val updatedManifest = linkMoreAccounts()
             nativeAuthFlowCoordinator().emit(ClearPartnerWebAuth)
-            eventTracker.track(PaneLoaded(Pane.RESET))
-            goNext(updatedManifest.nextPane)
-            Unit
+            eventTracker.track(PaneLoaded(PANE))
+            navigationManager.tryNavigateTo(
+                updatedManifest.nextPane.destination(referrer = PANE),
+                popUpToCurrent = true,
+                inclusive = true
+            )
         }.execute { copy(payload = it) }
     }
 
@@ -42,8 +46,12 @@ internal class ResetViewModel @Inject constructor(
         onAsync(
             ResetState::payload,
             onFail = { error ->
-                logger.error("Error linking more accounts", error)
-                eventTracker.track(Error(Pane.RESET, error))
+                eventTracker.logError(
+                    extraMessage = "Error linking more accounts",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
             },
         )
     }
@@ -62,6 +70,8 @@ internal class ResetViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        internal val PANE = Pane.RESET
     }
 }
 

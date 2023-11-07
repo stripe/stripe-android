@@ -4,6 +4,14 @@
   <string name="stripe_add_new_payment_method">添加新支付方式</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_bank_account_ending_in">移除尾号为 %s 的银行账户</string>
+  <!-- Text for alert message when user needs to confirm payment in their banking app -->
+  <string name="stripe_blik_confirm_payment">%s内在您的银行应用中确认付款，完成购物。</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">不会保存您的付款信息。</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">您想关闭此表单吗？</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">出错了。检查您的连接并重试。</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[继续操作即表示您同意按照<terms>这些条款</terms>授权付款。]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -17,12 +25,16 @@
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">保存地址</string>
   <!-- Title for shipping address entry section -->
-  <string name="stripe_paymentsheet_address_element_shipping_address">送货地址</string>
+  <string name="stripe_paymentsheet_address_element_shipping_address">收货地址</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">选择一个支付方式</string>
   <string name="stripe_paymentsheet_close">关闭</string>
+  <!-- A button used to confirm selecting a saved payment method -->
+  <string name="stripe_paymentsheet_confirm">确定</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">手动输入地址</string>
+  <!-- Title shown above a carousel containing the customer's payment methods -->
+  <string name="stripe_paymentsheet_manage_your_payment_methods">管理您的支付方式</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe 会在 1-2 个工作日向您的账户存入 0.01 美元。然后您会收到一封邮件，指导您完成向 %s 的付款。</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
@@ -36,11 +48,17 @@
   <!-- US Bank Account copy title for Mobile payment element form -->
   <string name="stripe_paymentsheet_pay_with_bank_title">只需少许几步，即可用您的银行账户付款。</string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-  <string name="stripe_paymentsheet_primary_button_processing">正在处理...</string>
+  <string name="stripe_paymentsheet_primary_button_processing">处理中...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">移除银行账户</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">移除 %s</string>
+  <!-- A button used for saving a new payment method -->
+  <string name="stripe_paymentsheet_save">保存</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_save_a_new_payment_method">保存新的支付方式</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_save_bank_title">几步保存您的银行账户。</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">保存以用于未来的付款</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
@@ -49,6 +67,8 @@
   <string name="stripe_paymentsheet_select_payment_method">选择您的支付方式</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">合计：%s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">出错了</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">取消并用另一方式支付</string>
   <!-- Text on a screen asking the user to approve a payment -->

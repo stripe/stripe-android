@@ -1,7 +1,7 @@
 package com.stripe.android.googlepaylauncher.injection
 
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherViewModel
 import dagger.BindsInstance
 import dagger.Subcomponent
@@ -14,7 +14,7 @@ internal interface GooglePayPaymentMethodLauncherViewModelSubcomponent {
     interface Builder {
 
         @BindsInstance
-        fun args(args: GooglePayPaymentMethodLauncherContract.Args): Builder
+        fun args(args: GooglePayPaymentMethodLauncherContractV2.Args): Builder
 
         @BindsInstance
         fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder

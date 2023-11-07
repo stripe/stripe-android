@@ -16,6 +16,12 @@ import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as ApiResult
 
 @Serializable
+data class ExamplePublishableKeyResponse(
+    @SerialName("publishable_key")
+    val publishableKey: String,
+)
+
+@Serializable
 data class ExampleCheckoutRequest(
     @SerialName("hot_dog_count")
     val hotDogCount: Int,
@@ -105,6 +111,8 @@ data class ExampleCreateAndConfirmIntentRequest(
     val isSubscribing: Boolean,
     @SerialName("return_url")
     val returnUrl: String,
+    @SerialName("customer_id")
+    val customerId: String?,
 )
 
 fun CartState.toCreateIntentRequest(
@@ -120,6 +128,7 @@ fun CartState.toCreateIntentRequest(
         saladCount = countOf(CartProduct.Id.Salad),
         isSubscribing = isSubscription,
         returnUrl = returnUrl,
+        customerId = customerId,
     )
 }
 
@@ -168,6 +177,34 @@ data class ExampleCustomerSheetResponse(
     val customerEphemeralKeySecret: String,
     @SerialName("customerId")
     val customerId: String
+)
+
+@Serializable
+data class PlaygroundCustomerSheetRequest(
+    @SerialName("customer")
+    val customerId: String,
+    @SerialName("mode")
+    val mode: String,
+    @SerialName("merchant_country_code")
+    val merchantCountryCode: String,
+    @SerialName("currency")
+    val currency: String,
+)
+
+@Serializable
+data class PlaygroundCustomerSheetResponse(
+    @SerialName("customerId")
+    val customerId: String,
+    @SerialName("intentClientSecret")
+    val clientSecret: String,
+    @SerialName("publishableKey")
+    val publishableKey: String,
+    @SerialName("customerEphemeralKeySecret")
+    val customerEphemeralKeySecret: String,
+    @SerialName("amount")
+    val amount: String,
+    @SerialName("paymentMethodTypes")
+    val paymentMethodTypes: String,
 )
 
 @Serializable
