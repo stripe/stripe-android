@@ -141,14 +141,14 @@ internal fun DocumentScanScreen(
                         else -> {} // no-op
                     }
                 }
-                CameraScreenLaunchedEffectLight(
+                CameraScreenLaunchedEffect(
                     identityViewModel = identityViewModel,
                     identityScanViewModel = identityScanViewModel,
                     verificationPage = pageAndModelFiles.page,
                     navController = navController
                 )
 
-                ScanScreen(
+                SelfieCaptureScreen(
                     newDisplayState,
                     documentScannerState,
                     targetScanType,
@@ -179,7 +179,7 @@ internal fun DocumentScanScreen(
 }
 
 @Composable
-private fun ScanScreen(
+private fun SelfieCaptureScreen(
     newDisplayState: IdentityScanState?,
     documentScannerState: IdentityScanViewModel.State,
     targetScanType: IdentityScanState.ScanType?,

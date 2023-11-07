@@ -12,7 +12,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.navigation.NavController
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.camera.CameraPreviewImage
@@ -58,6 +58,9 @@ class SelfieScreenTest {
     private val displayStateChangedFlow =
         MutableStateFlow<Pair<IdentityScanState, IdentityScanState?>?>(null)
 
+    private val scannerStateFlow =
+        MutableStateFlow<IdentityScanViewModel.State>(IdentityScanViewModel.State.Initialized)
+
     private val selfieCapturePage = mock<VerificationPageStaticContentSelfieCapturePage> {
         on { consentText } doReturn SELFIE_CONSENT_TEXT
     }
@@ -66,16 +69,21 @@ class SelfieScreenTest {
     }
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
-        on { verificationPage } doReturn MutableLiveData(Resource.success(verificationPage))
-        on { pageAndModelFiles } doReturn mock()
+        on { pageAndModelFiles } doReturn MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>(
+            Resource.success(
+                IdentityViewModel.PageAndModelFiles(verificationPage, mock(), null)
+            )
+        )
         on { identityAnalyticsRequestFactory } doReturn mock()
         on { workContext } doReturn UnconfinedTestDispatcher()
         on { screenTracker } doReturn mock()
+        on { fpsTracker } doReturn mock()
     }
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel> {
         on { interimResults } doReturn mock()
         on { finalResult } doReturn mock()
         on { displayStateChangedFlow } doReturn displayStateChangedFlow
+        on { scannerState } doReturn scannerStateFlow
     }
 
     private val dummyBitmap: Bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
@@ -195,6 +203,7 @@ class SelfieScreenTest {
                 state to mock()
             }
         }
+
         composeTestRule.setContent {
             SelfieScanScreen(
                 navController = mockNavController,

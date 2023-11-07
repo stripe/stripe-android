@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_ROUTE
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNSET_BUTTON_TEXT
+import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.Requirement.Companion.matchesFromRoute
 import com.stripe.android.identity.networking.models.Requirement.Companion.supportsForceConfirm
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -99,27 +100,33 @@ private val DOCUMENT_UPLOAD_ROUTES = setOf(
 )
 
 /**
- * Clear [IdentityViewModel.collectedData], [IdentityViewModel.documentFrontUploadedState] and
- * [IdentityViewModel.documentBackUploadedState] when the corresponding data collections screens
- * are about to be popped from navigation stack.
- * Then pop the screen by calling [NavController.navigateUp].
+ * Clear collected data before navigating up, each route maps to a set of [Requirement] and its corresponding field is
+ * cleared through [IdentityViewModel.clearCollectedData].
+ * Apart from collected data, the following document/selfie file upload related stats are also cleared.
+ *  * When navigating up from [DocumentScanDestination] or [DocumentUploadDestination], clear document status.
+ *  * When navigating up from [SelfieDestination], clear selfie status.
+ *  * When navigating from any destination to [DocSelectionDestination], clearing both document and selfie status.
  */
 internal fun NavController.clearDataAndNavigateUp(identityViewModel: IdentityViewModel): Boolean {
     currentBackStackEntry?.destination?.route?.let { currentEntryRoute ->
         if (DOCUMENT_UPLOAD_ROUTES.contains(currentEntryRoute)) {
-            identityViewModel.clearUploadedData()
+            identityViewModel.clearDocumentUploadedState()
         }
-
+        if (SelfieDestination.ROUTE.route == currentEntryRoute) {
+            identityViewModel.clearSelfieUploadedState()
+        }
         currentEntryRoute.routeToRequirement().forEach(identityViewModel::clearCollectedData)
     }
 
+    // Reset is needed because certain screens might be skipped from backstack.
+    // E.g upload document -> land on [SelfieWarmupDestination] -> clicks back -> land on [DocSelectionDestination]
+    //   Need to clear document and selfie status in this case, as document screen was not added to back stack and
+    //   won't trigger currentBackStackEntry clean up logic.
     previousBackStackEntry?.destination?.route?.let { previousEntryRoute ->
-        if (DOCUMENT_UPLOAD_ROUTES.contains(previousEntryRoute)) {
-            identityViewModel.clearUploadedData()
+        if (DocSelectionDestination.ROUTE.route == previousEntryRoute) {
+            identityViewModel.resetAllUploadState()
         }
-        previousEntryRoute.routeToRequirement().forEach(identityViewModel::clearCollectedData)
     }
-
     return navigateUp()
 }
 

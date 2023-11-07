@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
-import com.stripe.android.identity.camera.DocumentScanCameraManager
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.states.IdentityScanState
@@ -85,7 +84,7 @@ internal class IdentityScanViewModel(
      */
     fun initializeScanFlowAndUpdateState(
         pageAndModelFiles: IdentityViewModel.PageAndModelFiles,
-        cameraManager: DocumentScanCameraManager
+        cameraManager: IdentityCameraManager
     ) {
         _scannerInitializedState.update { State.Initializing }
         initializeScanFlow(
