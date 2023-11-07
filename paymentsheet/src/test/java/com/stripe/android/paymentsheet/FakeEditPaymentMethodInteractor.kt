@@ -38,8 +38,8 @@ internal class FakeEditPaymentMethodInteractor(
     object Factory : ModifiableEditPaymentMethodViewInteractor.Factory {
         override fun create(
             initialPaymentMethod: PaymentMethod,
-            onRemove: PaymentMethodRemoveOperation,
-            onUpdate: PaymentMethodUpdateOperation
+            removeExecutor: PaymentMethodRemoveOperation,
+            updateExecutor: PaymentMethodUpdateOperation
         ): ModifiableEditPaymentMethodViewInteractor {
             return FakeEditPaymentMethodInteractor(initialPaymentMethod)
         }

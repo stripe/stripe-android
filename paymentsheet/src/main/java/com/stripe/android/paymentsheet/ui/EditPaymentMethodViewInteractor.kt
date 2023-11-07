@@ -32,16 +32,16 @@ internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethod
     interface Factory {
         fun create(
             initialPaymentMethod: PaymentMethod,
-            onRemove: PaymentMethodRemoveOperation,
-            onUpdate: PaymentMethodUpdateOperation
+            removeExecutor: PaymentMethodRemoveOperation,
+            updateExecutor: PaymentMethodUpdateOperation
         ): ModifiableEditPaymentMethodViewInteractor
     }
 }
 
 internal class DefaultEditPaymentMethodViewInteractor constructor(
     initialPaymentMethod: PaymentMethod,
-    private val onRemove: PaymentMethodRemoveOperation,
-    private val onUpdate: PaymentMethodUpdateOperation,
+    private val removeExecutor: PaymentMethodRemoveOperation,
+    private val updateExecutor: PaymentMethodUpdateOperation,
     workContext: CoroutineContext = Dispatchers.Default,
     viewStateSharingStarted: SharingStarted = SharingStarted.WhileSubscribed()
 ) : ModifiableEditPaymentMethodViewInteractor, CoroutineScope {
@@ -95,7 +95,7 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
             status.emit(EditPaymentMethodViewState.Status.Removing)
 
             // TODO(samer-stripe): Display toast on remove method failure?
-            onRemove.invoke(paymentMethod.value)
+            removeExecutor.invoke(paymentMethod.value)
 
             status.emit(EditPaymentMethodViewState.Status.Idle)
         }
@@ -109,10 +109,10 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
             launch {
                 status.emit(EditPaymentMethodViewState.Status.Updating)
 
-                val updateResult = onUpdate.invoke(paymentMethod.value, currentChoice.brand)
+                val updateResult = updateExecutor.invoke(paymentMethod.value, currentChoice.brand)
 
                 updateResult.onSuccess { method ->
-                    paymentMethod.value = method
+                    paymentMethod.emit(method)
                 }.onFailure {
                     // TODO(samer-stripe): Display toast on update method failure?
                 }
@@ -156,13 +156,13 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
     object Factory : ModifiableEditPaymentMethodViewInteractor.Factory {
         override fun create(
             initialPaymentMethod: PaymentMethod,
-            onRemove: PaymentMethodRemoveOperation,
-            onUpdate: PaymentMethodUpdateOperation
+            removeExecutor: PaymentMethodRemoveOperation,
+            updateExecutor: PaymentMethodUpdateOperation
         ): ModifiableEditPaymentMethodViewInteractor {
             return DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = initialPaymentMethod,
-                onRemove = onRemove,
-                onUpdate = onUpdate
+                removeExecutor = removeExecutor,
+                updateExecutor = updateExecutor
             )
         }
     }

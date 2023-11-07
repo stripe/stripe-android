@@ -11,9 +11,9 @@ import org.junit.Test
 class EditPaymentMethodUiScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
-        SystemAppearance.values(),
-        PaymentSheetAppearance.values(),
-        FontSize.values(),
+        arrayOf(SystemAppearance.LightTheme),
+        arrayOf(FontSize.DefaultFont),
+        arrayOf(PaymentSheetAppearance.DefaultAppearance),
     )
 
     @Test

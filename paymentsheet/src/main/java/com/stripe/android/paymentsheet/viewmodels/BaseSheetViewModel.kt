@@ -455,12 +455,12 @@ internal abstract class BaseSheetViewModel(
             PaymentSheetScreen.EditPaymentMethod(
                 editInteractorFactory.create(
                     initialPaymentMethod = paymentMethod,
-                    onRemove = {
+                    removeExecutor = {
                         // TODO(samer-stripe): Replace with remove operation
                         delay(TEMP_DELAY)
                         true
                     },
-                    onUpdate = { _, _ ->
+                    updateExecutor = { _, _ ->
                         // TODO(samer-stripe): Replace with update operation
                         delay(TEMP_DELAY)
 

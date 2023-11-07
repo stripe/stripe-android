@@ -181,8 +181,8 @@ class DefaultEditPaymentMethodViewInteractorTest {
     ): DefaultEditPaymentMethodViewInteractor {
         return DefaultEditPaymentMethodViewInteractor(
             initialPaymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD,
-            onRemove = onRemove,
-            onUpdate = onUpdate,
+            removeExecutor = onRemove,
+            updateExecutor = onUpdate,
             viewStateSharingStarted = SharingStarted.Eagerly,
             workContext = workContext
         )
