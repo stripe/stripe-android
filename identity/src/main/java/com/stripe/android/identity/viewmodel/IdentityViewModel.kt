@@ -376,15 +376,6 @@ internal class IdentityViewModel constructor(
     val errorCause = MutableLiveData<Throwable>()
 
     /**
-     * Reset selfie uploaded state to loading state.
-     */
-    internal fun resetSelfieUploadedState() {
-        _selfieUploadedState.updateStateAndSave {
-            SelfieUploadState()
-        }
-    }
-
-    /**
      * Upload high_res of an image Uri manually picked from local file storage or taken from camera.
      */
     internal fun uploadManualResult(
@@ -1290,12 +1281,29 @@ internal class IdentityViewModel constructor(
         }
     }
 
-    fun clearUploadedData() {
+    fun clearDocumentUploadedState() {
         listOf(_documentFrontUploadedState, _documentBackUploadedState).forEach {
             it.updateStateAndSave {
                 SingleSideDocumentUploadState()
             }
         }
+    }
+
+    fun clearSelfieUploadedState() {
+        _selfieUploadedState.updateStateAndSave {
+            SelfieUploadState()
+        }
+    }
+
+    // Reset document upload, selfie upload(if applicable)
+    fun resetAllUploadState() {
+        clearDocumentUploadedState()
+        clearSelfieUploadedState()
+        listOf(
+            Requirement.IDDOCUMENTFRONT,
+            Requirement.IDDOCUMENTBACK,
+            Requirement.FACE
+        ).forEach(this::clearCollectedData)
     }
 
     /**

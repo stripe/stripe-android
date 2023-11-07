@@ -5,14 +5,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
-import com.stripe.android.core.exception.InvalidResponseException
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
-import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.navigation.CouldNotCaptureDestination
 import com.stripe.android.identity.navigation.navigateTo
-import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.IdentityScanState.Companion.isBack
@@ -24,7 +21,6 @@ import kotlinx.coroutines.launch
 /**
  * A LaunchedEffect to subscribe for the following events from [IdentityViewModel] and
  * [IdentityScanViewModel] for camera scanning.
- *  * Initialize identityScanFlow when pageAndModelFiles are ready
  *  * Track fps when an interim result is available
  *  * Process final result when one is available
  *
@@ -37,37 +33,10 @@ internal fun CameraScreenLaunchedEffect(
     identityViewModel: IdentityViewModel,
     identityScanViewModel: IdentityScanViewModel,
     verificationPage: VerificationPage,
-    navController: NavController,
-    cameraManager: IdentityCameraManager,
-    onCameraReady: () -> Unit
+    navController: NavController
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(identityScanViewModel) {
-        // Initialize identityScanFlow
-        identityViewModel.pageAndModelFiles.observe(lifecycleOwner) {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    requireNotNull(it.data).let { pageAndModelFiles ->
-                        identityScanViewModel.initializeScanFlow(
-                            pageAndModelFiles.page,
-                            idDetectorModelFile = pageAndModelFiles.idDetectorFile,
-                            faceDetectorModelFile = pageAndModelFiles.faceDetectorFile
-                        )
-                        identityScanViewModel.initializeCameraManager(cameraManager)
-                        onCameraReady()
-                    }
-                }
-                Status.LOADING -> {} // no-op
-                Status.IDLE -> {} // no-op
-                Status.ERROR -> {
-                    throw InvalidResponseException(
-                        cause = it.throwable,
-                        message = it.message
-                    )
-                }
-            }
-        }
-
         // Handles interim result - track FPS
         identityScanViewModel.interimResults.observe(lifecycleOwner) {
             identityViewModel.fpsTracker.trackFrame()
