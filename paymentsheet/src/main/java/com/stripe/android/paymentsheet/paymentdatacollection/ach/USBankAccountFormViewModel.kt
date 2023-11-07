@@ -254,6 +254,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         get() = savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY) == true
         set(value) = savedStateHandle.set(HAS_LAUNCHED_KEY, value)
 
+    private var shouldReset: Boolean
+        get() = savedStateHandle.get<Boolean>(SHOULD_RESET_KEY) == true
+        set(value) = savedStateHandle.set(SHOULD_RESET_KEY, value)
+
     fun register(activityResultRegistryOwner: ActivityResultRegistryOwner) {
         collectBankAccountLauncher = CollectBankAccountLauncher.create(
             activityResultRegistryOwner = activityResultRegistryOwner,
@@ -342,6 +346,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun reset(@StringRes error: Int? = null) {
         hasLaunched = false
+        shouldReset = false
         saveForFutureUseElement.controller.onValueChange(true)
         _collectBankAccountResult.tryEmit(null)
         _currentScreenState.update {
@@ -356,6 +361,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     fun onDestroy() {
+        if (shouldReset) {
+            reset()
+        }
         _result.tryEmit(null)
         _collectBankAccountResult.tryEmit(null)
         collectBankAccountLauncher?.unregister()
@@ -452,6 +460,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         )
 
         _result.tryEmit(paymentSelection)
+        shouldReset = true
     }
 
     private fun createNewPaymentSelection(
@@ -555,6 +564,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private companion object {
         private const val HAS_LAUNCHED_KEY = "has_launched"
+        private const val SHOULD_RESET_KEY = "should_reset"
     }
 }
 
