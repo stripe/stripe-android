@@ -17,6 +17,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
+import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -27,6 +28,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -82,6 +84,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val customerSheetLoader: CustomerSheetLoader,
+    private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
 ) : ViewModel() {
 
     private val backStack = MutableStateFlow(initialBackStack)
@@ -155,7 +158,7 @@ internal class CustomerSheetViewModel @Inject constructor(
      */
     fun bottomSheetConfirmStateChange(): Boolean {
         val currentViewState = viewState.value
-        return if (currentViewState.shouldDisplayDismissConfirmationModal) {
+        return if (currentViewState.shouldDisplayDismissConfirmationModal(isFinancialConnectionsAvailable)) {
             updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                 it.copy(
                     displayDismissConfirmationModal = true,
@@ -514,7 +517,15 @@ internal class CustomerSheetViewModel @Inject constructor(
         viewModelScope.launch {
             createPaymentMethod(paymentMethodCreateParams)
                 .onSuccess { paymentMethod ->
-                    attachPaymentMethodToCustomer(paymentMethod)
+                    if (paymentMethod.isUnverifiedUSBankAccount()) {
+                        _result.tryEmit(
+                            InternalCustomerSheetResult.Selected(
+                                paymentSelection = PaymentSelection.Saved(paymentMethod)
+                            )
+                        )
+                    } else {
+                        attachPaymentMethodToCustomer(paymentMethod)
+                    }
                 }.onFailure { throwable ->
                     logger.error(
                         msg = "Failed to create payment method for ${paymentMethodCreateParams.typeCode}",
