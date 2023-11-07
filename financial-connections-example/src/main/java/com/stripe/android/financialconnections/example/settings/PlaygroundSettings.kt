@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.example.settings
 import android.app.Application
 import android.content.Context
 import android.net.Uri
-import android.os.Debug
 import android.util.Log
 import androidx.core.content.edit
 import com.stripe.android.financialconnections.example.BuildConfig
