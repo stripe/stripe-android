@@ -1,12 +1,15 @@
 package com.stripe.android.ui.core
 
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.elements.AffirmElementUI
 import com.stripe.android.ui.core.elements.AffirmHeaderElement
 import com.stripe.android.ui.core.elements.AfterpayClearpayElementUI
@@ -64,37 +67,40 @@ fun FormUI(
     lastTextFieldIdentifier: IdentifierSpec?,
     modifier: Modifier = Modifier
 ) {
+    val visibleElements = remember(elements) {
+        elements.filter { it.identifier !in hiddenIdentifiers }
+    }
+
     Column(
-        modifier = modifier.fillMaxWidth(1f)
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        elements.forEachIndexed { _, element ->
-            if (!hiddenIdentifiers.contains(element.identifier)) {
-                when (element) {
-                    is SectionElement -> SectionElementUI(
-                        enabled,
-                        element,
-                        hiddenIdentifiers,
-                        lastTextFieldIdentifier
-                    )
-                    is StaticTextElement -> StaticTextElementUI(element)
-                    is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
-                    is AfterpayClearpayHeaderElement -> AfterpayClearpayElementUI(
-                        enabled,
-                        element
-                    )
-                    is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(element)
-                    is AffirmHeaderElement -> AffirmElementUI()
-                    is MandateTextElement -> MandateTextUI(element)
-                    is CardDetailsSectionElement -> CardDetailsSectionElementUI(
-                        enabled,
-                        element.controller,
-                        hiddenIdentifiers,
-                        lastTextFieldIdentifier
-                    )
-                    is BsbElement -> BsbElementUI(enabled, element, lastTextFieldIdentifier)
-                    is OTPElement -> OTPElementUI(enabled, element)
-                    is EmptyFormElement -> {}
-                }
+        for (element in visibleElements) {
+            when (element) {
+                is SectionElement -> SectionElementUI(
+                    enabled,
+                    element,
+                    hiddenIdentifiers,
+                    lastTextFieldIdentifier
+                )
+                is StaticTextElement -> StaticTextElementUI(element)
+                is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
+                is AfterpayClearpayHeaderElement -> AfterpayClearpayElementUI(
+                    enabled,
+                    element
+                )
+                is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(element)
+                is AffirmHeaderElement -> AffirmElementUI()
+                is MandateTextElement -> MandateTextUI(element)
+                is CardDetailsSectionElement -> CardDetailsSectionElementUI(
+                    enabled,
+                    element.controller,
+                    hiddenIdentifiers,
+                    lastTextFieldIdentifier
+                )
+                is BsbElement -> BsbElementUI(enabled, element, lastTextFieldIdentifier)
+                is OTPElement -> OTPElementUI(enabled, element)
+                is EmptyFormElement -> {}
             }
         }
     }

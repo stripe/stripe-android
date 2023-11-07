@@ -1,22 +1,21 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Card
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
+import androidx.compose.material.Card as MaterialCard
 
 /**
  * This is a simple section that holds content in a card view.  It has a label, content specified
@@ -25,21 +24,26 @@ import com.stripe.android.uicore.stripeColors
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Section(
-    @StringRes title: Int?,
+    title: String?,
     error: String?,
-    contentOutsideCard: @Composable () -> Unit = {},
-    contentInCard: @Composable () -> Unit
+    content: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    footer: @Composable () -> Unit = {},
 ) {
-    Column(modifier = Modifier.padding(top = 8.dp)) {
-        SectionTitle(title)
-        SectionCard(
-            content = contentInCard,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+    Column(modifier) {
+        if (title != null) {
+            SectionTitle(title)
+            Spacer(modifier = Modifier.requiredHeight(4.dp))
+        }
+
+        Card(content = content)
+
         if (error != null) {
+            Spacer(modifier = Modifier.requiredHeight(8.dp))
             SectionError(error)
         }
-        contentOutsideCard()
+
+        footer()
     }
 }
 
@@ -47,17 +51,13 @@ fun Section(
  * This is the layout for the section title
  */
 @Composable
-internal fun SectionTitle(@StringRes titleText: Int?) {
-    titleText?.let {
-        H6Text(
-            text = stringResource(titleText),
-            modifier = Modifier
-                .padding(bottom = 4.dp)
-                .semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility
-                    heading()
-                }
-        )
-    }
+private fun SectionTitle(text: String) {
+    H6Text(
+        text = text,
+        modifier = Modifier.semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility
+            heading()
+        },
+    )
 }
 
 /**
@@ -65,14 +65,14 @@ internal fun SectionTitle(@StringRes titleText: Int?) {
  */
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun SectionCard(
+fun Card(
     modifier: Modifier = Modifier,
     isSelected: Boolean = false,
     backgroundColor: Color = MaterialTheme.stripeColors.component,
     border: BorderStroke = MaterialTheme.getBorderStroke(isSelected),
     content: @Composable () -> Unit
 ) {
-    Card(
+    MaterialCard(
         border = border,
         // TODO(skyler-stripe): this will change when we add shadow configurations.
         elevation = if (isSelected) 1.5.dp else 0.dp,
@@ -90,7 +90,7 @@ fun SectionCard(
  * This is how error string for the section are displayed.
  */
 @Composable
-internal fun SectionError(error: String) {
+private fun SectionError(error: String) {
     Text(
         text = error,
         color = MaterialTheme.colors.error,

@@ -102,15 +102,19 @@ fun TextFieldSection(
         } ?: stringResource(it.errorMessage)
     }
 
-    Section(sectionTitle, sectionErrorString) {
-        TextField(
-            textFieldController = textFieldController,
-            enabled = enabled,
-            imeAction = imeAction,
-            modifier = modifier,
-            onTextStateChanged = onTextStateChanged
-        )
-    }
+    Section(
+        title = sectionTitle?.let { stringResource(it) },
+        error = sectionErrorString,
+        content = {
+            TextField(
+                textFieldController = textFieldController,
+                enabled = enabled,
+                imeAction = imeAction,
+                modifier = modifier,
+                onTextStateChanged = onTextStateChanged
+            )
+        },
+    )
 }
 
 /**

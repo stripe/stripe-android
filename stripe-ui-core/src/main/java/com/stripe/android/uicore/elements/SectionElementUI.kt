@@ -47,9 +47,9 @@ fun SectionElementUI(
         }
 
         Section(
-            controller.label,
-            sectionErrorString,
-            contentOutsideCard = {
+            title = controller.label?.let { stringResource(it) },
+            error = sectionErrorString,
+            footer = {
                 elementsOutsideCard.forEach { field ->
                     SectionFieldElementUI(
                         enabled,
@@ -61,7 +61,7 @@ fun SectionElementUI(
                     )
                 }
             },
-            contentInCard = {
+            content = {
                 elementsInsideCard.forEachIndexed { index, field ->
                     SectionFieldElementUI(
                         enabled,

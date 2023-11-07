@@ -112,7 +112,7 @@ fun OTPElementUI(
                 Spacer(modifier = Modifier.width(12.dp))
             }
 
-            SectionCard(
+            Card(
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 4.dp),

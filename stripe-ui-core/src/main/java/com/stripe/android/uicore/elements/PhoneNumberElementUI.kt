@@ -72,9 +72,13 @@ fun PhoneNumberCollectionSection(
         } ?: stringResource(it.errorMessage)
     }
 
-    Section(sectionTitle, sectionErrorString) {
-        PhoneNumberElementUI(enabled, phoneNumberController, requestFocusWhenShown, imeAction)
-    }
+    Section(
+        title = sectionTitle?.let { stringResource(it) },
+        error = sectionErrorString,
+        content = {
+            PhoneNumberElementUI(enabled, phoneNumberController, requestFocusWhenShown, imeAction)
+        },
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)

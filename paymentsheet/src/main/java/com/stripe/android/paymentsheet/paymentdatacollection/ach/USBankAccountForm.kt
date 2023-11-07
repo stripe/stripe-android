@@ -42,7 +42,7 @@ import com.stripe.android.uicore.elements.PhoneNumberElementUI
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SameAsShippingElementUI
 import com.stripe.android.uicore.elements.Section
-import com.stripe.android.uicore.elements.SectionCard
+import com.stripe.android.uicore.elements.Card
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.stripeColors
@@ -385,13 +385,17 @@ private fun PhoneSection(
             .padding(0.dp),
         contentAlignment = Alignment.CenterEnd
     ) {
-        Section(null, sectionErrorString) {
-            PhoneNumberElementUI(
-                enabled = !isProcessing,
-                controller = phoneController,
-                imeAction = imeAction,
-            )
-        }
+        Section(
+            title = null,
+            error = sectionErrorString,
+            content = {
+                PhoneNumberElementUI(
+                    enabled = !isProcessing,
+                    controller = phoneController,
+                    imeAction = imeAction,
+                )
+            },
+        )
     }
 }
 
@@ -421,14 +425,18 @@ private fun AddressSection(
         contentAlignment = Alignment.CenterEnd
     ) {
         Column {
-            Section(PaymentsUiCoreR.string.stripe_billing_details, sectionErrorString) {
-                AddressElementUI(
-                    enabled = !isProcessing,
-                    controller = addressController,
-                    hiddenIdentifiers = emptySet(),
-                    lastTextFieldIdentifier = lastTextFieldIdentifier,
-                )
-            }
+            Section(
+                title = stringResource(PaymentsUiCoreR.string.stripe_billing_details),
+                error = sectionErrorString,
+                content = {
+                    AddressElementUI(
+                        enabled = !isProcessing,
+                        controller = addressController,
+                        hiddenIdentifiers = emptySet(),
+                        lastTextFieldIdentifier = lastTextFieldIdentifier,
+                    )
+                },
+            )
             sameAsShippingElement?.let {
                 SameAsShippingElementUI(it.controller)
             }
@@ -457,7 +465,7 @@ private fun AccountDetailsForm(
             text = stringResource(StripeR.string.stripe_title_bank_account),
             modifier = Modifier.padding(vertical = 8.dp)
         )
-        SectionCard(modifier = Modifier.fillMaxWidth()) {
+        Card(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

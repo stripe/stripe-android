@@ -46,7 +46,7 @@ import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.paymentsheet.ui.PaymentOptionEditState
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.elements.SectionCard
+import com.stripe.android.uicore.elements.Card
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.R as StripeR
 
@@ -175,7 +175,7 @@ private fun PaymentOptionCard(
     onItemSelectedListener: (() -> Unit),
     modifier: Modifier = Modifier,
 ) {
-    SectionCard(
+    Card(
         isSelected = isSelected,
         modifier = modifier
             .height(64.dp)

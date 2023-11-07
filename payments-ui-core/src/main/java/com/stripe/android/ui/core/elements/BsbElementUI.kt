@@ -33,9 +33,9 @@ fun BsbElementUI(
     }
     Column {
         Section(
-            null,
-            sectionErrorString,
-            contentInCard = {
+            title = null,
+            error = sectionErrorString,
+            content = {
                 TextField(
                     element.textElement.controller,
                     enabled = enabled,
@@ -46,7 +46,7 @@ fun BsbElementUI(
                     }
                 )
             },
-            contentOutsideCard = {
+            footer = {
                 bankName?.let {
                     Text(
                         it,
