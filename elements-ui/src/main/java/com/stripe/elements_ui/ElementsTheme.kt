@@ -9,6 +9,80 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
+
+@Immutable
+data class ElementTypography(
+    private val fontWeightNormal: Int,
+    private val fontWeightMedium: Int,
+    private val fontWeightBold: Int,
+    private val fontSizeMultiplier: Float,
+    private val xxSmallFontSize: TextUnit,
+    private val xSmallFontSize: TextUnit,
+    private val smallFontSize: TextUnit,
+    private val mediumFontSize: TextUnit,
+    private val largeFontSize: TextUnit,
+    private val xLargeFontSize: TextUnit,
+    // global font overrides, takes precedence over individual font overrides below.
+    private val fontFamily: Int?,
+    // individual front overrides, only valid when fontFamily is null.
+    private val body1FontFamily: FontFamily? = null,
+    private val body2FontFamily: FontFamily? = null,
+    private val h4FontFamily: FontFamily? = null,
+    private val h5FontFamily: FontFamily? = null,
+    private val h6FontFamily: FontFamily? = null,
+    private val subtitle1FontFamily: FontFamily? = null,
+    private val captionFontFamily: FontFamily? = null
+) {
+
+    private val globalFontFamily: FontFamily?
+        get() = fontFamily?.let { FontFamily(Font(it)) }
+
+    val xLarge: TextStyle = TextStyle.Default.copy(
+        fontFamily = globalFontFamily ?: h4FontFamily ?: FontFamily.Default,
+        fontSize = (xLargeFontSize * fontSizeMultiplier),
+        fontWeight = FontWeight(fontWeightBold)
+    )
+
+    val large: TextStyle = TextStyle.Default.copy(
+        fontFamily = globalFontFamily ?: h5FontFamily ?: FontFamily.Default,
+        fontSize = (largeFontSize * fontSizeMultiplier),
+        fontWeight = FontWeight(fontWeightMedium),
+        letterSpacing = (-0.32).sp
+    )
+
+    val medium: TextStyle = TextStyle.Default.copy(
+        fontFamily = globalFontFamily ?: body1FontFamily ?: FontFamily.Default,
+        fontSize = (mediumFontSize * fontSizeMultiplier),
+        fontWeight = FontWeight(fontWeightNormal)
+    )
+
+    val small: TextStyle = TextStyle.Default.copy(
+        fontFamily = globalFontFamily ?: h6FontFamily ?: FontFamily.Default,
+        fontSize = (smallFontSize * fontSizeMultiplier),
+        fontWeight = FontWeight(fontWeightMedium),
+        letterSpacing = (-0.15).sp
+    )
+
+    val xSmall: TextStyle = TextStyle.Default.copy(
+        fontFamily = globalFontFamily ?: captionFontFamily ?: FontFamily.Default,
+        fontSize = (xSmallFontSize * fontSizeMultiplier),
+        fontWeight = FontWeight(fontWeightMedium)
+    )
+
+    val xxSmall: TextStyle = TextStyle.Default.copy(
+        fontFamily = globalFontFamily ?: body2FontFamily ?: FontFamily.Default,
+        fontSize = (xxSmallFontSize * fontSizeMultiplier),
+        fontWeight = FontWeight(fontWeightNormal),
+        letterSpacing = (-0.15).sp
+    )
+}
+
 
 @Immutable
 data class ElementColors(
