@@ -3,30 +3,30 @@ package com.stripe.android.financialconnections.example.settings
 import com.stripe.android.financialconnections.example.NativeOverride
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
-import com.stripe.android.financialconnections.example.settings.PlaygroundSettingDefinition.Option
 
-internal object NativeOverrideDefinition : PlaygroundSettingDefinition.Saveable<NativeOverride> {
-
-    override val displayName: String = "Flavor Override"
-    override val options: List<Option<NativeOverride>>
-        get() = listOf(
-            option("None", NativeOverride.None),
-            option("Native", NativeOverride.Native),
-            option("Web", NativeOverride.Web),
-        )
-
+data class NativeSetting(
+    override val selectedOption: NativeOverride = NativeOverride.None,
+    override val key: String = "financial_connections_override_native",
+) : Saveable<NativeOverride>, SingleChoiceSetting<NativeOverride>(
+    displayName = "Merchant",
+    options = listOf(
+        Option("None", NativeOverride.None),
+        Option("Native", NativeOverride.Native),
+        Option("Web", NativeOverride.Web),
+    ),
+    selectedOption = selectedOption
+) {
     override fun lasRequest(
         body: LinkAccountSessionBody,
-        value: NativeOverride
     ): LinkAccountSessionBody = body
 
     override fun paymentIntentRequest(
         body: PaymentIntentBody,
-        value: NativeOverride
     ): PaymentIntentBody = body
 
-    override val key: String = "financial_connections_override_native"
-    override val defaultValue: NativeOverride = NativeOverride.None
+    override fun valueUpdated(currentSettings: List<Setting<*>>, value: NativeOverride): List<Setting<*>> {
+        return replace(currentSettings, this.copy(selectedOption = value))
+    }
 
     override fun convertToValue(value: String): NativeOverride = NativeOverride.fromApiValue(value)
 
