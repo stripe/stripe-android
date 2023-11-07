@@ -1,25 +1,21 @@
 package com.stripe.elements_ui
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TextField as MaterialTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
-import com.stripe.android.uicore.elements.AnimatedIcons
 import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.stripeColors
+import androidx.compose.material.TextField as MaterialTextField
 
 @Composable
 fun TextField(
@@ -60,34 +56,34 @@ fun TextField(
                 )
             }
         },
-        trailingIcon = trailingIcon?.let {
-            {
-                Row {
-                    when (it) {
-                        is TextFieldIcon.Trailing -> {
-                            TrailingIcon(it, loading)
-                        }
-
-                        is TextFieldIcon.MultiTrailing -> {
-                            Row(modifier = Modifier.padding(10.dp)) {
-                                it.staticIcons.forEach {
-                                    TrailingIcon(it, loading)
-                                }
-                                AnimatedIcons(icons = it.animatedIcons, loading = loading)
-                            }
-                        }
-
-                        is TextFieldIcon.Dropdown -> {
-                            TrailingDropdown(
-                                icon = it,
-                                loading = loading,
-                                onDropdownItemClicked = onDropdownItemClicked
-                            )
-                        }
-                    }
-                }
-            }
-        },
+//        trailingIcon = trailingIcon?.let {
+//            {
+//                Row {
+//                    when (it) {
+//                        is TextFieldIcon.Trailing -> {
+//                            TrailingIcon(it, loading)
+//                        }
+//
+//                        is TextFieldIcon.MultiTrailing -> {
+//                            Row(modifier = Modifier.padding(10.dp)) {
+//                                it.staticIcons.forEach {
+//                                    TrailingIcon(it, loading)
+//                                }
+//                                AnimatedIcons(icons = it.animatedIcons, loading = loading)
+//                            }
+//                        }
+//
+//                        is TextFieldIcon.Dropdown -> {
+//                            TrailingDropdown(
+//                                icon = it,
+//                                loading = loading,
+//                                onDropdownItemClicked = onDropdownItemClicked
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//        },
         isError = shouldShowError,
         visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions,
@@ -118,7 +114,7 @@ fun TextFieldColors(
 )
 
 @Composable
-private fun Label(
+internal fun Label(
     value: String,
     enabled: Boolean
 ) {
