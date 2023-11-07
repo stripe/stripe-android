@@ -1,0 +1,51 @@
+apply from: configs.androidLibrary
+
+dependencies {
+    implementation project(":stripe-core")
+    implementation project(":stripe-ui-core")
+
+    implementation libs.compose.ui
+    implementation libs.compose.foundation
+    implementation libs.compose.material
+    implementation libs.compose.materialIcons
+    implementation libs.compose.activity
+    implementation libs.compose.uiToolingPreview
+
+    // Tooling support (Previews, etc.)
+    debugImplementation libs.compose.uiTooling
+
+    // TODO Paparazzi
+}
+
+android {
+    buildFeatures {
+        compose = true
+        viewBinding = true
+    }
+
+    testOptions {
+        unitTests {
+            // Note: without this, all Robolectric tests using assets will fail.
+            includeAndroidResources = true
+            all {
+                maxHeapSize = "1024m"
+            }
+        }
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
+    }
+
+    kotlinOptions {
+        freeCompilerArgs += ["-opt-in=kotlinx.coroutines.FlowPreview", "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+    }
+}
+
+ext {
+    artifactId = "elements-ui"
+    artifactName = "elements-ui"
+    artifactDescrption = "The UI module of Stripe Android Elements"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"
