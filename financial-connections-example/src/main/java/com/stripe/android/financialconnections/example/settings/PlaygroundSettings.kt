@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.example.settings
 import android.app.Application
 import android.content.Context
 import android.net.Uri
-import android.os.Debug
 import android.util.Log
 import androidx.core.content.edit
 import com.stripe.android.financialconnections.example.BuildConfig
@@ -120,7 +119,6 @@ internal data class PlaygroundSettings(
                 val saveable = setting.saveable()
                 val savedValue: String? = saveable?.key?.let { uri.getQueryParameter(it) }
                 if (savedValue != null) {
-                    Debug.waitForDebugger()
                     settings = settings.withValue(setting, saveable.convertToValue(savedValue))
                 } else if (setting.selectedOption != null) {
                     settings = settings.withValue(setting, setting.selectedOption)
