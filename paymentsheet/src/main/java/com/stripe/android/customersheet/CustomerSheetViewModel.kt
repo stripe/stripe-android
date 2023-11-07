@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
+import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.utils.mapAsStateFlow
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.Dispatchers
@@ -355,6 +356,13 @@ internal class CustomerSheetViewModel @Inject constructor(
                         id = R.string.stripe_paymentsheet_save
                     )
                 },
+                mandateText = it.draftPaymentSelection?.mandateText(
+                    context = application,
+                    merchantName = configuration.merchantDisplayName
+                        ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+                    isSaveForFutureUseSelected = false,
+                    isSetupFlow = true,
+                ),
                 primaryButtonEnabled = it.formViewData.completeFormValues != null && !it.isProcessing,
             )
         }
@@ -367,6 +375,10 @@ internal class CustomerSheetViewModel @Inject constructor(
                     completeFormValues = formFieldValues,
                 ),
                 primaryButtonEnabled = formFieldValues != null && !it.isProcessing,
+                draftPaymentSelection = formFieldValues?.transformToPaymentSelection(
+                    resources = resources,
+                    paymentMethod = it.selectedPaymentMethod,
+                )
             )
         }
     }
@@ -560,6 +572,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     }
                 ),
                 selectedPaymentMethod = selectedPaymentMethod,
+                draftPaymentSelection = null,
                 enabled = true,
                 isLiveMode = isLiveModeProvider(),
                 isProcessing = false,

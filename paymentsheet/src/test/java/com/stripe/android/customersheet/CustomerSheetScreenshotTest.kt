@@ -102,6 +102,7 @@ internal class CustomerSheetScreenshotTest {
         primaryButtonEnabled = false,
         customPrimaryButtonUiState = null,
         bankAccountResult = null,
+        draftPaymentSelection = null,
     )
 
     @Test
