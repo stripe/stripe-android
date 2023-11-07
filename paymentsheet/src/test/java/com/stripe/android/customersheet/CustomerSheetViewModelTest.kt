@@ -2092,6 +2092,69 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When confirming a US Bank Account, mandate text should be visible in select payment method screen`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                selectPaymentMethodViewState.copy(
+                    savedPaymentMethods = listOf(CARD_PAYMENT_METHOD, US_BANK_ACCOUNT),
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<SelectPaymentMethod>()
+            assertThat(viewState.mandateText)
+                .isNull()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    selection = PaymentSelection.Saved(
+                        paymentMethod = US_BANK_ACCOUNT
+                    )
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.mandateText)
+                .isNotNull()
+        }
+    }
+
+    @Test
+    fun `A confirmed US Bank Account shouldn't show mandate when selected in select payment method screen`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            savedPaymentSelection = PaymentSelection.Saved(
+                paymentMethod = US_BANK_ACCOUNT
+            ),
+            initialBackStack = listOf(
+                selectPaymentMethodViewState.copy(
+                    savedPaymentMethods = listOf(CARD_PAYMENT_METHOD, US_BANK_ACCOUNT),
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<SelectPaymentMethod>()
+            assertThat(viewState.mandateText)
+                .isNull()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    selection = PaymentSelection.Saved(
+                        paymentMethod = US_BANK_ACCOUNT
+                    )
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.mandateText)
+                .isNull()
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     private suspend inline fun <R> ReceiveTurbine<*>.awaitViewState(): R {
         return awaitItem() as R

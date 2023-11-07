@@ -208,6 +208,30 @@ internal class CustomerSheetScreenshotTest {
     }
 
     @Test
+    fun testSelectUSBankAccount() {
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = selectPaymentMethodViewState.copy(
+                    title = "Screenshot testing",
+                    savedPaymentMethods = listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                        PaymentMethodFixtures.US_BANK_ACCOUNT,
+                    ),
+                    paymentSelection = PaymentSelection.Saved(
+                        PaymentMethodFixtures.US_BANK_ACCOUNT
+                    ),
+                    isGooglePayEnabled = false,
+                    primaryButtonLabel = "Continue",
+                    primaryButtonVisible = true,
+                    mandateText = "Some mandate text that is much longer so that it shows up as centered."
+                ),
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = null,
+            )
+        }
+    }
+
+    @Test
     fun testAddPaymentMethodDisabled() {
         paparazzi.snapshot {
             CustomerSheetScreen(

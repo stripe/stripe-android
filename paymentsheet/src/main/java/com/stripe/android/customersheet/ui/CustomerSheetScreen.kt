@@ -157,6 +157,14 @@ internal fun SelectPaymentMethod(
                 )
             }
         }
+
+        AnimatedVisibility(visible = viewState.mandateText != null) {
+            Mandate(
+                mandateText = viewState.mandateText,
+                modifier = Modifier
+                    .padding(horizontal = horizontalPadding),
+            )
+        }
     }
 }
 

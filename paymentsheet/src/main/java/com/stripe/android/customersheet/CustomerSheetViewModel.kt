@@ -101,6 +101,9 @@ internal class CustomerSheetViewModel @Inject constructor(
         billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration.toInternal()
     )
 
+    private val merchantName = configuration.merchantDisplayName
+        ?: application.applicationInfo.loadLabel(application.packageManager).toString()
+
     init {
         configuration.appearance.parseAppearance()
 
@@ -358,8 +361,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 },
                 mandateText = it.draftPaymentSelection?.mandateText(
                     context = application,
-                    merchantName = configuration.merchantDisplayName
-                        ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+                    merchantName = merchantName,
                     isSaveForFutureUseSelected = false,
                     isSetupFlow = true,
                 ),
@@ -448,12 +450,19 @@ internal class CustomerSheetViewModel @Inject constructor(
                 }
 
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                    val primaryButtonVisible = savedPaymentSelection != paymentSelection
                     it.copy(
                         paymentSelection = paymentSelection,
-                        primaryButtonVisible = savedPaymentSelection != paymentSelection,
+                        primaryButtonVisible = primaryButtonVisible,
                         primaryButtonLabel = resources.getString(
                             R.string.stripe_paymentsheet_confirm
                         ),
+                        mandateText = paymentSelection.mandateText(
+                            context = application,
+                            merchantName = merchantName,
+                            isSaveForFutureUseSelected = false,
+                            isSetupFlow = true,
+                        )?.takeIf { primaryButtonVisible },
                     )
                 }
             }
@@ -528,8 +537,7 @@ internal class CustomerSheetViewModel @Inject constructor(
         val formArguments = FormArgumentsFactory.create(
             paymentMethod = card,
             configuration = configuration,
-            merchantName = configuration.merchantDisplayName
-                ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+            merchantName = merchantName,
         )
 
         val observe = buildFormObserver(
