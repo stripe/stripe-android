@@ -152,11 +152,22 @@ val LocalElementColors = staticCompositionLocalOf {
     lightElementColors
 }
 
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalElementTypography = staticCompositionLocalOf<ElementTypography> {
+    error("No ElementTypography provided")
+}
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object ElementsTheme {
+
     val colors: ElementColors
         @Composable
         get() = LocalElementColors.current
+
+    val typography: ElementTypography
+        @Composable
+        get() = LocalElementTypography.current
 }
 
 @Composable
@@ -167,8 +178,23 @@ fun ElementsTheme(
 ) {
     val colors = if (isDark) darkElementColors else lightElementColors
 
+    val typography = ElementTypography(
+        fontWeightNormal = FontWeight.Normal.weight,
+        fontWeightMedium = FontWeight.Medium.weight,
+        fontWeightBold = FontWeight.Bold.weight,
+        fontSizeMultiplier = 1.0F,
+        xxSmallFontSize = 9.sp,
+        xSmallFontSize = 12.sp,
+        smallFontSize = 13.sp,
+        mediumFontSize = 14.sp,
+        largeFontSize = 16.sp,
+        xLargeFontSize = 20.sp,
+        fontFamily = null // We default to the default system font.
+    )
+
     CompositionLocalProvider(
         LocalElementColors provides colors,
+        LocalElementTypography provides typography,
     ) {
         MaterialTheme(
             colors = colors.toMaterialColors(),
