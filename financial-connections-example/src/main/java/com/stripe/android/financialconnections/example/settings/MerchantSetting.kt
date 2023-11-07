@@ -35,7 +35,11 @@ data class MerchantSetting(
                 }
             }
 
-        return if (currentSettings.none { it is MerchantSetting }) updatedSettings + merchantSettings else updatedSettings
+        return if (currentSettings.none { it is MerchantSetting }) {
+            updatedSettings + merchantSettings
+        } else {
+            updatedSettings
+        }
     }
 
     override fun convertToString(value: Merchant): String = value.apiValue
