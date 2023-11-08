@@ -277,7 +277,7 @@ internal fun LinkInlineSignup(
 
                                         LinkTerms(
                                             modifier = Modifier.padding(top = 8.dp),
-                                            textAlign = TextAlign.Left
+                                            textAlign = TextAlign.Start,
                                         )
                                     }
                                 }
