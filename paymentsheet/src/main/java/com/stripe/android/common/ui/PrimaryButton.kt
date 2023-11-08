@@ -23,12 +23,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.getBorderStrokeColor
+import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.getOnBackgroundColor
 import com.stripe.android.ui.core.R as UiCoreR
 
@@ -53,11 +52,7 @@ internal fun PrimaryButton(
     val shape = RoundedCornerShape(
         StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
     )
-    val fontFamily = StripeTheme.primaryButtonStyle.typography.fontFamily
-    val textStyle = TextStyle(
-        fontFamily = if (fontFamily != null) FontFamily(Font(fontFamily)) else FontFamily.Default,
-        fontSize = StripeTheme.primaryButtonStyle.typography.fontSize
-    )
+    val textStyle = StripeTheme.primaryButtonStyle.getComposeTextStyle()
 
     CompositionLocalProvider(
         LocalContentAlpha provides if (isEnabled) ContentAlpha.high else ContentAlpha.disabled
