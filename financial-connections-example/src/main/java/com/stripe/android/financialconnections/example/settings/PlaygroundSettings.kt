@@ -42,6 +42,20 @@ internal data class PlaygroundSettings(
         return Json.encodeToString(JsonObject(json))
     }
 
+    fun asDeeplinkUri(): Uri {
+        val builder = Uri.Builder()
+            .scheme("stripeconnectionsexample")
+            .authority("playground")
+        for (definition in allSettings) {
+            val saveable = definition.saveable()
+            val value = definition.selectedOption
+            if (saveable != null && value != null) {
+                builder.appendQueryParameter(saveable.key, saveable.convertToString(value))
+            }
+        }
+        return builder.build()
+    }
+
     fun saveToSharedPreferences(context: Application) {
         val sharedPreferences = context.getSharedPreferences(
             sharedPreferencesName,

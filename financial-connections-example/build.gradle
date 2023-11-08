@@ -64,6 +64,7 @@ dependencies {
     implementation libs.retrofit
     implementation libs.retrofitKotlinSerializationConverter
     implementation libs.kotlin.serialization
+    implementation libs.zxing
 
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.compose.uiTooling
