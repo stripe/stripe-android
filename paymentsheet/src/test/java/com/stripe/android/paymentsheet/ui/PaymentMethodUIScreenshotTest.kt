@@ -35,7 +35,6 @@ internal class PaymentMethodUIScreenshotTest {
                 isSelected = true,
                 isEnabled = true,
                 tintOnSelected = true,
-                itemIndex = 0,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
@@ -54,7 +53,6 @@ internal class PaymentMethodUIScreenshotTest {
                 isSelected = false,
                 isEnabled = true,
                 tintOnSelected = true,
-                itemIndex = 0,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
@@ -73,7 +71,6 @@ internal class PaymentMethodUIScreenshotTest {
                 isSelected = false,
                 isEnabled = false,
                 tintOnSelected = true,
-                itemIndex = 0,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
@@ -92,7 +89,6 @@ internal class PaymentMethodUIScreenshotTest {
                 isSelected = false,
                 isEnabled = false,
                 tintOnSelected = true,
-                itemIndex = 0,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
