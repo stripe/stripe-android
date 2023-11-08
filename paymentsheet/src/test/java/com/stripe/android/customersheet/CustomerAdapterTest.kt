@@ -151,25 +151,7 @@ class CustomerAdapterTest {
     }
 
     @Test
-    fun `When CustomerSheetACHV2Flag is disabled, retrievePaymentMethods does not request US Bank Account payment methods`() = runTest {
-        featureFlagTestRule.setEnabled(false)
-        val customerRepository = mock<CustomerRepository>()
-
-        val adapter = createAdapter(
-            customerRepository = customerRepository
-        )
-
-        adapter.retrievePaymentMethods()
-
-        verify(customerRepository).getPaymentMethods(
-            customerConfig = any(),
-            types = eq(listOf(PaymentMethod.Type.Card)),
-            silentlyFail = eq(false),
-        )
-    }
-
-    @Test
-    fun `When CustomerSheetACHV2Flag is enabled, retrievePaymentMethods requests US Bank Account payment methods`() = runTest {
+    fun `retrievePaymentMethods requests US Bank Account payment methods`() = runTest {
         val customerRepository = mock<CustomerRepository>()
 
         val adapter = createAdapter(
