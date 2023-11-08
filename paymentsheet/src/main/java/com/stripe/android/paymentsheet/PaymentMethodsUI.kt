@@ -105,9 +105,8 @@ internal fun PaymentMethodsUI(
                     isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
                     tintOnSelected = item.tintIconOnSelection,
-                    itemIndex = index,
                     onItemSelectedListener = {
-                        onItemSelectedListener(paymentMethods[it])
+                        onItemSelectedListener(paymentMethods[index])
                     }
                 )
             }
@@ -179,9 +178,8 @@ internal fun PaymentMethodUI(
     isSelected: Boolean,
     isEnabled: Boolean,
     tintOnSelected: Boolean,
-    itemIndex: Int,
     modifier: Modifier = Modifier,
-    onItemSelectedListener: (Int) -> Unit
+    onItemSelectedListener: () -> Unit
 ) {
     val color = if (isSelected) {
         MaterialTheme.colors.primary
@@ -205,7 +203,7 @@ internal fun PaymentMethodUI(
                     selected = isSelected,
                     enabled = isEnabled,
                     onClick = {
-                        onItemSelectedListener(itemIndex)
+                        onItemSelectedListener()
                     }
                 )
         ) {
