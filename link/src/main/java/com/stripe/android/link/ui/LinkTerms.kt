@@ -15,12 +15,14 @@ import com.stripe.android.uicore.text.Html
 @Composable
 internal fun LinkTerms(
     modifier: Modifier = Modifier,
-    textAlign: TextAlign = TextAlign.Center
+    textAlign: TextAlign = TextAlign.Center,
 ) {
     Html(
         html = stringResource(R.string.stripe_sign_up_terms).replaceHyperlinks(),
         color = MaterialTheme.stripeColors.placeholderText,
-        style = MaterialTheme.typography.subtitle1,
+        style = MaterialTheme.typography.subtitle1.copy(
+            textAlign = textAlign,
+        ),
         modifier = modifier,
         urlSpanStyle = SpanStyle(
             color = MaterialTheme.colors.primary
