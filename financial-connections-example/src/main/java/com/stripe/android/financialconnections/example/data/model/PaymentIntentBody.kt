@@ -19,6 +19,8 @@ data class PaymentIntentBody(
     val publishableKey: String? = null,
     @SerialName("custom_sk")
     val secretKey: String? = null,
+    @SerialName("permissions")
+    val permissions: String? = null,
     @SerialName("customer_email")
     val customerEmail: String? = null,
     @SerialName("test_environment")

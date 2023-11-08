@@ -11,9 +11,13 @@ data class PermissionsSetting(
     options = Permission.values().map { Option(it.name, it) },
     selectedOption = selectedOption
 ) {
-    override fun lasRequest(body: LinkAccountSessionBody): LinkAccountSessionBody = body
+    override fun lasRequest(body: LinkAccountSessionBody): LinkAccountSessionBody = body.copy(
+        permissions = convertToString(selectedOption)
+    )
 
-    override fun paymentIntentRequest(body: PaymentIntentBody): PaymentIntentBody = body
+    override fun paymentIntentRequest(body: PaymentIntentBody): PaymentIntentBody = body.copy(
+        permissions = convertToString(selectedOption)
+    )
 
     override fun valueUpdated(currentSettings: List<Setting<*>>, value: List<Permission>): List<Setting<*>> =
         replace(currentSettings, this.copy(selectedOption = value))
