@@ -8,6 +8,7 @@
 
 Dependencies updated:
 * [7603](https://github.com/stripe/stripe-android/pull/7603) Bumped compile SDK from 33 to 34.
+* [7311](https://github.com/stripe/stripe-android/pull/7311) Bumped AndroidX Activity dependencies from `1.7.2` to `1.8.2`.
 
 ## 20.36.1 - 2024-01-08
 

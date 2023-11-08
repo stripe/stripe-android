@@ -1,15 +1,14 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
 import android.app.Activity
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
-import androidx.core.view.WindowCompat
 import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.paymentsheet.R
@@ -36,9 +35,8 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
-        renderEdgeToEdge()
 
         onBackPressedDispatcher.addCallback {
             viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnBackPressed)
@@ -96,13 +94,5 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
     override fun finish() {
         super.finish()
         fadeOut()
-    }
-
-    private fun renderEdgeToEdge() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            return
-        }
-
-        WindowCompat.setDecorFitsSystemWindows(window, false)
     }
 }

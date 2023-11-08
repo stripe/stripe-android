@@ -26,10 +26,7 @@
         <item name="actionMenuTextColor">@color/stripe_paymentsheet_toolbar_items_color</item>
     </style>
 
-    <style name="StripePaymentSheetDefaultTheme" parent="StripePaymentSheetBaseTheme">
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-    </style>
+    <style name="StripePaymentSheetDefaultTheme" parent="StripePaymentSheetBaseTheme" />
 
     <style name="StripePaymentSheetAddPaymentMethodTheme">
         <item name="colorOnSurface">@color/stripe_paymentsheet_form</item>

@@ -2,8 +2,11 @@ package com.stripe.android.payments.paymentlauncher
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import androidx.activity.SystemBarStyle
 import androidx.activity.addCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +35,10 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
     internal val viewModel: PaymentLauncherViewModel by viewModels { viewModelFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+        )
+
         super.onCreate(savedInstanceState)
 
         val args = runCatching {

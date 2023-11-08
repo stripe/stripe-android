@@ -2,6 +2,7 @@ package com.stripe.android.googlepaylauncher
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
@@ -39,6 +40,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
     private lateinit var args: GooglePayLauncherContract.Args
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         args = runCatching {

@@ -2,6 +2,7 @@ package com.stripe.android.googlepaylauncher
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
@@ -36,9 +37,8 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
     private lateinit var args: GooglePayPaymentMethodLauncherContractV2.Args
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
-        setFadeAnimations()
 
         val nullableArgs = GooglePayPaymentMethodLauncherContractV2.Args.fromIntent(intent)
         if (nullableArgs == null) {
@@ -80,11 +80,6 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
                 )
             }
         }
-    }
-
-    override fun finish() {
-        super.finish()
-        setFadeAnimations()
     }
 
     private fun launchGooglePay(task: Task<PaymentData>) {
@@ -168,7 +163,8 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun setFadeAnimations() {
+    override fun finish() {
+        super.finish()
         fadeOut()
     }
 
