@@ -138,6 +138,40 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
+    fun `load with google pay kill switch enabled should return expected result`() = runTest {
+        prefsRepository.savePaymentSelection(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            isGooglePayReady = true,
+            isGooglePayEnabledFromBackend = false,
+        )
+
+        assertThat(
+            loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            ).getOrThrow()
+        ).isEqualTo(
+            PaymentSheetState.Full(
+                config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                customerPaymentMethods = PAYMENT_METHODS,
+                isGooglePayReady = false,
+                paymentSelection = PaymentSelection.Saved(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                ),
+                linkState = null,
+                isEligibleForCardBrandChoice = false,
+            )
+        )
+    }
+
+    @Test
     fun `Should default to first payment method if customer has payment methods`() = runTest {
         prefsRepository.savePaymentSelection(null)
 
@@ -291,31 +325,6 @@ internal class DefaultPaymentSheetLoaderTest {
         }
 
     @Test
-    fun `load() with customer should filter out cards attached to a filtered wallet`() =
-        runTest {
-            val result = createPaymentSheetLoader(
-                customerRepo = FakeCustomerRepository(
-                    listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
-                            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
-                                wallet = Wallet.GooglePayWallet("3000")
-                            )
-                        )
-                    )
-                )
-            ).load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-                ),
-                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-            ).getOrThrow()
-
-            assertThat(result.customerPaymentMethods)
-                .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        }
-
-    @Test
     fun `load() with customer should not filter out cards attached to a wallet`() =
         runTest {
             val cardWithAmexWallet = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
@@ -340,38 +349,6 @@ internal class DefaultPaymentSheetLoaderTest {
             assertThat(result.customerPaymentMethods)
                 .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD, cardWithAmexWallet)
         }
-
-    // PayPal isn't supported as a saved payment method due to issues with on-session.
-    // See: https://docs.google.com/document/d/1_bCPJXxhV4Kdgy7LX7HPwpZfElN3a2DcYUooiWC9SgM
-    @Test
-    fun `load() with customer should filter out PayPal`() = runTest {
-        var requestPaymentMethodTypes: List<PaymentMethod.Type>? = null
-        val result = createPaymentSheetLoader(
-            customerRepo = object : FakeCustomerRepository() {
-                override suspend fun getPaymentMethods(
-                    customerConfig: PaymentSheet.CustomerConfiguration,
-                    types: List<PaymentMethod.Type>,
-                    silentlyFail: Boolean
-                ): Result<List<PaymentMethod>> {
-                    requestPaymentMethodTypes = types
-                    return Result.success(listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
-                }
-            },
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "paypal")
-            )
-        ).load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-            ),
-            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER,
-        ).getOrThrow()
-
-        assertThat(result.customerPaymentMethods)
-            .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        assertThat(requestPaymentMethodTypes)
-            .containsExactly(PaymentMethod.Type.Card)
-    }
 
     @Test
     fun `load() with customer should allow sepa`() = runTest {
@@ -809,6 +786,7 @@ internal class DefaultPaymentSheetLoaderTest {
         linkAccountState: AccountStatus = AccountStatus.Verified,
         error: Throwable? = null,
         linkSettings: ElementsSession.LinkSettings? = null,
+        isGooglePayEnabledFromBackend: Boolean = true,
     ): PaymentSheetLoader {
         return DefaultPaymentSheetLoader(
             appName = "App Name",
@@ -820,6 +798,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 stripeIntent = stripeIntent,
                 error = error,
                 linkSettings,
+                isGooglePayEnabledFromBackend,
             ),
             customerRepository = customerRepo,
             lpmRepository = lpmRepository,

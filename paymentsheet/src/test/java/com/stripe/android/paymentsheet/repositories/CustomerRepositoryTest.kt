@@ -7,6 +7,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -62,6 +63,80 @@ internal class CustomerRepositoryTest {
                 productUsageTokens = any(),
                 requestOptions = any()
             )
+        }
+
+    // PayPal isn't supported as a saved payment method due to issues with on-session.
+    // See: https://docs.google.com/document/d/1_bCPJXxhV4Kdgy7LX7HPwpZfElN3a2DcYUooiWC9SgM
+    @Test
+    fun `getPaymentMethods() should filter unsupported payment method types`() =
+        runTest {
+            givenGetPaymentMethodsReturns(
+                Result.success(emptyList())
+            )
+
+            repository.getPaymentMethods(
+                PaymentSheet.CustomerConfiguration(
+                    "customer_id",
+                    "ephemeral_key"
+                ),
+                listOf(PaymentMethod.Type.Card, PaymentMethod.Type.PayPal),
+                true,
+            )
+
+            verify(stripeRepository).getPaymentMethods(
+                listPaymentMethodsParams = eq(
+                    ListPaymentMethodsParams(
+                        customerId = "customer_id",
+                        paymentMethodType = PaymentMethod.Type.Card
+                    )
+                ),
+                productUsageTokens = any(),
+                requestOptions = any()
+            )
+        }
+
+    @Test
+    fun `getPaymentMethods() should filter cards attached to wallets`() =
+        runTest {
+            givenGetPaymentMethodsReturns(
+                Result.success(emptyList())
+            )
+
+            val mockedReturnPaymentMethods = listOf(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                    card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "filtered").card?.copy(
+                        wallet = Wallet.GooglePayWallet("3000")
+                    )
+                )
+            )
+
+            stripeRepository.stub {
+                onBlocking {
+                    getPaymentMethods(
+                        listPaymentMethodsParams = eq(
+                            ListPaymentMethodsParams(
+                                customerId = "customer_id",
+                                paymentMethodType = PaymentMethod.Type.Card
+                            )
+                        ),
+                        productUsageTokens = any(),
+                        requestOptions = any()
+                    )
+                }.thenReturn(Result.success(mockedReturnPaymentMethods))
+            }
+
+            val result = repository.getPaymentMethods(
+                PaymentSheet.CustomerConfiguration(
+                    "customer_id",
+                    "ephemeral_key"
+                ),
+                listOf(PaymentMethod.Type.Card),
+                true,
+            ).getOrThrow()
+
+            assertThat(result).hasSize(1)
+            assertThat(result[0].id).isEqualTo("pm_123456789")
         }
 
     @Test

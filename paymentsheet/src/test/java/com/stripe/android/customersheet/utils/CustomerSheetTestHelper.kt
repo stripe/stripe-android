@@ -107,6 +107,7 @@ internal object CustomerSheetTestHelper {
         primaryButtonEnabled = false,
         customPrimaryButtonUiState = null,
         bankAccountResult = null,
+        draftPaymentSelection = null,
     )
 
     internal fun mockedFormViewModel(
@@ -170,6 +171,10 @@ internal object CustomerSheetTestHelper {
         ),
         isGooglePayAvailable: Boolean = true,
         customerPaymentMethods: List<PaymentMethod> = listOf(CARD_PAYMENT_METHOD),
+        supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod> = listOf(
+            LpmRepository.HardcodedCard,
+            LpmRepository.hardCodedUsBankAccount,
+        ),
         savedPaymentSelection: PaymentSelection? = null,
         stripeRepository: StripeRepository = FakeStripeRepository(),
         paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
@@ -190,6 +195,7 @@ internal object CustomerSheetTestHelper {
         ),
         customerSheetLoader: CustomerSheetLoader = FakeCustomerSheetLoader(
             customerPaymentMethods = customerPaymentMethods,
+            supportedPaymentMethods = supportedPaymentMethods,
             paymentSelection = savedPaymentSelection,
             isGooglePayAvailable = isGooglePayAvailable,
         ),
@@ -223,7 +229,6 @@ internal object CustomerSheetTestHelper {
             statusBarColor = { null },
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
-            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
         }

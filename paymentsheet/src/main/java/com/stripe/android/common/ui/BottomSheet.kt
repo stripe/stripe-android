@@ -164,6 +164,7 @@ internal fun BottomSheet(
             topEnd = MaterialTheme.stripeShapes.cornerRadius.dp,
         ),
         sheetGesturesEnabled = state.sheetGesturesEnabled,
+        sheetElevation = 0.dp,
         sheetContent = {
             Box(modifier = Modifier.testTag(BottomSheetContentTestTag)) {
                 sheetContent()

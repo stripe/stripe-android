@@ -59,6 +59,8 @@ internal class ElementsSessionJsonParser(
             false
         }
 
+        val googlePayPreference = json.optString(FIELD_GOOGLE_PAY_PREFERENCE)
+
         return if (stripeIntent != null) {
             ElementsSession(
                 linkSettings = ElementsSession.LinkSettings(
@@ -69,6 +71,7 @@ internal class ElementsSessionJsonParser(
                 stripeIntent = stripeIntent,
                 merchantCountry = merchantCountry,
                 isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+                isGooglePayEnabled = googlePayPreference != "disabled",
             )
         } else {
             null
@@ -139,7 +142,7 @@ internal class ElementsSessionJsonParser(
         return cardBrandChoice.optBoolean(FIELD_ELIGIBLE, false)
     }
 
-    private companion object {
+    internal companion object {
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ELEMENTS_SESSION_ID = "session_id"
         private const val FIELD_COUNTRY_CODE = "country_code"
@@ -154,5 +157,6 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_PAYMENT_METHOD_SPECS = "payment_method_specs"
         private const val FIELD_CARD_BRAND_CHOICE = "card_brand_choice"
         private const val FIELD_ELIGIBLE = "eligible"
+        const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
     }
 }

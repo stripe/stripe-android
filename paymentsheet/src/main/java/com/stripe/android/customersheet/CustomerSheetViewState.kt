@@ -76,6 +76,7 @@ internal sealed class CustomerSheetViewState(
         val formArguments: FormArguments,
         val usBankAccountFormArguments: USBankAccountFormArguments,
         val selectedPaymentMethod: LpmRepository.SupportedPaymentMethod,
+        val draftPaymentSelection: PaymentSelection?,
         val enabled: Boolean,
         override val isLiveMode: Boolean,
         override val isProcessing: Boolean,

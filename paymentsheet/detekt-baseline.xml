@@ -58,6 +58,7 @@
     <ID>MaxLineLength:CustomerRepositoryTest.kt$CustomerRepositoryTest$fun</ID>
     <ID>MaxLineLength:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest$fun</ID>
     <ID>MaxLineLength:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest$publishableKey = "pk_test_51HvTI7Lu5o3livep6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"</ID>
+    <ID>MaxLineLength:DefaultCustomerSheetLoaderTest.kt$DefaultCustomerSheetLoaderTest$fun</ID>
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$fun</ID>
     <ID>MaxLineLength:DefaultPaymentSheetLoaderTest.kt$DefaultPaymentSheetLoaderTest$fun</ID>
     <ID>MaxLineLength:FlowControllerConfigurationHandlerTest.kt$FlowControllerConfigurationHandlerTest$.</ID>

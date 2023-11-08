@@ -5,13 +5,14 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.requireValidOrThrow
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.toInternal
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -28,6 +29,7 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val elementsSessionRepository: ElementsSessionRepository,
+    private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
     private val lpmRepository: LpmRepository,
     private val customerAdapter: CustomerAdapter,
 ) : CustomerSheetLoader {
@@ -49,25 +51,19 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
     private suspend fun retrieveElementsSession(
         configuration: CustomerSheet.Configuration?,
     ): Result<ElementsSession> {
-        return elementsSessionRepository.get(
-            PaymentSheet.InitializationMode.DeferredIntent(
-                PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
-                    paymentMethodTypes = listOf(
-                        PaymentMethod.Type.Card.code,
-                        PaymentMethod.Type.USBankAccount.code,
-                    )
-                )
+        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
             )
-        ).mapCatching { elementsSession ->
-            val billingDetailsCollectionConfig =
-                configuration?.billingDetailsCollectionConfiguration?.toInternal()
-                    ?: BillingDetailsCollectionConfiguration()
+        )
+        return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
+            val billingDetailsCollectionConfig = configuration?.billingDetailsCollectionConfiguration.toInternal()
 
             lpmRepository.update(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
+                isDeferred = true,
             )
 
             elementsSession.requireValidOrThrow()
@@ -120,10 +116,24 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
                     if (isLiveModeProvider()) GooglePayEnvironment.Production else GooglePayEnvironment.Test
                 ).isReady().first()
 
+                val billingDetailsCollectionConfig = configuration?.billingDetailsCollectionConfiguration.toInternal()
+
+                // By default, only cards are supported. If the elements session is not available, then US Bank account
+                // is not supported
+                val supportedPaymentMethods = elementsSession?.stripeIntent?.paymentMethodTypes?.mapNotNull {
+                    lpmRepository.fromCode(it)
+                } ?: listOf(LpmRepository.hardcodedCardSpec(billingDetailsCollectionConfig))
+
+                val validSupportedPaymentMethods = filterSupportedPaymentMethods(
+                    supportedPaymentMethods,
+                    isFinancialConnectionsAvailable,
+                )
+
                 Result.success(
                     CustomerSheetState.Full(
                         config = configuration,
                         stripeIntent = elementsSession?.stripeIntent,
+                        supportedPaymentMethods = validSupportedPaymentMethods,
                         customerPaymentMethods = paymentMethods,
                         isGooglePayReady = isGooglePayReadyAndEnabled,
                         paymentSelection = paymentSelection
@@ -134,5 +144,20 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
                 Result.failure(cause)
             }
         )
+    }
+
+    private fun filterSupportedPaymentMethods(
+        supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
+        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
+    ): List<LpmRepository.SupportedPaymentMethod> {
+        val supported = setOfNotNull(
+            PaymentMethod.Type.Card.code,
+            PaymentMethod.Type.USBankAccount.code.takeIf {
+                customerSheetACHv2.isEnabled && isFinancialConnectionsAvailable()
+            }
+        )
+        return supportedPaymentMethods.filter {
+            supported.contains(it.code)
+        }
     }
 }

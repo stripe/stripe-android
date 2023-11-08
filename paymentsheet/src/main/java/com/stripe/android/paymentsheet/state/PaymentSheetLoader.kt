@@ -11,10 +11,8 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -69,7 +67,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration?
     ): Result<PaymentSheetState.Full> = withContext(workContext) {
-        val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
         val isDecoupling = initializationMode is DeferredIntent
 
         eventReporter.onLoadStarted(isDecoupling = isDecoupling)
@@ -81,7 +78,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             create(
                 elementsSession = elementsSession,
                 config = paymentSheetConfiguration,
-                isGooglePayReady = isGooglePayReady,
+                isGooglePayReady = isGooglePayReady(paymentSheetConfiguration, elementsSession),
             )
         }.also {
             reportLoadResult(loaderResult = it, isDecoupling = isDecoupling)
@@ -89,9 +86,14 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 
     private suspend fun isGooglePayReady(
-        paymentSheetConfiguration: PaymentSheet.Configuration?
+        paymentSheetConfiguration: PaymentSheet.Configuration?,
+        elementsSession: ElementsSession,
     ): Boolean {
-        return paymentSheetConfiguration?.googlePay?.environment?.let { environment ->
+        return elementsSession.isGooglePayEnabled && paymentSheetConfiguration.isGooglePayReady()
+    }
+
+    private suspend fun PaymentSheet.Configuration?.isGooglePayReady(): Boolean {
+        return this?.googlePay?.environment?.let { environment ->
             googlePayRepositoryFactory(
                 when (environment) {
                     PaymentSheet.GooglePayConfiguration.Environment.Production ->
@@ -213,23 +215,11 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             PaymentMethod.Type.fromCode(it.code)
         }
 
-        val walletTypesToRemove = setOf(Wallet.Type.ApplePay, Wallet.Type.GooglePay, Wallet.Type.SamsungPay)
-
         val paymentMethods = customerRepository.getPaymentMethods(
             customerConfig = customerConfig,
-            types = paymentMethodTypes.filter { paymentMethodType ->
-                paymentMethodType in setOf(
-                    PaymentMethod.Type.Card,
-                    PaymentMethod.Type.USBankAccount,
-                    PaymentMethod.Type.SepaDebit,
-                )
-            },
+            types = paymentMethodTypes,
             silentlyFail = true,
-        ).getOrDefault(emptyList()).filter { paymentMethod ->
-            val isCardWithWallet = paymentMethod.type == PaymentMethod.Type.Card &&
-                walletTypesToRemove.contains(paymentMethod.card?.wallet?.walletType)
-            !isCardWithWallet
-        }
+        ).getOrDefault(emptyList())
 
         return paymentMethods.filter { paymentMethod ->
             paymentMethod.hasExpectedDetails()
@@ -249,6 +239,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
+                isDeferred = initializationMode is DeferredIntent,
             )
 
             if (!didParseServerResponse) {
@@ -393,13 +384,12 @@ private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
     return PaymentSelection.Saved(this)
 }
 
-internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal():
-    BillingDetailsCollectionConfiguration {
+internal fun PaymentSheet.BillingDetailsCollectionConfiguration?.toInternal(): BillingDetailsCollectionConfiguration {
     return BillingDetailsCollectionConfiguration(
-        collectName = name == Always,
-        collectEmail = email == Always,
-        collectPhone = phone == Always,
-        address = when (address) {
+        collectName = this?.name == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+        collectEmail = this?.email == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+        collectPhone = this?.phone == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+        address = when (this?.address) {
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
                 BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
             }
@@ -409,6 +399,7 @@ internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal():
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
                 BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             }
+            else -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
         },
     )
 }

@@ -100,6 +100,7 @@ class LpmRepository constructor(
         serverLpmSpecs: String?,
         billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration(),
+        isDeferred: Boolean = false,
     ): Boolean {
         val expectedLpms = stripeIntent.paymentMethodTypes
         var failedToParseServerResponse = false
@@ -108,7 +109,12 @@ class LpmRepository constructor(
             val deserializationResult = LpmSerializer.deserializeList(serverLpmSpecs)
             failedToParseServerResponse = deserializationResult.isFailure
             val serverLpmObjects = deserializationResult.getOrElse { emptyList() }
-            update(stripeIntent, serverLpmObjects, billingDetailsCollectionConfiguration)
+            update(
+                stripeIntent = stripeIntent,
+                specs = serverLpmObjects,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                isDeferred = isDeferred,
+            )
         }
 
         // If the server does not return specs, or they are not parsed successfully
@@ -122,6 +128,7 @@ class LpmRepository constructor(
                 missingLpms = lpmsNotParsedFromServerSpec,
                 stripeIntent = stripeIntent,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                isDeferred = isDeferred,
             )
         }
 
@@ -132,14 +139,21 @@ class LpmRepository constructor(
         missingLpms: List<String>,
         stripeIntent: StripeIntent,
         billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
+        isDeferred: Boolean,
     ) {
         val missingSpecsOnDisk = readFromDisk().filter { it.type in missingLpms }
 
-        val missingLpmsByType = missingSpecsOnDisk.mapNotNull { spec ->
+        val validSpecs = missingSpecsOnDisk.filterNot { spec ->
+            !arguments.isFinancialConnectionsAvailable() &&
+                spec.type == PaymentMethod.Type.USBankAccount.code
+        }
+
+        val missingLpmsByType = validSpecs.mapNotNull { spec ->
             convertToSupportedPaymentMethod(
                 stripeIntent = stripeIntent,
                 sharedDataSpec = spec,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                isDeferred = isDeferred,
             )
         }.associateBy {
             it.code
@@ -172,6 +186,7 @@ class LpmRepository constructor(
         specs: List<SharedDataSpec>,
         billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration(),
+        isDeferred: Boolean = false,
     ) {
         val validSpecs = specs.filterNot { spec ->
             !arguments.isFinancialConnectionsAvailable() &&
@@ -184,6 +199,7 @@ class LpmRepository constructor(
                 stripeIntent = stripeIntent,
                 sharedDataSpec = spec,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                isDeferred = isDeferred
             )
         }
 
@@ -209,6 +225,7 @@ class LpmRepository constructor(
         stripeIntent: StripeIntent,
         sharedDataSpec: SharedDataSpec,
         billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
+        isDeferred: Boolean = false,
     ) = when (sharedDataSpec.type) {
         PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
             code = "card",
@@ -467,8 +484,10 @@ class LpmRepository constructor(
              *         }
              *     }
              * }
+             *
+             * Verification method is always "automatic" when the intent is deferred.
              */
-            if (supportsVerificationMethod) {
+            if (supportsVerificationMethod || isDeferred) {
                 SupportedPaymentMethod(
                     code = "us_bank_account",
                     requiresMandate = true,

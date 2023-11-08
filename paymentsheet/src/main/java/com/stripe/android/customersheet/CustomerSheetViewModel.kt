@@ -27,7 +27,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -46,6 +45,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
+import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.utils.mapAsStateFlow
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.Dispatchers
@@ -82,7 +82,6 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val customerSheetLoader: CustomerSheetLoader,
-    private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
 ) : ViewModel() {
 
     private val backStack = MutableStateFlow(initialBackStack)
@@ -96,23 +95,13 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private var unconfirmedPaymentMethod: PaymentMethod? = null
     private var stripeIntent: StripeIntent? = null
+    private var supportedPaymentMethods = mutableListOf<LpmRepository.SupportedPaymentMethod>()
 
     private val card = LpmRepository.hardcodedCardSpec(
-        billingDetailsCollectionConfiguration =
-        configuration.billingDetailsCollectionConfiguration.toInternal()
-    )
-    private val usBankAccount = LpmRepository.hardCodedUsBankAccount
-
-    private val supportedPaymentMethods = listOfNotNull(
-        card,
-        usBankAccount.takeIf { isFinancialConnectionsAvailable() }
+        billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration.toInternal()
     )
 
     init {
-        lpmRepository.initializeWithPaymentMethods(
-            supportedPaymentMethods.associateBy { it.code }
-        )
-
         configuration.appearance.parseAppearance()
 
         if (viewState.value is CustomerSheetViewState.Loading) {
@@ -260,6 +249,9 @@ internal class CustomerSheetViewModel @Inject constructor(
 
         result.fold(
             onSuccess = { state ->
+                supportedPaymentMethods.clear()
+                supportedPaymentMethods.addAll(state.supportedPaymentMethods)
+
                 savedPaymentSelection = state.paymentSelection
                 isGooglePayReadyAndEnabled = state.isGooglePayReady
                 stripeIntent = state.stripeIntent
@@ -352,7 +344,10 @@ internal class CustomerSheetViewModel @Inject constructor(
                         ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
                 ),
                 selectedPaymentMethod = paymentMethod,
-                primaryButtonLabel = if (paymentMethod.code == PaymentMethod.Type.USBankAccount.code) {
+                primaryButtonLabel = if (
+                    paymentMethod.code == PaymentMethod.Type.USBankAccount.code &&
+                    it.bankAccountResult !is CollectBankAccountResultInternal.Completed
+                ) {
                     resolvableString(
                         id = UiCoreR.string.stripe_continue_button_label
                     )
@@ -361,6 +356,13 @@ internal class CustomerSheetViewModel @Inject constructor(
                         id = R.string.stripe_paymentsheet_save
                     )
                 },
+                mandateText = it.draftPaymentSelection?.mandateText(
+                    context = application,
+                    merchantName = configuration.merchantDisplayName
+                        ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+                    isSaveForFutureUseSelected = false,
+                    isSetupFlow = true,
+                ),
                 primaryButtonEnabled = it.formViewData.completeFormValues != null && !it.isProcessing,
             )
         }
@@ -373,6 +375,10 @@ internal class CustomerSheetViewModel @Inject constructor(
                     completeFormValues = formFieldValues,
                 ),
                 primaryButtonEnabled = formFieldValues != null && !it.isProcessing,
+                draftPaymentSelection = formFieldValues?.transformToPaymentSelection(
+                    resources = resources,
+                    paymentMethod = it.selectedPaymentMethod,
+                )
             )
         }
     }
@@ -566,6 +572,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     }
                 ),
                 selectedPaymentMethod = selectedPaymentMethod,
+                draftPaymentSelection = null,
                 enabled = true,
                 isLiveMode = isLiveModeProvider(),
                 isProcessing = false,
@@ -588,13 +595,11 @@ internal class CustomerSheetViewModel @Inject constructor(
             val uiState = callback(it.customPrimaryButtonUiState)
             if (uiState != null) {
                 it.copy(
-                    primaryButtonLabel = resolvableString(uiState.label),
                     primaryButtonEnabled = uiState.enabled,
                     customPrimaryButtonUiState = uiState,
                 )
             } else {
                 it.copy(
-                    primaryButtonLabel = it.primaryButtonLabel,
                     primaryButtonEnabled = it.formViewData.completeFormValues != null && !it.isProcessing,
                     customPrimaryButtonUiState = null,
                 )
@@ -614,7 +619,12 @@ internal class CustomerSheetViewModel @Inject constructor(
     private fun onCollectUSBankAccountResult(bankAccountResult: CollectBankAccountResultInternal) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
-                bankAccountResult = bankAccountResult
+                bankAccountResult = bankAccountResult,
+                primaryButtonLabel = if (bankAccountResult is CollectBankAccountResultInternal.Completed) {
+                    resolvableString(id = R.string.stripe_paymentsheet_save)
+                } else {
+                    resolvableString(id = UiCoreR.string.stripe_continue_button_label)
+                },
             )
         }
     }

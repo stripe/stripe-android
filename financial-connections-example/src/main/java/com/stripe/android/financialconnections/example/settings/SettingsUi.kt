@@ -1,19 +1,24 @@
 package com.stripe.android.financialconnections.example.settings
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.material.Checkbox
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material.ExposedDropdownMenuDefaults
+import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,33 +38,47 @@ internal fun SettingsUi(
     onSettingsChanged: (PlaygroundSettings) -> Unit,
 ) {
     Column {
-        for (settingDefinition in playgroundSettings.settings.map { it.key }) {
+        for (setting in playgroundSettings.settings) {
             Row(modifier = Modifier.padding(bottom = 16.dp)) {
-                Setting(settingDefinition, playgroundSettings, onSettingsChanged)
+                SingleSelectSetting(setting, playgroundSettings, onSettingsChanged)
             }
         }
     }
 }
 
 @Composable
-private fun <T> Setting(
-    settingDefinition: PlaygroundSettingDefinition<T>,
+private fun <T> SingleSelectSetting(
+    setting: Setting<T>,
     playgroundSettings: PlaygroundSettings,
     onSettingsChanged: (PlaygroundSettings) -> Unit
 ) {
-    Setting(
-        name = settingDefinition.displayName,
-        options = settingDefinition.options,
-        value = playgroundSettings[settingDefinition],
-    ) { newValue ->
-        onSettingsChanged(playgroundSettings.withValue(settingDefinition, newValue))
+    when (setting) {
+        is SingleChoiceSetting -> SingleSelectSetting(
+            name = setting.displayName,
+            options = setting.options,
+            value = setting.selectedOption
+        ) {
+            onSettingsChanged(
+                playgroundSettings.withValue(setting, it)
+            )
+        }
+
+        is MultipleChoiceSetting<*> -> MultiSelectSetting(
+            name = setting.displayName,
+            options = setting.options as List<Option<T>>,
+            selectedValues = setting.selectedOption as List<T>
+        ) {
+            onSettingsChanged(
+                playgroundSettings.withValue(setting as Setting<T>, it as T)
+            )
+        }
     }
 }
 
 @Composable
-private fun <T> Setting(
+private fun <T> SingleSelectSetting(
     name: String,
-    options: List<PlaygroundSettingDefinition.Option<T>>,
+    options: List<Option<T>>,
     value: T,
     onOptionChanged: (T) -> Unit,
 ) {
@@ -87,6 +106,50 @@ private fun <T> Setting(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class, ExperimentalLayoutApi::class)
+@Composable
+private fun <T> MultiSelectSetting(
+    name: String,
+    options: List<Option<T>>,
+    selectedValues: List<T>,
+    onOptionChanged: (List<T>) -> Unit
+) {
+    Column {
+        Row {
+            Text(
+                text = name,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+
+        FlowRow {
+            options.forEach { option ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(end = 5.dp)
+                ) {
+                    CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+                        Checkbox(
+                            checked = selectedValues.contains(option.value),
+                            onCheckedChange = {
+                                val newOptions = if (selectedValues.contains(option.value)) {
+                                    selectedValues - option.value
+                                } else {
+                                    selectedValues + option.value
+                                }
+                                onOptionChanged(newOptions)
+                            },
+                        )
+                    }
+                    Text(
+                        text = option.name,
+                    )
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun TextSetting(
@@ -101,7 +164,8 @@ private fun TextSetting(
         onValueChange = { newValue: String ->
             onOptionChanged(newValue)
         },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .semantics { testTagsAsResourceId = true }
             .testTag("$name setting"),
     )
@@ -111,7 +175,7 @@ private fun TextSetting(
 @Composable
 private fun <T> RadioButtonSetting(
     name: String,
-    options: List<PlaygroundSettingDefinition.Option<T>>,
+    options: List<Option<T>>,
     value: T,
     onOptionChanged: (T) -> Unit,
 ) {
@@ -158,7 +222,7 @@ private fun <T> RadioButtonSetting(
 @Composable
 private fun <T> DropdownSetting(
     name: String,
-    options: List<PlaygroundSettingDefinition.Option<T>>,
+    options: List<Option<T>>,
     value: T,
     onOptionChanged: (T) -> Unit,
 ) {

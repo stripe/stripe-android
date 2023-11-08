@@ -1734,46 +1734,6 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When FC SDK is not available, support payment methods should not include us bank account`() = runTest {
-        val viewModel = createViewModel(
-            isFinancialConnectionsAvailable = { false },
-            initialBackStack = listOf(
-                selectPaymentMethodViewState,
-            ),
-        )
-
-        viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
-
-            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
-
-            val viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.supportedPaymentMethods.map { it.code })
-                .doesNotContain(PaymentMethod.Type.USBankAccount.code)
-        }
-    }
-
-    @Test
-    fun `When FC SDK is available, support payment methods should be included us bank account`() = runTest {
-        val viewModel = createViewModel(
-            isFinancialConnectionsAvailable = { true },
-            initialBackStack = listOf(
-                selectPaymentMethodViewState,
-            ),
-        )
-
-        viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
-
-            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
-
-            val viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.supportedPaymentMethods.map { it.code })
-                .contains(PaymentMethod.Type.USBankAccount.code)
-        }
-    }
-
-    @Test
     fun `When adding a US Bank account and user taps on scrim, a confirmation dialog should be visible`() = runTest {
         val viewModel = createViewModel(
             isFinancialConnectionsAvailable = { true },
@@ -1985,6 +1945,150 @@ class CustomerSheetViewModelTest {
             )
 
             expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `When adding a us bank account and the account is retrieved, the primary button should say save`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                    selectedPaymentMethod = LpmRepository.hardCodedUsBankAccount,
+                    bankAccountResult = CollectBankAccountResultInternal.Completed(
+                        response = mock(),
+                    ),
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            val viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+        }
+    }
+
+    @Test
+    fun `When adding a us bank account and the account is cancelled, the primary button should say continue`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                    selectedPaymentMethod = LpmRepository.hardCodedUsBankAccount,
+                    bankAccountResult = null,
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnCollectBankAccountResult(
+                    CollectBankAccountResultInternal.Cancelled
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo(resolvableString(UiCoreR.string.stripe_continue_button_label))
+        }
+    }
+
+    @Test
+    fun `When adding us bank and primary button says save, it should stay as save`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                    selectedPaymentMethod = LpmRepository.hardCodedUsBankAccount,
+                    bankAccountResult = CollectBankAccountResultInternal.Completed(
+                        response = mock(),
+                    ),
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepository.HardcodedCard
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepository.hardCodedUsBankAccount
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.primaryButtonLabel)
+                .isEqualTo(resolvableString(R.string.stripe_paymentsheet_save))
+        }
+    }
+
+    @Test
+    fun `Mandate is required depending on payment method`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
+                    selectedPaymentMethod = LpmRepository.HardcodedCard,
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.mandateText)
+                .isNull()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepository.hardCodedUsBankAccount
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.mandateText)
+                .isNull()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnUpdateMandateText(
+                    mandateText = "Mandate",
+                    showAbovePrimaryButton = false
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.mandateText)
+                .isNotNull()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepository.HardcodedCard
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.mandateText)
+                .isNull()
         }
     }
 

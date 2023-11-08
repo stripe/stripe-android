@@ -3,7 +3,13 @@
 ## XX.XX.XX - 2023-XX-XX
 
 ### PaymentSheet
+* [FIXED][7584](https://github.com/stripe/stripe-android/pull/7584) Fixed an issue where PaymentSheet would render with a lightened surface color in dark mode.
+
+## 20.34.4 - 2023-11-02
+
+### PaymentSheet
 * [FIXED][7570](https://github.com/stripe/stripe-android/pull/7570) Fixed an issue where compiling PaymentSheet with R8 would cause an irrelevant warning for missing classes from Financial Connections if the module wasn't included.
+* [FIXED][7571](https://github.com/stripe/stripe-android/pull/7571) Fixed an issue where CustomerSheet would throw an error related to invalid payment_method_types.
 
 ## 20.34.3 - 2023-10-31
 

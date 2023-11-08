@@ -22,6 +22,7 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         id: create-pull-request
         with:
+          token: ${{ secrets.LOKALISE_CREATE_PR_TOKEN }}
           commit-message: Fetch latest Lokalize translations
           title: Update translations
           body: This pull request contains the latest translations from Lokalize.
