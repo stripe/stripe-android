@@ -3,6 +3,7 @@ package com.stripe.android.customersheet.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -162,6 +163,7 @@ internal fun SelectPaymentMethod(
             Mandate(
                 mandateText = viewState.mandateText,
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(horizontal = horizontalPadding),
             )
         }
@@ -277,6 +279,7 @@ internal fun AddPaymentMethodWithPaymentElement(
             Mandate(
                 mandateText = viewState.mandateText,
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(horizontal = horizontalPadding),
             )
         }
@@ -298,6 +301,7 @@ internal fun AddPaymentMethodWithPaymentElement(
             Mandate(
                 mandateText = viewState.mandateText,
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(horizontal = horizontalPadding),
             )
         }

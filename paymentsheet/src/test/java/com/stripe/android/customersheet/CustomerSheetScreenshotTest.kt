@@ -223,7 +223,7 @@ internal class CustomerSheetScreenshotTest {
                     isGooglePayEnabled = false,
                     primaryButtonLabel = "Continue",
                     primaryButtonVisible = true,
-                    mandateText = "Some mandate text that is much longer so that it shows up as centered."
+                    mandateText = "Some mandate text."
                 ),
                 paymentMethodNameProvider = { it!! },
                 formViewModelSubComponentBuilderProvider = null,
