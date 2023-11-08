@@ -82,7 +82,6 @@ internal class FinancialConnectionsQrCodeActivity : AppCompatActivity() {
                     color = MaterialTheme.colors.secondaryVariant
                 )
             }
-
         }
     }
 
