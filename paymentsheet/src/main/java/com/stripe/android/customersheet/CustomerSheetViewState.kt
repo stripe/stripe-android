@@ -58,6 +58,7 @@ internal sealed class CustomerSheetViewState(
         val primaryButtonLabel: String?,
         val errorMessage: String? = null,
         val unconfirmedPaymentMethod: PaymentMethod? = null,
+        val mandateText: String? = null,
     ) : CustomerSheetViewState(
         savedPaymentMethods = savedPaymentMethods,
         isLiveMode = isLiveMode,
