@@ -46,9 +46,9 @@ internal data class PlaygroundSettings(
         val builder = Uri.Builder()
             .scheme("stripeconnectionsexample")
             .authority("playground")
-        for (definition in allSettingDefinitions) {
+        for (definition in allSettings) {
             val saveable = definition.saveable()
-            val value = settings[definition]
+            val value = definition.selectedOption
             if (saveable != null && value != null) {
                 builder.appendQueryParameter(saveable.key, saveable.convertToString(value))
             }

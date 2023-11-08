@@ -11,7 +11,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,10 +29,10 @@ import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-internal class QrCodeActivity : AppCompatActivity() {
+internal class FinancialConnectionsQrCodeActivity : AppCompatActivity() {
     companion object {
         fun create(context: Context, settingsUri: String): Intent {
-            return Intent(context, QrCodeActivity::class.java).apply {
+            return Intent(context, FinancialConnectionsQrCodeActivity::class.java).apply {
                 putExtra("settingsUri", settingsUri)
             }
         }
@@ -46,31 +48,41 @@ internal class QrCodeActivity : AppCompatActivity() {
         }
 
         setContent {
-            var bitmap: Bitmap? by remember { mutableStateOf(null) }
+            FinancialConnectionsExampleTheme {
+                QrCodeScreen(settingsUri)
+            }
+        }
+    }
 
-            LaunchedEffect(settingsUri) {
-                launch(Dispatchers.IO) {
-                    bitmap = getQrCodeBitmap(settingsUri)
-                }
+    @Composable
+    private fun QrCodeScreen(settingsUri: String) {
+        var bitmap: Bitmap? by remember { mutableStateOf(null) }
+
+        LaunchedEffect(settingsUri) {
+            launch(Dispatchers.IO) {
+                bitmap = getQrCodeBitmap(settingsUri)
+            }
+        }
+
+        val localBitmap = bitmap
+        if (localBitmap != null) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    bitmap = localBitmap.asImageBitmap(),
+                    contentDescription = "QR Code",
+                    contentScale = ContentScale.Fit,
+                )
+                Text(
+                    text = settingsUri,
+                    color = MaterialTheme.colors.secondaryVariant
+                )
             }
 
-            val localBitmap = bitmap
-            if (localBitmap != null) {
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Image(
-                        bitmap = localBitmap.asImageBitmap(),
-                        contentDescription = "QR Code",
-                        contentScale = ContentScale.Fit,
-                    )
-                    Text(text = settingsUri)
-                }
-
-            }
         }
     }
 

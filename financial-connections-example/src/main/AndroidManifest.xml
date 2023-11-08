@@ -47,7 +47,10 @@
                     android:host="playground" />
             </intent-filter>
         </activity>
-        <activity android:name=".QrCodeActivity" />
+        <activity
+            android:name=".FinancialConnectionsQrCodeActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
     </application>
 
 </manifest>

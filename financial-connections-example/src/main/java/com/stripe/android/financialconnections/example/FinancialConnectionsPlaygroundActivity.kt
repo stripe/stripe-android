@@ -22,6 +22,7 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
@@ -36,7 +37,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
@@ -70,7 +70,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             viewModel::onCollectBankAccountLauncherResult
         )
         setContent {
-            FinancialConnectionsScreen()
+            FinancialConnectionsExampleTheme {
+                FinancialConnectionsScreen()
+            }
         }
     }
 
@@ -177,11 +179,11 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             Divider(Modifier.padding(vertical = 8.dp))
             Text(
                 text = "backend: ${state.backendUrl}",
-                color = Color.Gray
+                color = MaterialTheme.colors.secondaryVariant
             )
             Text(
                 text = "env: ${BuildConfig.TEST_ENVIRONMENT}",
-                color = Color.Gray
+                color = MaterialTheme.colors.secondaryVariant
             )
             Button(
                 modifier = Modifier
@@ -194,12 +196,13 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             LazyColumn {
                 items(state.status) { item ->
                     Row(Modifier.padding(4.dp), verticalAlignment = Alignment.Top) {
+                        val primary = MaterialTheme.colors.primary
                         Canvas(
                             modifier = Modifier
                                 .padding(end = 8.dp, top = 6.dp)
                                 .size(6.dp)
                         ) {
-                            drawCircle(Color.Black)
+                            drawCircle(primary)
                         }
                         SelectionContainer {
                             Text(text = item, fontSize = 12.sp)
@@ -236,7 +239,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     DropdownMenuItem(onClick = {
                         setShowMenu(false)
                         context.startActivity(
-                            QrCodeActivity.create(
+                            FinancialConnectionsQrCodeActivity.create(
                                 context = context,
                                 settingsUri = settings.asDeeplinkUri().toString(),
                             )
