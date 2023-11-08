@@ -24,7 +24,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
 
-private val LightColorPalette = FinancialConnectionsColors(
+@Deprecated("Use V3Colors instead")
+private val Colors = FinancialConnectionsColors(
     backgroundSurface = Color.White,
     backgroundContainer = Neutral50,
     backgroundBackdrop = Neutral200.copy(alpha = .70f),
@@ -46,7 +47,30 @@ private val LightColorPalette = FinancialConnectionsColors(
     iconAttention = Attention400
 )
 
-@Deprecated("Use AuthFlowV3Typography instead")
+private val V3Colors = FinancialConnectionsV3Colors(
+    textDefault = Color(0xFF414552),
+    textSubdued = Color(0xFF687385),
+    textDisabled = Color(0xFFA3ACBA),
+    textWhite = Color(0xFFFFFFFF),
+    textBrand = Color(0xFF625AFA),
+    textCritical = Color(0xFFDF1B41),
+    iconDefault = Color(0xFF545969),
+    iconSubdued = Color(0xFF87909F),
+    iconWhite = Color(0xFFFFFFFF),
+    iconBrand = Color(0xFF8D7FFA),
+    buttonPrimary = Color(0xFF625AFA),
+    buttonPrimaryHover = Color(0xFF625AFA),
+    buttonPrimaryPressed = Color(0xFF513DD9),
+    buttonSecondary = Color(0xFFF6F8FA),
+    buttonSecondaryHover = Color(0xFFF6F8FA),
+    buttonSecondaryPressed = Color(0xFFEBEEF1),
+    background = Color(0xFFF6F8FA),
+    backgroundBrand = Color(0xFFF9F7FF),
+    border = Color(0xFFD5DBE1),
+    borderBrand = Color(0xFF635BFF)
+)
+
+@Deprecated("Use V3Typography instead")
 private val Typography = FinancialConnectionsTypography(
     subtitle = TextStyle(
         fontSize = 24.sp,
@@ -135,7 +159,7 @@ private val Typography = FinancialConnectionsTypography(
     ),
 )
 
-private val AuthFlowV3Typography = FinancialConnectionsAuthFlowV3Typography(
+private val V3Typography = FinancialConnectionsV3Typography(
     headingXLarge = TextStyle(
         fontSize = 28.sp,
         lineHeight = 32.sp,
@@ -197,21 +221,21 @@ private val AuthFlowV3Typography = FinancialConnectionsAuthFlowV3Typography(
 )
 
 private val TextSelectionColors = TextSelectionColors(
-    handleColor = LightColorPalette.textBrand,
-    backgroundColor = LightColorPalette.textBrand.copy(alpha = 0.4f)
+    handleColor = V3Colors.textBrand,
+    backgroundColor = V3Colors.textBrand.copy(alpha = 0.4f)
 )
 
 @Immutable
 private object FinancialConnectionsRippleTheme : RippleTheme {
     @Composable
     override fun defaultColor() = RippleTheme.defaultRippleColor(
-        contentColor = LightColorPalette.textBrand,
+        contentColor = V3Colors.textBrand,
         lightTheme = MaterialTheme.colors.isLight
     )
 
     @Composable
     override fun rippleAlpha() = RippleTheme.defaultRippleAlpha(
-        contentColor = LightColorPalette.textBrand,
+        contentColor = V3Colors.textBrand,
         lightTheme = MaterialTheme.colors.isLight
     )
 }
@@ -220,8 +244,9 @@ private object FinancialConnectionsRippleTheme : RippleTheme {
 internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalFinancialConnectionsTypography provides Typography,
-        LocalAuthFlowV3Typography provides AuthFlowV3Typography,
-        LocalFinancialConnectionsColors provides LightColorPalette
+        LocalV3Typography provides V3Typography,
+        LocalFinancialConnectionsColors provides Colors,
+        LocalV3Colors provides V3Colors
     ) {
         val view = LocalView.current
         val window = findWindow()
@@ -268,9 +293,14 @@ private val LocalFinancialConnectionsTypography =
         error("no FinancialConnectionsTypography provided")
     }
 
-private val LocalAuthFlowV3Typography =
-    staticCompositionLocalOf<FinancialConnectionsAuthFlowV3Typography> {
-        error("no AuthFlowV3Typography provided")
+private val LocalV3Typography =
+    staticCompositionLocalOf<FinancialConnectionsV3Typography> {
+        error("no V3Typography provided")
+    }
+
+private val LocalV3Colors =
+    staticCompositionLocalOf<FinancialConnectionsV3Colors> {
+        error("no V3Colors provided")
     }
 
 private val LocalFinancialConnectionsColors = staticCompositionLocalOf<FinancialConnectionsColors> {
@@ -278,15 +308,22 @@ private val LocalFinancialConnectionsColors = staticCompositionLocalOf<Financial
 }
 
 internal object FinancialConnectionsTheme {
+
+    @Deprecated("Use v3Colors instead")
     val colors: FinancialConnectionsColors
         @Composable
         get() = LocalFinancialConnectionsColors.current
+
+    @Deprecated("Use v3Typography instead")
     val typography: FinancialConnectionsTypography
         @Composable
         get() = LocalFinancialConnectionsTypography.current
-    val authFlowV3Typography
+    val v3Typography
         @Composable
-        get() = LocalAuthFlowV3Typography.current
+        get() = LocalV3Typography.current
+    val v3Colors
+        @Composable
+        get() = LocalV3Colors.current
 }
 
 /**
