@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [FIXED][7584](https://github.com/stripe/stripe-android/pull/7584) Fixed an issue where PaymentSheet would render with a lightened surface color in dark mode.
+
 ## 20.34.4 - 2023-11-02
 
 ### PaymentSheet
