@@ -54,20 +54,20 @@ jobs:
           name: apk
       - name: diffuse
         id: diffuse
-        uses: usefulness/diffuse-action@v1
+        uses: usefulness/diffuse-action@d816fd102c1f5f69519ee4bb8e0e12a42d005788
         with:
           old-file-path: apk/identity-example-release-base.apk
           new-file-path: apk/identity-example-release-pr.apk
 
       # Post comment with output
 
-      - uses: peter-evans/find-comment@v1
+      - uses: peter-evans/find-comment@d2dae40ed151c634e4189471272b57e76ec19ba8
         id: find_comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: Diffuse output
 
-      - uses: peter-evans/create-or-update-comment@v1
+      - uses: peter-evans/create-or-update-comment@a35cf36e5301d70b76f316e867e7788a55a31dae
         if: ${{ steps.diffuse.outputs.diff-raw != null || steps.find_comment.outputs.comment-id != null }}
         with:
           body: |
@@ -94,7 +94,7 @@ jobs:
       - name: Generate Android release bundle
         run: ./gradlew :identity-example:bundleRelease
       - name: Upload artifact to Emerge
-        uses: EmergeTools/emerge-upload-action@v1.0.3
+        uses: EmergeTools/emerge-upload-action@a35cf36e5301d70b76f316e867e7788a55a31dae
         with:
           artifact_path: identity-example/build/outputs/bundle/theme1Release/identity-example-theme1-release.aab
           emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
