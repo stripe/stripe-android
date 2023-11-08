@@ -36,6 +36,7 @@ internal val Green500 = Color(0xff228403)
  * Financial Connections custom Color Palette
  */
 @Immutable
+@Deprecated("Use FinancialConnectionsV3Colors")
 internal data class FinancialConnectionsColors(
     // backgrounds
     val backgroundSurface: Color,
@@ -60,4 +61,28 @@ internal data class FinancialConnectionsColors(
     val iconInfo: Color,
     val iconSuccess: Color,
     val iconAttention: Color
+)
+
+@Immutable
+internal data class FinancialConnectionsV3Colors(
+    val textDefault: Color,
+    val textSubdued: Color,
+    val textDisabled: Color,
+    val textWhite: Color,
+    val textBrand: Color,
+    val textCritical: Color,
+    val iconDefault: Color,
+    val iconSubdued: Color,
+    val iconWhite: Color,
+    val iconBrand: Color,
+    val buttonPrimary: Color,
+    val buttonPrimaryHover: Color,
+    val buttonPrimaryPressed: Color,
+    val buttonSecondary: Color,
+    val buttonSecondaryHover: Color,
+    val buttonSecondaryPressed: Color,
+    val background: Color,
+    val backgroundBrand: Color,
+    val border: Color,
+    val borderBrand: Color
 )

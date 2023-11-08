@@ -10,8 +10,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 
 @Immutable
+@Deprecated("Use FinancialConnectionsV3Typography instead")
 internal data class FinancialConnectionsTypography(
     val subtitle: TextStyle,
     val subtitleEmphasized: TextStyle,
@@ -33,7 +35,7 @@ internal data class FinancialConnectionsTypography(
 )
 
 @Immutable
-internal data class FinancialConnectionsAuthFlowV3Typography(
+internal data class FinancialConnectionsV3Typography(
     val headingXLarge: TextStyle,
     val headingLarge: TextStyle,
     val headingMedium: TextStyle,
@@ -54,49 +56,49 @@ internal fun TypePreview() {
         Column {
             Text(
                 text = "Heading XLarge",
-                style = FinancialConnectionsTheme.authFlowV3Typography.headingXLarge
+                style = v3Typography.headingXLarge
             )
             Text(
                 text = "Heading Large",
-                style = FinancialConnectionsTheme.authFlowV3Typography.headingLarge
+                style = v3Typography.headingLarge
             )
             Text(
                 text = "Heading Medium",
-                style = FinancialConnectionsTheme.authFlowV3Typography.headingMedium
+                style = v3Typography.headingMedium
             )
             Divider()
             Text(
                 text = "Body Medium Emphasized",
-                style = FinancialConnectionsTheme.authFlowV3Typography.bodyMediumEmphasized
+                style = v3Typography.bodyMediumEmphasized
             )
             Text(
                 text = "Body Medium",
-                style = FinancialConnectionsTheme.authFlowV3Typography.bodyMedium
+                style = v3Typography.bodyMedium
             )
             Text(
                 text = "Body Small",
-                style = FinancialConnectionsTheme.authFlowV3Typography.bodySmall
+                style = v3Typography.bodySmall
             )
             Divider()
             Text(
                 text = "Label Large Emphasized",
-                style = FinancialConnectionsTheme.authFlowV3Typography.labelLargeEmphasized
+                style = v3Typography.labelLargeEmphasized
             )
             Text(
                 text = "Label Large",
-                style = FinancialConnectionsTheme.authFlowV3Typography.labelLarge
+                style = v3Typography.labelLarge
             )
             Text(
                 text = "Label Medium Emphasized",
-                style = FinancialConnectionsTheme.authFlowV3Typography.labelMediumEmphasized
+                style = v3Typography.labelMediumEmphasized
             )
             Text(
                 text = "Label Medium",
-                style = FinancialConnectionsTheme.authFlowV3Typography.labelMedium
+                style = v3Typography.labelMedium
             )
             Text(
                 text = "Label Small",
-                style = FinancialConnectionsTheme.authFlowV3Typography.labelSmall
+                style = v3Typography.labelSmall
             )
         }
     }
