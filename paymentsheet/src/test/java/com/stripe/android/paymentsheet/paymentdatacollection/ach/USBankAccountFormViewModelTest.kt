@@ -913,6 +913,50 @@ class USBankAccountFormViewModelTest {
         }
     }
 
+    @Test
+    fun `Should be reset after confirming bank account and attempting to reset`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem())
+                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+
+            val verifiedAccount = mockVerifiedBankAccount()
+            viewModel.handleCollectBankAccountResult(
+                result = verifiedAccount
+            )
+
+            assertThat(awaitItem())
+                .isInstanceOf(USBankAccountFormScreenState.MandateCollection::class.java)
+
+            viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
+            viewModel.reset()
+
+            assertThat(awaitItem())
+                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+        }
+    }
+
+    @Test
+    fun `Should not be reset after attempting to reset on the billing details screen`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem())
+                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+
+            viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
+
+            assertThat(awaitItem())
+                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+
+            viewModel.reset()
+
+            assertThat(awaitItem())
+                .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
+        }
+    }
+
     private fun createViewModel(
         args: USBankAccountFormViewModel.Args = defaultArgs
     ): USBankAccountFormViewModel {
