@@ -4,26 +4,26 @@ package com.stripe.android.payments.paymentlauncher
 
 import androidx.annotation.RestrictTo
 
-internal fun PaymentLauncher.PaymentResultCallback.toLauncherResultCallback():
-    PaymentLauncher.PaymentLauncherResultCallback {
-    return PaymentLauncher.PaymentLauncherResultCallback { result ->
+internal fun PaymentLauncher.PaymentResultCallback.toInternalResultCallback():
+    PaymentLauncher.InternalPaymentResultCallback {
+    return PaymentLauncher.InternalPaymentResultCallback { result ->
         when (result) {
-            is PaymentLauncherResult.Completed -> onPaymentResult(PaymentResult.Completed)
-            is PaymentLauncherResult.Failed -> onPaymentResult(PaymentResult.Failed(result.throwable))
-            is PaymentLauncherResult.Canceled -> onPaymentResult(PaymentResult.Canceled)
+            is InternalPaymentResult.Completed -> onPaymentResult(PaymentResult.Completed)
+            is InternalPaymentResult.Failed -> onPaymentResult(PaymentResult.Failed(result.throwable))
+            is InternalPaymentResult.Canceled -> onPaymentResult(PaymentResult.Canceled)
         }
     }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun toPaymentLauncherResultCallback(
+fun toInternalPaymentResultCallback(
     callback: (result: PaymentResult) -> Unit
-): (result: PaymentLauncherResult) -> Unit {
+): (result: InternalPaymentResult) -> Unit {
     return { result ->
         when (result) {
-            is PaymentLauncherResult.Completed -> callback.invoke(PaymentResult.Completed)
-            is PaymentLauncherResult.Failed -> callback.invoke(PaymentResult.Failed(result.throwable))
-            is PaymentLauncherResult.Canceled -> callback.invoke(PaymentResult.Canceled)
+            is InternalPaymentResult.Completed -> callback.invoke(PaymentResult.Completed)
+            is InternalPaymentResult.Failed -> callback.invoke(PaymentResult.Failed(result.throwable))
+            is InternalPaymentResult.Canceled -> callback.invoke(PaymentResult.Canceled)
         }
     }
 }

@@ -36,7 +36,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
-import com.stripe.android.payments.paymentlauncher.PaymentLauncherResult
+import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -1710,7 +1710,7 @@ internal class PaymentSheetViewModelTest {
             on {
                 registerForActivityResult<
                     PaymentLauncherContract.Args,
-                    PaymentLauncherResult
+                    InternalPaymentResult
                     >(any(), any())
             } doReturn mock()
         }
@@ -1734,7 +1734,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.updateSelection(selection)
 
-        val onPaymentResult = argumentCaptor<ActivityResultCallback<PaymentLauncherResult>>()
+        val onPaymentResult = argumentCaptor<ActivityResultCallback<InternalPaymentResult>>()
 
         verify(mockActivityResultCaller).registerForActivityResult(
             any<PaymentLauncherContract>(),
@@ -1742,7 +1742,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         onPaymentResult.firstValue.onActivityResult(
-            PaymentLauncherResult.Completed(intent)
+            InternalPaymentResult.Completed(intent)
         )
 
         val savedSelection = PaymentSelection.Saved(

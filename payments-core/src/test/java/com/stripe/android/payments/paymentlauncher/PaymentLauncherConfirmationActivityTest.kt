@@ -23,7 +23,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class PaymentLauncherConfirmationActivityTest {
     private val viewModel = mock<PaymentLauncherViewModel>().also {
-        whenever(it.paymentLauncherResult).thenReturn(mock())
+        whenever(it.internalPaymentResult).thenReturn(mock())
     }
     private val testFactory = TestUtils.viewModelFactoryFor(viewModel)
 
@@ -161,9 +161,9 @@ class PaymentLauncherConfirmationActivityTest {
             assertThat(activityScenario.state)
                 .isEqualTo(Lifecycle.State.DESTROYED)
             val result =
-                PaymentLauncherResult.fromIntent(
+                InternalPaymentResult.fromIntent(
                     activityScenario.getResult().resultData
-                ) as PaymentLauncherResult.Failed
+                ) as InternalPaymentResult.Failed
             assertThat(result.throwable.message)
                 .isEqualTo(
                     PaymentLauncherConfirmationActivity.EMPTY_ARG_ERROR

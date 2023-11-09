@@ -45,8 +45,8 @@ interface PaymentLauncher {
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun interface PaymentLauncherResultCallback {
-        fun onPaymentResult(launcherResult: PaymentLauncherResult)
+    fun interface InternalPaymentResultCallback {
+        fun onPaymentResult(launcherResult: InternalPaymentResult)
     }
 
     companion object {
@@ -65,7 +65,7 @@ interface PaymentLauncher {
             callback: PaymentResultCallback
         ) = PaymentLauncherFactory(
             activity,
-            callback.toLauncherResultCallback()
+            callback.toInternalResultCallback()
         ).create(publishableKey, stripeAccountId)
 
         /**
@@ -83,7 +83,7 @@ interface PaymentLauncher {
             callback: PaymentResultCallback
         ) = PaymentLauncherFactory(
             fragment,
-            callback.toLauncherResultCallback()
+            callback.toInternalResultCallback()
         ).create(publishableKey, stripeAccountId)
 
         /**
@@ -154,7 +154,7 @@ fun rememberPaymentLauncher(
     val activity = rememberActivityOrNull()
 
     val launcherCallback = remember(callback) {
-        callback.toLauncherResultCallback()
+        callback.toInternalResultCallback()
     }
 
     val activityResultLauncher = rememberLauncherForActivityResult(

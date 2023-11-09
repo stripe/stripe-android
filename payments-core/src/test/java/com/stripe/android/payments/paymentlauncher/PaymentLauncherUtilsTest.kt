@@ -13,9 +13,9 @@ class PaymentLauncherUtilsTest {
     fun `Converted 'PaymentResultCallback' should return completed result`() {
         val mockedResultCallback = mock<PaymentLauncher.PaymentResultCallback>()
 
-        val launcherResultCallback = mockedResultCallback.toLauncherResultCallback()
+        val launcherResultCallback = mockedResultCallback.toInternalResultCallback()
 
-        launcherResultCallback.onPaymentResult(PaymentLauncherResult.Completed(paymentIntent))
+        launcherResultCallback.onPaymentResult(InternalPaymentResult.Completed(paymentIntent))
         verify(mockedResultCallback).onPaymentResult(PaymentResult.Completed)
     }
 
@@ -23,9 +23,9 @@ class PaymentLauncherUtilsTest {
     fun `Converted 'PaymentResultCallback' should return failed result`() {
         val mockedResultCallback = mock<PaymentLauncher.PaymentResultCallback>()
 
-        val launcherResultCallback = mockedResultCallback.toLauncherResultCallback()
+        val launcherResultCallback = mockedResultCallback.toInternalResultCallback()
 
-        launcherResultCallback.onPaymentResult(PaymentLauncherResult.Failed(Exception()))
+        launcherResultCallback.onPaymentResult(InternalPaymentResult.Failed(Exception()))
         verify(mockedResultCallback).onPaymentResult(any<PaymentResult.Failed>())
     }
 
@@ -33,9 +33,9 @@ class PaymentLauncherUtilsTest {
     fun `Converted 'PaymentResultCallback' should return canceled result`() {
         val mockedResultCallback = mock<PaymentLauncher.PaymentResultCallback>()
 
-        val launcherResultCallback = mockedResultCallback.toLauncherResultCallback()
+        val launcherResultCallback = mockedResultCallback.toInternalResultCallback()
 
-        launcherResultCallback.onPaymentResult(PaymentLauncherResult.Canceled)
+        launcherResultCallback.onPaymentResult(InternalPaymentResult.Canceled)
         verify(mockedResultCallback).onPaymentResult(PaymentResult.Canceled)
     }
 
@@ -43,9 +43,9 @@ class PaymentLauncherUtilsTest {
     fun `Converted 'PaymentResult' lambda should return completed result`() {
         val mockedResultCallback = mock<(result: PaymentResult) -> Unit>()
 
-        val launcherResultCallback = toPaymentLauncherResultCallback(mockedResultCallback)
+        val launcherResultCallback = toInternalPaymentResultCallback(mockedResultCallback)
 
-        launcherResultCallback(PaymentLauncherResult.Completed(paymentIntent))
+        launcherResultCallback(InternalPaymentResult.Completed(paymentIntent))
         verify(mockedResultCallback).invoke(PaymentResult.Completed)
     }
 
@@ -53,11 +53,11 @@ class PaymentLauncherUtilsTest {
     fun `Converted 'PaymentResult' lambda should return failed result`() {
         val mockedResultCallback = mock<(result: PaymentResult) -> Unit>()
 
-        val launcherResultCallback = toPaymentLauncherResultCallback(mockedResultCallback)
+        val launcherResultCallback = toInternalPaymentResultCallback(mockedResultCallback)
 
         val exception = Exception()
 
-        launcherResultCallback(PaymentLauncherResult.Failed(exception))
+        launcherResultCallback(InternalPaymentResult.Failed(exception))
         verify(mockedResultCallback).invoke(any<PaymentResult.Failed>())
     }
 
@@ -65,9 +65,9 @@ class PaymentLauncherUtilsTest {
     fun `Converted 'PaymentResult' lambda should return canceled result`() {
         val mockedResultCallback = mock<(result: PaymentResult) -> Unit>()
 
-        val launcherResultCallback = toPaymentLauncherResultCallback(mockedResultCallback)
+        val launcherResultCallback = toInternalPaymentResultCallback(mockedResultCallback)
 
-        launcherResultCallback(PaymentLauncherResult.Canceled)
+        launcherResultCallback(InternalPaymentResult.Canceled)
         verify(mockedResultCallback).invoke(PaymentResult.Canceled)
     }
 }

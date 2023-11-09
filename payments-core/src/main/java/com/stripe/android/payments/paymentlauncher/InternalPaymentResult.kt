@@ -8,18 +8,18 @@ import com.stripe.android.model.StripeIntent
 import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class PaymentLauncherResult : Parcelable {
+sealed class InternalPaymentResult : Parcelable {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    data class Completed(val intent: StripeIntent) : PaymentLauncherResult()
+    data class Completed(val intent: StripeIntent) : InternalPaymentResult()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    class Failed(val throwable: Throwable) : PaymentLauncherResult()
+    class Failed(val throwable: Throwable) : InternalPaymentResult()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    object Canceled : PaymentLauncherResult()
+    object Canceled : InternalPaymentResult()
 
     @JvmSynthetic
     internal fun toBundle() = bundleOf(EXTRA to this)
@@ -28,7 +28,7 @@ sealed class PaymentLauncherResult : Parcelable {
         private const val EXTRA = "extra_args"
 
         @JvmSynthetic
-        fun fromIntent(intent: Intent?): PaymentLauncherResult {
+        fun fromIntent(intent: Intent?): InternalPaymentResult {
             return intent?.getParcelableExtra(EXTRA)
                 ?: Failed(IllegalStateException("Failed to get PaymentSheetResult from Intent"))
         }

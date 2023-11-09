@@ -43,7 +43,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
                 EMPTY_ARG_ERROR
             }
         }.getOrElse {
-            finishWithResult(PaymentLauncherResult.Failed(it))
+            finishWithResult(InternalPaymentResult.Failed(it))
             return
         }
 
@@ -52,7 +52,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.paymentLauncherResult.collect {
+            viewModel.internalPaymentResult.collect {
                 it?.let(::finishWithResult)
             }
         }
@@ -93,7 +93,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
      * After confirmation and next action is handled, finish the activity with
      * corresponding [PaymentResult]
      */
-    private fun finishWithResult(result: PaymentLauncherResult) {
+    private fun finishWithResult(result: InternalPaymentResult) {
         setResult(
             Activity.RESULT_OK,
             Intent()

@@ -19,7 +19,7 @@ class PaymentLauncherFactory(
 
     constructor(
         activity: ComponentActivity,
-        callback: PaymentLauncher.PaymentLauncherResultCallback
+        callback: PaymentLauncher.InternalPaymentResultCallback
     ) : this(
         hostActivityLauncher = activity.registerForActivityResult(
             PaymentLauncherContract(),
@@ -30,7 +30,7 @@ class PaymentLauncherFactory(
 
     constructor(
         fragment: Fragment,
-        callback: PaymentLauncher.PaymentLauncherResultCallback
+        callback: PaymentLauncher.InternalPaymentResultCallback
     ) : this(
         hostActivityLauncher = fragment.registerForActivityResult(
             PaymentLauncherContract(),

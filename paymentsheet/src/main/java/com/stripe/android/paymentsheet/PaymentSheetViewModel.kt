@@ -30,7 +30,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
-import com.stripe.android.payments.paymentlauncher.PaymentLauncherResult
+import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -471,7 +471,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             statusBarColor = args.statusBarColor,
             hostActivityLauncher = activityResultCaller.registerForActivityResult(
                 PaymentLauncherContract(),
-                ::onPaymentLauncherResult
+                ::onInternalPaymentResult
             ),
             includePaymentSheetAuthenticators = true,
         )
@@ -532,22 +532,22 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun onPaymentLauncherResult(launcherResult: PaymentLauncherResult) {
+    private fun onInternalPaymentResult(launcherResult: InternalPaymentResult) {
         viewModelScope.launch {
             runCatching {
                 requireNotNull(stripeIntent.value)
             }.fold(
                 onSuccess = { originalIntent ->
                     when (launcherResult) {
-                        is PaymentLauncherResult.Completed -> processPayment(
+                        is InternalPaymentResult.Completed -> processPayment(
                             stripeIntent = launcherResult.intent,
                             paymentResult = PaymentResult.Completed
                         )
-                        is PaymentLauncherResult.Failed -> processPayment(
+                        is InternalPaymentResult.Failed -> processPayment(
                             stripeIntent = originalIntent,
                             paymentResult = PaymentResult.Failed(launcherResult.throwable)
                         )
-                        is PaymentLauncherResult.Canceled -> processPayment(
+                        is InternalPaymentResult.Canceled -> processPayment(
                             stripeIntent = originalIntent,
                             paymentResult = PaymentResult.Canceled
                         )
