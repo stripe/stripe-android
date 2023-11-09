@@ -60,7 +60,7 @@ class EditPaymentMethodUiScreenshotTest {
         paparazziRule.snapshot {
             EditPaymentMethodUi(
                 viewState = createViewState(
-                    status = EditPaymentMethodViewState.Status.Updating,
+                    status = EditPaymentMethodViewState.Status.Removing,
                     canUpdate = true
                 ),
                 viewActionHandler = {}
