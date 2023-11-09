@@ -48,26 +48,26 @@ private val Colors = FinancialConnectionsColors(
 )
 
 private val V3Colors = FinancialConnectionsV3Colors(
-    textDefault = Color(0xFF414552),
-    textSubdued = Color(0xFF687385),
-    textDisabled = Color(0xFFA3ACBA),
+    textDefault = Color(0xFF353A44),
+    textSubdued = Color(0xFF596171),
+    textDisabled = Color(0xFF818DA0),
     textWhite = Color(0xFFFFFFFF),
-    textBrand = Color(0xFF625AFA),
-    textCritical = Color(0xFFDF1B41),
-    iconDefault = Color(0xFF545969),
-    iconSubdued = Color(0xFF87909F),
+    textBrand = Color(0xFF533AFD),
+    textCritical = Color(0xFFC0123C),
+    iconDefault = Color(0xFF474E5A),
+    iconSubdued = Color(0xFF6C7688),
     iconWhite = Color(0xFFFFFFFF),
-    iconBrand = Color(0xFF8D7FFA),
-    buttonPrimary = Color(0xFF625AFA),
-    buttonPrimaryHover = Color(0xFF625AFA),
-    buttonPrimaryPressed = Color(0xFF513DD9),
-    buttonSecondary = Color(0xFFF6F8FA),
-    buttonSecondaryHover = Color(0xFFF6F8FA),
+    iconBrand = Color(0xFF675DFF),
+    buttonPrimary = Color(0xFF675DFF),
+    buttonPrimaryHover = Color(0xFF857AFE),
+    buttonPrimaryPressed = Color(0xFF533AFD),
+    buttonSecondary = Color(0xFFF5F6F8),
+    buttonSecondaryHover = Color(0xFFF5F6F8),
     buttonSecondaryPressed = Color(0xFFEBEEF1),
-    background = Color(0xFFF6F8FA),
-    backgroundBrand = Color(0xFFF9F7FF),
-    border = Color(0xFFD5DBE1),
-    borderBrand = Color(0xFF635BFF)
+    background = Color(0xFFF5F6F8),
+    backgroundBrand = Color(0xFFF5F6F8),
+    border = Color(0xFFD8DEE4),
+    borderBrand = Color(0xFF675DFF)
 )
 
 @Deprecated("Use V3Typography instead")
