@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
@@ -61,13 +63,15 @@ class PaparazziRule(
                 }
 
                 paparazzi.snapshot {
-                    StripeTheme {
-                        Surface(color = MaterialTheme.colors.surface) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = boxModifier,
-                            ) {
-                                content()
+                    CompositionLocalProvider(LocalInspectionMode provides true) {
+                        StripeTheme {
+                            Surface(color = MaterialTheme.colors.surface) {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = boxModifier,
+                                ) {
+                                    content()
+                                }
                             }
                         }
                     }

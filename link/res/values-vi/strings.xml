@@ -51,7 +51,6 @@
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Bạn có chắc chắn muốn gỡ bỏ tài khoản liên kết này không?</string>
   <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Xóa thẻ</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Bạn có chắc chắn muốn gỡ bỏ thẻ này không?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

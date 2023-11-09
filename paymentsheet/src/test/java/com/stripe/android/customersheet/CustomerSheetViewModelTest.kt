@@ -16,10 +16,15 @@ import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.addPayment
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.selectPaymentMethodViewState
 import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.model.PaymentAccount
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT
+import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -39,6 +44,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFailsWith
 import com.stripe.android.ui.core.R as UiCoreR
@@ -1675,7 +1681,7 @@ class CustomerSheetViewModelTest {
                 addPaymentMethodViewState,
             ),
             stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(US_BANK_ACCOUNT),
+                createPaymentMethodResult = Result.success(US_BANK_ACCOUNT_VERIFIED),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
             customerAdapter = FakeCustomerAdapter(
@@ -1701,7 +1707,7 @@ class CustomerSheetViewModelTest {
 
             assertThat(viewState.paymentSelection)
                 .isEqualTo(
-                    PaymentSelection.Saved(US_BANK_ACCOUNT)
+                    PaymentSelection.Saved(US_BANK_ACCOUNT_VERIFIED)
                 )
 
             cancelAndIgnoreRemainingEvents()
@@ -1751,13 +1757,13 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnCollectBankAccountResult(
-                    bankAccountResult = CollectBankAccountResultInternal.Completed(
-                        response = mock(),
+                    bankAccountResult = mockUSBankAccountResult(
+                        isVerified = true
                     ),
                 )
             )
 
-            viewState = awaitViewState<AddPaymentMethod>()
+            viewState = awaitViewState()
             assertThat(viewState.displayDismissConfirmationModal)
                 .isFalse()
 
@@ -1821,8 +1827,8 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnCollectBankAccountResult(
-                    bankAccountResult = CollectBankAccountResultInternal.Completed(
-                        response = mock(),
+                    bankAccountResult = mockUSBankAccountResult(
+                        isVerified = true
                     ),
                 )
             )
@@ -1869,13 +1875,13 @@ class CustomerSheetViewModelTest {
 
         viewModel.handleViewAction(
             CustomerSheetViewAction.OnCollectBankAccountResult(
-                bankAccountResult = CollectBankAccountResultInternal.Completed(
-                    response = mock(),
+                bankAccountResult = mockUSBankAccountResult(
+                    isVerified = true
                 ),
             )
         )
 
-        viewState = viewStateTurbine.awaitViewState<AddPaymentMethod>()
+        viewState = viewStateTurbine.awaitViewState()
         assertThat(viewState.displayDismissConfirmationModal)
             .isFalse()
 
@@ -1907,8 +1913,8 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-                    bankAccountResult = CollectBankAccountResultInternal.Completed(
-                        response = mock(),
+                    bankAccountResult = mockUSBankAccountResult(
+                        isVerified = true
                     ),
                 ),
             ),
@@ -1916,8 +1922,59 @@ class CustomerSheetViewModelTest {
 
         viewModel.viewState.test {
             val viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.shouldDisplayDismissConfirmationModal)
-                .isTrue()
+            assertThat(
+                viewState.shouldDisplayDismissConfirmationModal(
+                    isFinancialConnectionsAvailable = { true }
+                )
+            ).isTrue()
+        }
+    }
+
+    @Test
+    fun `When in add flow and unverified us bank account is retrieved, then shouldDisplayConfirmationDialog should be false`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                    bankAccountResult = mockUSBankAccountResult(
+                        isVerified = false
+                    ),
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            val viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(
+                viewState.shouldDisplayDismissConfirmationModal(
+                    isFinancialConnectionsAvailable = { true }
+                )
+            ).isFalse()
+        }
+    }
+
+    @Test
+    fun `When financial connections is not available, then shouldDisplayConfirmationDialog should be false`() = runTest {
+        val viewModel = createViewModel(
+            isFinancialConnectionsAvailable = { true },
+            initialBackStack = listOf(
+                addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                    bankAccountResult = mockUSBankAccountResult(
+                        isVerified = false
+                    ),
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            val viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(
+                viewState.shouldDisplayDismissConfirmationModal(
+                    isFinancialConnectionsAvailable = { false }
+                )
+            ).isFalse()
         }
     }
 
@@ -2153,6 +2210,130 @@ class CustomerSheetViewModelTest {
             assertThat(viewState.mandateText)
                 .isNull()
         }
+    }
+
+    @Test
+    fun `When confirming a card, the card form should be reset when trying to add another card`() = runTest {
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                canCreateSetupIntents = false,
+                onAttachPaymentMethod = {
+                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD)
+                }
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+            )
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnFormFieldValuesCompleted(
+                    formFieldValues = FormFieldValues(
+                        fieldValuePairs = mapOf(
+                            IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                        ),
+                        showsMandate = false,
+                        userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    )
+                )
+            )
+            assertThat(awaitViewState<AddPaymentMethod>().formViewData.completeFormValues).isNotNull()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val newViewState = awaitViewState<AddPaymentMethod>()
+            assertThat(newViewState.formViewData.completeFormValues).isNull()
+        }
+    }
+
+    @Test
+    fun `When attaching a non-verified bank account, the sheet closes and returns the account`() = runTest {
+        val usBankAccount = PaymentSelection.New.USBankAccount(
+            labelResource = "Test",
+            iconResource = 0,
+            paymentMethodCreateParams = mock(),
+            customerRequestedSave = mock(),
+            input = PaymentSelection.New.USBankAccount.Input(
+                name = "",
+                email = null,
+                phone = null,
+                address = null,
+                saveForFutureUse = false,
+            ),
+            screenState = USBankAccountFormScreenState.SavedAccount(
+                financialConnectionsSessionId = "session_1234",
+                intentId = "intent_1234",
+                bankName = "Stripe Bank",
+                last4 = "6789",
+                primaryButtonText = "Continue",
+                mandateText = null,
+            ),
+        )
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                addPaymentMethodViewState,
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(US_BANK_ACCOUNT),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                onSetupIntentClientSecretForCustomerAttach = {
+                    CustomerAdapter.Result.success("seti_123")
+                },
+                canCreateSetupIntents = true,
+            ),
+        )
+
+        viewModel.result.test {
+            assertThat(awaitItem())
+                .isNull()
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnConfirmUSBankAccount(usBankAccount)
+            )
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnPrimaryButtonPressed
+            )
+
+            assertThat(awaitItem())
+                .isEqualTo(
+                    InternalCustomerSheetResult.Selected(
+                        PaymentSelection.Saved(US_BANK_ACCOUNT)
+                    )
+                )
+        }
+    }
+
+    private fun mockUSBankAccountResult(
+        isVerified: Boolean
+    ): CollectBankAccountResultInternal.Completed {
+        val paymentAccount = mock<PaymentAccount>()
+        val financialConnectionsAccount = mock<FinancialConnectionsAccount>()
+        val financialConnectionsSession = mock<FinancialConnectionsSession>()
+        val bankAccountResponse = mock<CollectBankAccountResponseInternal>()
+        whenever(bankAccountResponse.financialConnectionsSession).thenReturn(financialConnectionsSession)
+        whenever(financialConnectionsSession.paymentAccount).thenReturn(
+            if (isVerified) {
+                financialConnectionsAccount
+            } else {
+                paymentAccount
+            }
+        )
+        return CollectBankAccountResultInternal.Completed(
+            response = bankAccountResponse,
+        )
     }
 
     @Suppress("UNCHECKED_CAST")

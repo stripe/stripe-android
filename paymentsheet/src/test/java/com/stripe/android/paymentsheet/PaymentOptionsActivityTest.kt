@@ -454,6 +454,7 @@ internal class PaymentOptionsActivityTest {
                     context = ApplicationProvider.getApplicationContext(),
                     lpmRepository = lpmRepository,
                 ),
+                editInteractorFactory = mock()
             )
         }
 

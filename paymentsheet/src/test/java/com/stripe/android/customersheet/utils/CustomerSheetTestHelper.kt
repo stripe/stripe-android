@@ -229,6 +229,7 @@ internal object CustomerSheetTestHelper {
             statusBarColor = { null },
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
+            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
         }

@@ -49,6 +49,7 @@ import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
+import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -92,7 +93,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler: LinkHandler,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
-    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
+    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
+    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : BaseSheetViewModel(
     application = application,
     config = args.config,
@@ -107,6 +109,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkConfigurationCoordinator = linkConfigurationCoordinator,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = true),
     formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
+    editInteractorFactory = editInteractorFactory
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

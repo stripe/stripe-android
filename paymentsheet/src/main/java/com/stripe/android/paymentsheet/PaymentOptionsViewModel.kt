@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
+import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -54,7 +55,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
-    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
+    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
+    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : BaseSheetViewModel(
     application = application,
     config = args.state.config,
@@ -69,6 +71,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkConfigurationCoordinator = linkConfigurationCoordinator,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = false),
     formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
+    editInteractorFactory = editInteractorFactory
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

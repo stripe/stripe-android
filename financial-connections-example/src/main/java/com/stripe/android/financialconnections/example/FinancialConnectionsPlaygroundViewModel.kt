@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 internal class FinancialConnectionsPlaygroundViewModel(
     application: Application,
@@ -159,10 +160,14 @@ internal class FinancialConnectionsPlaygroundViewModel(
     }
 
     private fun showError(error: Throwable) {
+        val errorText = when (error) {
+            is HttpException -> error.response()?.errorBody()?.string() ?: error.message()
+            else -> error.message
+        }
         _state.update {
             it.copy(
                 loading = false,
-                status = it.status + "Error starting linked account session: $error"
+                status = it.status + "Error starting linked account session: $errorText"
             )
         }
     }

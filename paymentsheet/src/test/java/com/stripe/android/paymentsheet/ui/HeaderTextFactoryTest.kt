@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import org.junit.Test
+import org.mockito.Mockito.mock
 import com.stripe.android.R as StripeR
 
 class HeaderTextFactoryTest {
@@ -28,6 +29,19 @@ class HeaderTextFactoryTest {
         )
 
         assertThat(resource).isNull()
+    }
+
+    @Test
+    fun `Shows the correct header in complete flow and editing payment method`() {
+        val resource = HeaderTextFactory(isCompleteFlow = true).create(
+            screen = PaymentSheetScreen.EditPaymentMethod(
+                interactor = mock()
+            ),
+            isWalletEnabled = true,
+            types = emptyList(),
+        )
+
+        assertThat(resource).isEqualTo(StripeR.string.stripe_title_update_card)
     }
 
     @Test
@@ -72,6 +86,19 @@ class HeaderTextFactoryTest {
         )
 
         assertThat(resource).isEqualTo(StripeR.string.stripe_title_add_a_card)
+    }
+
+    @Test
+    fun `Shows the correct header when editing a saved payment method is shown in custom flow`() {
+        val resource = HeaderTextFactory(isCompleteFlow = false).create(
+            screen = PaymentSheetScreen.EditPaymentMethod(
+                interactor = mock()
+            ),
+            isWalletEnabled = true,
+            types = emptyList(),
+        )
+
+        assertThat(resource).isEqualTo(StripeR.string.stripe_title_update_card)
     }
 
     @Test

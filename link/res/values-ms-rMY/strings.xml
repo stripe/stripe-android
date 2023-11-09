@@ -51,7 +51,6 @@
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Anda pasti ingin mengalih keluar akaun yang dipautkan ini?</string>
   <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Alih keluar kad</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Anda pasti ingin mengalih keluar kad ini?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

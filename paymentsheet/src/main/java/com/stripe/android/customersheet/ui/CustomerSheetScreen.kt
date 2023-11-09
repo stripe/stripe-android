@@ -227,6 +227,7 @@ internal fun AddPaymentMethodWithPaymentElement(
         messageText = stringResource(id = R.string.stripe_confirm_close_form_body),
         confirmText = stringResource(id = R.string.stripe_paymentsheet_close),
         dismissText = stringResource(id = PaymentsCoreR.string.stripe_cancel),
+        destructive = true,
         onDismissListener = {
             viewActionHandler(CustomerSheetViewAction.OnCancelClose)
         },

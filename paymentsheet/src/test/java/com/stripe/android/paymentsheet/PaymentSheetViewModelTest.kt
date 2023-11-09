@@ -1660,6 +1660,7 @@ internal class PaymentSheetViewModelTest {
                 linkConfigurationCoordinator = linkInteractor,
                 intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
                 formViewModelSubComponentBuilderProvider = mock(),
+                editInteractorFactory = mock()
             )
         }
     }
