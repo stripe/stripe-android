@@ -51,7 +51,7 @@ jobs:
       - name: Generate Android release bundle
         run: ./gradlew :paymentsheet-example:bundleRelease
       - name: Upload artifact to Emerge
-        uses: EmergeTools/emerge-upload-action@3477b597fc62054136eb6f499e0ba78144f8a999
+        uses: EmergeTools/emerge-upload-action@v1.0.3
         with:
           artifact_path: paymentsheet-example/build/outputs/bundle/release/paymentsheet-example-release.aab
           emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
