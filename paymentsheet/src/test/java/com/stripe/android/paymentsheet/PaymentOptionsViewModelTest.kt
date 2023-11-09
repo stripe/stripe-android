@@ -555,6 +555,7 @@ internal class PaymentOptionsViewModelTest {
             linkHandler = linkHandler,
             linkConfigurationCoordinator = linkInteractor,
             formViewModelSubComponentBuilderProvider = mock(),
+            editInteractorFactory = mock()
         )
     }
 

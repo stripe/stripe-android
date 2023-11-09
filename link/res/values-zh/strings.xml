@@ -51,7 +51,6 @@
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">您确定要移除这个关联的账户吗？</string>
   <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">移除卡</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">您确定要移除此卡吗？</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

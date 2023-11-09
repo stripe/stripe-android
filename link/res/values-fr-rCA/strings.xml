@@ -51,7 +51,6 @@
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Voulez-vous vraiment retirer ce compte associé?</string>
   <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Retirer la carte</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Voulez-vous vraiment retirer cette carte?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->
