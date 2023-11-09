@@ -70,13 +70,14 @@ internal fun PaymentOptionUi(
     labelText: String = "",
     removePmDialogTitle: String = "",
     description: String,
+    shouldOpenRemoveDialog: Boolean = false,
     onRemoveListener: (() -> Unit)? = null,
     onModifyListener: (() -> Unit)? = null,
     onRemoveAccessibilityDescription: String = "",
     onModifyAccessibilityDescription: String = "",
     onItemSelectedListener: (() -> Unit),
 ) {
-    val openRemoveDialog = rememberSaveable { mutableStateOf(false) }
+    val openRemoveDialog = rememberSaveable { mutableStateOf(shouldOpenRemoveDialog) }
 
     BadgedBox(
         badge = {
@@ -129,6 +130,7 @@ internal fun PaymentOptionUi(
             messageText = description,
             confirmText = stringResource(StripeR.string.stripe_remove),
             dismissText = stringResource(StripeR.string.stripe_cancel),
+            destructive = true,
             onConfirmListener = onRemoveListener,
             onDismissListener = { openRemoveDialog.value = false }
         )
