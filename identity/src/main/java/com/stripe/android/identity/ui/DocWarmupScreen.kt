@@ -131,7 +131,7 @@ internal fun DocWarmupView(
                     style = MaterialTheme.typography.subtitle1,
                     modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 4.dp),
                 )
-                documentSelectPage.idDocumentTypeAllowlist.keys.map {
+                documentSelectPage.idDocumentTypeAllowlist.keys.mapNotNull {
                     when (it) {
                         DRIVING_LICENSE_KEY -> stringResource(id = R.string.stripe_driver_license)
                         ID_CARD_KEY -> stringResource(id = R.string.stripe_government_id)
@@ -139,12 +139,10 @@ internal fun DocWarmupView(
                         else -> null
                     }
                 }.forEach { idType ->
-                    idType?.let {
-                        Text(
-                            text = "• $idType",
-                            modifier = Modifier.padding(start = 10.dp, top = 4.dp, bottom = 4.dp),
-                        )
-                    }
+                    Text(
+                        text = "• $idType",
+                        modifier = Modifier.padding(start = 10.dp, top = 4.dp, bottom = 4.dp),
+                    )
                 }
             }
         }
