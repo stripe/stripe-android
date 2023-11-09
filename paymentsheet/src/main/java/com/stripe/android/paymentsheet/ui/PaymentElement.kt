@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
@@ -26,6 +27,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.Flow
+import java.util.UUID
 import javax.inject.Provider
 
 @Composable
@@ -43,6 +45,10 @@ internal fun PaymentElement(
     usBankAccountFormArguments: USBankAccountFormArguments,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
 ) {
+    // The PaymentMethodForm has a reference to a FormViewModel, which is scoped to a key. This is to ensure that
+    // the FormViewModel is recreated when the PaymentElement is recomposed.
+    val uuid = rememberSaveable { UUID.randomUUID().toString() }
+
     val context = LocalContext.current
     val imageLoader = remember {
         StripeImageLoader(context.applicationContext)
@@ -73,6 +79,7 @@ internal fun PaymentElement(
                 )
             } else {
                 PaymentMethodForm(
+                    uuid = uuid,
                     args = formArguments,
                     enabled = enabled,
                     onFormFieldValuesChanged = onFormFieldValuesChanged,

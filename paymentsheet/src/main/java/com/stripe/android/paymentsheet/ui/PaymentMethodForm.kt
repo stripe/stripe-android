@@ -19,6 +19,7 @@ import javax.inject.Provider
 
 @Composable
 internal fun PaymentMethodForm(
+    uuid: String,
     args: FormArguments,
     enabled: Boolean,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
@@ -27,7 +28,7 @@ internal fun PaymentMethodForm(
     modifier: Modifier = Modifier,
 ) {
     val formViewModel: FormViewModel = viewModel(
-        key = args.paymentMethodCode,
+        key = args.paymentMethodCode + "_" + uuid,
         factory = FormViewModel.Factory(
             config = args,
             showCheckboxFlow = showCheckboxFlow,

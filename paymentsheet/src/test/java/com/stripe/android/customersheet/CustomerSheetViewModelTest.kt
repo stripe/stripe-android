@@ -2155,6 +2155,51 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When confirming a card, the card form should be reset when trying to add another card`() = runTest {
+        val viewModel = createViewModel(
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+            customerAdapter = FakeCustomerAdapter(
+                canCreateSetupIntents = false,
+                onAttachPaymentMethod = {
+                    CustomerAdapter.Result.success(CARD_PAYMENT_METHOD)
+                }
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+            )
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnFormFieldValuesCompleted(
+                    formFieldValues = FormFieldValues(
+                        fieldValuePairs = mapOf(
+                            IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                        ),
+                        showsMandate = false,
+                        userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    )
+                )
+            )
+            assertThat(awaitViewState<AddPaymentMethod>().formViewData.completeFormValues).isNotNull()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val newViewState = awaitViewState<AddPaymentMethod>()
+            assertThat(newViewState.formViewData.completeFormValues).isNull()
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     private suspend inline fun <R> ReceiveTurbine<*>.awaitViewState(): R {
         return awaitItem() as R
