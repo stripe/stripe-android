@@ -1,5 +1,9 @@
 package com.stripe.android.lpm
 
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelected
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -8,6 +12,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailS
 import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
+import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import org.junit.Test
@@ -58,6 +64,88 @@ internal class TestCard : BasePlaygroundTest() {
                 authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
             )
+        )
+    }
+
+    /*
+     * TODO(samer-stripe): Once we update `PaymentResult` to return a `StripeIntent`, update the test
+     *  to check against the payment method IDs rather than the last 4 digits.
+     */
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun testDefaultSavedPaymentMethodUsedAfterSingleSave() {
+        val cardNumber = "6011111111111117"
+        val testParameters = TestParameters.create(
+            paymentMethod = LpmRepository.HardcodedCard,
+        ).copy(
+            authorizationAction = null,
+            saveForFutureUseCheckboxVisible = true,
+            saveCheckboxValue = true,
+        )
+
+        val state = testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters,
+            values = FieldPopulator.Values(
+                cardNumber = cardNumber,
+            ),
+        )
+
+        testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
+            customerId = state?.customerConfig?.id,
+            testParameters = testParameters,
+            beforeBuyAction = { selectors ->
+                selectors.composeTestRule.waitUntilAtLeastOneExists(
+                    hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+                        .and(isSelected())
+                        .and(hasText(cardNumber.takeLast(4), substring = true))
+                )
+            },
+        )
+    }
+
+    /*
+     * TODO(samer-stripe): Once we update `PaymentResult` to return a `StripeIntent`, update the test
+     *  to check against the payment method IDs rather than the last 4 digits.
+     */
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun testDefaultSavedPaymentMethodUsedAfterMultipleSaves() {
+        val firstCardNumber = "6011111111111117"
+        val secondCardNumber = "6011000990139424"
+
+        val testParameters = TestParameters.create(
+            paymentMethod = LpmRepository.HardcodedCard,
+        ).copy(
+            authorizationAction = null,
+            saveForFutureUseCheckboxVisible = true,
+            saveCheckboxValue = true,
+        )
+
+        val state = testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters,
+            values = FieldPopulator.Values(
+                cardNumber = firstCardNumber,
+            ),
+        )
+
+        testDriver.confirmExistingComplete(
+            customerId = state?.customerConfig?.id,
+            testParameters = testParameters,
+            values = FieldPopulator.Values(
+                cardNumber = secondCardNumber,
+            ),
+        )
+
+        testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
+            customerId = state?.customerConfig?.id,
+            testParameters = testParameters,
+            beforeBuyAction = { selectors ->
+                selectors.composeTestRule.waitUntilAtLeastOneExists(
+                    hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+                        .and(isSelected())
+                        .and(hasText(secondCardNumber.takeLast(4), substring = true))
+                )
+            },
         )
     }
 }

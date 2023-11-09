@@ -1729,6 +1729,9 @@ public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$SepaM
 	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
+public final class com/stripe/android/paymentsheet/ui/PaymentOptionsUIKt {
+}
+
 public final class com/stripe/android/paymentsheet/ui/SepaMandateContract$Args$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/ui/SepaMandateContract$Args;

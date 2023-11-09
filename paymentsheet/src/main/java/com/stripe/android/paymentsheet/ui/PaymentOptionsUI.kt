@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,8 +20,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -287,25 +294,37 @@ private fun SavedPaymentMethod(
         paymentMethod.displayName,
     )
 
-    PaymentOptionUi(
-        viewWidth = width,
-        editState = when {
-            isEditing && isModifiable -> PaymentOptionEditState.Modifiable
-            isEditing -> PaymentOptionEditState.Removable
-            else -> PaymentOptionEditState.None
-        },
-        isSelected = isSelected,
-        isEnabled = isEnabled,
-        iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(),
-        labelIcon = labelIcon,
-        labelText = labelText,
-        removePmDialogTitle = removeTitle,
-        description = paymentMethod.getDescription(context.resources),
-        onModifyListener = { onModifyItem(paymentMethod.paymentMethod) },
-        onModifyAccessibilityDescription = paymentMethod.getModifyDescription(context.resources),
-        onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },
-        onRemoveAccessibilityDescription = paymentMethod.getRemoveDescription(context.resources),
-        onItemSelectedListener = { onItemSelected(paymentMethod.toPaymentSelection()) },
-        modifier = modifier,
-    )
+    Box(
+        modifier = Modifier.semantics {
+            testTag = SAVED_PAYMENT_OPTION_TEST_TAG
+            selected = isSelected
+            text = AnnotatedString(labelText)
+        }
+    ) {
+        PaymentOptionUi(
+            viewWidth = width,
+            editState = when {
+                isEditing && isModifiable -> PaymentOptionEditState.Modifiable
+                isEditing -> PaymentOptionEditState.Removable
+                else -> PaymentOptionEditState.None
+            },
+            isSelected = isSelected,
+            isEnabled = isEnabled,
+            iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(),
+            labelIcon = labelIcon,
+            labelText = labelText,
+            removePmDialogTitle = removeTitle,
+            description = paymentMethod.getDescription(context.resources),
+            onModifyListener = { onModifyItem(paymentMethod.paymentMethod) },
+            onModifyAccessibilityDescription = paymentMethod.getModifyDescription(context.resources),
+            onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },
+            onRemoveAccessibilityDescription = paymentMethod.getRemoveDescription(context.resources),
+            onItemSelectedListener = { onItemSelected(paymentMethod.toPaymentSelection()) },
+            modifier = modifier,
+        )
+    }
 }
+
+@VisibleForTesting
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val SAVED_PAYMENT_OPTION_TEST_TAG = "PaymentSheetSavedPaymentOption"
