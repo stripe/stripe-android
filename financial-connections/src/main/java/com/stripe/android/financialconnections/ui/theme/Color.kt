@@ -2,8 +2,22 @@
 
 package com.stripe.android.financialconnections.ui.theme
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 
 internal val Info100 = Color(0xffCFF5F6)
 internal val Success100 = Color(0xffD7F7C2)
@@ -86,3 +100,49 @@ internal data class FinancialConnectionsV3Colors(
     val border: Color,
     val borderBrand: Color
 )
+
+@Preview(group = "Components", name = "Colors", showBackground = true)
+@Composable
+internal fun ColorsPreview() {
+    FinancialConnectionsPreview {
+        Column {
+            ColorPreview("textDefault", v3Colors.textDefault)
+            ColorPreview("textSubdued", v3Colors.textSubdued)
+            ColorPreview("textDisabled", v3Colors.textDisabled)
+            ColorPreview("textWhite", v3Colors.textWhite)
+            ColorPreview("textBrand", v3Colors.textBrand)
+            ColorPreview("textCritical", v3Colors.textCritical)
+            ColorPreview("iconDefault", v3Colors.iconDefault)
+            ColorPreview("iconSubdued", v3Colors.iconSubdued)
+            ColorPreview("iconWhite", v3Colors.iconWhite)
+            ColorPreview("iconBrand", v3Colors.iconBrand)
+            ColorPreview("buttonPrimary", v3Colors.buttonPrimary)
+            ColorPreview("buttonPrimaryHover", v3Colors.buttonPrimaryHover)
+            ColorPreview("buttonPrimaryPressed", v3Colors.buttonPrimaryPressed)
+            ColorPreview("buttonSecondary", v3Colors.buttonSecondary)
+            ColorPreview("buttonSecondaryHover", v3Colors.buttonSecondaryHover)
+            ColorPreview("buttonSecondaryPressed", v3Colors.buttonSecondaryPressed)
+            ColorPreview("background", v3Colors.background)
+            ColorPreview("backgroundBrand", v3Colors.backgroundBrand)
+            ColorPreview("border", v3Colors.border)
+            ColorPreview("borderBrand", v3Colors.borderBrand)
+        }
+    }
+}
+
+@Composable
+private fun ColorPreview(colorText: String, color: Color) {
+    Row {
+        Box(
+            Modifier
+                .size(40.dp)
+                .background(color)
+        )
+        // a text
+        Text(
+            text = colorText,
+            style = v3Typography.bodyMedium,
+            modifier = Modifier.padding(10.dp)
+        )
+    }
+}
