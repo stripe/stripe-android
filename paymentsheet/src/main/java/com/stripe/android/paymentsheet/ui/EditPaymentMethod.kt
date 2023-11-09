@@ -85,7 +85,7 @@ internal fun EditPaymentMethodUi(
                 colors = colors,
                 label = {
                     Text(
-                        text = stringResource(id = R.string.stripe_paymentsheet_card_number),
+                        text = stringResource(id = StripeR.string.stripe_acc_label_card_number),
                         modifier = modifier,
                         color = MaterialTheme.stripeColors.placeholderText
                             .copy(alpha = ContentAlpha.disabled),

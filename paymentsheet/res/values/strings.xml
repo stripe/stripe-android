@@ -69,8 +69,6 @@
   <string name="stripe_paymentsheet_save">Save</string>
   <!-- Content shown as a button label when modifying a saved payment method. -->
   <string name="stripe_paymentsheet_remove_card">Remove card</string>
-  <!-- Content shown as a text field label when modifying a saved payment method. -->
-  <string name="stripe_paymentsheet_card_number">Card number</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_save_a_new_payment_method">Save a new payment method</string>
   <!-- US Bank Account copy title for Mobile payment element form -->
