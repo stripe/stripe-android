@@ -2,7 +2,7 @@ package com.stripe.android.identity.navigation
 
 internal object SelfieWarmupDestination : IdentityTopLevelDestination(
     popUpToParam = PopUpToParam(
-        route = DocSelectionDestination.ROUTE.route,
+        route = DocWarmupDestination.ROUTE.route,
         inclusive = false
     )
 ) {

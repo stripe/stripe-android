@@ -183,4 +183,14 @@
   <string name="stripe_upload_file_text">Alternatively, you may manually upload a photo of your %1$s</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Upload your photo ID</string>
+  <!-- Title for doc front warmup page -->
+  <string name="stripe_doc_front_warmup_title">Get ready to scan your photo ID</string>
+  <!-- Body for doc front warmup page -->
+  <string name="stripe_doc_front_warmup_body">Make sure you\'re in a well-lit space.</string>
+  <!-- display name for Government issued photo ID -->
+  <string name="stripe_government_id">Government-issued photo ID</string>
+  <!-- title for accepted types of ids -->
+  <string name="stripe_accepted_forms_of_id">Accepted forms of ID</string>
+  <!-- Generic message for alternative options when uploading a document -->
+  <string name="stripe_upload_file_generic_text">Alternatively, you may manually upload a photo of your photo ID</string>
 </resources>

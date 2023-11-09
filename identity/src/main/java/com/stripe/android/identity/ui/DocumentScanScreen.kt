@@ -148,7 +148,7 @@ internal fun DocumentScanScreen(
                     navController = navController
                 )
 
-                SelfieCaptureScreen(
+                DocumentCaptureScreen(
                     newDisplayState,
                     documentScannerState,
                     targetScanType,
@@ -179,7 +179,7 @@ internal fun DocumentScanScreen(
 }
 
 @Composable
-private fun SelfieCaptureScreen(
+private fun DocumentCaptureScreen(
     newDisplayState: IdentityScanState?,
     documentScannerState: IdentityScanViewModel.State,
     targetScanType: IdentityScanState.ScanType?,

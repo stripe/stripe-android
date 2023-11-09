@@ -12,7 +12,6 @@ import com.stripe.android.identity.networking.models.Requirement.Companion.suppo
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingBack
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingConsent
-import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingDocType
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingFront
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingIndividualRequirements
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingOtp
@@ -105,9 +104,10 @@ private val DOCUMENT_UPLOAD_ROUTES = setOf(
  * Apart from collected data, the following document/selfie file upload related stats are also cleared.
  *  * When navigating up from [DocumentScanDestination] or [DocumentUploadDestination], clear document status.
  *  * When navigating up from [SelfieDestination], clear selfie status.
- *  * When navigating from any destination to [DocSelectionDestination], clearing both document and selfie status.
+ *  * When navigating from any destination to [DocWarmupDestination], clearing both document and selfie status.
  */
 internal fun NavController.clearDataAndNavigateUp(identityViewModel: IdentityViewModel): Boolean {
+    // Clicking back from Document/Selfie screen, cleaning doc/selfie upload status
     currentBackStackEntry?.destination?.route?.let { currentEntryRoute ->
         if (DOCUMENT_UPLOAD_ROUTES.contains(currentEntryRoute)) {
             identityViewModel.clearDocumentUploadedState()
@@ -118,14 +118,28 @@ internal fun NavController.clearDataAndNavigateUp(identityViewModel: IdentityVie
         currentEntryRoute.routeToRequirement().forEach(identityViewModel::clearCollectedData)
     }
 
-    // Reset is needed because certain screens might be skipped from backstack.
-    // E.g upload document -> land on [SelfieWarmupDestination] -> clicks back -> land on [DocSelectionDestination]
-    //   Need to clear document and selfie status in this case, as document screen was not added to back stack and
-    //   won't trigger currentBackStackEntry clean up logic.
     previousBackStackEntry?.destination?.route?.let { previousEntryRoute ->
-        if (DocSelectionDestination.ROUTE.route == previousEntryRoute) {
-            identityViewModel.resetAllUploadState()
+        // Clicking back from error screen and returning to Document/Selfie scan, cleaning doc/selfie upload status
+        if (DOCUMENT_UPLOAD_ROUTES.contains(previousEntryRoute)) {
+            identityViewModel.clearDocumentUploadedState()
         }
+        if (SelfieDestination.ROUTE.route == previousEntryRoute) {
+            identityViewModel.clearSelfieUploadedState()
+        }
+
+        // Back to [DocWarmupDestination], reset is needed because certain screens might be skipped from backstack.
+        // E.g upload document -> land on [SelfieWarmupDestination] -> clicks back -> land on [DocWarmupDestination]
+        //   Need to clear document and selfie status in this case, as document screen was not added to back stack and
+        //   won't trigger currentBackStackEntry clean up logic.
+        if (DocWarmupDestination.ROUTE.route == previousEntryRoute) {
+            identityViewModel.resetAllUploadState()
+            listOf(
+                Requirement.IDDOCUMENTFRONT,
+                Requirement.IDDOCUMENTBACK,
+                Requirement.FACE,
+            ).forEach(identityViewModel::clearCollectedData)
+        }
+        previousEntryRoute.routeToRequirement().forEach(identityViewModel::clearCollectedData)
     }
     return navigateUp()
 }
@@ -135,7 +149,6 @@ internal fun NavController.clearDataAndNavigateUp(identityViewModel: IdentityVie
  */
 internal suspend fun NavController.navigateOnVerificationPageData(
     verificationPageData: VerificationPageData,
-    onMissingFront: () -> Unit,
     onMissingOtp: () -> Unit,
     onMissingBack: () -> Unit,
     onReadyToSubmit: suspend () -> Unit
@@ -144,12 +157,8 @@ internal suspend fun NavController.navigateOnVerificationPageData(
         onMissingOtp()
     } else if (verificationPageData.isMissingConsent()) {
         navigateTo(ConsentDestination)
-    }
-    // TODO - remove this when backend removes docType
-    else if (verificationPageData.isMissingDocType()) {
-        navigateTo(DocSelectionDestination)
     } else if (verificationPageData.isMissingFront()) {
-        onMissingFront()
+        navigateTo(DocWarmupDestination)
     } else if (verificationPageData.isMissingBack()) {
         onMissingBack()
     } else if (verificationPageData.isMissingSelfie()) {

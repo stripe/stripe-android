@@ -54,7 +54,6 @@ class DebugScreenTest {
             VerificationPageRequirements(
                 missing = listOf(
                     Requirement.BIOMETRICCONSENT,
-                    Requirement.IDDOCUMENTTYPE,
                     Requirement.IDDOCUMENTFRONT,
                     Requirement.IDDOCUMENTBACK,
                     Requirement.IDNUMBER

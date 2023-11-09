@@ -256,14 +256,6 @@ private fun OTPViewStateEffect(
                     // document or individual fields, navigate accordingly.
                     navController.navigateOnVerificationPageData(
                         verificationPageData = verificationPageData,
-                        onMissingFront = {
-                            postErrorAndNavigateToFinalErrorScreen(
-                                identityViewModel,
-                                navController,
-                                context,
-                                IllegalStateException("Sending CannotVerify receives missing front")
-                            )
-                        },
                         onMissingOtp = {
                             postErrorAndNavigateToFinalErrorScreen(
                                 identityViewModel,

@@ -9,8 +9,6 @@ import kotlinx.serialization.json.Json
 internal data class ClearDataParam(
     @SerialName("biometric_consent")
     val biometricConsent: Boolean = false,
-    @SerialName("id_document_type")
-    val idDocumentType: Boolean = false,
     @SerialName("id_document_front")
     val idDocumentFront: Boolean = false,
     @SerialName("id_document_back")
@@ -44,7 +42,6 @@ internal data class ClearDataParam(
 
         fun createFromRequirements(requirements: Set<Requirement>) = ClearDataParam(
             biometricConsent = requirements.contains(Requirement.BIOMETRICCONSENT),
-            idDocumentType = requirements.contains(Requirement.IDDOCUMENTTYPE),
             idDocumentFront = requirements.contains(Requirement.IDDOCUMENTFRONT),
             idDocumentBack = requirements.contains(Requirement.IDDOCUMENTBACK),
             face = requirements.contains(Requirement.FACE),
