@@ -6,7 +6,7 @@ tags:
 ---
 - startRecording: ${'/tmp/test_results/testmode-paymentintent-testinstitution-networking-' + new Date().getTime()}
 - clearState
-- openLink: stripeconnectionsexample://playground?flow=PaymentIntent&financial_connections_override_native=native&merchant=networking_testmode&permissions=balances,transactions
+- openLink: stripeconnectionsexample://playground?flow=PaymentIntent&financial_connections_override_native=native&merchant=networking_testmode&permissions=balances,transactions,payment_method
 - tapOn:
     id: "Customer email setting"
 - inputRandomEmail
