@@ -26,8 +26,10 @@ data class PermissionsSetting(
         return value.joinToString(",") { it.apiValue }
     }
 
-    override fun convertToValue(value: String): List<Permission> {
-        return value.split(",").map { Permission.fromApiValue(it) }.toList()
+    override fun convertToValue(value: String): List<Permission> = if (value.isEmpty()) {
+        emptyList()
+    } else {
+        value.split(",").map { Permission.fromApiValue(it) }.toList()
     }
 }
 

@@ -46,7 +46,7 @@ internal data class PlaygroundSettings(
         val builder = Uri.Builder()
             .scheme("stripeconnectionsexample")
             .authority("playground")
-        for (definition in allSettings) {
+        for (definition in settings) {
             val saveable = definition.saveable()
             val value = definition.selectedOption
             if (saveable != null && value != null) {
