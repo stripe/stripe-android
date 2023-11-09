@@ -161,7 +161,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
 
     private fun showError(error: Throwable) {
         val errorText = when (error) {
-            is HttpException -> { error.response()?.errorBody()?.string() ?: error.message() }
+            is HttpException -> error.response()?.errorBody()?.string() ?: error.message()
             else -> error.message
         }
         _state.update {
