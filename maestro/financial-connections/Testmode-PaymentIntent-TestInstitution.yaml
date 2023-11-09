@@ -6,7 +6,7 @@ tags:
 ---
 - startRecording: ${'/tmp/test_results/testmode-paymentintent-testinstitution-' + new Date().getTime()}
 - clearState
-- openLink: stripeconnectionsexample://playground?flow=PaymentIntent&financial_connections_override_native=native&merchant=testmode&permissions=balances,payment_method
+- openLink: stripeconnectionsexample://playground?flow=PaymentIntent&financial_connections_override_native=native&merchant=testmode&permissions=balances
 - tapOn:
     id: "connect_accounts"
 # Wait until the consent button is visible
