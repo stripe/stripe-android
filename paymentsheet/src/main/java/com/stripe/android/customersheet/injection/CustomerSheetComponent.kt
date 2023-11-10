@@ -3,11 +3,9 @@ package com.stripe.android.customersheet.injection
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import dagger.BindsInstance
 import dagger.Subcomponent
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 @Subcomponent(
     modules = [
         CustomerSheetModule::class

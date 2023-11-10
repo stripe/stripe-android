@@ -16,7 +16,6 @@ import com.stripe.android.utils.rememberActivityOrNull
  * @param customerAdapter The [CustomerAdapter] to fetch customer-related information
  * @param callback Called with the result of the operation after [CustomerSheet] is dismissed
  */
-@ExperimentalCustomerSheetApi
 @Composable
 fun rememberCustomerSheet(
     configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(),

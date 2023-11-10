@@ -11,7 +11,6 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerEphemeralKeyProvider
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.SetupIntentClientSecretProvider
 import com.stripe.android.customersheet.StripeCustomerAdapter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -40,7 +39,6 @@ import kotlin.coroutines.CoroutineContext
         CoreCommonModule::class,
     ]
 )
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal interface StripeCustomerAdapterComponent {
     val stripeCustomerAdapter: StripeCustomerAdapter
 
@@ -64,7 +62,6 @@ internal interface StripeCustomerAdapterComponent {
 }
 
 @Module
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal interface StripeCustomerAdapterModule {
     @Binds
     fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository

@@ -140,9 +140,6 @@ public abstract interface class com/stripe/android/customersheet/CustomerSheetRe
 	public abstract fun onCustomerSheetResult (Lcom/stripe/android/customersheet/CustomerSheetResult;)V
 }
 
-public abstract interface annotation class com/stripe/android/customersheet/ExperimentalCustomerSheetApi : java/lang/annotation/Annotation {
-}
-
 public final class com/stripe/android/customersheet/InternalCustomerSheetResult$Canceled$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/customersheet/InternalCustomerSheetResult$Canceled;

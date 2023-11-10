@@ -21,7 +21,6 @@ import kotlin.coroutines.CoroutineContext
  * the customer's selected payment method to [SharedPreferences], which is used by [PaymentSheet]
  * to load the customer's default saved payment method.
  */
-@OptIn(ExperimentalCustomerSheetApi::class)
 @JvmSuppressWildcards
 internal class StripeCustomerAdapter @Inject constructor(
     private val context: Context,
@@ -169,7 +168,6 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 private data class CachedCustomerEphemeralKey(
     val result: CustomerAdapter.Result<CustomerEphemeralKey>,
     val date: Long,

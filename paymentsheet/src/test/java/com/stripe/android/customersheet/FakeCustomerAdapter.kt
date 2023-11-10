@@ -3,7 +3,6 @@ package com.stripe.android.customersheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal class FakeCustomerAdapter(
     override var canCreateSetupIntents: Boolean = true,
     var selectedPaymentOption: CustomerAdapter.Result<CustomerAdapter.PaymentOption?> =

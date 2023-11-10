@@ -12,7 +12,6 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.customersheet.CustomerSheetViewState
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
@@ -45,7 +44,6 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal object CustomerSheetTestHelper {
     internal val application = ApplicationProvider.getApplicationContext<Application>()
 

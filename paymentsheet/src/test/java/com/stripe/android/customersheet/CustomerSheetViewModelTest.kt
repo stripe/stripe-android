@@ -50,7 +50,6 @@ import kotlin.test.assertFailsWith
 import com.stripe.android.ui.core.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetViewModelTest {
 
     @get:Rule
