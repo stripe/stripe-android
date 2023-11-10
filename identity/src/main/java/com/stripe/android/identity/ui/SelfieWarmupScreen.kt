@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,10 +22,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
@@ -64,7 +63,7 @@ internal fun SelfieWarmupScreen(
             verticalArrangement = Arrangement.Center,
         ) {
             Image(
-                painter = painterResource(id = R.drawable.stripe_selfie_warmup_icon),
+                painter = painterResource(id = R.drawable.stripe_selfie_warmup),
                 modifier = Modifier
                     .size(140.dp)
                     .align(Alignment.CenterHorizontally),
@@ -77,8 +76,7 @@ internal fun SelfieWarmupScreen(
                     .padding(
                         top = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
                     ),
-                fontSize = dimensionResource(id = R.dimen.stripe_selfie_warmup_title_text_size).value.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.h4,
                 textAlign = TextAlign.Center
             )
             Text(
@@ -88,6 +86,7 @@ internal fun SelfieWarmupScreen(
                     .padding(
                         top = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
                     ),
+                style = MaterialTheme.typography.subtitle1,
                 textAlign = TextAlign.Center
             )
         }

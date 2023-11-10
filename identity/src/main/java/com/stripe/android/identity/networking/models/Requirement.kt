@@ -3,7 +3,7 @@ package com.stripe.android.identity.networking.models
 import android.content.Context
 import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.ConsentDestination
-import com.stripe.android.identity.navigation.DocSelectionDestination
+import com.stripe.android.identity.navigation.DocWarmupDestination
 import com.stripe.android.identity.navigation.DocumentScanDestination
 import com.stripe.android.identity.navigation.DocumentUploadDestination
 import com.stripe.android.identity.navigation.IdentityTopLevelDestination
@@ -25,9 +25,6 @@ internal enum class Requirement {
 
     @SerialName("id_document_front")
     IDDOCUMENTFRONT,
-
-    @SerialName("id_document_type")
-    IDDOCUMENTTYPE,
 
     @SerialName("face")
     FACE,
@@ -83,10 +80,6 @@ internal enum class Requirement {
                         fromRoute == DocumentUploadDestination.ROUTE.route
                 }
 
-                IDDOCUMENTTYPE -> {
-                    fromRoute == DocSelectionDestination.ROUTE.route
-                }
-
                 FACE -> {
                     fromRoute == SelfieDestination.ROUTE.route
                 }
@@ -113,8 +106,8 @@ internal enum class Requirement {
                     ConsentDestination
                 }
 
-                intersect(listOf(IDDOCUMENTTYPE, IDDOCUMENTFRONT, IDDOCUMENTBACK)).isNotEmpty() -> {
-                    DocSelectionDestination
+                intersect(listOf(IDDOCUMENTFRONT, IDDOCUMENTBACK)).isNotEmpty() -> {
+                    DocWarmupDestination
                 }
 
                 contains(FACE) -> {

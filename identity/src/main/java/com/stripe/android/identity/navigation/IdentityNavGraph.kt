@@ -15,7 +15,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -33,14 +32,12 @@ import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
-import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.getDisplayName
 import com.stripe.android.identity.ui.BottomSheet
 import com.stripe.android.identity.ui.ConfirmationScreen
 import com.stripe.android.identity.ui.ConsentScreen
 import com.stripe.android.identity.ui.CountryNotListedScreen
 import com.stripe.android.identity.ui.DebugScreen
-import com.stripe.android.identity.ui.DocSelectionScreen
+import com.stripe.android.identity.ui.DocWarmupScreen
 import com.stripe.android.identity.ui.DocumentScanScreen
 import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
@@ -73,7 +70,6 @@ internal fun IdentityNavGraph(
     topBarState: IdentityTopBarState,
     onNavControllerCreated: (NavController) -> Unit
 ) {
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
         onNavControllerCreated(navController)
@@ -115,8 +111,8 @@ internal fun IdentityNavGraph(
                     identityViewModel = identityViewModel
                 )
             }
-            screen(DocSelectionDestination.ROUTE) {
-                DocSelectionScreen(
+            screen(DocWarmupDestination.ROUTE) {
+                DocWarmupScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
                     cameraPermissionEnsureable = cameraPermissionEnsureable
@@ -185,23 +181,23 @@ internal fun IdentityNavGraph(
                 OTPScreen(navController = navController, identityViewModel = identityViewModel)
             }
             screen(CameraPermissionDeniedDestination.ROUTE) {
-                val collectedDataParamType =
-                    CameraPermissionDeniedDestination.collectedDataParamType(it)
+                val requireLiveCapture =
+                    identityViewModel.verificationPage.value?.data?.documentCapture?.requireLiveCapture ?: false
+
                 ErrorScreen(
                     identityViewModel = identityViewModel,
                     title = stringResource(id = R.string.stripe_camera_permission),
                     message1 = stringResource(id = R.string.stripe_grant_camera_permission_text),
                     message2 =
-                    if (collectedDataParamType != CollectedDataParam.Type.INVALID) {
+                    if (!requireLiveCapture) {
                         stringResource(
-                            R.string.stripe_upload_file_text,
-                            collectedDataParamType.getDisplayName(context)
+                            R.string.stripe_upload_file_generic_text
                         )
                     } else {
                         null
                     },
                     topButton =
-                    if (collectedDataParamType != CollectedDataParam.Type.INVALID) {
+                    if (!requireLiveCapture) {
                         ErrorScreenButton(
                             buttonText = stringResource(id = R.string.stripe_file_upload)
                         ) {
@@ -219,10 +215,10 @@ internal fun IdentityNavGraph(
                         buttonText = stringResource(id = R.string.stripe_app_settings)
                     ) {
                         appSettingsOpenable.openAppSettings()
-                        // navigate back to DocSelection, so that when user is back to the app
+                        // navigate back to DocWarmup, so that when user is back to the app
                         // from settings
                         // the camera permission check can be triggered again from there.
-                        navController.navigateTo(DocSelectionDestination)
+                        navController.navigateTo(DocWarmupDestination)
                     }
                 )
             }
