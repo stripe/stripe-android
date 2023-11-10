@@ -241,7 +241,7 @@ internal fun AddPaymentMethodWithPaymentElement(
         H4Text(
             text = stringResource(id = R.string.stripe_paymentsheet_save_a_new_payment_method),
             modifier = Modifier
-                .padding(bottom = 20.dp)
+                .padding(bottom = 4.dp)
                 .padding(horizontal = horizontalPadding)
         )
 
