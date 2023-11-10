@@ -50,7 +50,6 @@
   <string name="stripe_wallet_recollect_cvc_error">Z dôvodu bezpečnosti znovu zadajte bezpečnostný kód vašej karty.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Naozaj chcete odstrániť tento prepojený účet?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Naozaj chcete odstrániť túto kartu?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

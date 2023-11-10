@@ -51,6 +51,8 @@
   <string name="stripe_paymentsheet_primary_button_processing">处理中...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">移除银行账户</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_paymentsheet_remove_card">移除卡</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">移除 %s</string>
   <!-- A button used for saving a new payment method -->

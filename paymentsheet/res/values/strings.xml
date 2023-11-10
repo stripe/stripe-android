@@ -63,12 +63,12 @@
   <string name="stripe_paymentsheet_primary_button_processing">Processing…</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Remove bank account</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_paymentsheet_remove_card">Remove card</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Remove %s</string>
   <!-- A button used for saving a new payment method -->
   <string name="stripe_paymentsheet_save">Save</string>
-  <!-- Content shown as a button label when modifying a saved payment method. -->
-  <string name="stripe_paymentsheet_remove_card">Remove card</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_save_a_new_payment_method">Save a new payment method</string>
   <!-- US Bank Account copy title for Mobile payment element form -->

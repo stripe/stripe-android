@@ -50,7 +50,6 @@
   <string name="stripe_wallet_recollect_cvc_error">Turvallisuussyistä sinun on annettava korttisi turvakoodi uudelleen.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Haluatko varmasti poistaa tämän linkitetyn tilin?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Haluatko varmasti poistaa tämän kortin?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->
