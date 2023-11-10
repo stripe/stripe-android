@@ -5,8 +5,10 @@ import android.app.Application
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -289,6 +291,97 @@ internal class PlaygroundTestDriver(
         doAuthorization()
 
         afterAuthorization(selectors)
+
+        teardown()
+
+        return result
+    }
+
+    fun confirmExistingComplete(
+        customerId: String?,
+        testParameters: TestParameters,
+        values: FieldPopulator.Values = FieldPopulator.Values(),
+        beforeBuyAction: (Selectors) -> Unit = {},
+        afterBuyAction: (Selectors) -> Unit = {},
+        populateCustomLpmFields: () -> Unit = {},
+    ): PlaygroundState? {
+        if (customerId == null) {
+            fail("No customer id")
+            return playgroundState
+        }
+
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] = CustomerType.Existing(customerId)
+            }
+        )
+        launchComplete()
+
+        waitForAddPaymentMethodNode()
+        addPaymentMethodNode().performClick()
+
+        selectors.paymentSelection.click()
+
+        FieldPopulator(
+            selectors,
+            testParameters,
+            populateCustomLpmFields,
+            values = values,
+        ).populateFields()
+
+        // Verify device requirements are met prior to attempting confirmation.  Do this
+        // after we have had the chance to capture a screenshot.
+        verifyDeviceSupportsTestAuthorization(
+            testParameters.authorizationAction,
+            testParameters.useBrowser
+        )
+
+        val result = playgroundState
+
+        beforeBuyAction(selectors)
+
+        pressBuy()
+
+        doAuthorization()
+
+        afterBuyAction(selectors)
+
+        teardown()
+
+        return result
+    }
+
+    /**
+     * This will open the payment sheet complete flow from the playground with an existing
+     * user and complete the confirmation including any browser interactions.
+     */
+    fun confirmCompleteWithDefaultSavedPaymentMethod(
+        customerId: String?,
+        testParameters: TestParameters,
+        beforeBuyAction: (Selectors) -> Unit = {},
+        afterBuyAction: (Selectors) -> Unit = {},
+    ): PlaygroundState? {
+        if (customerId == null) {
+            fail("No customer id")
+            return playgroundState
+        }
+
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] = CustomerType.Existing(customerId)
+            }
+        )
+        launchComplete()
+
+        val result = playgroundState
+
+        beforeBuyAction(selectors)
+
+        pressBuy()
+
+        doAuthorization()
+
+        afterBuyAction(selectors)
 
         teardown()
 
@@ -720,6 +813,16 @@ internal class PlaygroundTestDriver(
     }
 
     private fun addPaymentMethodNode(): SemanticsNodeInteraction {
-        return composeTestRule.onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_+ Add")
+        waitForAddPaymentMethodNode()
+        return composeTestRule.onNodeWithTag(ADD_PAYMENT_METHOD_NODE_TAG)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    private fun waitForAddPaymentMethodNode() {
+        composeTestRule.waitUntilAtLeastOneExists(hasTestTag(ADD_PAYMENT_METHOD_NODE_TAG), 5000L)
+    }
+
+    private companion object {
+        const val ADD_PAYMENT_METHOD_NODE_TAG = "${PAYMENT_OPTION_CARD_TEST_TAG}_+ Add"
     }
 }

@@ -33,6 +33,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.payments.paymentlauncher.toInternalPaymentResultCallback
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -183,7 +184,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     ) {
         val launcher = activityResultCaller.registerForActivityResult(
             PaymentLauncherContract(),
-            ::onPaymentLauncherResult
+            toInternalPaymentResultCallback(::onPaymentLauncherResult)
         )
 
         paymentLauncher = paymentLauncherFactory.create(
