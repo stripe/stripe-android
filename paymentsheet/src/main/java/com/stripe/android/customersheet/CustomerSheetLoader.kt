@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.model.requireValidOrThrow
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -153,7 +152,7 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
         val supported = setOfNotNull(
             PaymentMethod.Type.Card.code,
             PaymentMethod.Type.USBankAccount.code.takeIf {
-                customerSheetACHv2.isEnabled && isFinancialConnectionsAvailable()
+                isFinancialConnectionsAvailable()
             }
         )
         return supportedPaymentMethods.filter {

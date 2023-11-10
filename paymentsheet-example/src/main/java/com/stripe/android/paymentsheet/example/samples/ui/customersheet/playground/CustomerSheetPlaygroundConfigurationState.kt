@@ -8,7 +8,6 @@ data class CustomerSheetPlaygroundConfigurationState(
     val isExistingCustomer: Boolean = true,
     val useDefaultBillingAddress: Boolean = true,
     val attachDefaultBillingAddress: Boolean = true,
-    val achEnabled: Boolean = true,
     val billingCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
         PaymentSheet.BillingDetailsCollectionConfiguration()
 )

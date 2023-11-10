@@ -6,7 +6,6 @@ import com.stripe.android.BuildConfig
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object FeatureFlags {
     val cardBrandChoice = FeatureFlag()
-    val customerSheetACHv2 = FeatureFlag()
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -16,14 +16,11 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.FakeCustomerRepository
-import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -40,12 +37,6 @@ class CustomerAdapterTest {
 
     private val application = ApplicationProvider.getApplicationContext<Application>()
     private val testDispatcher = UnconfinedTestDispatcher()
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.customerSheetACHv2,
-        isEnabled = true,
-    )
 
     @Before
     fun setup() {

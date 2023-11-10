@@ -32,14 +32,11 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
-import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -52,12 +49,6 @@ import com.stripe.android.ui.core.R as UiCoreR
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetViewModelTest {
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.customerSheetACHv2,
-        isEnabled = false,
-    )
 
     @Test
     fun `isLiveMode is true when publishable key is live`() {
@@ -1538,8 +1529,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `Payment method form changes on user selection`() = runTest {
-        featureFlagTestRule.setEnabled(true)
-
         val viewModel = createViewModel(
             initialBackStack = listOf(
                 addPaymentMethodViewState,
@@ -1565,8 +1554,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `When the payment method form is us bank account, the primary button label is continue`() = runTest {
-        featureFlagTestRule.setEnabled(true)
-
         val viewModel = createViewModel(
             initialBackStack = listOf(
                 addPaymentMethodViewState,

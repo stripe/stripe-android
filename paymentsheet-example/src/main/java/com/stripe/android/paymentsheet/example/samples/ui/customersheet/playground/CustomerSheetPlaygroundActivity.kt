@@ -281,10 +281,6 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                 configurationState = configurationState,
                 viewActionHandler = viewActionHandler,
             )
-            AchEnabledSwitch(
-                configurationState = configurationState,
-                viewActionHandler = viewActionHandler,
-            )
             BillingDetailsConfiguration(
                 configurationState = configurationState,
                 viewActionHandler = viewActionHandler,
@@ -369,29 +365,6 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                 modifier = Modifier
                     .semantics { testTagsAsResourceId = true }
                     .testTag("CUSTOMER_SHEET_PLAYGROUND_EXISTING_CUSTOMER")
-            )
-        }
-    }
-
-    @Composable
-    private fun AchEnabledSwitch(
-        configurationState: CustomerSheetPlaygroundConfigurationState,
-        viewActionHandler: (CustomerSheetPlaygroundViewAction) -> Unit,
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = "US Bank Accounts",
-                color = MaterialTheme.colors.onBackground,
-            )
-            Switch(
-                checked = configurationState.achEnabled,
-                onCheckedChange = {
-                    viewActionHandler(CustomerSheetPlaygroundViewAction.ToggleAchEnabled)
-                },
             )
         }
     }
