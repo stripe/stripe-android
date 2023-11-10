@@ -24,7 +24,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
 
-private val LightColorPalette = FinancialConnectionsColors(
+@Deprecated("Use V3Colors instead")
+private val Colors = FinancialConnectionsColors(
     backgroundSurface = Color.White,
     backgroundContainer = Neutral50,
     backgroundBackdrop = Neutral200.copy(alpha = .70f),
@@ -46,6 +47,30 @@ private val LightColorPalette = FinancialConnectionsColors(
     iconAttention = Attention400
 )
 
+private val V3Colors = FinancialConnectionsV3Colors(
+    textDefault = Color(0xFF353A44),
+    textSubdued = Color(0xFF596171),
+    textDisabled = Color(0xFF818DA0),
+    textWhite = Color(0xFFFFFFFF),
+    textBrand = Color(0xFF533AFD),
+    textCritical = Color(0xFFC0123C),
+    iconDefault = Color(0xFF474E5A),
+    iconSubdued = Color(0xFF6C7688),
+    iconWhite = Color(0xFFFFFFFF),
+    iconBrand = Color(0xFF675DFF),
+    buttonPrimary = Color(0xFF675DFF),
+    buttonPrimaryHover = Color(0xFF857AFE),
+    buttonPrimaryPressed = Color(0xFF533AFD),
+    buttonSecondary = Color(0xFFF5F6F8),
+    buttonSecondaryHover = Color(0xFFF5F6F8),
+    buttonSecondaryPressed = Color(0xFFEBEEF1),
+    background = Color(0xFFF5F6F8),
+    backgroundBrand = Color(0xFFF5F6F8),
+    border = Color(0xFFD8DEE4),
+    borderBrand = Color(0xFF675DFF)
+)
+
+@Deprecated("Use V3Typography instead")
 private val Typography = FinancialConnectionsTypography(
     subtitle = TextStyle(
         fontSize = 24.sp,
@@ -134,22 +159,83 @@ private val Typography = FinancialConnectionsTypography(
     ),
 )
 
+private val V3Typography = FinancialConnectionsV3Typography(
+    headingXLarge = TextStyle(
+        fontSize = 28.sp,
+        lineHeight = 32.sp,
+        letterSpacing = 0.38.sp,
+        fontWeight = FontWeight.W700
+    ),
+    headingLarge = TextStyle(
+        fontSize = 24.sp,
+        lineHeight = 32.sp,
+        letterSpacing = 0.30.sp,
+        fontWeight = FontWeight.W700
+    ),
+    headingMedium = TextStyle(
+        fontSize = 20.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.30.sp,
+        fontWeight = FontWeight.W700
+    ),
+    bodyMediumEmphasized = TextStyle(
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        fontWeight = FontWeight.W600
+    ),
+    bodyMedium = TextStyle(
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        fontWeight = FontWeight.W400
+    ),
+    bodySmall = TextStyle(
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        fontWeight = FontWeight.W400
+    ),
+    labelLargeEmphasized = TextStyle(
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        fontWeight = FontWeight.W600
+    ),
+    labelLarge = TextStyle(
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        fontWeight = FontWeight.W400
+    ),
+    labelMediumEmphasized = TextStyle(
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        fontWeight = FontWeight.W600
+    ),
+    labelMedium = TextStyle(
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        fontWeight = FontWeight.W400
+    ),
+    labelSmall = TextStyle(
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        fontWeight = FontWeight.W400
+    ),
+)
+
 private val TextSelectionColors = TextSelectionColors(
-    handleColor = LightColorPalette.textBrand,
-    backgroundColor = LightColorPalette.textBrand.copy(alpha = 0.4f)
+    handleColor = V3Colors.textBrand,
+    backgroundColor = V3Colors.textBrand.copy(alpha = 0.4f)
 )
 
 @Immutable
 private object FinancialConnectionsRippleTheme : RippleTheme {
     @Composable
     override fun defaultColor() = RippleTheme.defaultRippleColor(
-        contentColor = LightColorPalette.textBrand,
+        contentColor = V3Colors.textBrand,
         lightTheme = MaterialTheme.colors.isLight
     )
 
     @Composable
     override fun rippleAlpha() = RippleTheme.defaultRippleAlpha(
-        contentColor = LightColorPalette.textBrand,
+        contentColor = V3Colors.textBrand,
         lightTheme = MaterialTheme.colors.isLight
     )
 }
@@ -158,7 +244,9 @@ private object FinancialConnectionsRippleTheme : RippleTheme {
 internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalFinancialConnectionsTypography provides Typography,
-        LocalFinancialConnectionsColors provides LightColorPalette
+        LocalV3Typography provides V3Typography,
+        LocalFinancialConnectionsColors provides Colors,
+        LocalV3Colors provides V3Colors
     ) {
         val view = LocalView.current
         val window = findWindow()
@@ -205,17 +293,37 @@ private val LocalFinancialConnectionsTypography =
         error("no FinancialConnectionsTypography provided")
     }
 
+private val LocalV3Typography =
+    staticCompositionLocalOf<FinancialConnectionsV3Typography> {
+        error("no V3Typography provided")
+    }
+
+private val LocalV3Colors =
+    staticCompositionLocalOf<FinancialConnectionsV3Colors> {
+        error("no V3Colors provided")
+    }
+
 private val LocalFinancialConnectionsColors = staticCompositionLocalOf<FinancialConnectionsColors> {
     error("No FinancialConnectionsColors provided")
 }
 
 internal object FinancialConnectionsTheme {
+
+    @Deprecated("Use v3Colors instead")
     val colors: FinancialConnectionsColors
         @Composable
         get() = LocalFinancialConnectionsColors.current
+
+    @Deprecated("Use v3Typography instead")
     val typography: FinancialConnectionsTypography
         @Composable
         get() = LocalFinancialConnectionsTypography.current
+    val v3Typography
+        @Composable
+        get() = LocalV3Typography.current
+    val v3Colors
+        @Composable
+        get() = LocalV3Colors.current
 }
 
 /**

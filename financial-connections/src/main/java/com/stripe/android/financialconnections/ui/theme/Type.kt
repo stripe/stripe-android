@@ -2,15 +2,21 @@
 
 package com.stripe.android.financialconnections.ui.theme
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 
 @Immutable
+@Deprecated("Use FinancialConnectionsV3Typography instead")
 internal data class FinancialConnectionsTypography(
     val subtitle: TextStyle,
     val subtitleEmphasized: TextStyle,
@@ -28,66 +34,76 @@ internal data class FinancialConnectionsTypography(
     val bodyCode: TextStyle,
     val bodyCodeEmphasized: TextStyle,
     val captionCode: TextStyle,
-    val captionCodeEmphasized: TextStyle,
+    val captionCodeEmphasized: TextStyle
+)
 
+@Immutable
+internal data class FinancialConnectionsV3Typography(
+    val headingXLarge: TextStyle,
+    val headingLarge: TextStyle,
+    val headingMedium: TextStyle,
+    val bodyMediumEmphasized: TextStyle,
+    val bodyMedium: TextStyle,
+    val bodySmall: TextStyle,
+    val labelLargeEmphasized: TextStyle,
+    val labelLarge: TextStyle,
+    val labelMediumEmphasized: TextStyle,
+    val labelMedium: TextStyle,
+    val labelSmall: TextStyle
 )
 
 @Preview(group = "Components", name = "Type")
 @Composable
 internal fun TypePreview() {
     FinancialConnectionsPreview {
-        Column {
+        Column(
+            modifier = Modifier.background(Color.White)
+        ) {
             Text(
-                text = "subtitle",
-                style = FinancialConnectionsTheme.typography.subtitle
+                text = "Heading XLarge",
+                style = v3Typography.headingXLarge
             )
             Text(
-                text = "subtitleEmphasized",
-                style = FinancialConnectionsTheme.typography.subtitleEmphasized
+                text = "Heading Large",
+                style = v3Typography.headingLarge
             )
             Text(
-                text = "heading",
-                style = FinancialConnectionsTheme.typography.heading
+                text = "Heading Medium",
+                style = v3Typography.headingMedium
+            )
+            Divider()
+            Text(
+                text = "Body Medium Emphasized",
+                style = v3Typography.bodyMediumEmphasized
             )
             Text(
-                text = "subheading",
-                style = FinancialConnectionsTheme.typography.subheading
+                text = "Body Medium",
+                style = v3Typography.bodyMedium
             )
             Text(
-                text = "KICKER",
-                style = FinancialConnectionsTheme.typography.kicker
+                text = "Body Small",
+                style = v3Typography.bodySmall
+            )
+            Divider()
+            Text(
+                text = "Label Large Emphasized",
+                style = v3Typography.labelLargeEmphasized
             )
             Text(
-                text = "body",
-                style = FinancialConnectionsTheme.typography.body
+                text = "Label Large",
+                style = v3Typography.labelLarge
             )
             Text(
-                text = "bodyEmphasized",
-                style = FinancialConnectionsTheme.typography.bodyEmphasized
+                text = "Label Medium Emphasized",
+                style = v3Typography.labelMediumEmphasized
             )
             Text(
-                text = "detail",
-                style = FinancialConnectionsTheme.typography.detail
+                text = "Label Medium",
+                style = v3Typography.labelMedium
             )
             Text(
-                text = "detailEmphasized",
-                style = FinancialConnectionsTheme.typography.detailEmphasized
-            )
-            Text(
-                text = "caption",
-                style = FinancialConnectionsTheme.typography.caption
-            )
-            Text(
-                text = "captionEmphasized",
-                style = FinancialConnectionsTheme.typography.captionEmphasized
-            )
-            Text(
-                text = "captionTight",
-                style = FinancialConnectionsTheme.typography.captionTight
-            )
-            Text(
-                text = "captionTightEmphasized",
-                style = FinancialConnectionsTheme.typography.captionTightEmphasized
+                text = "Label Small",
+                style = v3Typography.labelSmall
             )
         }
     }
