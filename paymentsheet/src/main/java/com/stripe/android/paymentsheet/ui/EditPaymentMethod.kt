@@ -35,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
@@ -90,12 +91,9 @@ internal fun EditPaymentMethodUi(
                 enabled = false,
                 colors = colors,
                 label = {
-                    Text(
+                    Label(
                         text = stringResource(id = StripeR.string.stripe_acc_label_card_number),
-                        modifier = modifier,
-                        color = MaterialTheme.stripeColors.placeholderText
-                            .copy(alpha = ContentAlpha.disabled),
-                        style = MaterialTheme.typography.subtitle1
+                        modifier = modifier
                     )
                 },
                 trailingIcon = {
@@ -118,20 +116,57 @@ internal fun EditPaymentMethodUi(
 
         Spacer(modifier = Modifier.requiredHeight(4.dp))
 
-        CompositionLocalProvider(
-            LocalContentAlpha provides if (isIdle) ContentAlpha.high else ContentAlpha.disabled
+        RemoveButton(
+            idle = isIdle,
+            removing = viewState.status == EditPaymentMethodViewState.Status.Removing,
+            onRemove = {
+                viewActionHandler.invoke(EditPaymentMethodViewAction.OnRemovePressed)
+            }
+        )
+    }
+}
+
+@Composable
+private fun Label(
+    text: String,
+    modifier: Modifier
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        color = MaterialTheme.stripeColors.placeholderText.copy(alpha = ContentAlpha.disabled),
+        style = MaterialTheme.typography.subtitle1
+    )
+}
+
+@Composable
+private fun RemoveButton(
+    idle: Boolean,
+    removing: Boolean,
+    onRemove: () -> Unit
+) {
+    CompositionLocalProvider(
+        LocalContentAlpha provides if (removing) ContentAlpha.disabled else ContentAlpha.high
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
         ) {
             TextButton(
-                enabled = isIdle,
-                onClick = {
-                    viewActionHandler.invoke(EditPaymentMethodViewAction.OnRemovePressed)
-                }
+                modifier = Modifier.align(Alignment.Center),
+                enabled = idle && !removing,
+                onClick = onRemove
             ) {
                 Text(
                     text = stringResource(id = R.string.stripe_paymentsheet_remove_card),
                     color = MaterialTheme.colors.error.copy(LocalContentAlpha.current),
                     style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
                     modifier = Modifier.align(Alignment.CenterVertically),
+                )
+            }
+            if (removing) {
+                LoadingIndicator(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    color = MaterialTheme.colors.error
                 )
             }
         }
