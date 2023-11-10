@@ -94,7 +94,7 @@ internal class TestCard : BasePlaygroundTest() {
             customerId = state?.customerConfig?.id,
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
-                selectors.composeTestRule.waitUntilAtLeastOneExists(
+                selectors.composeTestRule.waitUntilExactlyOneExists(
                     hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
                         .and(hasText(cardNumber.takeLast(4), substring = true))
@@ -140,7 +140,7 @@ internal class TestCard : BasePlaygroundTest() {
             customerId = state?.customerConfig?.id,
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
-                selectors.composeTestRule.waitUntilAtLeastOneExists(
+                selectors.composeTestRule.waitUntilExactlyOneExists(
                     hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
                         .and(hasText(secondCardNumber.takeLast(4), substring = true))
