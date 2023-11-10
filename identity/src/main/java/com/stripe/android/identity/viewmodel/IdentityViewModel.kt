@@ -39,7 +39,6 @@ import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.navigation.CameraPermissionDeniedDestination
 import com.stripe.android.identity.navigation.ConfirmationDestination
-import com.stripe.android.identity.navigation.DocSelectionDestination
 import com.stripe.android.identity.navigation.DocumentScanDestination
 import com.stripe.android.identity.navigation.DocumentUploadDestination
 import com.stripe.android.identity.navigation.ErrorDestination
@@ -1105,14 +1104,6 @@ internal class IdentityViewModel constructor(
         navController: NavController,
         collectedDataParam: CollectedDataParam,
         fromRoute: String,
-        onMissingFront: () -> Unit = {
-            errorCause.postValue(
-                IllegalStateException(
-                    "unhandled onMissingFront from $fromRoute with $collectedDataParam"
-                )
-            )
-            navController.navigateToErrorScreenWithDefaultValues(getApplication())
-        },
         onMissingBack: () -> Unit = {
             errorCause.postValue(
                 IllegalStateException(
@@ -1145,7 +1136,6 @@ internal class IdentityViewModel constructor(
         ) { verificationPageData ->
             navController.navigateOnVerificationPageData(
                 verificationPageData = verificationPageData,
-                onMissingFront = onMissingFront,
                 onMissingOtp = onMissingPhoneOtp,
                 onMissingBack = onMissingBack,
                 onReadyToSubmit = onReadyToSubmit
@@ -1299,11 +1289,6 @@ internal class IdentityViewModel constructor(
     fun resetAllUploadState() {
         clearDocumentUploadedState()
         clearSelfieUploadedState()
-        listOf(
-            Requirement.IDDOCUMENTFRONT,
-            Requirement.IDDOCUMENTBACK,
-            Requirement.FACE
-        ).forEach(this::clearCollectedData)
     }
 
     /**
@@ -1344,81 +1329,28 @@ internal class IdentityViewModel constructor(
         }
     }
 
-    suspend fun postVerificationPageDataForDocSelection(
-        type: CollectedDataParam.Type,
+    /**
+     * Check Camera permission, if has permission navigate to [DocumentScanDestination],
+     * otherwise [CameraPermissionDeniedDestination]
+     */
+    fun checkPermissionAndNavigate(
         navController: NavController,
-        viewLifecycleOwner: LifecycleOwner,
         cameraPermissionEnsureable: CameraPermissionEnsureable
     ) {
-        postVerificationPageDataAndMaybeNavigate(
-            navController,
-            CollectedDataParam(idDocumentType = type),
-            fromRoute = DocSelectionDestination.ROUTE.route,
-            onMissingFront = {
-                cameraPermissionEnsureable.ensureCameraPermission(
-                    onCameraReady = {
-                        sendAnalyticsRequest(
-                            identityAnalyticsRequestFactory.cameraPermissionGranted()
-                        )
-                        _cameraPermissionGranted.update { true }
-                        idDetectorModelFile.observe(viewLifecycleOwner) { modelResource ->
-                            when (modelResource.status) {
-                                // model ready, camera permission is granted -> navigate to scan
-                                Status.SUCCESS -> {
-                                    navController.navigateTo(DocumentScanDestination)
-                                }
-                                // model not ready, camera permission is granted -> navigate to manual capture
-                                Status.ERROR -> {
-                                    requireVerificationPage(
-                                        viewLifecycleOwner,
-                                        navController
-                                    ) { verificationPage ->
-                                        if (verificationPage.documentCapture.requireLiveCapture) {
-                                            errorCause.postValue(
-                                                IllegalStateException(
-                                                    "Can't access camera and client has " +
-                                                        "required live capture."
-                                                )
-                                            )
-                                            navController.navigateToErrorScreenWithDefaultValues(
-                                                getApplication(),
-                                            )
-                                        } else {
-                                            navController.navigateTo(
-                                                DocumentUploadDestination
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Status.LOADING -> {} // no-op
-                                Status.IDLE -> {} // no-op
-                            }
-                        }
-                    },
-                    onUserDeniedCameraPermission = {
-                        sendAnalyticsRequest(
-                            identityAnalyticsRequestFactory.cameraPermissionDenied(
-                                type.toAnalyticsScanType()
-                            )
-                        )
-                        _cameraPermissionGranted.update { false }
-                        requireVerificationPage(
-                            viewLifecycleOwner,
-                            navController
-                        ) { verificationPage ->
-                            navController.navigateTo(
-                                CameraPermissionDeniedDestination(
-                                    if (verificationPage.documentCapture.requireLiveCapture) {
-                                        CollectedDataParam.Type.INVALID
-                                    } else {
-                                        type
-                                    }
-                                )
-                            )
-                        }
-                    }
+        cameraPermissionEnsureable.ensureCameraPermission(
+            onCameraReady = {
+                sendAnalyticsRequest(
+                    identityAnalyticsRequestFactory.cameraPermissionGranted()
                 )
+                _cameraPermissionGranted.update { true }
+                navController.navigateTo(DocumentScanDestination)
+            },
+            onUserDeniedCameraPermission = {
+                sendAnalyticsRequest(
+                    identityAnalyticsRequestFactory.cameraPermissionDenied()
+                )
+                _cameraPermissionGranted.update { false }
+                navController.navigateTo(CameraPermissionDeniedDestination)
             }
         )
     }
@@ -1500,7 +1432,6 @@ internal class IdentityViewModel constructor(
         check(requirementToForceConfirm.supportsForceConfirm()) {
             "Unsupported requirement to forceConfirm: $requirementToForceConfirm"
         }
-        val failedDocumentType = collectedData.value.idDocumentType
         val failedDocumentParam =
             if (requirementToForceConfirm == Requirement.IDDOCUMENTFRONT) {
                 collectedData.value.idDocumentFront
@@ -1509,7 +1440,7 @@ internal class IdentityViewModel constructor(
             }
         val failedUploadMethod = failedDocumentParam?.uploadMethod
 
-        check(failedDocumentType != null && failedDocumentParam != null && failedUploadMethod != null) {
+        check(failedDocumentParam != null && failedUploadMethod != null) {
             "Failed to calculate params to forceConfirm"
         }
         val collectedDataParamWithForceConfirm =
@@ -1782,13 +1713,6 @@ internal class IdentityViewModel constructor(
 
     fun visitedIndividualWelcome() {
         _visitedIndividualWelcomeScreen.updateStateAndSave { true }
-    }
-
-    private fun CollectedDataParam.Type.toAnalyticsScanType() = when (this) {
-        CollectedDataParam.Type.DRIVINGLICENSE -> IdentityScanState.ScanType.DOC_FRONT
-        CollectedDataParam.Type.IDCARD -> IdentityScanState.ScanType.DOC_FRONT
-        CollectedDataParam.Type.PASSPORT -> IdentityScanState.ScanType.DOC_FRONT
-        else -> throw IllegalStateException("Invalid CollectedDataParam.Type")
     }
 
     private fun <State> MutableStateFlow<State>.updateStateAndSave(function: (State) -> State) {

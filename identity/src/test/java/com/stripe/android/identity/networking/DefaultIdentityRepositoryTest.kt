@@ -57,7 +57,6 @@ class DefaultIdentityRepositoryTest {
             assertThat(it.documentCapture.requireLiveCapture).isFalse()
             assertThat(it.requirements.missing).containsExactly(
                 Requirement.BIOMETRICCONSENT,
-                Requirement.IDDOCUMENTTYPE,
                 Requirement.IDDOCUMENTFRONT,
                 Requirement.IDDOCUMENTBACK
             )
@@ -70,7 +69,6 @@ class DefaultIdentityRepositoryTest {
             assertThat(it.selfieCapture).isNotNull()
             assertThat(it.requirements.missing).containsExactly(
                 Requirement.BIOMETRICCONSENT,
-                Requirement.IDDOCUMENTTYPE,
                 Requirement.IDDOCUMENTFRONT,
                 Requirement.IDDOCUMENTBACK,
                 Requirement.FACE
@@ -83,7 +81,6 @@ class DefaultIdentityRepositoryTest {
         testFetchVerificationPage(VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING) {
             assertThat(it.requirements.missing).containsExactly(
                 Requirement.BIOMETRICCONSENT,
-                Requirement.IDDOCUMENTTYPE,
                 Requirement.IDDOCUMENTFRONT,
                 Requirement.IDDOCUMENTBACK,
                 Requirement.IDNUMBER
@@ -96,7 +93,6 @@ class DefaultIdentityRepositoryTest {
         testFetchVerificationPage(VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING) {
             assertThat(it.requirements.missing).containsExactly(
                 Requirement.BIOMETRICCONSENT,
-                Requirement.IDDOCUMENTTYPE,
                 Requirement.IDDOCUMENTFRONT,
                 Requirement.IDDOCUMENTBACK,
                 Requirement.ADDRESS
@@ -111,7 +107,6 @@ class DefaultIdentityRepositoryTest {
         ) {
             assertThat(it.requirements.missing).containsExactly(
                 Requirement.BIOMETRICCONSENT,
-                Requirement.IDDOCUMENTTYPE,
                 Requirement.IDDOCUMENTFRONT,
                 Requirement.IDDOCUMENTBACK,
                 Requirement.ADDRESS,

@@ -89,7 +89,7 @@ internal fun NavController.navigateTo(destination: IdentityTopLevelDestination) 
 internal fun String.routeToScreenName(): String = when (this) {
     ConsentDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_CONSENT
-    DocSelectionDestination.ROUTE.route ->
+    DocWarmupDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_DOC_SELECT
     DocumentScanDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
@@ -122,8 +122,6 @@ internal fun String.routeToScreenName(): String = when (this) {
 internal fun String.routeToRequirement(): List<Requirement> = when (this) {
     ConsentDestination.ROUTE.route ->
         listOf(Requirement.BIOMETRICCONSENT)
-    DocSelectionDestination.ROUTE.route ->
-        listOf(Requirement.IDDOCUMENTTYPE)
     DocumentScanDestination.ROUTE.route ->
         listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
     DocumentUploadDestination.ROUTE.route ->

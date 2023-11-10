@@ -33,7 +33,7 @@ internal object SelfieDestination : IdentityTopLevelDestination(
 
 internal object DocumentScanDestination : IdentityTopLevelDestination(
     popUpToParam = PopUpToParam(
-        route = DocSelectionDestination.ROUTE.route,
+        route = DocWarmupDestination.ROUTE.route,
         inclusive = false
     )
 ) {

@@ -364,6 +364,13 @@ public final class com/stripe/android/identity/ui/ComposableSingletons$DebugScre
 	public final fun getLambda-3$identity_release ()Lkotlin/jvm/functions/Function3;
 }
 
+public final class com/stripe/android/identity/ui/ComposableSingletons$DocWarmupScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$DocWarmupScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/identity/ui/ComposableSingletons$SelfieScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$SelfieScreenKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
