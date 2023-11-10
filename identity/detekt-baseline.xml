@@ -14,9 +14,9 @@
     <ID>LongMethod:ConsentWelcomeHeader.kt$@Composable internal fun ConsentWelcomeHeader( modifier: Modifier = Modifier, merchantLogoUri: Uri, title: String?, showLogos: Boolean = true )</ID>
     <ID>LongMethod:DebugScreen.kt$@Composable internal fun CompleteWithTestDataSection( onClickSubmit: (CompleteOption) -> Unit )</ID>
     <ID>LongMethod:DebugScreen.kt$@Composable internal fun DebugScreen( navController: NavController, identityViewModel: IdentityViewModel, verificationFlowFinishable: VerificationFlowFinishable )</ID>
-    <ID>LongMethod:DocSelectionScreen.kt$@Composable internal fun DocSelectionScreen( navController: NavController, identityViewModel: IdentityViewModel, cameraPermissionEnsureable: CameraPermissionEnsureable )</ID>
+    <ID>LongMethod:DocWarmupScreen.kt$@Composable internal fun DocWarmupView( documentSelectPage: VerificationPageStaticContentDocumentSelectPage, onContinueClick: () -> Unit )</ID>
     <ID>LongMethod:DocumentScanScreen.kt$@Composable internal fun DocumentScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel )</ID>
-    <ID>LongMethod:DocumentScanScreen.kt$@Composable private fun SelfieCaptureScreen( newDisplayState: IdentityScanState?, documentScannerState: IdentityScanViewModel.State, targetScanType: IdentityScanState.ScanType?, identityScanViewModel: IdentityScanViewModel, identityViewModel: IdentityViewModel, lifecycleOwner: LifecycleOwner, cameraManager: IdentityCameraManager, onContinueClick: () -> Unit )</ID>
+    <ID>LongMethod:DocumentScanScreen.kt$@Composable private fun DocumentCaptureScreen( newDisplayState: IdentityScanState?, documentScannerState: IdentityScanViewModel.State, targetScanType: IdentityScanState.ScanType?, identityScanViewModel: IdentityScanViewModel, identityViewModel: IdentityViewModel, lifecycleOwner: LifecycleOwner, cameraManager: IdentityCameraManager, onContinueClick: () -> Unit )</ID>
     <ID>LongMethod:ErrorScreen.kt$@Composable internal fun ErrorScreen( identityViewModel: IdentityViewModel, title: String, modifier: Modifier = Modifier, message1: String? = null, message2: String? = null, topButton: ErrorScreenButton? = null, bottomButton: ErrorScreenButton? = null, )</ID>
     <ID>LongMethod:IDDetectorAnalyzer.kt$IDDetectorAnalyzer$override suspend fun analyze( data: AnalyzerInput, state: IdentityScanState ): AnalyzerOutput</ID>
     <ID>LongMethod:IDNumberSection.kt$@Composable internal fun IDNumberSection( enabled: Boolean, idNumberCountries: List&lt;Country>, countryNotListedText: String, navController: NavController, onIdNumberCollected: (Resource&lt;IdNumberParam>) -> Unit )</ID>
@@ -24,7 +24,6 @@
     <ID>LongMethod:IdentityNavGraph.kt$@Composable @ExperimentalMaterialApi internal fun IdentityNavGraph( navController: NavHostController = rememberNavController(), identityViewModel: IdentityViewModel, fallbackUrlLauncher: FallbackUrlLauncher, appSettingsOpenable: AppSettingsOpenable, cameraPermissionEnsureable: CameraPermissionEnsureable, verificationFlowFinishable: VerificationFlowFinishable, identityScanViewModelFactory: IdentityScanViewModel.IdentityScanViewModelFactory, onTopBarNavigationClick: () -> Unit, topBarState: IdentityTopBarState, onNavControllerCreated: (NavController) -> Unit )</ID>
     <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$internal fun uploadScanResult( result: IdentityAggregator.FinalResult, verificationPage: VerificationPage )</ID>
     <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$private fun uploadDocumentImagesAndNotify( imageFile: File, filePurpose: StripeFilePurpose, uploadMethod: UploadMethod, scores: List&lt;Float>? = null, isHighRes: Boolean, isFront: Boolean, scanType: IdentityScanState.ScanType, compressionQuality: Float )</ID>
-    <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$suspend fun postVerificationPageDataForDocSelection( type: CollectedDataParam.Type, navController: NavController, viewLifecycleOwner: LifecycleOwner, cameraPermissionEnsureable: CameraPermissionEnsureable )</ID>
     <ID>LongMethod:IdentityViewModelTest.kt$IdentityViewModelTest$private fun testUploadDocumentScanSuccessResult(isFront: Boolean)</ID>
     <ID>LongMethod:IdentityViewModelTest.kt$IdentityViewModelTest$private fun testUploadSelfieScanSuccessResult( selfie: FaceDetectorTransitioner.Selfie, isHighRes: Boolean )</ID>
     <ID>LongMethod:IndividualScreen.kt$@Composable internal fun IndividualScreen( navController: NavController, identityViewModel: IdentityViewModel )</ID>
@@ -76,8 +75,6 @@
     <ID>TooManyFunctions:IdentityAnalyticsRequestFactory.kt$IdentityAnalyticsRequestFactory</ID>
     <ID>TooManyFunctions:IdentityRepository.kt$IdentityRepository</ID>
     <ID>TooManyFunctions:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
-    <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val docSelectionTitleTag = "Title"</ID>
-    <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val singleSelectionTag = "SingleSelection"</ID>
     <ID>UnnecessaryAbstractClass:IdentityCommonModule.kt$IdentityCommonModule$IdentityCommonModule</ID>
     <ID>UnusedPrivateMember:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$i</ID>
     <ID>VariableNaming:IdentityViewModel.kt$IdentityViewModel$/** * Response for initial VerificationPage, used for building UI. */ @VisibleForTesting internal val _verificationPage: MutableLiveData&lt;Resource&lt;VerificationPage>> = // No need to write to savedStateHandle for livedata savedStateHandle.getLiveData( key = VERIFICATION_PAGE, initialValue = Resource.idle() )</ID>

@@ -10,8 +10,7 @@ internal val VERIFICATION_PAGE_DATA_JSON_STRING = """
         ],
         "missing": [
           "id_document_front",
-          "id_document_back",
-          "id_document_type"
+          "id_document_back"
         ]
       },
       "status": "requires_input",
@@ -210,8 +209,7 @@ internal val VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
         "missing": [
           "biometric_consent",
           "id_document_front",
-          "id_document_back",
-          "id_document_type"
+          "id_document_back"
         ]
       },
       "status": "requires_input",
@@ -361,8 +359,7 @@ internal val VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
         "missing": [
           "biometric_consent",
           "id_document_front",
-          "id_document_back",
-          "id_document_type"
+          "id_document_back"
         ]
       },
       "status": "requires_input",
@@ -518,8 +515,7 @@ internal val VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING = """
           "biometric_consent",
           "face",
           "id_document_front",
-          "id_document_back",
-          "id_document_type"
+          "id_document_back"
         ]
       },
       "selfie": {
@@ -725,7 +721,6 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING = """
           "biometric_consent",
           "id_document_front",
           "id_document_back",
-          "id_document_type",
           "id_number"
         ]
       },
@@ -884,8 +879,7 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING = """
           "address",
           "biometric_consent",
           "id_document_front",
-          "id_document_back",
-          "id_document_type"
+          "id_document_back"
         ]
       },
       "selfie": null,
@@ -1043,7 +1037,6 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_AND_ID_NUMBER_JSON_
           "biometric_consent",
           "id_document_front",
           "id_document_back",
-          "id_document_type",
           "id_number"
         ]
       },

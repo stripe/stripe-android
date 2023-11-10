@@ -9,7 +9,6 @@ import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.navigation.ConfirmationDestination
-import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.DebugDestination
 import com.stripe.android.identity.navigation.INDIVIDUAL
 import com.stripe.android.identity.networking.Resource
@@ -45,21 +44,6 @@ class InitialLoadingScreenTest {
         whenever(it.fallbackUrl).thenReturn(FALLBACK_URL)
     }
 
-    private val verificationPageForDocType = mock<VerificationPage>().also {
-        whenever(it.livemode).thenReturn(true)
-        whenever(it.requirements).thenReturn(
-            VerificationPageRequirements(
-                missing = listOf(
-                    Requirement.BIOMETRICCONSENT,
-                    Requirement.IDDOCUMENTTYPE,
-                    Requirement.IDDOCUMENTFRONT,
-                    Requirement.IDDOCUMENTBACK,
-                    Requirement.IDNUMBER
-                )
-            )
-        )
-    }
-
     private val verificationPageForIdNumberType = mock<VerificationPage>().also {
         whenever(it.livemode).thenReturn(true)
         whenever(it.requirements).thenReturn(
@@ -92,7 +76,6 @@ class InitialLoadingScreenTest {
             VerificationPageRequirements(
                 missing = listOf(
                     Requirement.BIOMETRICCONSENT,
-                    Requirement.IDDOCUMENTTYPE,
                     Requirement.IDDOCUMENTFRONT,
                     Requirement.IDDOCUMENTBACK,
                     Requirement.IDNUMBER
@@ -112,18 +95,6 @@ class InitialLoadingScreenTest {
     fun testUnsupportedClientOpensFallback() {
         setComposeTestRuleWith(verificationPageUnsupported) {
             verify(mockFallbackUrlLauncher).launchFallbackUrl(eq(FALLBACK_URL))
-        }
-    }
-
-    @Test
-    fun testDocTypeNavigatesToConsent() {
-        setComposeTestRuleWith(verificationPageForDocType) {
-            verify(mockNavController).navigate(
-                argWhere {
-                    it.startsWith(ConsentDestination.CONSENT)
-                },
-                any<NavOptionsBuilder.() -> Unit>()
-            )
         }
     }
 

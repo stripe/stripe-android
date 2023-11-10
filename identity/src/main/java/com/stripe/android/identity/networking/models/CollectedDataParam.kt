@@ -19,8 +19,6 @@ import kotlinx.serialization.json.Json
 internal data class CollectedDataParam(
     @SerialName("biometric_consent")
     val biometricConsent: Boolean? = null,
-    @SerialName("id_document_type")
-    val idDocumentType: Type? = null,
     @SerialName("id_document_front")
     val idDocumentFront: DocumentUploadParam? = null,
     @SerialName("id_document_back")
@@ -156,7 +154,6 @@ internal data class CollectedDataParam(
             return another?.let {
                 this.copy(
                     biometricConsent = another.biometricConsent ?: this.biometricConsent,
-                    idDocumentType = another.idDocumentType ?: this.idDocumentType,
                     idDocumentFront = another.idDocumentFront ?: this.idDocumentFront,
                     idDocumentBack = another.idDocumentBack ?: this.idDocumentBack,
                     face = another.face ?: this.face,
@@ -175,7 +172,6 @@ internal data class CollectedDataParam(
                 Requirement.BIOMETRICCONSENT -> this.copy(biometricConsent = null)
                 Requirement.IDDOCUMENTBACK -> this.copy(idDocumentBack = null)
                 Requirement.IDDOCUMENTFRONT -> this.copy(idDocumentFront = null)
-                Requirement.IDDOCUMENTTYPE -> this.copy(idDocumentType = null)
                 Requirement.FACE -> this.copy(face = null)
                 Requirement.IDNUMBER -> this.copy(idNumber = null)
                 Requirement.DOB -> this.copy(dob = null)
@@ -190,9 +186,6 @@ internal data class CollectedDataParam(
             val requirements = mutableSetOf<Requirement>()
             this.biometricConsent?.let {
                 requirements.add(Requirement.BIOMETRICCONSENT)
-            }
-            this.idDocumentType?.let {
-                requirements.add(Requirement.IDDOCUMENTTYPE)
             }
             this.idDocumentFront?.let {
                 requirements.add(Requirement.IDDOCUMENTFRONT)

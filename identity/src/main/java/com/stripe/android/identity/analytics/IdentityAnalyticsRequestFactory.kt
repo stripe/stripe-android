@@ -147,13 +147,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun cameraPermissionDenied(
-        scanType: IdentityScanState.ScanType
-    ) = requestFactory.createRequest(
-        eventName = EVENT_CAMERA_PERMISSION_DENIED,
-        additionalParams = additionalParamWithEventMetadata(
-            PARAM_SCAN_TYPE to scanType.toParam()
-        )
+    fun cameraPermissionDenied() = requestFactory.createRequest(
+        eventName = EVENT_CAMERA_PERMISSION_DENIED
     )
 
     fun cameraPermissionGranted() = requestFactory.createRequest(

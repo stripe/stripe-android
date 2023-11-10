@@ -9,7 +9,7 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.ConsentDestination.CONSENT
-import com.stripe.android.identity.navigation.DocSelectionDestination
+import com.stripe.android.identity.navigation.DocWarmupDestination
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
 import com.stripe.android.identity.navigation.InitialLoadingDestination
@@ -181,7 +181,7 @@ class IdentityOnBackPressedHandlerTest {
     @Test
     fun testBackPressOnOtherScreen() {
         val mockDestination = mock<NavDestination> {
-            on { route } doReturn DocSelectionDestination.ROUTE.route
+            on { route } doReturn DocWarmupDestination.ROUTE.route
         }
 
         handler.updateState(

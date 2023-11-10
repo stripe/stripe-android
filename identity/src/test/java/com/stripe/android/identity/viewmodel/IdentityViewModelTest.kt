@@ -24,8 +24,6 @@ import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE
 import com.stripe.android.identity.VERIFICATION_PAGE_DATA_HAS_ERROR
 import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_BACK
 import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_CONSENT
-import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_DOCTYPE
-import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_FRONT
 import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_PHONE_OTP
 import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_SELFIE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
@@ -39,7 +37,6 @@ import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.ConsentDestination
-import com.stripe.android.identity.navigation.DocSelectionDestination
 import com.stripe.android.identity.navigation.DocumentScanDestination
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.IdentityTopLevelDestination
@@ -134,7 +131,6 @@ internal class IdentityViewModelTest {
     private val mockScreenTracker = mock<ScreenTracker>()
     private val mockController = mock<NavController>()
     private val mockCollectedDataParam = mock<CollectedDataParam>()
-    private val mockOnMissingFront = mock<() -> Unit>()
     private val mockOnMissingBack = mock<() -> Unit>()
     private val mockOnMissingPhoneOtp = mock<() -> Unit>()
     private val mockOnReadyToSubmit = mock<() -> Unit>()
@@ -383,7 +379,6 @@ internal class IdentityViewModelTest {
             mockController,
             mockCollectedDataParam,
             ConsentDestination.ROUTE.route,
-            mockOnMissingFront,
             mockOnMissingBack,
             mockOnMissingPhoneOtp,
             mockOnReadyToSubmit
@@ -414,28 +409,11 @@ internal class IdentityViewModelTest {
     }
 
     @Test
-    fun `postVerificationPageDataAndMaybeNavigate - missDocType`() {
-        testPostVerificationPageDataAndMaybeNavigate(
-            VERIFICATION_PAGE_DATA_MISSING_DOCTYPE,
-            DocSelectionDestination
-        )
-    }
-
-    @Test
     fun `postVerificationPageDataAndMaybeNavigate - missSelfie`() {
         testPostVerificationPageDataAndMaybeNavigate(
             VERIFICATION_PAGE_DATA_MISSING_SELFIE,
             SelfieWarmupDestination
         )
-    }
-
-    @Test
-    fun `postVerificationPageDataAndMaybeNavigate - missingFront`() {
-        testPostVerificationPageDataAndMaybeNavigateWithCallback(
-            VERIFICATION_PAGE_DATA_MISSING_FRONT
-        ) {
-            verify(mockOnMissingFront).invoke()
-        }
     }
 
     @Test
@@ -470,7 +448,7 @@ internal class IdentityViewModelTest {
         runBlocking {
             // sending a requirement not in REQUIREMENTS_SUPPORTS_FORCE_CONFIRM
             viewModel.postVerificationPageDataForForceConfirm(
-                requirementToForceConfirm = Requirement.IDDOCUMENTTYPE,
+                requirementToForceConfirm = Requirement.FACE,
                 navController = mockController
             )
 
@@ -822,7 +800,6 @@ internal class IdentityViewModelTest {
             mockController,
             collectedDataParam,
             ConsentDestination.ROUTE.route,
-            mockOnMissingFront,
             mockOnMissingBack,
             mockOnMissingPhoneOtp,
             mockOnReadyToSubmit
@@ -871,7 +848,6 @@ internal class IdentityViewModelTest {
             mockController,
             collectedDataParam,
             ConsentDestination.ROUTE.route,
-            mockOnMissingFront,
             mockOnMissingBack,
             mockOnMissingPhoneOtp,
             mockOnReadyToSubmit
@@ -1125,18 +1101,8 @@ internal class IdentityViewModelTest {
         verificationPageDataResponse: VerificationPageData,
         paramsCallback: suspend (CollectedDataParam) -> Unit
     ) = runBlocking {
-        // mock failed scanning front of driver license
-        val failedDocumentType = CollectedDataParam.Type.DRIVINGLICENSE
-
-//        // failed front, now fulfilled, target destination should be failed back
-//        val targetDestination = failedDocumentType.toScanDestination(
-//            shouldStartFromBack = true,
-//            shouldPopUpToDocSelection = true
-//        )
-
         val failedCollectedDataParam =
             CollectedDataParam(
-                idDocumentType = failedDocumentType,
                 idDocumentFront = DocumentUploadParam(
                     highResImage = "high/res/image/path",
                     uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
