@@ -15,7 +15,7 @@ import kotlinx.parcelize.Parcelize
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentLauncherContract :
-    ActivityResultContract<PaymentLauncherContract.Args, PaymentResult>() {
+    ActivityResultContract<PaymentLauncherContract.Args, InternalPaymentResult>() {
     override fun createIntent(context: Context, input: Args): Intent {
         return Intent(
             context,
@@ -23,8 +23,8 @@ class PaymentLauncherContract :
         ).putExtras(input.toBundle())
     }
 
-    override fun parseResult(resultCode: Int, intent: Intent?): PaymentResult {
-        return PaymentResult.fromIntent(intent)
+    override fun parseResult(resultCode: Int, intent: Intent?): InternalPaymentResult {
+        return InternalPaymentResult.fromIntent(intent)
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

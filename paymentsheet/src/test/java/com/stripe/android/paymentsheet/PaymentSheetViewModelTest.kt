@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultCaller
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
@@ -26,12 +28,15 @@ import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
+import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -71,6 +76,7 @@ import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
@@ -1620,6 +1626,152 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
+    @Test
+    fun `On complete payment launcher result in PI mode & should reuse, should save payment selection`() = runTest {
+        selectionSavedTest(
+            initializationMode = InitializationMode.PaymentIntent(
+                clientSecret = "pi_12345"
+            ),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+        )
+    }
+
+    @Test
+    fun `On complete payment launcher result in PI mode & should not reuse, should not save payment selection`() = runTest {
+        selectionSavedTest(
+            initializationMode = InitializationMode.PaymentIntent(
+                clientSecret = "pi_12345"
+            ),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+            shouldSave = false
+        )
+    }
+
+    @Test
+    fun `On complete payment launcher result in SI mode, should save payment selection`() = runTest {
+        selectionSavedTest(
+            initializationMode = InitializationMode.SetupIntent(
+                clientSecret = "si_123456"
+            )
+        )
+    }
+
+    @Test
+    fun `On complete payment launcher result with PI config but no SFU, should not save payment selection`() = runTest {
+        selectionSavedTest(
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 10L,
+                        currency = "USD"
+                    )
+                )
+            ),
+            shouldSave = false
+        )
+    }
+
+    @Test
+    fun `On complete payment launcher result with DI (PI+SFU), should save payment selection`() = runTest {
+        selectionSavedTest(
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 10L,
+                        currency = "USD",
+                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `On complete payment launcher result with DI (SI), should save payment selection`() = runTest {
+        selectionSavedTest(
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(
+                        currency = "USD"
+                    )
+                )
+            )
+        )
+    }
+
+    private suspend fun selectionSavedTest(
+        initializationMode: InitializationMode = ARGS_CUSTOMER_WITH_GOOGLEPAY.initializationMode,
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave =
+            PaymentSelection.CustomerRequestedSave.NoRequest,
+        shouldSave: Boolean = true
+    ) {
+        val intent = PAYMENT_INTENT_WITH_PAYMENT_METHOD!!
+        val mockActivityResultCaller = mock<ActivityResultCaller> {
+            on {
+                registerForActivityResult<
+                    PaymentLauncherContract.Args,
+                    InternalPaymentResult
+                    >(any(), any())
+            } doReturn mock()
+        }
+
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                initializationMode = initializationMode
+            ),
+            stripeIntent = PAYMENT_INTENT
+        ).apply {
+            registerFromActivity(mockActivityResultCaller, TestLifecycleOwner())
+        }
+
+        val selection = PaymentSelection.New.Card(
+            brand = CardBrand.Visa,
+            customerRequestedSave = customerRequestedSave,
+            paymentMethodCreateParams = PaymentMethodCreateParams.create(
+                card = PaymentMethodCreateParams.Card()
+            )
+        )
+
+        viewModel.updateSelection(selection)
+
+        val onPaymentResult = argumentCaptor<ActivityResultCallback<InternalPaymentResult>>()
+
+        verify(mockActivityResultCaller).registerForActivityResult(
+            any<PaymentLauncherContract>(),
+            onPaymentResult.capture()
+        )
+
+        onPaymentResult.firstValue.onActivityResult(
+            InternalPaymentResult.Completed(intent)
+        )
+
+        val savedSelection = PaymentSelection.Saved(
+            paymentMethod = intent.paymentMethod!!
+        )
+
+        if (shouldSave) {
+            assertThat(prefsRepository.paymentSelectionArgs).containsExactly(savedSelection)
+
+            assertThat(
+                prefsRepository.getSavedSelection(
+                    isGooglePayAvailable = true,
+                    isLinkAvailable = true
+                )
+            ).isEqualTo(
+                SavedSelection.PaymentMethod(savedSelection.paymentMethod.id.orEmpty())
+            )
+        } else {
+            assertThat(prefsRepository.paymentSelectionArgs).isEmpty()
+
+            assertThat(
+                prefsRepository.getSavedSelection(
+                    isGooglePayAvailable = true,
+                    isLinkAvailable = true
+                )
+            ).isEqualTo(SavedSelection.None)
+        }
+    }
+
     private fun createViewModel(
         args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
@@ -1690,6 +1842,7 @@ internal class PaymentSheetViewModelTest {
         private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        val PAYMENT_INTENT_WITH_PAYMENT_METHOD = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD
         val SETUP_INTENT = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
     }
 }
