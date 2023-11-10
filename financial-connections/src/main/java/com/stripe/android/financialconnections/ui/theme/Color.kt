@@ -101,11 +101,13 @@ internal data class FinancialConnectionsV3Colors(
     val borderBrand: Color
 )
 
-@Preview(group = "Components", name = "Colors", showBackground = true)
+@Preview(group = "Components", name = "Colors")
 @Composable
 internal fun ColorsPreview() {
     FinancialConnectionsPreview {
-        Column {
+        Column(
+            modifier = Modifier.background(Color.White)
+        ) {
             ColorPreview("textDefault", v3Colors.textDefault)
             ColorPreview("textSubdued", v3Colors.textSubdued)
             ColorPreview("textDisabled", v3Colors.textDisabled)
@@ -138,7 +140,6 @@ private fun ColorPreview(colorText: String, color: Color) {
                 .size(40.dp)
                 .background(color)
         )
-        // a text
         Text(
             text = colorText,
             style = v3Typography.bodyMedium,

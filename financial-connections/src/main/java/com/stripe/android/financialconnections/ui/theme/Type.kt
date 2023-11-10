@@ -2,11 +2,14 @@
 
 package com.stripe.android.financialconnections.ui.theme
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -53,7 +56,9 @@ internal data class FinancialConnectionsV3Typography(
 @Composable
 internal fun TypePreview() {
     FinancialConnectionsPreview {
-        Column {
+        Column(
+            modifier = Modifier.background(Color.White)
+        ) {
             Text(
                 text = "Heading XLarge",
                 style = v3Typography.headingXLarge
