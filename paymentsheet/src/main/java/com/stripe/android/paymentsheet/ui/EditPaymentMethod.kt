@@ -15,10 +15,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +44,7 @@ import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
 import com.stripe.android.uicore.elements.TextFieldColors
+import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.R as PaymentsCoreR
 import com.stripe.android.R as StripeR
@@ -67,13 +71,15 @@ internal fun EditPaymentMethodUi(
     modifier: Modifier = Modifier
 ) {
     val padding = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    val isIdle = viewState.status == EditPaymentMethodViewState.Status.Idle
 
     Column(
         modifier = modifier.padding(
             top = padding,
             start = padding,
             end = padding
-        )
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         SectionCard {
             val colors = TextFieldColors(false)
@@ -104,22 +110,31 @@ internal fun EditPaymentMethodUi(
         PrimaryButton(
             label = stringResource(id = StripeR.string.stripe_title_update_card),
             isLoading = viewState.status == EditPaymentMethodViewState.Status.Updating,
-            isEnabled = viewState.canUpdate && viewState.status == EditPaymentMethodViewState.Status.Idle,
+            isEnabled = viewState.canUpdate && isIdle,
             onButtonClick = {
                 viewActionHandler.invoke(EditPaymentMethodViewAction.OnUpdatePressed)
             }
         )
 
-        Spacer(modifier = Modifier.requiredHeight(8.dp))
+        Spacer(modifier = Modifier.requiredHeight(4.dp))
 
-        PrimaryButton(
-            label = stringResource(id = R.string.stripe_paymentsheet_remove_card),
-            isLoading = viewState.status == EditPaymentMethodViewState.Status.Removing,
-            isEnabled = viewState.status == EditPaymentMethodViewState.Status.Idle,
-            onButtonClick = {
-                viewActionHandler.invoke(EditPaymentMethodViewAction.OnRemovePressed)
+        CompositionLocalProvider(
+            LocalContentAlpha provides if (isIdle) ContentAlpha.high else ContentAlpha.disabled
+        ) {
+            TextButton(
+                enabled = isIdle,
+                onClick = {
+                    viewActionHandler.invoke(EditPaymentMethodViewAction.OnRemovePressed)
+                }
+            ) {
+                Text(
+                    text = stringResource(id = R.string.stripe_paymentsheet_remove_card),
+                    color = MaterialTheme.colors.error.copy(LocalContentAlpha.current),
+                    style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                )
             }
-        )
+        }
     }
 }
 
