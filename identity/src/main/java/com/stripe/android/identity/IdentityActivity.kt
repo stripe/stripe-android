@@ -44,6 +44,7 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
+ * Revert this
  * Host activity to perform Identity verification.
  */
 internal class IdentityActivity :
