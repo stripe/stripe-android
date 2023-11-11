@@ -18,6 +18,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.MAIN_FONT_SIZE
@@ -48,7 +52,10 @@ fun PaymentMethodSelector(
             modifier = Modifier.clickable(
                 enabled = isEnabled,
                 onClick = onClick
-            ).testTag(PAYMENT_METHOD_SELECTOR_TEST_TAG),
+            ).semantics {
+                testTag = PAYMENT_METHOD_SELECTOR_TEST_TAG
+                text = AnnotatedString(paymentMethodLabel)
+            },
         ) {
             if (paymentMethodIcon != null) {
                 Icon(
