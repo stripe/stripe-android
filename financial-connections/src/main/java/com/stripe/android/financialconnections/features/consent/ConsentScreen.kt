@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -61,12 +60,11 @@ import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 import kotlinx.coroutines.launch
@@ -215,7 +213,6 @@ private fun ConsentMainContent(
     }
 }
 
-
 @Composable
 private fun LoadedContent(
     payload: ConsentState.Payload,
@@ -275,28 +272,14 @@ private fun ConsentFooter(
     val belowCta = remember(consent.belowCta) {
         consent.belowCta?.let { TextResource.Text(fromHtml(consent.belowCta)) }
     }
-    Column(
-        modifier = Modifier.padding(
-            start = 24.dp,
-            end = 24.dp,
-            top = 16.dp,
-            bottom = 24.dp
-        )
-    ) {
+    Column() {
         AnnotatedText(
+            modifier = Modifier.fillMaxWidth(),
             text = aboveCta,
             onClickableTextClick = onClickableTextClick,
-            defaultStyle = typography.detail.copy(
+            defaultStyle = v3Typography.labelSmall.copy(
                 textAlign = TextAlign.Center,
-                color = colors.textSecondary
-            ),
-            annotationStyles = mapOf(
-                StringAnnotation.CLICKABLE to typography.detailEmphasized
-                    .toSpanStyle()
-                    .copy(color = colors.textBrand),
-                StringAnnotation.BOLD to typography.detailEmphasized
-                    .toSpanStyle()
-                    .copy(color = colors.textSecondary)
+                color = v3Colors.textDefault
             )
         )
         Spacer(modifier = Modifier.size(16.dp))
@@ -311,22 +294,14 @@ private fun ConsentFooter(
             Text(text = consent.cta)
         }
         if (belowCta != null) {
-            Spacer(modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.size(16.dp))
             AnnotatedText(
                 modifier = Modifier.fillMaxWidth(),
                 text = belowCta,
                 onClickableTextClick = onClickableTextClick,
-                defaultStyle = typography.detail.copy(
+                defaultStyle = v3Typography.labelSmall.copy(
                     textAlign = TextAlign.Center,
-                    color = colors.textSecondary
-                ),
-                annotationStyles = mapOf(
-                    StringAnnotation.CLICKABLE to typography.detailEmphasized
-                        .toSpanStyle()
-                        .copy(color = colors.textBrand),
-                    StringAnnotation.BOLD to typography.detailEmphasized
-                        .toSpanStyle()
-                        .copy(color = colors.textSecondary)
+                    color = v3Colors.textDefault
                 )
             )
             Spacer(modifier = Modifier.size(16.dp))

@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.ui.theme
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,17 +11,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun Layout(
@@ -50,36 +45,25 @@ internal fun Layout(
     }
 }
 
-
 @OptIn(ExperimentalFoundationApi::class)
 @Preview(showBackground = true)
+@Suppress("MagicNumber")
 @Composable
 internal fun LayoutPreview() {
     FinancialConnectionsTheme {
         val state = rememberLazyListState()
-        val scope = rememberCoroutineScope()
         Layout(
             lazyListState = state,
             content = {
                 item {
                     Text(
-                        "Doesn't stick",
+                        "Title",
                         style = v3Typography.headingXLarge
-
                     )
                 }
-                stickyHeader(key = "sticky") {
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.White),
-                        value = "", onValueChange = { },
-
-                        )
-                }
-                (1..100).forEach {
+                for (it in 1..50) {
                     item {
-                        Text("Item $it")
+                        Text("Body item $it")
                     }
                 }
             },
@@ -89,11 +73,7 @@ internal fun LayoutPreview() {
                 ) {
                     FinancialConnectionsButton(
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            scope.launch {
-                                state.animateScrollToItem(1)
-                            }
-                        }
+                        onClick = {}
                     ) {
                         Text("Button 1")
                     }

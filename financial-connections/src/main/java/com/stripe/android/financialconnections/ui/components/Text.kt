@@ -21,6 +21,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.text.getSpans
 import com.stripe.android.financialconnections.ui.TextResource
@@ -33,9 +34,9 @@ internal fun AnnotatedText(
     defaultStyle: TextStyle,
     modifier: Modifier = Modifier,
     annotationStyles: Map<StringAnnotation, SpanStyle> = mapOf(
-        StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.bodyEmphasized
+        StringAnnotation.CLICKABLE to defaultStyle
             .toSpanStyle()
-            .copy(color = FinancialConnectionsTheme.colors.textBrand)
+            .copy(textDecoration = TextDecoration.Underline)
     ),
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip

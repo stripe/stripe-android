@@ -124,12 +124,10 @@ internal class ConsentPreviewParameterProvider :
                 ),
                 Bullet(
                     icon = Image("https://www.cdn.stripe.com/12321312321.png"),
-                    content = "Stripe will allow Goldilocks to access only the data requested",
                     title = "Stripe will allow Goldilocks to access only the data requested"
                 ),
                 Bullet(
                     icon = Image("https://www.cdn.stripe.com/12321312321.png"),
-                    content = "Stripe will allow Goldilocks to access only the data requested",
                     title = "Stripe will allow Goldilocks to access only the data requested"
                 ),
             )
