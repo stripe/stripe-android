@@ -1080,6 +1080,19 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
+        @JvmStatic
+        @JvmOverloads
+        fun createKonbini(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Konbini,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createLink(
             paymentDetailsId: String,
