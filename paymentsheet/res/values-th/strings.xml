@@ -51,6 +51,8 @@
   <string name="stripe_paymentsheet_primary_button_processing">กำลังประมวลผล...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">นำบัญชีธนาคารออก</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_paymentsheet_remove_card">นำบัตรออก</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">นำ %s ออก</string>
   <!-- A button used for saving a new payment method -->
