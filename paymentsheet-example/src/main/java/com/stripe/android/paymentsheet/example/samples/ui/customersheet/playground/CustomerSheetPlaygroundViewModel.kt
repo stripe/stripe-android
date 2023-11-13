@@ -54,7 +54,7 @@ class CustomerSheetPlaygroundViewModel(
     private val _configurationState = MutableStateFlow(CustomerSheetPlaygroundConfigurationState())
     val configurationState: StateFlow<CustomerSheetPlaygroundConfigurationState> = _configurationState
 
-    private val initialConfiguration = CustomerSheet.Configuration.builder()
+    private val initialConfiguration = CustomerSheet.Configuration.builder(merchantDisplayName = "Payment Sheet Example")
         .defaultBillingDetails(
             PaymentSheet.BillingDetails(
                 name = "CustomerSheet Testing"
