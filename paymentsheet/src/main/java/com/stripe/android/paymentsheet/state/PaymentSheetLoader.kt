@@ -7,7 +7,6 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher.Companion.supportedFundingSources
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.StripeIntent
@@ -85,9 +84,16 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun isGooglePayReady(
         paymentSheetConfiguration: PaymentSheet.Configuration,
-        elementsSession: ElementsSession,
+        loadResult: ElementsSessionRepository.LoadResult,
     ): Boolean {
-        return elementsSession.isGooglePayEnabled && paymentSheetConfiguration.isGooglePayReady()
+        return when (loadResult) {
+            is ElementsSessionRepository.LoadResult.Session -> {
+                loadResult.session.isGooglePayEnabled && paymentSheetConfiguration.isGooglePayReady()
+            }
+            is ElementsSessionRepository.LoadResult.Fallback -> {
+                paymentSheetConfiguration.isGooglePayReady()
+            }
+        }
     }
 
     private suspend fun PaymentSheet.Configuration.isGooglePayReady(): Boolean {
@@ -112,7 +118,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val stripeIntent = loadResult.stripeIntent
         val merchantCountry = loadResult.session?.merchantCountry
-        val isGooglePayReady = loadResult.session?.let { isGooglePayReady(config, it) } ?: true
+        val isGooglePayReady = isGooglePayReady(config, loadResult)
 
         val linkPassthroughModeEnabled = loadResult.session?.linkSettings?.linkPassthroughModeEnabled ?: false
         val isLinkAvailable = (
