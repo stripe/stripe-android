@@ -50,7 +50,7 @@ internal fun LoadingShimmerEffect(
         targetValue = 1000f,
         animationSpec = infiniteRepeatable(
             animation = tween(
-                durationMillis = LOADING_ANIMATION,
+                durationMillis = LOADING_SPINNER_ROTATION_MS,
                 easing = FastOutLinearInEasing
             )
         )
@@ -77,7 +77,7 @@ internal fun LoadingContent(
             .padding(horizontal = 24.dp)
     ) {
         Spacer(modifier = Modifier.size(8.dp))
-        LoadingSpinner()
+        LoadingSpinner(modifier = Modifier.size(32.dp))
         if (title != null) {
             Spacer(modifier = Modifier.size(16.dp))
             Text(
@@ -99,7 +99,7 @@ internal fun LoadingContent(
 internal fun FullScreenGenericLoading() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         LoadingSpinner(
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(56.dp),
         )
     }
 }
@@ -115,7 +115,7 @@ fun LoadingSpinner(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(LOADING_ANIMATION, easing = LinearEasing),
+            animation = tween(LOADING_SPINNER_ROTATION_MS, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "loading_animation"
@@ -151,7 +151,7 @@ fun LoadingSpinner(
     }
 }
 
-private const val LOADING_ANIMATION = 1000
+private const val LOADING_SPINNER_ROTATION_MS = 1000
 
 @Preview(
     group = "Loading",

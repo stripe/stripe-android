@@ -98,13 +98,13 @@ internal fun LegalDetailsBottomSheetContent(
 
 @Composable
 private fun ModalBottomSheetContent(
-    title: TextResource.Text,
-    subtitle: TextResource.Text?,
+    title: TextResource,
+    subtitle: TextResource?,
     onClickableTextClick: (String) -> Unit,
     bullets: List<BulletUI>?,
     connectedAccountNotice: TextResource?,
     cta: String,
-    learnMore: TextResource.Text?,
+    learnMore: TextResource?,
     onConfirmModalClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()

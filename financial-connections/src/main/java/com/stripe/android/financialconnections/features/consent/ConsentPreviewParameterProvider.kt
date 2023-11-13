@@ -17,8 +17,6 @@ import com.stripe.android.financialconnections.model.LegalDetailsNotice
 internal class ConsentPreviewParameterProvider :
     PreviewParameterProvider<Pair<ModalBottomSheetValue, ConsentState>> {
     override val values = sequenceOf(
-        ModalBottomSheetValue.Hidden to canonical(),
-        ModalBottomSheetValue.Hidden to withNoLogos(),
         ModalBottomSheetValue.Hidden to withPlatformLogos(),
         ModalBottomSheetValue.Hidden to withConnectedAccountLogos(),
         ModalBottomSheetValue.Hidden to manualEntryPlusMicrodeposits(),
@@ -28,28 +26,6 @@ internal class ConsentPreviewParameterProvider :
 
     override val count: Int
         get() = super.count
-
-    private fun canonical() =
-        ConsentState(
-            consent = Success(
-                ConsentState.Payload(
-                    consent = sampleConsent().copy(belowCta = null),
-                    merchantLogos = emptyList(),
-                    shouldShowMerchantLogos = false
-                )
-            )
-        )
-
-    private fun withNoLogos() =
-        ConsentState(
-            consent = Success(
-                ConsentState.Payload(
-                    consent = sampleConsent().copy(belowCta = null),
-                    merchantLogos = emptyList(),
-                    shouldShowMerchantLogos = true
-                )
-            )
-        )
 
     private fun withPlatformLogos() =
         ConsentState(
@@ -84,7 +60,10 @@ internal class ConsentPreviewParameterProvider :
         consent = Success(
             ConsentState.Payload(
                 consent = sampleConsent(),
-                merchantLogos = emptyList(),
+                merchantLogos = listOf(
+                    "www.logo1.com",
+                    "www.logo2.com"
+                ),
                 shouldShowMerchantLogos = false
             )
         )
@@ -95,7 +74,10 @@ internal class ConsentPreviewParameterProvider :
         consent = Success(
             ConsentState.Payload(
                 consent = sampleConsent(),
-                merchantLogos = emptyList(),
+                merchantLogos = listOf(
+                    "www.logo1.com",
+                    "www.logo2.com"
+                ),
                 shouldShowMerchantLogos = false
             )
         )
@@ -106,7 +88,10 @@ internal class ConsentPreviewParameterProvider :
         consent = Success(
             ConsentState.Payload(
                 consent = sampleConsent().copy(belowCta = null),
-                merchantLogos = emptyList(),
+                merchantLogos = listOf(
+                    "www.logo1.com",
+                    "www.logo2.com"
+                ),
                 shouldShowMerchantLogos = false
             )
         )
