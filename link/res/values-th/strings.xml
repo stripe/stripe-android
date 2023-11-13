@@ -50,7 +50,6 @@
   <string name="stripe_wallet_recollect_cvc_error">โปรดป้อนรหัสรักษาความปลอดภัยของบัตรอีกครั้งเพื่อความปลอดภัย</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">แน่ใจไหมว่าต้องการนำบัญชีที่ลิงก์นี้ออก</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">แน่ใจไหมว่าต้องการนำบัตรใบนี้ออก</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

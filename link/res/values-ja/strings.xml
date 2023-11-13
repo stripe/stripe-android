@@ -50,7 +50,6 @@
   <string name="stripe_wallet_recollect_cvc_error">セキュリティー保持のため、お客様のクレジットカードのセキュリティーコードをもう一度入力してください。</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">この関連付けられた口座を削除しますか？</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">このカードを削除しますか？</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->
