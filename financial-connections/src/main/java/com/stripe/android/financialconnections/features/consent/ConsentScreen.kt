@@ -272,7 +272,7 @@ private fun ConsentFooter(
     val belowCta = remember(consent.belowCta) {
         consent.belowCta?.let { TextResource.Text(fromHtml(consent.belowCta)) }
     }
-    Column() {
+    Column {
         AnnotatedText(
             modifier = Modifier.fillMaxWidth(),
             text = aboveCta,

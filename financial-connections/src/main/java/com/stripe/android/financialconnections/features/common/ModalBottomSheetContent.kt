@@ -210,35 +210,24 @@ internal fun BulletItem(
     Row {
         BulletIcon(icon = bullet.imageResource)
         Spacer(modifier = Modifier.size(16.dp))
+        val shouldEmphasize = remember(bullet) { bullet.title != null && bullet.content != null }
         Column {
-            when {
-                // title + content
-                bullet.title != null && bullet.content != null -> {
-                    AnnotatedText(
-                        text = bullet.title,
-                        defaultStyle = v3Typography.bodyMediumEmphasized.copy(
-                            color = v3Colors.textDefault
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                    AnnotatedText(
-                        text = bullet.content,
-                        defaultStyle = v3Typography.bodySmall.copy(
-                            color = v3Colors.textSubdued
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                }
-                // just title or bullet are available
-                else -> {
-                    AnnotatedText(
-                        text = bullet.title ?: bullet.content ?: TextResource.Text(""),
-                        defaultStyle = v3Typography.bodyMedium.copy(
-                            color = v3Colors.textDefault
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                }
+            if (bullet.title != null) {
+                val titleStyle = if (shouldEmphasize) v3Typography.bodyMediumEmphasized else v3Typography.bodyMedium
+                AnnotatedText(
+                    text = bullet.title,
+                    defaultStyle = titleStyle.copy(color = v3Colors.textDefault),
+                    onClickableTextClick = onClickableTextClick
+                )
+            }
+            if (bullet.content != null) {
+                AnnotatedText(
+                    text = bullet.content,
+                    defaultStyle = v3Typography.bodySmall.copy(
+                        color = v3Colors.textSubdued
+                    ),
+                    onClickableTextClick = onClickableTextClick
+                )
             }
         }
     }
