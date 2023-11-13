@@ -3,12 +3,12 @@ package com.stripe.android.customersheet
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
-import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.requireValidOrThrow
+import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -34,7 +34,7 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
     private val customerAdapter: CustomerAdapter,
 ) : CustomerSheetLoader {
     override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full> {
-        val elementsSession = if (customerAdapter.canCreateSetupIntents) {
+        val loadResult = if (customerAdapter.canCreateSetupIntents) {
             retrieveElementsSession(configuration).getOrElse {
                 return Result.failure(it)
             }
@@ -44,35 +44,36 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
 
         return loadPaymentMethods(
             configuration = configuration,
-            elementsSession = elementsSession,
+            stripeIntent = loadResult?.stripeIntent,
         )
     }
 
     private suspend fun retrieveElementsSession(
         configuration: CustomerSheet.Configuration?,
-    ): Result<ElementsSession> {
+    ): Result<ElementsSessionRepository.LoadResult> {
         val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
             PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
             )
         )
-        return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
+        return elementsSessionRepository.get(initializationMode).mapCatching { loadResult ->
             val billingDetailsCollectionConfig = configuration?.billingDetailsCollectionConfiguration.toInternal()
 
             lpmRepository.update(
-                stripeIntent = elementsSession.stripeIntent,
-                serverLpmSpecs = elementsSession.paymentMethodSpecs,
+                stripeIntent = loadResult.stripeIntent,
+                serverLpmSpecs = loadResult.session?.paymentMethodSpecs,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
                 isDeferred = true,
             )
 
-            elementsSession.requireValidOrThrow()
+            StripeIntentValidator.requireValid(loadResult.stripeIntent)
+            loadResult
         }
     }
 
     private suspend fun loadPaymentMethods(
         configuration: CustomerSheet.Configuration?,
-        elementsSession: ElementsSession?,
+        stripeIntent: StripeIntent?,
     ) = coroutineScope {
         val paymentMethodsResult = async {
             customerAdapter.retrievePaymentMethods()
@@ -120,7 +121,7 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
 
                 // By default, only cards are supported. If the elements session is not available, then US Bank account
                 // is not supported
-                val supportedPaymentMethods = elementsSession?.stripeIntent?.paymentMethodTypes?.mapNotNull {
+                val supportedPaymentMethods = stripeIntent?.paymentMethodTypes?.mapNotNull {
                     lpmRepository.fromCode(it)
                 } ?: listOf(LpmRepository.hardcodedCardSpec(billingDetailsCollectionConfig))
 
@@ -132,7 +133,7 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
                 Result.success(
                     CustomerSheetState.Full(
                         config = configuration,
-                        stripeIntent = elementsSession?.stripeIntent,
+                        stripeIntent = stripeIntent,
                         supportedPaymentMethods = validSupportedPaymentMethods,
                         customerPaymentMethods = paymentMethods,
                         isGooglePayReady = isGooglePayReadyAndEnabled,

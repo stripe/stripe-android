@@ -19,9 +19,9 @@ import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
-import com.stripe.android.paymentsheet.model.requireValidOrThrow
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
@@ -68,17 +68,18 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         eventReporter.onLoadStarted(isDecoupling = isDecoupling)
 
-        retrieveElementsSession(
+        val result = retrieveElementsSession(
             initializationMode = initializationMode,
             configuration = paymentSheetConfiguration,
-        ).mapCatching { elementsSession ->
-            create(
-                elementsSession = elementsSession,
+        )
+
+        reportLoadResult(loaderResult = result, isDecoupling = isDecoupling)
+
+        result.mapCatching { loadResult ->
+            createStateFromLoadResult(
+                loadResult = loadResult,
                 config = paymentSheetConfiguration,
-                isGooglePayReady = isGooglePayReady(paymentSheetConfiguration, elementsSession),
             )
-        }.also {
-            reportLoadResult(loaderResult = it, isDecoupling = isDecoupling)
         }
     }
 
@@ -102,18 +103,18 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }?.isReady()?.first() ?: false
     }
 
-    private suspend fun create(
-        elementsSession: ElementsSession,
+    private suspend fun createStateFromLoadResult(
+        loadResult: ElementsSessionRepository.LoadResult,
         config: PaymentSheet.Configuration,
-        isGooglePayReady: Boolean,
     ): PaymentSheetState.Full = coroutineScope {
         val customerConfig = config.customer
         val prefsRepository = prefsRepositoryFactory(customerConfig)
 
-        val stripeIntent = elementsSession.stripeIntent
-        val merchantCountry = elementsSession.merchantCountry
+        val stripeIntent = loadResult.stripeIntent
+        val merchantCountry = loadResult.session?.merchantCountry
+        val isGooglePayReady = loadResult.session?.let { isGooglePayReady(config, it) } ?: true
 
-        val linkPassthroughModeEnabled = elementsSession.linkSettings?.linkPassthroughModeEnabled ?: false
+        val linkPassthroughModeEnabled = loadResult.session?.linkSettings?.linkPassthroughModeEnabled ?: false
         val isLinkAvailable = (
             stripeIntent.paymentMethodTypes.contains(Link.code) &&
                 stripeIntent.linkFundingSources.intersect(supportedFundingSources).isNotEmpty()
@@ -186,7 +187,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 isGooglePayReady = isGooglePayReady,
                 linkState = linkState.await(),
                 isEligibleForCardBrandChoice = FeatureFlags.cardBrandChoice.isEnabled &&
-                    elementsSession.isEligibleForCardBrandChoice,
+                    (loadResult.session?.isEligibleForCardBrandChoice ?: false),
                 paymentSelection = initialPaymentSelection.await(),
             )
         } else {
@@ -226,14 +227,14 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration,
-    ): Result<ElementsSession> {
-        return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
+    ): Result<ElementsSessionRepository.LoadResult> {
+        return elementsSessionRepository.get(initializationMode).mapCatching { loadResult ->
             val billingDetailsCollectionConfig =
                 configuration.billingDetailsCollectionConfiguration.toInternal()
 
             val didParseServerResponse = lpmRepository.update(
-                stripeIntent = elementsSession.stripeIntent,
-                serverLpmSpecs = elementsSession.paymentMethodSpecs,
+                stripeIntent = loadResult.stripeIntent,
+                serverLpmSpecs = loadResult.session?.paymentMethodSpecs,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
                 isDeferred = initializationMode is DeferredIntent,
             )
@@ -244,7 +245,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 )
             }
 
-            elementsSession.requireValidOrThrow()
+            StripeIntentValidator.requireValid(loadResult.stripeIntent)
+            loadResult
         }
     }
 
@@ -343,12 +345,20 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 
     private fun reportLoadResult(
-        loaderResult: Result<PaymentSheetState.Full>,
+        loaderResult: Result<ElementsSessionRepository.LoadResult>,
         isDecoupling: Boolean,
     ) {
         loaderResult.fold(
-            onSuccess = {
-                eventReporter.onLoadSucceeded(isDecoupling = isDecoupling)
+            onSuccess = { loadResult ->
+                when (loadResult) {
+                    is ElementsSessionRepository.LoadResult.Session -> {
+                        eventReporter.onLoadSucceeded(isDecoupling)
+                    }
+                    is ElementsSessionRepository.LoadResult.Fallback -> {
+                        eventReporter.onLoadSucceeded(isDecoupling)
+                        eventReporter.onElementsSessionLoadFailed(isDecoupling, loadResult.error)
+                    }
+                }
             },
             onFailure = { error ->
                 logger.error("Failure loading PaymentSheetState", error)

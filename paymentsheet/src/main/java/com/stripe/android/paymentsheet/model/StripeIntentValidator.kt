@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.model
 
-import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Automatic
 import com.stripe.android.model.SetupIntent
@@ -9,11 +8,6 @@ import com.stripe.android.model.StripeIntent.Status.Canceled
 import com.stripe.android.model.StripeIntent.Status.RequiresCapture
 import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
-
-internal fun ElementsSession.requireValidOrThrow(): ElementsSession {
-    StripeIntentValidator.requireValid(stripeIntent)
-    return this
-}
 
 /**
  * Validator for [PaymentIntent] or [SetupIntent] instances used in PaymentSheet.

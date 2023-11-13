@@ -40,6 +40,14 @@ internal interface EventReporter {
     )
 
     /**
+     * PaymentSheet or FlowController have failed to load from the Elements session endpoint.
+     */
+    fun onElementsSessionLoadFailed(
+        isDecoupling: Boolean,
+        error: Throwable,
+    )
+
+    /**
      * PaymentSheet has been dismissed by pressing the close button.
      */
     fun onDismiss(
