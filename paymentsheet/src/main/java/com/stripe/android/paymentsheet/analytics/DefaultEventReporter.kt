@@ -25,7 +25,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 ) : EventReporter {
 
     override fun onInit(
-        configuration: PaymentSheet.Configuration?,
+        configuration: PaymentSheet.Configuration,
         isDecoupling: Boolean,
     ) {
         fireEvent(

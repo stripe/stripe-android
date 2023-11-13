@@ -109,11 +109,14 @@ internal class DefaultFlowController @Inject internal constructor(
     override var shippingDetails: AddressDetails?
         get() = viewModel.state?.config?.shippingDetails
         set(value) {
-            viewModel.state = viewModel.state?.copy(
-                config = viewModel.state?.config?.copy(
-                    shippingDetails = value
+            val state = viewModel.state
+            if (state != null) {
+                viewModel.state = state.copy(
+                    config = state.config.copy(
+                        shippingDetails = value
+                    )
                 )
-            )
+            }
         }
 
     init {
@@ -177,7 +180,7 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         configure(
             mode = PaymentSheet.InitializationMode.PaymentIntent(paymentIntentClientSecret),
-            configuration = configuration,
+            configuration = configuration ?: PaymentSheet.Configuration.default(viewModel.getApplication()),
             callback = callback,
         )
     }
@@ -189,7 +192,7 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         configure(
             mode = PaymentSheet.InitializationMode.SetupIntent(setupIntentClientSecret),
-            configuration = configuration,
+            configuration = configuration ?: PaymentSheet.Configuration.default(viewModel.getApplication()),
             callback = callback,
         )
     }
@@ -201,14 +204,14 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         configure(
             mode = PaymentSheet.InitializationMode.DeferredIntent(intentConfiguration),
-            configuration = configuration,
+            configuration = configuration ?: PaymentSheet.Configuration.default(viewModel.getApplication()),
             callback = callback,
         )
     }
 
     private fun configure(
         mode: PaymentSheet.InitializationMode,
-        configuration: PaymentSheet.Configuration?,
+        configuration: PaymentSheet.Configuration,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         configurationHandler.configure(
@@ -286,7 +289,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     // we present the mandate directly.
                     sepaMandateActivityLauncher.launch(
                         SepaMandateContract.Args(
-                            merchantName = state.config?.merchantDisplayName ?: ""
+                            merchantName = state.config.merchantDisplayName
                         )
                     )
                 } else {
@@ -307,7 +310,7 @@ internal class DefaultFlowController @Inject internal constructor(
             val nextStep = intentConfirmationInterceptor.intercept(
                 initializationMode = initializationMode!!,
                 paymentSelection = paymentSelection,
-                shippingValues = state.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
+                shippingValues = state.config.shippingDetails?.toConfirmPaymentIntentShipping(),
             )
 
             viewModel.deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
@@ -563,8 +566,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun launchGooglePay(state: PaymentSheetState.Full) {
         // state.config.googlePay is guaranteed not to be null or GooglePay would be disabled
-        val config = requireNotNull(state.config)
-        val googlePayConfig = requireNotNull(config.googlePay)
+        val googlePayConfig = requireNotNull(state.config.googlePay)
         val googlePayPaymentLauncherConfig = GooglePayPaymentMethodLauncher.Config(
             environment = when (googlePayConfig.environment) {
                 PaymentSheet.GooglePayConfiguration.Environment.Production ->
@@ -573,7 +575,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     GooglePayEnvironment.Test
             },
             merchantCountryCode = googlePayConfig.countryCode,
-            merchantName = config.merchantDisplayName
+            merchantName = state.config.merchantDisplayName
         )
 
         googlePayPaymentMethodLauncherFactory.create(

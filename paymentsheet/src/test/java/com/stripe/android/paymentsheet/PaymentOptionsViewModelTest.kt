@@ -516,7 +516,7 @@ internal class PaymentOptionsViewModelTest {
     fun `Doesn't consider unsupported payment methods in header text creation`() = runTest {
         val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
             state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
-                config = PAYMENT_OPTION_CONTRACT_ARGS.state.config?.copy(
+                config = PAYMENT_OPTION_CONTRACT_ARGS.state.config.copy(
                     allowsDelayedPaymentMethods = false,
                 ),
                 isGooglePayReady = false,

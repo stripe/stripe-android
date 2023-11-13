@@ -416,6 +416,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         ).exceptionOrNull()
 
         assertThat(result).isEqualTo(PaymentSheetLoadingException.InvalidConfirmationMethod(Manual))
@@ -642,6 +643,7 @@ internal class DefaultPaymentSheetLoaderTest {
 
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         ).exceptionOrNull()
 
         assertThat(result).isEqualTo(
@@ -658,6 +660,7 @@ internal class DefaultPaymentSheetLoaderTest {
 
         loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = false)
@@ -677,6 +680,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     ),
                 ),
             ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = true)
@@ -690,6 +694,7 @@ internal class DefaultPaymentSheetLoaderTest {
 
         loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = false)
@@ -714,6 +719,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     ),
                 ),
             ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = true)
@@ -741,6 +747,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     ),
                 ),
             ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = true)
@@ -759,6 +766,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         ).getOrThrow()
 
         assertThat(result.isEligibleForCardBrandChoice).isFalse()
@@ -774,6 +782,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         ).getOrThrow()
 
         assertThat(result.isEligibleForCardBrandChoice).isTrue()
@@ -789,7 +798,6 @@ internal class DefaultPaymentSheetLoaderTest {
         isGooglePayEnabledFromBackend: Boolean = true,
     ): PaymentSheetLoader {
         return DefaultPaymentSheetLoader(
-            appName = "App Name",
             prefsRepositoryFactory = { prefsRepository },
             googlePayRepositoryFactory = {
                 if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository

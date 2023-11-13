@@ -20,9 +20,6 @@ const val IS_PAYMENT_INTENT = "isPaymentIntent"
  */
 const val IS_INSTANT_APP = "isInstantApp"
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val APP_NAME = "appName"
-
 /**
  * Status bar color of the host activity.
  */

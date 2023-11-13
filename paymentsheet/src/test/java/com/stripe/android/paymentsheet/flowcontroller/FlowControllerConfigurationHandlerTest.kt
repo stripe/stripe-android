@@ -36,10 +36,10 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.isNull
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.seconds
@@ -319,7 +319,7 @@ class FlowControllerConfigurationHandlerTest {
                     initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                         clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
                     ),
-                    configuration = null,
+                    configuration = PaymentSheet.Configuration("Some name"),
                 ) { _, _ ->
                     onInitCallbacks++
                 }
@@ -353,7 +353,7 @@ class FlowControllerConfigurationHandlerTest {
                         )
                     )
                 ),
-                configuration = null,
+                configuration = PaymentSheet.Configuration("Some name"),
                 callback = { _, _ ->
                     resultTurbine.add(amount)
                 },
@@ -380,7 +380,7 @@ class FlowControllerConfigurationHandlerTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            configuration = null,
+            configuration = PaymentSheet.Configuration("Some name"),
             callback = { _, _ ->
                 resultTurbine.add(Unit)
             },
@@ -404,7 +404,7 @@ class FlowControllerConfigurationHandlerTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            configuration = null,
+            configuration = PaymentSheet.Configuration("Some name"),
         ) { _, exception ->
             resultTurbine.add(exception)
         }
@@ -421,7 +421,7 @@ class FlowControllerConfigurationHandlerTest {
         configurationHandler.configure(
             scope = this,
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("pi_123_sk_456"),
-            configuration = null,
+            configuration = PaymentSheet.Configuration("Some name"),
         ) { _, _ ->
             configureTurbine.close()
         }
@@ -429,7 +429,7 @@ class FlowControllerConfigurationHandlerTest {
         configureTurbine.awaitComplete()
 
         verify(eventReporter).onInit(
-            configuration = isNull(),
+            configuration = any(),
             isDecoupling = eq(false),
         )
     }
@@ -453,7 +453,7 @@ class FlowControllerConfigurationHandlerTest {
                     ),
                 ),
             ),
-            configuration = null,
+            configuration = PaymentSheet.Configuration("Some name"),
         ) { _, _ ->
             configureTurbine.close()
         }
@@ -461,7 +461,7 @@ class FlowControllerConfigurationHandlerTest {
         configureTurbine.awaitComplete()
 
         verify(eventReporter).onInit(
-            configuration = isNull(),
+            configuration = any(),
             isDecoupling = eq(true),
         )
     }
@@ -486,7 +486,7 @@ class FlowControllerConfigurationHandlerTest {
                     ),
                 ),
             ),
-            configuration = null,
+            configuration = PaymentSheet.Configuration("Some name"),
         ) { _, _ ->
             configureTurbine.close()
         }
@@ -494,7 +494,7 @@ class FlowControllerConfigurationHandlerTest {
         configureTurbine.awaitComplete()
 
         verify(eventReporter).onInit(
-            configuration = isNull(),
+            configuration = any(),
             isDecoupling = eq(true),
         )
     }
