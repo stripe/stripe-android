@@ -115,7 +115,6 @@ class PaymentSessionViewModelTest {
     @Test
     fun settingPaymentSessionData_shouldUpdateStateFlow() = runTest {
         viewModel.paymentSessionDataStateFlow.test {
-            assertThat(awaitItem()).isNull() // Initial Value
             viewModel.paymentSessionData = UPDATED_DATA
             assertThat(awaitItem())
                 .isEqualTo(UPDATED_DATA)
@@ -125,14 +124,12 @@ class PaymentSessionViewModelTest {
     @Test
     fun onPaymentMethodResult_withGooglePay_shouldUpdateStateFlow() = runTest {
         viewModel.paymentSessionDataStateFlow.test {
-            assertThat(awaitItem()).isNull() // Initial Value
-
             viewModel.onPaymentMethodResult(
                 PaymentMethodsActivityStarter.Result(
                     useGooglePay = true
                 )
             )
-            assertThat(awaitItem()?.useGooglePay)
+            assertThat(awaitItem().useGooglePay)
                 .isTrue()
         }
     }
@@ -181,8 +178,6 @@ class PaymentSessionViewModelTest {
     @Test
     fun onCustomerRetrieved_whenIsInitialFetchAndPreviouslyUsedPaymentMethodIsNotFoundInList_shouldNotUpdatePaymentSessionData() = runTest {
         viewModel.paymentSessionDataStateFlow.test {
-            assertThat(awaitItem()).isNull() // Initial Value.
-
             val customerPaymentMethods = PaymentMethodFixtures.createCards(20)
             doNothing().whenever(customerSession).getPaymentMethods(
                 paymentMethodType = eq(PaymentMethod.Type.Card),
@@ -223,8 +218,6 @@ class PaymentSessionViewModelTest {
     @Test
     fun onCustomerRetrieved_whenIsInitialFetchAndPreviouslyUsedPaymentMethodDoesNotExist_shouldNotFetchPaymentMethods() = runTest {
         viewModel.paymentSessionDataStateFlow.test {
-            assertThat(awaitItem()).isNull() // Initial Value.
-
             whenever(paymentSessionPrefs.getPaymentMethod("cus_123"))
                 .thenReturn(null)
 
@@ -254,7 +247,7 @@ class PaymentSessionViewModelTest {
     @Test
     fun fetchCustomer_onSuccess_returnsSuccessResult() = runTest {
         viewModel.networkState.test {
-            assertThat(awaitItem()).isNull() // Initial Value
+            assertThat(awaitItem()).isEqualTo(PaymentSessionViewModel.NetworkState.Inactive) // Initial Value
 
             doNothing().whenever(customerSession).retrieveCurrentCustomer(
                 listener = any()
@@ -284,7 +277,7 @@ class PaymentSessionViewModelTest {
     @Test
     fun fetchCustomer_onError_returnsErrorResult() = runTest {
         viewModel.networkState.test {
-            assertThat(awaitItem()).isNull() // Initial Value
+            assertThat(awaitItem()).isEqualTo(PaymentSessionViewModel.NetworkState.Inactive) // Initial Value
 
             doNothing().whenever(customerSession).retrieveCurrentCustomer(
                 listener = any()
