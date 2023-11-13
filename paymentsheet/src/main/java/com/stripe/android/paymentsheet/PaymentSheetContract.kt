@@ -52,6 +52,8 @@ class PaymentSheetContract :
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     ) : ActivityStarter.Args {
 
+        val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay
+
         internal fun toV2(context: Context): PaymentSheetContractV2.Args {
             return PaymentSheetContractV2.Args(
                 initializationMode = when (clientSecret) {
