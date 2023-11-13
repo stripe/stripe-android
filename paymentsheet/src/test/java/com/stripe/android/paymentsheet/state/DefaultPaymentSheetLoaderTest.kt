@@ -782,7 +782,7 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @Test
     fun `Doesn't include card brand choice state if feature is disabled`() = runTest {
-        val loader = createPaymentSheetLoader()
+        val loader = createPaymentSheetLoader(isCbcEligible = true)
 
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
@@ -798,7 +798,7 @@ internal class DefaultPaymentSheetLoaderTest {
     fun `Includes card brand choice state if feature is enabled`() = runTest {
         featureFlagTestRule.setEnabled(true)
 
-        val loader = createPaymentSheetLoader()
+        val loader = createPaymentSheetLoader(isCbcEligible = true)
 
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
@@ -819,6 +819,7 @@ internal class DefaultPaymentSheetLoaderTest {
         linkSettings: ElementsSession.LinkSettings? = null,
         isGooglePayEnabledFromBackend: Boolean = true,
         fallbackError: Throwable? = null,
+        isCbcEligible: Boolean = false,
     ): PaymentSheetLoader {
         return DefaultPaymentSheetLoader(
             prefsRepositoryFactory = { prefsRepository },
@@ -829,9 +830,9 @@ internal class DefaultPaymentSheetLoaderTest {
                 stripeIntent = stripeIntent,
                 error = error,
                 sessionsError = fallbackError,
-                linkSettings,
-                isGooglePayEnabledFromBackend,
-                isCbcEligible = false,
+                linkSettings = linkSettings,
+                isGooglePayEnabled = isGooglePayEnabledFromBackend,
+                isCbcEligible = isCbcEligible,
             ),
             customerRepository = customerRepo,
             lpmRepository = lpmRepository,
