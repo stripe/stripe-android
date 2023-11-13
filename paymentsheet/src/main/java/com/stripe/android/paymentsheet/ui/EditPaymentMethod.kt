@@ -15,10 +15,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
@@ -41,6 +45,7 @@ import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
 import com.stripe.android.uicore.elements.TextFieldColors
+import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.R as PaymentsCoreR
 import com.stripe.android.R as StripeR
@@ -67,13 +72,15 @@ internal fun EditPaymentMethodUi(
     modifier: Modifier = Modifier
 ) {
     val padding = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    val isIdle = viewState.status == EditPaymentMethodViewState.Status.Idle
 
     Column(
         modifier = modifier.padding(
             top = padding,
             start = padding,
             end = padding
-        )
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         SectionCard {
             val colors = TextFieldColors(false)
@@ -84,12 +91,9 @@ internal fun EditPaymentMethodUi(
                 enabled = false,
                 colors = colors,
                 label = {
-                    Text(
+                    Label(
                         text = stringResource(id = StripeR.string.stripe_acc_label_card_number),
-                        modifier = modifier,
-                        color = MaterialTheme.stripeColors.placeholderText
-                            .copy(alpha = ContentAlpha.disabled),
-                        style = MaterialTheme.typography.subtitle1
+                        modifier = modifier
                     )
                 },
                 trailingIcon = {
@@ -104,22 +108,68 @@ internal fun EditPaymentMethodUi(
         PrimaryButton(
             label = stringResource(id = StripeR.string.stripe_title_update_card),
             isLoading = viewState.status == EditPaymentMethodViewState.Status.Updating,
-            isEnabled = viewState.canUpdate && viewState.status == EditPaymentMethodViewState.Status.Idle,
+            isEnabled = viewState.canUpdate && isIdle,
             onButtonClick = {
                 viewActionHandler.invoke(EditPaymentMethodViewAction.OnUpdatePressed)
             }
         )
 
-        Spacer(modifier = Modifier.requiredHeight(8.dp))
+        Spacer(modifier = Modifier.requiredHeight(4.dp))
 
-        PrimaryButton(
-            label = stringResource(id = R.string.stripe_paymentsheet_remove_card),
-            isLoading = viewState.status == EditPaymentMethodViewState.Status.Removing,
-            isEnabled = viewState.status == EditPaymentMethodViewState.Status.Idle,
-            onButtonClick = {
+        RemoveButton(
+            idle = isIdle,
+            removing = viewState.status == EditPaymentMethodViewState.Status.Removing,
+            onRemove = {
                 viewActionHandler.invoke(EditPaymentMethodViewAction.OnRemovePressed)
             }
         )
+    }
+}
+
+@Composable
+private fun Label(
+    text: String,
+    modifier: Modifier
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        color = MaterialTheme.stripeColors.placeholderText.copy(alpha = ContentAlpha.disabled),
+        style = MaterialTheme.typography.subtitle1
+    )
+}
+
+@Composable
+private fun RemoveButton(
+    idle: Boolean,
+    removing: Boolean,
+    onRemove: () -> Unit
+) {
+    CompositionLocalProvider(
+        LocalContentAlpha provides if (removing) ContentAlpha.disabled else ContentAlpha.high
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+        ) {
+            TextButton(
+                modifier = Modifier.align(Alignment.Center),
+                enabled = idle && !removing,
+                onClick = onRemove
+            ) {
+                Text(
+                    text = stringResource(id = R.string.stripe_paymentsheet_remove_card),
+                    color = MaterialTheme.colors.error.copy(LocalContentAlpha.current),
+                    style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                )
+            }
+            if (removing) {
+                LoadingIndicator(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    color = MaterialTheme.colors.error
+                )
+            }
+        }
     }
 }
 
