@@ -770,6 +770,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = intent.clientSecret!!,
             ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = false)
