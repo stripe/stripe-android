@@ -67,23 +67,19 @@ class PaymentSession @VisibleForTesting internal constructor(
         lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
 
         lifecycleOwner.lifecycleScope.launch {
-            viewModel.networkState.collect {
-                it?.let { networkState ->
-                    listener?.onCommunicatingStateChanged(
-                        when (networkState) {
-                            PaymentSessionViewModel.NetworkState.Active -> true
-                            PaymentSessionViewModel.NetworkState.Inactive -> false
-                        }
-                    )
-                }
+            viewModel.networkState.collect { networkState ->
+                listener?.onCommunicatingStateChanged(
+                    when (networkState) {
+                        PaymentSessionViewModel.NetworkState.Active -> true
+                        PaymentSessionViewModel.NetworkState.Inactive -> false
+                    }
+                )
             }
         }
 
         lifecycleOwner.lifecycleScope.launch {
             viewModel.paymentSessionDataStateFlow.collect { sessionData ->
-                sessionData?.let {
-                    listener?.onPaymentSessionDataChanged(it)
-                }
+                listener?.onPaymentSessionDataChanged(sessionData)
             }
         }
     }
@@ -163,21 +159,25 @@ class PaymentSession @VisibleForTesting internal constructor(
                 }
                 false
             }
+
             Activity.RESULT_OK -> when (requestCode) {
                 PaymentMethodsActivityStarter.REQUEST_CODE -> {
                     onPaymentMethodResult(data)
                     true
                 }
+
                 PaymentFlowActivityStarter.REQUEST_CODE -> {
                     data.getParcelableExtra<PaymentSessionData>(EXTRA_PAYMENT_SESSION_DATA)?.let {
                         viewModel.onPaymentFlowResult(it)
                     }
                     true
                 }
+
                 else -> {
                     false
                 }
             }
+
             else -> false
         }
     }
