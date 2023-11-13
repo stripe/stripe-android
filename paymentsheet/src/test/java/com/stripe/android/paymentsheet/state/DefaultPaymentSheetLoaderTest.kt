@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
@@ -759,6 +760,26 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
+    fun `Emits correct events when we fallback to the core Stripe API`() = runTest {
+        val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        val error = APIConnectionException()
+
+        val loader = createPaymentSheetLoader(fallbackError = error)
+
+        loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = intent.clientSecret!!,
+            ),
+        )
+
+        verify(eventReporter).onLoadStarted(isDecoupling = false)
+        verify(eventReporter).onElementsSessionLoadFailed(
+            isDecoupling = false,
+            error = error,
+        )
+    }
+
+    @Test
     fun `Doesn't include card brand choice state if feature is disabled`() = runTest {
         val loader = createPaymentSheetLoader()
 
@@ -796,6 +817,7 @@ internal class DefaultPaymentSheetLoaderTest {
         error: Throwable? = null,
         linkSettings: ElementsSession.LinkSettings? = null,
         isGooglePayEnabledFromBackend: Boolean = true,
+        fallbackError: Throwable? = null,
     ): PaymentSheetLoader {
         return DefaultPaymentSheetLoader(
             prefsRepositoryFactory = { prefsRepository },
@@ -805,6 +827,7 @@ internal class DefaultPaymentSheetLoaderTest {
             elementsSessionRepository = FakeElementsSessionRepository(
                 stripeIntent = stripeIntent,
                 error = error,
+                fallbackError = fallbackError,
                 linkSettings,
                 isGooglePayEnabledFromBackend,
             ),

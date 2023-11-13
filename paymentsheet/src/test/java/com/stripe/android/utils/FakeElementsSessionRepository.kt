@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 internal class FakeElementsSessionRepository(
     private val stripeIntent: StripeIntent,
     private val error: Throwable?,
+    private val fallbackError: Throwable? = null,
     private val linkSettings: ElementsSession.LinkSettings?,
     private val isGooglePayEnabled: Boolean = true,
 ) : ElementsSessionRepository {
@@ -16,21 +17,29 @@ internal class FakeElementsSessionRepository(
 
     override suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
-    ): Result<ElementsSession> {
+    ): Result<ElementsSessionRepository.LoadResult> {
         lastGetParam = initializationMode
         return if (error != null) {
             Result.failure(error)
         } else {
-            Result.success(
-                ElementsSession(
-                    linkSettings = linkSettings,
-                    paymentMethodSpecs = null,
+            val loadResult = if (fallbackError != null) {
+                ElementsSessionRepository.LoadResult.Fallback(
                     stripeIntent = stripeIntent,
-                    merchantCountry = null,
-                    isEligibleForCardBrandChoice = true,
-                    isGooglePayEnabled = isGooglePayEnabled,
+                    error = fallbackError,
                 )
-            )
+            } else {
+                ElementsSessionRepository.LoadResult.Session(
+                    ElementsSession(
+                        linkSettings = linkSettings,
+                        paymentMethodSpecs = null,
+                        stripeIntent = stripeIntent,
+                        merchantCountry = null,
+                        isEligibleForCardBrandChoice = true,
+                        isGooglePayEnabled = isGooglePayEnabled,
+                    )
+                )
+            }
+            Result.success(loadResult)
         }
     }
 }
