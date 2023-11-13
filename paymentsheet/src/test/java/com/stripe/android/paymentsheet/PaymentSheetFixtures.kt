@@ -121,7 +121,7 @@ internal object PaymentSheetFixtures {
         paymentMethods: List<PaymentMethod> = state.customerPaymentMethods,
         isGooglePayReady: Boolean = state.isGooglePayReady,
         stripeIntent: StripeIntent = state.stripeIntent,
-        config: PaymentSheet.Configuration? = state.config,
+        config: PaymentSheet.Configuration = state.config,
         paymentSelection: PaymentSelection? = state.paymentSelection,
         linkState: LinkState? = state.linkState,
     ): PaymentOptionContract.Args {
@@ -162,18 +162,9 @@ internal object PaymentSheetFixtures {
             STATUS_BAR_COLOR
         )
 
-    internal val ARGS_WITHOUT_CONFIG
-        get() = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            config = null,
-            STATUS_BAR_COLOR
-        )
-
     internal val ARGS_WITHOUT_CUSTOMER
         get() = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                 customer = null
             )
         )

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.injection
 
-import android.app.Application
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -11,7 +10,6 @@ import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
-import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -120,16 +118,6 @@ internal abstract class PaymentSheetCommonModule {
                 customerConfig?.id,
                 workContext
             )
-        }
-
-        @Provides
-        @Singleton
-        @Named(APP_NAME)
-        fun provideAppName(
-            appContext: Context,
-        ): String {
-            val application = appContext as Application
-            return application.applicationInfo.loadLabel(application.packageManager).toString()
         }
 
         @Provides

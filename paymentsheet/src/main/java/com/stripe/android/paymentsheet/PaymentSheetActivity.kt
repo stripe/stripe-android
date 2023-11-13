@@ -92,8 +92,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         } else {
             try {
                 starterArgs.initializationMode.validate()
-                starterArgs.config?.validate()
-                starterArgs.config?.appearance?.parseAppearance()
+                starterArgs.config.validate()
+                starterArgs.config.appearance.parseAppearance()
                 Result.success(starterArgs)
             } catch (e: InvalidParameterException) {
                 Result.failure(e)

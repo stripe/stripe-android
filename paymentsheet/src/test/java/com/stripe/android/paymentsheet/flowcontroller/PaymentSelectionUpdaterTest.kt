@@ -22,6 +22,8 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 @RunWith(RobolectricTestRunner::class)
 class PaymentSelectionUpdaterTest {
 
+    private val defaultPaymentSheetConfiguration: PaymentSheet.Configuration = PaymentSheet.Configuration("Some name")
+
     @Test
     fun `Uses new payment selection if there's no existing one`() {
         val newState = mockPaymentSheetStateWithPaymentIntent(paymentSelection = PaymentSelection.GooglePay)
@@ -83,7 +85,7 @@ class PaymentSelectionUpdaterTest {
 
         val result = updater(
             currentSelection = existingSelection,
-            previousConfig = null,
+            previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
         )
         assertThat(result).isEqualTo(existingSelection)
@@ -198,7 +200,7 @@ class PaymentSelectionUpdaterTest {
 
         val result = updater(
             currentSelection = existingSelection,
-            previousConfig = null,
+            previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
         )
 
@@ -233,7 +235,7 @@ class PaymentSelectionUpdaterTest {
 
         val result = updater(
             currentSelection = existingSelection,
-            previousConfig = null,
+            previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
         )
 
@@ -244,7 +246,7 @@ class PaymentSelectionUpdaterTest {
         paymentMethodTypes: List<String>? = null,
         paymentSelection: PaymentSelection? = null,
         customerPaymentMethods: List<PaymentMethod> = emptyList(),
-        config: PaymentSheet.Configuration? = null,
+        config: PaymentSheet.Configuration = PaymentSheet.Configuration("Some name"),
     ): PaymentSheetState.Full {
         val intent = PAYMENT_INTENT
 
@@ -265,7 +267,7 @@ class PaymentSelectionUpdaterTest {
         paymentMethodTypes: List<String>? = null,
         paymentSelection: PaymentSelection? = null,
         customerPaymentMethods: List<PaymentMethod> = emptyList(),
-        config: PaymentSheet.Configuration? = null,
+        config: PaymentSheet.Configuration = defaultPaymentSheetConfiguration,
     ): PaymentSheetState.Full {
         val intent = SETUP_INTENT
 

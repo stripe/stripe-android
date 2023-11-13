@@ -122,7 +122,7 @@ class SupportedPaymentMethodTest {
 
         val expected = listOf<SupportedPaymentMethod>().plus(card)
 
-        assertThat(getPMsToAdd(mockIntent, null, lpmRepository)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, PaymentSheet.Configuration("Some Name"), lpmRepository)).isEqualTo(expected)
     }
 
     @Test
@@ -147,7 +147,7 @@ class SupportedPaymentMethodTest {
 
         val expected = listOf<SupportedPaymentMethod>().plus(card)
 
-        assertThat(getPMsToAdd(mockIntent, null, lpmRepository)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, PaymentSheet.Configuration("Some Name"), lpmRepository)).isEqualTo(expected)
     }
 
     @Test
@@ -172,7 +172,7 @@ class SupportedPaymentMethodTest {
 
         val expected = listOf<SupportedPaymentMethod>()
 
-        assertThat(getPMsToAdd(mockIntent, null, lpmRepository)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, PaymentSheet.Configuration("Some Name"), lpmRepository)).isEqualTo(expected)
     }
 
     @Test
@@ -197,7 +197,7 @@ class SupportedPaymentMethodTest {
 
         val expected = listOf<SupportedPaymentMethod>().plus(card)
 
-        assertThat(getPMsToAdd(mockIntent, null, lpmRepository)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, PaymentSheet.Configuration("Some Name"), lpmRepository)).isEqualTo(expected)
     }
 
     @Test
@@ -347,11 +347,11 @@ class SupportedPaymentMethodTest {
         }
 
         fun getConfig() = if (hasCustomer) {
-            PaymentSheetFixtures.ARGS_CUSTOMER_WITHOUT_GOOGLEPAY.config?.copy(
+            PaymentSheetFixtures.ARGS_CUSTOMER_WITHOUT_GOOGLEPAY.config.copy(
                 allowsDelayedPaymentMethods = allowsDelayedPayment
             )
         } else {
-            PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER.config?.copy(
+            PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER.config.copy(
                 allowsDelayedPaymentMethods = allowsDelayedPayment
             )
         }

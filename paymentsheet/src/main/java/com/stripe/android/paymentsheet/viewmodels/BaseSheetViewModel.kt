@@ -71,7 +71,7 @@ import kotlin.coroutines.CoroutineContext
 @Suppress("TooManyFunctions")
 internal abstract class BaseSheetViewModel(
     application: Application,
-    internal val config: PaymentSheet.Configuration?,
+    internal val config: PaymentSheet.Configuration,
     internal val eventReporter: EventReporter,
     protected val customerRepository: CustomerRepository,
     protected val prefsRepository: PrefsRepository,
@@ -86,9 +86,8 @@ internal abstract class BaseSheetViewModel(
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : AndroidViewModel(application) {
 
-    internal val customerConfig = config?.customer
-    internal val merchantName = config?.merchantDisplayName
-        ?: application.applicationInfo.loadLabel(application.packageManager).toString()
+    internal val customerConfig = config.customer
+    internal val merchantName = config.merchantDisplayName
 
     protected var mostRecentError: Throwable? = null
     protected var cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible

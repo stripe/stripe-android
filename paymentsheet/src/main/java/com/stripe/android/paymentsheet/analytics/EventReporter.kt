@@ -12,7 +12,7 @@ internal interface EventReporter {
      * PaymentSheet has been instantiated or FlowController has finished its configuration.
      */
     fun onInit(
-        configuration: PaymentSheet.Configuration?,
+        configuration: PaymentSheet.Configuration,
         isDecoupling: Boolean,
     )
 

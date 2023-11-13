@@ -124,7 +124,7 @@ internal fun AddPaymentMethod(
                     isPaymentFlow = stripeIntent.value is PaymentIntent,
                     stripeIntentId = stripeIntent.value?.id,
                     clientSecret = stripeIntent.value?.clientSecret,
-                    shippingDetails = sheetViewModel.config?.shippingDetails,
+                    shippingDetails = sheetViewModel.config.shippingDetails,
                     draftPaymentSelection = sheetViewModel.newPaymentSelection,
                     onMandateTextChanged = sheetViewModel::updateMandateText,
                     onConfirmUSBankAccount = sheetViewModel::handleConfirmUSBankAccount,

@@ -14,7 +14,7 @@ internal sealed interface PaymentSheetState : Parcelable {
 
     @Parcelize
     data class Full(
-        val config: PaymentSheet.Configuration?,
+        val config: PaymentSheet.Configuration,
         val stripeIntent: StripeIntent,
         val customerPaymentMethods: List<PaymentMethod>,
         val isGooglePayReady: Boolean,

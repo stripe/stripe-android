@@ -46,7 +46,7 @@ internal abstract class BasePrimaryButtonContainerFragment : Fragment() {
         @Suppress("DEPRECATION")
         viewBinding.primaryButton.setAppearanceConfiguration(
             StripeTheme.primaryButtonStyle,
-            tintList = viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
+            tintList = viewModel.config.primaryButtonColor ?: ColorStateList.valueOf(
                 StripeTheme.primaryButtonStyle.getBackgroundColor(requireActivity().baseContext)
             )
         )

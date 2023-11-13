@@ -394,7 +394,7 @@ internal class DefaultFlowControllerTest {
             state = PaymentSheetState.Full(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = emptyList(),
-                config = null,
+                config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
                 isGooglePayReady = false,
                 paymentSelection = null,
                 linkState = null,
@@ -1579,6 +1579,7 @@ internal class DefaultFlowControllerTest {
         ),
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
+        context = context,
         eventReporter = eventReporter,
         viewModel = viewModel,
         paymentLauncherFactory = paymentLauncherAssistedFactory,

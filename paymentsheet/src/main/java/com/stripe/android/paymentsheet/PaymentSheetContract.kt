@@ -30,7 +30,7 @@ class PaymentSheetContract :
     ): Intent {
         val statusBarColor = (context as? Activity)?.window?.statusBarColor
         val args = input.copy(statusBarColor = statusBarColor)
-        return Intent(context, PaymentSheetActivity::class.java).putExtra(EXTRA_ARGS, args.toV2())
+        return Intent(context, PaymentSheetActivity::class.java).putExtra(EXTRA_ARGS, args.toV2(context))
     }
 
     override fun parseResult(
@@ -54,7 +54,7 @@ class PaymentSheetContract :
 
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay
 
-        internal fun toV2(): PaymentSheetContractV2.Args {
+        internal fun toV2(context: Context): PaymentSheetContractV2.Args {
             return PaymentSheetContractV2.Args(
                 initializationMode = when (clientSecret) {
                     is PaymentIntentClientSecret -> {
@@ -64,7 +64,7 @@ class PaymentSheetContract :
                         PaymentSheet.InitializationMode.SetupIntent(clientSecret.value)
                     }
                 },
-                config = config,
+                config = config ?: PaymentSheet.Configuration.default(context),
                 statusBarColor = statusBarColor,
             )
         }

@@ -19,7 +19,7 @@ internal class RelayingPaymentSheetLoader : PaymentSheetLoader {
                 PaymentSheetState.Full(
                     stripeIntent = stripeIntent,
                     customerPaymentMethods = emptyList(),
-                    config = null,
+                    config = PaymentSheet.Configuration("Example"),
                     isGooglePayReady = false,
                     paymentSelection = null,
                     linkState = null,
@@ -40,7 +40,7 @@ internal class RelayingPaymentSheetLoader : PaymentSheetLoader {
 
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
-        paymentSheetConfiguration: PaymentSheet.Configuration?
+        paymentSheetConfiguration: PaymentSheet.Configuration
     ): Result<PaymentSheetState.Full> {
         return results.receive()
     }

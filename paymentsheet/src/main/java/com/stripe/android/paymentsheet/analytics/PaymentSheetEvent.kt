@@ -47,55 +47,55 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class Init(
         private val mode: EventReporter.Mode,
-        private val configuration: PaymentSheet.Configuration?,
+        private val configuration: PaymentSheet.Configuration,
         override val isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
 
         override val eventName: String
             get() {
                 val configValue = listOfNotNull(
-                    FIELD_CUSTOMER.takeIf { configuration?.customer != null },
-                    FIELD_GOOGLE_PAY.takeIf { configuration?.googlePay != null }
+                    FIELD_CUSTOMER.takeIf { configuration.customer != null },
+                    FIELD_GOOGLE_PAY.takeIf { configuration.googlePay != null }
                 ).takeUnless { it.isEmpty() }?.joinToString(separator = "_") ?: "default"
                 return formatEventName(mode, "init_$configValue")
             }
 
         override val additionalParams: Map<String, Any?>
             get() {
-                val primaryButtonConfig = configuration?.appearance?.primaryButton
+                val primaryButtonConfig = configuration.appearance.primaryButton
                 val primaryButtonConfigMap = mapOf(
                     FIELD_COLORS_LIGHT to (
-                        primaryButtonConfig?.colorsLight
+                        primaryButtonConfig.colorsLight
                             != PaymentSheet.PrimaryButtonColors.defaultLight
                         ),
                     FIELD_COLORS_DARK to (
-                        primaryButtonConfig?.colorsDark
+                        primaryButtonConfig.colorsDark
                             != PaymentSheet.PrimaryButtonColors.defaultDark
                         ),
-                    FIELD_CORNER_RADIUS to (primaryButtonConfig?.shape?.cornerRadiusDp != null),
-                    FIELD_BORDER_WIDTH to (primaryButtonConfig?.shape?.borderStrokeWidthDp != null),
-                    FIELD_FONT to (primaryButtonConfig?.typography?.fontResId != null)
+                    FIELD_CORNER_RADIUS to (primaryButtonConfig.shape.cornerRadiusDp != null),
+                    FIELD_BORDER_WIDTH to (primaryButtonConfig.shape.borderStrokeWidthDp != null),
+                    FIELD_FONT to (primaryButtonConfig.typography.fontResId != null)
                 )
                 val appearanceConfigMap = mutableMapOf(
                     FIELD_COLORS_LIGHT to (
-                        configuration?.appearance?.colorsLight
+                        configuration.appearance.colorsLight
                             != PaymentSheet.Colors.defaultLight
                         ),
                     FIELD_COLORS_DARK to (
-                        configuration?.appearance?.colorsDark
+                        configuration.appearance.colorsDark
                             != PaymentSheet.Colors.defaultDark
                         ),
                     FIELD_CORNER_RADIUS to (
-                        configuration?.appearance?.shapes?.cornerRadiusDp
+                        configuration.appearance.shapes.cornerRadiusDp
                             != StripeThemeDefaults.shapes.cornerRadius
                         ),
                     FIELD_BORDER_WIDTH to (
-                        configuration?.appearance?.shapes?.borderStrokeWidthDp
+                        configuration.appearance.shapes.borderStrokeWidthDp
                             != StripeThemeDefaults.shapes.borderStrokeWidth
                         ),
-                    FIELD_FONT to (configuration?.appearance?.typography?.fontResId != null),
+                    FIELD_FONT to (configuration.appearance.typography.fontResId != null),
                     FIELD_SIZE_SCALE_FACTOR to (
-                        configuration?.appearance?.typography?.sizeScaleFactor
+                        configuration.appearance.typography.sizeScaleFactor
                             != StripeThemeDefaults.typography.fontSizeMultiplier
                         ),
                     FIELD_PRIMARY_BUTTON to primaryButtonConfigMap
@@ -110,33 +110,33 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
                 val billingDetailsCollectionConfigMap = mapOf(
                     FIELD_ATTACH_DEFAULTS to configuration
-                        ?.billingDetailsCollectionConfiguration
-                        ?.attachDefaultsToPaymentMethod,
+                        .billingDetailsCollectionConfiguration
+                        .attachDefaultsToPaymentMethod,
                     FIELD_COLLECT_NAME to configuration
-                        ?.billingDetailsCollectionConfiguration
-                        ?.name
-                        ?.name,
+                        .billingDetailsCollectionConfiguration
+                        .name
+                        .name,
                     FIELD_COLLECT_EMAIL to configuration
-                        ?.billingDetailsCollectionConfiguration
-                        ?.email
-                        ?.name,
+                        .billingDetailsCollectionConfiguration
+                        .email
+                        .name,
                     FIELD_COLLECT_PHONE to configuration
-                        ?.billingDetailsCollectionConfiguration
-                        ?.phone
-                        ?.name,
+                        .billingDetailsCollectionConfiguration
+                        .phone
+                        .name,
                     FIELD_COLLECT_ADDRESS to configuration
-                        ?.billingDetailsCollectionConfiguration
-                        ?.address
-                        ?.name,
+                        .billingDetailsCollectionConfiguration
+                        .address
+                        .name,
                 )
 
                 @Suppress("DEPRECATION")
                 val configurationMap = mapOf(
-                    FIELD_CUSTOMER to (configuration?.customer != null),
-                    FIELD_GOOGLE_PAY to (configuration?.googlePay != null),
-                    FIELD_PRIMARY_BUTTON_COLOR to (configuration?.primaryButtonColor != null),
-                    FIELD_BILLING to (configuration?.defaultBillingDetails != null),
-                    FIELD_DELAYED_PMS to (configuration?.allowsDelayedPaymentMethods),
+                    FIELD_CUSTOMER to (configuration.customer != null),
+                    FIELD_GOOGLE_PAY to (configuration.googlePay != null),
+                    FIELD_PRIMARY_BUTTON_COLOR to (configuration.primaryButtonColor != null),
+                    FIELD_BILLING to (configuration.defaultBillingDetails != null),
+                    FIELD_DELAYED_PMS to (configuration.allowsDelayedPaymentMethods),
                     FIELD_APPEARANCE to appearanceConfigMap,
                     FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
                         billingDetailsCollectionConfigMap,

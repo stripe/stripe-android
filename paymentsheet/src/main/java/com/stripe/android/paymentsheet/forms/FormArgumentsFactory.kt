@@ -17,7 +17,7 @@ internal object FormArgumentsFactory {
     fun create(
         paymentMethod: LpmRepository.SupportedPaymentMethod,
         stripeIntent: StripeIntent,
-        config: PaymentSheet.Configuration?,
+        config: PaymentSheet.Configuration,
         merchantName: String,
         amount: Amount? = null,
         newLpm: PaymentSelection.New?,
@@ -56,11 +56,10 @@ internal object FormArgumentsFactory {
             showCheckboxControlledFields = showCheckboxControlledFields,
             merchantName = merchantName,
             amount = amount,
-            billingDetails = config?.defaultBillingDetails,
-            shippingDetails = config?.shippingDetails,
+            billingDetails = config.defaultBillingDetails,
+            shippingDetails = config.shippingDetails,
             initialPaymentMethodCreateParams = initialParams,
-            billingDetailsCollectionConfiguration = config?.billingDetailsCollectionConfiguration
-                ?: PaymentSheet.BillingDetailsCollectionConfiguration(),
+            billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
             cbcEligibility = cbcEligibility,
             requiresMandate = paymentMethod.requiresMandate,
             requiredFields = paymentMethod.placeholderOverrideList,
