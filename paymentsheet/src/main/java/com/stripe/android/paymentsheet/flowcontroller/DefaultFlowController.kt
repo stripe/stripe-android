@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Activity
+import android.content.Context
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
@@ -72,6 +73,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentResultCallback: PaymentSheetResultCallback,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     // Properties provided through injection
+    private val context: Context,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
@@ -180,7 +182,7 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         configure(
             mode = PaymentSheet.InitializationMode.PaymentIntent(paymentIntentClientSecret),
-            configuration = configuration ?: PaymentSheet.Configuration.default(viewModel.getApplication()),
+            configuration = configuration ?: PaymentSheet.Configuration.default(context),
             callback = callback,
         )
     }
@@ -192,7 +194,7 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         configure(
             mode = PaymentSheet.InitializationMode.SetupIntent(setupIntentClientSecret),
-            configuration = configuration ?: PaymentSheet.Configuration.default(viewModel.getApplication()),
+            configuration = configuration ?: PaymentSheet.Configuration.default(context),
             callback = callback,
         )
     }
@@ -204,7 +206,7 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         configure(
             mode = PaymentSheet.InitializationMode.DeferredIntent(intentConfiguration),
-            configuration = configuration ?: PaymentSheet.Configuration.default(viewModel.getApplication()),
+            configuration = configuration ?: PaymentSheet.Configuration.default(context),
             callback = callback,
         )
     }
