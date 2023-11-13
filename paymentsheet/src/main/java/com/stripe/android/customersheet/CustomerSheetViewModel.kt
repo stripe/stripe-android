@@ -308,10 +308,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onAddCardPressed() {
-        transitionToAddPaymentMethod(
-            isFirstPaymentMethod = false,
-            cbcEligibility = viewState.value.cbcEligibility,
-        )
+        transitionToAddPaymentMethod(isFirstPaymentMethod = false)
     }
 
     private fun onDismissed() {
@@ -440,10 +437,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                         }
 
                         if (savedPaymentMethods.isEmpty() && !isGooglePayReadyAndEnabled) {
-                            transitionToAddPaymentMethod(
-                                isFirstPaymentMethod = true,
-                                cbcEligibility = currentViewState.cbcEligibility,
-                            )
+                            transitionToAddPaymentMethod(isFirstPaymentMethod = true)
                         }
                     }
                     else -> Unit
@@ -589,7 +583,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private fun transitionToAddPaymentMethod(
         isFirstPaymentMethod: Boolean,
-        cbcEligibility: CardBrandChoiceEligibility,
+        cbcEligibility: CardBrandChoiceEligibility = viewState.value.cbcEligibility,
     ) {
         val paymentMethodCode = PaymentMethod.Type.Card.code
 

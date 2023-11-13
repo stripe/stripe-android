@@ -117,7 +117,7 @@ internal sealed class CustomerSheetViewState(
         cbcEligibility = cbcEligibility,
     )
 
-    data class EditPaymentMethod constructor(
+    data class EditPaymentMethod(
         val editPaymentMethodInteractor: ModifiableEditPaymentMethodViewInteractor,
         override val isLiveMode: Boolean,
         override val cbcEligibility: CardBrandChoiceEligibility,

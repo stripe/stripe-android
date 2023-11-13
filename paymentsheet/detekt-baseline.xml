@@ -26,7 +26,7 @@
     <ID>LongMethod:CustomerSheetLoader.kt$DefaultCustomerSheetLoader$private suspend fun loadPaymentMethods( configuration: CustomerSheet.Configuration?, elementsSession: ElementsSession?, )</ID>
     <ID>LongMethod:CustomerSheetScreen.kt$@Composable internal fun AddPaymentMethodWithPaymentElement( viewState: CustomerSheetViewState.AddPaymentMethod, viewActionHandler: (CustomerSheetViewAction) -> Unit, formViewModelSubComponentBuilderProvider: Provider&lt;FormViewModelSubcomponent.Builder>?, )</ID>
     <ID>LongMethod:CustomerSheetScreen.kt$@Composable internal fun SelectPaymentMethod( viewState: CustomerSheetViewState.SelectPaymentMethod, viewActionHandler: (CustomerSheetViewAction) -> Unit, paymentMethodNameProvider: (PaymentMethodCode?) -> String, modifier: Modifier = Modifier, )</ID>
-    <ID>LongMethod:CustomerSheetViewModel.kt$CustomerSheetViewModel$private fun transitionToAddPaymentMethod( isFirstPaymentMethod: Boolean, cbcEligibility: CardBrandChoiceEligibility, )</ID>
+    <ID>LongMethod:CustomerSheetViewModel.kt$CustomerSheetViewModel$private fun transitionToAddPaymentMethod( isFirstPaymentMethod: Boolean, cbcEligibility: CardBrandChoiceEligibility = viewState.value.cbcEligibility, )</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`()</ID>
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
@@ -93,8 +93,5 @@
     <ID>UnnecessaryAbstractClass:PaymentSheetCommonModule.kt$PaymentSheetCommonModule$PaymentSheetCommonModule</ID>
     <ID>UnnecessaryAbstractClass:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule$PaymentSheetLauncherModule</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
-    <ID>UnusedPrivateMember:CustomerSheetViewModel.kt$CustomerSheetViewModel$paymentMethod: PaymentMethod</ID>
-    <ID>UnusedPrivateMember:CustomerSheetViewModel.kt$CustomerSheetViewModel$private fun handlePaymentMethodRemoved(paymentMethod: PaymentMethod)</ID>
-    <ID>UnusedPrivateMember:CustomerSheetViewModel.kt$CustomerSheetViewModel$private fun handlePaymentMethodUpdated(paymentMethod: PaymentMethod)</ID>
   </CurrentIssues>
 </SmellBaseline>
