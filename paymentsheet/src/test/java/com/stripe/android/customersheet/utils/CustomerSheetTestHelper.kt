@@ -204,6 +204,7 @@ internal object CustomerSheetTestHelper {
             stripeAccountId = null,
         ),
         configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
+            merchantDisplayName = "Example",
             googlePayEnabled = isGooglePayAvailable
         ),
         formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder> =

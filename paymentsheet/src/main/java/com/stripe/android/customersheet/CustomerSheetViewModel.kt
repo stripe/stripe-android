@@ -112,9 +112,6 @@ internal class CustomerSheetViewModel @Inject constructor(
         billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration.toInternal()
     )
 
-    private val merchantName = configuration.merchantDisplayName
-        ?: application.applicationInfo.loadLabel(application.packageManager).toString()
-
     init {
         configuration.appearance.parseAppearance()
 
@@ -366,8 +363,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 formArguments = FormArgumentsFactory.create(
                     paymentMethod = paymentMethod,
                     configuration = configuration,
-                    merchantName = configuration.merchantDisplayName
-                        ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+                    merchantName = configuration.merchantDisplayName,
                     cbcEligibility = it.cbcEligibility,
                 ),
                 selectedPaymentMethod = paymentMethod,
@@ -385,7 +381,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 },
                 mandateText = it.draftPaymentSelection?.mandateText(
                     context = application,
-                    merchantName = merchantName,
+                    merchantName = configuration.merchantDisplayName,
                     isSaveForFutureUseSelected = false,
                     isSetupFlow = true,
                 ),
@@ -537,7 +533,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                         ),
                         mandateText = paymentSelection.mandateText(
                             context = application,
-                            merchantName = merchantName,
+                            merchantName = configuration.merchantDisplayName,
                             isSaveForFutureUseSelected = false,
                             isSetupFlow = true,
                         )?.takeIf { primaryButtonVisible },
@@ -626,7 +622,7 @@ internal class CustomerSheetViewModel @Inject constructor(
         val formArguments = FormArgumentsFactory.create(
             paymentMethod = card,
             configuration = configuration,
-            merchantName = merchantName,
+            merchantName = configuration.merchantDisplayName,
             cbcEligibility = cbcEligibility,
         )
 
