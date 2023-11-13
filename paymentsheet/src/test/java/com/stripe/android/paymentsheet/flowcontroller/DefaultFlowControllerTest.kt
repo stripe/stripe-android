@@ -1579,6 +1579,7 @@ internal class DefaultFlowControllerTest {
         ),
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
+        context = context,
         eventReporter = eventReporter,
         viewModel = viewModel,
         paymentLauncherFactory = paymentLauncherAssistedFactory,
