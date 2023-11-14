@@ -5,9 +5,10 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.uicore.elements.SingleChoiceDropdownItem
 
-internal data class EditPaymentMethodViewState(
+internal data class EditPaymentMethodViewState constructor(
     val status: Status,
     val last4: String,
+    val displayName: String,
     val canUpdate: Boolean,
     val selectedBrand: CardBrandChoice,
     val availableBrands: List<CardBrandChoice>

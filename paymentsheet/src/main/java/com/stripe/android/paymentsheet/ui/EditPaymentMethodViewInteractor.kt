@@ -20,6 +20,8 @@ internal typealias PaymentMethodUpdateOperation = suspend (
     brand: CardBrand
 ) -> Result<PaymentMethod>
 
+internal const val PaymentMethodRemovalDelayMillis = 600L
+
 internal interface EditPaymentMethodViewInteractor {
     val viewState: StateFlow<EditPaymentMethodViewState>
 
@@ -33,15 +35,19 @@ internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethod
         fun create(
             initialPaymentMethod: PaymentMethod,
             removeExecutor: PaymentMethodRemoveOperation,
-            updateExecutor: PaymentMethodUpdateOperation
+            updateExecutor: PaymentMethodUpdateOperation,
+            onRemoved: (PaymentMethod) -> Unit,
+            displayName: String,
         ): ModifiableEditPaymentMethodViewInteractor
     }
 }
 
 internal class DefaultEditPaymentMethodViewInteractor constructor(
     initialPaymentMethod: PaymentMethod,
+    displayName: String,
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updateExecutor: PaymentMethodUpdateOperation,
+    private val onRemoved: (PaymentMethod) -> Unit,
     workContext: CoroutineContext = Dispatchers.Default,
     viewStateSharingStarted: SharingStarted = SharingStarted.WhileSubscribed()
 ) : ModifiableEditPaymentMethodViewInteractor, CoroutineScope {
@@ -64,7 +70,8 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
             canUpdate = savedChoice != choice,
             selectedBrand = choice,
             availableBrands = availableChoices,
-            status = status
+            status = status,
+            displayName = displayName,
         )
     }.stateIn(
         scope = this,
@@ -74,7 +81,8 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
             selectedBrand = initialPaymentMethod.getPreferredChoice(),
             canUpdate = false,
             availableBrands = initialPaymentMethod.getAvailableNetworks(),
-            status = EditPaymentMethodViewState.Status.Idle
+            status = EditPaymentMethodViewState.Status.Idle,
+            displayName = displayName,
         )
     )
 
@@ -95,7 +103,12 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
             status.emit(EditPaymentMethodViewState.Status.Removing)
 
             // TODO(samer-stripe): Display toast on remove method failure?
-            removeExecutor.invoke(paymentMethod.value)
+            val paymentMethod = paymentMethod.value
+            val success = removeExecutor(paymentMethod)
+
+            if (success) {
+                onRemoved(paymentMethod)
+            }
 
             status.emit(EditPaymentMethodViewState.Status.Idle)
         }
@@ -109,7 +122,7 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
             launch {
                 status.emit(EditPaymentMethodViewState.Status.Updating)
 
-                val updateResult = updateExecutor.invoke(paymentMethod.value, currentChoice.brand)
+                val updateResult = updateExecutor(paymentMethod.value, currentChoice.brand)
 
                 updateResult.onSuccess { method ->
                     paymentMethod.emit(method)
@@ -146,7 +159,7 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
     }
 
     private fun PaymentMethod.getCard(): PaymentMethod.Card {
-        return card ?: throw IllegalStateException("Payment method must a card in order to be edited")
+        return card ?: throw IllegalStateException("Payment method must be a card in order to be edited")
     }
 
     private fun CardBrand.toChoice(): EditPaymentMethodViewState.CardBrandChoice {
@@ -157,12 +170,16 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
         override fun create(
             initialPaymentMethod: PaymentMethod,
             removeExecutor: PaymentMethodRemoveOperation,
-            updateExecutor: PaymentMethodUpdateOperation
+            updateExecutor: PaymentMethodUpdateOperation,
+            onRemoved: (PaymentMethod) -> Unit,
+            displayName: String,
         ): ModifiableEditPaymentMethodViewInteractor {
             return DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = initialPaymentMethod,
                 removeExecutor = removeExecutor,
-                updateExecutor = updateExecutor
+                updateExecutor = updateExecutor,
+                displayName = displayName,
+                onRemoved = onRemoved,
             )
         }
     }
