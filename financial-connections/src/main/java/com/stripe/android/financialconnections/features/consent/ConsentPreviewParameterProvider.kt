@@ -17,8 +17,6 @@ import com.stripe.android.financialconnections.model.LegalDetailsNotice
 internal class ConsentPreviewParameterProvider :
     PreviewParameterProvider<Pair<ModalBottomSheetValue, ConsentState>> {
     override val values = sequenceOf(
-        ModalBottomSheetValue.Hidden to canonical(),
-        ModalBottomSheetValue.Hidden to withNoLogos(),
         ModalBottomSheetValue.Hidden to withPlatformLogos(),
         ModalBottomSheetValue.Hidden to withConnectedAccountLogos(),
         ModalBottomSheetValue.Hidden to manualEntryPlusMicrodeposits(),
@@ -28,28 +26,6 @@ internal class ConsentPreviewParameterProvider :
 
     override val count: Int
         get() = super.count
-
-    private fun canonical() =
-        ConsentState(
-            consent = Success(
-                ConsentState.Payload(
-                    consent = sampleConsent().copy(belowCta = null),
-                    merchantLogos = emptyList(),
-                    shouldShowMerchantLogos = false
-                )
-            )
-        )
-
-    private fun withNoLogos() =
-        ConsentState(
-            consent = Success(
-                ConsentState.Payload(
-                    consent = sampleConsent().copy(belowCta = null),
-                    merchantLogos = emptyList(),
-                    shouldShowMerchantLogos = true
-                )
-            )
-        )
 
     private fun withPlatformLogos() =
         ConsentState(
@@ -84,7 +60,10 @@ internal class ConsentPreviewParameterProvider :
         consent = Success(
             ConsentState.Payload(
                 consent = sampleConsent(),
-                merchantLogos = emptyList(),
+                merchantLogos = listOf(
+                    "www.logo1.com",
+                    "www.logo2.com"
+                ),
                 shouldShowMerchantLogos = false
             )
         )
@@ -95,7 +74,10 @@ internal class ConsentPreviewParameterProvider :
         consent = Success(
             ConsentState.Payload(
                 consent = sampleConsent(),
-                merchantLogos = emptyList(),
+                merchantLogos = listOf(
+                    "www.logo1.com",
+                    "www.logo2.com"
+                ),
                 shouldShowMerchantLogos = false
             )
         )
@@ -106,7 +88,10 @@ internal class ConsentPreviewParameterProvider :
         consent = Success(
             ConsentState.Payload(
                 consent = sampleConsent().copy(belowCta = null),
-                merchantLogos = emptyList(),
+                merchantLogos = listOf(
+                    "www.logo1.com",
+                    "www.logo2.com"
+                ),
                 shouldShowMerchantLogos = false
             )
         )
@@ -114,7 +99,7 @@ internal class ConsentPreviewParameterProvider :
 
     @Suppress("LongMethod")
     private fun sampleConsent(): ConsentPane = ConsentPane(
-        title = "Goldilocks works with Stripe to link your accounts",
+        title = "Goldilocks uses Stripe to link your accounts",
         body = ConsentPaneBody(
             bullets = listOf(
                 Bullet(
@@ -124,12 +109,10 @@ internal class ConsentPreviewParameterProvider :
                 ),
                 Bullet(
                     icon = Image("https://www.cdn.stripe.com/12321312321.png"),
-                    content = "Stripe will allow Goldilocks to access only the data requested",
                     title = "Stripe will allow Goldilocks to access only the data requested"
                 ),
                 Bullet(
                     icon = Image("https://www.cdn.stripe.com/12321312321.png"),
-                    content = "Stripe will allow Goldilocks to access only the data requested",
                     title = "Stripe will allow Goldilocks to access only the data requested"
                 ),
             )
@@ -139,7 +122,7 @@ internal class ConsentPreviewParameterProvider :
             " We never share your login details with them.",
         cta = "Agree",
         dataAccessNotice = DataAccessNotice(
-            title = "Goldilocks works with Stripe to link your accounts",
+            title = "Goldilocks uses Stripe to link your accounts",
             subtitle = "Goldilocks will use your account and routing number, balances and transactions:",
             body = DataAccessNoticeBody(
                 bullets = listOf(

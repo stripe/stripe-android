@@ -32,6 +32,8 @@ import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import com.stripe.android.uicore.image.StripeImage
 
 @Composable
@@ -47,13 +49,13 @@ internal fun DataAccessBottomSheetContent(
         dataDialog.subtitle?.let { TextResource.Text(fromHtml(it)) }
     }
     val learnMore = remember(dataDialog.learnMore) {
-        TextResource.Text(fromHtml(dataDialog.learnMore))
+        dataDialog.learnMore?.let { TextResource.Text(fromHtml(it)) }
     }
     val connectedAccountNotice = remember(dataDialog.connectedAccountNotice) {
         dataDialog.connectedAccountNotice?.let { TextResource.Text(fromHtml(it)) }
     }
     val bullets = remember(dataDialog.body.bullets) {
-        dataDialog.body.bullets.map { BulletUI.from(it) }
+        dataDialog.body.bullets?.map { BulletUI.from(it) }
     }
     ModalBottomSheetContent(
         title = title,
@@ -77,10 +79,10 @@ internal fun LegalDetailsBottomSheetContent(
         TextResource.Text(fromHtml(legalDetails.title))
     }
     val learnMore = remember(legalDetails.learnMore) {
-        TextResource.Text(fromHtml(legalDetails.learnMore))
+        legalDetails.learnMore?.let { TextResource.Text(fromHtml(it)) }
     }
     val bullets = remember(legalDetails.body.bullets) {
-        legalDetails.body.bullets.map { BulletUI.from(it) }
+        legalDetails.body.bullets?.map { BulletUI.from(it) }
     }
     ModalBottomSheetContent(
         title = title,
@@ -96,13 +98,13 @@ internal fun LegalDetailsBottomSheetContent(
 
 @Composable
 private fun ModalBottomSheetContent(
-    title: TextResource.Text,
-    subtitle: TextResource.Text?,
+    title: TextResource,
+    subtitle: TextResource?,
     onClickableTextClick: (String) -> Unit,
-    bullets: List<BulletUI>,
+    bullets: List<BulletUI>?,
     connectedAccountNotice: TextResource?,
     cta: String,
-    learnMore: TextResource,
+    learnMore: TextResource?,
     onConfirmModalClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -139,7 +141,7 @@ private fun ModalBottomSheetContent(
                     onClickableTextClick = onClickableTextClick
                 )
             }
-            bullets.forEach {
+            bullets?.forEach {
                 Spacer(modifier = Modifier.size(16.dp))
                 BulletItem(
                     bullet = it,
@@ -172,21 +174,23 @@ private fun ModalBottomSheetContent(
                 )
                 Spacer(modifier = Modifier.size(12.dp))
             }
-            AnnotatedText(
-                text = learnMore,
-                onClickableTextClick = onClickableTextClick,
-                defaultStyle = typography.caption.copy(
-                    color = colors.textSecondary
-                ),
-                annotationStyles = mapOf(
-                    StringAnnotation.CLICKABLE to typography.captionEmphasized
-                        .toSpanStyle()
-                        .copy(color = colors.textBrand),
-                    StringAnnotation.BOLD to typography.captionEmphasized
-                        .toSpanStyle()
-                        .copy(color = colors.textSecondary),
+            if (learnMore != null) {
+                AnnotatedText(
+                    text = learnMore,
+                    onClickableTextClick = onClickableTextClick,
+                    defaultStyle = typography.caption.copy(
+                        color = colors.textSecondary
+                    ),
+                    annotationStyles = mapOf(
+                        StringAnnotation.CLICKABLE to typography.captionEmphasized
+                            .toSpanStyle()
+                            .copy(color = colors.textBrand),
+                        StringAnnotation.BOLD to typography.captionEmphasized
+                            .toSpanStyle()
+                            .copy(color = colors.textSecondary),
+                    )
                 )
-            )
+            }
             Spacer(modifier = Modifier.size(16.dp))
             FinancialConnectionsButton(
                 onClick = { onConfirmModalClick() },
@@ -205,79 +209,25 @@ internal fun BulletItem(
 ) {
     Row {
         BulletIcon(icon = bullet.imageResource)
-        Spacer(modifier = Modifier.size(8.dp))
+        Spacer(modifier = Modifier.size(16.dp))
+        val shouldEmphasize = remember(bullet) { bullet.title != null && bullet.content != null }
         Column {
-            when {
-                // title + content
-                bullet.title != null && bullet.content != null -> {
-                    AnnotatedText(
-                        text = bullet.title,
-                        defaultStyle = typography.body.copy(
-                            color = colors.textPrimary
-                        ),
-                        annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textBrand),
-                            StringAnnotation.BOLD to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textPrimary),
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                    Spacer(modifier = Modifier.size(2.dp))
-                    AnnotatedText(
-                        text = bullet.content,
-                        defaultStyle = typography.detail.copy(
-                            color = colors.textSecondary
-                        ),
-                        annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to typography.detailEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textBrand),
-                            StringAnnotation.BOLD to typography.detailEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textSecondary),
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                }
-                // only title
-                bullet.title != null -> {
-                    AnnotatedText(
-                        text = bullet.title,
-                        defaultStyle = typography.body.copy(
-                            color = colors.textPrimary
-                        ),
-                        annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textBrand),
-                            StringAnnotation.BOLD to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textPrimary),
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                }
-                // only content
-                bullet.content != null -> {
-                    AnnotatedText(
-                        text = bullet.content,
-                        defaultStyle = typography.body.copy(
-                            color = colors.textSecondary
-                        ),
-                        annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textBrand),
-                            StringAnnotation.BOLD to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textSecondary),
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                }
+            if (bullet.title != null) {
+                val titleStyle = if (shouldEmphasize) v3Typography.bodyMediumEmphasized else v3Typography.bodyMedium
+                AnnotatedText(
+                    text = bullet.title,
+                    defaultStyle = titleStyle.copy(color = v3Colors.textDefault),
+                    onClickableTextClick = onClickableTextClick
+                )
+            }
+            if (bullet.content != null) {
+                AnnotatedText(
+                    text = bullet.content,
+                    defaultStyle = v3Typography.bodySmall.copy(
+                        color = v3Colors.textSubdued
+                    ),
+                    onClickableTextClick = onClickableTextClick
+                )
             }
         }
     }
@@ -286,13 +236,13 @@ internal fun BulletItem(
 @Composable
 private fun BulletIcon(icon: ImageResource?) {
     val modifier = Modifier
-        .size(16.dp)
+        .size(20.dp)
         .offset(y = 2.dp)
     if (icon == null) {
-        val color = colors.textPrimary
+        val color = v3Colors.iconDefault
         Canvas(
             modifier = Modifier
-                .size(16.dp)
+                .size(20.dp)
                 .padding(6.dp)
                 .offset(y = 2.dp),
             onDraw = { drawCircle(color = color) }
@@ -308,7 +258,7 @@ private fun BulletIcon(icon: ImageResource?) {
             is ImageResource.Network -> StripeImage(
                 url = icon.url,
                 errorContent = {
-                    val color = colors.textSecondary
+                    val color = v3Colors.iconDefault
                     Canvas(
                         modifier = Modifier
                             .size(6.dp)

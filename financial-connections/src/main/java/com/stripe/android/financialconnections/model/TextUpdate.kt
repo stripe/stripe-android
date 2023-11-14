@@ -146,7 +146,7 @@ internal data class ConsentPaneBody(
 @Parcelize
 internal data class DataAccessNoticeBody(
     @SerialName("bullets")
-    val bullets: List<Bullet>
+    val bullets: List<Bullet>? = emptyList()
 ) : Parcelable
 
 @Serializable
@@ -178,7 +178,7 @@ internal data class DataAccessNotice(
     val cta: String,
     @SerialName("learn_more")
     @Serializable(with = MarkdownToHtmlSerializer::class)
-    val learnMore: String,
+    val learnMore: String? = null,
     @SerialName("connected_account_notice")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val connectedAccountNotice: String? = null,
@@ -197,7 +197,7 @@ internal data class LegalDetailsNotice(
     val cta: String,
     @SerialName("learn_more")
     @Serializable(with = MarkdownToHtmlSerializer::class)
-    val learnMore: String,
+    val learnMore: String? = null,
 
 ) : Parcelable
 
@@ -205,7 +205,7 @@ internal data class LegalDetailsNotice(
 @Parcelize
 internal data class LegalDetailsBody(
     @SerialName("bullets")
-    val bullets: List<Bullet>
+    val bullets: List<Bullet>? = emptyList()
 ) : Parcelable
 
 @Serializable
