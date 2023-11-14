@@ -68,7 +68,7 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
                 isDeferred = true,
             )
 
-            elementsSession.requireValidOrThrow()
+            elementsSession.requireValidOrThrow(allowSuccessState = false)
         }
     }
 

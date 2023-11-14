@@ -86,7 +86,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         AnalyticsRequestFactory.regenerateSessionId()
 
-        paymentSheetLoader.load(initializationMode, configuration).fold(
+        paymentSheetLoader.load(initializationMode, configuration, currentIntentId = null).fold(
             onSuccess = { state ->
                 viewModel.previousConfigureRequest = configureRequest
                 onInitSuccess(state, configureRequest)

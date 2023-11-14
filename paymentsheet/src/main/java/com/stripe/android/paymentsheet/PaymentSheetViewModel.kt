@@ -76,6 +76,8 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as StripeR
 
+private const val KeyProcessDeathRecoveryState = "ProcessDeathRecoveryState"
+
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     application: Application,
@@ -290,13 +292,24 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun loadPaymentSheetState() {
+        val recoveryState = savedStateHandle.remove<ProcessDeathRecoveryState>(KeyProcessDeathRecoveryState)
+        val isRecoveringFromProcessDeath = recoveryState != null
+
         val result = withContext(workContext) {
-            paymentSheetLoader.load(args.initializationMode, args.config)
+            paymentSheetLoader.load(
+                initializationMode = args.initializationMode,
+                paymentSheetConfiguration = args.config,
+                currentIntentId = recoveryState?.pendingIntentId,
+            )
         }
 
         result.fold(
             onSuccess = { state ->
-                handlePaymentSheetStateLoaded(state)
+                if (isRecoveringFromProcessDeath) {
+                    processPayment(state.stripeIntent, PaymentResult.Completed, skipAnimation = true)
+                } else {
+                    handlePaymentSheetStateLoaded(state)
+                }
             },
             onFailure = { error ->
                 setStripeIntent(null)
@@ -498,6 +511,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             )
 
             deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
+            savedStateHandle[KeyProcessDeathRecoveryState] = ProcessDeathRecoveryState(
+                pendingIntentId = stripeIntent.id!!,
+            )
 
             when (nextStep) {
                 is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
@@ -533,6 +549,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun onInternalPaymentResult(launcherResult: InternalPaymentResult) {
+        // We'll handle this once we load the newest PaymentSheet state on initialization
+        val isRecoveringFromProcessDeath = savedStateHandle.contains(KeyProcessDeathRecoveryState)
+        if (isRecoveringFromProcessDeath) {
+            return
+        }
+
         viewModelScope.launch {
             runCatching {
                 requireNotNull(stripeIntent.value)
@@ -558,7 +580,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun processPayment(stripeIntent: StripeIntent, paymentResult: PaymentResult) {
+    private fun processPayment(
+        stripeIntent: StripeIntent,
+        paymentResult: PaymentResult,
+        skipAnimation: Boolean = false,
+    ) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
                 eventReporter.onPaymentSuccess(
@@ -586,8 +612,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     prefsRepository.savePaymentSelection(it)
                 }
 
-                viewState.value = PaymentSheetViewState.FinishProcessing {
-                    _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
+                if (skipAnimation) {
+                    emitPaymentSheetResult(PaymentSheetResult.Completed)
+                } else {
+                    viewState.value = PaymentSheetViewState.FinishProcessing {
+                        emitPaymentSheetResult(PaymentSheetResult.Completed)
+                    }
                 }
             }
             is PaymentResult.Failed -> {
@@ -606,6 +636,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 resetViewState(userErrorMessage = null)
             }
         }
+    }
+
+    private fun emitPaymentSheetResult(result: PaymentSheetResult) {
+        _paymentSheetResult.tryEmit(result)
     }
 
     internal fun onGooglePayResult(result: GooglePayPaymentMethodLauncher.Result) {
@@ -645,16 +679,16 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onFatal(throwable: Throwable) {
         logger.error("Payment Sheet error", throwable)
         mostRecentError = throwable
-        _paymentSheetResult.tryEmit(PaymentSheetResult.Failed(throwable))
+        emitPaymentSheetResult(PaymentSheetResult.Failed(throwable))
     }
 
     override fun onUserCancel() {
         reportDismiss(isDecoupling)
-        _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
+        emitPaymentSheetResult(PaymentSheetResult.Canceled)
     }
 
     override fun onFinish() {
-        _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
+        emitPaymentSheetResult(PaymentSheetResult.Completed)
     }
 
     override fun onError(@IntegerRes error: Int?) =
@@ -703,6 +737,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         SheetBottomBuy,
         None
     }
+
+    internal data class ProcessDeathRecoveryState(
+        val pendingIntentId: String?,
+    )
 }
 
 private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean
