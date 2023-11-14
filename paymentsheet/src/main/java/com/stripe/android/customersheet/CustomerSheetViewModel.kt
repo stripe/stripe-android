@@ -478,15 +478,10 @@ internal class CustomerSheetViewModel @Inject constructor(
                     initialPaymentMethod = paymentMethod,
                     displayName = providePaymentMethodName(paymentMethod.type?.code),
                     removeExecutor = { pm ->
-                        when (val result = removePaymentMethod(pm)) {
-                            is CustomerAdapter.Result.Success -> {
-                                onBackPressed()
-                                removePaymentMethodFromState(pm)
-
-                                Result.success(Unit)
-                            }
-                            is CustomerAdapter.Result.Failure -> Result.failure(result.cause)
-                        }
+                        removePaymentMethod(pm).onSuccess {
+                            onBackPressed()
+                            removePaymentMethodFromState(pm)
+                        }.failureOrNull()?.cause
                     },
                     updateExecutor = { _, _ ->
                         // TODO(tillh-stripe): Replace with update operation

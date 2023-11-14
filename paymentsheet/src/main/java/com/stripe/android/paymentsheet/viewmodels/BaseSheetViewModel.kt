@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
+import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -424,24 +425,38 @@ internal abstract class BaseSheetViewModel(
         val paymentMethodId = paymentMethod.id ?: return
 
         viewModelScope.launch {
-            val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
-            val didRemoveSelectedItem = currentSelection == paymentMethodId
+            removePaymentMethodInternal(paymentMethodId)
+        }
+    }
 
-            if (didRemoveSelectedItem) {
-                // Remove the current selection. The new selection will be set when we're computing
-                // the next PaymentOptionsState.
-                updateSelection(null)
-            }
+    private suspend fun removePaymentMethodInternal(paymentMethodId: String): Result<PaymentMethod> {
+        val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
+        val didRemoveSelectedItem = currentSelection == paymentMethodId
+
+        if (didRemoveSelectedItem) {
+            // Remove the current selection. The new selection will be set when we're computing
+            // the next PaymentOptionsState.
+            updateSelection(null)
+        }
+
+        if (currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods) {
+            // We only update the state if we're in the SPM screen. If we're in the edit screen, we delay
+            // the state update so that we can show an animation when returning to the SPM screen.
+            removeDeletedPaymentMethodFromState(paymentMethodId)
+        }
+
+        return customerRepository.detachPaymentMethod(
+            customerConfig!!,
+            paymentMethodId
+        )
+    }
+
+    private fun removeDeletedPaymentMethodFromState(paymentMethodId: String) {
+        viewModelScope.launch {
+            delay(PaymentMethodRemovalDelayMillis)
 
             savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods.value?.filter {
                 it.id != paymentMethodId
-            }
-
-            customerConfig?.let {
-                customerRepository.detachPaymentMethod(
-                    it,
-                    paymentMethodId
-                )
             }
 
             val shouldResetToAddPaymentMethodForm = paymentMethods.value.isNullOrEmpty() &&
@@ -459,10 +474,11 @@ internal abstract class BaseSheetViewModel(
                 editInteractorFactory.create(
                     initialPaymentMethod = paymentMethod,
                     displayName = providePaymentMethodName(paymentMethod.type?.code),
-                    removeExecutor = {
-                        // TODO(samer-stripe): Replace with remove operation
-                        delay(TEMP_DELAY)
-                        Result.success(Unit)
+                    removeExecutor = { pm ->
+                        removePaymentMethodInternal(paymentMethodId = pm.id!!).onSuccess {
+                            onUserBack()
+                            removeDeletedPaymentMethodFromState(paymentMethodId = pm.id!!)
+                        }.exceptionOrNull()
                     },
                     updateExecutor = { method, brand ->
                         modifyCardPaymentMethod(method, brand)
@@ -613,8 +629,5 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
-
-        // TODO(samer-stripe): Remove after replacing placeholder update and remove payment method operations
-        private const val TEMP_DELAY = 2000L
     }
 }
