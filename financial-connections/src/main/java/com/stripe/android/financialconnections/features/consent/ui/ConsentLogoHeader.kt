@@ -49,7 +49,7 @@ import com.stripe.android.financialconnections.ui.LocalImageLoader
 
 @Composable
 @Suppress("MagicNumber")
-fun ConsentLogoHeader(
+internal fun ConsentLogoHeader(
     modifier: Modifier = Modifier,
     logos: List<String>
 ) {

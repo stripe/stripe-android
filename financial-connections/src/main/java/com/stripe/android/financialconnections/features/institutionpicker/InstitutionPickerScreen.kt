@@ -309,7 +309,7 @@ private fun SearchInstitutionsList(
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier.fillMaxWidth()
-                    ) { LoadingSpinner(modifier = Modifier.size(32.dp)) }
+                    ) { LoadingSpinner() }
                 }
 
                 is Success -> {
@@ -496,7 +496,7 @@ private fun FeaturedInstitutionsGrid(
             when (payload) {
                 Uninitialized, is Loading -> {
                     item(span = { GridItemSpan(2) }) {
-                        LoadingSpinner(modifier = Modifier.size(32.dp))
+                        LoadingSpinner()
                     }
                 }
                 // Show empty featured institutions grid. Users will be able to search using search bar.
