@@ -128,22 +128,21 @@ internal fun FullScreenGenericLoading() {
     }
 }
 
-
 @Composable
-fun V3LoadingSpinner(
+internal fun V3LoadingSpinner(
     modifier: Modifier = Modifier,
     strokeWidth: Dp = ProgressIndicatorDefaults.StrokeWidth,
     gradient: Brush = Brush.sweepGradient(listOf(v3Colors.iconWhite, v3Colors.borderBrand))
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "loading_transition")
     val angle by infiniteTransition.animateFloat(
+        label = "loading_animation",
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
             animation = tween(LOADING_SPINNER_ROTATION_MS, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
-        label = "loading_animation"
     )
 
     Canvas(modifier = modifier) {

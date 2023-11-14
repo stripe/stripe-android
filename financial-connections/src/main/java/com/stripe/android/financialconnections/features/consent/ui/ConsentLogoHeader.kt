@@ -15,16 +15,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,9 +43,7 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 
 @Composable
@@ -54,35 +53,15 @@ internal fun ConsentLogoHeader(
     logos: List<String>
 ) {
     val isPreview = LocalInspectionMode.current
-    val stripeImageLoader = LocalImageLoader.current
     val localDensity = LocalDensity.current
     val isVisible = remember { mutableStateOf(false) }
     val bitmapLoadSize = remember { with(localDensity) { 36.dp.toPx().toInt() } }
 
     val images = if (isPreview) {
         isVisible.value = true
-        previewBitmaps(bitmapLoadSize).take(logos.size)
+        debugPreviewBitmaps(logos, bitmapLoadSize, isVisible)
     } else {
-        // Actual image loading logic for runtime
-        val loadedImages = remember { mutableStateListOf<ImageBitmap?>() }
-        // Load images
-        logos.forEachIndexed { index, logo ->
-            LaunchedEffect(logo) {
-                stripeImageLoader.load(
-                    logo,
-                    bitmapLoadSize,
-                    bitmapLoadSize
-                ).onSuccess { result ->
-                    while (loadedImages.size <= index) { loadedImages.add(null) }
-                    loadedImages[index] = result?.asImageBitmap()
-                    // Set visibility to true when all images are loaded
-                    if (loadedImages.size == logos.size && loadedImages.all { it != null }) {
-                        isVisible.value = true
-                    }
-                }
-            }
-        }
-        loadedImages
+        loadBitmaps(logos, bitmapLoadSize, isVisible)
     }
 
     Box(modifier = modifier.height(72.dp)) {
@@ -101,8 +80,14 @@ internal fun ConsentLogoHeader(
                         if (index != images.lastIndex) {
                             images[index + 1]?.let { nextImage ->
                                 AnimatedDotsWithFixedGradient(
-                                    startColor = getDotColor(imageBitmap.asAndroidBitmap(), Quarter.END),
-                                    endColor = getDotColor(nextImage.asAndroidBitmap(), Quarter.START)
+                                    startColor = getPrevalentColorCloseToDots(
+                                        imageBitmap.asAndroidBitmap(),
+                                        startSide = true
+                                    ),
+                                    endColor = getPrevalentColorCloseToDots(
+                                        nextImage.asAndroidBitmap(),
+                                        startSide = false
+                                    )
                                 )
                             }
                         }
@@ -114,51 +99,48 @@ internal fun ConsentLogoHeader(
 }
 
 @Composable
-private fun previewBitmaps(size: Int): List<ImageBitmap> =
-    listOf(Color.Red, Color.Blue, Color.Green).map {
-        val androidBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+private fun debugPreviewBitmaps(
+    size: List<String>,
+    bitmapLoadSize: Int,
+    isVisible: MutableState<Boolean>
+): List<ImageBitmap> {
+    isVisible.value = true
+    return listOf(Color.Red, Color.Blue, Color.Green).take(size.size).map {
+        val androidBitmap = Bitmap.createBitmap(bitmapLoadSize, bitmapLoadSize, Bitmap.Config.ARGB_8888)
         val canvas = android.graphics.Canvas(androidBitmap)
         canvas.drawColor(it.toArgb())
         androidBitmap.asImageBitmap()
     }
+}
 
 @Composable
-private fun Logo(imageBitmap: ImageBitmap) {
-    Image(
-        bitmap = imageBitmap,
-        contentDescription = null,
-        modifier = Modifier
-            .width(72.dp)
-            .height(72.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .shadow(elevation = 50.dp)
-    )
-}
-
-enum class Quarter {
-    START, END
-}
-
-@Suppress("MagicNumber")
-private fun getDotColor(bitmap: Bitmap, quarter: Quarter): Color {
-    val colorMap = HashMap<Int, Int>()
-    val width = bitmap.width
-    val height = bitmap.height
-    val startX = if (quarter == Quarter.START) 0 else (width * 3) / 4
-    val endX = if (quarter == Quarter.START) width / 4 else width
-    val startY = height * 2 / 5 // 40% of the height
-    val endY = height * 3 / 5 // 60% of the height
-
-    for (x in startX until endX) {
-        for (y in startY until endY) {
-            val pixelColor = bitmap.getPixel(x, y)
-            colorMap[pixelColor] = (colorMap[pixelColor] ?: 0) + 1
+private fun loadBitmaps(
+    logos: List<String>,
+    bitmapLoadSize: Int,
+    isVisible: MutableState<Boolean>
+): SnapshotStateList<ImageBitmap?> {
+    val stripeImageLoader = LocalImageLoader.current
+    val loadedImages = remember { mutableStateListOf<ImageBitmap?>() }
+    // Load images
+    logos.forEachIndexed { index, logo ->
+        LaunchedEffect(logo) {
+            stripeImageLoader.load(
+                logo,
+                bitmapLoadSize,
+                bitmapLoadSize
+            ).onSuccess { result ->
+                while (loadedImages.size <= index) {
+                    loadedImages.add(null)
+                }
+                loadedImages[index] = result?.asImageBitmap()
+                // Set visibility to true when all images are loaded
+                if (loadedImages.size == logos.size && loadedImages.all { it != null }) {
+                    isVisible.value = true
+                }
+            }
         }
     }
-    return colorMap
-        .maxByOrNull { it.value }
-        ?.let { Color(it.key) }
-        ?: Color.Black // Default color if no prevalent color is found
+    return loadedImages
 }
 
 @Composable
@@ -173,9 +155,9 @@ private fun AnimatedDotsWithFixedGradient(
     val animatedOffset by infiniteTransition.animateFloat(
         label = "animated-dots",
         initialValue = 0f,
-        targetValue = with(LocalDensity.current) { 10.dp.toPx() }, // One step forward
+        targetValue = with(LocalDensity.current) { 10.dp.toPx() },
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 500, easing = LinearEasing), // Adjust the speed as needed
+            animation = tween(durationMillis = 500, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
     )
@@ -192,8 +174,8 @@ private fun AnimatedDotsWithFixedGradient(
     ) {
         Canvas(modifier = Modifier.matchParentSize()) {
             val dotRadius = 3.dp.toPx()
-            val dotSpacing = 10.dp.toPx() // The space between the centers of each dot
-            val dotY = center.y // Vertical center
+            val dotSpacing = 10.dp.toPx()
+            val dotY = center.y
             val numberOfDots = (size.width / dotSpacing).toInt() + 2 // Enough dots to fill the screen + 2 extra
 
             // Create a path for the animated dots
@@ -217,31 +199,46 @@ private fun AnimatedDotsWithFixedGradient(
     }
 }
 
-@Preview
 @Composable
-fun ConsentLogoHeaderPreview() {
-    FinancialConnectionsPreview {
-        ConsentLogoHeader(
-            modifier = Modifier.fillMaxWidth(),
-            logos = listOf(
-                "https://stripe.com/img/v3/home/twitter.png",
-                "https://stripe.com/img/v3/home/twitter.png",
-            )
-        )
-    }
+private fun Logo(imageBitmap: ImageBitmap) {
+    Image(
+        bitmap = imageBitmap,
+        contentDescription = null,
+        modifier = Modifier
+            .width(72.dp)
+            .height(72.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .shadow(elevation = 50.dp)
+    )
 }
 
-@Preview
-@Composable
-fun ConsentLogoHeaderPreviewThreeLogos() {
-    FinancialConnectionsPreview {
-        ConsentLogoHeader(
-            modifier = Modifier.fillMaxWidth(),
-            logos = listOf(
-                "https://stripe.com/img/v3/home/twitter.png",
-                "https://stripe.com/img/v3/home/twitter.png",
-                "https://stripe.com/img/v3/home/twitter.png",
-            )
-        )
+/**
+ * Get the prevalent color of the bitmap in the given quarter to generate the gradient for the dots.
+ *
+ * It focuses on the horizontal center and either on the 1st or 4th vertical quarter of the
+ * bitmap, depending on the [startSide] parameter, narrowing the main color search to the area of the logo
+ * the dots will be merging with.
+ *
+ * @param startSide whether the quarter is the start or end of the bitmap
+ */
+@Suppress("MagicNumber")
+private fun getPrevalentColorCloseToDots(bitmap: Bitmap, startSide: Boolean): Color {
+    val colorMap = HashMap<Int, Int>()
+    val width = bitmap.width
+    val height = bitmap.height
+    val startX = if (startSide) 0 else (width * 3) / 4
+    val endX = if (startSide) width / 4 else width
+    val startY = height * 2 / 5 // 40% of the height
+    val endY = height * 3 / 5 // 60% of the height
+
+    for (x in startX until endX) {
+        for (y in startY until endY) {
+            val pixelColor = bitmap.getPixel(x, y)
+            colorMap[pixelColor] = (colorMap[pixelColor] ?: 0) + 1
+        }
     }
+    return colorMap
+        .maxByOrNull { it.value }
+        ?.let { Color(it.key) }
+        ?: Color.Black // Default color if no prevalent color is found
 }
