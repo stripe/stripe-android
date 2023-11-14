@@ -146,7 +146,7 @@ internal data class ConsentPaneBody(
 @Parcelize
 internal data class DataAccessNoticeBody(
     @SerialName("bullets")
-    val bullets: List<Bullet>? = emptyList()
+    val bullets: List<Bullet>
 ) : Parcelable
 
 @Serializable
@@ -165,47 +165,64 @@ internal data class Bullet(
 @Serializable
 @Parcelize
 internal data class DataAccessNotice(
-    @SerialName("body")
-    val body: DataAccessNoticeBody,
+    @SerialName("icon")
+    val icon: Image? = null,
     @SerialName("title")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val title: String,
     @SerialName("subtitle")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val subtitle: String? = null,
-    @SerialName("cta")
-    @Serializable(with = MarkdownToHtmlSerializer::class)
-    val cta: String,
-    @SerialName("learn_more")
-    @Serializable(with = MarkdownToHtmlSerializer::class)
-    val learnMore: String? = null,
+    @SerialName("body")
+    val body: DataAccessNoticeBody,
     @SerialName("connected_account_notice")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val connectedAccountNotice: String? = null,
+    @SerialName("disclaimer")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val disclaimer: String? = null,
+    @SerialName("cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val cta: String,
 ) : Parcelable
 
 @Serializable
 @Parcelize
 internal data class LegalDetailsNotice(
-    @SerialName("body")
-    val body: LegalDetailsBody,
+    @SerialName("icon")
+    val icon: Image? = null,
     @SerialName("title")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val title: String,
+    @SerialName("subtitle")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val subtitle: String? = null,
+    @SerialName("body")
+    val body: LegalDetailsBody,
     @SerialName("cta")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val cta: String,
-    @SerialName("learn_more")
+    @SerialName("disclaimer")
     @Serializable(with = MarkdownToHtmlSerializer::class)
-    val learnMore: String? = null,
+    val disclaimer: String? = null,
 
 ) : Parcelable
 
 @Serializable
 @Parcelize
 internal data class LegalDetailsBody(
-    @SerialName("bullets")
-    val bullets: List<Bullet>? = emptyList()
+    @SerialName("links")
+    val links: List<ServerLink>? = emptyList()
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class ServerLink(
+    @SerialName("text")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val text: String,
+    @SerialName("content")
+    val content: String? = null
 ) : Parcelable
 
 @Serializable
