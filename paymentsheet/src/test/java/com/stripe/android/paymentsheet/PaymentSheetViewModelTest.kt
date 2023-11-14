@@ -280,7 +280,7 @@ internal class PaymentSheetViewModelTest {
             createViewModel(
                 stripeIntent = stripeIntent,
                 args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                    config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                    config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                         shippingDetails = AddressDetails(
                             address = PaymentSheet.Address(
                                 country = "US"
@@ -599,7 +599,7 @@ internal class PaymentSheetViewModelTest {
     fun `Verify supported payment methods exclude afterpay if no shipping and no allow flag`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                     shippingDetails = null,
                     allowsPaymentMethodsRequiringShippingAddress = false,
                 )
@@ -617,7 +617,7 @@ internal class PaymentSheetViewModelTest {
     fun `Verify supported payment methods include afterpay if allow flag but no shipping`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                     allowsPaymentMethodsRequiringShippingAddress = true,
                 )
             ),
@@ -635,7 +635,7 @@ internal class PaymentSheetViewModelTest {
     fun `Verify supported payment methods include afterpay if shipping but no allow flag`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                     allowsPaymentMethodsRequiringShippingAddress = false,
                 )
             ),
@@ -687,17 +687,6 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewModel.isProcessingPaymentIntent)
             .isFalse()
-    }
-
-    @Test
-    fun `When configuration is empty, merchant name should reflect the app name`() {
-        val viewModel = createViewModel(
-            args = ARGS_WITHOUT_CUSTOMER
-        )
-
-        // In a real app, the app name will be used. In tests the package name is returned.
-        assertThat(viewModel.merchantName)
-            .isEqualTo("com.stripe.android.paymentsheet.test")
     }
 
     @Test
@@ -1222,7 +1211,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             isGooglePayReady = true,
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                     allowsDelayedPaymentMethods = true,
                 ),
             ),
@@ -1557,7 +1546,7 @@ internal class PaymentSheetViewModelTest {
         val expectedAmount = 1099L
 
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                 googlePay = PaymentSheet.GooglePayConfiguration(
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                     countryCode = "CA",
@@ -1594,7 +1583,7 @@ internal class PaymentSheetViewModelTest {
         val expectedAmount = 1234L
 
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config?.copy(
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
                 googlePay = PaymentSheet.GooglePayConfiguration(
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                     countryCode = "CA",
@@ -1837,7 +1826,7 @@ internal class PaymentSheetViewModelTest {
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP =
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
-        private val ARGS_WITHOUT_CUSTOMER = PaymentSheetFixtures.ARGS_WITHOUT_CONFIG
+        private val ARGS_WITHOUT_CUSTOMER = PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER
 
         private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 

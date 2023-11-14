@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
@@ -416,6 +417,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         ).exceptionOrNull()
 
         assertThat(result).isEqualTo(PaymentSheetLoadingException.InvalidConfirmationMethod(Manual))
@@ -642,6 +644,7 @@ internal class DefaultPaymentSheetLoaderTest {
 
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         ).exceptionOrNull()
 
         assertThat(result).isEqualTo(
@@ -658,6 +661,7 @@ internal class DefaultPaymentSheetLoaderTest {
 
         loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = false)
@@ -677,6 +681,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     ),
                 ),
             ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = true)
@@ -690,6 +695,7 @@ internal class DefaultPaymentSheetLoaderTest {
 
         loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = false)
@@ -714,6 +720,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     ),
                 ),
             ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = true)
@@ -741,6 +748,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     ),
                 ),
             ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = true)
@@ -752,6 +760,27 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
+    fun `Emits correct events when we fallback to the core Stripe API`() = runTest {
+        val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        val error = APIConnectionException()
+
+        val loader = createPaymentSheetLoader(fallbackError = error)
+
+        loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = intent.clientSecret!!,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+        )
+
+        verify(eventReporter).onLoadStarted(isDecoupling = false)
+        verify(eventReporter).onElementsSessionLoadFailed(
+            isDecoupling = false,
+            error = error,
+        )
+    }
+
+    @Test
     fun `Doesn't include card brand choice state if feature is disabled`() = runTest {
         val loader = createPaymentSheetLoader()
 
@@ -759,6 +788,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         ).getOrThrow()
 
         assertThat(result.isEligibleForCardBrandChoice).isFalse()
@@ -774,6 +804,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         ).getOrThrow()
 
         assertThat(result.isEligibleForCardBrandChoice).isTrue()
@@ -787,9 +818,9 @@ internal class DefaultPaymentSheetLoaderTest {
         error: Throwable? = null,
         linkSettings: ElementsSession.LinkSettings? = null,
         isGooglePayEnabledFromBackend: Boolean = true,
+        fallbackError: Throwable? = null,
     ): PaymentSheetLoader {
         return DefaultPaymentSheetLoader(
-            appName = "App Name",
             prefsRepositoryFactory = { prefsRepository },
             googlePayRepositoryFactory = {
                 if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
@@ -797,6 +828,7 @@ internal class DefaultPaymentSheetLoaderTest {
             elementsSessionRepository = FakeElementsSessionRepository(
                 stripeIntent = stripeIntent,
                 error = error,
+                sessionsError = fallbackError,
                 linkSettings,
                 isGooglePayEnabledFromBackend,
             ),

@@ -51,6 +51,8 @@
   <string name="stripe_paymentsheet_primary_button_processing">処理中...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">銀行口座を削除</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_paymentsheet_remove_card">カードを削除</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">%s を削除</string>
   <!-- A button used for saving a new payment method -->

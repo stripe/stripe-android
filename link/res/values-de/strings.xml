@@ -50,7 +50,6 @@
   <string name="stripe_wallet_recollect_cvc_error">Geben Sie aus Sicherheitsgründen bitte den Sicherheitscode Ihrer Karte erneut ein.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Sind Sie sicher, dass Sie dieses verknüpfte Konto entfernen möchten?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Sind Sie sicher, dass Sie diese Karte entfernen möchten?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

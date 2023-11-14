@@ -308,7 +308,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
         cbcEligibility = when (state.isEligibleForCardBrandChoice) {
             true -> CardBrandChoiceEligibility.Eligible(
-                preferredNetworks = state.config?.preferredNetworks ?: listOf()
+                preferredNetworks = state.config.preferredNetworks
             )
             false -> CardBrandChoiceEligibility.Ineligible
         }
@@ -494,7 +494,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val nextStep = intentConfirmationInterceptor.intercept(
                 initializationMode = args.initializationMode,
                 paymentSelection = paymentSelection,
-                shippingValues = args.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
+                shippingValues = args.config.shippingDetails?.toConfirmPaymentIntentShipping(),
             )
 
             deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType

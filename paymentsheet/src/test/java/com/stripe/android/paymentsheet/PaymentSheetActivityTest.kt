@@ -845,7 +845,9 @@ internal class PaymentSheetActivityTest {
     fun `Handles invalid client secret correctly`() {
         val args = PaymentSheetContractV2.Args(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = ""),
-            config = null,
+            config = PaymentSheet.Configuration(
+                merchantDisplayName = "Some name",
+            ),
             statusBarColor = null,
         )
 

@@ -66,7 +66,7 @@ internal class RealElementsSessionRepository @Inject constructor(
                     options = requestOptions,
                     expandFields = listOf("payment_method")
                 ).map {
-                    ElementsSession.default(it)
+                    ElementsSession.createFromFallback(it, elementsSessionFailure)
                 }
             }
             is ElementsSessionParams.SetupIntentType -> {
@@ -75,7 +75,7 @@ internal class RealElementsSessionRepository @Inject constructor(
                     options = requestOptions,
                     expandFields = listOf("payment_method")
                 ).map {
-                    ElementsSession.default(it)
+                    ElementsSession.createFromFallback(it, elementsSessionFailure)
                 }
             }
             is ElementsSessionParams.DeferredIntentType -> {

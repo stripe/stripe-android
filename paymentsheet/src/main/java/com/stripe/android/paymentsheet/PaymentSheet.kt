@@ -552,6 +552,13 @@ class PaymentSheet internal constructor(
                 preferredNetworks = preferredNetworks
             )
         }
+
+        internal companion object {
+            fun default(context: Context): Configuration {
+                val appName = context.applicationInfo.loadLabel(context.packageManager).toString()
+                return Configuration(appName)
+            }
+        }
     }
 
     @Parcelize

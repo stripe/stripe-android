@@ -35,8 +35,9 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository.retrieveElementsSession(any(), any())
         ).thenReturn(
             Result.success(
-                ElementsSession.default(
+                ElementsSession.createFromFallback(
                     stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                    sessionsError = null,
                 )
             )
         )
@@ -110,8 +111,9 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository.retrieveElementsSession(any(), any())
         ).thenReturn(
             Result.success(
-                ElementsSession.default(
+                ElementsSession.createFromFallback(
                     stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                    sessionsError = null,
                 )
             )
         )

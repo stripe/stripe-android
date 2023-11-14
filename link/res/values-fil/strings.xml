@@ -50,7 +50,6 @@
   <string name="stripe_wallet_recollect_cvc_error">Para sa seguridad, pakilagay muli ang security code ng iyong kard.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Sigurado ka bang nais mong alisin ang naka-link na account na ito?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Sigurado ka bang nais mong alisin ang kard na ito?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

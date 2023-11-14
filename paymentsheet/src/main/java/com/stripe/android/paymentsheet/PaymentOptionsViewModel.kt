@@ -60,7 +60,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 ) : BaseSheetViewModel(
     application = application,
     config = args.state.config,
-    prefsRepository = prefsRepositoryFactory(args.state.config?.customer),
+    prefsRepository = prefsRepositoryFactory(args.state.config.customer),
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     workContext = workContext,
@@ -140,7 +140,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         cbcEligibility = when (args.state.isEligibleForCardBrandChoice) {
             true -> CardBrandChoiceEligibility.Eligible(
-                preferredNetworks = args.state.config?.preferredNetworks ?: listOf()
+                preferredNetworks = args.state.config.preferredNetworks
             )
             false -> CardBrandChoiceEligibility.Ineligible
         }

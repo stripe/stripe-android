@@ -84,7 +84,7 @@ internal class DefaultPaymentSheetLauncher(
     ) {
         val args = PaymentSheetContractV2.Args(
             initializationMode = mode,
-            config = configuration,
+            config = configuration ?: PaymentSheet.Configuration.default(activity),
             statusBarColor = activity.window?.statusBarColor,
         )
 
