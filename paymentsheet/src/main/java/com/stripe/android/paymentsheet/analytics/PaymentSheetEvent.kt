@@ -45,6 +45,16 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class ElementsSessionLoadFailed(
+        error: String,
+        override val isDecoupled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_elements_session_load_failed"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_ERROR_MESSAGE to error,
+        )
+    }
+
     class Init(
         private val mode: EventReporter.Mode,
         private val configuration: PaymentSheet.Configuration,

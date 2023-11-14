@@ -68,17 +68,19 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         eventReporter.onLoadStarted(isDecoupling = isDecoupling)
 
-        retrieveElementsSession(
+        val elementsSessionResult = retrieveElementsSession(
             initializationMode = initializationMode,
             configuration = paymentSheetConfiguration,
-        ).mapCatching { elementsSession ->
+        )
+
+        reportLoadResult(elementsSessionResult, isDecoupling)
+
+        elementsSessionResult.mapCatching { elementsSession ->
             create(
                 elementsSession = elementsSession,
                 config = paymentSheetConfiguration,
                 isGooglePayReady = isGooglePayReady(paymentSheetConfiguration, elementsSession),
             )
-        }.also {
-            reportLoadResult(loaderResult = it, isDecoupling = isDecoupling)
         }
     }
 
@@ -343,11 +345,15 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 
     private fun reportLoadResult(
-        loaderResult: Result<PaymentSheetState.Full>,
+        loaderResult: Result<ElementsSession>,
         isDecoupling: Boolean,
     ) {
         loaderResult.fold(
-            onSuccess = {
+            onSuccess = { elementsSession ->
+                elementsSession.sessionsError?.let { sessionsError ->
+                    eventReporter.onElementsSessionLoadFailed(isDecoupling, sessionsError)
+                }
+
                 eventReporter.onLoadSucceeded(isDecoupling = isDecoupling)
             },
             onFailure = { error ->

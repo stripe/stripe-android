@@ -66,6 +66,15 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onElementsSessionLoadFailed(isDecoupling: Boolean, error: Throwable) {
+        fireEvent(
+            PaymentSheetEvent.ElementsSessionLoadFailed(
+                error = error.asPaymentSheetLoadingException.type,
+                isDecoupled = isDecoupling,
+            )
+        )
+    }
+
     override fun onDismiss(
         isDecoupling: Boolean,
     ) {

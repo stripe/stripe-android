@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 internal class FakeElementsSessionRepository(
     private val stripeIntent: StripeIntent,
     private val error: Throwable?,
+    private val sessionsError: Throwable? = null,
     private val linkSettings: ElementsSession.LinkSettings?,
     private val isGooglePayEnabled: Boolean = true,
 ) : ElementsSessionRepository {
@@ -29,6 +30,7 @@ internal class FakeElementsSessionRepository(
                     merchantCountry = null,
                     isEligibleForCardBrandChoice = true,
                     isGooglePayEnabled = isGooglePayEnabled,
+                    sessionsError = sessionsError,
                 )
             )
         }
