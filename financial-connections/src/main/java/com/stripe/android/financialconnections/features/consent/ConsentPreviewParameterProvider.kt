@@ -12,6 +12,7 @@ import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.LegalDetailsBody
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
+import com.stripe.android.financialconnections.model.ServerLink
 
 @OptIn(ExperimentalMaterialApi::class)
 internal class ConsentPreviewParameterProvider :
@@ -138,23 +139,25 @@ internal class ConsentPreviewParameterProvider :
                     ),
                 )
             ),
-            learnMore = "Learn more about data access",
+            disclaimer = "Learn more about data access",
             connectedAccountNotice = "Connected account placeholder",
             cta = "OK"
         ),
         legalDetailsNotice = LegalDetailsNotice(
             title = "Stripe uses your account data as described in the Terms, including:",
             body = LegalDetailsBody(
-                bullets = listOf(
-                    Bullet(
+                links = listOf(
+                    ServerLink(
+                        text = "To provide our services",
                         content = "To improve our services"
                     ),
-                    Bullet(
+                    ServerLink(
+                        text = "To manage fraud and loss risk of transactions",
                         content = "To manage fraud and loss risk of transactions"
                     ),
                 )
             ),
-            learnMore = "Learn more",
+            disclaimer = "Learn more",
             cta = "OK"
         ),
     )

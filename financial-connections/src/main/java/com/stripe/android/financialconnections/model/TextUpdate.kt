@@ -212,7 +212,7 @@ internal data class LegalDetailsNotice(
 @Parcelize
 internal data class LegalDetailsBody(
     @SerialName("links")
-    val links: List<ServerLink>? = emptyList()
+    val links: List<ServerLink>
 ) : Parcelable
 
 @Serializable

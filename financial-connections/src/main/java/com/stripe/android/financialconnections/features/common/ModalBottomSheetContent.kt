@@ -5,6 +5,7 @@ package com.stripe.android.financialconnections.features.common
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,17 +22,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.model.DataAccessNotice
+import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.ui.ImageResource
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
-import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import com.stripe.android.uicore.image.StripeImage
@@ -48,24 +47,35 @@ internal fun DataAccessBottomSheetContent(
     val subtitle = remember(dataDialog.subtitle) {
         dataDialog.subtitle?.let { TextResource.Text(fromHtml(it)) }
     }
-    val learnMore = remember(dataDialog.learnMore) {
-        dataDialog.learnMore?.let { TextResource.Text(fromHtml(it)) }
+    val disclaimer = remember(dataDialog.disclaimer) {
+        dataDialog.disclaimer?.let { TextResource.Text(fromHtml(it)) }
     }
     val connectedAccountNotice = remember(dataDialog.connectedAccountNotice) {
         dataDialog.connectedAccountNotice?.let { TextResource.Text(fromHtml(it)) }
     }
     val bullets = remember(dataDialog.body.bullets) {
-        dataDialog.body.bullets?.map { BulletUI.from(it) }
+        dataDialog.body.bullets.map { BulletUI.from(it) }
     }
     ModalBottomSheetContent(
+        icon = dataDialog.icon,
         title = title,
         subtitle = subtitle,
         onClickableTextClick = onClickableTextClick,
-        bullets = bullets,
         connectedAccountNotice = connectedAccountNotice,
         cta = dataDialog.cta,
-        learnMore = learnMore,
+        disclaimer = disclaimer,
         onConfirmModalClick = onConfirmModalClick,
+        content = {
+            bullets.forEachIndexed { index, bullet ->
+                BulletItem(
+                    bullet = bullet,
+                    onClickableTextClick = onClickableTextClick
+                )
+                if (index < bullets.size - 1) {
+                    Spacer(modifier = Modifier.size(16.dp))
+                }
+            }
+        }
     )
 }
 
@@ -78,34 +88,39 @@ internal fun LegalDetailsBottomSheetContent(
     val title = remember(legalDetails.title) {
         TextResource.Text(fromHtml(legalDetails.title))
     }
-    val learnMore = remember(legalDetails.learnMore) {
-        legalDetails.learnMore?.let { TextResource.Text(fromHtml(it)) }
+    val learnMore = remember(legalDetails.disclaimer) {
+        legalDetails.disclaimer?.let { TextResource.Text(fromHtml(it)) }
     }
-    val bullets = remember(legalDetails.body.bullets) {
-        legalDetails.body.bullets?.map { BulletUI.from(it) }
+    val links = remember(legalDetails.body.links) {
+        legalDetails.body.links
     }
     ModalBottomSheetContent(
+        icon = legalDetails.icon,
         title = title,
         subtitle = null,
         onClickableTextClick = onClickableTextClick,
-        bullets = bullets,
         connectedAccountNotice = null,
         cta = legalDetails.cta,
-        learnMore = learnMore,
-        onConfirmModalClick = onConfirmModalClick,
-    )
+        disclaimer = learnMore,
+        onConfirmModalClick = onConfirmModalClick
+    ) {
+        links.forEach {
+            Text(text = it.text + "\n" + it.content)
+        }
+    }
 }
 
 @Composable
 private fun ModalBottomSheetContent(
+    icon: Image?,
     title: TextResource,
     subtitle: TextResource?,
     onClickableTextClick: (String) -> Unit,
-    bullets: List<BulletUI>?,
     connectedAccountNotice: TextResource?,
     cta: String,
-    learnMore: TextResource?,
+    disclaimer: TextResource?,
     onConfirmModalClick: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     val scrollState = rememberScrollState()
     Column {
@@ -115,39 +130,35 @@ private fun ModalBottomSheetContent(
                 .verticalScroll(scrollState)
                 .padding(24.dp)
         ) {
+            icon?.default?.let {
+                StripeImage(
+                    url = it,
+                    imageLoader = LocalImageLoader.current,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(40.dp)
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+            }
             AnnotatedText(
                 text = title,
-                defaultStyle = typography.heading.copy(
-                    color = colors.textPrimary
+                defaultStyle = v3Typography.headingMedium.copy(
+                    color = v3Colors.textDefault
                 ),
-                annotationStyles = emptyMap(),
                 onClickableTextClick = onClickableTextClick
             )
             subtitle?.let {
-                Spacer(modifier = Modifier.size(4.dp))
+                Spacer(modifier = Modifier.size(16.dp))
                 AnnotatedText(
                     text = it,
-                    defaultStyle = typography.body.copy(
-                        color = colors.textPrimary
-                    ),
-                    annotationStyles = mapOf(
-                        StringAnnotation.CLICKABLE to typography.detail
-                            .toSpanStyle()
-                            .copy(color = colors.textBrand),
-                        StringAnnotation.BOLD to typography.detailEmphasized
-                            .toSpanStyle()
-                            .copy(color = colors.textPrimary),
+                    defaultStyle = v3Typography.bodyMedium.copy(
+                        color = v3Colors.textDefault
                     ),
                     onClickableTextClick = onClickableTextClick
                 )
             }
-            bullets?.forEach {
-                Spacer(modifier = Modifier.size(16.dp))
-                BulletItem(
-                    bullet = it,
-                    onClickableTextClick = onClickableTextClick
-                )
-            }
+            Spacer(modifier = Modifier.size(24.dp))
+            content()
         }
         Column(
             Modifier.padding(
@@ -160,35 +171,19 @@ private fun ModalBottomSheetContent(
                 AnnotatedText(
                     text = connectedAccountNotice,
                     onClickableTextClick = onClickableTextClick,
-                    defaultStyle = typography.caption.copy(
-                        color = colors.textSecondary
+                    defaultStyle = v3Typography.labelSmall.copy(
+                        color = v3Colors.textDefault
                     ),
-                    annotationStyles = mapOf(
-                        StringAnnotation.CLICKABLE to typography.captionEmphasized
-                            .toSpanStyle()
-                            .copy(color = colors.textBrand),
-                        StringAnnotation.BOLD to typography.captionEmphasized
-                            .toSpanStyle()
-                            .copy(color = colors.textSecondary),
-                    )
                 )
                 Spacer(modifier = Modifier.size(12.dp))
             }
-            if (learnMore != null) {
+            if (disclaimer != null) {
                 AnnotatedText(
-                    text = learnMore,
+                    text = disclaimer,
                     onClickableTextClick = onClickableTextClick,
-                    defaultStyle = typography.caption.copy(
-                        color = colors.textSecondary
+                    defaultStyle = v3Typography.labelSmall.copy(
+                        color = v3Colors.textDefault
                     ),
-                    annotationStyles = mapOf(
-                        StringAnnotation.CLICKABLE to typography.captionEmphasized
-                            .toSpanStyle()
-                            .copy(color = colors.textBrand),
-                        StringAnnotation.BOLD to typography.captionEmphasized
-                            .toSpanStyle()
-                            .copy(color = colors.textSecondary),
-                    )
                 )
             }
             Spacer(modifier = Modifier.size(16.dp))
