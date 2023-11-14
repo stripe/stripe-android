@@ -21,10 +21,20 @@ internal sealed class PaymentSheetConfirmationError : Throwable() {
             get() = "googlePay_$errorCode"
     }
 
-    object InvalidState : PaymentSheetConfirmationError() {
+    @Suppress("DataClassPrivateConstructor")
+    data class InvalidState private constructor(
+        override val analyticsValue: String,
+    ) : PaymentSheetConfirmationError() {
 
-        override val analyticsValue: String
-            get() = "invalidState"
+        companion object {
+            fun inProgressConfiguration(): InvalidState {
+                return InvalidState("inProgressConfiguration")
+            }
+
+            fun missingState(): InvalidState {
+                return InvalidState("invalidState")
+            }
+        }
     }
 }
 

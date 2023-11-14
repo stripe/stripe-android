@@ -272,7 +272,10 @@ internal class DefaultFlowController @Inject internal constructor(
                     "to configureWithPaymentIntent(), configureWithSetupIntent() or " +
                     "configureWithIntentConfiguration() has completed successfully."
             )
-            onPaymentResult(PaymentResult.Failed(error))
+            onPaymentResult(
+                paymentResult = PaymentResult.Failed(error),
+                confirmationError = PaymentSheetConfirmationError.InvalidState.inProgressConfiguration(),
+            )
             return
         }
 
@@ -404,7 +407,7 @@ internal class DefaultFlowController @Inject internal constructor(
                             paymentSelection = PaymentSelection.GooglePay,
                             currency = viewModel.state?.stripeIntent?.currency,
                             isDecoupling = isDecoupling,
-                            error = PaymentSheetConfirmationError.InvalidState,
+                            error = PaymentSheetConfirmationError.InvalidState.missingState(),
                         )
                         paymentResultCallback.onPaymentSheetResult(
                             PaymentSheetResult.Failed(error)
@@ -457,7 +460,7 @@ internal class DefaultFlowController @Inject internal constructor(
                         paymentSelection = PaymentSelection.Link,
                         currency = viewModel.state?.stripeIntent?.currency,
                         isDecoupling = isDecoupling,
-                        error = PaymentSheetConfirmationError.InvalidState,
+                        error = PaymentSheetConfirmationError.InvalidState.missingState(),
                     )
                     paymentResultCallback.onPaymentSheetResult(
                         PaymentSheetResult.Failed(error)
@@ -506,8 +509,11 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    internal fun onPaymentResult(paymentResult: PaymentResult) {
-        logPaymentResult(paymentResult)
+    internal fun onPaymentResult(
+        paymentResult: PaymentResult,
+        confirmationError: PaymentSheetConfirmationError? = null,
+    ) {
+        logPaymentResult(paymentResult, confirmationError)
         viewModelScope.launch {
             paymentResultCallback.onPaymentSheetResult(
                 paymentResult.convertToPaymentSheetResult()
@@ -527,7 +533,10 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun logPaymentResult(paymentResult: PaymentResult?) {
+    private fun logPaymentResult(
+        paymentResult: PaymentResult?,
+        confirmationError: PaymentSheetConfirmationError?,
+    ) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
                 eventReporter.onPaymentSuccess(
@@ -542,7 +551,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     paymentSelection = viewModel.paymentSelection,
                     currency = viewModel.state?.stripeIntent?.currency,
                     isDecoupling = isDecoupling,
-                    error = PaymentSheetConfirmationError.Stripe(paymentResult.throwable),
+                    error = confirmationError?: PaymentSheetConfirmationError.Stripe(paymentResult.throwable),
                 )
             }
             else -> {
