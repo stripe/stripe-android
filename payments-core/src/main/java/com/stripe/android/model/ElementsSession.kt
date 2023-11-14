@@ -13,6 +13,7 @@ data class ElementsSession(
     val merchantCountry: String?,
     val isEligibleForCardBrandChoice: Boolean,
     val isGooglePayEnabled: Boolean,
+    val sessionsError: Throwable? = null,
 ) : StripeModel {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -24,7 +25,10 @@ data class ElementsSession(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        fun default(stripeIntent: StripeIntent): ElementsSession {
+        fun createFromFallback(
+            stripeIntent: StripeIntent,
+            sessionsError: Throwable?,
+        ): ElementsSession {
             return ElementsSession(
                 linkSettings = null,
                 paymentMethodSpecs = null,
@@ -32,6 +36,7 @@ data class ElementsSession(
                 merchantCountry = null,
                 isEligibleForCardBrandChoice = false,
                 isGooglePayEnabled = true,
+                sessionsError = sessionsError,
             )
         }
     }

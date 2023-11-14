@@ -18,31 +18,9 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal interface ElementsSessionRepository {
-
     suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
-    ): Result<LoadResult>
-
-    sealed interface LoadResult {
-
-        val stripeIntent: StripeIntent
-        val session: ElementsSession?
-
-        data class Session(override val session: ElementsSession) : LoadResult {
-
-            override val stripeIntent: StripeIntent
-                get() = session.stripeIntent
-        }
-
-        data class Fallback(
-            override val stripeIntent: StripeIntent,
-            val error: Throwable,
-        ) : LoadResult {
-
-            override val session: ElementsSession?
-                get() = null
-        }
-    }
+    ): Result<ElementsSession>
 }
 
 /**
@@ -64,15 +42,13 @@ internal class RealElementsSessionRepository @Inject constructor(
 
     override suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
-    ): Result<ElementsSessionRepository.LoadResult> {
+    ): Result<ElementsSession> {
         val params = initializationMode.toElementsSessionParams()
 
         val elementsSession = stripeRepository.retrieveElementsSession(
             params = params,
             options = requestOptions,
-        ).map {
-            ElementsSessionRepository.LoadResult.Session(it)
-        }
+        )
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
             fallback(params, elementsSessionFailure)
@@ -82,7 +58,7 @@ internal class RealElementsSessionRepository @Inject constructor(
     private suspend fun fallback(
         params: ElementsSessionParams,
         elementsSessionFailure: Throwable,
-    ): Result<ElementsSessionRepository.LoadResult> = withContext(workContext) {
+    ): Result<ElementsSession> = withContext(workContext) {
         when (params) {
             is ElementsSessionParams.PaymentIntentType -> {
                 stripeRepository.retrievePaymentIntent(
@@ -90,7 +66,7 @@ internal class RealElementsSessionRepository @Inject constructor(
                     options = requestOptions,
                     expandFields = listOf("payment_method")
                 ).map {
-                    ElementsSessionRepository.LoadResult.Fallback(it, elementsSessionFailure)
+                    ElementsSession.createFromFallback(it, elementsSessionFailure)
                 }
             }
             is ElementsSessionParams.SetupIntentType -> {
@@ -99,7 +75,7 @@ internal class RealElementsSessionRepository @Inject constructor(
                     options = requestOptions,
                     expandFields = listOf("payment_method")
                 ).map {
-                    ElementsSessionRepository.LoadResult.Fallback(it, elementsSessionFailure)
+                    ElementsSession.createFromFallback(it, elementsSessionFailure)
                 }
             }
             is ElementsSessionParams.DeferredIntentType -> {

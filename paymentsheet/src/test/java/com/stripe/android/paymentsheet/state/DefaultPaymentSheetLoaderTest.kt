@@ -828,7 +828,7 @@ internal class DefaultPaymentSheetLoaderTest {
             elementsSessionRepository = FakeElementsSessionRepository(
                 stripeIntent = stripeIntent,
                 error = error,
-                fallbackError = fallbackError,
+                sessionsError = fallbackError,
                 linkSettings,
                 isGooglePayEnabledFromBackend,
             ),
