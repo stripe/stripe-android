@@ -7,6 +7,9 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.events.EventRegistry
+import com.stripe.android.paymentsheet.events.ExperimentalEventsApi
+import com.stripe.android.paymentsheet.events.PaymentSuccessEvent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 import kotlinx.coroutines.CoroutineScope
@@ -148,6 +151,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    @OptIn(ExperimentalEventsApi::class)
     override fun onPaymentSuccess(
         paymentSelection: PaymentSelection?,
         currency: String?,
@@ -159,6 +163,8 @@ internal class DefaultEventReporter @Inject internal constructor(
 
         val realSelection = savedSelection?.walletType?.paymentSelection ?: paymentSelection
         val duration = durationProvider.end(DurationProvider.Key.Checkout)
+
+        EventRegistry.sendEvent(PaymentSuccessEvent(duration))
 
         fireEvent(
             PaymentSheetEvent.Payment(

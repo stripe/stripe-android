@@ -1414,6 +1414,24 @@ public final class com/stripe/android/paymentsheet/databinding/StripePrimaryButt
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripePrimaryButtonBinding;
 }
 
+public abstract interface class com/stripe/android/paymentsheet/events/EventListener {
+	public abstract fun onEvent (Ljava/lang/Object;)V
+}
+
+public final class com/stripe/android/paymentsheet/events/EventRegistry {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/events/EventRegistry;
+	public final fun setEventHandler (Lcom/stripe/android/paymentsheet/events/EventListener;)V
+}
+
+public abstract interface annotation class com/stripe/android/paymentsheet/events/ExperimentalEventsApi : java/lang/annotation/Annotation {
+}
+
+public final class com/stripe/android/paymentsheet/events/PaymentSuccessEvent {
+	public static final field $stable I
+	public final fun getDuration-FghU774 ()Lkotlin/time/Duration;
+}
+
 public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowController$Args$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController$Args;

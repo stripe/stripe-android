@@ -2,10 +2,15 @@ package com.stripe.android.paymentsheet.example
 
 import android.app.Application
 import android.os.StrictMode
+import com.stripe.android.paymentsheet.events.EventRegistry
+import com.stripe.android.paymentsheet.events.ExperimentalEventsApi
 
 class ExampleApplication : Application() {
 
+    @OptIn(ExperimentalEventsApi::class)
     override fun onCreate() {
+        EventRegistry.setEventHandler(ExampleEventListener)
+
         StrictMode.setThreadPolicy(
             StrictMode.ThreadPolicy.Builder()
                 .detectAll()
