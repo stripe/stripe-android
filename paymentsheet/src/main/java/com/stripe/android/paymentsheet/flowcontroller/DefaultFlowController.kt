@@ -14,6 +14,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -267,7 +268,7 @@ internal class DefaultFlowController @Inject internal constructor(
         )
 
         if (!configurationHandler.isConfigured) {
-            val error = IllegalStateException(
+            val error = LocalStripeException(
                 "FlowController.confirm() can only be called if the most recent call " +
                     "to configureWithPaymentIntent(), configureWithSetupIntent() or " +
                     "configureWithIntentConfiguration() has completed successfully."
