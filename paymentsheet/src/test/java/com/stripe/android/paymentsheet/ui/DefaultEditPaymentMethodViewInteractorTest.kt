@@ -37,7 +37,8 @@ class DefaultEditPaymentMethodViewInteractorTest {
                     availableBrands = listOf(
                         VISA_BRAND_CHOICE,
                         CARTES_BANCAIRES_BRAND_CHOICE
-                    )
+                    ),
+                    displayName = "Card",
                 )
             )
         }
@@ -63,7 +64,8 @@ class DefaultEditPaymentMethodViewInteractorTest {
                     availableBrands = listOf(
                         VISA_BRAND_CHOICE,
                         CARTES_BANCAIRES_BRAND_CHOICE
-                    )
+                    ),
+                    displayName = "Card",
                 )
             )
         }
@@ -93,7 +95,8 @@ class DefaultEditPaymentMethodViewInteractorTest {
                     availableBrands = listOf(
                         VISA_BRAND_CHOICE,
                         CARTES_BANCAIRES_BRAND_CHOICE
-                    )
+                    ),
+                    displayName = "Card",
                 )
             )
         }
@@ -126,6 +129,34 @@ class DefaultEditPaymentMethodViewInteractorTest {
         assertThat(interactor.currentStatus()).isEqualTo(EditPaymentMethodViewState.Status.Idle)
 
         verify(removeOperation).invoke(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+    }
+
+    @Test
+    fun `on remove pressed, should invoke 'onRemoved' upon success`() = runTest {
+        val onRemove: PaymentMethodRemoveOperation = {
+            delay(100)
+            true
+        }
+
+        val onRemoved: (PaymentMethod) -> Unit = mock()
+
+        val interactor = createInteractor(
+            onRemove = onRemove,
+            onRemoved = onRemoved,
+            workContext = testDispatcher,
+        )
+
+        assertThat(interactor.currentStatus()).isEqualTo(EditPaymentMethodViewState.Status.Idle)
+
+        interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
+
+        testDispatcher.scheduler.advanceTimeBy(50)
+        assertThat(interactor.currentStatus()).isEqualTo(EditPaymentMethodViewState.Status.Removing)
+
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertThat(interactor.currentStatus()).isEqualTo(EditPaymentMethodViewState.Status.Idle)
+
+        verify(onRemoved).invoke(CARD_WITH_NETWORKS_PAYMENT_METHOD)
     }
 
     @Test
@@ -176,12 +207,15 @@ class DefaultEditPaymentMethodViewInteractorTest {
 
     private fun createInteractor(
         onRemove: PaymentMethodRemoveOperation = { true },
+        onRemoved: (PaymentMethod) -> Unit = {},
         onUpdate: PaymentMethodUpdateOperation = { _, _ -> Result.success(CARD_WITH_NETWORKS_PAYMENT_METHOD) },
         workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): DefaultEditPaymentMethodViewInteractor {
         return DefaultEditPaymentMethodViewInteractor(
             initialPaymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD,
+            displayName = "Card",
             removeExecutor = onRemove,
+            onRemoved = onRemoved,
             updateExecutor = onUpdate,
             viewStateSharingStarted = SharingStarted.Eagerly,
             workContext = workContext

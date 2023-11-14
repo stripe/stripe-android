@@ -57,9 +57,17 @@ internal object CustomerSheetTestHelper {
         override fun create(
             initialPaymentMethod: PaymentMethod,
             removeExecutor: PaymentMethodRemoveOperation,
-            updateExecutor: PaymentMethodUpdateOperation
+            updateExecutor: PaymentMethodUpdateOperation,
+            onRemoved: (PaymentMethod) -> Unit,
+            displayName: String
         ): ModifiableEditPaymentMethodViewInteractor {
-            return DefaultEditPaymentMethodViewInteractor(initialPaymentMethod, removeExecutor, updateExecutor)
+            return DefaultEditPaymentMethodViewInteractor(
+                initialPaymentMethod = initialPaymentMethod,
+                displayName = "Card",
+                removeExecutor = removeExecutor,
+                onRemoved = onRemoved,
+                updateExecutor = updateExecutor,
+            )
         }
     }
 
