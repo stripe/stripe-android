@@ -8,13 +8,13 @@ import org.mockito.kotlin.mock
 internal object TestViewModelFactory {
     fun <T : BaseSheetViewModel> create(
         linkConfigurationCoordinator: LinkConfigurationCoordinator = mock(),
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
         viewModelFactory: (
             linkHandler: LinkHandler,
             linkConfigurationCoordinator: LinkConfigurationCoordinator,
             savedStateHandle: SavedStateHandle,
         ) -> T
     ): T {
-        val savedStateHandle = SavedStateHandle()
         val linkHandler = LinkHandler(
             linkLauncher = mock(),
             linkConfigurationCoordinator = linkConfigurationCoordinator,

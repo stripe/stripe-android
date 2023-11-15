@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
@@ -71,6 +72,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -738,9 +740,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         None
     }
 
+    @Parcelize
     internal data class ProcessDeathRecoveryState(
         val pendingIntentId: String?,
-    )
+    ) : Parcelable
 }
 
 private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
@@ -1688,6 +1689,27 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
+    @Test
+    fun `Behaves correctly when recovering from process death during payment confirmation`() = runTest {
+        val intent = PaymentIntentFactory.create(
+            status = StripeIntent.Status.Succeeded,
+        )
+
+        val recoveryState = PaymentSheetViewModel.ProcessDeathRecoveryState(pendingIntentId = intent.id!!)
+        val simulatedStateAfterProcessDeath = mapOf("ProcessDeathRecoveryState" to recoveryState)
+
+        val viewModel = createViewModel(
+            stripeIntent = intent,
+            savedStateHandle = SavedStateHandle(
+                initialState = simulatedStateAfterProcessDeath,
+            ),
+        )
+
+        viewModel.paymentSheetResult.test {
+            assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Completed)
+        }
+    }
+
     private suspend fun selectionSavedTest(
         initializationMode: InitializationMode = ARGS_CUSTOMER_WITH_GOOGLEPAY.initializationMode,
         customerRequestedSave: PaymentSelection.CustomerRequestedSave =
@@ -1771,11 +1793,13 @@ internal class PaymentSheetViewModelTest {
         isGooglePayReady: Boolean = false,
         delay: Duration = Duration.ZERO,
         lpmRepository: LpmRepository = this.lpmRepository,
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return TestViewModelFactory.create(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
-        ) { linkHandler, linkInteractor, savedStateHandle ->
+            savedStateHandle = savedStateHandle,
+        ) { linkHandler, linkInteractor, _ ->
             PaymentSheetViewModel(
                 application = application,
                 args = args,
@@ -1810,7 +1834,7 @@ internal class PaymentSheetViewModelTest {
         args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
     ): PaymentSheetViewModel {
-        val deferredIntent = paymentIntent.copy(id = null, clientSecret = null)
+        val deferredIntent = paymentIntent.copy(id = "elements_session_1t6ejApXCS5", clientSecret = null)
 
         val intentConfig = PaymentSheet.IntentConfiguration(
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 12345, currency = "usd"),
@@ -1826,7 +1850,6 @@ internal class PaymentSheetViewModelTest {
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP =
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
-        private val ARGS_WITHOUT_CUSTOMER = PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER
 
         private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 

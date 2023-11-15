@@ -30,7 +30,8 @@ internal class FakePaymentSheetLoader(
 
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
-        paymentSheetConfiguration: PaymentSheet.Configuration
+        paymentSheetConfiguration: PaymentSheet.Configuration,
+        currentIntentId: String?,
     ): Result<PaymentSheetState.Full> {
         delay(delay)
         return if (shouldFail) {

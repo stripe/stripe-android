@@ -40,7 +40,8 @@ internal class RelayingPaymentSheetLoader : PaymentSheetLoader {
 
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
-        paymentSheetConfiguration: PaymentSheet.Configuration
+        paymentSheetConfiguration: PaymentSheet.Configuration,
+        currentIntentId: String?,
     ): Result<PaymentSheetState.Full> {
         return results.receive()
     }
