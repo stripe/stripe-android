@@ -19,9 +19,6 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 
-internal val Info100 = Color(0xffCFF5F6)
-internal val Success100 = Color(0xffD7F7C2)
-
 internal val Neutral50 = Color(0xffF6F8FA)
 internal val Neutral150 = Color(0xffE0E6EB)
 internal val Neutral200 = Color(0xffC0C8D2)

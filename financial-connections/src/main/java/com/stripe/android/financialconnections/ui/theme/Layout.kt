@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.ui.theme
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,11 +22,12 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 internal fun Layout(
     content: LazyListScope.() -> Unit,
     footer: @Composable () -> Unit = {},
+    inModal: Boolean = false,
     lazyListState: LazyListState = rememberLazyListState()
 ) {
     Column(
         Modifier
-            .fillMaxSize()
+            .also { if (inModal.not()) it.fillMaxSize() }
             .padding(
                 horizontal = 24.dp,
                 vertical = 16.dp
@@ -37,7 +37,7 @@ internal fun Layout(
             state = lazyListState,
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1f, fill = inModal.not())
         ) {
             content()
         }
@@ -45,7 +45,6 @@ internal fun Layout(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Preview(showBackground = true)
 @Suppress("MagicNumber")
 @Composable
