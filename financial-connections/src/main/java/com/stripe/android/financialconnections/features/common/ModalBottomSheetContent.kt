@@ -4,6 +4,8 @@ package com.stripe.android.financialconnections.features.common
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -13,12 +15,15 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.model.DataAccessNotice
@@ -31,6 +36,7 @@ import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
+import com.stripe.android.financialconnections.ui.theme.Brand50
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import com.stripe.android.uicore.image.StripeImage
@@ -92,7 +98,7 @@ internal fun LegalDetailsBottomSheetContent(
         legalDetails.disclaimer?.let { TextResource.Text(fromHtml(it)) }
     }
     val links = remember(legalDetails.body.links) {
-        legalDetails.body.links
+        legalDetails.body.links.map { TextResource.Text(fromHtml(it.title)) }
     }
     ModalBottomSheetContent(
         icon = legalDetails.icon,
@@ -104,8 +110,21 @@ internal fun LegalDetailsBottomSheetContent(
         disclaimer = learnMore,
         onConfirmModalClick = onConfirmModalClick
     ) {
-        links.forEach {
-            Text(text = it.text + "\n" + it.content)
+        links.forEachIndexed { index, link ->
+            Divider(color = v3Colors.border, modifier = Modifier.padding(bottom = 16.dp))
+            AnnotatedText(
+                modifier = Modifier.padding(bottom = 16.dp),
+                text = link,
+                defaultStyle = v3Typography.labelLargeEmphasized.copy(
+                    color = v3Colors.textBrand
+                ),
+                // remove annotation styles to avoid link underline (the default)
+                annotationStyles = emptyMap(),
+                onClickableTextClick = onClickableTextClick,
+            )
+            if (links.lastIndex == index) {
+                Divider(color = v3Colors.border)
+            }
         }
     }
 }
@@ -131,13 +150,21 @@ private fun ModalBottomSheetContent(
                 .padding(24.dp)
         ) {
             icon?.default?.let {
-                StripeImage(
-                    url = it,
-                    imageLoader = LocalImageLoader.current,
-                    contentDescription = null,
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .size(40.dp)
-                )
+                        .size(56.dp)
+                        .background(color = Brand50, shape = CircleShape)
+                ) {
+                    StripeImage(
+                        url = it,
+                        imageLoader = LocalImageLoader.current,
+                        contentDescription = "Web Icon",
+                        modifier = Modifier
+                            .size(20.dp),
+                        contentScale = ContentScale.Crop // Adjust the scaling if needed
+                    )
+                }
                 Spacer(modifier = Modifier.size(16.dp))
             }
             AnnotatedText(

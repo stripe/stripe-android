@@ -218,10 +218,11 @@ internal data class LegalDetailsBody(
 @Serializable
 @Parcelize
 internal data class ServerLink(
-    @SerialName("text")
+    @SerialName("title")
     @Serializable(with = MarkdownToHtmlSerializer::class)
-    val text: String,
+    val title: String,
     @SerialName("content")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
     val content: String? = null
 ) : Parcelable
 

@@ -148,11 +148,11 @@ internal class ConsentPreviewParameterProvider :
             body = LegalDetailsBody(
                 links = listOf(
                     ServerLink(
-                        text = "To provide our services",
+                        title = "To provide our services",
                         content = "To improve our services"
                     ),
                     ServerLink(
-                        text = "To manage fraud and loss risk of transactions",
+                        title = "To manage fraud and loss risk of transactions",
                         content = "To manage fraud and loss risk of transactions"
                     ),
                 )
