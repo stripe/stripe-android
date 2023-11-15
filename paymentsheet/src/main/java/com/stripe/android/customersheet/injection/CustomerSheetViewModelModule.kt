@@ -31,6 +31,8 @@ import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
+import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
+import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import dagger.Binds
 import dagger.Module
@@ -182,6 +184,11 @@ internal interface CustomerSheetViewModelModule {
 
         @Provides
         fun savedPaymentSelection(): PaymentSelection? = savedPaymentSelection
+
+        @Provides
+        fun providesEditPaymentMethodViewInteractorFactory(): ModifiableEditPaymentMethodViewInteractor.Factory {
+            return DefaultEditPaymentMethodViewInteractor.Factory
+        }
 
         private val savedPaymentSelection: PaymentSelection? = null
     }

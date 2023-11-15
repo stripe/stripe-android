@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import junit.framework.TestCase.fail
 import org.junit.Test
@@ -24,6 +25,7 @@ class CustomerSheetConfigurationTest {
             name = "Test"
         )
         val headerTextForSelectionScreen = "Test"
+        val preferredNetworks = listOf(CardBrand.AmericanExpress)
 
         val configuration = CustomerSheet.Configuration.builder()
             .googlePayEnabled(googlePayEnabled)
@@ -32,6 +34,7 @@ class CustomerSheetConfigurationTest {
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
             .defaultBillingDetails(defaultBillingDetails)
             .headerTextForSelectionScreen(headerTextForSelectionScreen)
+            .preferredNetworks(preferredNetworks)
             .build()
 
         assertThat(configuration.googlePayEnabled)
@@ -46,6 +49,7 @@ class CustomerSheetConfigurationTest {
             .isEqualTo(defaultBillingDetails)
         assertThat(configuration.headerTextForSelectionScreen)
             .isEqualTo(headerTextForSelectionScreen)
+        assertThat(configuration.preferredNetworks).isEqualTo(preferredNetworks)
     }
 
     @Test
@@ -77,6 +81,7 @@ class CustomerSheetConfigurationTest {
             "billingDetailsCollectionConfiguration",
             "defaultBillingDetails",
             "headerTextForSelectionScreen",
+            "preferredNetworks",
             "build"
         )
 
