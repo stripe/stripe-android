@@ -25,6 +25,7 @@ internal val Neutral200 = Color(0xffC0C8D2)
 internal val Neutral300 = Color(0xffA3ACBA)
 internal val Neutral500 = Color(0xff6A7383)
 internal val Neutral800 = Color(0xff30313D)
+internal val Neutral900 = Color(0xff21252C)
 
 internal val Attention500 = Color(0xffC84801)
 internal val Attention400 = Color(0xffED6704)
@@ -93,6 +94,7 @@ internal data class FinancialConnectionsV3Colors(
     val buttonSecondary: Color,
     val buttonSecondaryHover: Color,
     val buttonSecondaryPressed: Color,
+    val backgroundSurface: Color,
     val background: Color,
     val backgroundBrand: Color,
     val border: Color,

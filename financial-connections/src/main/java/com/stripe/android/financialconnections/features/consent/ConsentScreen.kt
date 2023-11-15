@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
@@ -43,9 +44,9 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
-import com.stripe.android.financialconnections.features.common.BulletItem
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
+import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
@@ -63,10 +64,10 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.Neutral900
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
@@ -182,6 +183,8 @@ private fun ConsentMainContent(
                         logos = payload.merchantLogos,
                     )
                     Spacer(modifier = Modifier.size(32.dp))
+                }
+                item {
                     AnnotatedText(
                         text = title,
                         onClickableTextClick = { onClickableTextClick(it) },
@@ -191,14 +194,12 @@ private fun ConsentMainContent(
                     )
                     Spacer(modifier = Modifier.size(32.dp))
                 }
-                bullets.forEach { bullet ->
-                    item {
-                        BulletItem(
-                            bullet,
-                            onClickableTextClick = onClickableTextClick
-                        )
-                        Spacer(modifier = Modifier.size(24.dp))
-                    }
+                items(bullets) { bullet ->
+                    ListItem(
+                        bullet = bullet,
+                        onClickableTextClick = onClickableTextClick
+                    )
+                    Spacer(modifier = Modifier.size(24.dp))
                 }
             },
             footer = {
@@ -226,9 +227,9 @@ private fun LoadedContent(
 ) {
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
-        sheetBackgroundColor = colors.backgroundSurface,
+        sheetBackgroundColor = v3Colors.backgroundSurface,
         sheetShape = RoundedCornerShape(8.dp),
-        scrimColor = colors.textSecondary.copy(alpha = 0.5f),
+        scrimColor = Neutral900.copy(alpha = 0.32f),
         sheetContent = {
             when (bottomSheetMode) {
                 ConsentState.BottomSheetContent.LEGAL -> LegalDetailsBottomSheetContent(

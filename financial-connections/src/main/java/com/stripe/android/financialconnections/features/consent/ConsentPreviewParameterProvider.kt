@@ -144,16 +144,16 @@ internal class ConsentPreviewParameterProvider :
             cta = "OK"
         ),
         legalDetailsNotice = LegalDetailsNotice(
-            title = "Stripe uses your account data as described in the Terms, including:",
+            title = "Terms and privacy policy",
+            subtitle = "Stripe only uses your data and credentials as described in the Terms, " +
+                "such as to improve its services, manage loss, and mitigate fraud.",
             body = LegalDetailsBody(
                 links = listOf(
                     ServerLink(
-                        title = "To provide our services",
-                        content = "To improve our services"
+                        title = "Terms",
                     ),
                     ServerLink(
-                        title = "To manage fraud and loss risk of transactions",
-                        content = "To manage fraud and loss risk of transactions"
+                        title = "Privacy Policy",
                     ),
                 )
             ),

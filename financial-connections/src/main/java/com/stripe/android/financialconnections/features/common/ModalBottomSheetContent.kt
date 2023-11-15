@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
@@ -72,7 +73,7 @@ internal fun DataAccessBottomSheetContent(
         content = {
             bullets.forEachIndexed { index, bullet ->
                 item {
-                    BulletItem(
+                    ListItem(
                         bullet = bullet,
                         onClickableTextClick = onClickableTextClick
                     )
@@ -236,75 +237,69 @@ private fun ModalBottomSheetFooter(
         }
     }
 
-
 @Composable
-internal fun BulletItem(
+internal fun ListItem(
     bullet: BulletUI,
-    onClickableTextClick: (String) -> Unit
+    onClickableTextClick: (String) -> Unit,
 ) {
     val firstText = bullet.title ?: bullet.content ?: TextResource.Text("")
     val secondText = remember(firstText) { bullet.content?.takeIf { bullet.title != null } }
-    val iconSize = 20.dp
     val titleStyle = if (secondText != null) v3Typography.bodyMediumEmphasized else v3Typography.bodyMedium
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            BulletIcon(
-                icon = bullet.imageResource,
-                modifier = Modifier.size(iconSize)
-            )
-            Spacer(modifier = Modifier.size(16.dp))
+    Row {
+        ListItemIcon(icon = bullet.imageResource)
+        Spacer(modifier = Modifier.size(16.dp))
+        Column {
             AnnotatedText(
                 text = firstText,
                 defaultStyle = titleStyle.copy(color = v3Colors.textDefault),
                 onClickableTextClick = onClickableTextClick
             )
-        }
-        secondText?.let {
-            Row {
-                Spacer(modifier = Modifier.size(16.dp + iconSize))
-                Spacer(modifier = Modifier.size(20.dp))
-                AnnotatedText(
-                    text = requireNotNull(bullet.content),
-                    defaultStyle = v3Typography.bodySmall.copy(color = v3Colors.textSubdued),
-                    onClickableTextClick = onClickableTextClick
-                )
+            secondText?.let {
+                Row {
+                    AnnotatedText(
+                        text = requireNotNull(bullet.content),
+                        defaultStyle = v3Typography.bodySmall.copy(color = v3Colors.textSubdued),
+                        onClickableTextClick = onClickableTextClick
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun BulletIcon(icon: ImageResource?, modifier: Modifier) {
-    if (icon == null) {
-        val color = v3Colors.iconDefault
-        Canvas(
-            modifier = modifier
-                .padding(6.dp),
-            onDraw = { drawCircle(color = color) }
+private fun ListItemIcon(icon: ImageResource?) {
+    val bulletColor = v3Colors.iconDefault
+    val iconSize = 20.dp
+    val modifier = Modifier
+        .size(iconSize)
+        .offset(y = 1.dp)
+    when (icon) {
+        // Render a bullet if no icon is provided
+        null -> Canvas(
+            modifier = modifier.padding((iconSize - 8.dp) / 2),
+            onDraw = { drawCircle(color = bulletColor) }
         )
-    } else {
-        when (icon) {
-            is ImageResource.Local -> Image(
-                modifier = modifier,
-                painter = painterResource(id = icon.resId),
-                contentDescription = null,
-            )
 
-            is ImageResource.Network -> StripeImage(
-                url = icon.url,
-                errorContent = {
-                    val color = v3Colors.iconDefault
-                    Canvas(
-                        modifier = modifier
-                            .padding(8.dp)
-                            .align(Alignment.Center),
-                        onDraw = { drawCircle(color = color) }
-                    )
-                },
-                imageLoader = LocalImageLoader.current,
-                contentDescription = null,
-                modifier = modifier
-            )
-        }
+        // Render the icon if it's a local resource
+        is ImageResource.Local -> Image(
+            modifier = modifier,
+            painter = painterResource(id = icon.resId),
+            contentDescription = null,
+        )
+
+        // Render the icon if it's a network resource, or fallback to a bullet if it fails to load
+        is ImageResource.Network -> StripeImage(
+            url = icon.url,
+            errorContent = {
+                Canvas(
+                    modifier = modifier.padding((iconSize - 8.dp) / 2),
+                    onDraw = { drawCircle(color = bulletColor) }
+                )
+            },
+            imageLoader = LocalImageLoader.current,
+            contentDescription = null,
+            modifier = modifier
+        )
     }
 }
