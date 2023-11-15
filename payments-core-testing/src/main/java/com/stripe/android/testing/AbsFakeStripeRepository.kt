@@ -25,6 +25,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
@@ -120,6 +121,13 @@ abstract class AbsFakeStripeRepository : StripeRepository {
 
     override suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
+        options: ApiRequest.Options
+    ): Result<PaymentMethod> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updatePaymentMethod(
+        paymentMethodUpdateParams: PaymentMethodUpdateParams,
         options: ApiRequest.Options
     ): Result<PaymentMethod> {
         TODO("Not yet implemented")
