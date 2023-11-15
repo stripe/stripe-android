@@ -35,7 +35,6 @@ import com.stripe.android.model.CvcTokenParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.PersonTokenParams
 import com.stripe.android.model.PiiTokenParams
 import com.stripe.android.model.PossibleBrands
@@ -863,25 +862,6 @@ class Stripe internal constructor(
         return runBlocking {
             stripeRepository.createPaymentMethod(
                 paymentMethodCreateParams,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId,
-                    idempotencyKey = idempotencyKey
-                )
-            ).getOrElse { throw StripeException.create(it) }
-        }
-    }
-
-    // TODO Remove again
-    fun updatePaymentMethodSynchronous(
-        paymentMethodUpdateParams: PaymentMethodUpdateParams,
-        idempotencyKey: String? = null,
-        stripeAccountId: String? = this.stripeAccountId,
-        publishableKey: String = this.publishableKey,
-    ): PaymentMethod {
-        return runBlocking {
-            stripeRepository.updatePaymentMethod(
-                paymentMethodUpdateParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,

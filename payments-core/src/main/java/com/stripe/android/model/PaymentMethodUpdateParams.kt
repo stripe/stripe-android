@@ -3,7 +3,6 @@ package com.stripe.android.model
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
-import kotlinx.parcelize.RawValue
 import java.util.Objects
 
 /**
@@ -11,42 +10,35 @@ import java.util.Objects
  *
  * See [Update a PaymentMethod](https://stripe.com/docs/api/payment_methods/update).
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 class PaymentMethodUpdateParams private constructor(
     internal val paymentMethodId: String,
     private val card: Card? = null,
-    private val usBankAccount: USBankAccount? = null,
-    private val link: Link? = null,
     private val billingDetails: PaymentMethod.BillingDetails? = null,
     private val metadata: Map<String, String>? = null,
-    private val productUsage: Set<String> = emptySet(),
-
-    /**
-     * If provided, will be used as the representation of this object when calling the Stripe API,
-     * instead of generating the map from its content.
-     *
-     * The map should be valid according to the
-     * [PaymentMethod creation API](https://stripe.com/docs/api/payment_methods/create)
-     * documentation, including a required `type` entry.
-     *
-     * The values of the map must be any of the types supported by [android.os.Parcel.writeValue].
-     */
-//    private val overrideParamMap: Map<String, @RawValue Any>? = null
+    internal val attribution: Set<String> = emptySet(),
 ) : StripeParamsModel, Parcelable {
 
-    internal val attribution: Set<String>
-        get() = productUsage
-
-    private val paymentMethodType: PaymentMethod.Type
+    private val type: PaymentMethod.Type
         get() = when {
             card != null -> PaymentMethod.Type.Card
-            usBankAccount != null -> PaymentMethod.Type.USBankAccount
-            link != null -> PaymentMethod.Type.Link
-            else -> error("Invalid state in PaymentMethodUpdateParams")
+            else -> error("Invalid internal state in PaymentMethodUpdateParams")
+        }
+
+    private val paymentMethod: StripeParamsModel
+        get() = card ?: error("Invalid internal state in PaymentMethodUpdateParams")
+
+    private val typeParams: Map<String, Any>
+        get() {
+            val params = paymentMethod.toParamMap().takeIf { it.isNotEmpty() }
+            return params?.let {
+                mapOf(type.code to it)
+            }.orEmpty()
         }
 
     override fun toParamMap(): Map<String, Any> {
-        val type = mapOf(PARAM_TYPE to paymentMethodType.code)
+        val type = mapOf(PARAM_TYPE to type.code)
 
         val billing = billingDetails?.let {
             mapOf(PARAM_BILLING_DETAILS to it.toParamMap())
@@ -59,19 +51,9 @@ class PaymentMethodUpdateParams private constructor(
         return type + typeParams + billing + metadataParams
     }
 
-    private val typeParams: Map<String, Any>
-        get() {
-            val type = card ?: usBankAccount ?: link
-            val params = type?.toParamMap()?.takeIf { it.isNotEmpty() }
-            return params?.let {
-                mapOf(paymentMethodType.code to it)
-            }.orEmpty()
-        }
-
-    @Parcelize
-    data class Card
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    constructor(
+    @Parcelize
+    data class Card(
         internal val expiryMonth: Int? = null,
         internal val expiryYear: Int? = null,
         internal val networks: Networks? = null,
@@ -128,59 +110,23 @@ class PaymentMethodUpdateParams private constructor(
         }
     }
 
-    @Parcelize
-    class USBankAccount internal constructor(
-        internal val accountHolderType: PaymentMethod.USBankAccount.USBankAccountHolderType? = null
-    ) : StripeParamsModel, Parcelable {
-
-        override fun toParamMap(): Map<String, Any> {
-            return if (accountHolderType != null) {
-                mapOf(
-                    PARAM_ACCOUNT_HOLDER_TYPE to accountHolderType.value
-                )
-            } else {
-                emptyMap()
-            }
-        }
-
-        private companion object {
-            private const val PARAM_ACCOUNT_HOLDER_TYPE = "account_holder_type"
-        }
-    }
-
-    // TODO
-    @Parcelize
-    data class Link(
-        internal var paymentDetailsId: String,
-        internal var consumerSessionClientSecret: String,
-        internal var extraParams: Map<String, @RawValue Any>? = null
-    ) : StripeParamsModel, Parcelable {
-        override fun toParamMap(): Map<String, Any> {
-            return mapOf(
-                PARAM_PAYMENT_DETAILS_ID to paymentDetailsId,
-                PARAM_CREDENTIALS to mapOf(
-                    PARAM_CONSUMER_SESSION_CLIENT_SECRET to consumerSessionClientSecret
-                )
-            ).plus(
-                extraParams ?: emptyMap()
-            )
-        }
-
-        private companion object {
-            private const val PARAM_PAYMENT_DETAILS_ID = "payment_details_id"
-            private const val PARAM_CREDENTIALS = "credentials"
-            private const val PARAM_CONSUMER_SESSION_CLIENT_SECRET =
-                "consumer_session_client_secret"
-        }
-    }
-
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         private const val PARAM_TYPE = "type"
         private const val PARAM_BILLING_DETAILS = "billing_details"
         private const val PARAM_METADATA = "metadata"
 
         /**
-         * TODO
+         * Update a [PaymentMethod.Type.Card] payment method with the provided data.
+         *
+         * @param paymentMethodId The ID of the [PaymentMethod]
+         * @param expiryMonth The new expiry month
+         * @param expiryYear The new expiry year
+         * @param networks The new [Card.Networks] information
+         * @param billingDetails Billing information to attach to the [PaymentMethod]
+         * @param metadata Metadata to attach to the [PaymentMethod]
+         *
+         * @return Params for updating a [PaymentMethod.Type.Card] payment method.
          */
         @JvmStatic
         @JvmOverloads
@@ -199,43 +145,6 @@ class PaymentMethodUpdateParams private constructor(
                     expiryYear = expiryYear,
                     networks = networks,
                 ),
-                billingDetails = billingDetails,
-                metadata = metadata,
-            )
-        }
-
-        /**
-         * TODO
-         */
-        @JvmStatic
-        @JvmOverloads
-        fun createUSBankAccount(
-            paymentMethodId: String,
-            accountHolderType: PaymentMethod.USBankAccount.USBankAccountHolderType? = null,
-            billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null,
-        ): PaymentMethodUpdateParams {
-            return PaymentMethodUpdateParams(
-                paymentMethodId = paymentMethodId,
-                usBankAccount = USBankAccount(accountHolderType),
-                billingDetails = billingDetails,
-                metadata = metadata,
-            )
-        }
-
-        /**
-         * TODO
-         */
-        @JvmStatic
-        @JvmOverloads
-        fun createLink(
-            paymentMethodId: String,
-            billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null,
-        ): PaymentMethodUpdateParams {
-            return PaymentMethodUpdateParams(
-                paymentMethodId = paymentMethodId,
-                link = Link("", "", null),
                 billingDetails = billingDetails,
                 metadata = metadata,
             )
