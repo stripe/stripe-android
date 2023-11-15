@@ -4,6 +4,7 @@
 
 ### PaymentSheet
 * [FIXED][7584](https://github.com/stripe/stripe-android/pull/7584) Fixed an issue where PaymentSheet would render with a lightened surface color in dark mode.
+* [FIXED][7635](https://github.com/stripe/stripe-android/pull/7635) Fixed an issue where PaymentSheet wouldn't accept valid Mexican phone numbers.
 
 ## 20.34.4 - 2023-11-02
 
