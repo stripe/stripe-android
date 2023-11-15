@@ -395,7 +395,7 @@ internal sealed class PhoneNumberFormatter {
             "PM" to Metadata(prefix = "+508", regionCode = "PM", pattern = "## ## ##"),
             "HT" to Metadata(prefix = "+509", regionCode = "HT", pattern = "## ## ####"),
             "PE" to Metadata(prefix = "+51", regionCode = "PE", pattern = "### ### ###"),
-            "MX" to Metadata(prefix = "+52", regionCode = "MX", pattern = "## #### ####"),
+            "MX" to Metadata(prefix = "+52", regionCode = "MX", pattern = "### ### ####"),
             "CY" to Metadata(prefix = "+537", regionCode = "CY", pattern = ""),
             "AR" to Metadata(prefix = "+54", regionCode = "AR", pattern = "## ##-####-####"),
             "BR" to Metadata(prefix = "+55", regionCode = "BR", pattern = "## #####-####"),
