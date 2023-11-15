@@ -35,7 +35,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerAdapterTest {
 
     private val application = ApplicationProvider.getApplicationContext<Application>()

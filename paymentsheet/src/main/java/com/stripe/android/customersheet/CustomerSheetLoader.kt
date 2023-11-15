@@ -19,12 +19,10 @@ import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Named
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal interface CustomerSheetLoader {
     suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full>
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal class DefaultCustomerSheetLoader @Inject constructor(
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,

@@ -19,12 +19,9 @@ import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
 /**
- * 🏗 This feature is in private beta and could change 🏗
- *
  * [CustomerSheet] A class that presents a bottom sheet to manage a customer through the
  * [CustomerAdapter].
  */
-@ExperimentalCustomerSheetApi
 class CustomerSheet @Inject internal constructor(
     private val application: Application,
     lifecycleOwner: LifecycleOwner,
@@ -119,7 +116,6 @@ class CustomerSheet @Inject internal constructor(
     /**
      * Configuration for [CustomerSheet]
      */
-    @ExperimentalCustomerSheetApi
     class Configuration internal constructor(
         /**
          * Describes the appearance of [CustomerSheet].
@@ -180,7 +176,6 @@ class CustomerSheet @Inject internal constructor(
                 .merchantDisplayName(merchantDisplayName)
         }
 
-        @ExperimentalCustomerSheetApi
         class Builder internal constructor() {
             private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
             private var googlePayEnabled: Boolean = false
@@ -236,7 +231,6 @@ class CustomerSheet @Inject internal constructor(
         }
     }
 
-    @ExperimentalCustomerSheetApi
     companion object {
 
         /**

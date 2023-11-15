@@ -6,13 +6,11 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.view.ActivityStarter
 import com.stripe.android.model.PaymentMethod as StripePaymentMethod
 
-@ExperimentalCustomerSheetApi
 sealed class CustomerSheetResult {
     /**
      * The customer selected a payment method
      * @param selection the [PaymentOptionSelection] the customer selected from the [CustomerSheet]
      */
-    @ExperimentalCustomerSheetApi
     class Selected internal constructor(
         val selection: PaymentOptionSelection?
     ) : CustomerSheetResult()
@@ -20,7 +18,6 @@ sealed class CustomerSheetResult {
     /**
      * The customer canceled the sheet
      */
-    @ExperimentalCustomerSheetApi
     class Canceled internal constructor(
         val selection: PaymentOptionSelection?
     ) : CustomerSheetResult()
@@ -28,7 +25,6 @@ sealed class CustomerSheetResult {
     /**
      * An error occurred when presenting the sheet
      */
-    @ExperimentalCustomerSheetApi
     class Failed internal constructor(
         val exception: Throwable
     ) : CustomerSheetResult()
@@ -46,7 +42,6 @@ sealed class CustomerSheetResult {
  * The customer's payment option selection
  * @param paymentOption, contains the drawable and label to display
  */
-@ExperimentalCustomerSheetApi
 sealed class PaymentOptionSelection private constructor(
     open val paymentOption: PaymentOption
 ) {
@@ -54,7 +49,6 @@ sealed class PaymentOptionSelection private constructor(
     /**
      * A Stripe payment method was selected.
      */
-    @ExperimentalCustomerSheetApi
     class PaymentMethod internal constructor(
         val paymentMethod: StripePaymentMethod,
         override val paymentOption: PaymentOption,
@@ -63,7 +57,6 @@ sealed class PaymentOptionSelection private constructor(
     /**
      * Google Pay is the selected payment option.
      */
-    @ExperimentalCustomerSheetApi
     class GooglePay internal constructor(
         override val paymentOption: PaymentOption,
     ) : PaymentOptionSelection(paymentOption)

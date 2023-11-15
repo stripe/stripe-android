@@ -5,7 +5,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal sealed interface CustomerSheetState {
     object Loading : CustomerSheetState
 

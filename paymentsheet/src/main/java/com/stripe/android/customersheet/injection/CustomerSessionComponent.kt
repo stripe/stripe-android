@@ -5,13 +5,11 @@ import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSessionViewModel
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResultCallback
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSessionScope
 @Component(
     modules = [

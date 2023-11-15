@@ -27,14 +27,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.utils.rememberDrawablePainter
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSheetExampleActivity : AppCompatActivity() {
     private val viewModel by viewModels<CustomerSheetExampleViewModel>()
 
@@ -113,7 +111,6 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
     }
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 @Composable
 private fun CustomerPaymentMethods(
     state: CustomerSheetExampleViewState.Data,

@@ -11,7 +11,6 @@ import com.stripe.android.customersheet.injection.DaggerCustomerSessionComponent
  * new dependencies, then the customer session component is recreated. The lifecycle of the
  * customer session lives longer than the [CustomerSheetActivity].
  */
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSessionViewModel(
     application: Application,
 ) : AndroidViewModel(application) {

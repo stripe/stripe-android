@@ -44,7 +44,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.edit
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
@@ -54,7 +53,6 @@ import com.stripe.android.paymentsheet.example.utils.rememberDrawablePainter
 import com.stripe.android.paymentsheet.rememberPaymentSheet
 import java.util.Locale
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetPlaygroundActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<CustomerSheetPlaygroundViewModel> {
@@ -160,7 +158,6 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     @Composable
     private fun CustomerPaymentMethods(
         state: CustomerSheetPlaygroundViewState.Data,

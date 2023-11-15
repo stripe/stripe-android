@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### CustomerSheet
+* [Added] CustomerSheet(https://stripe.com/docs/elements/customer-sheet?platform=android) API, a prebuilt UI component that lets your customers manage their saved payment methods.
+
 ### PaymentSheet
 * [FIXED][7584](https://github.com/stripe/stripe-android/pull/7584) Fixed an issue where PaymentSheet would render with a lightened surface color in dark mode.
 

@@ -12,7 +12,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSessionViewModelTest {
 
     private val application = ApplicationProvider.getApplicationContext<Application>()
