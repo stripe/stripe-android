@@ -211,6 +211,7 @@ private fun ModalBottomSheetFooter(
         connectedAccountNotice?.let {
             Spacer(modifier = Modifier.size(16.dp))
             AnnotatedText(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
                 text = it,
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = v3Typography.labelSmall.copy(
@@ -221,6 +222,7 @@ private fun ModalBottomSheetFooter(
         disclaimer?.let {
             Spacer(modifier = Modifier.size(16.dp))
             AnnotatedText(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
                 text = it,
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = v3Typography.labelSmall.copy(
