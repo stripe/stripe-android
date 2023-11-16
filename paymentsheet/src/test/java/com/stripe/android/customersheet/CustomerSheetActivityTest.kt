@@ -260,6 +260,7 @@ internal class CustomerSheetActivityTest {
             isGooglePayEnabled = isGooglePayEnabled,
             primaryButtonVisible = primaryButtonVisible,
             primaryButtonLabel = primaryButtonLabel,
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         )
     }
 
@@ -292,6 +293,7 @@ internal class CustomerSheetActivityTest {
             customPrimaryButtonUiState = null,
             bankAccountResult = null,
             draftPaymentSelection = null,
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         )
     }
 
