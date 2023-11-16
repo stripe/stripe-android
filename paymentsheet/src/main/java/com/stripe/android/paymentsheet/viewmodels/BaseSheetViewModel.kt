@@ -9,9 +9,11 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -462,15 +464,57 @@ internal abstract class BaseSheetViewModel(
                         delay(TEMP_DELAY)
                         true
                     },
-                    updateExecutor = { _, _ ->
-                        // TODO(samer-stripe): Replace with update operation
-                        delay(TEMP_DELAY)
-
-                        Result.success(paymentMethod)
-                    },
+                    updateExecutor = { method, brand ->
+                        modifyCardPaymentMethod(method, brand)
+                    }
                 )
             )
         )
+    }
+
+    private suspend fun modifyCardPaymentMethod(
+        paymentMethod: PaymentMethod,
+        brand: CardBrand
+    ): Result<PaymentMethod> {
+        val customerConfig = config.customer
+        val paymentMethodId = paymentMethod.id
+
+        return if (customerConfig != null && paymentMethodId != null) {
+            customerRepository.updatePaymentMethod(
+                customerConfig = customerConfig,
+                params = PaymentMethodUpdateParams.createCard(
+                    paymentMethodId = paymentMethodId,
+                    networks = PaymentMethodUpdateParams.Card.Networks(
+                        preferred = brand.code
+                    )
+                )
+            ).onSuccess { updatedMethod ->
+                savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods
+                    .value
+                    ?.let { savedPaymentMethods ->
+                        savedPaymentMethods.map { savedMethod ->
+                            val savedId = savedMethod.id
+                            val updatedId = updatedMethod.id
+
+                            if (updatedId != null && savedId != null && updatedId == savedId) {
+                                updatedMethod
+                            } else {
+                                paymentMethod
+                            }
+                        }
+                    }
+            }.onFailure {
+                // TODO(samer-stripe): Localize error message with proper strings.
+                onError("Failed to update payment method")
+            }
+        } else {
+            // TODO(samer-stripe): Localize error message with proper strings.
+            onError("Failed to update payment method")
+
+            Result.failure(
+                IllegalStateException("Customer configuration & existing payment method must be available!")
+            )
+        }
     }
 
     private fun mapToHeaderTextResource(

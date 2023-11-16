@@ -123,8 +123,6 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
 
                 updateResult.onSuccess { method ->
                     paymentMethod.emit(method)
-                }.onFailure {
-                    // TODO(samer-stripe): Display toast on update method failure?
                 }
 
                 status.emit(EditPaymentMethodViewState.Status.Idle)
