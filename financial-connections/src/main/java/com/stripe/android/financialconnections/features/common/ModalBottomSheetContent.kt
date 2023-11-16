@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
@@ -71,15 +72,13 @@ internal fun DataAccessBottomSheetContent(
         disclaimer = disclaimer,
         onConfirmModalClick = onConfirmModalClick,
         content = {
-            bullets.forEachIndexed { index, bullet ->
-                item {
-                    ListItem(
-                        bullet = bullet,
-                        onClickableTextClick = onClickableTextClick
-                    )
-                    if (index < bullets.size - 1) {
-                        Spacer(modifier = Modifier.size(16.dp))
-                    }
+            itemsIndexed(bullets) { index, bullet ->
+                ListItem(
+                    bullet = bullet,
+                    onClickableTextClick = onClickableTextClick
+                )
+                if (index < bullets.lastIndex) {
+                    Spacer(modifier = Modifier.size(16.dp))
                 }
             }
         }
@@ -111,22 +110,20 @@ internal fun LegalDetailsBottomSheetContent(
         disclaimer = learnMore,
         onConfirmModalClick = onConfirmModalClick
     ) {
-        links.forEachIndexed { index, link ->
-            item {
-                Divider(color = v3Colors.border, modifier = Modifier.padding(bottom = 16.dp))
-                AnnotatedText(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = link,
-                    defaultStyle = v3Typography.labelLargeEmphasized.copy(
-                        color = v3Colors.textBrand
-                    ),
-                    // remove annotation styles to avoid link underline (the default)
-                    annotationStyles = emptyMap(),
-                    onClickableTextClick = onClickableTextClick,
-                )
-                if (links.lastIndex == index) {
-                    Divider(color = v3Colors.border)
-                }
+        itemsIndexed(links) { index, link ->
+            Divider(color = v3Colors.border, modifier = Modifier.padding(bottom = 16.dp))
+            AnnotatedText(
+                modifier = Modifier.padding(bottom = 16.dp),
+                text = link,
+                defaultStyle = v3Typography.labelLargeEmphasized.copy(
+                    color = v3Colors.textBrand
+                ),
+                // remove annotation styles to avoid link underline (the default)
+                annotationStyles = emptyMap(),
+                onClickableTextClick = onClickableTextClick,
+            )
+            if (links.lastIndex == index) {
+                Divider(color = v3Colors.border)
             }
         }
     }
