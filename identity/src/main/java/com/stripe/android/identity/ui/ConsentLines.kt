@@ -10,6 +10,7 @@ import androidx.compose.material.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -24,7 +25,6 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConse
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentBottomSheetContent
 import com.stripe.android.identity.networking.models.getContentDescriptionId
 import com.stripe.android.identity.networking.models.getResourceId
-import com.stripe.android.identity.ui.theme.htmlLineColor
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -51,12 +51,12 @@ internal fun ConsentLines(
             )
             BottomSheetHTML(
                 html = line.content,
-                color = htmlLineColor,
+                color = colorResource(id = R.color.stripe_html_line),
                 style = LocalTextStyle.current.merge(fontSize = 16.sp),
                 bottomSheets = bottomSheets,
                 urlSpanStyle = SpanStyle(
                     textDecoration = TextDecoration.Underline,
-                    color = htmlLineColor
+                    color = colorResource(id = R.color.stripe_html_line)
                 )
             )
         }
