@@ -3,11 +3,13 @@ package com.stripe.android.identity.ui
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -21,6 +23,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.identity.R
@@ -72,11 +75,11 @@ internal fun ConsentWelcomeHeader(
                 )
             }
             Image(
-                painter = painterResource(id = R.drawable.stripe_plus_icon),
+                painter = painterResource(id = R.drawable.stripe_ellipsis_icon),
                 modifier = Modifier
                     .width(16.dp)
                     .height(16.dp),
-                contentDescription = stringResource(id = R.string.stripe_description_plus)
+                contentDescription = stringResource(id = R.string.stripe_description_ellipsis)
             )
 
             Image(
@@ -105,4 +108,20 @@ internal fun ConsentWelcomeHeader(
         textAlign = TextAlign.Center
 
     )
+}
+
+@Preview
+@Composable
+@ExperimentalMaterialApi
+internal fun ConsentWelcomeHeaderPreview() {
+    IdentityPreview {
+        Column {
+            ConsentWelcomeHeader(
+                modifier = Modifier,
+                merchantLogoUri = Uri.EMPTY,
+                title = "TEST TITLE",
+                showLogos = true
+            )
+        }
+    }
 }

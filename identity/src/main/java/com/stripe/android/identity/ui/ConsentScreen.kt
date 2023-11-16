@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,6 +39,7 @@ import com.stripe.android.identity.networking.models.VerificationPageIconType
 import com.stripe.android.identity.networking.models.VerificationPageStaticConsentLineContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentBottomSheetContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
+import com.stripe.android.identity.ui.theme.htmlLineColor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.text.Html
 import kotlinx.coroutines.launch
@@ -168,10 +168,10 @@ private fun SuccessUI(
                 .semantics {
                     testTag = PRIVACY_POLICY_TAG
                 },
-            color = MaterialTheme.colors.onBackground,
+            color = htmlLineColor,
             urlSpanStyle = SpanStyle(
                 textDecoration = TextDecoration.Underline,
-                color = MaterialTheme.colors.secondary
+                color = htmlLineColor
             )
         )
 

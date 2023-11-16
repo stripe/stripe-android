@@ -46,12 +46,12 @@ class DocWarmupScreenTest {
         }
         with(composeTestRule) {
             onNodeWithTag(DOC_FRONT_ACCEPTED_IDS_TAG).assertExists()
-            onNodeWithTag(DOC_FRONT_ACCEPTED_IDS_TAG).onChildAt(1)
-                .assertTextEquals("• " + context.getString(R.string.stripe_passport))
-            onNodeWithTag(DOC_FRONT_ACCEPTED_IDS_TAG).onChildAt(2)
-                .assertTextEquals("• " + context.getString(R.string.stripe_driver_license))
-            onNodeWithTag(DOC_FRONT_ACCEPTED_IDS_TAG).onChildAt(3)
-                .assertTextEquals("• " + context.getString(R.string.stripe_government_id))
+            onNodeWithTag(DOC_FRONT_ACCEPTED_IDS_TAG).assertTextEquals(
+                "${context.getString(R.string.stripe_accepted_forms_of_id)} " +
+                    "${context.getString(R.string.stripe_passport)}, " +
+                    "${context.getString(R.string.stripe_driver_license)}, " +
+                    "${context.getString(R.string.stripe_government_id)}."
+            )
             onNodeWithTag(DOC_FRONT_CONTINUE_BUTTON_TAG).onChildAt(0).performClick()
             verify(onContinueClickMock).invoke()
         }
