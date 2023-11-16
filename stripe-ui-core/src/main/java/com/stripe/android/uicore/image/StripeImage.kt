@@ -27,7 +27,6 @@ import com.stripe.android.uicore.image.StripeImageState.Loading
 import com.stripe.android.uicore.image.StripeImageState.Success
 import kotlinx.coroutines.delay
 
-
 /**
  * A composable that executes an image request asynchronously using the
  * provided [StripeImageLoader] and renders the result.
