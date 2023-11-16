@@ -27,6 +27,7 @@ import com.stripe.android.uicore.image.StripeImageState.Loading
 import com.stripe.android.uicore.image.StripeImageState.Success
 import kotlinx.coroutines.delay
 
+
 /**
  * A composable that executes an image request asynchronously using the
  * provided [StripeImageLoader] and renders the result.
@@ -84,7 +85,7 @@ fun StripeImage(
             is Success -> {
                 var visible by remember { mutableStateOf(debugMode) }
                 LaunchedEffect(Unit) {
-                    delay(300)
+                    delay(FADE_IN_TIME_MS)
                     visible = true
                 }
                 AnimatedVisibility(
@@ -134,3 +135,5 @@ private sealed class StripeImageState {
     data class Success(val painter: Painter) : StripeImageState()
     object Error : StripeImageState()
 }
+
+private const val FADE_IN_TIME_MS = 300L
