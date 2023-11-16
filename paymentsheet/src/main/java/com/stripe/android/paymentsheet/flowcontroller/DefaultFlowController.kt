@@ -29,11 +29,11 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.payments.paymentlauncher.toInternalPaymentResultCallback
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.PaymentOptionResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -53,6 +54,7 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
+import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.utils.AnimationConstants
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -71,6 +73,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
+    private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     // Properties provided through injection
     private val context: Context,
@@ -124,7 +127,7 @@ internal class DefaultFlowController @Inject internal constructor(
     init {
         val paymentLauncherActivityResultLauncher = activityResultRegistryOwner.register(
             PaymentLauncherContract(),
-            toInternalPaymentResultCallback(::onPaymentResult)
+            ::onInternalPaymentResult
         )
 
         paymentOptionActivityLauncher = activityResultRegistryOwner.register(
@@ -504,6 +507,40 @@ internal class DefaultFlowController @Inject internal constructor(
                 paymentOptionCallback.onPaymentOption(null)
             }
         }
+    }
+
+    internal fun onInternalPaymentResult(internalPaymentResult: InternalPaymentResult) {
+        val paymentResult = when (internalPaymentResult) {
+            is InternalPaymentResult.Completed -> {
+                val stripeIntent = internalPaymentResult.intent
+                val currentSelection = viewModel.paymentSelection
+                val currentInitializationMode = initializationMode
+
+                /*
+                 * Sets current selection as default payment method in future payment sheet usage. New payment
+                 * methods are only saved if the payment sheet is in setup mode, is in payment intent with setup
+                 * for usage, or the customer has requested the payment method be saved.
+                 */
+                when (currentSelection) {
+                    is PaymentSelection.New -> stripeIntent.paymentMethod.takeIf {
+                        currentInitializationMode != null && currentSelection.canSave(
+                            initializationMode = currentInitializationMode
+                        )
+                    }?.let { method ->
+                        PaymentSelection.Saved(method)
+                    }
+                    else -> currentSelection
+                }?.let {
+                    prefsRepositoryFactory(viewModel.state?.config?.customer).savePaymentSelection(it)
+                }
+
+                PaymentResult.Completed
+            }
+            is InternalPaymentResult.Failed -> PaymentResult.Failed(internalPaymentResult.throwable)
+            is InternalPaymentResult.Canceled -> PaymentResult.Canceled
+        }
+
+        onPaymentResult(paymentResult)
     }
 
     internal fun onPaymentResult(paymentResult: PaymentResult) {
