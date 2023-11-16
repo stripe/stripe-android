@@ -927,13 +927,14 @@ data class AccountParams internal constructor(
         private const val PARAM_TOS_SHOWN_AND_ACCEPTED = "tos_shown_and_accepted"
 
         /**
-         * Create an [AccountParams] instance with information about the person represented by the account.
+         * Create an [AccountParams] instance with information about the person and their company represented by the
+         * account.
          *
-         * @param tosShownAndAccepted Whether the user described by the data in the token has been
-         * shown the
+         * @param tosShownAndAccepted Whether the user described by the data in the token has been shown the
          * [Stripe Connected Account Agreement](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-tos_shown_and_accepted).
          * When creating an account token to create a new Connect account, this value must be `true`.
          * @param individual Information about the person represented by the account.
+         * @param company Information about the company or business.
          *
          * @return [AccountParams]
          */
