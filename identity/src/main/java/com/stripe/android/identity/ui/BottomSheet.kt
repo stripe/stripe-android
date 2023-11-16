@@ -152,9 +152,10 @@ private fun BottomSheetLine(line: VerificationPageStaticContentBottomSheetLineCo
 }
 
 private fun String.tryParseUl(): List<String>? {
+    val trimmed = this.trim()
     // Detect if string is an unordered HTML list
-    val ulPattern = Pattern.compile("<ul>.*</ul>", Pattern.DOTALL)
-    val ulMatcher = ulPattern.matcher(this)
+    val ulPattern = Pattern.compile("^<ul>.*</ul>$", Pattern.DOTALL)
+    val ulMatcher = ulPattern.matcher(trimmed)
     if (!ulMatcher.find()) {
         return null
     }
@@ -162,7 +163,7 @@ private fun String.tryParseUl(): List<String>? {
     // Extract list items
     val items: MutableList<String> = mutableListOf()
     val liPattern = Pattern.compile("<li>(.*?)</li>", Pattern.DOTALL)
-    val liMatcher = liPattern.matcher(this)
+    val liMatcher = liPattern.matcher(trimmed)
 
     while (liMatcher.find()) {
         items.add(requireNotNull(liMatcher.group(1)))
