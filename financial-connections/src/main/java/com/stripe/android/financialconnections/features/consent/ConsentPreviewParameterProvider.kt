@@ -123,6 +123,7 @@ internal class ConsentPreviewParameterProvider :
             " We never share your login details with them.",
         cta = "Agree",
         dataAccessNotice = DataAccessNotice(
+            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
             title = "Goldilocks uses Stripe to link your accounts",
             subtitle = "Goldilocks will use your account and routing number, balances and transactions:",
             body = DataAccessNoticeBody(
@@ -144,6 +145,7 @@ internal class ConsentPreviewParameterProvider :
             cta = "OK"
         ),
         legalDetailsNotice = LegalDetailsNotice(
+            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
             title = "Terms and privacy policy",
             subtitle = "Stripe only uses your data and credentials as described in the Terms, " +
                 "such as to improve its services, manage loss, and mitigate fraud.",

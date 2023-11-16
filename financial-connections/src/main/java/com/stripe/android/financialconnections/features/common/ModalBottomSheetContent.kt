@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
@@ -157,6 +158,7 @@ private fun ModalBottomSheetContent(
                         StripeImage(
                             url = it,
                             imageLoader = LocalImageLoader.current,
+                            debugPainter = painterResource(id = R.drawable.stripe_logo),
                             contentDescription = "Web Icon",
                             modifier = Modifier
                                 .size(20.dp),
@@ -290,6 +292,7 @@ private fun ListItemIcon(icon: ImageResource?) {
         // Render the icon if it's a network resource, or fallback to a bullet if it fails to load
         is ImageResource.Network -> StripeImage(
             url = icon.url,
+            debugPainter = painterResource(id = R.drawable.stripe_ic_check_circle),
             errorContent = {
                 Canvas(
                     modifier = modifier.padding((iconSize - 8.dp) / 2),
