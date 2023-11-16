@@ -254,13 +254,11 @@ internal fun ListItem(
                 onClickableTextClick = onClickableTextClick
             )
             secondText?.let {
-                Row {
-                    AnnotatedText(
-                        text = requireNotNull(bullet.content),
-                        defaultStyle = v3Typography.bodySmall.copy(color = v3Colors.textSubdued),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                }
+                AnnotatedText(
+                    text = requireNotNull(bullet.content),
+                    defaultStyle = v3Typography.bodySmall.copy(color = v3Colors.textSubdued),
+                    onClickableTextClick = onClickableTextClick
+                )
             }
         }
     }
