@@ -6,6 +6,7 @@ import androidx.annotation.DrawableRes
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
@@ -107,10 +108,10 @@ internal sealed class PaymentSelection : Parcelable {
         }
     }
 
-    enum class CustomerRequestedSave {
-        RequestReuse,
-        RequestNoReuse,
-        NoRequest
+    enum class CustomerRequestedSave(val setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?) {
+        RequestReuse(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession),
+        RequestNoReuse(ConfirmPaymentIntentParams.SetupFutureUsage.Blank),
+        NoRequest(null)
     }
 
     sealed class New : PaymentSelection() {
@@ -132,7 +133,7 @@ internal sealed class PaymentSelection : Parcelable {
         }
 
         @Parcelize
-        data class Card constructor(
+        data class Card(
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             val brand: CardBrand,
             override val customerRequestedSave: CustomerRequestedSave,
@@ -204,7 +205,7 @@ internal sealed class PaymentSelection : Parcelable {
         }
 
         @Parcelize
-        data class GenericPaymentMethod constructor(
+        data class GenericPaymentMethod(
             val labelResource: String,
             @DrawableRes val iconResource: Int,
             val lightThemeIconUrl: String?,
