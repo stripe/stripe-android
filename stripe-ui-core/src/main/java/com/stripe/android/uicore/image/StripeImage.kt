@@ -123,5 +123,3 @@ private sealed class StripeImageState {
     data class Success(val painter: Painter) : StripeImageState()
     object Error : StripeImageState()
 }
-
-private const val FADE_IN_TIME_MS = 300L
