@@ -11,7 +11,6 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
 ): IntentConfirmationInterceptor.NextStep {
     return when (paymentSelection) {
         is PaymentSelection.New -> {
-            // TODO: We might still be missing something here.
             intercept(
                 initializationMode = initializationMode,
                 paymentMethodOptionsParams = paymentSelection.paymentMethodOptionsParams,
