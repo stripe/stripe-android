@@ -132,7 +132,7 @@ internal sealed class PaymentSelection : Parcelable {
         }
 
         @Parcelize
-        data class Card(
+        data class Card constructor(
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             val brand: CardBrand,
             override val customerRequestedSave: CustomerRequestedSave,
@@ -204,7 +204,7 @@ internal sealed class PaymentSelection : Parcelable {
         }
 
         @Parcelize
-        data class GenericPaymentMethod(
+        data class GenericPaymentMethod constructor(
             val labelResource: String,
             @DrawableRes val iconResource: Int,
             val lightThemeIconUrl: String?,

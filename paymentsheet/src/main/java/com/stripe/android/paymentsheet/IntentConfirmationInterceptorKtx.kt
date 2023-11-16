@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 
@@ -12,18 +11,13 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
 ): IntentConfirmationInterceptor.NextStep {
     return when (paymentSelection) {
         is PaymentSelection.New -> {
-            val setupFutureUsage = when (paymentSelection.customerRequestedSave) {
-                CustomerRequestedSave.RequestReuse -> SetupFutureUsage.OffSession
-                CustomerRequestedSave.RequestNoReuse -> SetupFutureUsage.Blank
-                CustomerRequestedSave.NoRequest -> null
-            }
-
+            // TODO: We might still be missing something here.
             intercept(
                 initializationMode = initializationMode,
                 paymentMethodOptionsParams = paymentSelection.paymentMethodOptionsParams,
                 paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
                 shippingValues = shippingValues,
-                setupForFutureUsage = setupFutureUsage,
+                customerRequestedSave = paymentSelection.customerRequestedSave == CustomerRequestedSave.RequestReuse,
             )
         }
         is PaymentSelection.Saved -> {
@@ -31,7 +25,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
                 initializationMode = initializationMode,
                 paymentMethod = paymentSelection.paymentMethod,
                 shippingValues = shippingValues,
-                setupForFutureUsage = null,
+                customerRequestedSave = false,
             )
         }
         else -> {

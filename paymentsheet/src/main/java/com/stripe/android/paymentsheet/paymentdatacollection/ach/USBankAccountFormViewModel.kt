@@ -14,8 +14,10 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -468,6 +470,27 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         bankName: String,
         linkAccountId: String,
     ): PaymentSelection.New.USBankAccount {
+        val customerRequestedSave = if (args.formArgs.showCheckbox) {
+            if (saveForFutureUse.value) {
+                PaymentSelection.CustomerRequestedSave.RequestReuse
+            } else {
+                PaymentSelection.CustomerRequestedSave.RequestNoReuse
+            }
+        } else {
+            PaymentSelection.CustomerRequestedSave.NoRequest
+        }
+        val setupFutureUsage = when (customerRequestedSave) {
+            PaymentSelection.CustomerRequestedSave.RequestReuse -> {
+                ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            }
+            PaymentSelection.CustomerRequestedSave.RequestNoReuse -> {
+                ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+            }
+            PaymentSelection.CustomerRequestedSave.NoRequest -> {
+                null
+            }
+        }
+
         return PaymentSelection.New.USBankAccount(
             labelResource = application.getString(
                 R.string.stripe_paymentsheet_payment_method_item_card_number,
@@ -487,16 +510,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     address = address.value,
                 )
             ),
-            paymentMethodOptionsParams = null,
-            customerRequestedSave = if (args.formArgs.showCheckbox) {
-                if (saveForFutureUse.value) {
-                    PaymentSelection.CustomerRequestedSave.RequestReuse
-                } else {
-                    PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                }
-            } else {
-                PaymentSelection.CustomerRequestedSave.NoRequest
-            },
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.USBankAccount(setupFutureUsage = setupFutureUsage),
+            customerRequestedSave = customerRequestedSave,
             screenState = currentScreenState.value,
             input = PaymentSelection.New.USBankAccount.Input(
                 name = name.value,

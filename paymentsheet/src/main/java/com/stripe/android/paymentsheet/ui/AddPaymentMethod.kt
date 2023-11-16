@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -203,8 +204,19 @@ internal fun FormFieldValues.transformToPaymentSelection(
     val params = transformToPaymentMethodCreateParams(paymentMethod)
     val options = transformToPaymentMethodOptionsParams(paymentMethod)
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
+        val setupFutureUsage = when (userRequestedReuse) {
+            PaymentSelection.CustomerRequestedSave.RequestReuse -> {
+                ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            }
+            PaymentSelection.CustomerRequestedSave.RequestNoReuse -> {
+                ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+            }
+            PaymentSelection.CustomerRequestedSave.NoRequest -> {
+                null
+            }
+        }
         PaymentSelection.New.Card(
-            paymentMethodOptionsParams = options,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(setupFutureUsage = setupFutureUsage),
             paymentMethodCreateParams = params,
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,
