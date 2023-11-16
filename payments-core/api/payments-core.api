@@ -1600,12 +1600,13 @@ public final class com/stripe/android/model/AccountParams : com/stripe/android/m
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/AccountParams$Companion;
-	public final fun copy (ZLcom/stripe/android/model/AccountParams$BusinessTypeParams;)Lcom/stripe/android/model/AccountParams;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/AccountParams;ZLcom/stripe/android/model/AccountParams$BusinessTypeParams;ILjava/lang/Object;)Lcom/stripe/android/model/AccountParams;
+	public final fun copy (ZLcom/stripe/android/model/AccountParams$BusinessTypeParams$Individual;Lcom/stripe/android/model/AccountParams$BusinessTypeParams$Company;)Lcom/stripe/android/model/AccountParams;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/AccountParams;ZLcom/stripe/android/model/AccountParams$BusinessTypeParams$Individual;Lcom/stripe/android/model/AccountParams$BusinessTypeParams$Company;ILjava/lang/Object;)Lcom/stripe/android/model/AccountParams;
 	public static final fun create (Z)Lcom/stripe/android/model/AccountParams;
 	public static final fun create (ZLcom/stripe/android/model/AccountParams$BusinessType;)Lcom/stripe/android/model/AccountParams;
 	public static final fun create (ZLcom/stripe/android/model/AccountParams$BusinessTypeParams$Company;)Lcom/stripe/android/model/AccountParams;
 	public static final fun create (ZLcom/stripe/android/model/AccountParams$BusinessTypeParams$Individual;)Lcom/stripe/android/model/AccountParams;
+	public static final fun create (ZLcom/stripe/android/model/AccountParams$BusinessTypeParams$Individual;Lcom/stripe/android/model/AccountParams$BusinessTypeParams$Company;)Lcom/stripe/android/model/AccountParams;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getTypeDataParams ()Ljava/util/Map;
@@ -1930,6 +1931,7 @@ public final class com/stripe/android/model/AccountParams$Companion {
 	public final fun create (ZLcom/stripe/android/model/AccountParams$BusinessType;)Lcom/stripe/android/model/AccountParams;
 	public final fun create (ZLcom/stripe/android/model/AccountParams$BusinessTypeParams$Company;)Lcom/stripe/android/model/AccountParams;
 	public final fun create (ZLcom/stripe/android/model/AccountParams$BusinessTypeParams$Individual;)Lcom/stripe/android/model/AccountParams;
+	public final fun create (ZLcom/stripe/android/model/AccountParams$BusinessTypeParams$Individual;Lcom/stripe/android/model/AccountParams$BusinessTypeParams$Company;)Lcom/stripe/android/model/AccountParams;
 }
 
 public final class com/stripe/android/model/AccountParams$Creator : android/os/Parcelable$Creator {

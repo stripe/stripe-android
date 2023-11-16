@@ -21,18 +21,29 @@ data class AccountParams internal constructor(
      */
     private val tosShownAndAccepted: Boolean,
 
-    private val businessTypeParams: BusinessTypeParams? = null
+    private val individualBusinessTypeParams: BusinessTypeParams.Individual? = null,
+
+    private val companyBusinessTypeParams: BusinessTypeParams.Company? = null,
 ) : TokenParams(Token.Type.Account) {
+
+    private val allTypeParams: List<BusinessTypeParams>
+        get() = listOfNotNull(individualBusinessTypeParams, companyBusinessTypeParams)
+
+    private val topLevelType: BusinessType?
+        get() = (individualBusinessTypeParams ?: companyBusinessTypeParams)?.type
+
     override val typeDataParams: Map<String, Any>
-        get() = mapOf(PARAM_TOS_SHOWN_AND_ACCEPTED to tosShownAndAccepted)
-            .plus(
-                businessTypeParams?.let { params ->
-                    mapOf(
-                        PARAM_BUSINESS_TYPE to params.type.code,
-                        params.type.code to params.toParamMap()
-                    )
-                }.orEmpty()
-            )
+        get() {
+            val tos = mapOf(PARAM_TOS_SHOWN_AND_ACCEPTED to tosShownAndAccepted)
+
+            val types = allTypeParams.associate { it.type.code to it.toParamMap() }
+
+            val topLevelType = topLevelType?.let {
+                mapOf(PARAM_BUSINESS_TYPE to it.code)
+            }.orEmpty()
+
+            return tos + topLevelType + types
+        }
 
     /**
      * The business type.
@@ -929,11 +940,35 @@ data class AccountParams internal constructor(
         @JvmStatic
         fun create(
             tosShownAndAccepted: Boolean,
+            individual: BusinessTypeParams.Individual,
+            company: BusinessTypeParams.Company,
+        ): AccountParams {
+            return AccountParams(
+                tosShownAndAccepted = tosShownAndAccepted,
+                individualBusinessTypeParams = individual,
+                companyBusinessTypeParams = company,
+            )
+        }
+
+        /**
+         * Create an [AccountParams] instance with information about the person represented by the account.
+         *
+         * @param tosShownAndAccepted Whether the user described by the data in the token has been
+         * shown the
+         * [Stripe Connected Account Agreement](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-tos_shown_and_accepted).
+         * When creating an account token to create a new Connect account, this value must be `true`.
+         * @param individual Information about the person represented by the account.
+         *
+         * @return [AccountParams]
+         */
+        @JvmStatic
+        fun create(
+            tosShownAndAccepted: Boolean,
             individual: BusinessTypeParams.Individual
         ): AccountParams {
             return AccountParams(
-                tosShownAndAccepted,
-                individual
+                tosShownAndAccepted = tosShownAndAccepted,
+                individualBusinessTypeParams = individual,
             )
         }
 
@@ -954,8 +989,8 @@ data class AccountParams internal constructor(
             company: BusinessTypeParams.Company
         ): AccountParams {
             return AccountParams(
-                tosShownAndAccepted,
-                company
+                tosShownAndAccepted = tosShownAndAccepted,
+                companyBusinessTypeParams = company,
             )
         }
 
@@ -976,11 +1011,13 @@ data class AccountParams internal constructor(
             businessType: BusinessType
         ): AccountParams {
             return AccountParams(
-                tosShownAndAccepted,
-                when (businessType) {
-                    BusinessType.Individual -> BusinessTypeParams.Individual()
-                    BusinessType.Company -> BusinessTypeParams.Company()
-                }
+                tosShownAndAccepted = tosShownAndAccepted,
+                individualBusinessTypeParams = BusinessTypeParams.Individual().takeIf {
+                    businessType == BusinessType.Individual
+                },
+                companyBusinessTypeParams = BusinessTypeParams.Company().takeIf {
+                    businessType == BusinessType.Company
+                },
             )
         }
 
