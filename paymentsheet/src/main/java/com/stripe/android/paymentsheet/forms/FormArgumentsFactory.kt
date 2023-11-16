@@ -71,6 +71,7 @@ internal object FormArgumentsFactory {
         paymentMethod: LpmRepository.SupportedPaymentMethod,
         configuration: CustomerSheet.Configuration,
         merchantName: String,
+        cbcEligibility: CardBrandChoiceEligibility,
     ): FormArguments {
         return FormArguments(
             paymentMethodCode = paymentMethod.code,
@@ -79,8 +80,7 @@ internal object FormArgumentsFactory {
             merchantName = merchantName,
             billingDetails = configuration.defaultBillingDetails,
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-            // TODO(tillh-stripe) Determine this based on /wallets-config response
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            cbcEligibility = cbcEligibility,
         )
     }
 }

@@ -14,7 +14,9 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
 import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -70,6 +72,7 @@ internal class CustomerSheetScreenshotTest {
         isGooglePayEnabled = false,
         primaryButtonVisible = false,
         primaryButtonLabel = null,
+        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
     )
 
     private val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
@@ -103,6 +106,7 @@ internal class CustomerSheetScreenshotTest {
         customPrimaryButtonUiState = null,
         bankAccountResult = null,
         draftPaymentSelection = null,
+        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
     )
 
     @Test
@@ -357,6 +361,36 @@ internal class CustomerSheetScreenshotTest {
                     formViewData = FormViewModel.ViewData(),
                     displayDismissConfirmationModal = true,
                 ),
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = null,
+            )
+        }
+    }
+
+    @Test
+    fun testEditScreen() {
+        val paymentMethod = PaymentMethodFactory.card().copy(
+            card = PaymentMethod.Card(
+                last4 = "1001",
+                networks = PaymentMethod.Card.Networks(
+                    available = setOf(CardBrand.CartesBancaires.code, CardBrand.Visa.code),
+                ),
+            )
+        )
+
+        val editPaymentMethod = CustomerSheetViewState.EditPaymentMethod(
+            editPaymentMethodInteractor = DefaultEditPaymentMethodViewInteractor(
+                initialPaymentMethod = paymentMethod,
+                removeExecutor = { true },
+                updateExecutor = { pm, _ -> Result.success(pm) },
+            ),
+            isLiveMode = true,
+            cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
+        )
+
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = editPaymentMethod,
                 paymentMethodNameProvider = { it!! },
                 formViewModelSubComponentBuilderProvider = null,
             )

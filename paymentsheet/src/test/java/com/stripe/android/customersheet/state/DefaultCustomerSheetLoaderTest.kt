@@ -12,6 +12,7 @@ import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -21,6 +22,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FeatureFlags
@@ -39,7 +41,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class DefaultCustomerSheetLoaderTest {
     @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
+    val achFeatureFlagTestRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.customerSheetACHv2,
         isEnabled = false,
     )
@@ -63,6 +65,12 @@ class DefaultCustomerSheetLoaderTest {
 
     private val readyGooglePayRepository = mock<GooglePayRepository>()
     private val unreadyGooglePayRepository = mock<GooglePayRepository>()
+
+    @get:Rule
+    val cbcFeatureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.cardBrandChoice,
+        isEnabled = false,
+    )
 
     @Before
     fun setup() {
@@ -126,6 +134,7 @@ class DefaultCustomerSheetLoaderTest {
                 paymentSelection = PaymentSelection.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 ),
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             )
         )
 
@@ -181,6 +190,7 @@ class DefaultCustomerSheetLoaderTest {
                 ),
                 isGooglePayReady = false,
                 paymentSelection = null,
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             )
         )
     }
@@ -222,6 +232,7 @@ class DefaultCustomerSheetLoaderTest {
                 paymentSelection = PaymentSelection.Saved(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3")
                 ),
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             )
         )
     }
@@ -259,6 +270,7 @@ class DefaultCustomerSheetLoaderTest {
                 ),
                 isGooglePayReady = false,
                 paymentSelection = null,
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             )
         )
     }
@@ -287,7 +299,7 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC unavailable, flag disabled, us bank not in intent, then us bank account is not available`() = runTest {
-        featureFlagTestRule.setEnabled(false)
+        achFeatureFlagTestRule.setEnabled(false)
 
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
@@ -312,7 +324,7 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC unavailable, flag disabled, us bank in intent, then us bank account is not available`() = runTest {
-        featureFlagTestRule.setEnabled(false)
+        achFeatureFlagTestRule.setEnabled(false)
 
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
@@ -337,7 +349,7 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC unavailable, flag enabled, us bank not in intent, then us bank account is not available`() = runTest {
-        featureFlagTestRule.setEnabled(true)
+        achFeatureFlagTestRule.setEnabled(true)
 
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
@@ -362,7 +374,7 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC unavailable, flag enabled, us bank in intent, then us bank account is not available`() = runTest {
-        featureFlagTestRule.setEnabled(true)
+        achFeatureFlagTestRule.setEnabled(true)
 
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
@@ -387,7 +399,7 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC available, flag disabled, us bank not in intent, then us bank account is not available`() = runTest {
-        featureFlagTestRule.setEnabled(false)
+        achFeatureFlagTestRule.setEnabled(false)
 
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
@@ -412,7 +424,7 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC available, flag disabled, us bank in intent, then us bank account is not available`() = runTest {
-        featureFlagTestRule.setEnabled(false)
+        achFeatureFlagTestRule.setEnabled(false)
 
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
@@ -437,7 +449,7 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC available, flag enabled, us bank not in intent, then us bank account is not available`() = runTest {
-        featureFlagTestRule.setEnabled(true)
+        achFeatureFlagTestRule.setEnabled(true)
 
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
@@ -462,7 +474,7 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC available, flag enabled, us bank in intent, then us bank account is available`() = runTest {
-        featureFlagTestRule.setEnabled(true)
+        achFeatureFlagTestRule.setEnabled(true)
 
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
@@ -485,14 +497,47 @@ class DefaultCustomerSheetLoaderTest {
         ).contains(LpmRepository.hardCodedUsBankAccount)
     }
 
+    @Test
+    fun `Loads correct CBC eligibility if feature enabled`() = runTest {
+        cbcFeatureFlagTestRule.setEnabled(true)
+        val loader = createCustomerSheetLoader(isCbcEligible = true)
+        val state = loader.load(CustomerSheet.Configuration()).getOrThrow()
+        assertThat(state.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Eligible(emptyList()))
+    }
+
+    @Test
+    fun `Loads correct CBC eligibility and merchant-preferred networks if feature enabled`() = runTest {
+        cbcFeatureFlagTestRule.setEnabled(true)
+        val loader = createCustomerSheetLoader(isCbcEligible = true)
+
+        val state = loader.load(
+            CustomerSheet.Configuration(
+                preferredNetworks = listOf(CardBrand.CartesBancaires),
+            )
+        ).getOrThrow()
+
+        assertThat(state.cbcEligibility).isEqualTo(
+            CardBrandChoiceEligibility.Eligible(preferredNetworks = listOf(CardBrand.CartesBancaires))
+        )
+    }
+
+    @Test
+    fun `Does not load CBC eligibility if feature disabled`() = runTest {
+        val loader = createCustomerSheetLoader(isCbcEligible = true)
+        val state = loader.load(CustomerSheet.Configuration()).getOrThrow()
+        assertThat(state.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
+    }
+
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
+        isCbcEligible: Boolean = false,
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = IsFinancialConnectionsAvailable { false },
         elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
             stripeIntent = STRIPE_INTENT,
             error = null,
             linkSettings = null,
+            isCbcEligible = isCbcEligible,
         ),
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         lpmRepository: LpmRepository = this.lpmRepository,
