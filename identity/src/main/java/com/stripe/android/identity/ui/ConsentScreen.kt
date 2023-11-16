@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -168,10 +168,10 @@ private fun SuccessUI(
                 .semantics {
                     testTag = PRIVACY_POLICY_TAG
                 },
-            color = MaterialTheme.colors.onBackground,
+            color = colorResource(id = R.color.stripe_html_line),
             urlSpanStyle = SpanStyle(
                 textDecoration = TextDecoration.Underline,
-                color = MaterialTheme.colors.secondary
+                color = colorResource(id = R.color.stripe_html_line)
             )
         )
 
@@ -196,7 +196,7 @@ private fun SuccessUI(
             onConsentAgreed()
         }
 
-        LoadingButton(
+        LoadingTextButton(
             modifier = Modifier
                 .semantics { testTag = DECLINE_BUTTON_TAG },
             text = consentPage.declineButtonText.uppercase(),
