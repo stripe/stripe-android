@@ -86,7 +86,8 @@ class EditPaymentMethodUiScreenshotTest {
                 EditPaymentMethodViewState.CardBrandChoice(
                     brand = CardBrand.CartesBancaires
                 )
-            )
+            ),
+            displayName = "Card",
         )
     }
 }

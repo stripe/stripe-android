@@ -26,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +41,9 @@ import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemovePressed
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnUpdatePressed
+import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.SectionCard
@@ -72,7 +76,9 @@ internal fun EditPaymentMethodUi(
     modifier: Modifier = Modifier
 ) {
     val padding = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+
     val isIdle = viewState.status == EditPaymentMethodViewState.Status.Idle
+    val showRemoveConfirmationDialog = rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = modifier.padding(
@@ -109,9 +115,7 @@ internal fun EditPaymentMethodUi(
             label = stringResource(id = StripeR.string.stripe_title_update_card),
             isLoading = viewState.status == EditPaymentMethodViewState.Status.Updating,
             isEnabled = viewState.canUpdate && isIdle,
-            onButtonClick = {
-                viewActionHandler.invoke(EditPaymentMethodViewAction.OnUpdatePressed)
-            }
+            onButtonClick = { viewActionHandler.invoke(OnUpdatePressed) },
         )
 
         Spacer(modifier = Modifier.requiredHeight(4.dp))
@@ -119,9 +123,28 @@ internal fun EditPaymentMethodUi(
         RemoveButton(
             idle = isIdle,
             removing = viewState.status == EditPaymentMethodViewState.Status.Removing,
-            onRemove = {
-                viewActionHandler.invoke(EditPaymentMethodViewAction.OnRemovePressed)
-            }
+            onRemove = { showRemoveConfirmationDialog.value = true },
+        )
+    }
+
+    if (showRemoveConfirmationDialog.value) {
+        val title = stringResource(
+            R.string.stripe_paymentsheet_remove_pm,
+            viewState.displayName,
+        )
+
+        SimpleDialogElementUI(
+            openDialog = showRemoveConfirmationDialog.value,
+            titleText = title,
+            messageText = null,
+            confirmText = stringResource(StripeR.string.stripe_remove),
+            dismissText = stringResource(StripeR.string.stripe_cancel),
+            destructive = true,
+            onConfirmListener = {
+                showRemoveConfirmationDialog.value = false
+                viewActionHandler.invoke(OnRemovePressed)
+            },
+            onDismissListener = { showRemoveConfirmationDialog.value = false }
         )
     }
 }
@@ -237,6 +260,7 @@ private fun EditPaymentMethodPreview() {
             viewState = EditPaymentMethodViewState(
                 status = EditPaymentMethodViewState.Status.Idle,
                 last4 = "4242",
+                displayName = "Card",
                 selectedBrand = EditPaymentMethodViewState.CardBrandChoice(
                     brand = CardBrand.CartesBancaires
                 ),

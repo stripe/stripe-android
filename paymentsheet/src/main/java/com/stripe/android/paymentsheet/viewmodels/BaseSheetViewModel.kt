@@ -187,14 +187,16 @@ internal abstract class BaseSheetViewModel(
             googlePayState = googlePayState,
             isLinkEnabled = linkHandler.isLinkEnabled,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
-            nameProvider = { code ->
-                val paymentMethod = lpmRepository.fromCode(code)
-                paymentMethod?.displayNameResource?.let {
-                    application.getString(it)
-                }.orEmpty()
-            },
+            nameProvider = ::providePaymentMethodName,
             isCbcEligible = { cbcEligibility is CardBrandChoiceEligibility.Eligible }
         )
+    }
+
+    private fun providePaymentMethodName(code: PaymentMethodCode?): String {
+        val paymentMethod = lpmRepository.fromCode(code)
+        return paymentMethod?.displayNameResource?.let {
+            getApplication<Application>().getString(it)
+        }.orEmpty()
     }
 
     val paymentOptionsState: StateFlow<PaymentOptionsState> = paymentOptionsStateMapper()
@@ -454,6 +456,7 @@ internal abstract class BaseSheetViewModel(
             PaymentSheetScreen.EditPaymentMethod(
                 editInteractorFactory.create(
                     initialPaymentMethod = paymentMethod,
+                    displayName = providePaymentMethodName(paymentMethod.type?.code),
                     removeExecutor = {
                         // TODO(samer-stripe): Replace with remove operation
                         delay(TEMP_DELAY)
@@ -464,7 +467,7 @@ internal abstract class BaseSheetViewModel(
                         delay(TEMP_DELAY)
 
                         Result.success(paymentMethod)
-                    }
+                    },
                 )
             )
         )

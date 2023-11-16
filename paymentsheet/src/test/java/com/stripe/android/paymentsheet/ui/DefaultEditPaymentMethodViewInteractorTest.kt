@@ -37,7 +37,8 @@ class DefaultEditPaymentMethodViewInteractorTest {
                     availableBrands = listOf(
                         VISA_BRAND_CHOICE,
                         CARTES_BANCAIRES_BRAND_CHOICE
-                    )
+                    ),
+                    displayName = "Card",
                 )
             )
         }
@@ -63,7 +64,8 @@ class DefaultEditPaymentMethodViewInteractorTest {
                     availableBrands = listOf(
                         VISA_BRAND_CHOICE,
                         CARTES_BANCAIRES_BRAND_CHOICE
-                    )
+                    ),
+                    displayName = "Card",
                 )
             )
         }
@@ -93,7 +95,8 @@ class DefaultEditPaymentMethodViewInteractorTest {
                     availableBrands = listOf(
                         VISA_BRAND_CHOICE,
                         CARTES_BANCAIRES_BRAND_CHOICE
-                    )
+                    ),
+                    displayName = "Card",
                 )
             )
         }
@@ -181,6 +184,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
     ): DefaultEditPaymentMethodViewInteractor {
         return DefaultEditPaymentMethodViewInteractor(
             initialPaymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD,
+            displayName = "Card",
             removeExecutor = onRemove,
             updateExecutor = onUpdate,
             viewStateSharingStarted = SharingStarted.Eagerly,
