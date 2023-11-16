@@ -16,12 +16,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -293,6 +295,15 @@ private fun ListItemIcon(icon: ImageResource?) {
                     modifier = modifier.padding((iconSize - 8.dp) / 2),
                     onDraw = { drawCircle(color = bulletColor) }
                 )
+            },
+            loadingContent = {
+                LoadingShimmerEffect { shimmer ->
+                    Spacer(
+                        modifier = modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(shimmer)
+                    )
+                }
             },
             imageLoader = LocalImageLoader.current,
             contentDescription = null,

@@ -1,18 +1,15 @@
 package com.stripe.android.uicore.image
 
 import androidx.annotation.RestrictTo
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
@@ -25,7 +22,6 @@ import androidx.compose.ui.unit.IntSize.Companion.Zero
 import com.stripe.android.uicore.image.StripeImageState.Error
 import com.stripe.android.uicore.image.StripeImageState.Loading
 import com.stripe.android.uicore.image.StripeImageState.Success
-import kotlinx.coroutines.delay
 
 /**
  * A composable that executes an image request asynchronously using the
@@ -78,27 +74,20 @@ fun StripeImage(
                     state.value = Error
                 }
         }
-        when (val result = state.value) {
-            Error -> errorContent()
-            Loading -> loadingContent()
-            is Success -> {
-                var visible by remember { mutableStateOf(debugMode) }
-                LaunchedEffect(Unit) {
-                    delay(FADE_IN_TIME_MS)
-                    visible = true
-                }
-                AnimatedVisibility(
-                    visible = visible,
-                    enter = fadeIn()
-                ) {
-                    Image(
-                        modifier = modifier,
-                        colorFilter = colorFilter,
-                        contentDescription = contentDescription,
-                        contentScale = contentScale,
-                        painter = result.painter
-                    )
-                }
+        AnimatedContent(
+            targetState = state.value,
+            label = "loading_image_animation"
+        ) {
+            when (it) {
+                Error -> errorContent()
+                Loading -> loadingContent()
+                is Success -> Image(
+                    modifier = modifier,
+                    colorFilter = colorFilter,
+                    contentDescription = contentDescription,
+                    contentScale = contentScale,
+                    painter = it.painter
+                )
             }
         }
     }
