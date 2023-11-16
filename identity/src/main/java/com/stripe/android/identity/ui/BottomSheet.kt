@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -22,9 +23,11 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.VerificationPageIconType
@@ -34,6 +37,7 @@ import com.stripe.android.identity.networking.models.getContentDescriptionId
 import com.stripe.android.identity.networking.models.getResourceId
 import com.stripe.android.identity.viewmodel.BottomSheetViewModel
 import com.stripe.android.uicore.text.Html
+import java.util.regex.Pattern
 
 @Composable
 @ExperimentalMaterialApi
@@ -111,23 +115,60 @@ private fun BottomSheetLine(line: VerificationPageStaticContentBottomSheetLineCo
         ) {
             Text(
                 text = line.title,
-                style = MaterialTheme.typography.h5,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(
                     bottom = 4.dp
-                )
-            )
-            Html(
-                html = line.content,
-                color = MaterialTheme.colors.onSurface.copy(
-                    alpha = 0.6f
                 ),
-                urlSpanStyle = SpanStyle(
-                    textDecoration = TextDecoration.Underline,
-                    color = MaterialTheme.colors.secondary
-                )
             )
+
+            line.content.tryParseUl()?.let { bulletStrings ->
+                // [HTML] uses HtmlCompat.fromHtml, which automatically adds an additional line break for <li> items.
+                // We would like to build our line break instead.
+                for (bulletString in bulletStrings) {
+                    Text(
+                        modifier = Modifier.padding(bottom = 2.dp),
+                        text = "• $bulletString",
+                        color = MaterialTheme.colors.onSurface,
+                        style = LocalTextStyle.current.merge(
+                            lineHeight = 20.sp
+                        )
+                    )
+                }
+            } ?: run {
+                Html(
+                    html = line.content,
+                    color = MaterialTheme.colors.onSurface,
+                    style = LocalTextStyle.current.merge(
+                        lineHeight = 20.sp
+                    ),
+                    urlSpanStyle = SpanStyle(
+                        textDecoration = TextDecoration.Underline,
+                        color = MaterialTheme.colors.onSurface
+                    )
+                )
+            }
         }
     }
+}
+
+private fun String.tryParseUl(): List<String>? {
+    val trimmed = this.trim()
+    // Detect if string is an unordered HTML list
+    val ulPattern = Pattern.compile("^<ul>.*</ul>$", Pattern.DOTALL)
+    val ulMatcher = ulPattern.matcher(trimmed)
+    if (!ulMatcher.find()) {
+        return null
+    }
+
+    // Extract list items
+    val items: MutableList<String> = mutableListOf()
+    val liPattern = Pattern.compile("<li>(.*?)</li>", Pattern.DOTALL)
+    val liMatcher = liPattern.matcher(trimmed)
+
+    while (liMatcher.find()) {
+        items.add(requireNotNull(liMatcher.group(1)))
+    }
+    return items
 }
 
 @Preview
@@ -153,8 +194,14 @@ internal fun ButtonSheetPreview() {
                     VerificationPageStaticContentBottomSheetLineContent(
                         icon = VerificationPageIconType.CLOUD,
                         title = "cloud line",
-                        content = "cloud line content with another " +
+                        content = "Drivers license cloud line content with another " +
                             "<a href='https://stripe.com'>link</a>, with multiline content"
+                    ),
+                    VerificationPageStaticContentBottomSheetLineContent(
+                        icon = VerificationPageIconType.WALLET,
+                        title = "bullets line",
+                        content = "<ul><li>Drivers license</li><li>Passport</li><li>National ID</li>" +
+                            "<li>Valid government-issued identification that clearly shows your face</li><ul>"
                     )
                 )
             )

@@ -346,8 +346,22 @@ public final class com/stripe/android/identity/ui/ComposableSingletons$BottomShe
 	public final fun getLambda-2$identity_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/identity/ui/ComposableSingletons$ConsentLinesKt {
+	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$ConsentLinesKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/identity/ui/ComposableSingletons$ConsentScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$ConsentScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/identity/ui/ComposableSingletons$ConsentWelcomeHeaderKt {
+	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$ConsentWelcomeHeaderKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function2;

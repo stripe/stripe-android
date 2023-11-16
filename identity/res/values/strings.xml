@@ -2,6 +2,8 @@
 <resources>
   <!-- title for accepted types of ids -->
   <string name="stripe_accepted_forms_of_id">Accepted forms of ID</string>
+  <!-- title for accepted types of ids prefix -->
+  <string name="stripe_accepted_forms_of_id_include">Accepted forms of ID include</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">App Settings</string>
   <!-- Description of back of driver's license image -->
@@ -47,6 +49,8 @@
   <string name="stripe_description_dispute_protection">dispute_protection icon</string>
   <!-- Content description for document icon -->
   <string name="stripe_description_document">document icon</string>
+  <!-- Content description for ellipsis icon -->
+  <string name="stripe_description_ellipsis">ellipsis icon</string>
   <!-- Content description for exclamation icon -->
   <string name="stripe_description_exclamation">exclamation icon</string>
   <!-- Content description for back button -->
@@ -111,6 +115,8 @@
   <string name="stripe_id_card">ID</string>
   <!-- Label for ID number section -->
   <string name="stripe_id_number">ID Number</string>
+  <!-- I'm ready button text -->
+  <string name="stripe_im_ready">I\'m ready</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">The ID number you entered is incomplete.</string>
   <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
