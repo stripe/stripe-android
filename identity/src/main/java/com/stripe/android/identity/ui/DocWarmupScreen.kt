@@ -106,7 +106,7 @@ internal fun DocWarmupView(
             val driverLicense = stringResource(id = R.string.stripe_driver_license)
             val governmentId = stringResource(id = R.string.stripe_government_id)
             val passport = stringResource(id = R.string.stripe_passport)
-            val formsOfId = stringResource(id = R.string.stripe_accepted_forms_of_id)
+            val formsOfId = stringResource(id = R.string.stripe_accepted_forms_of_id_include)
 
             val allowedListString = remember(documentSelectPage) {
                 "$formsOfId " + documentSelectPage.idDocumentTypeAllowlist.keys.mapNotNull {
