@@ -36,7 +36,6 @@ internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethod
             initialPaymentMethod: PaymentMethod,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
-            onRemoved: (PaymentMethod) -> Unit,
             displayName: String,
         ): ModifiableEditPaymentMethodViewInteractor
     }
@@ -47,7 +46,6 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
     displayName: String,
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updateExecutor: PaymentMethodUpdateOperation,
-    private val onRemoved: (PaymentMethod) -> Unit,
     workContext: CoroutineContext = Dispatchers.Default,
     viewStateSharingStarted: SharingStarted = SharingStarted.WhileSubscribed()
 ) : ModifiableEditPaymentMethodViewInteractor, CoroutineScope {
@@ -102,12 +100,11 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
         launch {
             status.emit(EditPaymentMethodViewState.Status.Removing)
 
-            // TODO(samer-stripe): Display toast on remove method failure?
             val paymentMethod = paymentMethod.value
             val success = removeExecutor(paymentMethod)
 
-            if (success) {
-                onRemoved(paymentMethod)
+            if (!success) {
+                // TODO(samer-stripe): Display toast on remove method failure?
             }
 
             status.emit(EditPaymentMethodViewState.Status.Idle)
@@ -171,7 +168,6 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
             initialPaymentMethod: PaymentMethod,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
-            onRemoved: (PaymentMethod) -> Unit,
             displayName: String,
         ): ModifiableEditPaymentMethodViewInteractor {
             return DefaultEditPaymentMethodViewInteractor(
@@ -179,7 +175,6 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
                 removeExecutor = removeExecutor,
                 updateExecutor = updateExecutor,
                 displayName = displayName,
-                onRemoved = onRemoved,
             )
         }
     }

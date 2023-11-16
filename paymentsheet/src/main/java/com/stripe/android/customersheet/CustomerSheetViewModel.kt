@@ -482,17 +482,17 @@ internal class CustomerSheetViewModel @Inject constructor(
                 editPaymentMethodInteractor = editInteractorFactory.create(
                     initialPaymentMethod = paymentMethod,
                     displayName = providePaymentMethodName(paymentMethod.type?.code),
-                    removeExecutor = {
-                        removePaymentMethod(it) is CustomerAdapter.Result.Success
+                    removeExecutor = { pm ->
+                        val result = removePaymentMethod(pm).onSuccess {
+                            onBackPressed()
+                            removePaymentMethodFromState(pm)
+                        }
+                        result is CustomerAdapter.Result.Success
                     },
                     updateExecutor = { _, _ ->
                         // TODO(tillh-stripe): Replace with update operation
                         delay(TempDelay)
                         Result.success(paymentMethod)
-                    },
-                    onRemoved = {
-                        onBackPressed()
-                        removePaymentMethodFromState(it)
                     },
                 ),
                 isLiveMode = currentViewState.isLiveMode,

@@ -383,7 +383,6 @@ internal class CustomerSheetScreenshotTest {
                 initialPaymentMethod = paymentMethod,
                 displayName = "Card",
                 removeExecutor = { true },
-                onRemoved = {},
                 updateExecutor = { pm, _ -> Result.success(pm) },
             ),
             isLiveMode = true,

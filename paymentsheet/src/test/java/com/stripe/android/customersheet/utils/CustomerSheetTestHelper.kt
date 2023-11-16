@@ -58,14 +58,12 @@ internal object CustomerSheetTestHelper {
             initialPaymentMethod: PaymentMethod,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
-            onRemoved: (PaymentMethod) -> Unit,
             displayName: String
         ): ModifiableEditPaymentMethodViewInteractor {
             return DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = initialPaymentMethod,
                 displayName = "Card",
                 removeExecutor = removeExecutor,
-                onRemoved = onRemoved,
                 updateExecutor = updateExecutor,
             )
         }

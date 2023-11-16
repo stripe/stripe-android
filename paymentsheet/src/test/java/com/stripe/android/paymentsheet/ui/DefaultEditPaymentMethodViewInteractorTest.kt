@@ -132,34 +132,6 @@ class DefaultEditPaymentMethodViewInteractorTest {
     }
 
     @Test
-    fun `on remove pressed, should invoke 'onRemoved' upon success`() = runTest {
-        val onRemove: PaymentMethodRemoveOperation = {
-            delay(100)
-            true
-        }
-
-        val onRemoved: (PaymentMethod) -> Unit = mock()
-
-        val interactor = createInteractor(
-            onRemove = onRemove,
-            onRemoved = onRemoved,
-            workContext = testDispatcher,
-        )
-
-        assertThat(interactor.currentStatus()).isEqualTo(EditPaymentMethodViewState.Status.Idle)
-
-        interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
-
-        testDispatcher.scheduler.advanceTimeBy(50)
-        assertThat(interactor.currentStatus()).isEqualTo(EditPaymentMethodViewState.Status.Removing)
-
-        testDispatcher.scheduler.advanceUntilIdle()
-        assertThat(interactor.currentStatus()).isEqualTo(EditPaymentMethodViewState.Status.Idle)
-
-        verify(onRemoved).invoke(CARD_WITH_NETWORKS_PAYMENT_METHOD)
-    }
-
-    @Test
     fun `on update pressed with selection change, should invoke 'onUpdate' to begin update process`() = runTest(
         context = testDispatcher
     ) {
@@ -207,7 +179,6 @@ class DefaultEditPaymentMethodViewInteractorTest {
 
     private fun createInteractor(
         onRemove: PaymentMethodRemoveOperation = { true },
-        onRemoved: (PaymentMethod) -> Unit = {},
         onUpdate: PaymentMethodUpdateOperation = { _, _ -> Result.success(CARD_WITH_NETWORKS_PAYMENT_METHOD) },
         workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): DefaultEditPaymentMethodViewInteractor {
@@ -215,7 +186,6 @@ class DefaultEditPaymentMethodViewInteractorTest {
             initialPaymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD,
             displayName = "Card",
             removeExecutor = onRemove,
-            onRemoved = onRemoved,
             updateExecutor = onUpdate,
             viewStateSharingStarted = SharingStarted.Eagerly,
             workContext = workContext

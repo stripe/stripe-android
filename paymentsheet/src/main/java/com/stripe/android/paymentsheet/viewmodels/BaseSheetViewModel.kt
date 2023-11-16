@@ -468,9 +468,6 @@ internal abstract class BaseSheetViewModel(
 
                         Result.success(paymentMethod)
                     },
-                    onRemoved = {
-                        // TODO(tillh-stripe) Implement
-                    },
                 )
             )
         )

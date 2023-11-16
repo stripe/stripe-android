@@ -41,7 +41,6 @@ internal class FakeEditPaymentMethodInteractor(
             initialPaymentMethod: PaymentMethod,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
-            onRemoved: (PaymentMethod) -> Unit,
             displayName: String
         ): ModifiableEditPaymentMethodViewInteractor {
             return FakeEditPaymentMethodInteractor(initialPaymentMethod)
