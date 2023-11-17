@@ -43,7 +43,6 @@ import com.stripe.android.identity.ui.CompleteOption.FAILURE_ASYNC
 import com.stripe.android.identity.ui.CompleteOption.SUCCESS
 import com.stripe.android.identity.ui.CompleteOption.SUCCESS_ASYNC
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import com.stripe.android.uicore.text.Html
 import kotlinx.coroutines.launch
 
 /**
@@ -170,8 +169,8 @@ internal fun CompleteWithTestDataSection(
         text = stringResource(id = R.string.stripe_complete_with_test_data),
         style = MaterialTheme.typography.h4
     )
-    Html(
-        html = stringResource(id = R.string.stripe_complete_with_test_data_details),
+    Text(
+        text = stringResource(id = R.string.stripe_complete_with_test_data_details),
         modifier = Modifier.padding(vertical = 8.dp)
     )
     CompleteOptionRow(
@@ -234,8 +233,8 @@ private fun FinishMobileFlowWithResultSection(
         text = stringResource(id = R.string.stripe_finish_mobile_flow),
         style = MaterialTheme.typography.h4
     )
-    Html(
-        html = stringResource(id = R.string.stripe_finish_mobile_flow_details),
+    Text(
+        text = stringResource(id = R.string.stripe_finish_mobile_flow_details),
         modifier = Modifier.padding(vertical = 8.dp)
     )
 

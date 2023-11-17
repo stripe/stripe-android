@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -10,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
@@ -19,8 +17,6 @@ import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentOptionsP
 import com.stripe.android.paymentsheet.navigation.Content
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.text.Html
 
 @Composable
 internal fun PaymentOptionsScreen(
@@ -53,7 +49,7 @@ internal fun PaymentOptionsScreenContent(
     val currentScreen by viewModel.currentScreen.collectAsState()
 
     val errorMessage by viewModel.error.collectAsState(initial = null)
-    val notesText by viewModel.notesText.collectAsState()
+    val mandateText by viewModel.mandateText.collectAsState()
 
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
@@ -69,6 +65,13 @@ internal fun PaymentOptionsScreenContent(
 
         currentScreen.Content(viewModel)
 
+        if (mandateText?.showAbovePrimaryButton == true) {
+            Mandate(
+                mandateText = mandateText?.text,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+            )
+        }
+
         errorMessage?.let { error ->
             ErrorMessage(
                 error = error,
@@ -83,14 +86,10 @@ internal fun PaymentOptionsScreenContent(
             modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
         )
 
-        notesText?.let { text ->
-            Html(
-                html = text,
-                color = MaterialTheme.stripeColors.subtitle,
-                style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .padding(horizontal = horizontalPadding),
+        if (mandateText?.showAbovePrimaryButton == false) {
+            Mandate(
+                mandateText = mandateText?.text,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
             )
         }
 

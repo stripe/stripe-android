@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -188,8 +189,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         flowOf(null)
     }
 
-    private val _result = MutableSharedFlow<PaymentSelection.New.USBankAccount>(replay = 1)
-    val result: Flow<PaymentSelection.New.USBankAccount> = _result
+    private val _result = MutableSharedFlow<PaymentSelection.New.USBankAccount?>(replay = 1)
+    val result: Flow<PaymentSelection.New.USBankAccount?> = _result
+    private val _collectBankAccountResult = MutableSharedFlow<CollectBankAccountResultInternal?>(replay = 1)
+    val collectBankAccountResult: Flow<CollectBankAccountResultInternal?> = _collectBankAccountResult
 
     private val defaultSaveForFutureUse: Boolean =
         args.savedPaymentMethod?.input?.saveForFutureUse ?: false
@@ -252,6 +255,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         get() = savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY) == true
         set(value) = savedStateHandle.set(HAS_LAUNCHED_KEY, value)
 
+    private var shouldReset: Boolean
+        get() = savedStateHandle.get<Boolean>(SHOULD_RESET_KEY) == true
+        set(value) = savedStateHandle.set(SHOULD_RESET_KEY, value)
+
     fun register(activityResultRegistryOwner: ActivityResultRegistryOwner) {
         collectBankAccountLauncher = CollectBankAccountLauncher.create(
             activityResultRegistryOwner = activityResultRegistryOwner,
@@ -262,6 +269,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     @VisibleForTesting
     fun handleCollectBankAccountResult(result: CollectBankAccountResultInternal) {
         hasLaunched = false
+        _collectBankAccountResult.tryEmit(result)
         when (result) {
             is CollectBankAccountResultInternal.Completed -> {
                 when (
@@ -308,6 +316,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun handlePrimaryButtonClick(screenState: USBankAccountFormScreenState) {
         when (screenState) {
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
+                _currentScreenState.update {
+                    screenState.copy(isProcessing = true)
+                }
                 collectBankAccount(args.clientSecret)
             }
             is USBankAccountFormScreenState.MandateCollection ->
@@ -336,18 +347,26 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun reset(@StringRes error: Int? = null) {
         hasLaunched = false
+        shouldReset = false
         saveForFutureUseElement.controller.onValueChange(true)
+        _collectBankAccountResult.tryEmit(null)
         _currentScreenState.update {
             USBankAccountFormScreenState.BillingDetailsCollection(
                 error = error,
                 primaryButtonText = application.getString(
                     StripeUiCoreR.string.stripe_continue_button_label
                 ),
+                isProcessing = false,
             )
         }
     }
 
     fun onDestroy() {
+        if (shouldReset) {
+            reset()
+        }
+        _result.tryEmit(null)
+        _collectBankAccountResult.tryEmit(null)
         collectBankAccountLauncher?.unregister()
         collectBankAccountLauncher = null
     }
@@ -364,6 +383,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 primaryButtonText = application.getString(
                     StripeUiCoreR.string.stripe_continue_button_label
                 ),
+                isProcessing = false,
             )
         }
     }
@@ -441,6 +461,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         )
 
         _result.tryEmit(paymentSelection)
+        shouldReset = true
     }
 
     private fun createNewPaymentSelection(
@@ -448,6 +469,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         bankName: String,
         linkAccountId: String,
     ): PaymentSelection.New.USBankAccount {
+        val customerRequestedSave = customerRequestedSave(
+            showCheckbox = args.formArgs.showCheckbox,
+            saveForFutureUse = saveForFutureUse.value
+        )
         return PaymentSelection.New.USBankAccount(
             labelResource = application.getString(
                 R.string.stripe_paymentsheet_payment_method_item_card_number,
@@ -467,16 +492,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     address = address.value,
                 )
             ),
-            paymentMethodOptionsParams = null,
-            customerRequestedSave = if (args.formArgs.showCheckbox) {
-                if (saveForFutureUse.value) {
-                    PaymentSelection.CustomerRequestedSave.RequestReuse
-                } else {
-                    PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                }
-            } else {
-                PaymentSelection.CustomerRequestedSave.NoRequest
-            },
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.USBankAccount(
+                setupFutureUsage = customerRequestedSave.setupFutureUsage
+            ),
+            customerRequestedSave = customerRequestedSave,
             screenState = currentScreenState.value,
             input = PaymentSelection.New.USBankAccount.Input(
                 name = name.value,
@@ -510,6 +529,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             context = application,
             merchantName = formattedMerchantName(),
             isSaveForFutureUseSelected = saveForFutureUse.value,
+            isSetupFlow = !args.isPaymentFlow,
         )
     }
 
@@ -543,6 +563,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private companion object {
         private const val HAS_LAUNCHED_KEY = "has_launched"
+        private const val SHOULD_RESET_KEY = "should_reset"
     }
 }
 
@@ -574,3 +595,18 @@ internal fun PaymentSheet.Address.asAddressModel() =
         country = country,
         postalCode = postalCode,
     )
+
+internal fun customerRequestedSave(
+    showCheckbox: Boolean,
+    saveForFutureUse: Boolean
+): PaymentSelection.CustomerRequestedSave {
+    return if (showCheckbox) {
+        if (saveForFutureUse) {
+            PaymentSelection.CustomerRequestedSave.RequestReuse
+        } else {
+            PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        }
+    } else {
+        PaymentSelection.CustomerRequestedSave.NoRequest
+    }
+}

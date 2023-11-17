@@ -50,8 +50,6 @@
   <string name="stripe_wallet_recollect_cvc_error">В целях безопасности введите заново код CVV/CVC карты.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Вы уверены, что хотите удалить этот привязанный счет?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Удалить карту</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Вы уверены, что хотите удалить эту карту?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

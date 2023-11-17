@@ -2,8 +2,8 @@ package com.stripe.android.customersheet.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,22 +17,33 @@ import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
+import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ErrorMessage
+import com.stripe.android.paymentsheet.ui.Mandate
+import com.stripe.android.paymentsheet.ui.PaymentElement
 import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
+import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.FormUI
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
+import kotlinx.coroutines.flow.flowOf
+import javax.inject.Provider
+import com.stripe.android.R as PaymentsCoreR
 
 @Composable
 internal fun CustomerSheetScreen(
     viewState: CustomerSheetViewState,
+    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>?,
     modifier: Modifier = Modifier,
     viewActionHandler: (CustomerSheetViewAction) -> Unit = {},
     paymentMethodNameProvider: (PaymentMethodCode?) -> String,
 ) {
-    val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
-
     PaymentSheetScaffold(
         topBar = {
             PaymentSheetTopBar(
@@ -48,7 +59,7 @@ internal fun CustomerSheetScreen(
             )
         },
         content = {
-            Box(modifier = Modifier.animateContentSize()) {
+            Column(modifier = Modifier.animateContentSize()) {
                 when (viewState) {
                     is CustomerSheetViewState.Loading -> {
                         BottomSheetLoadingIndicator()
@@ -59,17 +70,33 @@ internal fun CustomerSheetScreen(
                             viewActionHandler = viewActionHandler,
                             paymentMethodNameProvider = paymentMethodNameProvider,
                         )
+                        PaymentSheetContentPadding()
                     }
                     is CustomerSheetViewState.AddPaymentMethod -> {
-                        AddCard(
+                        if (customerSheetACHv2.isEnabled) {
+                            AddPaymentMethodWithPaymentElement(
+                                viewState = viewState,
+                                viewActionHandler = viewActionHandler,
+                                formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
+                            )
+                        } else {
+                            AddPaymentMethod(
+                                viewState = viewState,
+                                viewActionHandler = viewActionHandler,
+                            )
+                        }
+                        PaymentSheetContentPadding()
+                    }
+                    is CustomerSheetViewState.EditPaymentMethod -> {
+                        EditPaymentMethod(
                             viewState = viewState,
-                            viewActionHandler = viewActionHandler,
                         )
+                        PaymentSheetContentPadding()
                     }
                 }
             }
         },
-        modifier = modifier.padding(bottom = bottomPadding)
+        modifier = modifier,
     )
 }
 
@@ -101,11 +128,13 @@ internal fun SelectPaymentMethod(
                 showLink = false,
                 currentSelection = viewState.paymentSelection,
                 nameProvider = paymentMethodNameProvider,
+                isCbcEligible = viewState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
             ),
             isEditing = viewState.isEditing,
             isProcessing = viewState.isProcessing,
             onAddCardPressed = { viewActionHandler(CustomerSheetViewAction.OnAddCardPressed) },
             onItemSelected = { viewActionHandler(CustomerSheetViewAction.OnItemSelected(it)) },
+            onModifyItem = { viewActionHandler(CustomerSheetViewAction.OnModifyItem(it)) },
             onItemRemoved = { viewActionHandler(CustomerSheetViewAction.OnItemRemoved(it)) },
             modifier = Modifier.padding(bottom = 2.dp),
         )
@@ -136,11 +165,20 @@ internal fun SelectPaymentMethod(
                 )
             }
         }
+
+        AnimatedVisibility(visible = viewState.mandateText != null) {
+            Mandate(
+                mandateText = viewState.mandateText,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = horizontalPadding),
+            )
+        }
     }
 }
 
 @Composable
-internal fun AddCard(
+internal fun AddPaymentMethod(
     viewState: CustomerSheetViewState.AddPaymentMethod,
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
     modifier: Modifier = Modifier,
@@ -178,6 +216,124 @@ internal fun AddCard(
                 viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
             },
             modifier = Modifier.padding(top = 10.dp),
+        )
+    }
+}
+
+@Composable
+internal fun AddPaymentMethodWithPaymentElement(
+    viewState: CustomerSheetViewState.AddPaymentMethod,
+    viewActionHandler: (CustomerSheetViewAction) -> Unit,
+    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>?,
+) {
+    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+
+    SimpleDialogElementUI(
+        openDialog = viewState.displayDismissConfirmationModal,
+        titleText = stringResource(id = R.string.stripe_confirm_close_form_title),
+        messageText = stringResource(id = R.string.stripe_confirm_close_form_body),
+        confirmText = stringResource(id = R.string.stripe_paymentsheet_close),
+        dismissText = stringResource(id = PaymentsCoreR.string.stripe_cancel),
+        destructive = true,
+        onDismissListener = {
+            viewActionHandler(CustomerSheetViewAction.OnCancelClose)
+        },
+        onConfirmListener = {
+            viewActionHandler(CustomerSheetViewAction.OnDismissed)
+        }
+    )
+
+    // TODO (jameswoo) make sure that the spacing is consistent with paymentsheet
+    Column {
+        H4Text(
+            text = stringResource(id = R.string.stripe_paymentsheet_save_a_new_payment_method),
+            modifier = Modifier
+                .padding(bottom = 4.dp)
+                .padding(horizontal = horizontalPadding)
+        )
+
+        formViewModelSubComponentBuilderProvider?.let {
+            PaymentElement(
+                formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
+                enabled = viewState.enabled,
+                supportedPaymentMethods = viewState.supportedPaymentMethods,
+                selectedItem = viewState.selectedPaymentMethod,
+                showLinkInlineSignup = false,
+                linkConfigurationCoordinator = null,
+                showCheckboxFlow = flowOf(false),
+                onItemSelectedListener = {
+                    viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
+                },
+                onLinkSignupStateChanged = { _, _ -> },
+                formArguments = viewState.formArguments,
+                usBankAccountFormArguments = viewState.usBankAccountFormArguments,
+                onFormFieldValuesChanged = {
+                    // This only gets emitted if form field values are complete
+                    viewActionHandler(CustomerSheetViewAction.OnFormFieldValuesCompleted(it))
+                }
+            )
+        }
+
+        AnimatedVisibility(visible = viewState.errorMessage != null) {
+            viewState.errorMessage?.let { error ->
+                ErrorMessage(
+                    error = error,
+                    modifier = Modifier.padding(horizontal = horizontalPadding)
+                )
+            }
+        }
+
+        if (viewState.showMandateAbovePrimaryButton) {
+            Mandate(
+                mandateText = viewState.mandateText,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = horizontalPadding),
+            )
+        }
+
+        PrimaryButton(
+            label = viewState.primaryButtonLabel.resolve(),
+            isEnabled = viewState.primaryButtonEnabled,
+            isLoading = viewState.isProcessing,
+            displayLockIcon = true,
+            onButtonClick = {
+                viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            },
+            modifier = Modifier
+                .padding(top = 10.dp)
+                .padding(horizontal = horizontalPadding),
+        )
+
+        if (!viewState.showMandateAbovePrimaryButton) {
+            Mandate(
+                mandateText = viewState.mandateText,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = horizontalPadding),
+            )
+        }
+    }
+}
+
+@Composable
+private fun EditPaymentMethod(
+    viewState: CustomerSheetViewState.EditPaymentMethod,
+    modifier: Modifier = Modifier,
+) {
+    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+
+    Column(modifier) {
+        H4Text(
+            text = stringResource(PaymentsCoreR.string.stripe_title_update_card),
+            modifier = Modifier
+                .padding(bottom = 20.dp)
+                .padding(horizontal = horizontalPadding)
+        )
+
+        EditPaymentMethod(
+            interactor = viewState.editPaymentMethodInteractor,
+            modifier = modifier,
         )
     }
 }

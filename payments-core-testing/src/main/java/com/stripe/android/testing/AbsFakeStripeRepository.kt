@@ -20,10 +20,12 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
+import com.stripe.android.model.MobileCardElementConfig
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
@@ -119,6 +121,13 @@ abstract class AbsFakeStripeRepository : StripeRepository {
 
     override suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
+        options: ApiRequest.Options
+    ): Result<PaymentMethod> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updatePaymentMethod(
+        paymentMethodUpdateParams: PaymentMethodUpdateParams,
         options: ApiRequest.Options
     ): Result<PaymentMethod> {
         TODO("Not yet implemented")
@@ -285,8 +294,17 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        active: Boolean,
     ): Result<ConsumerPaymentDetails> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun sharePaymentDetails(
+        consumerSessionClientSecret: String,
+        id: String,
+        requestOptions: ApiRequest.Options
+    ): Result<String> {
         TODO("Not yet implemented")
     }
 
@@ -390,6 +408,12 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         cardNumber: String,
         requestOptions: ApiRequest.Options
     ): Result<CardMetadata> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun retrieveCardElementConfig(
+        requestOptions: ApiRequest.Options,
+    ): Result<MobileCardElementConfig> {
         TODO("Not yet implemented")
     }
 

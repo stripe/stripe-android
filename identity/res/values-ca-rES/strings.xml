@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Marca de verificació per indicar l\'èxit de la captura del document</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Trieu una foto</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Completeu amb les dades de prova</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Estalvieu temps escollint un resultat desitjat i completant immediatament amb el resultat. El flux de l\'SDK per a mòbils tornarà amb el resultat completat.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">No hem pogut capturar una imatge d\'alta qualitat.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Podeu tornar-ho a provar o carregar una imatge des del vostre dispositiu.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">No s\'ha pogut capturar la imatge</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">icona de la càmera</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Icona del rellotge</string>
   <!-- Content description for close button -->
@@ -101,6 +107,8 @@
   <string name="stripe_passport">Passaport</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">S\'ha seleccionat el passaport</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Número de telèfon</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Gireu el permís de conduir perquè se\'n vegi l\'altra cara</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -127,12 +135,22 @@
   <string name="stripe_selfie_item_description">s\'ha capturat una autofoto</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">No s\'han desat les autofotos. Voleu sortir?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">Es faran unes quantes fotos automàticament al següent pas per verificar que sou vosaltres</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Prepareu-vos per fer-vos l\'autofoto</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Fes foto</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Aquesta pàgina només es mostra en mode de prova.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Ara esteu en mode de prova</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Torna-ho a intentar</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Hi ha hagut un error inesperat - torna-ho a intentar en uns segons</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Carregueu una foto</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Carregueu el revers del permís de conduir</string>
   <!-- Title of dialog to upload front of driver license -->
@@ -145,4 +163,6 @@
   <string name="stripe_upload_dialog_title_passport">Carregueu el passaport</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">També podeu pujar manualment una foto de %1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Carregueu la vostra ID amb foto</string>
 </resources>

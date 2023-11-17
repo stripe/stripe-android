@@ -19,7 +19,7 @@ import com.stripe.android.utils.rememberActivityOrNull
 @ExperimentalCustomerSheetApi
 @Composable
 fun rememberCustomerSheet(
-    configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(),
+    configuration: CustomerSheet.Configuration,
     customerAdapter: CustomerAdapter,
     callback: CustomerSheetResultCallback,
 ): CustomerSheet {

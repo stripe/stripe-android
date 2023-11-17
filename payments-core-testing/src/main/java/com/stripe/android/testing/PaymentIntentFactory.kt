@@ -13,6 +13,7 @@ object PaymentIntentFactory {
         setupFutureUsage: StripeIntent.Usage? = null,
         confirmationMethod: PaymentIntent.ConfirmationMethod = PaymentIntent.ConfirmationMethod.Automatic,
         status: StripeIntent.Status = StripeIntent.Status.RequiresConfirmation,
+        paymentMethodOptionsJsonString: String? = null,
     ): PaymentIntent = PaymentIntent(
         created = 500L,
         amount = 1000L,
@@ -27,6 +28,7 @@ object PaymentIntentFactory {
         unactivatedPaymentMethods = emptyList(),
         setupFutureUsage = setupFutureUsage,
         confirmationMethod = confirmationMethod,
+        paymentMethodOptionsJsonString = paymentMethodOptionsJsonString,
     )
 
     private fun createCardPaymentMethod(): PaymentMethod = PaymentMethod(

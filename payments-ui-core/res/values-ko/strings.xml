@@ -4,12 +4,24 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[<img/>로 <installment_price/>의 <num_installments/>회 무이자 결제로 대금을 지급하십시오.]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">뒤로</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">계좌 번호</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">계좌 번호가 불완전합니다.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">은행 계좌</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">본인은 Stripe가 %s을(를) 대신하여 자동 이체를 수취하고 본인이 계정 소유자이며 이 계정에서 인출을 승인할 수 있는 유일한 당사자임을 확인합니다.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">분류 코드</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">분류 코드가 불완전합니다.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">청구 주소</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">BLIK 코드</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">계속하면 이 승인이 취소될 때까지 %2$s의 약관에 따라 이 결제 및 향후 결제에 대해 %1$s이(가) Cash App 계좌에서 인출하도록 승인하는 것입니다. 이는 Cash App 설정에서 언제든지 변경할 수 있습니다.</string>
   <!-- Title for the contact information section -->
@@ -57,10 +69,14 @@
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS 자동 이체</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">카드</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">PayPal 결제를 확인하면 %s에서 해당 회사의 약관에 따라 향후 결제에 대해 PayPal 계정에 대금을 청구하도록 허용하는 것입니다.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">RevolutPay 결제를 확인하면 %s에서 해당 회사의 약관에 따라 향후 결제에 대해 RevolutPay 계정에 대금을 청구하도록 허용하는 것입니다.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">향후 %s 결제에 사용하도록 저장</string>
   <!-- Button title to open camera to scan credit/debit card -->

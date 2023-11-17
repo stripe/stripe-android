@@ -8,6 +8,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -35,6 +36,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -352,6 +354,62 @@ internal class PaymentOptionsActivityTest {
         )
     }
 
+    @Test
+    fun `mandate text is shown below primary button when showAbove is false`() {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+            state = PAYMENT_OPTIONS_CONTRACT_ARGS.state.copy(
+                customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
+        )
+        runActivityScenario(args) { scenario ->
+            scenario.onActivity { activity ->
+                val viewModel = activity.viewModel
+                val text = "some text"
+                val mandateNode = composeTestRule.onNode(hasText(text))
+                val primaryButtonNode = composeTestRule
+                    .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+
+                viewModel.updateMandateText(text, false)
+                mandateNode.assertIsDisplayed()
+
+                val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
+                val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
+                assertThat(mandatePosition).isGreaterThan(primaryButtonPosition)
+
+                viewModel.updateMandateText(null, false)
+                mandateNode.assertDoesNotExist()
+            }
+        }
+    }
+
+    @Test
+    fun `mandate text is shown above primary button when showAbove is true`() {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+            state = PAYMENT_OPTIONS_CONTRACT_ARGS.state.copy(
+                customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
+        )
+        runActivityScenario(args) { scenario ->
+            scenario.onActivity { activity ->
+                val viewModel = activity.viewModel
+                val text = "some text"
+                val mandateNode = composeTestRule.onNode(hasText(text))
+                val primaryButtonNode = composeTestRule
+                    .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+
+                viewModel.updateMandateText(text, true)
+                mandateNode.assertIsDisplayed()
+
+                val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
+                val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
+                assertThat(mandatePosition).isLessThan(primaryButtonPosition)
+
+                viewModel.updateMandateText(null, true)
+                mandateNode.assertDoesNotExist()
+            }
+        }
+    }
+
     private fun runActivityScenario(
         args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS,
         block: (InjectableActivityScenario<PaymentOptionsActivity>) -> Unit,
@@ -396,6 +454,7 @@ internal class PaymentOptionsActivityTest {
                     context = ApplicationProvider.getApplicationContext(),
                     lpmRepository = lpmRepository,
                 ),
+                editInteractorFactory = mock()
             )
         }
 

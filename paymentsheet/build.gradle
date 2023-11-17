@@ -39,8 +39,6 @@ dependencies {
     implementation libs.compose.materialIcons
     implementation libs.compose.activity
     implementation libs.compose.navigation
-    implementation libs.accompanist.navigationAnimation
-    implementation libs.accompanist.navigationMaterial
     implementation libs.accompanist.systemUiController
 
     // Other
@@ -61,7 +59,9 @@ dependencies {
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.fragment
     testImplementation testLibs.androidx.junit
+    testImplementation testLibs.androidx.junitKtx
     testImplementation testLibs.androidx.lifecycle
+    testImplementation testLibs.androidx.testRules
     testImplementation testLibs.hamcrest
     testImplementation testLibs.junit
     testImplementation testLibs.json

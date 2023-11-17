@@ -39,7 +39,6 @@ private fun USBankAccountFormArguments.updatePrimaryButton(
     shouldShowProcessingWhenClicked: Boolean,
     enabled: Boolean,
 ) {
-    onUpdatePrimaryButtonState(PrimaryButton.State.Ready)
     onUpdatePrimaryButtonUIState {
         PrimaryButton.UIState(
             label = text,
@@ -79,5 +78,5 @@ internal fun USBankAccountFormArguments.updateMandateText(
         """.trimIndent()
     }
 
-    onMandateTextChanged(updatedText)
+    onMandateTextChanged(updatedText, false)
 }

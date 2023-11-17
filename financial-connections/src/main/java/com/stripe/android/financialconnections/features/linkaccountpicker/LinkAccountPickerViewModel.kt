@@ -7,11 +7,13 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLearnMoreDataAccess
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Click
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLearnMoreDataAccess
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -27,6 +29,7 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -39,6 +42,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val selectNetworkedAccount: SelectNetworkedAccount,
     private val updateLocalManifest: UpdateLocalManifest,
     private val updateCachedAccounts: UpdateCachedAccounts,
+    private val coreAuthorizationPendingNetworkingRepair: CoreAuthorizationPendingNetworkingRepairRepository,
     private val getManifest: GetManifest,
     private val navigationManager: NavigationManager,
     private val logger: Logger
@@ -68,8 +72,10 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                         Pair(matchingPartnerAccount, networkedAccount)
                     }
             }
+
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
+                partnerToCoreAuths = accountsResponse.partnerToCoreAuths,
                 accounts = accounts,
                 nextPaneOnNewAccount = accountsResponse.nextPaneOnAddAccount,
                 addNewAccount = requireNotNull(display.addNewAccount),
@@ -86,16 +92,24 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         onAsync(
             LinkAccountPickerState::payload,
             onFail = { error ->
-                logger.error("Error fetching payload", error)
-                eventTracker.track(Error(PANE, error))
+                eventTracker.logError(
+                    extraMessage = "Error fetching payload",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
                 navigationManager.tryNavigateTo(Destination.InstitutionPicker(referrer = PANE))
             },
         )
         onAsync(
             LinkAccountPickerState::selectNetworkedAccountAsync,
             onFail = { error ->
-                logger.error("Error selecting networked account", error)
-                eventTracker.track(Error(PANE, error))
+                eventTracker.logError(
+                    extraMessage = "Error selecting networked account",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
             },
         )
     }
@@ -132,8 +146,10 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             }
 
             Pane.BANK_AUTH_REPAIR -> {
+                coreAuthorizationPendingNetworkingRepair.set(
+                    requireNotNull(payload.partnerToCoreAuths).getValue(account.authorization)
+                )
                 eventTracker.track(Click("click.repair_accounts", PANE))
-                TODO("Account repair flow not yet implemented")
             }
 
             Pane.PARTNER_AUTH -> {
@@ -143,6 +159,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             else -> Unit
         }
         nextPane?.let {
+            FinancialConnections.emitEvent(name = Name.ACCOUNTS_SELECTED)
             navigationManager.tryNavigateTo(it.destination(referrer = PANE))
         }
         Unit
@@ -185,7 +202,8 @@ internal data class LinkAccountPickerState(
         val accessibleData: AccessibleDataCalloutModel,
         val consumerSessionClientSecret: String,
         val defaultCta: String,
-        val nextPaneOnNewAccount: Pane?
+        val nextPaneOnNewAccount: Pane?,
+        val partnerToCoreAuths: Map<String, String>?
     )
 
     val cta: String?

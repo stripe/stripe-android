@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -20,14 +21,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.getBorderStrokeColor
+import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.getOnBackgroundColor
+import com.stripe.android.ui.core.R as UiCoreR
 
 @Composable
 internal fun PrimaryButton(
@@ -36,6 +38,7 @@ internal fun PrimaryButton(
     onButtonClick: () -> Unit,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
+    displayLockIcon: Boolean = false,
 ) {
     // We need to use PaymentsTheme.primaryButtonStyle instead of MaterialTheme
     // because of the rules API for primary button.
@@ -49,11 +52,7 @@ internal fun PrimaryButton(
     val shape = RoundedCornerShape(
         StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
     )
-    val fontFamily = StripeTheme.primaryButtonStyle.typography.fontFamily
-    val textStyle = TextStyle(
-        fontFamily = if (fontFamily != null) FontFamily(Font(fontFamily)) else FontFamily.Default,
-        fontSize = StripeTheme.primaryButtonStyle.typography.fontSize
-    )
+    val textStyle = StripeTheme.primaryButtonStyle.getComposeTextStyle()
 
     CompositionLocalProvider(
         LocalContentAlpha provides if (isEnabled) ContentAlpha.high else ContentAlpha.disabled
@@ -79,7 +78,9 @@ internal fun PrimaryButton(
                     text = label,
                     color = onBackground.copy(alpha = LocalContentAlpha.current),
                     style = textStyle,
+                    isEnabled = isEnabled,
                     isLoading = isLoading,
+                    displayLockIcon = displayLockIcon,
                 )
             }
         }
@@ -91,8 +92,13 @@ private fun PrimaryButtonContent(
     text: String,
     color: Color,
     style: TextStyle,
+    isEnabled: Boolean,
     isLoading: Boolean,
+    displayLockIcon: Boolean,
 ) {
+    val context = LocalContext.current
+    val onBackground = Color(StripeTheme.primaryButtonStyle.getOnBackgroundColor(context))
+
     BoxWithConstraints(contentAlignment = Alignment.CenterStart) {
         Text(
             text = text,
@@ -109,6 +115,27 @@ private fun PrimaryButtonContent(
                 LoadingIndicator(
                     color = MaterialTheme.colors.onPrimary,
                     modifier = Modifier.align(Alignment.CenterEnd)
+                )
+            }
+        } else if (displayLockIcon) {
+            Box(
+                modifier = Modifier
+                    .width(maxWidth)
+                    .padding(end = 8.dp)
+            ) {
+                Icon(
+                    painter = painterResource(
+                        id = UiCoreR.drawable.stripe_ic_lock
+                    ),
+                    tint = onBackground.copy(
+                        alpha = if (isEnabled) {
+                            LocalContentAlpha.current
+                        } else {
+                            0.5f
+                        }
+                    ),
+                    contentDescription = "lock",
+                    modifier = Modifier.align(Alignment.CenterEnd),
                 )
             }
         }

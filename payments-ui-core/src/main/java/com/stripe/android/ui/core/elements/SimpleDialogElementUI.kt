@@ -2,50 +2,59 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.compose.material.AlertDialog
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.ui.graphics.Color
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.H6Text
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun SimpleDialogElementUI(
-    openDialog: MutableState<Boolean>,
+    openDialog: Boolean,
     titleText: String,
-    messageText: String,
+    messageText: String?,
     confirmText: String,
     dismissText: String,
-    onConfirmListener: (() -> Unit) = {},
-    onDismissListener: (() -> Unit) = {}
+    destructive: Boolean = false,
+    onConfirmListener: () -> Unit,
+    onDismissListener: () -> Unit,
 ) {
-    if (openDialog.value) {
+    if (openDialog) {
         StripeTheme {
             AlertDialog(
                 onDismissRequest = {
-                    openDialog.value = false
+                    onDismissListener()
                 },
                 title = {
                     H4Text(text = titleText)
                 },
-                text = {
-                    H6Text(text = messageText)
+                text = messageText?.let {
+                    {
+                        H6Text(text = it)
+                    }
                 },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            openDialog.value = false
                             onConfirmListener()
                         }
                     ) {
-                        Text(confirmText)
+                        Text(
+                            text = confirmText,
+                            color = if (destructive) {
+                                MaterialTheme.colors.error
+                            } else {
+                                Color.Unspecified
+                            }
+                        )
                     }
                 },
                 dismissButton = {
                     TextButton(
                         onClick = {
-                            openDialog.value = false
                             onDismissListener()
                         }
                     ) {

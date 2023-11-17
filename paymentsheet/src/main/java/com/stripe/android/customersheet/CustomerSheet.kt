@@ -3,6 +3,7 @@ package com.stripe.android.customersheet
 import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -10,6 +11,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.customersheet.injection.CustomerSheetComponent
+import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -157,31 +159,33 @@ class CustomerSheet @Inject internal constructor(
         /**
          * Your customer-facing business name. The default value is the name of your app.
          */
-        val merchantDisplayName: String? = null,
+        val merchantDisplayName: String,
+
+        // TODO(tillh-stripe) Add docs
+        internal val preferredNetworks: List<CardBrand> = emptyList(),
     ) {
 
         // Hide no-argument constructor init
-        internal constructor() : this(
+        internal constructor(merchantDisplayName: String) : this(
             appearance = PaymentSheet.Appearance(),
             googlePayEnabled = false,
             headerTextForSelectionScreen = null,
             defaultBillingDetails = PaymentSheet.BillingDetails(),
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
-            merchantDisplayName = null,
+            merchantDisplayName = merchantDisplayName,
         )
 
         fun newBuilder(): Builder {
-            return Builder()
+            return Builder(merchantDisplayName)
                 .appearance(appearance)
                 .googlePayEnabled(googlePayEnabled)
                 .headerTextForSelectionScreen(headerTextForSelectionScreen)
                 .defaultBillingDetails(defaultBillingDetails)
                 .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
-                .merchantDisplayName(merchantDisplayName)
         }
 
         @ExperimentalCustomerSheetApi
-        class Builder internal constructor() {
+        class Builder internal constructor(private val merchantDisplayName: String) {
             private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
             private var googlePayEnabled: Boolean = false
             private var headerTextForSelectionScreen: String? = null
@@ -189,7 +193,7 @@ class CustomerSheet @Inject internal constructor(
             private var billingDetailsCollectionConfiguration:
                 PaymentSheet.BillingDetailsCollectionConfiguration =
                     PaymentSheet.BillingDetailsCollectionConfiguration()
-            private var merchantDisplayName: String? = null
+            private var preferredNetworks: List<CardBrand> = emptyList()
 
             fun appearance(appearance: PaymentSheet.Appearance) = apply {
                 this.appearance = appearance
@@ -213,8 +217,12 @@ class CustomerSheet @Inject internal constructor(
                 this.billingDetailsCollectionConfiguration = configuration
             }
 
-            fun merchantDisplayName(name: String?) = apply {
-                this.merchantDisplayName = name
+            // TODO(tillh-stripe): Make this function public prior to release
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun preferredNetworks(
+                preferredNetworks: List<CardBrand>
+            ) = apply {
+                this.preferredNetworks = preferredNetworks
             }
 
             fun build() = Configuration(
@@ -224,14 +232,15 @@ class CustomerSheet @Inject internal constructor(
                 defaultBillingDetails = defaultBillingDetails,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 merchantDisplayName = merchantDisplayName,
+                preferredNetworks = preferredNetworks,
             )
         }
 
         companion object {
 
             @JvmStatic
-            fun builder(): Builder {
-                return Builder()
+            fun builder(merchantDisplayName: String): Builder {
+                return Builder(merchantDisplayName)
             }
         }
     }

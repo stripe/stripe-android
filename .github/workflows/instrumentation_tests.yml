@@ -44,7 +44,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@d94c3fbe4fe6a29e4a5ba47c12fb47677c73656b
         with:
           api-level: 28
           arch: x86_64
@@ -62,18 +62,18 @@ jobs:
             **/build/reports/shot/debug/verification/
             **/tmp/shot/screenshot/
             **/build/reports/androidTests/connected/
-      - uses: peter-evans/create-or-update-comment@v2
+      - uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d
         if: steps.failed-screenshots.outputs.PR_COMMENT
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: ${{ steps.failed-screenshots.outputs.PR_COMMENT }}
           token: ${{ secrets.GITHUB_TOKEN }}
-#       - name: Notify failure endpoint
-#         id: notifyFailureEndpoint
-#         if: failure()
-#         run: |
-#           ./scripts/notify_failure_endpoint.rb \
-#           ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
-#           ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
-#           "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}" \
-#           RUN_MOBILESDK
+      - name: Notify failure endpoint
+        id: notifyFailureEndpoint
+        if: failure()
+        run: |
+          ./scripts/notify_failure_endpoint.rb \
+          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
+          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
+          "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}" \
+          RUN_MOBILESDK

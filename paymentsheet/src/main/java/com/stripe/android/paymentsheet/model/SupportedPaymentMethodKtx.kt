@@ -1,8 +1,11 @@
 package com.stripe.android.paymentsheet.model
 
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.paymentsheet.forms.PIRequirement
@@ -25,7 +28,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPayment
  */
 internal fun SupportedPaymentMethod.getPMAddForm(
     stripeIntent: StripeIntent,
-    config: PaymentSheet.Configuration?
+    config: PaymentSheet.Configuration
 ) = requireNotNull(getSpecWithFullfilledRequirements(stripeIntent, config))
 
 /**
@@ -34,7 +37,7 @@ internal fun SupportedPaymentMethod.getPMAddForm(
  */
 internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
     stripeIntent: StripeIntent,
-    config: PaymentSheet.Configuration?
+    config: PaymentSheet.Configuration
 ): LayoutFormDescriptor? {
     val formSpec = formSpec
     val oneTimeUse = LayoutFormDescriptor(
@@ -96,7 +99,7 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
  * This checks to see if the payment method is supported from a SetupIntent.
  */
 private fun SupportedPaymentMethod.supportsSetupIntent(
-    config: PaymentSheet.Configuration?
+    config: PaymentSheet.Configuration
 ) = requirement.getConfirmPMFromCustomer(code) &&
     checkSetupIntentRequirements(requirement.siRequirements, config)
 
@@ -108,7 +111,7 @@ private fun SupportedPaymentMethod.supportsSetupIntent(
  */
 private fun SupportedPaymentMethod.supportsPaymentIntentSfuSet(
     paymentIntent: PaymentIntent,
-    config: PaymentSheet.Configuration?
+    config: PaymentSheet.Configuration
 ) = requirement.getConfirmPMFromCustomer(code) &&
     checkSetupIntentRequirements(requirement.siRequirements, config) &&
     checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config)
@@ -119,7 +122,7 @@ private fun SupportedPaymentMethod.supportsPaymentIntentSfuSet(
  */
 private fun SupportedPaymentMethod.supportsPaymentIntentSfuNotSettable(
     paymentIntent: PaymentIntent,
-    config: PaymentSheet.Configuration?
+    config: PaymentSheet.Configuration
 ) = checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config)
 
 /**
@@ -134,8 +137,8 @@ private fun SupportedPaymentMethod.supportsPaymentIntentSfuNotSettable(
  */
 private fun SupportedPaymentMethod.supportsPaymentIntentSfuSettable(
     paymentIntent: PaymentIntent,
-    config: PaymentSheet.Configuration?
-) = config?.customer != null &&
+    config: PaymentSheet.Configuration
+) = config.customer != null &&
     requirement.getConfirmPMFromCustomer(code) &&
     checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config) &&
     checkSetupIntentRequirements(requirement.siRequirements, config)
@@ -145,11 +148,11 @@ private fun SupportedPaymentMethod.supportsPaymentIntentSfuSettable(
  */
 private fun checkSetupIntentRequirements(
     requirements: Set<SIRequirement>?,
-    config: PaymentSheet.Configuration?
+    config: PaymentSheet.Configuration
 ): Boolean {
     return requirements?.map { requirement ->
         when (requirement) {
-            Delayed -> config?.allowsDelayedPaymentMethods == true
+            Delayed -> config.allowsDelayedPaymentMethods
         }
     }?.contains(false) == false
 }
@@ -160,15 +163,15 @@ private fun checkSetupIntentRequirements(
 private fun checkPaymentIntentRequirements(
     requirements: Set<PIRequirement>?,
     paymentIntent: PaymentIntent,
-    config: PaymentSheet.Configuration?
+    config: PaymentSheet.Configuration
 ): Boolean {
     return requirements?.map { requirement ->
         when (requirement) {
             Delayed -> {
-                config?.allowsDelayedPaymentMethods == true
+                config.allowsDelayedPaymentMethods
             }
             ShippingAddress -> {
-                val forceAllow = config?.allowsPaymentMethodsRequiringShippingAddress == true
+                val forceAllow = config.allowsPaymentMethodsRequiringShippingAddress
                 paymentIntent.containsValidShippingInfo || forceAllow
             }
         }
@@ -187,7 +190,7 @@ private val PaymentIntent.containsValidShippingInfo: Boolean
  */
 internal fun getSupportedSavedCustomerPMs(
     stripeIntent: StripeIntent?,
-    config: PaymentSheet.Configuration?,
+    config: PaymentSheet.Configuration,
     lpmRepository: LpmRepository
 ) = stripeIntent?.paymentMethodTypes?.mapNotNull {
     lpmRepository.fromCode(it)
@@ -198,8 +201,9 @@ internal fun getSupportedSavedCustomerPMs(
 
 internal fun getPMsToAdd(
     stripeIntent: StripeIntent?,
-    config: PaymentSheet.Configuration?,
-    lpmRepository: LpmRepository
+    config: PaymentSheet.Configuration,
+    lpmRepository: LpmRepository,
+    isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable()
 ) = stripeIntent?.paymentMethodTypes?.mapNotNull {
     lpmRepository.fromCode(it)
 }?.filter { supportedPaymentMethod ->
@@ -210,4 +214,7 @@ internal fun getPMsToAdd(
 }?.filterNot { supportedPaymentMethod ->
     stripeIntent.isLiveMode &&
         stripeIntent.unactivatedPaymentMethods.contains(supportedPaymentMethod.code)
+}?.filterNot { supportedPaymentMethod ->
+    !isFinancialConnectionsAvailable() &&
+        supportedPaymentMethod.code == PaymentMethod.Type.USBankAccount.code
 } ?: emptyList()

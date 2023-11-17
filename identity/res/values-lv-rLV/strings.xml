@@ -19,12 +19,18 @@
   <string name="stripe_check_mark">Atzīme, lai norādītu dokumenta uzņemšanas izdošanos</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Izvēlēties fotoattēlu</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Aizpildīšana, izmantojot testa datus</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Ietaupiet laiku, izvēloties vēlamo informāciju un tūlītēji aizpildot ar attiecīgajiem datiem. Mobilā SDK plūsma atgriezīsies ar rezultātu Izpildīts.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Neizdevās uzņemt augstas kvalitātes attēlu.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Varat mēģināt vēlreiz vai augšupielādēt attēlu no jūsu ierīces.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Neizdevās uzņemt attēlu</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">kameras ikona</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Pulksteņa ikona</string>
   <!-- Content description for close button -->
@@ -101,6 +107,8 @@
   <string name="stripe_passport">Pase</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Pase ir atlasīta</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Tālruņa numurs</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Apgrieziet autovadītāja apliecību uz otru pusi</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -127,12 +135,22 @@
   <string name="stripe_selfie_item_description">uzņemts viens pašportrets</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Jūsu pašportreta attēli nav saglabāti. Vai vēlaties iziet?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">Nākamajā darbībā tiks automātiski uzņemti daži fotoattēli, lai pārbaudītu jūsu identitāti</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Sagatavojieties uzņemt pašportretu</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Uzņemt attēlu</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Šī lapa tiek parādīta tikai testa režīmā.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Šobrīd esat testa režīmā</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Mēģināt vēlreiz</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Radusies negaidīta kļūda — mēģiniet vēlreiz pēc dažām sekundēm</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Augšupielādēt fotoattēlu</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Augšupielādējiet vadītāja apliecības aizmuguri</string>
   <!-- Title of dialog to upload front of driver license -->
@@ -145,4 +163,6 @@
   <string name="stripe_upload_dialog_title_passport">Augšupielādēt pasi</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Vai arī varat manuāli augšupielādēt %1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Augšupielādējiet savu ID dokumentu ar fotogrāfiju</string>
 </resources>

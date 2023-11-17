@@ -1,12 +1,31 @@
 #!/usr/bin/env bash
 set -o pipefail
-set -x
 set -e
 
-export MAESTRO_VERSION=1.31.0
+# Maestro tags to be executed. see https://maestro.mobile.dev/cli/tags
+MAESTRO_TAGS=""
+
+while getopts ":t:" opt; do
+  case $opt in
+    t) MAESTRO_TAGS="$OPTARG"
+    ;;
+    \?) echo "Invalid option -$OPTARG" >&2
+    exit 1
+    ;;
+  esac
+done
+
+# Check if tags is empty
+if [ -z "$MAESTRO_TAGS" ]
+then
+  echo "Tags parameter is required."
+  exit 1
+fi
+
+export MAESTRO_VERSION=1.33.1
 
 # Retry mechanism for Maestro installation
-MAX_RETRIES=3
+MAX_RETRIES=5
 RETRY_COUNT=0
 
 while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
@@ -25,11 +44,30 @@ if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
     exit 1
 fi
 
-# Create test results folder.
-mkdir -p /tmp/test_results
-
 # install APK.
 adb install $BITRISE_APK_PATH
 
-# Clear and start collecting logs
-maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml maestro/financial-connections/
+TEST_DIR_PATH=maestro/financial-connections
+TEST_RESULTS_PATH=/tmp/test_results
+RETRY_COUNT=0
+
+# Create test results folder.
+mkdir -p $TEST_RESULTS_PATH
+
+for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
+   # Check if tags are present in the test file
+    if awk '/tags:/,/---/' "$TEST_FILE_PATH" | grep -q "$MAESTRO_TAGS"; then
+        # Execute Maestro test flow and retries if failed.
+        while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
+            maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output $TEST_FILE_PATH.xml "$TEST_FILE_PATH" && break
+            let RETRY_COUNT=RETRY_COUNT+1
+            echo "Maestro test attempt $RETRY_COUNT failed. Retrying..."
+        done
+        if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
+            echo "Maestro tests failed after $MAX_RETRIES attempts."
+            exit 1
+        else
+            RETRY_COUNT=0
+        fi
+    fi
+done

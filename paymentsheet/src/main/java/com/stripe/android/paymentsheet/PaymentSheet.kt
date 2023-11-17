@@ -6,10 +6,12 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.link.account.CookieStore
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -318,7 +320,7 @@ class PaymentSheet internal constructor(
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    data class Configuration @JvmOverloads constructor(
+    data class Configuration internal constructor(
         /**
          * Your customer-facing business name.
          *
@@ -417,7 +419,47 @@ class PaymentSheet internal constructor(
          */
         val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration(),
+
+        /**
+         * A list of preferred networks that should be used to process payments
+         * made with a co-branded card if your user hasn't selected a network
+         * themselves.
+         *
+         * The first preferred network that matches any available network will
+         * be used. If no preferred network is applicable, Stripe will select
+         * the network.
+         */
+        val preferredNetworks: List<CardBrand> = listOf(),
     ) : Parcelable {
+        @JvmOverloads
+        constructor(
+            merchantDisplayName: String,
+            customer: CustomerConfiguration? = null,
+            googlePay: GooglePayConfiguration? = null,
+            primaryButtonColor: ColorStateList? = null,
+            defaultBillingDetails: BillingDetails? = null,
+            shippingDetails: AddressDetails? = null,
+            allowsDelayedPaymentMethods: Boolean = false,
+            allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
+            appearance: Appearance = Appearance(),
+            primaryButtonLabel: String? = null,
+            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+                BillingDetailsCollectionConfiguration(),
+        ) : this(
+            merchantDisplayName = merchantDisplayName,
+            customer = customer,
+            googlePay = googlePay,
+            primaryButtonColor = primaryButtonColor,
+            defaultBillingDetails = defaultBillingDetails,
+            shippingDetails = shippingDetails,
+            allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+            appearance = appearance,
+            primaryButtonLabel = primaryButtonLabel,
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            preferredNetworks = listOf()
+        )
+
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */
@@ -433,8 +475,10 @@ class PaymentSheet internal constructor(
             private var allowsDelayedPaymentMethods: Boolean = false
             private var allowsPaymentMethodsRequiringShippingAddress: Boolean = false
             private var appearance: Appearance = Appearance()
+            private var primaryButtonLabel: String? = null
             private var billingDetailsCollectionConfiguration =
                 BillingDetailsCollectionConfiguration()
+            private var preferredNetworks: List<CardBrand> = listOf()
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -474,24 +518,46 @@ class PaymentSheet internal constructor(
             fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
 
+            fun primaryButtonLabel(primaryButtonLabel: String) =
+                apply { this.primaryButtonLabel = primaryButtonLabel }
+
             fun billingDetailsCollectionConfiguration(
                 billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
             ) = apply {
                 this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
             }
 
+            /*
+             * TODO(samer-stripe): Make this function public prior to release
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun preferredNetworks(
+                preferredNetworks: List<CardBrand>
+            ) = apply {
+                this.preferredNetworks = preferredNetworks
+            }
+
             fun build() = Configuration(
-                merchantDisplayName,
-                customer,
-                googlePay,
-                primaryButtonColor,
-                defaultBillingDetails,
-                shippingDetails,
-                allowsDelayedPaymentMethods,
-                allowsPaymentMethodsRequiringShippingAddress,
-                appearance,
+                merchantDisplayName = merchantDisplayName,
+                customer = customer,
+                googlePay = googlePay,
+                primaryButtonColor = primaryButtonColor,
+                defaultBillingDetails = defaultBillingDetails,
+                shippingDetails = shippingDetails,
+                allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+                appearance = appearance,
+                primaryButtonLabel = primaryButtonLabel,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                preferredNetworks = preferredNetworks
             )
+        }
+
+        internal companion object {
+            fun default(context: Context): Configuration {
+                val appName = context.applicationInfo.loadLabel(context.packageManager).toString()
+                return Configuration(appName)
+            }
         }
     }
 

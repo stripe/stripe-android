@@ -50,8 +50,6 @@
   <string name="stripe_wallet_recollect_cvc_error">Din motive de securitate, vă rugăm să introduceți din nou codul de securitate al cardului dvs.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Sigur doriți să eliminați acest cont asociat?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Eliminare card</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Sigur doriți să eliminați acest card?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

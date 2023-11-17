@@ -36,15 +36,15 @@ internal data class PopupPayload(
 
     @SerialName("paymentUserAgent")
     val paymentUserAgent: String,
+
+    @SerialName("paymentObject")
+    val paymentObject: String,
 ) {
     @SerialName("path")
     val path: String = "mobile_pay"
 
     @SerialName("integrationType")
     val integrationType: String = "mobile"
-
-    @SerialName("paymentObject")
-    val paymentObject: String = "link_payment_method"
 
     @SerialName("loggerMetadata")
     val loggerMetadata: Map<String, String> = emptyMap()
@@ -128,7 +128,12 @@ internal data class PopupPayload(
                 appId = context.applicationInfo.packageName,
                 locale = context.currentLocale(),
                 paymentUserAgent = paymentUserAgent,
+                paymentObject = paymentObject(),
             )
+        }
+
+        private fun LinkConfiguration.paymentObject(): String {
+            return if (passthroughModeEnabled) "card_payment_method" else "link_payment_method"
         }
 
         private fun StripeIntent.toPaymentInfo(): PaymentInfo? {

@@ -2,6 +2,61 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [FIXED][7584](https://github.com/stripe/stripe-android/pull/7584) Fixed an issue where PaymentSheet would render with a lightened surface color in dark mode.
+* [FIXED][7635](https://github.com/stripe/stripe-android/pull/7635) Fixed an issue where PaymentSheet wouldn't accept valid Mexican phone numbers.
+* [CHANGED][7627](https://github.com/stripe/stripe-android/pull/7627) Updated the experimental CustomerSheet.Configuration to require a merchant name.
+
+## 20.34.4 - 2023-11-02
+
+### PaymentSheet
+* [FIXED][7570](https://github.com/stripe/stripe-android/pull/7570) Fixed an issue where compiling PaymentSheet with R8 would cause an irrelevant warning for missing classes from Financial Connections if the module wasn't included.
+* [FIXED][7571](https://github.com/stripe/stripe-android/pull/7571) Fixed an issue where CustomerSheet would throw an error related to invalid payment_method_types.
+
+## 20.34.3 - 2023-10-31
+
+### PaymentSheet
+* [FIXED][7530](https://github.com/stripe/stripe-android/pull/7530) Fixed an issue which caused PaymentSheet to transitively include the Financial Connections SDK even if not requested.
+* [FIXED][7545](https://github.com/stripe/stripe-android/pull/7545) Fixed an issue where the US Bank Account collection flow would not launch when using FlowController with Payment Intents.
+
+## 20.34.2 - 2023-10-30
+
+### PaymentSheet
+* [FIXED][7499](https://github.com/stripe/stripe-android/pull/7499) Fixed an issue with incorrect error messages when encountering a failure after 3D Secure authentication.
+* [FIXED][7464](https://github.com/stripe/stripe-android/pull/7464) Fixed an issue where canceling the US Bank Account selection flow prevents the user from launching it again.
+* [FIXED][7529](https://github.com/stripe/stripe-android/pull/7529) PaymentSheet no longer displays saved cards that originated from Apple Pay or Google Pay.
+
+## 20.34.1 - 2023-10-24
+
+### Payments
+* [FIXED][7485](https://github.com/stripe/stripe-android/pull/7485) Fixed a crash when using `CardInputWidget` in an AppCompat theme.
+
+## 20.34.0 - 2023-10-23
+
+### Payments
+* [ADDED][7449](https://github.com/stripe/stripe-android/pull/7449) Added saved payment method support for SEPA family payment methods.
+
+## 20.33.0 - 2023-10-16
+
+### Payments
+* [ADDED][7431](https://github.com/stripe/stripe-android/pull/7431) Added bindings support for MobilePay. See [private beta information](https://stripe.com/docs/payments/mobilepay).
+
+## 20.32.1 - 2023-10-09
+
+### PaymentSheet
+* [FIXED][7387](https://github.com/stripe/stripe-android/pull/7387) Fixed a bug where `AddressLauncher.present` would crash.
+
+Dependencies updated:
+* [7409](https://github.com/stripe/stripe-android/pull/7409) Bumped Kotlin to 1.8.22 and Compose Compiler to 1.4.8.
+
+## 20.32.0 - 2023-09-25
+
+### PaymentSheet
+* [ADDED][7337](https://github.com/stripe/stripe-android/pull/7337) PaymentSheet now supports Swish for PaymentIntents in private beta.
+
+### Payments
+* [ADDED][7337](https://github.com/stripe/stripe-android/pull/7337) Added support for Swish for PaymentIntents in private beta.
+
 ### Financial Connections
 * [FIXED][7331](https://github.com/stripe/stripe-android/pull/7331) When cancelling out of a auth session, going back to the consent screen required two back taps.
 

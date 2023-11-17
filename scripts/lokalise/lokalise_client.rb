@@ -42,7 +42,7 @@ class LokaliseClient
                     "translations": [
                         {
                             "language_iso": "en",
-                            "translation": key_object[:value],
+                            "translation": key_object[:lokalise_value],
                             "is_reviewed": true,
                             "is_unverified": false,
                             "is_archived": false,

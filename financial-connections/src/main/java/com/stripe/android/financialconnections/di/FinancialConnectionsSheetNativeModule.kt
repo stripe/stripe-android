@@ -3,9 +3,11 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
@@ -18,6 +20,7 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
+import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
@@ -31,11 +34,11 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import java.util.Locale
 import javax.inject.Named
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 @Module(
     subcomponents = [
@@ -141,8 +144,22 @@ internal interface FinancialConnectionsSheetNativeModule {
 
         @Singleton
         @Provides
-        fun providesSaveToLinkWithStripeSucceededRepository() = SaveToLinkWithStripeSucceededRepository(
-            CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        fun providesSaveToLinkWithStripeSucceededRepository(
+            @IOContext workContext: CoroutineContext
+        ) = SaveToLinkWithStripeSucceededRepository(
+            CoroutineScope(SupervisorJob() + workContext)
+        )
+
+        @Singleton
+        @Provides
+        fun providesPartnerToCoreAuthsRepository(
+            logger: Logger,
+            @IOContext workContext: CoroutineContext,
+            analyticsTracker: FinancialConnectionsAnalyticsTracker
+        ) = CoreAuthorizationPendingNetworkingRepairRepository(
+            coroutineScope = CoroutineScope(SupervisorJob() + workContext),
+            logger = logger,
+            analyticsTracker = analyticsTracker
         )
 
         @Provides

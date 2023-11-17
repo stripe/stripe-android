@@ -50,8 +50,6 @@
   <string name="stripe_wallet_recollect_cvc_error">Ange säkerhetskoden för ditt kort igen av säkerhetsskäl.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Är du säker på att du vill ta bort det länkade kontot?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Ta bort kort</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Är du säker på att du vill ta bort kortet?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

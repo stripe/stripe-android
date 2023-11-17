@@ -4,12 +4,24 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[ผ่อนชำระ <num_installments/> งวดแบบปลอดดอกเบี้ย งวดละ <installment_price/> ด้วย <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">ย้อนกลับ</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">หมายเลขบัญชี</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">หมายเลขบัญชีไม่ครบถ้วน</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">บัญชีธนาคาร</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">ฉันเข้าใจว่า Stripe จะดำเนินการหักบัญชีอัตโนมัติในนามของ %s และยืนยันว่าฉันเป็นเจ้าของบัญชีและเป็นบุคคลเดียวเท่านั้นที่อนุญาตให้หักเงินจากบัญชีนี้ได้</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Sort Code</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">Sort Code ของคุณไม่ครบถ้วน</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">ที่อยู่ในการเรียกเก็บเงิน</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">รหัส BLIK</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">การดำเนินการต่อ หมายความว่าคุณอนุญาตให้ %1$s ฝากเงินเข้าบัญชี Cash App ของคุณสำหรับการชำระเงินรายการนี้ และการชำระเงินในอนาคตโดยสอดคล้องกับข้อกำหนดของ %2$s จนกว่าจะมีการเพิกถอนการอนุญาต คุณสามารถเปลี่ยนแปลงการตั้งค่านี้ได้ทุกเมื่อในการตั้งค่า Cash App</string>
   <!-- Title for the contact information section -->
@@ -57,10 +69,14 @@
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">การหักบัญชีอัตโนมัติแบบ BECS ในออสเตรเลีย</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">บัตร</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">การหักบัญชีอัตโนมัติแบบ SEPA</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">การยืนยันการการชำระเงินด้วย PayPal หมายความว่าคุณอนุญาตให้ %s เรียกเก็บเงินจากบัญชี PayPal ของคุณสำหรับการชำระเงินในอนาคตตามเงื่อนไขของผู้ค้ารายดังกล่าว</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">การยืนยันการการชำระเงินด้วย RevolutPay หมายความว่าคุณอนุญาตให้ %s เรียกเก็บเงินจากบัญชี RevolutPay ของคุณสำหรับการชำระเงินในอนาคตตามเงื่อนไขของผู้ค้ารายดังกล่าว</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">บันทึกไว้เพื่อชำระเงินด้วย %s ในอนาคต</string>
   <!-- Button title to open camera to scan credit/debit card -->

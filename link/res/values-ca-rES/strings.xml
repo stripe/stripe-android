@@ -50,8 +50,6 @@
   <string name="stripe_wallet_recollect_cvc_error">Per raons de seguretat, torna a introduir el codi de seguretat de la targeta.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Segur que vols eliminar aquest compte vinculat?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Elimina la targeta</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Segur que vols eliminar aquesta targeta?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

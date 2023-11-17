@@ -102,6 +102,10 @@
   <string name="stripe_becs_widget_name_required">O seu nome é obrigatório.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">Cancelar</string>
+  <!-- Title for a dropdown option when selecting a card brand -->
+  <string name="stripe_card_brand_choice_no_selection">Sem seleção</string>
+  <!-- Title for a dropdown where the customer can select a card brand -->
+  <string name="stripe_card_brand_choice_selection_header">Selecione a marca do cartão (opcional)</string>
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">O seu cartão foi recusado</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->

@@ -34,11 +34,11 @@ internal class PaymentSheetContractV2 :
     @Parcelize
     data class Args(
         internal val initializationMode: PaymentSheet.InitializationMode,
-        internal val config: PaymentSheet.Configuration?,
+        internal val config: PaymentSheet.Configuration,
         @ColorInt internal val statusBarColor: Int?,
     ) : ActivityStarter.Args {
 
-        val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay
+        val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config.googlePay
 
         companion object {
             internal fun fromIntent(intent: Intent): Args? {

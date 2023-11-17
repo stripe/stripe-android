@@ -4,10 +4,12 @@ import android.widget.FrameLayout
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.mockito.kotlin.mock
@@ -255,51 +257,47 @@ class PaymentMethodsAdapterTest {
     }
 
     @Test
-    fun `click on add card view should emit args`() {
+    fun `click on add card view should emit args`() = runTest {
         val adapter = PaymentMethodsAdapter(
             ARGS,
             shouldShowGooglePay = true
         )
 
-        val argsList = mutableListOf<AddPaymentMethodActivityStarter.Args?>()
-        adapter.addPaymentMethodArgs.observeForever { args ->
-            argsList.add(args)
+        adapter.addPaymentMethodArgs.test {
+            assertThat(awaitItem()).isNull() // Initial value.
+
+            val viewHolder = adapter.createViewHolder(
+                FrameLayout(context),
+                PaymentMethodsAdapter.ViewType.AddCard.ordinal
+            )
+            adapter.onBindViewHolder(viewHolder, 0)
+            viewHolder.itemView.performClick()
+
+            assertThat(awaitItem())
+                .isEqualTo(adapter.addCardArgs)
         }
-
-        val viewHolder = adapter.createViewHolder(
-            FrameLayout(context),
-            PaymentMethodsAdapter.ViewType.AddCard.ordinal
-        )
-        adapter.onBindViewHolder(viewHolder, 0)
-        viewHolder.itemView.performClick()
-
-        assertThat(argsList.filterNotNull())
-            .containsExactly(adapter.addCardArgs)
     }
 
     @Test
-    fun `click on add FPX view should emit args`() {
+    fun `click on add FPX view should emit args`() = runTest {
         val adapter = PaymentMethodsAdapter(
             ARGS,
             shouldShowGooglePay = true
         )
 
-        val argsList = mutableListOf<AddPaymentMethodActivityStarter.Args>()
-        adapter.addPaymentMethodArgs.observeForever { args ->
-            if (args != null) {
-                argsList.add(args)
-            }
+        adapter.addPaymentMethodArgs.test {
+            assertThat(awaitItem()).isNull() // Initial value.
+
+            val viewHolder = adapter.createViewHolder(
+                FrameLayout(context),
+                PaymentMethodsAdapter.ViewType.AddFpx.ordinal
+            )
+            adapter.onBindViewHolder(viewHolder, 0)
+            viewHolder.itemView.performClick()
+
+            assertThat(awaitItem())
+                .isEqualTo(adapter.addFpxArgs)
         }
-
-        val viewHolder = adapter.createViewHolder(
-            FrameLayout(context),
-            PaymentMethodsAdapter.ViewType.AddFpx.ordinal
-        )
-        adapter.onBindViewHolder(viewHolder, 0)
-        viewHolder.itemView.performClick()
-
-        assertThat(argsList)
-            .containsExactly(adapter.addFpxArgs)
     }
 
     private companion object {

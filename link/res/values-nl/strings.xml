@@ -50,8 +50,6 @@
   <string name="stripe_wallet_recollect_cvc_error">Voer uit veiligheidsoverwegingen de beveiligingscode van je betaalkaart opnieuw in.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Weet je zeker dat je dit gekoppelde account wilt verwijderen?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Betaalkaart verwijderen</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Weet je zeker dat je deze betaalkaart wilt verwijderen?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

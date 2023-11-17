@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
 import com.stripe.android.R
@@ -24,6 +25,7 @@ import com.stripe.android.databinding.StripePaymentMethodsActivityBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.utils.argsAreInvalid
 import com.stripe.android.view.i18n.TranslatorManager
+import kotlinx.coroutines.launch
 
 /**
  * An activity that allows a customer to select from their attached payment methods,
@@ -105,14 +107,21 @@ class PaymentMethodsActivity : AppCompatActivity() {
             finishWithResult(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
         }
 
-        viewModel.snackbarData.observe(this) { snackbarText ->
-            snackbarText?.let {
-                Snackbar.make(viewBinding.coordinator, it, Snackbar.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            viewModel.snackbarData.collect { snackbarText ->
+                snackbarText?.let {
+                    Snackbar.make(viewBinding.coordinator, it, Snackbar.LENGTH_SHORT).show()
+                }
             }
         }
-        viewModel.progressData.observe(this) {
-            viewBinding.progressBar.isVisible = it
+
+        lifecycleScope.launch {
+            viewModel.progressData.collect {
+                viewBinding.progressBar.isVisible = it
+            }
         }
+
+        observePaymentMethodData()
 
         setupRecyclerView()
 
@@ -120,9 +129,12 @@ class PaymentMethodsActivity : AppCompatActivity() {
             AddPaymentMethodContract(),
             ::onAddPaymentMethodResult
         )
-        adapter.addPaymentMethodArgs.observe(this) { args ->
-            if (args != null) {
-                addPaymentMethodLauncher.launch(args)
+
+        lifecycleScope.launch {
+            adapter.addPaymentMethodArgs.collect { args ->
+                if (args != null) {
+                    addPaymentMethodLauncher.launch(args)
+                }
             }
         }
 
@@ -141,8 +153,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
             viewBinding.footerContainer.addView(footer)
             viewBinding.footerContainer.isVisible = true
         }
-
-        fetchCustomerPaymentMethods()
 
         // This prevents the first click from being eaten by the focus.
         viewBinding.recycler.requestFocusFromTouch()
@@ -208,34 +218,12 @@ class PaymentMethodsActivity : AppCompatActivity() {
     private fun onAddedPaymentMethod(paymentMethod: PaymentMethod) {
         if (paymentMethod.type?.isReusable == true) {
             // Refresh the list of Payment Methods with the new reusable Payment Method.
-            fetchCustomerPaymentMethods()
             viewModel.onPaymentMethodAdded(paymentMethod)
         } else {
             // If the added Payment Method is not reusable, it also can't be attached to a
             // customer, so immediately return to the launching host with the new
             // Payment Method.
             finishWithResult(paymentMethod)
-        }
-    }
-
-    private fun fetchCustomerPaymentMethods() {
-        viewModel.getPaymentMethods().observe(this) { result ->
-            result.fold(
-                onSuccess = { adapter.setPaymentMethods(it) },
-                onFailure = {
-                    alertDisplayer.show(
-                        when (it) {
-                            is StripeException -> {
-                                TranslatorManager.getErrorMessageTranslator()
-                                    .translate(it.statusCode, it.message, it.stripeError)
-                            }
-                            else -> {
-                                it.message.orEmpty()
-                            }
-                        }
-                    )
-                }
-            )
         }
     }
 
@@ -287,6 +275,29 @@ class PaymentMethodsActivity : AppCompatActivity() {
             footerView
         } else {
             null
+        }
+    }
+
+    private fun observePaymentMethodData() {
+        lifecycleScope.launch {
+            viewModel.paymentMethodsData.collect { result ->
+                result?.fold(
+                    onSuccess = { adapter.setPaymentMethods(it) },
+                    onFailure = {
+                        alertDisplayer.show(
+                            when (it) {
+                                is StripeException -> {
+                                    TranslatorManager.getErrorMessageTranslator()
+                                        .translate(it.statusCode, it.message, it.stripeError)
+                                }
+                                else -> {
+                                    it.message.orEmpty()
+                                }
+                            }
+                        )
+                    }
+                )
+            }
         }
     }
 

@@ -32,7 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
-import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetExampleActivity
@@ -42,6 +41,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_fl
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
+import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity as NewPaymentSheetPlaygroundActivity
 
 private const val SurfaceOverlayOpacity = 0.12f
 
@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
             MenuItem(
                 titleResId = R.string.playground_title,
                 subtitleResId = R.string.playground_subtitle,
-                klass = PaymentSheetPlaygroundActivity::class.java,
+                klass = NewPaymentSheetPlaygroundActivity::class.java,
                 section = MenuItem.Section.Internal,
             ),
             MenuItem(

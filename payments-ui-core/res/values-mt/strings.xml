@@ -4,12 +4,24 @@
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Ħallas f\'dan-numru ta\' pagamenti: <num_installments/> ta\' <installment_price/> mingħajr imgħax grazzi għal <img/>]]></string>
   <!-- Text for back button -->
   <string name="stripe_back">Lura</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Numru tal-kont</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
   <string name="stripe_bacs_account_number_incomplete">In-numru tal-kont tiegħek mhux komplut.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Kont tal-bank</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Jiena nifhem li Stripe se tkun qed tiġbor id-Debiti Diretti f\'isem %s u nikkonferma li jiena d-detentur tal-kont u l-unika persuna meħtieġa biex tawtorizza d-debiti minn dan il-kont.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Il-kodiċi sort</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">Il-kodiċi sort tiegħek mhux komplut.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Indirizz tal-kont</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">Kodiċi BLIK</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Meta tkompli tkun qed tagħti permess lil %1$s biex, sakemm dal-permess jitneħħa, tkun tista\' tiġbor il-flus mill-kont Cash App tiegħek għal dal-pagament u għall-pagamenti tal-ġejjieni skont ir-regoli ta\' %2$s. Tista\' tibdel dil-ħaġa meta trid mill-Għażliet ta\' Cash App.</string>
   <!-- Title for the contact information section -->
@@ -57,10 +69,14 @@
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Debitu Dirett BECS AU</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kard</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Debitu SEPA</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Meta tikkonferma l-pagament tiegħek ma\' PayPal, tkun qed tagħti permess lil %s biex fil-ġejjieni tiġbor il-pagamenti mill-kont ta\' PayPal tiegħek skont ir-regoli tagħha.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">Meta tikkonferma l-pagament tiegħek b\'RevolutPay, tkun qed tħalli lil %s tiġbor il-flus mill-kont ta\' RevolutPay tiegħek għall-pagamenti tal-ġejjieni skont ir-regoli tagħha.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Issejvja għall-pagamenti futuri lil %s</string>
   <!-- Button title to open camera to scan credit/debit card -->

@@ -12,7 +12,7 @@ internal interface EventReporter {
      * PaymentSheet has been instantiated or FlowController has finished its configuration.
      */
     fun onInit(
-        configuration: PaymentSheet.Configuration?,
+        configuration: PaymentSheet.Configuration,
         isDecoupling: Boolean,
     )
 
@@ -35,6 +35,14 @@ internal interface EventReporter {
      * PaymentSheet or FlowController have failed to load.
      */
     fun onLoadFailed(
+        isDecoupling: Boolean,
+        error: Throwable,
+    )
+
+    /**
+     * PaymentSheet or FlowController have failed to load from the Elements session endpoint.
+     */
+    fun onElementsSessionLoadFailed(
         isDecoupling: Boolean,
         error: Throwable,
     )

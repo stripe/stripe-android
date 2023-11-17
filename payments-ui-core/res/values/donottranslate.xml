@@ -17,7 +17,7 @@
     <string name="stripe_paymentsheet_payment_method_grabpay">GrabPay</string>
     <string name="stripe_paymentsheet_payment_method_fpx">FPX Bank</string>
     <string name="stripe_paymentsheet_payment_method_boleto">Boleto</string>
-
+    <string name="stripe_paymentsheet_payment_method_swish">Swish</string>
     <string name="stripe_paymentsheet_payment_method_affirm">Affirm</string>
     <string name="stripe_paymentsheet_payment_method_revolut_pay">Revolut Pay</string>
     <string name="stripe_paymentsheet_payment_method_amazon_pay">Amazon Pay</string>

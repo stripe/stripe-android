@@ -189,6 +189,9 @@ constructor(
             is StripeIntent.NextActionData.BlikAuthorize -> {
                 StripeIntent.NextActionType.BlikAuthorize
             }
+            is StripeIntent.NextActionData.SwishRedirect -> {
+                StripeIntent.NextActionType.SwishRedirect
+            }
             is StripeIntent.NextActionData.AlipayRedirect,
             is StripeIntent.NextActionData.WeChatPayRedirect,
             null -> {

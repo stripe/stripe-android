@@ -20,7 +20,6 @@ class ConsumerPaymentDetailsJsonParserTest {
                 listOf(
                     ConsumerPaymentDetails.Card(
                         id = "QAAAKJ6",
-                        isDefault = true,
                         expiryYear = 2023,
                         expiryMonth = 12,
                         brand = CardBrand.MasterCard,
@@ -45,7 +44,6 @@ class ConsumerPaymentDetailsJsonParserTest {
                 listOf(
                     ConsumerPaymentDetails.BankAccount(
                         id = "wAAACGA",
-                        isDefault = true,
                         bankIconCode = null,
                         bankName = "STRIPE TEST BANK",
                         last4 = "6789"
@@ -63,7 +61,6 @@ class ConsumerPaymentDetailsJsonParserTest {
                 listOf(
                     ConsumerPaymentDetails.Card(
                         id = "QAAAKJ6",
-                        isDefault = true,
                         expiryYear = 2023,
                         expiryMonth = 12,
                         brand = CardBrand.MasterCard,
@@ -76,7 +73,6 @@ class ConsumerPaymentDetailsJsonParserTest {
                     ),
                     ConsumerPaymentDetails.Card(
                         id = "QAAAKIL",
-                        isDefault = false,
                         expiryYear = 2024,
                         expiryMonth = 4,
                         brand = CardBrand.Visa,
@@ -89,7 +85,6 @@ class ConsumerPaymentDetailsJsonParserTest {
                     ),
                     ConsumerPaymentDetails.BankAccount(
                         id = "wAAACGA",
-                        isDefault = false,
                         bankIconCode = null,
                         bankName = "STRIPE TEST BANK",
                         last4 = "6789"
@@ -176,7 +171,6 @@ class ConsumerPaymentDetailsJsonParserTest {
                 listOf(
                     ConsumerPaymentDetails.Card(
                         id = "QAAAKJ6",
-                        isDefault = true,
                         expiryYear = 2023,
                         expiryMonth = 12,
                         brand = CardBrand.AmericanExpress,
@@ -189,7 +183,6 @@ class ConsumerPaymentDetailsJsonParserTest {
                     ),
                     ConsumerPaymentDetails.Card(
                         id = "QAAAKIL",
-                        isDefault = false,
                         expiryYear = 2024,
                         expiryMonth = 4,
                         brand = CardBrand.DinersClub,

@@ -6,6 +6,12 @@
   <string name="stripe_bank_account_ending_in">Odebrat bankovní účet končící na %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Dokončete nákup potvrzením platby v bankovní aplikaci do  %s.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">Vaše platební údaje nebudou uloženy.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Chcete tento formulář zavřít?</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">Došlo k chybě. Zkontrolujte připojení a zkuste to znovu.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Pokračovaním souhlasíte s autorizací plateb podle <terms>těchto podmínek</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -45,12 +51,16 @@
   <string name="stripe_paymentsheet_primary_button_processing">Zpracování...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Odebrat bankovní účet</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_paymentsheet_remove_card">Odebrat kartu</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Odebrat %s</string>
   <!-- A button used for saving a new payment method -->
   <string name="stripe_paymentsheet_save">Uložit</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_save_a_new_payment_method">Uložte novou platební metodu</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_save_bank_title">Uložte si svůj bankovní účet v několika málo krocích.</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Uložit pro budoucí platby</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
@@ -59,6 +69,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Vyberte svou platební metodu</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Celkem: %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">Něco se pokazilo</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Zrušit a zaplatit jiným způsobem</string>
   <!-- Text on a screen asking the user to approve a payment -->

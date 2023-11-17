@@ -54,7 +54,6 @@ import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
-import com.stripe.android.link.ui.progressIndicatorTestTag
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.EmailConfig
@@ -67,6 +66,8 @@ import com.stripe.android.uicore.elements.menu.Checkbox
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
+
+internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
 
 @Preview
 @Composable
@@ -276,7 +277,7 @@ internal fun LinkInlineSignup(
 
                                         LinkTerms(
                                             modifier = Modifier.padding(top = 8.dp),
-                                            textAlign = TextAlign.Left
+                                            textAlign = TextAlign.Start,
                                         )
                                     }
                                 }
@@ -339,7 +340,7 @@ internal fun EmailCollectionSection(
                         bottom = 8.dp
                     )
                     .semantics {
-                        testTag = progressIndicatorTestTag
+                        testTag = ProgressIndicatorTestTag
                     },
                 color = MaterialTheme.linkColors.progressIndicator,
                 strokeWidth = 2.dp

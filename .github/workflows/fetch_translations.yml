@@ -18,10 +18,17 @@ jobs:
       - name: Compute timestamp
         id: timestamp
         run: echo "TIMESTAMP=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
+      - name: Generate translations app token
+        id: generate-translations-app-token
+        uses: actions/create-github-app-token@eaddb9eb7e4226c68cf4b39f167c83e5bd132b3e
+        with:
+          app-id: ${{ secrets.ANDROID_TRANSLATIONS_APP_ID }}
+          private-key: ${{ secrets.ANDROID_TRANSLATIONS_APP_PRIVATE_KEY }}
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38
         id: create-pull-request
         with:
+          token: ${{ steps.generate-translations-app-token.outputs.token }}
           commit-message: Fetch latest Lokalize translations
           title: Update translations
           body: This pull request contains the latest translations from Lokalize.

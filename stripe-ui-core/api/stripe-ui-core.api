@@ -100,6 +100,13 @@ public final class com/stripe/android/uicore/elements/ComposableSingletons$Secti
 	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/uicore/elements/ComposableSingletons$TextFieldUIKt {
+	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$TextFieldUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/uicore/elements/DropdownConfig$DefaultImpls {
 	public static fun getDisableDropdownWithSingleElement (Lcom/stripe/android/uicore/elements/DropdownConfig;)Z
 	public static fun getTinyMode (Lcom/stripe/android/uicore/elements/DropdownConfig;)Z
@@ -146,6 +153,7 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$Companion {
 	public final fun getOneLineAddress ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getPhone ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getPostalCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getPreferredCardBrand ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getSameAsShipping ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getSaveForFutureUse ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getSortingCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
@@ -192,6 +200,7 @@ public final class com/stripe/android/uicore/elements/TextFieldController$Defaul
 	public static fun ComposeUI-MxjM1cc (Lcom/stripe/android/uicore/elements/TextFieldController;ZLcom/stripe/android/uicore/elements/SectionFieldElement;Landroidx/compose/ui/Modifier;Ljava/util/Set;Lcom/stripe/android/uicore/elements/IdentifierSpec;IILandroidx/compose/runtime/Composer;I)V
 	public static fun getEnabled (Lcom/stripe/android/uicore/elements/TextFieldController;)Z
 	public static fun getPlaceHolder (Lcom/stripe/android/uicore/elements/TextFieldController;)Lkotlinx/coroutines/flow/Flow;
+	public static fun onDropdownItemClicked (Lcom/stripe/android/uicore/elements/TextFieldController;Lcom/stripe/android/uicore/elements/TextFieldIcon$Dropdown$Item;)V
 }
 
 public abstract class com/stripe/android/uicore/elements/TextFieldStateConstants$Error : com/stripe/android/uicore/elements/TextFieldState {

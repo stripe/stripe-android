@@ -1,6 +1,7 @@
 package com.stripe.android.view
 
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.networking.ApiRequest
@@ -20,14 +21,11 @@ class FpxViewModelTest {
     )
 
     @Test
-    internal fun `getFpxBankStatues should update LiveData`() = runTest {
-        var bankStatuses: BankStatuses? = null
-        viewModel.getFpxBankStatues().observeForever {
-            bankStatuses = it
+    internal fun `fpxBankStatues should emit on view model init`() = runTest {
+        viewModel.fpxBankStatues.test {
+            assertThat(FpxBank.get("affin_bank")?.let { awaitItem()?.isOnline(it) })
+                .isTrue()
         }
-
-        assertThat(FpxBank.get("affin_bank")?.let { bankStatuses?.isOnline(it) })
-            .isTrue()
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {

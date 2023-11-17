@@ -40,7 +40,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     fun configure(
         scope: CoroutineScope,
         initializationMode: PaymentSheet.InitializationMode,
-        configuration: PaymentSheet.Configuration?,
+        configuration: PaymentSheet.Configuration,
         callback: PaymentSheet.FlowController.ConfigCallback,
     ) {
         val oldJob = job.getAndSet(
@@ -57,7 +57,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
     private suspend fun configureInternal(
         initializationMode: PaymentSheet.InitializationMode,
-        configuration: PaymentSheet.Configuration?,
+        configuration: PaymentSheet.Configuration,
         callback: PaymentSheet.FlowController.ConfigCallback,
     ) {
         suspend fun onConfigured(error: Throwable? = null) {
@@ -70,7 +70,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         try {
             initializationMode.validate()
-            configuration?.validate()
+            configuration.validate()
         } catch (e: InvalidParameterException) {
             onConfigured(error = e)
             return
@@ -98,7 +98,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         )
     }
 
-    private fun onInitSuccess(
+    private suspend fun onInitSuccess(
         state: PaymentSheetState.Full,
         configureRequest: ConfigureRequest,
     ) {
@@ -115,7 +115,9 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             newState = state,
         )
 
-        viewModel.state = state
+        withContext(uiContext) {
+            viewModel.state = state
+        }
     }
 
     private fun resetJob() {
@@ -124,6 +126,6 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
     data class ConfigureRequest(
         val initializationMode: PaymentSheet.InitializationMode,
-        val configuration: PaymentSheet.Configuration?,
+        val configuration: PaymentSheet.Configuration,
     )
 }

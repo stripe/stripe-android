@@ -10,7 +10,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
-import com.stripe.android.link.ui.progressIndicatorTestTag
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -149,7 +148,7 @@ internal class LinkInlineSignupViewTest {
     }
 
     private fun onEmailField() = composeTestRule.onNodeWithText("Email")
-    private fun onProgressIndicator() = composeTestRule.onNodeWithTag(progressIndicatorTestTag)
+    private fun onProgressIndicator() = composeTestRule.onNodeWithTag(ProgressIndicatorTestTag)
     private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
     private fun onNameField() = composeTestRule.onNodeWithText("Full name")
     private fun onSaveMyInfo() = composeTestRule.onNodeWithText("Save my info", substring = true)

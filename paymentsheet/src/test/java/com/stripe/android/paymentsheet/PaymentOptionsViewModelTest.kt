@@ -6,10 +6,12 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
@@ -192,7 +194,7 @@ internal class PaymentOptionsViewModelTest {
 
         assertThat(viewModel.paymentMethods.value).isEmpty()
         assertThat(viewModel.primaryButtonUiState.value).isNull()
-        assertThat(viewModel.notesText.value).isNull()
+        assertThat(viewModel.mandateText.value?.text).isNull()
     }
 
     @Test
@@ -510,6 +512,31 @@ internal class PaymentOptionsViewModelTest {
         verify(eventReporter).onDismiss(isDecoupling = true)
     }
 
+    @Test
+    fun `Doesn't consider unsupported payment methods in header text creation`() = runTest {
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
+                config = PAYMENT_OPTION_CONTRACT_ARGS.state.config.copy(
+                    allowsDelayedPaymentMethods = false,
+                ),
+                isGooglePayReady = false,
+                customerPaymentMethods = emptyList(),
+                stripeIntent = PAYMENT_INTENT.copy(
+                    paymentMethodTypes = listOf(
+                        PaymentMethod.Type.Card.code,
+                        PaymentMethod.Type.AuBecsDebit.code,
+                    ),
+                )
+            ),
+        )
+
+        val viewModel = createViewModel(args)
+
+        viewModel.headerText.test {
+            assertThat(awaitItem()).isEqualTo(R.string.stripe_title_add_a_card)
+        }
+    }
+
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,
@@ -528,6 +555,7 @@ internal class PaymentOptionsViewModelTest {
             linkHandler = linkHandler,
             linkConfigurationCoordinator = linkInteractor,
             formViewModelSubComponentBuilderProvider = mock(),
+            editInteractorFactory = mock()
         )
     }
 

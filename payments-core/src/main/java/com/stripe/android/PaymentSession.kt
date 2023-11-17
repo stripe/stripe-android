@@ -13,12 +13,14 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentSession.PaymentSessionListener
 import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
+import kotlinx.coroutines.launch
 
 /**
  * Represents a single start-to-finish payment operation.
@@ -63,26 +65,23 @@ class PaymentSession @VisibleForTesting internal constructor(
 
     init {
         lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
-        viewModel.networkState.observe(
-            lifecycleOwner,
-            {
-                it?.let { networkState ->
-                    listener?.onCommunicatingStateChanged(
-                        when (networkState) {
-                            PaymentSessionViewModel.NetworkState.Active -> true
-                            PaymentSessionViewModel.NetworkState.Inactive -> false
-                        }
-                    )
-                }
-            }
-        )
 
-        viewModel.paymentSessionDataLiveData.observe(
-            lifecycleOwner,
-            {
-                listener?.onPaymentSessionDataChanged(it)
+        lifecycleOwner.lifecycleScope.launch {
+            viewModel.networkState.collect { networkState ->
+                listener?.onCommunicatingStateChanged(
+                    when (networkState) {
+                        PaymentSessionViewModel.NetworkState.Active -> true
+                        PaymentSessionViewModel.NetworkState.Inactive -> false
+                    }
+                )
             }
-        )
+        }
+
+        lifecycleOwner.lifecycleScope.launch {
+            viewModel.paymentSessionDataStateFlow.collect { sessionData ->
+                listener?.onPaymentSessionDataChanged(sessionData)
+            }
+        }
     }
 
     /**
@@ -160,21 +159,25 @@ class PaymentSession @VisibleForTesting internal constructor(
                 }
                 false
             }
+
             Activity.RESULT_OK -> when (requestCode) {
                 PaymentMethodsActivityStarter.REQUEST_CODE -> {
                     onPaymentMethodResult(data)
                     true
                 }
+
                 PaymentFlowActivityStarter.REQUEST_CODE -> {
                     data.getParcelableExtra<PaymentSessionData>(EXTRA_PAYMENT_SESSION_DATA)?.let {
                         viewModel.onPaymentFlowResult(it)
                     }
                     true
                 }
+
                 else -> {
                     false
                 }
             }
+
             else -> false
         }
     }

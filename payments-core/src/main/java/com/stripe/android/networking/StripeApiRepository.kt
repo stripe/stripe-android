@@ -60,10 +60,12 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
+import com.stripe.android.model.MobileCardElementConfig
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
@@ -76,12 +78,14 @@ import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
+import com.stripe.android.model.parsers.ConsumerPaymentDetailsShareJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.model.parsers.FinancialConnectionsSessionJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.IssuingCardPinJsonParser
+import com.stripe.android.model.parsers.MobileCardElementConfigParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.parsers.PaymentMethodMessageJsonParser
@@ -536,6 +540,26 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     productUsageTokens = paymentMethodCreateParams.attribution
                 )
             )
+        }
+    }
+
+    override suspend fun updatePaymentMethod(
+        paymentMethodUpdateParams: PaymentMethodUpdateParams,
+        options: ApiRequest.Options,
+    ): Result<PaymentMethod> {
+        fireFraudDetectionDataRequest()
+
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getPaymentMethodUrl(paymentMethodUpdateParams.paymentMethodId),
+                options = options,
+                params = paymentMethodUpdateParams.toParamMap()
+                    .plus(buildPaymentUserAgentPair(paymentMethodUpdateParams.attribution))
+                    .plus(fraudDetectionData?.params.orEmpty())
+            ),
+            jsonParser = PaymentMethodJsonParser()
+        ) {
+            // TODO
         }
     }
 
@@ -1025,7 +1049,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        active: Boolean,
     ): Result<ConsumerPaymentDetails> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
@@ -1036,13 +1061,35 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
-                    "active" to false
+                    "active" to active,
                 ).plus(
                     paymentDetailsCreateParams.toParamMap()
                 )
             ),
             jsonParser = ConsumerPaymentDetailsJsonParser(),
         )
+    }
+
+    override suspend fun sharePaymentDetails(
+        consumerSessionClientSecret: String,
+        id: String,
+        requestOptions: ApiRequest.Options
+    ): Result<String> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = sharePaymentDetailsUrl,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to "android_payment_element",
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "id" to id,
+                    PAYMENT_USER_AGENT to buildPaymentUserAgentPair()
+                )
+            ),
+            jsonParser = ConsumerPaymentDetailsShareJsonParser,
+        ).map { it.id }
     }
 
     override suspend fun createFinancialConnectionsSessionForDeferredPayments(
@@ -1355,6 +1402,19 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 bin = bin,
                 accountRanges = accountRanges
             )
+        )
+    }
+
+    override suspend fun retrieveCardElementConfig(
+        requestOptions: ApiRequest.Options,
+    ): Result<MobileCardElementConfig> {
+        return fetchStripeModelResult(
+            apiRequestFactory.createGet(
+                url = mobileCardElementConfigUrl,
+                options = requestOptions,
+                params = null,
+            ),
+            jsonParser = MobileCardElementConfigParser(),
         )
     }
 
@@ -1695,6 +1755,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
             get() = getApiUrl("consumers/payment_details/list")
 
         /**
+         * @return `https://api.stripe.com/v1/consumers/payment_details/share`
+         */
+        internal val sharePaymentDetailsUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/payment_details/share")
+
+        /**
          * @return `https://api.stripe.com/v1/consumers/link_account_sessions`
          */
         internal val linkFinancialConnectionsSessionUrl: String
@@ -1707,6 +1774,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val deferredFinancialConnectionsSessionUrl: String
             @JvmSynthetic
             get() = getApiUrl("connections/link_account_sessions_for_deferred_payment")
+
+        internal val mobileCardElementConfigUrl: String
+            get() = getMerchantUiUrl("mobile-card-element-config")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/:id`
@@ -1908,6 +1978,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
             return getApiUrl("issuing/cards/%s/pin", cardId)
         }
 
+        /**
+         * @return `https://api.stripe.com/v1/setup_intents/:clientSecret/verify_microdeposits`
+         */
+        @JvmSynthetic
+        internal fun getPaymentMethodUrl(
+            paymentMethodId: String,
+        ): String {
+            return getApiUrl("payment_methods/$paymentMethodId")
+        }
+
         private fun getApiUrl(path: String, vararg args: Any): String {
             return getApiUrl(String.format(Locale.ENGLISH, path, *args))
         }
@@ -1918,6 +1998,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         private fun getEdgeUrl(path: String): String {
             return "${ApiRequest.API_HOST}/edge-internal/$path"
+        }
+
+        private fun getMerchantUiUrl(path: String): String {
+            return "https://merchant-ui-api.stripe.com/elements/$path"
         }
 
         private fun createExpandParam(expandFields: List<String>): Map<String, List<String>> {

@@ -9,9 +9,12 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.LinkHandler
@@ -23,6 +26,7 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
+import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave.RequestReuse
 import com.stripe.android.paymentsheet.model.currency
@@ -35,13 +39,16 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
+import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -56,6 +63,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.Closeable
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
@@ -65,7 +73,7 @@ import kotlin.coroutines.CoroutineContext
 @Suppress("TooManyFunctions")
 internal abstract class BaseSheetViewModel(
     application: Application,
-    internal val config: PaymentSheet.Configuration?,
+    internal val config: PaymentSheet.Configuration,
     internal val eventReporter: EventReporter,
     protected val customerRepository: CustomerRepository,
     protected val prefsRepository: PrefsRepository,
@@ -77,14 +85,14 @@ internal abstract class BaseSheetViewModel(
     val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val headerTextFactory: HeaderTextFactory,
     val formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
+    private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : AndroidViewModel(application) {
 
-    internal val customerConfig = config?.customer
-    internal val merchantName = config?.merchantDisplayName
-        ?: application.applicationInfo.loadLabel(application.packageManager).toString()
+    internal val customerConfig = config.customer
+    internal val merchantName = config.merchantDisplayName
 
     protected var mostRecentError: Throwable? = null
-    protected var isEligibleForCardBrandChoice: Boolean = false
+    protected var cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible
 
     internal val googlePayState: StateFlow<GooglePayState> = savedStateHandle
         .getStateFlow(SAVE_GOOGLE_PAY_STATE, GooglePayState.Indeterminate)
@@ -129,9 +137,9 @@ internal abstract class BaseSheetViewModel(
         currentScreen,
         linkHandler.isLinkEnabled.filterNotNull(),
         googlePayState,
-        stripeIntent.filterNotNull(),
-    ) { screen, isLinkAvailable, googlePay, intent ->
-        mapToHeaderTextResource(screen, isLinkAvailable, googlePay, intent)
+        supportedPaymentMethodsFlow,
+    ) { screen, isLinkAvailable, googlePay, supportedPaymentMethods ->
+        mapToHeaderTextResource(screen, isLinkAvailable, googlePay, supportedPaymentMethods)
     }
 
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
@@ -153,8 +161,8 @@ internal abstract class BaseSheetViewModel(
 
     abstract val primaryButtonUiState: StateFlow<PrimaryButton.UIState?>
 
-    private val _notesText = MutableStateFlow<String?>(null)
-    internal val notesText: StateFlow<String?> = _notesText
+    private val _mandateText = MutableStateFlow<MandateText?>(null)
+    internal val mandateText: StateFlow<MandateText?> = _mandateText
 
     /**
      * This should be initialized from the starter args, and then from that point forward it will be
@@ -181,13 +189,16 @@ internal abstract class BaseSheetViewModel(
             googlePayState = googlePayState,
             isLinkEnabled = linkHandler.isLinkEnabled,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
-            nameProvider = { code ->
-                val paymentMethod = lpmRepository.fromCode(code)
-                paymentMethod?.displayNameResource?.let {
-                    application.getString(it)
-                }.orEmpty()
-            }
+            nameProvider = ::providePaymentMethodName,
+            isCbcEligible = { cbcEligibility is CardBrandChoiceEligibility.Eligible }
         )
+    }
+
+    private fun providePaymentMethodName(code: PaymentMethodCode?): String {
+        val paymentMethod = lpmRepository.fromCode(code)
+        return paymentMethod?.displayNameResource?.let {
+            getApplication<Application>().getString(it)
+        }.orEmpty()
     }
 
     val paymentOptionsState: StateFlow<PaymentOptionsState> = paymentOptionsStateMapper()
@@ -200,7 +211,7 @@ internal abstract class BaseSheetViewModel(
 
     val topBarState: StateFlow<PaymentSheetTopBarState> = combine(
         currentScreen,
-        paymentMethods,
+        paymentMethods.map { it.orEmpty() },
         stripeIntent.map { it?.isLiveMode ?: true },
         processing,
         editing,
@@ -236,7 +247,7 @@ internal abstract class BaseSheetViewModel(
 
     protected fun transitionToFirstScreen() {
         val initialBackStack = determineInitialBackStack()
-        backStack.value = initialBackStack
+        resetTo(initialBackStack)
         reportPaymentSheetShown(initialBackStack.first())
     }
 
@@ -253,22 +264,25 @@ internal abstract class BaseSheetViewModel(
 
     private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
-            PaymentSheetScreen.Loading, AddAnotherPaymentMethod -> {
+            is PaymentSheetScreen.Loading, AddAnotherPaymentMethod -> {
                 // Nothing to do here
             }
-            PaymentSheetScreen.SelectSavedPaymentMethods -> {
+            is PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = stripeIntent.value?.clientSecret == null,
                 )
             }
-            AddFirstPaymentMethod -> {
+            is AddFirstPaymentMethod -> {
                 eventReporter.onShowNewPaymentOptionForm(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = stripeIntent.value?.clientSecret == null,
                 )
+            }
+            is PaymentSheetScreen.EditPaymentMethod -> {
+                // TODO(tillh-stripe) Add reporting
             }
         }
     }
@@ -363,8 +377,8 @@ internal abstract class BaseSheetViewModel(
         _primaryButtonState.value = state
     }
 
-    fun updateBelowButtonText(text: String?) {
-        _notesText.value = text
+    fun updateMandateText(mandateText: String?, showAbove: Boolean) {
+        _mandateText.value = if (mandateText != null) MandateText(mandateText, showAbove) else null
     }
 
     abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)
@@ -388,9 +402,13 @@ internal abstract class BaseSheetViewModel(
             context = getApplication(),
             merchantName = merchantName,
             isSaveForFutureUseSelected = isRequestingReuse,
+            isSetupFlow = stripeIntent.value is SetupIntent,
         )
 
-        updateBelowButtonText(mandateText)
+        val showAbove = (selection as? PaymentSelection.Saved?)
+            ?.showMandateAbovePrimaryButton == true
+
+        updateMandateText(mandateText = mandateText, showAbove = showAbove)
         clearErrorMessages()
     }
 
@@ -430,8 +448,65 @@ internal abstract class BaseSheetViewModel(
                 currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
 
             if (shouldResetToAddPaymentMethodForm) {
-                backStack.value = listOf(AddFirstPaymentMethod)
+                resetTo(listOf(AddFirstPaymentMethod))
             }
+        }
+    }
+
+    fun modifyPaymentMethod(paymentMethod: PaymentMethod) {
+        transitionTo(
+            PaymentSheetScreen.EditPaymentMethod(
+                editInteractorFactory.create(
+                    initialPaymentMethod = paymentMethod,
+                    displayName = providePaymentMethodName(paymentMethod.type?.code),
+                    removeExecutor = {
+                        // TODO(samer-stripe): Replace with remove operation
+                        delay(TEMP_DELAY)
+                        true
+                    },
+                    updateExecutor = { method, brand ->
+                        modifyCardPaymentMethod(method, brand)
+                    }
+                )
+            )
+        )
+    }
+
+    private suspend fun modifyCardPaymentMethod(
+        paymentMethod: PaymentMethod,
+        brand: CardBrand
+    ): Result<PaymentMethod> {
+        val customerConfig = config.customer
+        val paymentMethodId = paymentMethod.id
+
+        return customerRepository.updatePaymentMethod(
+            customerConfig = customerConfig!!,
+            params = PaymentMethodUpdateParams.createCard(
+                paymentMethodId = paymentMethodId!!,
+                networks = PaymentMethodUpdateParams.Card.Networks(
+                    preferred = brand.code
+                )
+            )
+        ).onSuccess { updatedMethod ->
+            savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods
+                .value
+                ?.let { savedPaymentMethods ->
+                    savedPaymentMethods.map { savedMethod ->
+                        val savedId = savedMethod.id
+                        val updatedId = updatedMethod.id
+
+                        if (updatedId != null && savedId != null && updatedId == savedId) {
+                            updatedMethod
+                        } else {
+                            paymentMethod
+                        }
+                    }
+                }
+
+            handleBackPressed()
+        }.onFailure {
+            // TODO(samer-stripe): Localize error message with proper strings.
+            onError("Failed to update payment method")
         }
     }
 
@@ -439,13 +514,13 @@ internal abstract class BaseSheetViewModel(
         screen: PaymentSheetScreen?,
         isLinkAvailable: Boolean,
         googlePayState: GooglePayState,
-        stripeIntent: StripeIntent,
+        supportedPaymentMethods: List<PaymentMethodCode>,
     ): Int? {
         return if (screen != null) {
             headerTextFactory.create(
                 screen = screen,
                 isWalletEnabled = isLinkAvailable || googlePayState is GooglePayState.Available,
-                types = stripeIntent.paymentMethodTypes,
+                types = supportedPaymentMethods,
             )
         } else {
             null
@@ -473,7 +548,7 @@ internal abstract class BaseSheetViewModel(
         merchantName = merchantName,
         amount = amount.value,
         newLpm = newPaymentSelection,
-        isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
+        cbcEligibility = cbcEligibility,
     )
 
     fun handleBackPressed() {
@@ -491,11 +566,36 @@ internal abstract class BaseSheetViewModel(
 
     private fun onUserBack() {
         clearErrorMessages()
-        backStack.update { it.dropLast(1) }
+        backStack.update { screens ->
+            val modifiableScreens = screens.toMutableList()
+
+            modifiableScreens.removeLast().onClose()
+
+            modifiableScreens.toList()
+        }
 
         // Reset the selection to the one from before opening the add payment method screen
         val paymentOptionsState = paymentOptionsState.value
         updateSelection(paymentOptionsState.selectedItem?.toPaymentSelection())
+    }
+
+    private fun resetTo(screens: List<PaymentSheetScreen>) {
+        val previousBackStack = backStack.value
+
+        backStack.value = screens
+
+        previousBackStack.forEach { oldScreen ->
+            if (oldScreen !in screens) {
+                oldScreen.onClose()
+            }
+        }
+    }
+
+    private fun PaymentSheetScreen.onClose() {
+        when (this) {
+            is Closeable -> close()
+            else -> Unit
+        }
     }
 
     fun reportAutofillEvent(type: String) {
@@ -517,5 +617,8 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
+
+        // TODO(samer-stripe): Remove after replacing placeholder update and remove payment method operations
+        private const val TEMP_DELAY = 2000L
     }
 }

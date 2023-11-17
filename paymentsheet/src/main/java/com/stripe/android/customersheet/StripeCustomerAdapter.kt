@@ -49,13 +49,9 @@ internal class StripeCustomerAdapter @Inject constructor(
                     id = customerEphemeralKey.customerId,
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 ),
-                types = listOfNotNull(
+                types = listOf(
                     PaymentMethod.Type.Card,
-                    if (CustomerSheetACHV2Flag) {
-                        PaymentMethod.Type.USBankAccount
-                    } else {
-                        null
-                    },
+                    PaymentMethod.Type.USBankAccount,
                 ),
                 silentlyFail = false,
             ).getOrElse {

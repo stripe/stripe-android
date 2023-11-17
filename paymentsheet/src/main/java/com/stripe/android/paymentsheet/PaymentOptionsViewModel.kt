@@ -24,9 +24,11 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
+import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -53,11 +55,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
-    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
+    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
+    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : BaseSheetViewModel(
     application = application,
     config = args.state.config,
-    prefsRepository = prefsRepositoryFactory(args.state.config?.customer),
+    prefsRepository = prefsRepositoryFactory(args.state.config.customer),
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     workContext = workContext,
@@ -68,6 +71,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkConfigurationCoordinator = linkConfigurationCoordinator,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = false),
     formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
+    editInteractorFactory = editInteractorFactory
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
@@ -134,7 +138,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         updateSelection(args.state.paymentSelection)
 
-        isEligibleForCardBrandChoice = args.state.isEligibleForCardBrandChoice
+        cbcEligibility = when (args.state.isEligibleForCardBrandChoice) {
+            true -> CardBrandChoiceEligibility.Eligible(
+                preferredNetworks = args.state.config.preferredNetworks
+            )
+            false -> CardBrandChoiceEligibility.Ineligible
+        }
 
         transitionToFirstScreen()
     }
@@ -158,9 +167,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
             LinkHandler.ProcessingState.Launched -> {
             }
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
-                processingState.details?.let {
+                processingState.paymentSelection?.let {
                     // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-                    updateSelection(PaymentSelection.New.LinkInline(it))
+                    updateSelection(it)
                     onUserSelection()
                 } ?: run {
                     // Creating Link PaymentDetails failed, fallback to regular checkout.
@@ -273,7 +282,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     private fun processExistingPaymentMethod(paymentSelection: PaymentSelection) {
-        prefsRepository.savePaymentSelection(paymentSelection)
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,
@@ -283,7 +291,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     private fun processNewPaymentMethod(paymentSelection: PaymentSelection) {
-        prefsRepository.savePaymentSelection(paymentSelection)
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,

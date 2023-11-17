@@ -1,9 +1,9 @@
 package com.stripe.android.financialconnections.example.data
 
-import androidx.annotation.Keep
-import com.google.gson.annotations.SerializedName
 import com.stripe.android.financialconnections.example.data.model.CreateIntentResponse
 import com.stripe.android.financialconnections.example.data.model.CreateLinkAccountSessionResponse
+import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
+import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 import retrofit2.http.Body
 import retrofit2.http.POST
 
@@ -23,37 +23,3 @@ interface BackendApiService {
         @Body params: PaymentIntentBody
     ): CreateIntentResponse
 }
-
-@Keep
-data class LinkAccountSessionBody(
-    @SerializedName("flow")
-    val flow: String?,
-    @SerializedName("custom_pk")
-    val publishableKey: String?,
-    @SerializedName("custom_sk")
-    val secretKey: String?,
-    @SerializedName("customer_email")
-    val customerEmail: String?,
-    @SerializedName("test_environment")
-    val testEnvironment: String?
-)
-
-@Keep
-data class PaymentIntentBody(
-    @SerializedName("flow")
-    val flow: String?,
-    @SerializedName("country")
-    val country: String?,
-    @SerializedName("customer_id")
-    val customerId: String?,
-    @SerializedName("supported_payment_methods")
-    val supportedPaymentMethods: String?,
-    @SerializedName("custom_pk")
-    val publishableKey: String?,
-    @SerializedName("custom_sk")
-    val secretKey: String?,
-    @SerializedName("customer_email")
-    val customerEmail: String?,
-    @SerializedName("test_environment")
-    val testEnvironment: String?
-)

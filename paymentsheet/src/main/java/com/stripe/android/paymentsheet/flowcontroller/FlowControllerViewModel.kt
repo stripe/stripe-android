@@ -19,9 +19,11 @@ internal class FlowControllerViewModel(
             .flowControllerViewModel(this)
             .build()
 
+    @Volatile
     var paymentSelection: PaymentSelection? = null
 
     // Used to determine if we need to reload the flow controller configuration.
+    @Volatile
     var previousConfigureRequest: FlowControllerConfigurationHandler.ConfigureRequest? = null
 
     var state: PaymentSheetState.Full?

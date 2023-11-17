@@ -6,6 +6,10 @@
   <string name="stripe_bank_account_ending_in">Remove bank account ending in %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Confirm the payment in your bank\'s app within %s to complete the purchase.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">Your payment information will not be saved.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Do you want to close this form?</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">An error occurred. Check your connection and try again.</string>
   <!-- Text providing link to terms for ACH payments -->
@@ -22,6 +26,16 @@
   <string name="stripe_paymentsheet_address_element_primary_button">Save address</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Shipping Address</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">An email will be sent to %s within three business days to confirm the setup of this debit instruction.</string>
+  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">Confirm your Direct Debit details</string>
+  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">Modify details</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Additionally, you will receive two days advance notice via email of any amount to be debited under this instruction. Payments will show as \'%s\' on your bank statement.</string>
+  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Your payments are protected by the %s.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Choose a payment method</string>
   <string name="stripe_paymentsheet_close">Close</string>
@@ -33,6 +47,8 @@
   <string name="stripe_paymentsheet_manage_your_payment_methods">Manage your payment methods</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe will deposit $0.01 to your account in 1-2 business days. Then you’ll get an email with instructions to complete payment to %s.</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">Edit %s</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Or pay using</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
@@ -47,12 +63,16 @@
   <string name="stripe_paymentsheet_primary_button_processing">Processing…</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Remove bank account</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_paymentsheet_remove_card">Remove card</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Remove %s</string>
   <!-- A button used for saving a new payment method -->
   <string name="stripe_paymentsheet_save">Save</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_save_a_new_payment_method">Save a new payment method</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_save_bank_title">Save your bank account in just a few steps.</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Save for future payments</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->

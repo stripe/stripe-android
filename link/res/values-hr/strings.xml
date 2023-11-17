@@ -50,8 +50,6 @@
   <string name="stripe_wallet_recollect_cvc_error">Radi sigurnosti, ponovno unesite sigurnosni kod vaše kartice.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Jeste li sigurni da želite ukloniti ovaj povezani račun?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Ukloni karticu</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Jeste li sigurni da želite ukloniti ovu karticu?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

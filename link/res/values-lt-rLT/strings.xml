@@ -50,8 +50,6 @@
   <string name="stripe_wallet_recollect_cvc_error">Saugumo sumetimais dar kartą įveskite kortelės saugumo kodą.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Ar tikrai norite pašalinti šią susietą paskyrą?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Pašalinti kortelę</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Ar tikrai norite pašalinti šią kortelę?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

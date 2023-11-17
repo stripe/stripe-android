@@ -12,6 +12,7 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.utils.SynchronizedTestFlowController
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
@@ -168,11 +169,12 @@ internal class FlowControllerTest {
         val scenario = activityScenarioRule.scenario
         lateinit var flowController: PaymentSheet.FlowController
 
-        fun initializeActivity() {
+        fun initializeActivity(synchronize: Boolean) {
             scenario.moveToState(Lifecycle.State.CREATED)
             scenario.onActivity {
                 PaymentConfiguration.init(it, "pk_test_123")
-                flowController = PaymentSheet.FlowController.create(
+
+                val unsynchronizedController = PaymentSheet.FlowController.create(
                     activity = it,
                     paymentOptionCallback = { paymentOption ->
                         assertThat(paymentOption?.label).endsWith("4242")
@@ -182,11 +184,17 @@ internal class FlowControllerTest {
                         throw AssertionError("Not expected")
                     },
                 )
+
+                flowController = if (synchronize) {
+                    SynchronizedTestFlowController(unsynchronizedController)
+                } else {
+                    unsynchronizedController
+                }
             }
             scenario.moveToState(Lifecycle.State.RESUMED)
         }
 
-        initializeActivity()
+        initializeActivity(synchronize = true)
         scenario.onActivity {
             flowController.configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
@@ -206,7 +214,7 @@ internal class FlowControllerTest {
         assertThat(paymentOptionCallbackCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
 
         scenario.recreate()
-        initializeActivity()
+        initializeActivity(synchronize = false)
 
         val configureCallbackCountDownLatch = CountDownLatch(1)
         scenario.onActivity {

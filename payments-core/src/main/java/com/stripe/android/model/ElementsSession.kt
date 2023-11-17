@@ -12,11 +12,32 @@ data class ElementsSession(
     val stripeIntent: StripeIntent,
     val merchantCountry: String?,
     val isEligibleForCardBrandChoice: Boolean,
+    val isGooglePayEnabled: Boolean,
+    val sessionsError: Throwable? = null,
 ) : StripeModel {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
-        val linkFundingSources: List<String>
+        val linkFundingSources: List<String>,
+        val linkPassthroughModeEnabled: Boolean,
     ) : StripeModel
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        fun createFromFallback(
+            stripeIntent: StripeIntent,
+            sessionsError: Throwable?,
+        ): ElementsSession {
+            return ElementsSession(
+                linkSettings = null,
+                paymentMethodSpecs = null,
+                stripeIntent = stripeIntent,
+                merchantCountry = null,
+                isEligibleForCardBrandChoice = false,
+                isGooglePayEnabled = true,
+                sessionsError = sessionsError,
+            )
+        }
+    }
 }

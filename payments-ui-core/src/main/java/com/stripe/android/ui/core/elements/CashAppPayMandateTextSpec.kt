@@ -11,7 +11,7 @@ import kotlinx.serialization.Transient
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
-internal data class CashAppPayMandateTextSpec(
+data class CashAppPayMandateTextSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("cashapp_mandate"),
     @StringRes

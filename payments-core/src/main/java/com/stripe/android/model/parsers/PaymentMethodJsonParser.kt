@@ -138,6 +138,9 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 },
                 networks = json.optJSONObject(FIELD_NETWORKS)?.let {
                     NetworksJsonParser().parse(it)
+                },
+                displayBrand = json.optJSONObject(FIELD_DISPLAY_BRAND)?.let {
+                    DisplayBrandParser.parse(it)
                 }
             )
         }
@@ -171,6 +174,16 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
 
             private companion object {
                 private const val FIELD_IS_SUPPORTED = "supported"
+            }
+        }
+
+        internal object DisplayBrandParser : ModelJsonParser<PaymentMethod.Card.DisplayBrand> {
+            private const val FIELD_TYPE = "type"
+
+            override fun parse(json: JSONObject): PaymentMethod.Card.DisplayBrand {
+                return PaymentMethod.Card.DisplayBrand(
+                    type = CardBrand.fromCode(json.getString(FIELD_TYPE))
+                )
             }
         }
 
@@ -208,6 +221,7 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             private const val FIELD_LAST4 = "last4"
             private const val FIELD_THREE_D_SECURE_USAGE = "three_d_secure_usage"
             private const val FIELD_WALLET = "wallet"
+            private const val FIELD_DISPLAY_BRAND = "display_brand"
             private const val FIELD_NETWORKS = "networks"
         }
     }

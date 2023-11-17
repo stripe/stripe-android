@@ -9,7 +9,6 @@ internal interface FinancialConnectionsInstitutionsRepository {
 
     suspend fun featuredInstitutions(
         clientSecret: String,
-        limit: Int
     ): InstitutionResponse
 
     suspend fun searchInstitutions(
@@ -39,14 +38,12 @@ private class FinancialConnectionsInstitutionsRepositoryImpl(
 
     override suspend fun featuredInstitutions(
         clientSecret: String,
-        limit: Int
     ): InstitutionResponse {
         val request = apiRequestFactory.createGet(
             url = featuredInstitutionsUrl,
             options = apiOptions,
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
-                "limit" to limit
             )
         )
         return requestExecutor.execute(

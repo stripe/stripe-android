@@ -5,8 +5,11 @@ import android.os.Parcelable
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.identity.R
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
+import com.stripe.android.identity.navigation.DriverLicenseScanDestination
 import com.stripe.android.identity.navigation.DriverLicenseUploadDestination
+import com.stripe.android.identity.navigation.IDScanDestination
 import com.stripe.android.identity.navigation.IDUploadDestination
+import com.stripe.android.identity.navigation.PassportScanDestination
 import com.stripe.android.identity.navigation.PassportUploadDestination
 import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.ui.DRIVING_LICENSE_KEY
@@ -232,22 +235,33 @@ internal data class CollectedDataParam(
         }
 
         fun Type.toUploadDestination(
-            shouldShowTakePhoto: Boolean,
-            shouldShowChoosePhoto: Boolean
+            shouldPopUpToDocSelection: Boolean = false
         ) = when (this) {
-            Type.IDCARD -> IDUploadDestination(
-                shouldShowTakePhoto,
-                shouldShowChoosePhoto
-            )
-            Type.DRIVINGLICENSE -> DriverLicenseUploadDestination(
-                shouldShowTakePhoto,
-                shouldShowChoosePhoto
-            )
-            Type.PASSPORT -> PassportUploadDestination(
-                shouldShowTakePhoto,
-                shouldShowChoosePhoto
-            )
+            Type.IDCARD -> IDUploadDestination(shouldPopUpToDocSelection = shouldPopUpToDocSelection)
+            Type.DRIVINGLICENSE -> DriverLicenseUploadDestination(shouldPopUpToDocSelection = shouldPopUpToDocSelection)
+            Type.PASSPORT -> PassportUploadDestination(shouldPopUpToDocSelection = shouldPopUpToDocSelection)
             else -> throw java.lang.IllegalStateException("Invalid CollectedDataParam.Type")
+        }
+        fun Type.toScanDestination(
+            shouldStartFromBack: Boolean = false,
+            shouldPopUpToDocSelection: Boolean = false
+        ) = when (this) {
+            Type.IDCARD -> IDScanDestination(
+                shouldStartFromBack,
+                shouldPopUpToDocSelection
+            )
+
+            Type.PASSPORT -> PassportScanDestination(
+                shouldStartFromBack,
+                shouldPopUpToDocSelection
+            )
+
+            Type.DRIVINGLICENSE -> DriverLicenseScanDestination(
+                shouldStartFromBack,
+                shouldPopUpToDocSelection
+            )
+
+            else -> throw IllegalStateException("Invalid CollectedDataParam.Type")
         }
 
         fun Type.getDisplayName(context: Context) =

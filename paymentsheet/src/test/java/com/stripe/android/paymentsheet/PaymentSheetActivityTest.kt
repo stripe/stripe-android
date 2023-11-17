@@ -7,6 +7,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -45,6 +46,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.state.LinkState
@@ -104,7 +106,6 @@ internal class PaymentSheetActivityTest {
         createGooglePayPaymentMethodLauncherFactory()
 
     private val paymentLauncherFactory = PaymentLauncherFactory(
-        context = context,
         hostActivityLauncher = mock(),
         statusBarColor = null,
     )
@@ -116,7 +117,7 @@ internal class PaymentSheetActivityTest {
     }
 
     private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory> {
-        on { create(any(), any(), any(), any()) } doReturn paymentLauncher
+        on { create(any(), any(), any(), any(), any()) } doReturn paymentLauncher
     }
 
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
@@ -458,7 +459,16 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `handles screen transitions correctly`() = runTest {
-        val viewModel = createViewModel()
+        val card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
+                networks = PaymentMethod.Card.Networks(
+                    available = setOf("visa", "cartes_bancaires"),
+                )
+            )
+        )
+
+        val paymentMethods = listOf(card)
+        val viewModel = createViewModel(paymentMethods = paymentMethods)
         val scenario = activityScenario(viewModel)
 
         viewModel.currentScreen.test {
@@ -467,6 +477,12 @@ internal class PaymentSheetActivityTest {
 
             viewModel.transitionToAddPaymentScreen()
             assertThat(awaitItem()).isEqualTo(AddAnotherPaymentMethod)
+
+            pressBack()
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+
+            viewModel.modifyPaymentMethod(card)
+            assertThat(awaitItem()).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
 
             pressBack()
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
@@ -727,7 +743,7 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity {
             val text = context.getString(StripeUiCoreR.string.stripe_paymentsheet_payment_method_us_bank_account)
-            viewModel.updateBelowButtonText(text)
+            viewModel.updateMandateText(text, false)
 
             composeTestRule
                 .onNodeWithText(text)
@@ -736,24 +752,48 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `notes visibility is gone`() {
+    fun `mandate text is shown below primary button when showAbove is false`() {
         val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
             val text = "some text"
+            val mandateNode = composeTestRule.onNode(hasText(text))
+            val primaryButtonNode = composeTestRule
+                .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-            viewModel.updateBelowButtonText(text)
+            viewModel.updateMandateText(text, false)
+            mandateNode.assertIsDisplayed()
 
-            composeTestRule
-                .onNodeWithText(text)
-                .assertIsDisplayed()
+            val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
+            val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
+            assertThat(mandatePosition).isGreaterThan(primaryButtonPosition)
 
-            viewModel.updateBelowButtonText(null)
+            viewModel.updateMandateText(null, false)
+            mandateNode.assertDoesNotExist()
+        }
+    }
 
-            composeTestRule
-                .onNodeWithText(text)
-                .assertDoesNotExist()
+    @Test
+    fun `mandate text is shown above primary button when showAbove is true`() {
+        val viewModel = createViewModel()
+        val scenario = activityScenario(viewModel)
+
+        scenario.launch(intent).onActivity {
+            val text = "some text"
+            val mandateNode = composeTestRule.onNode(hasText(text))
+            val primaryButtonNode = composeTestRule
+                .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+
+            viewModel.updateMandateText(text, true)
+            mandateNode.assertIsDisplayed()
+
+            val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
+            val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
+            assertThat(mandatePosition).isLessThan(primaryButtonPosition)
+
+            viewModel.updateMandateText(null, true)
+            mandateNode.assertDoesNotExist()
         }
     }
 
@@ -805,7 +845,9 @@ internal class PaymentSheetActivityTest {
     fun `Handles invalid client secret correctly`() {
         val args = PaymentSheetContractV2.Args(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = ""),
-            config = null,
+            config = PaymentSheet.Configuration(
+                merchantDisplayName = "Some name",
+            ),
             statusBarColor = null,
         )
 
@@ -969,6 +1011,7 @@ internal class PaymentSheetActivityTest {
                     context = ApplicationProvider.getApplicationContext(),
                     lpmRepository = lpmRepository,
                 ),
+                editInteractorFactory = FakeEditPaymentMethodInteractor.Factory
             )
         }
     }
@@ -990,6 +1033,6 @@ internal class PaymentSheetActivityTest {
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-        private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
     }
 }

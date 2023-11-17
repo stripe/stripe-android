@@ -6,6 +6,12 @@
   <string name="stripe_bank_account_ending_in">Remover conta bancária que termina em %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Confirme o pagamento na aplicação do seu banco dentro de %s para concluir a compra.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">As suas informações de pagamento não serão guardadas.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Pretende fechar este formulário?</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">Ocorreu um erro. Verifique a sua ligação e tente novamente.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Ao continuar, concorda em autorizar pagamentos de acordo com <terms>estas condições</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -45,12 +51,16 @@
   <string name="stripe_paymentsheet_primary_button_processing">A processar…</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Remover conta bancária</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_paymentsheet_remove_card">Eliminar cartão</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Remover %s</string>
   <!-- A button used for saving a new payment method -->
   <string name="stripe_paymentsheet_save">Guardar</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_save_a_new_payment_method">Guardar um novo método de pagamento</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_save_bank_title">Guarde a sua conta bancária em apenas alguns passos.</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Guardar para pagamentos futuros</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
@@ -59,6 +69,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Selecione o seu método de pagamento</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">Ocorreu um problema</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Cancelar e pagar de outra forma</string>
   <!-- Text on a screen asking the user to approve a payment -->

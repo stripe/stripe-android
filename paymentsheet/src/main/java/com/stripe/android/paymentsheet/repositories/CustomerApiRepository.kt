@@ -7,6 +7,8 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -50,7 +52,13 @@ internal class CustomerApiRepository @Inject constructor(
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
     ): Result<List<PaymentMethod>> = withContext(workContext) {
-        val requests = types.map { paymentMethodType ->
+        val requests = types.filter { paymentMethodType ->
+            paymentMethodType in setOf(
+                PaymentMethod.Type.Card,
+                PaymentMethod.Type.USBankAccount,
+                PaymentMethod.Type.SepaDebit,
+            )
+        }.map { paymentMethodType ->
             async {
                 stripeRepository.getPaymentMethods(
                     listPaymentMethodsParams = ListPaymentMethodsParams(
@@ -76,8 +84,15 @@ internal class CustomerApiRepository @Inject constructor(
                         return@withContext Result.failure(it)
                     }
                 },
-                onSuccess = {
-                    paymentMethods.addAll(it)
+                onSuccess = { customerPaymentMethods ->
+                    val walletTypesToRemove = setOf(Wallet.Type.ApplePay, Wallet.Type.GooglePay, Wallet.Type.SamsungPay)
+                    paymentMethods.addAll(
+                        customerPaymentMethods.filter { paymentMethod ->
+                            val isCardWithWallet = paymentMethod.type == PaymentMethod.Type.Card &&
+                                walletTypesToRemove.contains(paymentMethod.card?.wallet?.walletType)
+                            !isCardWithWallet
+                        }
+                    )
                 }
             )
         }
@@ -114,5 +129,19 @@ internal class CustomerApiRepository @Inject constructor(
             )
         ).onFailure {
             logger.error("Failed to attach payment method $paymentMethodId.", it)
+        }
+
+    override suspend fun updatePaymentMethod(
+        customerConfig: PaymentSheet.CustomerConfiguration,
+        params: PaymentMethodUpdateParams
+    ): Result<PaymentMethod> =
+        stripeRepository.updatePaymentMethod(
+            paymentMethodUpdateParams = params,
+            options = ApiRequest.Options(
+                apiKey = customerConfig.ephemeralKeySecret,
+                stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+            )
+        ).onFailure {
+            logger.error("Failed to update payment method ${params.paymentMethodId}.", it)
         }
 }

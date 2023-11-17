@@ -12,9 +12,20 @@ public final class com/stripe/android/financialconnections/ComposableSingletons$
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/financialconnections/FinancialConnections {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/FinancialConnections;
+	public static final fun clearEventListener ()V
+	public static final fun setEventListener (Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEventListener;)V
+}
+
 public final class com/stripe/android/financialconnections/FinancialConnectionsSheet {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Companion;
+	public static final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
+	public static final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
+	public static final fun createForBankAccountToken (Landroidx/activity/ComponentActivity;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultForTokenCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
+	public static final fun createForBankAccountToken (Landroidx/fragment/app/Fragment;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultForTokenCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
 	public final fun present (Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;)V
 }
 
@@ -205,6 +216,74 @@ public abstract interface class com/stripe/android/financialconnections/Financia
 	public abstract fun onFinancialConnectionsSheetResult (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult;)V
 }
 
+public final class com/stripe/android/financialconnections/analytics/FinancialConnectionsEvent {
+	public static final field $stable I
+	public final fun component1 ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public final fun component2 ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;
+	public final fun copy (Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;)Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent;
+	public static synthetic fun copy$default (Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;ILjava/lang/Object;)Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMetadata ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;
+	public final fun getName ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode : java/lang/Enum {
+	public static final field ACCOUNTS_UNAVAILABLE Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field ACCOUNT_NUMBERS_UNAVAILABLE Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field AUTHORIZATION_FAILED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field FAILED_BOT_DETECTION Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field INSTITUTION_TIMEOUT Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field INSTITUTION_UNAVAILABLE_PLANNED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field INSTITUTION_UNAVAILABLE_UNPLANNED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field NO_DEBITABLE_ACCOUNT Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field SESSION_EXPIRED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field UNEXPECTED_ERROR Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field WEB_BROWSER_UNAVAILABLE Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public final fun getValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static fun values ()[Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+}
+
+public final class com/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Boolean;
+	public final fun component3 ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;)Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;
+	public static synthetic fun copy$default (Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;ILjava/lang/Object;)Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getErrorCode ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public final fun getInstitutionName ()Ljava/lang/String;
+	public final fun getManualEntry ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public final fun toMap ()Ljava/util/Map;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name : java/lang/Enum {
+	public static final field ACCOUNTS_SELECTED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field CANCEL Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field CONSENT_ACQUIRED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field ERROR Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field FLOW_LAUNCHED_IN_BROWSER Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field INSTITUTION_AUTHORIZED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field INSTITUTION_SELECTED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field MANUAL_ENTRY_INITIATED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field OPEN Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field SEARCH_INITIATED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static final field SUCCESS Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public final fun getValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+	public static fun values ()[Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
+}
+
+public abstract interface class com/stripe/android/financialconnections/analytics/FinancialConnectionsEventListener {
+	public abstract fun onEvent (Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent;)V
+}
+
 public final class com/stripe/android/financialconnections/exception/AppInitializationError : com/stripe/android/core/exception/StripeException {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V
@@ -291,6 +370,13 @@ public final class com/stripe/android/financialconnections/features/common/Compo
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 }
 
+public final class com/stripe/android/financialconnections/features/common/ComposableSingletons$SharedPartnerAuthKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/common/ComposableSingletons$SharedPartnerAuthKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+}
+
 public final class com/stripe/android/financialconnections/features/consent/ComposableSingletons$ConsentScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/consent/ComposableSingletons$ConsentScreenKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
@@ -369,17 +455,6 @@ public final class com/stripe/android/financialconnections/features/networkingsa
 	public fun <init> ()V
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class com/stripe/android/financialconnections/features/partnerauth/ComposableSingletons$PartnerAuthScreenKt {
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/partnerauth/ComposableSingletons$PartnerAuthScreenKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function3;
-	public fun <init> ()V
-	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-}
-
-public final class com/stripe/android/financialconnections/features/partnerauth/PartnerAuthScreenKt {
-	public static final fun ErrorContent (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
 }
 
 public final class com/stripe/android/financialconnections/features/reset/ComposableSingletons$ResetScreenKt {
@@ -503,7 +578,7 @@ public final class com/stripe/android/financialconnections/model/AccountHolder :
 	public final fun getType ()Lcom/stripe/android/financialconnections/model/AccountHolder$Type;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/financialconnections/model/AccountHolder;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/financialconnections/model/AccountHolder;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -576,7 +651,7 @@ public final class com/stripe/android/financialconnections/model/Balance : andro
 	public final fun getType ()Lcom/stripe/android/financialconnections/model/Balance$Type;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/financialconnections/model/Balance;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/financialconnections/model/Balance;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -635,7 +710,7 @@ public final class com/stripe/android/financialconnections/model/BalanceRefresh 
 	public final fun getStatus ()Lcom/stripe/android/financialconnections/model/BalanceRefresh$BalanceRefreshStatus;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/financialconnections/model/BalanceRefresh;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/financialconnections/model/BalanceRefresh;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -733,7 +808,7 @@ public final class com/stripe/android/financialconnections/model/CashBalance : a
 	public final fun getAvailable ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/financialconnections/model/CashBalance;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/financialconnections/model/CashBalance;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -793,7 +868,7 @@ public final class com/stripe/android/financialconnections/model/CreditBalance :
 	public final fun getUsed ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/financialconnections/model/CreditBalance;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/financialconnections/model/CreditBalance;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -912,7 +987,7 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 	public final fun getSupportedPaymentMethodTypes ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -1043,7 +1118,7 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 	public final fun getUrl ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccountList;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccountList;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -1114,7 +1189,7 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 	public final fun getStatusDetails ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession$StatusDetails;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -1174,7 +1249,7 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 	public final fun getCancelled ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession$StatusDetails$Cancelled;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession$StatusDetails;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession$StatusDetails;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -1204,7 +1279,7 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 	public final fun getReason ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession$StatusDetails$Cancelled$Reason;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession$StatusDetails$Cancelled;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession$StatusDetails$Cancelled;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -1278,7 +1353,7 @@ public final class com/stripe/android/financialconnections/model/GetFinancialCon
 	public fun hashCode ()I
 	public final fun toParamMap ()Ljava/util/Map;
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/financialconnections/model/GetFinancialConnectionsAcccountsParams;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/financialconnections/model/GetFinancialConnectionsAcccountsParams;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -1340,7 +1415,7 @@ public final class com/stripe/android/financialconnections/model/ManualEntry : a
 	public final fun getMode ()Lcom/stripe/android/financialconnections/model/ManualEntryMode;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/financialconnections/model/ManualEntry;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/financialconnections/model/ManualEntry;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -1431,7 +1506,7 @@ public final class com/stripe/android/financialconnections/model/OwnershipRefres
 	public final fun getStatus ()Lcom/stripe/android/financialconnections/model/OwnershipRefresh$Status;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/financialconnections/model/OwnershipRefresh;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lcom/stripe/android/financialconnections/model/OwnershipRefresh;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -1540,6 +1615,7 @@ public final class com/stripe/android/financialconnections/navigation/Composable
 	public static field lambda-13 Lkotlin/jvm/functions/Function3;
 	public static field lambda-14 Lkotlin/jvm/functions/Function3;
 	public static field lambda-15 Lkotlin/jvm/functions/Function3;
+	public static field lambda-16 Lkotlin/jvm/functions/Function3;
 	public static field lambda-2 Lkotlin/jvm/functions/Function3;
 	public static field lambda-3 Lkotlin/jvm/functions/Function3;
 	public static field lambda-4 Lkotlin/jvm/functions/Function3;
@@ -1556,6 +1632,7 @@ public final class com/stripe/android/financialconnections/navigation/Composable
 	public final fun getLambda-13$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-14$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-15$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-16$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-3$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-4$financial_connections_release ()Lkotlin/jvm/functions/Function3;

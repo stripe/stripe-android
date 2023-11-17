@@ -20,7 +20,9 @@ class ConfirmPaymentIntentParamsFactoryTest {
         assertThat(
             factory.create(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+                optionsParams = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                )
             )
         ).isEqualTo(
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -39,7 +41,9 @@ class ConfirmPaymentIntentParamsFactoryTest {
         assertThat(
             factory.create(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank,
+                optionsParams = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                )
             )
         ).isEqualTo(
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -58,7 +62,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
         assertThat(
             factory.create(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                setupFutureUsage = null,
+                optionsParams = PaymentMethodOptionsParams.Card(),
             )
         ).isEqualTo(
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -108,7 +112,6 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
         val result = factoryWithConfig.create(
             createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            setupFutureUsage = null,
         )
 
         assertThat(result.shipping).isEqualTo(shippingDetails)

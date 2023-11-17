@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.forms.PaypalRequirement
 import com.stripe.android.paymentsheet.forms.RevolutPayRequirement
 import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
+import com.stripe.android.paymentsheet.forms.SwishRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.paymentsheet.forms.UpiRequirement
 import com.stripe.android.paymentsheet.forms.ZipRequirement
@@ -99,6 +100,7 @@ class LpmRepository constructor(
         serverLpmSpecs: String?,
         billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration(),
+        isDeferred: Boolean = false,
     ): Boolean {
         val expectedLpms = stripeIntent.paymentMethodTypes
         var failedToParseServerResponse = false
@@ -107,7 +109,12 @@ class LpmRepository constructor(
             val deserializationResult = LpmSerializer.deserializeList(serverLpmSpecs)
             failedToParseServerResponse = deserializationResult.isFailure
             val serverLpmObjects = deserializationResult.getOrElse { emptyList() }
-            update(stripeIntent, serverLpmObjects, billingDetailsCollectionConfiguration)
+            update(
+                stripeIntent = stripeIntent,
+                specs = serverLpmObjects,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                isDeferred = isDeferred,
+            )
         }
 
         // If the server does not return specs, or they are not parsed successfully
@@ -121,6 +128,7 @@ class LpmRepository constructor(
                 missingLpms = lpmsNotParsedFromServerSpec,
                 stripeIntent = stripeIntent,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                isDeferred = isDeferred,
             )
         }
 
@@ -131,14 +139,21 @@ class LpmRepository constructor(
         missingLpms: List<String>,
         stripeIntent: StripeIntent,
         billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
+        isDeferred: Boolean,
     ) {
         val missingSpecsOnDisk = readFromDisk().filter { it.type in missingLpms }
 
-        val missingLpmsByType = missingSpecsOnDisk.mapNotNull { spec ->
+        val validSpecs = missingSpecsOnDisk.filterNot { spec ->
+            !arguments.isFinancialConnectionsAvailable() &&
+                spec.type == PaymentMethod.Type.USBankAccount.code
+        }
+
+        val missingLpmsByType = validSpecs.mapNotNull { spec ->
             convertToSupportedPaymentMethod(
                 stripeIntent = stripeIntent,
                 sharedDataSpec = spec,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                isDeferred = isDeferred,
             )
         }.associateBy {
             it.code
@@ -148,20 +163,13 @@ class LpmRepository constructor(
     }
 
     /**
-     * This method can be used to initialize the LpmRepository with the hardcoded card spec.
+     * This method can be used to initialize the LpmRepository with a given map of payment methods.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun initializeWithCardSpec(
-        billingConfiguration: BillingDetailsCollectionConfiguration =
-            BillingDetailsCollectionConfiguration(),
+    fun initializeWithPaymentMethods(
+        paymentMethods: Map<String, SupportedPaymentMethod>
     ) {
-        lpmInitialFormData.putAll(
-            mapOf(
-                PaymentMethod.Type.Card.code to hardcodedCardSpec(
-                    billingDetailsCollectionConfiguration = billingConfiguration
-                )
-            )
-        )
+        lpmInitialFormData.putAll(paymentMethods)
     }
 
     @VisibleForTesting
@@ -178,6 +186,7 @@ class LpmRepository constructor(
         specs: List<SharedDataSpec>,
         billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration(),
+        isDeferred: Boolean = false,
     ) {
         val validSpecs = specs.filterNot { spec ->
             !arguments.isFinancialConnectionsAvailable() &&
@@ -190,6 +199,7 @@ class LpmRepository constructor(
                 stripeIntent = stripeIntent,
                 sharedDataSpec = spec,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                isDeferred = isDeferred
             )
         }
 
@@ -215,6 +225,7 @@ class LpmRepository constructor(
         stripeIntent: StripeIntent,
         sharedDataSpec: SharedDataSpec,
         billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
+        isDeferred: Boolean = false,
     ) = when (sharedDataSpec.type) {
         PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
             code = "card",
@@ -473,8 +484,10 @@ class LpmRepository constructor(
              *         }
              *     }
              * }
+             *
+             * Verification method is always "automatic" when the intent is deferred.
              */
-            if (supportsVerificationMethod) {
+            if (supportsVerificationMethod || isDeferred) {
                 SupportedPaymentMethod(
                     code = "us_bank_account",
                     requiresMandate = true,
@@ -598,6 +611,17 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = KonbiniRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields),
+        )
+        PaymentMethod.Type.Swish.code -> SupportedPaymentMethod(
+            code = "swish",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_swish,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_swish,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = SwishRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields),
         )
         else -> null
@@ -728,6 +752,20 @@ class LpmRepository constructor(
                 formSpec = LayoutSpec(specs),
             )
         }
+
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val hardCodedUsBankAccount: SupportedPaymentMethod =
+            SupportedPaymentMethod(
+                code = "us_bank_account",
+                requiresMandate = true,
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
+                iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+                tintIconOnSelection = true,
+                requirement = USBankAccountRequirement,
+                formSpec = LayoutSpec(emptyList())
+            )
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

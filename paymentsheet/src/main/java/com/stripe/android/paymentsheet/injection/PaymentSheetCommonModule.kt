@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.injection
 
-import android.app.Application
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -11,7 +10,6 @@ import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
-import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -30,8 +28,8 @@ import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentSheetLoader
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
-import com.stripe.android.view.CbcEnabledProvider
-import com.stripe.android.view.RealCbcEnabledProvider
+import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
+import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import dagger.Binds
 import dagger.Lazy
 import dagger.Module
@@ -67,9 +65,6 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsLinkAccountStatusProvider(
         impl: DefaultLinkAccountStatusProvider,
     ): LinkAccountStatusProvider
-
-    @Binds
-    abstract fun bindsCbcEnabledProvider(impl: RealCbcEnabledProvider): CbcEnabledProvider
 
     @Binds
     abstract fun bindsIntentConfirmationInterceptor(
@@ -127,18 +122,14 @@ internal abstract class PaymentSheetCommonModule {
 
         @Provides
         @Singleton
-        @Named(APP_NAME)
-        fun provideAppName(
-            appContext: Context,
-        ): String {
-            val application = appContext as Application
-            return application.applicationInfo.loadLabel(application.packageManager).toString()
+        fun provideDurationProvider(): DurationProvider {
+            return DefaultDurationProvider.instance
         }
 
         @Provides
         @Singleton
-        fun provideDurationProvider(): DurationProvider {
-            return DefaultDurationProvider.instance
+        fun providesEditPaymentMethodViewInteractorFactory(): ModifiableEditPaymentMethodViewInteractor.Factory {
+            return DefaultEditPaymentMethodViewInteractor.Factory
         }
     }
 }

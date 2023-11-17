@@ -50,8 +50,6 @@
   <string name="stripe_wallet_recollect_cvc_error">Güvenliğinizin sağlanması için lütfen kartınızın güvenlik kodunu tekrar girin.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Bu bağlı hesabı kaldırmak istediğinizden emin misiniz?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Kartı kaldır</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Bu kartı kaldırmak istediğinizden emin misiniz?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

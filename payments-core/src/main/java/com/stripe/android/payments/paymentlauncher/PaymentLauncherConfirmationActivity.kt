@@ -9,8 +9,10 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.AuthActivityStarterHost
+import kotlinx.coroutines.launch
 
 /**
  * Host activity to perform actions for [PaymentLauncher].
@@ -41,7 +43,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
                 EMPTY_ARG_ERROR
             }
         }.getOrElse {
-            finishWithResult(PaymentResult.Failed(it))
+            finishWithResult(InternalPaymentResult.Failed(it))
             return
         }
 
@@ -49,7 +51,12 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             // Prevent back presses while confirming payment
         }
 
-        viewModel.paymentLauncherResult.observe(this, ::finishWithResult)
+        lifecycleScope.launch {
+            viewModel.internalPaymentResult.collect {
+                it?.let(::finishWithResult)
+            }
+        }
+
         viewModel.register(
             activityResultCaller = this,
             lifecycleOwner = this,
@@ -86,7 +93,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
      * After confirmation and next action is handled, finish the activity with
      * corresponding [PaymentResult]
      */
-    private fun finishWithResult(result: PaymentResult) {
+    private fun finishWithResult(result: InternalPaymentResult) {
         setResult(
             Activity.RESULT_OK,
             Intent()

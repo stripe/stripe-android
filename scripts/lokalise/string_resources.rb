@@ -62,6 +62,8 @@ class StringResources
                 if description.start_with?('<!--') && description.end_with?('-->')
                     # Remove the leading <!-- and trailing --> from description
                     description = description.delete_prefix('<!--').delete_suffix('-->').strip
+                else
+                    description = nil
                 end
 
                 key_object = {
@@ -80,10 +82,7 @@ class StringResources
     end
 
     def escape_for_lokalise(value)
-        value
-            # Wrap any placeholders in square brackets
-            .gsub("%s", "[%s]")
-            # Wrap any numbered placeholders such as ""%1$s" in square brackets
-            .gsub(/[%]*[0-9]*[$][s]/) { |value| "[#{value}]" }
+        # Remove escape characters, as Lokalise doesn't understand them
+        return value.gsub("\\", "")
     end
 end

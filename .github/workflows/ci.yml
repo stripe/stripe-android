@@ -51,7 +51,7 @@ jobs:
       - name: Generate Android release bundle
         run: ./gradlew :paymentsheet-example:bundleRelease
       - name: Upload artifact to Emerge
-        uses: EmergeTools/emerge-upload-action@v1.0.3
+        uses: EmergeTools/emerge-upload-action@3477b597fc62054136eb6f499e0ba78144f8a999
         with:
           artifact_path: paymentsheet-example/build/outputs/bundle/release/paymentsheet-example-release.aab
           emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
@@ -60,10 +60,19 @@ jobs:
   check-for-untranslated-strings:
     name: Check for untranslated strings
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: Check for untranslated strings
         run: cd scripts && ruby lokalise/check_untranslated_strings.rb
         env:
           LOKALISE_API_TOKEN: ${{ secrets.LOKALISE_API_TOKEN }}
+
+  check-for-transitive-dependency-updates:
+    name: Check for transitive dependency updates
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for transitive dependency updates
+        run: ruby scripts/dependencies/check_transitive_dependencies.rb

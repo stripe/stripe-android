@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -50,7 +51,15 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
         setContent {
             StripeTheme {
-                val bottomSheetState = rememberBottomSheetState()
+                val bottomSheetState = rememberBottomSheetState(
+                    confirmValueChange = {
+                        if (it == ModalBottomSheetValue.Hidden) {
+                            viewModel.bottomSheetConfirmStateChange()
+                        } else {
+                            true
+                        }
+                    }
+                )
 
                 val viewState by viewModel.viewState.collectAsState()
                 val result by viewModel.result.collectAsState()
@@ -74,6 +83,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                         viewState = viewState,
                         viewActionHandler = viewModel::handleViewAction,
                         paymentMethodNameProvider = viewModel::providePaymentMethodName,
+                        formViewModelSubComponentBuilderProvider = viewModel.formViewModelSubcomponentBuilderProvider,
                     )
                 }
             }

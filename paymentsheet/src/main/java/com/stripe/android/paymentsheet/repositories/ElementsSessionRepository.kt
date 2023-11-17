@@ -66,13 +66,7 @@ internal class RealElementsSessionRepository @Inject constructor(
                     options = requestOptions,
                     expandFields = listOf("payment_method")
                 ).map {
-                    ElementsSession(
-                        linkSettings = null,
-                        paymentMethodSpecs = null,
-                        stripeIntent = it,
-                        merchantCountry = null,
-                        isEligibleForCardBrandChoice = false,
-                    )
+                    ElementsSession.createFromFallback(it, elementsSessionFailure)
                 }
             }
             is ElementsSessionParams.SetupIntentType -> {
@@ -81,13 +75,7 @@ internal class RealElementsSessionRepository @Inject constructor(
                     options = requestOptions,
                     expandFields = listOf("payment_method")
                 ).map {
-                    ElementsSession(
-                        linkSettings = null,
-                        paymentMethodSpecs = null,
-                        stripeIntent = it,
-                        merchantCountry = null,
-                        isEligibleForCardBrandChoice = false,
-                    )
+                    ElementsSession.createFromFallback(it, elementsSessionFailure)
                 }
             }
             is ElementsSessionParams.DeferredIntentType -> {

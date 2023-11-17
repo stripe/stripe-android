@@ -16,11 +16,14 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -38,9 +41,14 @@ class CustomerAdapterTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
     private val testDispatcher = UnconfinedTestDispatcher()
 
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.customerSheetACHv2,
+        isEnabled = true,
+    )
+
     @Before
     fun setup() {
-        CustomerSheetACHV2Flag = true
         PaymentConfiguration.init(
             context = application,
             publishableKey = "pk_123",
@@ -143,26 +151,7 @@ class CustomerAdapterTest {
     }
 
     @Test
-    fun `When CustomerSheetACHV2Flag is disabled, retrievePaymentMethods does not request US Bank Account payment methods`() = runTest {
-        CustomerSheetACHV2Flag = false
-        val customerRepository = mock<CustomerRepository>()
-
-        val adapter = createAdapter(
-            customerRepository = customerRepository
-        )
-
-        adapter.retrievePaymentMethods()
-
-        verify(customerRepository).getPaymentMethods(
-            customerConfig = any(),
-            types = eq(listOf(PaymentMethod.Type.Card)),
-            silentlyFail = eq(false),
-        )
-    }
-
-    @Test
-    fun `When CustomerSheetACHV2Flag is enabled, retrievePaymentMethods requests US Bank Account payment methods`() = runTest {
-        CustomerSheetACHV2Flag = true
+    fun `retrievePaymentMethods requests US Bank Account payment methods`() = runTest {
         val customerRepository = mock<CustomerRepository>()
 
         val adapter = createAdapter(
@@ -666,6 +655,7 @@ class CustomerAdapterTest {
             application = application
         ).createCustomerSessionComponent(
             configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
                 googlePayEnabled = true
             ),
             customerAdapter = adapter,
@@ -697,6 +687,7 @@ class CustomerAdapterTest {
             application = application
         ).createCustomerSessionComponent(
             configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
                 googlePayEnabled = false
             ),
             customerAdapter = adapter,

@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
@@ -152,6 +153,8 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private fun isPostalRequired() =
         (postalCodeRequired || usZipCodeRequired) && shouldShowPostalCode
+
+    internal var viewModelStoreOwner: ViewModelStoreOwner? = null
 
     /**
      * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;

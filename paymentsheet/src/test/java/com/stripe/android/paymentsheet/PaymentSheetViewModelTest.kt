@@ -1,8 +1,9 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultCaller
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
@@ -27,13 +28,16 @@ import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.StripeIntent.NextActionData
+import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
+import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -45,6 +49,7 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
@@ -52,7 +57,10 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.utils.FakeEditPaymentMethodInteractorFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.testing.PaymentIntentFactory
@@ -80,7 +88,6 @@ import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.robolectric.RobolectricTestRunner
@@ -88,7 +95,6 @@ import java.io.IOException
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.time.Duration
 
 @RunWith(RobolectricTestRunner::class)
@@ -126,17 +132,17 @@ internal class PaymentSheetViewModelTest {
 
     private val prefsRepository = FakePrefsRepository()
 
-    private val paymentLauncher = mock<StripePaymentLauncher> {
-        on { authenticatorRegistry } doReturn mock()
-    }
+    private val paymentLauncher = mock<StripePaymentLauncher>()
+
     private val paymentLauncherFactory = mock<StripePaymentLauncherAssistedFactory> {
-        on { create(any(), any(), anyOrNull(), any()) } doReturn paymentLauncher
+        on { create(any(), any(), anyOrNull(), any(), any()) } doReturn paymentLauncher
     }
     private val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
     private val googlePayLauncherFactory = mock<GooglePayPaymentMethodLauncherFactory> {
         on { create(any(), any(), any(), any(), any()) } doReturn googlePayLauncher
     }
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
+    private val fakeEditPaymentMethodInteractorFactory = FakeEditPaymentMethodInteractorFactory(testDispatcher)
 
     private val linkConfigurationCoordinator = mock<LinkConfigurationCoordinator> {
         on { getAccountStatusFlow(any()) } doReturn flowOf(AccountStatus.SignedOut)
@@ -178,6 +184,74 @@ internal class PaymentSheetViewModelTest {
             any(),
             eq(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!)
         )
+    }
+
+    @Test
+    fun `modifyPaymentMethod updates payment methods on successful update`() = runTest {
+        val paymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
+        val updatedPaymentMethod = paymentMethod.copy(
+            card = paymentMethod.card?.copy(
+                networks = paymentMethod.card?.networks?.copy(
+                    preferred = CardBrand.Visa.code
+                )
+            )
+        )
+
+        val customerRepository = spy(
+            FakeCustomerRepository(
+                onUpdatePaymentMethod = {
+                    Result.success(updatedPaymentMethod)
+                }
+            )
+        )
+        val viewModel = createViewModel(
+            customerPaymentMethods = listOf(paymentMethod),
+            customerRepository = customerRepository
+        )
+
+        viewModel.currentScreen.test {
+            awaitItem()
+
+            viewModel.modifyPaymentMethod(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+            val currentScreen = awaitItem()
+
+            assertThat(currentScreen).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+
+            if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
+                val interactor = currentScreen.interactor
+
+                interactor.handleViewAction(
+                    EditPaymentMethodViewAction.OnBrandChoiceChanged(
+                        EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa)
+                    )
+                )
+
+                interactor.handleViewAction(EditPaymentMethodViewAction.OnUpdatePressed)
+            }
+
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
+        }
+
+        val paramsCaptor = argumentCaptor<PaymentMethodUpdateParams>()
+
+        verify(customerRepository).updatePaymentMethod(
+            any(),
+            paramsCaptor.capture()
+        )
+
+        assertThat(
+            paramsCaptor.firstValue.toParamMap()
+        ).isEqualTo(
+            PaymentMethodUpdateParams.createCard(
+                paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
+                networks = PaymentMethodUpdateParams.Card.Networks(
+                    preferred = CardBrand.Visa.code
+                )
+            ).toParamMap()
+        )
+
+        assertThat(viewModel.paymentMethods.value).contains(updatedPaymentMethod)
     }
 
     @Test
@@ -280,7 +354,7 @@ internal class PaymentSheetViewModelTest {
             createViewModel(
                 stripeIntent = stripeIntent,
                 args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                    config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                    config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                         shippingDetails = AddressDetails(
                             address = PaymentSheet.Address(
                                 country = "US"
@@ -599,7 +673,7 @@ internal class PaymentSheetViewModelTest {
     fun `Verify supported payment methods exclude afterpay if no shipping and no allow flag`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                     shippingDetails = null,
                     allowsPaymentMethodsRequiringShippingAddress = false,
                 )
@@ -617,7 +691,7 @@ internal class PaymentSheetViewModelTest {
     fun `Verify supported payment methods include afterpay if allow flag but no shipping`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                     allowsPaymentMethodsRequiringShippingAddress = true,
                 )
             ),
@@ -635,7 +709,7 @@ internal class PaymentSheetViewModelTest {
     fun `Verify supported payment methods include afterpay if shipping but no allow flag`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                     allowsPaymentMethodsRequiringShippingAddress = false,
                 )
             ),
@@ -687,17 +761,6 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewModel.isProcessingPaymentIntent)
             .isFalse()
-    }
-
-    @Test
-    fun `When configuration is empty, merchant name should reflect the app name`() {
-        val viewModel = createViewModel(
-            args = ARGS_WITHOUT_CUSTOMER
-        )
-
-        // In a real app, the app name will be used. In tests the package name is returned.
-        assertThat(viewModel.merchantName)
-            .isEqualTo("com.stripe.android.paymentsheet.test")
     }
 
     @Test
@@ -782,11 +845,12 @@ internal class PaymentSheetViewModelTest {
             PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
         )
 
-        assertThat(viewModel.notesText.value)
+        assertThat(viewModel.mandateText.value?.text)
             .isEqualTo(
                 "By continuing, you agree to authorize payments pursuant to " +
                     "<a href=\"https://stripe.com/ach-payments/authorization\">these terms</a>."
             )
+        assertThat(viewModel.mandateText.value?.showAbovePrimaryButton).isFalse()
 
         viewModel.updateSelection(
             PaymentSelection.New.GenericPaymentMethod(
@@ -799,15 +863,41 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        assertThat(viewModel.notesText.value)
-            .isEqualTo(null)
+        assertThat(viewModel.mandateText.value).isNull()
 
         viewModel.updateSelection(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
 
-        assertThat(viewModel.notesText.value)
-            .isEqualTo(null)
+        assertThat(viewModel.mandateText.value).isNull()
+    }
+
+    @Test
+    fun `updateSelection() posts mandate text when selected payment is sepa`() {
+        val viewModel = createViewModel()
+
+        viewModel.updateSelection(
+            PaymentSelection.Saved(SEPA_DEBIT_PAYMENT_METHOD)
+        )
+
+        assertThat(viewModel.mandateText.value?.text)
+            .isEqualTo(
+                "By providing your payment information and confirming this payment, you authorise (A) Merchant, Inc. " +
+                    "and Stripe, our payment service provider, to send instructions to your bank to debit your " +
+                    "account and (B) your bank to debit your account in accordance with those instructions. As part" +
+                    " of your rights, you are entitled to a refund from your bank under the terms and conditions of" +
+                    " your agreement with your bank. A refund must be claimed within 8 weeks starting from the date" +
+                    " on which your account was debited. Your rights are explained in a statement that you can " +
+                    "obtain from your bank. You agree to receive notifications for future debits up to 2 days before" +
+                    " they occur."
+            )
+        assertThat(viewModel.mandateText.value?.showAbovePrimaryButton).isTrue()
+
+        viewModel.updateSelection(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        assertThat(viewModel.mandateText.value).isNull()
     }
 
     @Test
@@ -1195,7 +1285,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             isGooglePayReady = true,
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                     allowsDelayedPaymentMethods = true,
                 ),
             ),
@@ -1359,24 +1449,6 @@ internal class PaymentSheetViewModelTest {
                 deferredIntentConfirmationType = eq(deferredIntentConfirmationType),
             )
         }
-    }
-
-    @Test
-    fun `Invalidates authenticator when lifecycle owner is destroyed`() {
-        val lifecycleOwner = TestLifecycleOwner()
-        val viewModel = createViewModel()
-
-        viewModel.registerFromActivity(DummyActivityResultCaller(), lifecycleOwner)
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-
-        val argumentCaptor = argumentCaptor<Class<out NextActionData>>()
-
-        // unregisterAuthenticator should be called for each call to registerAuthenticator.
-        verify(paymentLauncher.authenticatorRegistry, times(2)).unregisterAuthenticator(argumentCaptor.capture())
-
-        val capturedArguments = argumentCaptor.allValues
-        assertEquals(NextActionData.UpiAwaitNotification::class.java, capturedArguments[0])
-        assertEquals(NextActionData.BlikAuthorize::class.java, capturedArguments[1])
     }
 
     @Test
@@ -1548,7 +1620,7 @@ internal class PaymentSheetViewModelTest {
         val expectedAmount = 1099L
 
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                 googlePay = PaymentSheet.GooglePayConfiguration(
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                     countryCode = "CA",
@@ -1585,7 +1657,7 @@ internal class PaymentSheetViewModelTest {
         val expectedAmount = 1234L
 
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config?.copy(
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
                 googlePay = PaymentSheet.GooglePayConfiguration(
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                     countryCode = "CA",
@@ -1615,6 +1687,152 @@ internal class PaymentSheetViewModelTest {
             transactionId = anyOrNull(),
             label = eq(expectedLabel),
         )
+    }
+
+    @Test
+    fun `On complete payment launcher result in PI mode & should reuse, should save payment selection`() = runTest {
+        selectionSavedTest(
+            initializationMode = InitializationMode.PaymentIntent(
+                clientSecret = "pi_12345"
+            ),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+        )
+    }
+
+    @Test
+    fun `On complete payment launcher result in PI mode & should not reuse, should not save payment selection`() = runTest {
+        selectionSavedTest(
+            initializationMode = InitializationMode.PaymentIntent(
+                clientSecret = "pi_12345"
+            ),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+            shouldSave = false
+        )
+    }
+
+    @Test
+    fun `On complete payment launcher result in SI mode, should save payment selection`() = runTest {
+        selectionSavedTest(
+            initializationMode = InitializationMode.SetupIntent(
+                clientSecret = "si_123456"
+            )
+        )
+    }
+
+    @Test
+    fun `On complete payment launcher result with PI config but no SFU, should not save payment selection`() = runTest {
+        selectionSavedTest(
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 10L,
+                        currency = "USD"
+                    )
+                )
+            ),
+            shouldSave = false
+        )
+    }
+
+    @Test
+    fun `On complete payment launcher result with DI (PI+SFU), should save payment selection`() = runTest {
+        selectionSavedTest(
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 10L,
+                        currency = "USD",
+                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `On complete payment launcher result with DI (SI), should save payment selection`() = runTest {
+        selectionSavedTest(
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(
+                        currency = "USD"
+                    )
+                )
+            )
+        )
+    }
+
+    private suspend fun selectionSavedTest(
+        initializationMode: InitializationMode = ARGS_CUSTOMER_WITH_GOOGLEPAY.initializationMode,
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave =
+            PaymentSelection.CustomerRequestedSave.NoRequest,
+        shouldSave: Boolean = true
+    ) {
+        val intent = PAYMENT_INTENT_WITH_PAYMENT_METHOD!!
+        val mockActivityResultCaller = mock<ActivityResultCaller> {
+            on {
+                registerForActivityResult<
+                    PaymentLauncherContract.Args,
+                    InternalPaymentResult
+                    >(any(), any())
+            } doReturn mock()
+        }
+
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                initializationMode = initializationMode
+            ),
+            stripeIntent = PAYMENT_INTENT
+        ).apply {
+            registerFromActivity(mockActivityResultCaller, TestLifecycleOwner())
+        }
+
+        val selection = PaymentSelection.New.Card(
+            brand = CardBrand.Visa,
+            customerRequestedSave = customerRequestedSave,
+            paymentMethodCreateParams = PaymentMethodCreateParams.create(
+                card = PaymentMethodCreateParams.Card()
+            )
+        )
+
+        viewModel.updateSelection(selection)
+
+        val onPaymentResult = argumentCaptor<ActivityResultCallback<InternalPaymentResult>>()
+
+        verify(mockActivityResultCaller).registerForActivityResult(
+            any<PaymentLauncherContract>(),
+            onPaymentResult.capture()
+        )
+
+        onPaymentResult.firstValue.onActivityResult(
+            InternalPaymentResult.Completed(intent)
+        )
+
+        val savedSelection = PaymentSelection.Saved(
+            paymentMethod = intent.paymentMethod!!
+        )
+
+        if (shouldSave) {
+            assertThat(prefsRepository.paymentSelectionArgs).containsExactly(savedSelection)
+
+            assertThat(
+                prefsRepository.getSavedSelection(
+                    isGooglePayAvailable = true,
+                    isLinkAvailable = true
+                )
+            ).isEqualTo(
+                SavedSelection.PaymentMethod(savedSelection.paymentMethod.id.orEmpty())
+            )
+        } else {
+            assertThat(prefsRepository.paymentSelectionArgs).isEmpty()
+
+            assertThat(
+                prefsRepository.getSavedSelection(
+                    isGooglePayAvailable = true,
+                    isLinkAvailable = true
+                )
+            ).isEqualTo(SavedSelection.None)
+        }
     }
 
     private fun createViewModel(
@@ -1657,6 +1875,7 @@ internal class PaymentSheetViewModelTest {
                 linkConfigurationCoordinator = linkInteractor,
                 intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
                 formViewModelSubComponentBuilderProvider = mock(),
+                editInteractorFactory = fakeEditPaymentMethodInteractorFactory
             )
         }
     }
@@ -1681,11 +1900,12 @@ internal class PaymentSheetViewModelTest {
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP =
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
-        private val ARGS_WITHOUT_CUSTOMER = PaymentSheetFixtures.ARGS_WITHOUT_CONFIG
+        private val ARGS_WITHOUT_CUSTOMER = PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER
 
         private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        val PAYMENT_INTENT_WITH_PAYMENT_METHOD = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD
         val SETUP_INTENT = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
     }
 }

@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -100,7 +101,7 @@ internal fun AddPaymentMethod(
                 ?.intentConfiguration
                 ?.onBehalfOf
             PaymentElement(
-                sheetViewModel = sheetViewModel,
+                formViewModelSubComponentBuilderProvider = sheetViewModel.formViewModelSubComponentBuilderProvider,
                 enabled = !processing,
                 supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
                 selectedItem = selectedItem,
@@ -120,13 +121,14 @@ internal fun AddPaymentMethod(
                 usBankAccountFormArguments = USBankAccountFormArguments(
                     onBehalfOf = onBehalfOf,
                     isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
-                    isPaymentFlow = initializationMode is PaymentSheet.InitializationMode.PaymentIntent,
+                    isPaymentFlow = stripeIntent.value is PaymentIntent,
                     stripeIntentId = stripeIntent.value?.id,
                     clientSecret = stripeIntent.value?.clientSecret,
-                    shippingDetails = sheetViewModel.config?.shippingDetails,
+                    shippingDetails = sheetViewModel.config.shippingDetails,
                     draftPaymentSelection = sheetViewModel.newPaymentSelection,
-                    onMandateTextChanged = sheetViewModel::updateBelowButtonText,
-                    onHandleUSBankAccount = sheetViewModel::handleConfirmUSBankAccount,
+                    onMandateTextChanged = sheetViewModel::updateMandateText,
+                    onConfirmUSBankAccount = sheetViewModel::handleConfirmUSBankAccount,
+                    onCollectBankAccountResult = null,
                     onUpdatePrimaryButtonUIState = sheetViewModel::updateCustomPrimaryButtonUiState,
                     onUpdatePrimaryButtonState = sheetViewModel::updatePrimaryButtonState,
                     onError = sheetViewModel::onError
@@ -202,7 +204,9 @@ internal fun FormFieldValues.transformToPaymentSelection(
     val options = transformToPaymentMethodOptionsParams(paymentMethod)
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
         PaymentSelection.New.Card(
-            paymentMethodOptionsParams = options,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = userRequestedReuse.setupFutureUsage
+            ),
             paymentMethodCreateParams = params,
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,

@@ -1,6 +1,8 @@
 package com.stripe.android.ui.core.elements
 
 import android.content.Context
+import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.SectionMultiFieldElement
@@ -19,15 +21,13 @@ internal class CardDetailsElement(
     identifier: IdentifierSpec,
     context: Context,
     initialValues: Map<IdentifierSpec, String?>,
-    viewOnlyFields: Set<IdentifierSpec> = emptySet(),
     collectName: Boolean = false,
-    private val isEligibleForCardBrandChoice: Boolean = false,
+    private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     val controller: CardDetailsController = CardDetailsController(
         context,
         initialValues,
-        viewOnlyFields.contains(IdentifierSpec.CardNumber),
         collectName,
-        isEligibleForCardBrandChoice,
+        cbcEligibility,
     )
 ) : SectionMultiFieldElement(identifier) {
     val isCardScanEnabled = controller.numberElement.controller.cardScanEnabled
@@ -73,6 +73,16 @@ internal class CardDetailsElement(
                     IdentifierSpec.CardBrand to FormFieldEntry(it.code, true)
                 }
             )
+            if (cbcEligibility is CardBrandChoiceEligibility.Eligible) {
+                add(
+                    controller.numberElement.controller.selectedCardBrandFlow.map { brand ->
+                        IdentifierSpec.PreferredCardBrand to FormFieldEntry(
+                            value = brand.code.takeUnless { brand == CardBrand.Unknown },
+                            isComplete = true
+                        )
+                    }
+                )
+            }
             add(
                 controller.expirationDateElement.controller.formFieldValue.map {
                     IdentifierSpec.CardExpMonth to getExpiryMonthFormFieldEntry(it)
