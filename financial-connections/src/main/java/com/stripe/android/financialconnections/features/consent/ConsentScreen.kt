@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
@@ -156,7 +156,7 @@ private fun ConsentMainContent(
     onContinueClick: () -> Unit,
     onCloseClick: () -> Unit
 ) {
-    val scrollState = rememberScrollState()
+    val scrollState = rememberLazyListState()
     val title = remember(payload.consent.title) {
         TextResource.Text(fromHtml(payload.consent.title))
     }
@@ -176,6 +176,7 @@ private fun ConsentMainContent(
         }
     ) {
         Layout(
+            lazyListState = scrollState,
             content = {
                 item {
                     ConsentLogoHeader(
@@ -305,7 +306,6 @@ private fun ConsentFooter(
                     color = v3Colors.textDefault
                 )
             )
-            Spacer(modifier = Modifier.size(16.dp))
         }
     }
 }

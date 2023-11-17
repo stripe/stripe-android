@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.DataAccessNotice
@@ -148,7 +149,9 @@ private fun ModalBottomSheetContent(
         inModal = true,
         content = {
             item {
+
                 icon?.default?.let {
+                    Spacer(modifier = Modifier.size(24.dp))
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
@@ -165,7 +168,7 @@ private fun ModalBottomSheetContent(
                             contentScale = ContentScale.Crop // Adjust the scaling if needed
                         )
                     }
-                    Spacer(modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.size(24.dp))
                 }
                 AnnotatedText(
                     text = title,
@@ -216,7 +219,8 @@ private fun ModalBottomSheetFooter(
                 text = it,
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = v3Typography.labelSmall.copy(
-                    color = v3Colors.textDefault
+                    color = v3Colors.textDefault,
+                    textAlign = TextAlign.Center
                 ),
             )
         }
@@ -227,7 +231,8 @@ private fun ModalBottomSheetFooter(
                 text = it,
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = v3Typography.labelSmall.copy(
-                    color = v3Colors.textDefault
+                    color = v3Colors.textDefault,
+                    textAlign = TextAlign.Center
                 ),
             )
         }
