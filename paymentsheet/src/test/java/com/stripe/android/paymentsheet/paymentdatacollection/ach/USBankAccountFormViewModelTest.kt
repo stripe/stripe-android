@@ -12,8 +12,10 @@ import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.model.Address
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -194,6 +196,29 @@ class USBankAccountFormViewModelTest {
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.MandateCollection)
 
             assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
+        }
+    }
+
+    @Test
+    fun `when payment options, verified bank account, then result has correct paymentMethodOptionsParams`() = runTest {
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(showCheckbox = true)
+            )
+        )
+        val bankAccount = mockVerifiedBankAccount()
+
+        viewModel.result.test {
+            viewModel.handleCollectBankAccountResult(bankAccount)
+
+            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.MandateCollection)
+
+            assertThat(awaitItem()?.paymentMethodOptionsParams).isEqualTo(
+                PaymentMethodOptionsParams.USBankAccount(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                )
+            )
         }
     }
 
@@ -955,6 +980,36 @@ class USBankAccountFormViewModelTest {
             assertThat(awaitItem())
                 .isInstanceOf(USBankAccountFormScreenState.BillingDetailsCollection::class.java)
         }
+    }
+
+    @Test
+    fun `customerRequestedSave equals RequestReuse when showCheckbox and saveForFutureUse`() {
+        assertThat(
+            customerRequestedSave(
+                showCheckbox = true,
+                saveForFutureUse = true
+            )
+        ).isEqualTo(PaymentSelection.CustomerRequestedSave.RequestReuse)
+    }
+
+    @Test
+    fun `customerRequestedSave equals RequestNoReuse when showCheckbox and not saveForFutureUse`() {
+        assertThat(
+            customerRequestedSave(
+                showCheckbox = true,
+                saveForFutureUse = false
+            )
+        ).isEqualTo(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
+    }
+
+    @Test
+    fun `customerRequestedSave equals NoRequest when not showCheckbox and not saveForFutureUse`() {
+        assertThat(
+            customerRequestedSave(
+                showCheckbox = false,
+                saveForFutureUse = false
+            )
+        ).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
     }
 
     private fun createViewModel(

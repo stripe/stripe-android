@@ -48,7 +48,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        customerRequestedSave: Boolean,
     ): IntentConfirmationInterceptor.NextStep {
         return channel.receive()
     }
@@ -57,7 +57,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         initializationMode: PaymentSheet.InitializationMode,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        customerRequestedSave: Boolean,
     ): IntentConfirmationInterceptor.NextStep {
         return channel.receive()
     }

@@ -22,7 +22,6 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
     abstract fun create(
         createParams: PaymentMethodCreateParams,
         optionsParams: PaymentMethodOptionsParams? = null,
-        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
     ): T
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -78,40 +77,11 @@ internal class ConfirmPaymentIntentParamsFactory(
     override fun create(
         createParams: PaymentMethodCreateParams,
         optionsParams: PaymentMethodOptionsParams?,
-        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
             paymentMethodCreateParams = createParams,
             clientSecret = clientSecret,
-
-            /**
-             Sets `payment_method_options[card][setup_future_usage]`
-             - Note: PaymentSheet uses this `setup_future_usage` (SFU) value very differently from the top-level one:
-             We read the top-level SFU to know the merchant’s desired save behavior
-             We write payment method options SFU to set the customer’s desired save behavior
-             */
-            // At this time, paymentMethodOptions card and us_bank_account is the only PM that
-            // supports setup future usage
-            paymentMethodOptions = when (createParams.typeCode) {
-                PaymentMethod.Type.Card.code -> {
-                    PaymentMethodOptionsParams.Card(setupFutureUsage = setupFutureUsage)
-                }
-                PaymentMethod.Type.USBankAccount.code -> {
-                    PaymentMethodOptionsParams.USBankAccount(setupFutureUsage = setupFutureUsage)
-                }
-                PaymentMethod.Type.Blik.code -> {
-                    optionsParams
-                }
-                PaymentMethod.Type.Konbini.code -> {
-                    optionsParams
-                }
-                PaymentMethod.Type.Link.code -> {
-                    null
-                }
-                else -> {
-                    PaymentMethodOptionsParams.Card(setupFutureUsage = null)
-                }
-            },
+            paymentMethodOptions = optionsParams,
             shipping = shipping,
         )
     }
@@ -133,7 +103,6 @@ internal class ConfirmSetupIntentParamsFactory(
     override fun create(
         createParams: PaymentMethodCreateParams,
         optionsParams: PaymentMethodOptionsParams?,
-        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
             paymentMethodCreateParams = createParams,

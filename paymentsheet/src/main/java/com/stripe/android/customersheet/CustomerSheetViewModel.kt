@@ -18,7 +18,6 @@ import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
-import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -816,7 +815,7 @@ internal class CustomerSheetViewModel @Inject constructor(
             ),
             paymentMethod = paymentMethod,
             shippingValues = null,
-            setupForFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+            customerRequestedSave = true,
         )
 
         unconfirmedPaymentMethod = paymentMethod
