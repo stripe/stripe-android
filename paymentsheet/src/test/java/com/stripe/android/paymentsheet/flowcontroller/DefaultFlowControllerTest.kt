@@ -61,6 +61,11 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -90,6 +95,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
@@ -198,6 +204,14 @@ internal class DefaultFlowControllerTest {
             activityResultRegistry.register(
                 any(),
                 any<PaymentLauncherContract>(),
+                any()
+            )
+        ).thenReturn(mock())
+
+        whenever(
+            activityResultRegistry.register(
+                any(),
+                any<BacsMandateConfirmationContract>(),
                 any()
             )
         ).thenReturn(mock())
@@ -1528,6 +1542,73 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `Launches Bacs with name, email, sort code and account number`() = runTest {
+        val expectedAccountNumber = "00012345"
+        val expectedSortCode = "108800"
+        val expectedName = "John Doe"
+        val expectedEmail = "johndoe@email.com"
+
+        val activityResultLauncherMock = mock<ActivityResultLauncher<BacsMandateConfirmationContract.Args>>()
+
+        whenever(
+            activityResultRegistry.register(
+                any(),
+                any<BacsMandateConfirmationContract>(),
+                any()
+            )
+        ).thenReturn(activityResultLauncherMock)
+
+        val launcher = spy(FakeBacsMandateConfirmationLauncher())
+        val launcherFactory = spy(FakeBacsMandateConfirmationLauncherFactory(launcher))
+
+        val flowController = createFlowController(
+            bacsMandateConfirmationLauncherFactory = launcherFactory
+        )
+
+        verify(launcherFactory).create(activityResultLauncherMock)
+
+        flowController.configureExpectingSuccess(
+            clientSecret = PaymentSheetFixtures.SETUP_CLIENT_SECRET
+        )
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(
+                PaymentSelection.New.GenericPaymentMethod(
+                    labelResource = "",
+                    iconResource = 0,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
+                        bacsDebit = PaymentMethodCreateParams.BacsDebit(
+                            accountNumber = expectedAccountNumber,
+                            sortCode = expectedSortCode
+                        ),
+                        billingDetails = PaymentMethod.BillingDetails(
+                            name = expectedName,
+                            email = expectedEmail
+                        )
+                    )
+                )
+            )
+        )
+
+        flowController.confirm()
+
+        verify(launcher).launch(
+            eq(
+                BacsMandateData(
+                    name = expectedName,
+                    email = expectedEmail,
+                    sortCode = expectedSortCode,
+                    accountNumber = expectedAccountNumber
+                )
+            ),
+            eq(PaymentSheet.Appearance())
+        )
+    }
+
+    @Test
     fun `On complete internal payment result in PI mode & should reuse, should save payment selection`() = runTest {
         selectionSavedTest(
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
@@ -1676,6 +1757,8 @@ internal class DefaultFlowControllerTest {
             loginState = LinkState.LoginState.LoggedIn,
         ),
         viewModel: FlowControllerViewModel = createViewModel(),
+        bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory =
+            FakeBacsMandateConfirmationLauncherFactory()
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentSheetLoader(
@@ -1684,13 +1767,16 @@ internal class DefaultFlowControllerTest {
                 paymentSelection = paymentSelection,
                 linkState = linkState,
             ),
-            viewModel
+            viewModel,
+            bacsMandateConfirmationLauncherFactory
         )
     }
 
     private fun createFlowController(
         paymentSheetLoader: PaymentSheetLoader,
         viewModel: FlowControllerViewModel = createViewModel(),
+        bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory =
+            FakeBacsMandateConfirmationLauncherFactory()
     ) = DefaultFlowController(
         viewModelScope = testScope,
         lifecycleOwner = lifeCycleOwner,
@@ -1713,6 +1799,7 @@ internal class DefaultFlowControllerTest {
         productUsage = PRODUCT_USAGE,
         googlePayPaymentMethodLauncherFactory = createGooglePayPaymentMethodLauncherFactory(),
         prefsRepositoryFactory = { prefsRepository },
+        bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
         linkLauncher = linkPaymentLauncher,
         configurationHandler = FlowControllerConfigurationHandler(
             paymentSheetLoader = paymentSheetLoader,

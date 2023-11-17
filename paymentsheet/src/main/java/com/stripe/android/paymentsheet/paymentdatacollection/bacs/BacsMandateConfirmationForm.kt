@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,8 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -20,6 +19,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -31,9 +32,12 @@ import com.google.android.gms.common.util.VisibleForTesting
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
+import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.R as PaymentsCoreR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
@@ -55,17 +59,17 @@ internal fun BacsMandateConfirmationFormView(
     viewActionHandler: (action: BacsMandateConfirmationViewAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val padding = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+
     return Column(
         modifier = modifier
-            .verticalScroll(rememberScrollState())
             .background(MaterialTheme.colors.surface)
-            .padding(16.dp),
+            .padding(horizontal = padding),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
+        H4Text(
             text = stringResource(id = R.string.stripe_paymentsheet_bacs_mandate_title),
-            style = MaterialTheme.typography.h4.copy(fontWeight = FontWeight.Medium),
-            color = MaterialTheme.colors.onBackground
+            modifier = Modifier.padding(bottom = 2.dp),
         )
         BacsMandateDetails(
             email = state.email,
@@ -90,9 +94,15 @@ internal fun BacsMandateConfirmationFormView(
                 isHtml = true
             )
             Box(modifier = Modifier.weight(WEIGHT_40_PERCENT), contentAlignment = Alignment.CenterEnd) {
+                val tint = if (MaterialTheme.colors.surface.shouldUseDarkDynamicColor()) {
+                    Color.Black
+                } else {
+                    Color.White
+                }
+
                 Icon(
                     painterResource(id = R.drawable.stripe_bacs_direct_debit_mark),
-                    tint = MaterialTheme.stripeColors.subtitle,
+                    tint = tint.copy(alpha = 0.5f),
                     contentDescription = null
                 )
             }
@@ -161,13 +171,13 @@ internal fun BacsMandateDetailsRow(
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Text(
             modifier = Modifier.weight(WEIGHT_40_PERCENT),
-            style = MaterialTheme.typography.subtitle2,
+            fontWeight = FontWeight(MaterialTheme.stripeTypography.fontWeightMedium),
             color = MaterialTheme.stripeColors.onComponent,
             text = label
         )
         Text(
             modifier = Modifier.weight(WEIGHT_60_PERCENT),
-            style = MaterialTheme.typography.body1,
+            fontWeight = FontWeight(MaterialTheme.stripeTypography.fontWeightNormal),
             color = MaterialTheme.stripeColors.onComponent,
             text = value
         )
@@ -216,14 +226,14 @@ private fun MandateButtons(
             type = BacsMandateButtonType.Secondary,
             label = stringResource(R.string.stripe_paymentsheet_bacs_modify_details_button_label),
             onClick = {
-                viewActionHandler.invoke(BacsMandateConfirmationViewAction.OnCancelPressed)
+                viewActionHandler.invoke(BacsMandateConfirmationViewAction.OnModifyDetailsPressed)
             }
         )
     }
 }
 
 @Composable
-@Preview
+@Preview(uiMode = UI_MODE_NIGHT_YES)
 private fun BacsMandateConfirmationFormPreview() {
     StripeTheme {
         BacsMandateConfirmationFormView(

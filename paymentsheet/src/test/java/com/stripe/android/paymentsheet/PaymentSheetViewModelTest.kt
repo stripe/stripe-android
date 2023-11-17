@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
@@ -55,6 +56,10 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherP
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
@@ -1742,6 +1747,61 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `Launch confirmation form when Bacs debit is selected and filled`() {
+        val expectedAccountNumber = "00012345"
+        val expectedSortCode = "108800"
+        val expectedName = "John Doe"
+        val expectedEmail = "johndoe@email.com"
+
+        val launcher = spy(FakeBacsMandateConfirmationLauncher())
+        val launcherFactory = spy(FakeBacsMandateConfirmationLauncherFactory(launcher))
+
+        val viewModel = createViewModel(
+            bacsMandateConfirmationLauncherFactory = launcherFactory
+        )
+
+        val activityResultLauncherMock = mock<ActivityResultLauncher<BacsMandateConfirmationContract.Args>>()
+
+        viewModel.setupBacsMandateConfirmation(activityResultLauncherMock)
+
+        verify(launcherFactory).create(activityResultLauncherMock)
+
+        viewModel.updateSelection(
+            PaymentSelection.New.GenericPaymentMethod(
+                labelResource = "Test",
+                iconResource = 0,
+                paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
+                    bacsDebit = PaymentMethodCreateParams.BacsDebit(
+                        accountNumber = expectedAccountNumber,
+                        sortCode = expectedSortCode
+                    ),
+                    billingDetails = PaymentMethod.BillingDetails(
+                        name = expectedName,
+                        email = expectedEmail
+                    )
+                ),
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+            )
+        )
+
+        viewModel.checkout()
+
+        verify(launcher).launch(
+            eq(
+                BacsMandateData(
+                    name = expectedName,
+                    email = expectedEmail,
+                    sortCode = expectedSortCode,
+                    accountNumber = expectedAccountNumber,
+                )
+            ),
+            eq(PaymentSheet.Appearance())
+        )
+    }
+
+    @Test
     fun `On complete payment launcher result in PI mode & should reuse, should save payment selection`() = runTest {
         selectionSavedTest(
             initializationMode = InitializationMode.PaymentIntent(
@@ -1897,6 +1957,8 @@ internal class PaymentSheetViewModelTest {
         isGooglePayReady: Boolean = false,
         delay: Duration = Duration.ZERO,
         lpmRepository: LpmRepository = this.lpmRepository,
+        bacsMandateConfirmationLauncherFactory: FakeBacsMandateConfirmationLauncherFactory =
+            FakeBacsMandateConfirmationLauncherFactory(),
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return TestViewModelFactory.create(
@@ -1920,6 +1982,7 @@ internal class PaymentSheetViewModelTest {
                 lpmRepository = lpmRepository,
                 paymentLauncherFactory = paymentLauncherFactory,
                 googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
+                bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,

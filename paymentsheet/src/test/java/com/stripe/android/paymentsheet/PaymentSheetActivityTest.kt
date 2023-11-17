@@ -49,6 +49,7 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
@@ -1001,6 +1002,7 @@ internal class PaymentSheetActivityTest {
                 lpmRepository,
                 stripePaymentLauncherAssistedFactory,
                 googlePayPaymentMethodLauncherFactory,
+                FakeBacsMandateConfirmationLauncherFactory(),
                 Logger.noop(),
                 testDispatcher,
                 savedStateHandle = savedStateHandle,

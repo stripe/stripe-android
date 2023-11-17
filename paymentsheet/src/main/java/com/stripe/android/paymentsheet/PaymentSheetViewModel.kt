@@ -27,6 +27,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
@@ -45,6 +46,11 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
@@ -90,6 +96,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     lpmRepository: LpmRepository,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
+    private val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
     logger: Logger,
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
@@ -159,6 +166,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override var newPaymentSelection: PaymentSelection.New? = null
 
     private var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
+
+    private var bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher? = null
 
     private var deferredIntentConfirmationType: DeferredIntentConfirmationType? = null
 
@@ -362,6 +371,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
+    fun setupBacsMandateConfirmation(
+        activityLauncher: ActivityResultLauncher<BacsMandateConfirmationContract.Args>
+    ) {
+        bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncherFactory.create(activityLauncher)
+    }
+
     private fun resetViewState(userErrorMessage: String? = null) {
         viewState.value =
             PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
@@ -406,6 +421,32 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     },
                     transactionId = stripeIntent.id,
                     label = args.googlePayConfig?.label,
+                )
+            }
+        } else if (
+            paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
+            paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code
+        ) {
+            BacsMandateData.fromPaymentSelection(paymentSelection)?.let { data ->
+                runCatching {
+                    requireNotNull(bacsMandateConfirmationLauncher)
+                }.onSuccess { launcher ->
+                    launcher.launch(
+                        data = data,
+                        appearance = config.appearance
+                    )
+                }.onFailure {
+                    resetViewState(
+                        userErrorMessage = getApplication<Application>()
+                            .resources
+                            .getString(R.string.stripe_something_went_wrong)
+                    )
+                }
+            } ?: run {
+                resetViewState(
+                    userErrorMessage = getApplication<Application>()
+                        .resources
+                        .getString(R.string.stripe_something_went_wrong)
                 )
             }
         } else {
@@ -654,6 +695,23 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is GooglePayPaymentMethodLauncher.Result.Canceled -> {
                 resetViewState()
             }
+        }
+    }
+
+    internal fun onBacsMandateResult(result: BacsMandateConfirmationResult) {
+        when (result) {
+            is BacsMandateConfirmationResult.Confirmed -> {
+                val paymentSelection = selection.value
+
+                if (
+                    paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
+                    paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code
+                ) {
+                    confirmPaymentSelection(paymentSelection)
+                }
+            }
+            is BacsMandateConfirmationResult.ModifyDetails,
+            is BacsMandateConfirmationResult.Cancelled -> resetViewState(userErrorMessage = null)
         }
     }
 

@@ -37,7 +37,8 @@ internal class BacsMandateConfirmationViewModel constructor(
     fun handleViewAction(action: BacsMandateConfirmationViewAction) {
         when (action) {
             is BacsMandateConfirmationViewAction.OnConfirmPressed -> onConfirmPress()
-            is BacsMandateConfirmationViewAction.OnCancelPressed -> onCancelPress()
+            is BacsMandateConfirmationViewAction.OnModifyDetailsPressed -> onModifyDetailsPressed()
+            is BacsMandateConfirmationViewAction.OnBackPressed -> onBackPress()
         }
     }
 
@@ -47,7 +48,13 @@ internal class BacsMandateConfirmationViewModel constructor(
         }
     }
 
-    private fun onCancelPress() {
+    private fun onModifyDetailsPressed() {
+        viewModelScope.launch {
+            _result.emit(BacsMandateConfirmationResult.ModifyDetails)
+        }
+    }
+
+    private fun onBackPress() {
         viewModelScope.launch {
             _result.emit(BacsMandateConfirmationResult.Cancelled)
         }

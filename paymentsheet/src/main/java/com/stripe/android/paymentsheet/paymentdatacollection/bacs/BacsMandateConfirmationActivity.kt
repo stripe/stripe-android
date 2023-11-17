@@ -14,10 +14,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.core.view.WindowCompat
 import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.parseAppearance
+import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.AnimationConstants
 import kotlinx.coroutines.flow.collectLatest
+import com.stripe.android.R as StripeR
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class BacsMandateConfirmationActivity : AppCompatActivity() {
     private val starterArgs: BacsMandateConfirmationContract.Args by lazy {
@@ -44,10 +50,10 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
         renderEdgeToEdge()
 
         onBackPressedDispatcher.addCallback {
-            viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnCancelPressed)
+            viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnBackPressed)
         }
 
-        starterArgs.appearance.parseAppearance()
+        starterArgs.appearance?.parseAppearance()
 
         setContent {
             StripeTheme {
@@ -67,10 +73,30 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
                 BottomSheet(
                     state = bottomSheetState,
                     onDismissed = {
-                        viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnCancelPressed)
+                        viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnBackPressed)
                     }
                 ) {
-                    BacsMandateConfirmationFormScreen(viewModel)
+                    PaymentSheetScaffold(
+                        topBar = {
+                            PaymentSheetTopBar(
+                                state = PaymentSheetTopBarState(
+                                    icon = R.drawable.stripe_ic_paymentsheet_close,
+                                    contentDescription = StripeUiCoreR.string.stripe_back,
+                                    isEnabled = true,
+                                    showEditMenu = false,
+                                    showTestModeLabel = false,
+                                    editMenuLabel = StripeR.string.stripe_edit
+                                ),
+                                handleBackPressed = {
+                                    viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnBackPressed)
+                                },
+                                toggleEditing = {},
+                            )
+                        },
+                        content = {
+                            BacsMandateConfirmationFormScreen(viewModel)
+                        }
+                    )
                 }
             }
         }

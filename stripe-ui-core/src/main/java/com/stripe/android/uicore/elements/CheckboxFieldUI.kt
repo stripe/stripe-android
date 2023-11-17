@@ -23,11 +23,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.R
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.StripeTheme
@@ -99,11 +99,9 @@ internal fun CheckboxFieldUIView(
     }
 
     Column(
-        modifier = modifier
-            .semantics {
-                testTag = debugTag
-                stateDescription = accessibilityDescription
-            }
+        modifier = modifier.semantics {
+            stateDescription = accessibilityDescription
+        }
     ) {
         Row(
             modifier = Modifier
@@ -113,6 +111,7 @@ internal fun CheckboxFieldUIView(
                     onValueChange = onValueChange,
                     enabled = enabled
                 )
+                .testTag(debugTag)
                 .fillMaxWidth(),
         ) {
             Checkbox(

@@ -1,9 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -11,9 +8,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.dp
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.common.ui.PrimaryButton
 
 @Composable
 internal fun BacsMandateButton(type: BacsMandateButtonType, label: String, onClick: () -> Unit) {
@@ -23,41 +18,24 @@ internal fun BacsMandateButton(type: BacsMandateButtonType, label: String, onCli
             contentColor = MaterialTheme.colors.onPrimary
         )
         BacsMandateButtonType.Secondary -> ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.stripeColors.component,
-            contentColor = MaterialTheme.stripeColors.onComponent
+            backgroundColor = Color.Transparent,
+            contentColor = MaterialTheme.colors.primary
         )
     }
 
-    return TextButton(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(44.dp)
-            .addButtonBorder(
-                type,
-                MaterialTheme.shapes.small,
-                MaterialTheme.stripeColors.componentBorder
-            ),
-        shape = MaterialTheme.shapes.small,
-        colors = colors,
-        onClick = onClick
-    ) {
-        Text(text = label)
-    }
-}
-
-private fun Modifier.addButtonBorder(
-    type: BacsMandateButtonType,
-    shape: Shape,
-    color: Color
-): Modifier {
-    return when (type) {
-        BacsMandateButtonType.Primary -> this
-        BacsMandateButtonType.Secondary -> border(
-            border = BorderStroke(
-                width = 1.5.dp,
-                color = color,
-            ),
-            shape = shape
+    when (type) {
+        BacsMandateButtonType.Primary -> PrimaryButton(
+            label = label,
+            isEnabled = true,
+            onButtonClick = onClick
         )
+        BacsMandateButtonType.Secondary -> TextButton(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.small,
+            colors = colors,
+            onClick = onClick
+        ) {
+            Text(text = label)
+        }
     }
 }
