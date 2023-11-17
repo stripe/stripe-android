@@ -502,7 +502,7 @@ class DefaultCustomerSheetLoaderTest {
     fun `Loads correct CBC eligibility if feature enabled`() = runTest {
         cbcFeatureFlagTestRule.setEnabled(true)
         val loader = createCustomerSheetLoader(isCbcEligible = true)
-        val state = loader.load(CustomerSheet.Configuration()).getOrThrow()
+        val state = loader.load(CustomerSheet.Configuration(merchantDisplayName = "Example")).getOrThrow()
         assertThat(state.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Eligible(emptyList()))
     }
 
@@ -513,6 +513,7 @@ class DefaultCustomerSheetLoaderTest {
 
         val state = loader.load(
             CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
                 preferredNetworks = listOf(CardBrand.CartesBancaires),
             )
         ).getOrThrow()
@@ -525,7 +526,7 @@ class DefaultCustomerSheetLoaderTest {
     @Test
     fun `Does not load CBC eligibility if feature disabled`() = runTest {
         val loader = createCustomerSheetLoader(isCbcEligible = true)
-        val state = loader.load(CustomerSheet.Configuration()).getOrThrow()
+        val state = loader.load(CustomerSheet.Configuration(merchantDisplayName = "Example")).getOrThrow()
         assertThat(state.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
     }
 
