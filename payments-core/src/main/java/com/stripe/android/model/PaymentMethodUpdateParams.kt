@@ -11,55 +11,45 @@ import java.util.Objects
  * See [Update a PaymentMethod](https://stripe.com/docs/api/payment_methods/update).
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Parcelize
-class PaymentMethodUpdateParams private constructor(
-    val paymentMethodId: String,
-    private val card: Card? = null,
-    private val billingDetails: PaymentMethod.BillingDetails? = null,
-    private val metadata: Map<String, String>? = null,
-    internal val attribution: Set<String> = emptySet(),
+sealed class PaymentMethodUpdateParams(
+    internal val type: PaymentMethod.Type,
 ) : StripeParamsModel, Parcelable {
 
-    private val type: PaymentMethod.Type
-        get() = when {
-            card != null -> PaymentMethod.Type.Card
-            else -> error("Invalid internal state in PaymentMethodUpdateParams")
-        }
+    internal abstract val billingDetails: PaymentMethod.BillingDetails?
 
-    private val paymentMethod: StripeParamsModel
-        get() = card ?: error("Invalid internal state in PaymentMethodUpdateParams")
-
-    private val typeParams: Map<String, Any>
-        get() {
-            val params = paymentMethod.toParamMap().takeIf { it.isNotEmpty() }
-            return params?.let {
-                mapOf(type.code to it)
-            }.orEmpty()
-        }
+    internal abstract fun generateTypeParams(): Map<String, Any>
 
     override fun toParamMap(): Map<String, Any> {
-        val type = mapOf(PARAM_TYPE to type.code)
+        val typeParams = mapOf(type.code to generateTypeParams())
 
-        val billing = billingDetails?.let {
+        val billingInfo = billingDetails?.let {
             mapOf(PARAM_BILLING_DETAILS to it.toParamMap())
         }.orEmpty()
 
-        val metadataParams = metadata?.let {
-            mapOf(PARAM_METADATA to it)
-        }.orEmpty()
-
-        return type + typeParams + billing + metadataParams
+        return billingInfo + typeParams
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    data class Card(
+    class Card internal constructor(
         internal val expiryMonth: Int? = null,
         internal val expiryYear: Int? = null,
         internal val networks: Networks? = null,
-    ) : StripeParamsModel, Parcelable {
+        override val billingDetails: PaymentMethod.BillingDetails?,
+    ) : PaymentMethodUpdateParams(PaymentMethod.Type.Card) {
 
-        // TODO(tillh-stripe) Add docs and make public
+        override fun generateTypeParams(): Map<String, Any> {
+            return listOf(
+                PARAM_EXP_MONTH to expiryMonth,
+                PARAM_EXP_YEAR to expiryYear,
+                PARAM_NETWORKS to networks?.toParamMap(),
+            ).mapNotNull {
+                it.second?.let { value ->
+                    it.first to value
+                }
+            }.toMap()
+        }
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         class Networks(
@@ -91,18 +81,6 @@ class PaymentMethodUpdateParams private constructor(
             }
         }
 
-        override fun toParamMap(): Map<String, Any> {
-            return listOf(
-                PARAM_EXP_MONTH to expiryMonth,
-                PARAM_EXP_YEAR to expiryYear,
-                PARAM_NETWORKS to networks?.toParamMap(),
-            ).mapNotNull {
-                it.second?.let { value ->
-                    it.first to value
-                }
-            }.toMap()
-        }
-
         private companion object {
             const val PARAM_EXP_MONTH: String = "exp_month"
             const val PARAM_EXP_YEAR: String = "exp_year"
@@ -112,41 +90,23 @@ class PaymentMethodUpdateParams private constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+
         private const val PARAM_TYPE = "type"
         private const val PARAM_BILLING_DETAILS = "billing_details"
-        private const val PARAM_METADATA = "metadata"
 
-        /**
-         * Update a [PaymentMethod.Type.Card] payment method with the provided data.
-         *
-         * @param paymentMethodId The ID of the [PaymentMethod]
-         * @param expiryMonth The new expiry month
-         * @param expiryYear The new expiry year
-         * @param networks The new [Card.Networks] information
-         * @param billingDetails Billing information to attach to the [PaymentMethod]
-         * @param metadata Metadata to attach to the [PaymentMethod]
-         *
-         * @return Params for updating a [PaymentMethod.Type.Card] payment method.
-         */
         @JvmStatic
         @JvmOverloads
         fun createCard(
-            paymentMethodId: String,
             expiryMonth: Int? = null,
             expiryYear: Int? = null,
             networks: Card.Networks? = null,
             billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null,
         ): PaymentMethodUpdateParams {
-            return PaymentMethodUpdateParams(
-                paymentMethodId = paymentMethodId,
-                card = Card(
-                    expiryMonth = expiryMonth,
-                    expiryYear = expiryYear,
-                    networks = networks,
-                ),
+            return Card(
+                expiryMonth = expiryMonth,
+                expiryYear = expiryYear,
+                networks = networks,
                 billingDetails = billingDetails,
-                metadata = metadata,
             )
         }
     }

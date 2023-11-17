@@ -46,6 +46,7 @@ internal interface CustomerRepository {
 
     suspend fun updatePaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,
+        paymentMethodId: String,
         params: PaymentMethodUpdateParams
     ): Result<PaymentMethod>
 }

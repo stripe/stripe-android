@@ -133,15 +133,17 @@ internal class CustomerApiRepository @Inject constructor(
 
     override suspend fun updatePaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,
-        params: PaymentMethodUpdateParams
+        paymentMethodId: String,
+        params: PaymentMethodUpdateParams,
     ): Result<PaymentMethod> =
         stripeRepository.updatePaymentMethod(
+            paymentMethodId = paymentMethodId,
             paymentMethodUpdateParams = params,
             options = ApiRequest.Options(
                 apiKey = customerConfig.ephemeralKeySecret,
                 stripeAccount = lazyPaymentConfig.get().stripeAccountId,
             )
         ).onFailure {
-            logger.error("Failed to update payment method ${params.paymentMethodId}.", it)
+            logger.error("Failed to update payment method ${paymentMethodId}.", it)
         }
 }
