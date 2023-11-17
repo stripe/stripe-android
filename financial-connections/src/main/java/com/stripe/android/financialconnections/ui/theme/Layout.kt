@@ -31,11 +31,7 @@ internal fun Layout(
     showFooterDividerOnScroll: Boolean = true,
     lazyListState: LazyListState = rememberLazyListState()
 ) {
-    val isScrolled = remember {
-        derivedStateOf {
-            lazyListState.firstVisibleItemIndex > 0 || lazyListState.firstVisibleItemScrollOffset > 0
-        }
-    }
+    val isScrolled = remember { derivedStateOf { lazyListState.canBeScrolled() } }
     Column(
         Modifier
             .also { if (inModal.not()) it.fillMaxSize() }
@@ -61,6 +57,24 @@ internal fun Layout(
         )
     }
 }
+
+private fun LazyListState.canBeScrolled(): Boolean {
+    val layoutInfo = layoutInfo
+    val visibleItemsInfo = layoutInfo.visibleItemsInfo
+    return if (layoutInfo.totalItemsCount == 0) {
+        false
+    } else {
+        val firstVisibleItem = visibleItemsInfo.first()
+        val lastVisibleItem = visibleItemsInfo.last()
+
+        val viewportHeight = layoutInfo.viewportEndOffset + layoutInfo.viewportStartOffset
+        !(firstVisibleItem.index == 0 &&
+            firstVisibleItem.offset == 0 &&
+            lastVisibleItem.index + 1 == layoutInfo.totalItemsCount &&
+            lastVisibleItem.offset + lastVisibleItem.size <= viewportHeight)
+    }
+}
+
 
 @Preview(showBackground = true)
 @Suppress("MagicNumber")
