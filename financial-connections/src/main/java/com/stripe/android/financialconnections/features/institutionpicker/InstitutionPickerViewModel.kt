@@ -58,12 +58,12 @@ internal class InstitutionPickerViewModel @Inject constructor(
         logErrors()
         suspend {
             val manifest = getManifest()
-            val result: Result<Pair<List<FinancialConnectionsInstitution>, Long>> =
+            val (featuredInstitutions, duration) =
                 kotlin.runCatching {
                     measureTimeMillis {
                         featuredInstitutions(
                             clientSecret = configuration.financialConnectionsSessionClientSecret
-                        ).data
+                        )
                     }
                 }.onFailure {
                     eventTracker.logError(
@@ -72,14 +72,12 @@ internal class InstitutionPickerViewModel @Inject constructor(
                         pane = Pane.INSTITUTION_PICKER,
                         logger = logger
                     )
-                }
+                }.getOrThrow()
 
-            val (institutions, duration) = result.getOrNull() ?: Pair(emptyList(), 0L)
             Payload(
                 featuredInstitutionsDuration = duration,
-                featuredInstitutions = institutions,
+                featuredInstitutions = featuredInstitutions,
                 searchDisabled = manifest.institutionSearchDisabled,
-                allowManualEntry = manifest.allowManualEntry
             )
         }.execute { copy(payload = it) }
     }
@@ -93,7 +91,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                     FeaturedInstitutionsLoaded(
                         pane = Pane.INSTITUTION_PICKER,
                         duration = payload.featuredInstitutionsDuration,
-                        institutionIds = payload.featuredInstitutions.map { it.id }.toSet()
+                        institutionIds = payload.featuredInstitutions.data.map { it.id }.toSet()
                     )
                 )
             },
@@ -258,8 +256,7 @@ internal data class InstitutionPickerState(
 ) : MavericksState {
 
     data class Payload(
-        val featuredInstitutions: List<FinancialConnectionsInstitution>,
-        val allowManualEntry: Boolean,
+        val featuredInstitutions: InstitutionResponse,
         val searchDisabled: Boolean,
         val featuredInstitutionsDuration: Long
     )

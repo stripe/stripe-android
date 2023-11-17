@@ -76,14 +76,14 @@ internal class InstitutionPickerPreviewParameterProvider :
 
     private fun searchModeFailed() = InstitutionPickerState(
         previewText = "Some query",
-        payload = Success(payload().copy(allowManualEntry = true)),
+        payload = Success(payload(manualEntry = true)),
         searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
         searchMode = true,
     )
 
     private fun searchModeFailedNoManualEntry() = InstitutionPickerState(
         previewText = "Some query",
-        payload = Success(payload().copy(allowManualEntry = false)),
+        payload = Success(payload(manualEntry = false)),
         searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
         searchMode = true,
     )
@@ -95,9 +95,8 @@ internal class InstitutionPickerPreviewParameterProvider :
         searchMode = false,
     )
 
-    private fun payload() = InstitutionPickerState.Payload(
-        featuredInstitutions = institutionResponse().data,
-        allowManualEntry = false,
+    private fun payload(manualEntry: Boolean = true) = InstitutionPickerState.Payload(
+        featuredInstitutions = institutionResponse().copy(showManualEntry = manualEntry),
         searchDisabled = false,
         featuredInstitutionsDuration = 0
     )
