@@ -655,6 +655,7 @@ class CustomerAdapterTest {
             application = application
         ).createCustomerSessionComponent(
             configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
                 googlePayEnabled = true
             ),
             customerAdapter = adapter,
@@ -686,6 +687,7 @@ class CustomerAdapterTest {
             application = application
         ).createCustomerSessionComponent(
             configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
                 googlePayEnabled = false
             ),
             customerAdapter = adapter,

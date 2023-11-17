@@ -143,8 +143,7 @@ internal object CustomerSheetTestHelper {
                 showCheckbox = false,
                 showCheckboxControlledFields = false,
                 initialPaymentMethodCreateParams = null,
-                merchantName = configuration.merchantDisplayName
-                    ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+                merchantName = configuration.merchantDisplayName,
                 billingDetails = configuration.defaultBillingDetails,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible
@@ -204,6 +203,7 @@ internal object CustomerSheetTestHelper {
             stripeAccountId = null,
         ),
         configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
+            merchantDisplayName = "Example",
             googlePayEnabled = isGooglePayAvailable
         ),
         formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder> =

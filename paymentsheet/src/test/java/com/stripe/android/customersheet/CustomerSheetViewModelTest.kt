@@ -1200,6 +1200,7 @@ class CustomerSheetViewModelTest {
                 selectPaymentMethodViewState,
             ),
             configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
                 googlePayEnabled = true,
             ),
             isGooglePayAvailable = false,
@@ -1219,6 +1220,7 @@ class CustomerSheetViewModelTest {
                 CustomerSheetViewState.Loading(false),
             ),
             configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
                 googlePayEnabled = true,
             ),
             customerSheetLoader = FakeCustomerSheetLoader(

@@ -31,7 +31,7 @@ class CustomerSessionViewModelTest {
             publishableKey = "ek_123",
         )
         val component1 = viewModel.createCustomerSessionComponent(
-            configuration = CustomerSheet.Configuration(),
+            configuration = CustomerSheet.Configuration(merchantDisplayName = "Example"),
             customerAdapter = CustomerAdapter.create(
                 context = application,
                 customerEphemeralKeyProvider = {
@@ -50,6 +50,7 @@ class CustomerSessionViewModelTest {
 
         val component2 = viewModel.createCustomerSessionComponent(
             configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
                 googlePayEnabled = true
             ),
             customerAdapter = CustomerAdapter.create(
@@ -77,6 +78,7 @@ class CustomerSessionViewModelTest {
         val callback = mock<CustomerSheetResultCallback>()
         val component1 = viewModel.createCustomerSessionComponent(
             configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
                 googlePayEnabled = false,
             ),
             customerAdapter = customerAdapter,
@@ -86,6 +88,7 @@ class CustomerSessionViewModelTest {
 
         val component2 = viewModel.createCustomerSessionComponent(
             configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
                 googlePayEnabled = true,
             ),
             customerAdapter = customerAdapter,
