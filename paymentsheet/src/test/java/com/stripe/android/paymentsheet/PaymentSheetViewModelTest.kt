@@ -229,6 +229,8 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(EditPaymentMethodViewAction.OnUpdatePressed)
             }
+
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
         }
 
         val paramsCaptor = argumentCaptor<PaymentMethodUpdateParams>()

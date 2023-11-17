@@ -13,7 +13,7 @@ import java.util.Objects
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 class PaymentMethodUpdateParams private constructor(
-    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val paymentMethodId: String,
+    val paymentMethodId: String,
     private val card: Card? = null,
     private val billingDetails: PaymentMethod.BillingDetails? = null,
     private val metadata: Map<String, String>? = null,

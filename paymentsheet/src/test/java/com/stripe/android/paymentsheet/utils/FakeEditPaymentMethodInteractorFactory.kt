@@ -15,12 +15,14 @@ internal class FakeEditPaymentMethodInteractorFactory(
     override fun create(
         initialPaymentMethod: PaymentMethod,
         removeExecutor: PaymentMethodRemoveOperation,
-        updateExecutor: PaymentMethodUpdateOperation
+        updateExecutor: PaymentMethodUpdateOperation,
+        displayName: String
     ): ModifiableEditPaymentMethodViewInteractor {
         return DefaultEditPaymentMethodViewInteractor(
             initialPaymentMethod = initialPaymentMethod,
             removeExecutor = removeExecutor,
             updateExecutor = updateExecutor,
+            displayName = displayName,
             workContext = context,
             viewStateSharingStarted = SharingStarted.Eagerly
         )

@@ -479,41 +479,34 @@ internal abstract class BaseSheetViewModel(
         val customerConfig = config.customer
         val paymentMethodId = paymentMethod.id
 
-        return if (customerConfig != null && paymentMethodId != null) {
-            customerRepository.updatePaymentMethod(
-                customerConfig = customerConfig,
-                params = PaymentMethodUpdateParams.createCard(
-                    paymentMethodId = paymentMethodId,
-                    networks = PaymentMethodUpdateParams.Card.Networks(
-                        preferred = brand.code
-                    )
+        return customerRepository.updatePaymentMethod(
+            customerConfig = customerConfig!!,
+            params = PaymentMethodUpdateParams.createCard(
+                paymentMethodId = paymentMethodId!!,
+                networks = PaymentMethodUpdateParams.Card.Networks(
+                    preferred = brand.code
                 )
-            ).onSuccess { updatedMethod ->
-                savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods
-                    .value
-                    ?.let { savedPaymentMethods ->
-                        savedPaymentMethods.map { savedMethod ->
-                            val savedId = savedMethod.id
-                            val updatedId = updatedMethod.id
+            )
+        ).onSuccess { updatedMethod ->
+            savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods
+                .value
+                ?.let { savedPaymentMethods ->
+                    savedPaymentMethods.map { savedMethod ->
+                        val savedId = savedMethod.id
+                        val updatedId = updatedMethod.id
 
-                            if (updatedId != null && savedId != null && updatedId == savedId) {
-                                updatedMethod
-                            } else {
-                                paymentMethod
-                            }
+                        if (updatedId != null && savedId != null && updatedId == savedId) {
+                            updatedMethod
+                        } else {
+                            paymentMethod
                         }
                     }
-            }.onFailure {
-                // TODO(samer-stripe): Localize error message with proper strings.
-                onError("Failed to update payment method")
-            }
-        } else {
+                }
+
+            handleBackPressed()
+        }.onFailure {
             // TODO(samer-stripe): Localize error message with proper strings.
             onError("Failed to update payment method")
-
-            Result.failure(
-                IllegalStateException("Customer configuration & existing payment method must be available!")
-            )
         }
     }
 
