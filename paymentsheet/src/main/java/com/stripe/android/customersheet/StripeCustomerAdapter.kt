@@ -103,6 +103,7 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun updatePaymentMethod(
+        paymentMethodId: String,
         params: PaymentMethodUpdateParams
     ): CustomerAdapter.Result<PaymentMethod> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
@@ -111,6 +112,7 @@ internal class StripeCustomerAdapter @Inject constructor(
                     id = customerEphemeralKey.customerId,
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey
                 ),
+                paymentMethodId = paymentMethodId,
                 params = params
             ).getOrElse {
                 return CustomerAdapter.Result.failure(

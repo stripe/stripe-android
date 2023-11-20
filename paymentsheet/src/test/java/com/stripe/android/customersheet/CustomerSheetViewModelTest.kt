@@ -2504,7 +2504,7 @@ class CustomerSheetViewModelTest {
 
         val customerAdapter = FakeCustomerAdapter(
             paymentMethods = CustomerAdapter.Result.Success(paymentMethods),
-            onUpdatePaymentMethod = {
+            onUpdatePaymentMethod = { _, _ ->
                 CustomerAdapter.Result.Success(updatedMethod)
             }
         )

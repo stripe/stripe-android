@@ -16,7 +16,7 @@ internal class FakeCustomerAdapter(
     private val onAttachPaymentMethod: ((paymentMethodId: String) -> CustomerAdapter.Result<PaymentMethod>)? = null,
     private val onDetachPaymentMethod: ((paymentMethodId: String) -> CustomerAdapter.Result<PaymentMethod>)? = null,
     private val onUpdatePaymentMethod:
-        ((params: PaymentMethodUpdateParams) -> CustomerAdapter.Result<PaymentMethod>)? = null,
+        ((paymentMethodId: String, params: PaymentMethodUpdateParams) -> CustomerAdapter.Result<PaymentMethod>)? = null,
     private val onSetupIntentClientSecretForCustomerAttach: (() -> CustomerAdapter.Result<String>)? = null
 ) : CustomerAdapter {
 
@@ -35,12 +35,13 @@ internal class FakeCustomerAdapter(
     }
 
     override suspend fun updatePaymentMethod(
+        paymentMethodId: String,
         params: PaymentMethodUpdateParams
     ): CustomerAdapter.Result<PaymentMethod> {
-        return onUpdatePaymentMethod?.invoke(params)
+        return onUpdatePaymentMethod?.invoke(paymentMethodId, params)
             ?: CustomerAdapter.Result.success(
                 paymentMethods.getOrNull()?.find {
-                    it.id!! == params.paymentMethodId
+                    it.id!! == paymentMethodId
                 }!!
             )
     }

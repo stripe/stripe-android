@@ -433,11 +433,9 @@ internal class CustomerSheetViewModel @Inject constructor(
         paymentMethod: PaymentMethod,
         brand: CardBrand
     ): CustomerAdapter.Result<PaymentMethod> {
-        val paymentMethodId = paymentMethod.id
-
         return customerAdapter.updatePaymentMethod(
+            paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(
-                paymentMethodId = paymentMethodId!!,
                 networks = PaymentMethodUpdateParams.Card.Networks(
                     preferred = brand.code
                 )

@@ -299,9 +299,8 @@ class CustomerAdapterTest {
             )
         )
         val result = adapter.updatePaymentMethod(
-            PaymentMethodUpdateParams.createCard(
-                paymentMethodId = "pm_1234"
-            )
+            paymentMethodId = "pm_1234",
+            params = PaymentMethodUpdateParams.createCard()
         )
         assertThat(result.getOrNull()).isEqualTo(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -322,9 +321,8 @@ class CustomerAdapterTest {
             )
         )
         val result = adapter.updatePaymentMethod(
-            PaymentMethodUpdateParams.createCard(
-                paymentMethodId = "pm_1234"
-            )
+            paymentMethodId = "pm_1234",
+            params = PaymentMethodUpdateParams.createCard()
         )
         assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Something went wrong")
@@ -345,9 +343,8 @@ class CustomerAdapterTest {
             )
         )
         val result = adapter.updatePaymentMethod(
-            PaymentMethodUpdateParams.createCard(
-                paymentMethodId = "pm_1234"
-            )
+            paymentMethodId = "pm_1234",
+            params = PaymentMethodUpdateParams.createCard()
         )
         assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Unable to update payment method")

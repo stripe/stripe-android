@@ -15,7 +15,7 @@ public abstract interface class com/stripe/android/customersheet/CustomerAdapter
 	public abstract fun retrieveSelectedPaymentOption (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun setSelectedPaymentOption (Lcom/stripe/android/customersheet/CustomerAdapter$PaymentOption;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun setupIntentClientSecretForCustomerAttach (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun updatePaymentMethod (Lcom/stripe/android/model/PaymentMethodUpdateParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updatePaymentMethod (Ljava/lang/String;Lcom/stripe/android/model/PaymentMethodUpdateParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/stripe/android/customersheet/CustomerAdapter$Companion {
