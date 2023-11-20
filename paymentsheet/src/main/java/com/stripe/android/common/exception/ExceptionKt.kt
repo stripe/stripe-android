@@ -23,7 +23,7 @@ internal fun Throwable?.stripeErrorMessage(context: Context): String {
 }
 
 @Suppress("ReturnCount")
-internal fun Throwable?.stripeErrorMessage(): ResolvableString {
+internal fun Throwable.stripeErrorMessage(): ResolvableString {
     (this as? APIConnectionException)?.let {
         return resolvableString(R.string.stripe_network_error_message)
     }
