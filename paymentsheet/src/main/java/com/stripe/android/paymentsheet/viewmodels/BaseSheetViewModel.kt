@@ -425,6 +425,7 @@ internal abstract class BaseSheetViewModel(
         val paymentMethodId = paymentMethod.id ?: return
 
         viewModelScope.launch {
+            removeDeletedPaymentMethodFromState(paymentMethodId)
             removePaymentMethodInternal(paymentMethodId)
         }
     }
@@ -439,12 +440,6 @@ internal abstract class BaseSheetViewModel(
             updateSelection(null)
         }
 
-        if (currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods) {
-            // We only update the state if we're in the SPM screen. If we're in the edit screen, we delay
-            // the state update so that we can show an animation when returning to the SPM screen.
-            removeDeletedPaymentMethodFromState(paymentMethodId)
-        }
-
         return customerRepository.detachPaymentMethod(
             customerConfig!!,
             paymentMethodId
@@ -452,19 +447,15 @@ internal abstract class BaseSheetViewModel(
     }
 
     private fun removeDeletedPaymentMethodFromState(paymentMethodId: String) {
-        viewModelScope.launch {
-            delay(PaymentMethodRemovalDelayMillis)
+        savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods.value?.filter {
+            it.id != paymentMethodId
+        }
 
-            savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods.value?.filter {
-                it.id != paymentMethodId
-            }
+        val shouldResetToAddPaymentMethodForm = paymentMethods.value.isNullOrEmpty() &&
+            currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
 
-            val shouldResetToAddPaymentMethodForm = paymentMethods.value.isNullOrEmpty() &&
-                currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
-
-            if (shouldResetToAddPaymentMethodForm) {
-                resetTo(listOf(AddFirstPaymentMethod))
-            }
+        if (shouldResetToAddPaymentMethodForm) {
+            resetTo(listOf(AddFirstPaymentMethod))
         }
     }
 
@@ -474,11 +465,8 @@ internal abstract class BaseSheetViewModel(
                 editInteractorFactory.create(
                     initialPaymentMethod = paymentMethod,
                     displayName = providePaymentMethodName(paymentMethod.type?.code),
-                    removeExecutor = { pm ->
-                        removePaymentMethodInternal(paymentMethodId = pm.id!!).onSuccess {
-                            onUserBack()
-                            removeDeletedPaymentMethodFromState(paymentMethodId = pm.id!!)
-                        }.exceptionOrNull()
+                    removeExecutor = { method ->
+                        removePaymentMethodInEditScreen(method)
                     },
                     updateExecutor = { method, brand ->
                         modifyCardPaymentMethod(method, brand)
@@ -486,6 +474,21 @@ internal abstract class BaseSheetViewModel(
                 )
             )
         )
+    }
+
+    private suspend fun removePaymentMethodInEditScreen(paymentMethod: PaymentMethod): Throwable? {
+        val paymentMethodId = paymentMethod.id!!
+        val result = removePaymentMethodInternal(paymentMethodId)
+
+        if (result.isSuccess) {
+            viewModelScope.launch {
+                onUserBack()
+                delay(PaymentMethodRemovalDelayMillis)
+                removeDeletedPaymentMethodFromState(paymentMethodId = paymentMethodId)
+            }
+        }
+
+        return result.exceptionOrNull()
     }
 
     private suspend fun modifyCardPaymentMethod(

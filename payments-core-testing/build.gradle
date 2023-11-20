@@ -5,6 +5,7 @@ dependencies {
 
     implementation libs.androidx.viewModel
     implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
     implementation testLibs.junit
     implementation testLibs.kotlin.coroutines
 
