@@ -10,6 +10,7 @@ import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.
 import com.stripe.android.customersheet.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -286,6 +287,70 @@ class CustomerAdapterTest {
         val result = adapter.detachPaymentMethod("pm_1234")
         assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Unable to detach payment method")
+    }
+
+    @Test
+    fun `updatePaymentMethod succeeds when the payment method is update`() = runTest {
+        val adapter = createAdapter(
+            customerRepository = FakeCustomerRepository(
+                onUpdatePaymentMethod = {
+                    Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                }
+            )
+        )
+        val result = adapter.updatePaymentMethod(
+            PaymentMethodUpdateParams.createCard(
+                paymentMethodId = "pm_1234"
+            )
+        )
+        assertThat(result.getOrNull()).isEqualTo(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
+    }
+
+    @Test
+    fun `updatePaymentMethod fails with default message when the payment method couldn't be updated`() = runTest {
+        val adapter = createAdapter(
+            customerRepository = FakeCustomerRepository(
+                onUpdatePaymentMethod = {
+                    Result.failure(
+                        APIException(
+                            message = "could not update payment method",
+                        )
+                    )
+                }
+            )
+        )
+        val result = adapter.updatePaymentMethod(
+            PaymentMethodUpdateParams.createCard(
+                paymentMethodId = "pm_1234"
+            )
+        )
+        assertThat(result.failureOrNull()?.displayMessage)
+            .isEqualTo("Something went wrong")
+    }
+
+    @Test
+    fun `updatePaymentMethod fails with Stripe message when the payment method couldn't be updated`() = runTest {
+        val adapter = createAdapter(
+            customerRepository = FakeCustomerRepository(
+                onUpdatePaymentMethod = {
+                    Result.failure(
+                        APIException(
+                            message = "could not update payment method",
+                            stripeError = StripeError(message = "Unable to update payment method")
+                        )
+                    )
+                }
+            )
+        )
+        val result = adapter.updatePaymentMethod(
+            PaymentMethodUpdateParams.createCard(
+                paymentMethodId = "pm_1234"
+            )
+        )
+        assertThat(result.failureOrNull()?.displayMessage)
+            .isEqualTo("Unable to update payment method")
     }
 
     @Test

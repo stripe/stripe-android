@@ -19,6 +19,7 @@ import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PaymentAccount
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT
@@ -31,7 +32,10 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnBrandChoiceChanged
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemovePressed
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnUpdatePressed
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FeatureFlagTestRule
@@ -2480,6 +2484,66 @@ class CustomerSheetViewModelTest {
 
             val finalViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(finalViewState.savedPaymentMethods).containsExactly(paymentMethods.last())
+        }
+    }
+
+    @Test
+    fun `Updating payment method in edit screen goes through expected states`() = runTest(testDispatcher) {
+        val paymentMethods = PaymentMethodFactory.cards(size = 1)
+
+        val firstMethod = paymentMethods.single()
+
+        val updatedMethod = firstMethod.copy(
+            card = firstMethod.card?.copy(
+                networks = PaymentMethod.Card.Networks(
+                    available = setOf("visa", "cartes_bancaires"),
+                    preferred = "visa"
+                )
+            )
+        )
+
+        val customerAdapter = FakeCustomerAdapter(
+            paymentMethods = CustomerAdapter.Result.Success(paymentMethods),
+            onUpdatePaymentMethod = {
+                CustomerAdapter.Result.Success(updatedMethod)
+            }
+        )
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            initialBackStack = listOf(
+                selectPaymentMethodViewState.copy(
+                    savedPaymentMethods = paymentMethods,
+                )
+            ),
+            customerPaymentMethods = paymentMethods,
+            customerAdapter = customerAdapter,
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(firstMethod))
+
+            val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
+            editViewState.editPaymentMethodInteractor.handleViewAction(
+                OnBrandChoiceChanged(
+                    EditPaymentMethodViewState.CardBrandChoice(
+                        brand = CardBrand.Visa
+                    )
+                )
+            )
+            editViewState.editPaymentMethodInteractor.handleViewAction(OnUpdatePressed)
+
+            // Confirm that nothing has changed yet. We're waiting to update the payment method
+            // once we return to the SPM screen.
+            val updatedViewState = awaitViewState<SelectPaymentMethod>()
+            assertThat(updatedViewState.savedPaymentMethods).containsExactlyElementsIn(paymentMethods)
+
+            // Simulate the delay
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val finalViewState = awaitViewState<SelectPaymentMethod>()
+            assertThat(finalViewState.savedPaymentMethods).containsExactlyElementsIn(listOf(updatedMethod))
         }
     }
 
