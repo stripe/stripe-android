@@ -1,3 +1,5 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.model
 
 import android.os.Parcelable
@@ -10,7 +12,6 @@ import java.util.Objects
  *
  * See [Update a PaymentMethod](https://stripe.com/docs/api/payment_methods/update).
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class PaymentMethodUpdateParams(
     internal val type: PaymentMethod.Type,
 ) : StripeParamsModel, Parcelable {
@@ -29,7 +30,6 @@ sealed class PaymentMethodUpdateParams(
         return billingInfo + typeParams
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     class Card internal constructor(
         internal val expiryMonth: Int? = null,
@@ -50,7 +50,27 @@ sealed class PaymentMethodUpdateParams(
             }.toMap()
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        override fun equals(other: Any?): Boolean {
+            return other is Card &&
+                other.expiryMonth == expiryMonth &&
+                other.expiryYear == expiryYear &&
+                other.networks == networks &&
+                other.billingDetails == billingDetails
+        }
+
+        override fun hashCode(): Int {
+            return Objects.hash(expiryMonth, expiryYear, networks, billingDetails)
+        }
+
+        override fun toString(): String {
+            return "PaymentMethodCreateParams.Card.(" +
+                "expiryMonth=$expiryMonth, " +
+                "expiryYear=$expiryYear, " +
+                "networks=$networks, " +
+                "billingDetails=$billingDetails" +
+                ")"
+        }
+
         @Parcelize
         class Networks(
             val preferred: String? = null,
@@ -88,10 +108,46 @@ sealed class PaymentMethodUpdateParams(
         }
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    class USBankAccount internal constructor(
+        internal val accountHolderType: PaymentMethod.USBankAccount.USBankAccountHolderType?,
+        override val billingDetails: PaymentMethod.BillingDetails?,
+    ) : PaymentMethodUpdateParams(PaymentMethod.Type.USBankAccount) {
+
+        override fun generateTypeParams(): Map<String, Any> {
+            return listOf(
+                PARAM_ACCOUNT_HOLDER_TYPE to accountHolderType,
+            ).mapNotNull {
+                it.second?.let { value ->
+                    it.first to value
+                }
+            }.toMap()
+        }
+
+        override fun equals(other: Any?): Boolean {
+            return other is USBankAccount &&
+                other.accountHolderType == accountHolderType &&
+                other.billingDetails == billingDetails
+        }
+
+        override fun hashCode(): Int {
+            return Objects.hash(accountHolderType, billingDetails)
+        }
+
+        override fun toString(): String {
+            return "PaymentMethodCreateParams.Card.(" +
+                "accountHolderType=$accountHolderType, " +
+                "billingDetails=$billingDetails" +
+                ")"
+        }
+
+        private companion object {
+            const val PARAM_ACCOUNT_HOLDER_TYPE: String = "account_holder_type"
+        }
+    }
+
     companion object {
 
-        private const val PARAM_TYPE = "type"
         private const val PARAM_BILLING_DETAILS = "billing_details"
 
         @JvmStatic
