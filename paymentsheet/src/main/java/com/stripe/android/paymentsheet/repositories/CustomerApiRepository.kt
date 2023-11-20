@@ -144,6 +144,6 @@ internal class CustomerApiRepository @Inject constructor(
                 stripeAccount = lazyPaymentConfig.get().stripeAccountId,
             )
         ).onFailure {
-            logger.error("Failed to update payment method ${paymentMethodId}.", it)
+            logger.error("Failed to update payment method $paymentMethodId.", it)
         }
 }

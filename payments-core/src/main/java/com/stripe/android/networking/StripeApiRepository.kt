@@ -554,7 +554,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequest = apiRequestFactory.createPost(
                 url = getPaymentMethodUrl(paymentMethodId),
                 options = options,
-                params = paymentMethodUpdateParams.toParamMap() +fraudDetectionData?.params.orEmpty(),
+                params = paymentMethodUpdateParams.toParamMap() + fraudDetectionData?.params.orEmpty(),
             ),
             jsonParser = PaymentMethodJsonParser()
         )

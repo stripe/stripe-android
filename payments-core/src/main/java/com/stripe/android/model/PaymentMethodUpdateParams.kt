@@ -1,5 +1,3 @@
-@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-
 package com.stripe.android.model
 
 import android.os.Parcelable
@@ -12,6 +10,7 @@ import java.util.Objects
  *
  * See [Update a PaymentMethod](https://stripe.com/docs/api/payment_methods/update).
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class PaymentMethodUpdateParams(
     internal val type: PaymentMethod.Type,
 ) : StripeParamsModel, Parcelable {
@@ -30,6 +29,7 @@ sealed class PaymentMethodUpdateParams(
         return billingInfo + typeParams
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     class Card internal constructor(
         internal val expiryMonth: Int? = null,
@@ -71,6 +71,7 @@ sealed class PaymentMethodUpdateParams(
                 ")"
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         class Networks(
             val preferred: String? = null,
@@ -108,6 +109,7 @@ sealed class PaymentMethodUpdateParams(
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     class USBankAccount internal constructor(
         internal val accountHolderType: PaymentMethod.USBankAccount.USBankAccountHolderType?,
@@ -146,6 +148,7 @@ sealed class PaymentMethodUpdateParams(
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
         private const val PARAM_BILLING_DETAILS = "billing_details"
