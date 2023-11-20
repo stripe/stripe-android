@@ -212,7 +212,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.currentScreen.test {
             awaitItem()
 
-            viewModel.modifyPaymentMethod(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
+            viewModel.modifyPaymentMethod(paymentMethod)
 
             val currentScreen = awaitItem()
 
@@ -233,18 +233,21 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
         }
 
+        val idCaptor = argumentCaptor<String>()
         val paramsCaptor = argumentCaptor<PaymentMethodUpdateParams>()
 
         verify(customerRepository).updatePaymentMethod(
             any(),
+            idCaptor.capture(),
             paramsCaptor.capture()
         )
+
+        assertThat(idCaptor.firstValue).isEqualTo(paymentMethod.id!!)
 
         assertThat(
             paramsCaptor.firstValue.toParamMap()
         ).isEqualTo(
             PaymentMethodUpdateParams.createCard(
-                paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
                 networks = PaymentMethodUpdateParams.Card.Networks(
                     preferred = CardBrand.Visa.code
                 )

@@ -477,12 +477,11 @@ internal abstract class BaseSheetViewModel(
         brand: CardBrand
     ): Result<PaymentMethod> {
         val customerConfig = config.customer
-        val paymentMethodId = paymentMethod.id
 
         return customerRepository.updatePaymentMethod(
             customerConfig = customerConfig!!,
+            paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(
-                paymentMethodId = paymentMethodId!!,
                 networks = PaymentMethodUpdateParams.Card.Networks(
                     preferred = brand.code
                 )

@@ -317,9 +317,8 @@ internal class CustomerRepositoryTest {
                     "customer_id",
                     "ephemeral_key"
                 ),
-                PaymentMethodUpdateParams.createCard(
-                    paymentMethodId = "payment_method_id"
-                )
+                paymentMethodId = "payment_method_id",
+                params = PaymentMethodUpdateParams.createCard()
             )
 
             assertThat(result).isEqualTo(success)
@@ -336,9 +335,8 @@ internal class CustomerRepositoryTest {
                     "customer_id",
                     "ephemeral_key"
                 ),
-                PaymentMethodUpdateParams.createCard(
-                    paymentMethodId = "payment_method_id"
-                )
+                paymentMethodId = "payment_method_id",
+                params = PaymentMethodUpdateParams.createCard()
             )
 
             assertThat(result).isEqualTo(error)
@@ -407,6 +405,7 @@ internal class CustomerRepositoryTest {
         stripeRepository.stub {
             onBlocking {
                 updatePaymentMethod(
+                    paymentMethodId = any(),
                     paymentMethodUpdateParams = any(),
                     options = any(),
                 )
