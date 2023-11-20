@@ -1,6 +1,8 @@
 package com.stripe.android.financialconnections.ui.theme
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,13 +13,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -28,28 +29,27 @@ internal fun Layout(
     content: LazyListScope.() -> Unit,
     footer: @Composable () -> Unit = {},
     inModal: Boolean = false,
-    showFooterDividerOnScroll: Boolean = true,
+    showFooterShadowWhenScrollable: Boolean = true,
     lazyListState: LazyListState = rememberLazyListState()
 ) {
-    val isScrolled = remember { derivedStateOf { lazyListState.canBeScrolled() } }
     Column(
         Modifier
             .also { if (inModal.not()) it.fillMaxSize() }
     ) {
-        LazyColumn(
-            state = lazyListState,
-            modifier = Modifier
+        Box(
+            Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
                 .weight(1f, fill = inModal.not())
         ) {
-            content()
-        }
-        if (showFooterDividerOnScroll) {
-            Divider(
-                modifier = Modifier.alpha(if (isScrolled.value) 1f else 0f),
-                color = FinancialConnectionsTheme.v3Colors.border
-            )
+            if (showFooterShadowWhenScrollable && lazyListState.canScrollForward) {
+                FooterTopShadow()
+            }
+            LazyColumn(
+                state = lazyListState,
+                modifier = Modifier.padding(horizontal = 24.dp)
+            ) {
+                content()
+            }
         }
         Box(
             modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
@@ -58,23 +58,27 @@ internal fun Layout(
     }
 }
 
-private fun LazyListState.canBeScrolled(): Boolean {
-    val layoutInfo = layoutInfo
-    val visibleItemsInfo = layoutInfo.visibleItemsInfo
-    return if (layoutInfo.totalItemsCount == 0) {
-        false
-    } else {
-        val firstVisibleItem = visibleItemsInfo.first()
-        val lastVisibleItem = visibleItemsInfo.last()
-
-        val viewportHeight = layoutInfo.viewportEndOffset + layoutInfo.viewportStartOffset
-        !(firstVisibleItem.index == 0 &&
-            firstVisibleItem.offset == 0 &&
-            lastVisibleItem.index + 1 == layoutInfo.totalItemsCount &&
-            lastVisibleItem.offset + lastVisibleItem.size <= viewportHeight)
-    }
+@Composable
+@Suppress("MagicNumber")
+private fun BoxScope.FooterTopShadow() {
+    val shadowSize = 4
+    Box(
+        modifier = Modifier.Companion
+            .align(Alignment.BottomCenter)
+            .fillMaxWidth()
+            .height(shadowSize.dp)
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        Color.LightGray.copy(alpha = 0.2f)
+                    ),
+                    0.0f,
+                    shadowSize.toFloat()
+                )
+            )
+    )
 }
-
 
 @Preview(showBackground = true)
 @Suppress("MagicNumber")
