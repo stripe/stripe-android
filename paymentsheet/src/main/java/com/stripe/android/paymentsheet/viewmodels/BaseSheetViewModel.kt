@@ -462,7 +462,7 @@ internal abstract class BaseSheetViewModel(
                     removeExecutor = {
                         // TODO(samer-stripe): Replace with remove operation
                         delay(TEMP_DELAY)
-                        true
+                        Result.success(Unit)
                     },
                     updateExecutor = { method, brand ->
                         modifyCardPaymentMethod(method, brand)
@@ -504,9 +504,6 @@ internal abstract class BaseSheetViewModel(
                 }
 
             handleBackPressed()
-        }.onFailure {
-            // TODO(samer-stripe): Localize error message with proper strings.
-            onError("Failed to update payment method")
         }
     }
 
