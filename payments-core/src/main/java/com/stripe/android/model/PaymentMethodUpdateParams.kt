@@ -161,12 +161,16 @@ sealed class PaymentMethodUpdateParams(
             networks: Card.Networks? = null,
             billingDetails: PaymentMethod.BillingDetails? = null,
         ): PaymentMethodUpdateParams {
-            return Card(
-                expiryMonth = expiryMonth,
-                expiryYear = expiryYear,
-                networks = networks,
-                billingDetails = billingDetails,
-            )
+            return Card(expiryMonth, expiryYear, networks, billingDetails)
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createUSBankAccount(
+            accountHolderType: PaymentMethod.USBankAccount.USBankAccountHolderType? = null,
+            billingDetails: PaymentMethod.BillingDetails? = null,
+        ): PaymentMethodUpdateParams {
+            return USBankAccount(accountHolderType, billingDetails)
         }
     }
 }
