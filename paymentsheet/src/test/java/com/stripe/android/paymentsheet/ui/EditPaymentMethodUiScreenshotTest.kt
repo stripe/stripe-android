@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.utils.screenshots.FontSize
 import com.stripe.android.utils.screenshots.PaparazziRule
@@ -43,6 +44,20 @@ class EditPaymentMethodUiScreenshotTest {
     }
 
     @Test
+    fun testErrorState() {
+        paparazziRule.snapshot {
+            EditPaymentMethodUi(
+                viewState = createViewState(
+                    status = EditPaymentMethodViewState.Status.Idle,
+                    canUpdate = true,
+                    error = "Failed to update payment method!"
+                ),
+                viewActionHandler = {}
+            )
+        }
+    }
+
+    @Test
     fun testUpdatingState() {
         paparazziRule.snapshot {
             EditPaymentMethodUi(
@@ -70,7 +85,8 @@ class EditPaymentMethodUiScreenshotTest {
 
     private fun createViewState(
         status: EditPaymentMethodViewState.Status,
-        canUpdate: Boolean
+        canUpdate: Boolean,
+        error: String? = null,
     ): EditPaymentMethodViewState {
         return EditPaymentMethodViewState(
             status = status,
@@ -88,6 +104,7 @@ class EditPaymentMethodUiScreenshotTest {
                 )
             ),
             displayName = "Card",
+            error = error?.let { resolvableString(it) },
         )
     }
 }

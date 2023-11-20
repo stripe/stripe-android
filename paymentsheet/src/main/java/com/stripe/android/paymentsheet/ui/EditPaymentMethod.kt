@@ -50,6 +50,7 @@ import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
 import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.getComposeTextStyle
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.R as PaymentsCoreR
 import com.stripe.android.R as StripeR
@@ -85,8 +86,7 @@ internal fun EditPaymentMethodUi(
             top = padding,
             start = padding,
             end = padding
-        ),
-        horizontalAlignment = Alignment.CenterHorizontally
+        )
     ) {
         SectionCard {
             val colors = TextFieldColors(false)
@@ -110,6 +110,15 @@ internal fun EditPaymentMethodUi(
         }
 
         Spacer(modifier = Modifier.requiredHeight(48.dp))
+
+        viewState.error?.let { resolvableError ->
+            ErrorMessage(
+                error = resolvableError.resolve(),
+                modifier = Modifier.padding(
+                    bottom = 8.dp
+                ),
+            )
+        }
 
         PrimaryButton(
             label = stringResource(id = StripeR.string.stripe_title_update_card),
@@ -172,7 +181,9 @@ private fun RemoveButton(
         LocalContentAlpha provides if (removing) ContentAlpha.disabled else ContentAlpha.high
     ) {
         Box(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
         ) {
             TextButton(
                 modifier = Modifier.align(Alignment.Center),
