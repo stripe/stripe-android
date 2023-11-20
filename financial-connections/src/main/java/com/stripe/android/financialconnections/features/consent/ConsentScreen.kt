@@ -177,7 +177,7 @@ private fun ConsentMainContent(
     ) {
         Layout(
             lazyListState = scrollState,
-            content = {
+            body = {
                 item {
                     ConsentLogoHeader(
                         modifier = Modifier.fillMaxWidth(),

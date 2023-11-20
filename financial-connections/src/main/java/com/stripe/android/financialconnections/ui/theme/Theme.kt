@@ -23,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
+import androidx.navigation.compose.rememberNavController
+import com.stripe.android.financialconnections.ui.LocalNavHostController
 
 @Deprecated("Use V3Colors instead")
 private val Colors = FinancialConnectionsColors(
@@ -245,6 +247,7 @@ private object FinancialConnectionsRippleTheme : RippleTheme {
 internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalFinancialConnectionsTypography provides Typography,
+        LocalNavHostController provides rememberNavController(),
         LocalV3Typography provides V3Typography,
         LocalFinancialConnectionsColors provides Colors,
         LocalV3Colors provides V3Colors

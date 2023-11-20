@@ -147,7 +147,7 @@ private fun ModalBottomSheetContent(
 ) {
     Layout(
         inModal = true,
-        content = {
+        body = {
             item {
 
                 icon?.default?.let {
