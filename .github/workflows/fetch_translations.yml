@@ -30,6 +30,8 @@ jobs:
         with:
           token: ${{ steps.generate-translations-app-token.outputs.token }}
           commit-message: Fetch latest Lokalize translations
+          author: ${{ secrets.ANDROID_TRANSLATIONS_APP_AUTHOR }}
+          committer: ${{ secrets.ANDROID_TRANSLATIONS_APP_AUTHOR }}
           title: Update translations
           body: This pull request contains the latest translations from Lokalize.
           branch: update-translations-${{ steps.timestamp.outputs.TIMESTAMP }}
