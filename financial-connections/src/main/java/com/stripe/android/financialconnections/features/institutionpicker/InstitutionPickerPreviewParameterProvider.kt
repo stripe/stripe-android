@@ -27,28 +27,24 @@ internal class InstitutionPickerPreviewParameterProvider :
         previewText = null,
         payload = Loading(),
         searchInstitutions = Uninitialized,
-        searchMode = false,
     )
 
     private fun searchModeSearchingInstitutions() = InstitutionPickerState(
         previewText = "Some query",
         payload = Success(payload()),
         searchInstitutions = Loading(),
-        searchMode = true,
     )
 
     private fun searchModeWithResults() = InstitutionPickerState(
         previewText = "Some query",
         payload = Success(payload()),
         searchInstitutions = Success(institutionResponse().copy(showManualEntry = true)),
-        searchMode = true,
     )
 
     private fun searchModeWithResultsNoManualEntry() = InstitutionPickerState(
         previewText = "Some query",
         payload = Success(payload()),
         searchInstitutions = Success(institutionResponse().copy(showManualEntry = false)),
-        searchMode = true,
     )
 
     private fun searchModeNoResults() = InstitutionPickerState(
@@ -60,7 +56,6 @@ internal class InstitutionPickerPreviewParameterProvider :
                 showManualEntry = true
             )
         ),
-        searchMode = true,
     )
 
     private fun searchModeNoResultsNoManualEntry() = InstitutionPickerState(
@@ -72,28 +67,24 @@ internal class InstitutionPickerPreviewParameterProvider :
                 showManualEntry = false
             )
         ),
-        searchMode = true,
     )
 
     private fun searchModeFailed() = InstitutionPickerState(
         previewText = "Some query",
         payload = Success(payload(manualEntry = true)),
         searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
-        searchMode = true,
     )
 
     private fun searchModeFailedNoManualEntry() = InstitutionPickerState(
         previewText = "Some query",
         payload = Success(payload(manualEntry = false)),
         searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
-        searchMode = true,
     )
 
     private fun noSearchMode() = InstitutionPickerState(
         previewText = "Some query",
         payload = Success(payload()),
         searchInstitutions = Success(institutionResponse()),
-        searchMode = false,
     )
 
     private fun noSearchModeSelectedInstitution() = InstitutionPickerState(
@@ -102,7 +93,6 @@ internal class InstitutionPickerPreviewParameterProvider :
         searchInstitutions = Success(institutionResponse()),
         selectedInstitutionId = "2",
         selectInstitution = Loading(),
-        searchMode = false,
     )
 
     private fun payload(manualEntry: Boolean = true) = InstitutionPickerState.Payload(

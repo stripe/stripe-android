@@ -2,10 +2,10 @@
 
 package com.stripe.android.financialconnections.features.institutionpicker
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +38,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
@@ -77,7 +76,6 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
-import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.theme.Brand100
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
@@ -92,25 +90,15 @@ internal fun InstitutionPickerScreen() {
     val parentViewModel = parentViewModel()
     val state: InstitutionPickerState by viewModel.collectAsState()
 
-    // when in search mode, back closes search.
-    val focusManager = LocalFocusManager.current
-    BackHandler(state.searchMode) {
-        focusManager.clearFocus()
-        viewModel.onCancelSearchClick()
-    }
-
     InstitutionPickerContent(
         payload = state.payload,
         institutions = state.searchInstitutions,
-        searchMode = state.searchMode,
         // This is just used to provide a text in Compose previews
         previewText = state.previewText,
         selectedInstitutionId = state.selectedInstitutionId,
         onQueryChanged = viewModel::onQueryChanged,
         onInstitutionSelected = viewModel::onInstitutionSelected,
-        onCancelSearchClick = viewModel::onCancelSearchClick,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.INSTITUTION_PICKER) },
-        onSearchFocused = viewModel::onSearchFocused,
         onManualEntryClick = viewModel::onManualEntryClick,
         onScrollChanged = viewModel::onScrollChanged
     )
@@ -120,14 +108,11 @@ internal fun InstitutionPickerScreen() {
 private fun InstitutionPickerContent(
     payload: Async<Payload>,
     institutions: Async<InstitutionResponse>,
-    searchMode: Boolean,
     previewText: String?,
     selectedInstitutionId: String?,
     onQueryChanged: (String) -> Unit,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
-    onCancelSearchClick: () -> Unit,
     onCloseClick: () -> Unit,
-    onSearchFocused: () -> Unit,
     onManualEntryClick: () -> Unit,
     onScrollChanged: () -> Unit
 ) {
@@ -143,12 +128,9 @@ private fun InstitutionPickerContent(
             is Fail -> {} //TODO
             is Loading -> {} //TODO
             is Success -> LoadedContent(
-                searchMode = searchMode,
                 previewText = previewText,
                 selectedInstitutionId = selectedInstitutionId,
                 onQueryChanged = onQueryChanged,
-                onSearchFocused = onSearchFocused,
-                onCancelSearchClick = onCancelSearchClick,
                 institutions = institutions,
                 onInstitutionSelected = onInstitutionSelected,
                 payload = payload(),
@@ -162,12 +144,9 @@ private fun InstitutionPickerContent(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LoadedContent(
-    searchMode: Boolean,
     previewText: String?,
     selectedInstitutionId: String?,
     onQueryChanged: (String) -> Unit,
-    onSearchFocused: () -> Unit,
-    onCancelSearchClick: () -> Unit,
     institutions: Async<InstitutionResponse>,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     payload: Payload,
@@ -175,7 +154,6 @@ private fun LoadedContent(
     onScrollChanged: () -> Unit,
 ) {
     var input by remember { mutableStateOf(TextFieldValue(previewText ?: "")) }
-    LaunchedEffect(searchMode) { if (!searchMode) input = TextFieldValue() }
     val listState = rememberLazyListState()
     val shouldEmitScrollEvent = remember { mutableStateOf(true) }
 
@@ -201,13 +179,10 @@ private fun LoadedContent(
                 stickyHeader {
                     SearchRow(
                         query = input,
-                        searchMode = searchMode,
                         onQueryChanged = {
                             input = it
                             onQueryChanged(input.text)
                         },
-                        onSearchFocused = onSearchFocused,
-                        onCancelSearchClick = onCancelSearchClick
                     )
                 }
             }
@@ -321,9 +296,6 @@ private fun SearchTitle() {
 private fun SearchRow(
     query: TextFieldValue,
     onQueryChanged: (TextFieldValue) -> Unit,
-    onCancelSearchClick: () -> Unit,
-    onSearchFocused: () -> Unit,
-    searchMode: Boolean
 ) {
     val focusManager = LocalFocusManager.current
     Column(
@@ -336,14 +308,14 @@ private fun SearchRow(
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Done
             ),
-            leadingIcon = if (searchMode) {
+            leadingIcon = if (query.text.isNotEmpty()) {
                 {
                     Icon(
                         Icons.Filled.ArrowBack,
                         tint = colors.textPrimary,
                         contentDescription = "Back button",
                         modifier = Modifier.clickable {
-                            onCancelSearchClick()
+                            onQueryChanged(TextFieldValue(""))
                             focusManager.clearFocus()
                         }
                     )
@@ -357,8 +329,6 @@ private fun SearchRow(
                     )
                 }
             },
-            modifier = Modifier
-                .onFocusChanged { if (it.isFocused) onSearchFocused() },
             placeholder = {
                 Text(
                     text = stringResource(id = R.string.stripe_search),
@@ -421,11 +391,16 @@ private fun InstitutionResultTile(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
+
         modifier = Modifier
             .fillMaxSize()
             .semantics { testTagsAsResourceId = true }
             .testTag("search_result_$index")
-            .clickableSingle { onInstitutionSelected(institution) }
+            .clickable(
+                enabled = enabled && loading.not(),
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+            ) { onInstitutionSelected(institution) }
             .alpha(if (enabled) 1f else 0.3f)
             .padding(vertical = 8.dp)
     ) {
@@ -519,14 +494,11 @@ internal fun InstitutionPickerPreview(
         InstitutionPickerContent(
             payload = state.payload,
             institutions = state.searchInstitutions,
-            searchMode = state.searchMode,
             previewText = state.previewText,
             selectedInstitutionId = state.selectedInstitutionId,
             onQueryChanged = {},
             onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
             onCloseClick = {},
-            onSearchFocused = {},
             onManualEntryClick = {},
         ) {}
     }

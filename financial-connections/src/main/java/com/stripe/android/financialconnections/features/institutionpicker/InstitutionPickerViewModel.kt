@@ -191,10 +191,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
         }
     }
 
-    fun onCancelSearchClick() {
-        clearSearch()
-    }
-
     private fun clearSearch() {
         setState {
             copy(
@@ -204,14 +200,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                         showManualEntry = false
                     )
                 ),
-                searchMode = false
             )
-        }
-    }
-
-    fun onSearchFocused() {
-        setState {
-            copy(searchMode = true)
         }
     }
 
@@ -255,7 +244,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
 internal data class InstitutionPickerState(
     // This is just used to provide a text in Compose previews
     val previewText: String? = null,
-    val searchMode: Boolean = false,
     val selectedInstitutionId: String? = null,
     val payload: Async<Payload> = Uninitialized,
     val searchInstitutions: Async<InstitutionResponse> = Uninitialized,
