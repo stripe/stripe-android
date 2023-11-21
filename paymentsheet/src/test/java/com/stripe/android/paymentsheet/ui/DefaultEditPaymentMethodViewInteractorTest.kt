@@ -105,9 +105,9 @@ class DefaultEditPaymentMethodViewInteractorTest {
 
     @Test
     fun `on remove pressed, should invoke 'onRemove' & succeed removal process`() = runTest {
-        val removeOperation: (paymentMethod: PaymentMethod) -> Result<Unit> = mock {
+        val removeOperation: (paymentMethod: PaymentMethod) -> Throwable? = mock {
             onGeneric { invoke(any()) }.thenAnswer {
-                Result.success(Unit)
+                null
             }
         }
 
@@ -136,11 +136,9 @@ class DefaultEditPaymentMethodViewInteractorTest {
 
     @Test
     fun `on remove pressed, should fail removal process`() = runTest {
-        val onRemove: (paymentMethod: PaymentMethod) -> Result<Unit> = mock {
+        val onRemove: (paymentMethod: PaymentMethod) -> Throwable? = mock {
             onGeneric { invoke(any()) }.thenAnswer {
-                Result.failure<Unit>(
-                    LocalStripeException("Failed to remove")
-                )
+                LocalStripeException("Failed to remove")
             }
         }
 
@@ -231,7 +229,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
     }
 
     private fun createInteractor(
-        onRemove: PaymentMethodRemoveOperation = { Result.success(Unit) },
+        onRemove: PaymentMethodRemoveOperation = { null },
         onUpdate: PaymentMethodUpdateOperation = { _, _ -> Result.success(CARD_WITH_NETWORKS_PAYMENT_METHOD) },
         workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): DefaultEditPaymentMethodViewInteractor {
