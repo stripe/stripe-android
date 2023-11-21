@@ -20,6 +20,9 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
+import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -30,6 +33,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -52,6 +56,7 @@ import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.R as PaymentsCoreR
 import com.stripe.android.R as StripeR
 import com.stripe.android.uicore.R as UiCoreR
@@ -109,7 +114,7 @@ internal fun EditPaymentMethodUi(
             )
         }
 
-        Spacer(modifier = Modifier.requiredHeight(48.dp))
+        Spacer(modifier = Modifier.requiredHeight(32.dp))
 
         viewState.error?.let { resolvableError ->
             ErrorMessage(
@@ -178,30 +183,29 @@ private fun RemoveButton(
     onRemove: () -> Unit
 ) {
     CompositionLocalProvider(
-        LocalContentAlpha provides if (removing) ContentAlpha.disabled else ContentAlpha.high
+        LocalContentAlpha provides if (removing) ContentAlpha.disabled else ContentAlpha.high,
+        LocalRippleTheme provides ErrorRippleTheme
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
+        TextButton(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.stripeShapes.roundedCornerShape,
+            enabled = idle && !removing,
+            onClick = onRemove
         ) {
-            TextButton(
-                modifier = Modifier.align(Alignment.Center),
-                enabled = idle && !removing,
-                onClick = onRemove
-            ) {
+            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
                 Text(
                     text = stringResource(id = R.string.stripe_paymentsheet_remove_card),
                     color = MaterialTheme.colors.error.copy(LocalContentAlpha.current),
                     style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
-                    modifier = Modifier.align(Alignment.CenterVertically),
+                    modifier = Modifier.align(Alignment.Center),
                 )
-            }
-            if (removing) {
-                LoadingIndicator(
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                    color = MaterialTheme.colors.error
-                )
+
+                if (removing) {
+                    LoadingIndicator(
+                        modifier = Modifier.align(Alignment.CenterEnd),
+                        color = MaterialTheme.colors.error
+                    )
+                }
             }
         }
     }
@@ -259,6 +263,24 @@ private fun Dropdown(
             onDismiss = {
                 expanded = false
             }
+        )
+    }
+}
+
+private object ErrorRippleTheme : RippleTheme {
+    @Composable
+    override fun defaultColor(): Color {
+        return RippleTheme.defaultRippleColor(
+            MaterialTheme.colors.error,
+            lightTheme = MaterialTheme.colors.isLight
+        )
+    }
+
+    @Composable
+    override fun rippleAlpha(): RippleAlpha {
+        return RippleTheme.defaultRippleAlpha(
+            MaterialTheme.colors.error.copy(alpha = 0.25f),
+            lightTheme = MaterialTheme.colors.isLight
         )
     }
 }
