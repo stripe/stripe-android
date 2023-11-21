@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
-internal typealias PaymentMethodRemoveOperation = suspend (paymentMethod: PaymentMethod) -> Result<Unit>
+internal typealias PaymentMethodRemoveOperation = suspend (paymentMethod: PaymentMethod) -> Throwable?
 internal typealias PaymentMethodUpdateOperation = suspend (
     paymentMethod: PaymentMethod,
     brand: CardBrand
@@ -107,12 +107,9 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
             status.emit(EditPaymentMethodViewState.Status.Removing)
 
             val paymentMethod = paymentMethod.value
-            val removeResult = removeExecutor(paymentMethod)
+            val removeError = removeExecutor(paymentMethod)
 
-            removeResult.onFailure { throwable ->
-                error.emit(throwable.stripeErrorMessage())
-            }
-
+            error.emit(removeError?.stripeErrorMessage())
             status.emit(EditPaymentMethodViewState.Status.Idle)
         }
     }
