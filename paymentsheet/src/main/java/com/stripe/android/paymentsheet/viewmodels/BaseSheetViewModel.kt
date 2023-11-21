@@ -497,7 +497,7 @@ internal abstract class BaseSheetViewModel(
                         if (updatedId != null && savedId != null && updatedId == savedId) {
                             updatedMethod
                         } else {
-                            paymentMethod
+                            savedMethod
                         }
                     }
                 }
