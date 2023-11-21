@@ -51,10 +51,11 @@ interface CustomerAdapter {
     suspend fun detachPaymentMethod(paymentMethodId: String): Result<PaymentMethod>
 
     /**
-     * Updates the given payment method from a customer
-     * @param paymentMethodId, the payment method to update that is attached to the customer
-     * @param params, parameters for updating a payment method
-     * @return the modified [PaymentMethod].
+     * Updates a payment method with the provided [PaymentMethodUpdateParams].
+     *
+     * @param paymentMethodId The payment method to update
+     * @param paymentMethodUpdateParams The [PaymentMethodUpdateParams]
+     * @return The updated [PaymentMethod]
      */
     suspend fun updatePaymentMethod(paymentMethodId: String, params: PaymentMethodUpdateParams): Result<PaymentMethod>
 
