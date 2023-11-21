@@ -2,6 +2,7 @@ package com.stripe.android.customersheet
 
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
+import com.stripe.android.model.PaymentMethodUpdateParams
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal class FakeCustomerAdapter(
@@ -13,6 +14,7 @@ internal class FakeCustomerAdapter(
     private val onSetSelectedPaymentOption:
         ((paymentOption: CustomerAdapter.PaymentOption?) -> CustomerAdapter.Result<Unit>)? = null,
     private val onAttachPaymentMethod: ((paymentMethodId: String) -> CustomerAdapter.Result<PaymentMethod>)? = null,
+    private val onUpdatePaymentMethod: ((paymentMethodId: String, updateParams: PaymentMethodUpdateParams) -> CustomerAdapter.Result<PaymentMethod>)? = null,
     private val onDetachPaymentMethod: ((paymentMethodId: String) -> CustomerAdapter.Result<PaymentMethod>)? = null,
     private val onSetupIntentClientSecretForCustomerAttach: (() -> CustomerAdapter.Result<String>)? = null
 ) : CustomerAdapter {
@@ -23,6 +25,14 @@ internal class FakeCustomerAdapter(
 
     override suspend fun attachPaymentMethod(paymentMethodId: String): CustomerAdapter.Result<PaymentMethod> {
         return onAttachPaymentMethod?.invoke(paymentMethodId)
+            ?: CustomerAdapter.Result.success(paymentMethods.getOrNull()?.find { it.id!! == paymentMethodId }!!)
+    }
+
+    override suspend fun updatePaymentMethod(
+        paymentMethodId: String,
+        paymentMethodUpdateParams: PaymentMethodUpdateParams
+    ): CustomerAdapter.Result<PaymentMethod> {
+        return onUpdatePaymentMethod?.invoke(paymentMethodId, paymentMethodUpdateParams)
             ?: CustomerAdapter.Result.success(paymentMethods.getOrNull()?.find { it.id!! == paymentMethodId }!!)
     }
 
