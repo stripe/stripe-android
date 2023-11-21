@@ -294,7 +294,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun loadPaymentSheetState() {
-        val recoveryState = savedStateHandle.remove<ProcessDeathRecoveryState>(KeyProcessDeathRecoveryState)
+        val recoveryState = savedStateHandle.get<ProcessDeathRecoveryState>(KeyProcessDeathRecoveryState)
         val isRecoveringFromProcessDeath = recoveryState != null
 
         val result = withContext(workContext) {
