@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import java.util.Objects
 
@@ -10,7 +9,6 @@ import java.util.Objects
  *
  * See [Update a PaymentMethod](https://stripe.com/docs/api/payment_methods/update).
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class PaymentMethodUpdateParams(
     internal val type: PaymentMethod.Type,
 ) : StripeParamsModel, Parcelable {
@@ -29,12 +27,11 @@ sealed class PaymentMethodUpdateParams(
         return billingInfo + typeParams
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     class Card internal constructor(
-        internal val expiryMonth: Int? = null,
-        internal val expiryYear: Int? = null,
-        internal val networks: Networks? = null,
+        val expiryMonth: Int? = null,
+        val expiryYear: Int? = null,
+        val networks: Networks? = null,
         override val billingDetails: PaymentMethod.BillingDetails?,
     ) : PaymentMethodUpdateParams(PaymentMethod.Type.Card) {
 
@@ -71,7 +68,6 @@ sealed class PaymentMethodUpdateParams(
                 ")"
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         class Networks(
             val preferred: String? = null,
@@ -98,18 +94,17 @@ sealed class PaymentMethodUpdateParams(
             }
 
             private companion object {
-                const val PARAM_PREFERRED = "preferred"
+                private const val PARAM_PREFERRED = "preferred"
             }
         }
 
         private companion object {
-            const val PARAM_EXP_MONTH: String = "exp_month"
-            const val PARAM_EXP_YEAR: String = "exp_year"
-            const val PARAM_NETWORKS: String = "networks"
+            private const val PARAM_EXP_MONTH: String = "exp_month"
+            private const val PARAM_EXP_YEAR: String = "exp_year"
+            private const val PARAM_NETWORKS: String = "networks"
         }
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     class USBankAccount internal constructor(
         internal val accountHolderType: PaymentMethod.USBankAccount.USBankAccountHolderType?,
@@ -144,11 +139,10 @@ sealed class PaymentMethodUpdateParams(
         }
 
         private companion object {
-            const val PARAM_ACCOUNT_HOLDER_TYPE: String = "account_holder_type"
+            private const val PARAM_ACCOUNT_HOLDER_TYPE: String = "account_holder_type"
         }
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
         private const val PARAM_BILLING_DETAILS = "billing_details"
