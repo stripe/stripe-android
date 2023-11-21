@@ -114,6 +114,7 @@ class DefaultCustomerSheetLoaderTest {
         )
 
         val config = CustomerSheet.Configuration(
+            merchantDisplayName = "Example",
             googlePayEnabled = true
         )
 
@@ -156,7 +157,7 @@ class DefaultCustomerSheetLoaderTest {
             )
         )
 
-        val config = CustomerSheet.Configuration()
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
             loader.load(config).getOrThrow().stripeIntent
@@ -176,7 +177,7 @@ class DefaultCustomerSheetLoaderTest {
             )
         )
 
-        val config = CustomerSheet.Configuration()
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
             loader.load(config).getOrThrow()
@@ -212,7 +213,7 @@ class DefaultCustomerSheetLoaderTest {
             )
         )
 
-        val config = CustomerSheet.Configuration()
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
             loader.load(config).getOrThrow()
@@ -252,7 +253,7 @@ class DefaultCustomerSheetLoaderTest {
             )
         )
 
-        val config = CustomerSheet.Configuration()
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
             loader.load(config).getOrThrow()
@@ -291,7 +292,7 @@ class DefaultCustomerSheetLoaderTest {
         val loader = createCustomerSheetLoader(
             lpmRepository = lpmRepository,
         )
-        loader.load(CustomerSheet.Configuration())
+        loader.load(CustomerSheet.Configuration(merchantDisplayName = "Example"))
 
         card = lpmRepository.fromCode("card")
         assertThat(card).isNotNull()
@@ -315,7 +316,7 @@ class DefaultCustomerSheetLoaderTest {
             )
         )
 
-        val config = CustomerSheet.Configuration()
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
@@ -340,7 +341,7 @@ class DefaultCustomerSheetLoaderTest {
             )
         )
 
-        val config = CustomerSheet.Configuration()
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
@@ -365,7 +366,7 @@ class DefaultCustomerSheetLoaderTest {
             )
         )
 
-        val config = CustomerSheet.Configuration()
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
@@ -390,7 +391,7 @@ class DefaultCustomerSheetLoaderTest {
             )
         )
 
-        val config = CustomerSheet.Configuration()
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
@@ -415,7 +416,7 @@ class DefaultCustomerSheetLoaderTest {
             )
         )
 
-        val config = CustomerSheet.Configuration()
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
@@ -440,7 +441,7 @@ class DefaultCustomerSheetLoaderTest {
             )
         )
 
-        val config = CustomerSheet.Configuration()
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
@@ -465,7 +466,7 @@ class DefaultCustomerSheetLoaderTest {
             )
         )
 
-        val config = CustomerSheet.Configuration()
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
@@ -490,7 +491,7 @@ class DefaultCustomerSheetLoaderTest {
             )
         )
 
-        val config = CustomerSheet.Configuration()
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
@@ -501,7 +502,7 @@ class DefaultCustomerSheetLoaderTest {
     fun `Loads correct CBC eligibility if feature enabled`() = runTest {
         cbcFeatureFlagTestRule.setEnabled(true)
         val loader = createCustomerSheetLoader(isCbcEligible = true)
-        val state = loader.load(CustomerSheet.Configuration()).getOrThrow()
+        val state = loader.load(CustomerSheet.Configuration(merchantDisplayName = "Example")).getOrThrow()
         assertThat(state.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Eligible(emptyList()))
     }
 
@@ -512,6 +513,7 @@ class DefaultCustomerSheetLoaderTest {
 
         val state = loader.load(
             CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
                 preferredNetworks = listOf(CardBrand.CartesBancaires),
             )
         ).getOrThrow()
@@ -524,7 +526,7 @@ class DefaultCustomerSheetLoaderTest {
     @Test
     fun `Does not load CBC eligibility if feature disabled`() = runTest {
         val loader = createCustomerSheetLoader(isCbcEligible = true)
-        val state = loader.load(CustomerSheet.Configuration()).getOrThrow()
+        val state = loader.load(CustomerSheet.Configuration(merchantDisplayName = "Example")).getOrThrow()
         assertThat(state.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
     }
 

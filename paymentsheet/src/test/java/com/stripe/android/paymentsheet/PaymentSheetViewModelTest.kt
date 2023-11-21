@@ -33,6 +33,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
@@ -48,6 +49,7 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
@@ -55,7 +57,10 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.utils.FakeEditPaymentMethodInteractorFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.testing.PaymentIntentFactory
@@ -137,6 +142,7 @@ internal class PaymentSheetViewModelTest {
         on { create(any(), any(), any(), any(), any()) } doReturn googlePayLauncher
     }
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
+    private val fakeEditPaymentMethodInteractorFactory = FakeEditPaymentMethodInteractorFactory(testDispatcher)
 
     private val linkConfigurationCoordinator = mock<LinkConfigurationCoordinator> {
         on { getAccountStatusFlow(any()) } doReturn flowOf(AccountStatus.SignedOut)
@@ -177,6 +183,82 @@ internal class PaymentSheetViewModelTest {
         verify(customerRepository).detachPaymentMethod(
             any(),
             eq(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!)
+        )
+    }
+
+    @Test
+    fun `modifyPaymentMethod updates payment methods on successful update`() = runTest {
+        val paymentMethods = PaymentMethodFixtures.createCards(5)
+
+        val firstPaymentMethod = paymentMethods.first()
+
+        val updatedPaymentMethod = firstPaymentMethod.copy(
+            card = firstPaymentMethod.card?.copy(
+                networks = firstPaymentMethod.card?.networks?.copy(
+                    preferred = CardBrand.Visa.code
+                )
+            )
+        )
+
+        val customerRepository = spy(
+            FakeCustomerRepository(
+                onUpdatePaymentMethod = {
+                    Result.success(updatedPaymentMethod)
+                }
+            )
+        )
+        val viewModel = createViewModel(
+            customerPaymentMethods = paymentMethods,
+            customerRepository = customerRepository
+        )
+
+        viewModel.currentScreen.test {
+            awaitItem()
+
+            viewModel.modifyPaymentMethod(firstPaymentMethod)
+
+            val currentScreen = awaitItem()
+
+            assertThat(currentScreen).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+
+            if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
+                val interactor = currentScreen.interactor
+
+                interactor.handleViewAction(
+                    EditPaymentMethodViewAction.OnBrandChoiceChanged(
+                        EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa)
+                    )
+                )
+
+                interactor.handleViewAction(EditPaymentMethodViewAction.OnUpdatePressed)
+            }
+
+            assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
+        }
+
+        val idCaptor = argumentCaptor<String>()
+        val paramsCaptor = argumentCaptor<PaymentMethodUpdateParams>()
+
+        verify(customerRepository).updatePaymentMethod(
+            any(),
+            idCaptor.capture(),
+            paramsCaptor.capture()
+        )
+
+        assertThat(idCaptor.firstValue).isEqualTo(firstPaymentMethod.id!!)
+
+        assertThat(
+            paramsCaptor.firstValue.toParamMap()
+        ).isEqualTo(
+            PaymentMethodUpdateParams.createCard(
+                networks = PaymentMethodUpdateParams.Card.Networks(
+                    preferred = CardBrand.Visa.code
+                )
+            ).toParamMap()
+        )
+
+        assertThat(viewModel.paymentMethods.value).isEqualTo(
+            listOf(updatedPaymentMethod) + paymentMethods.takeLast(4)
         )
     }
 
@@ -1801,7 +1883,7 @@ internal class PaymentSheetViewModelTest {
                 linkConfigurationCoordinator = linkInteractor,
                 intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
                 formViewModelSubComponentBuilderProvider = mock(),
-                editInteractorFactory = mock()
+                editInteractorFactory = fakeEditPaymentMethodInteractorFactory
             )
         }
     }

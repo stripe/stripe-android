@@ -98,7 +98,7 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
     }
 
     private fun buildConfig(): CustomerSheet.Configuration {
-        return CustomerSheet.Configuration.builder()
+        return CustomerSheet.Configuration.builder(merchantDisplayName = "Payment Sheet Example")
             .defaultBillingDetails(
                 PaymentSheet.BillingDetails(
                     name = "CustomerSheet Testing"

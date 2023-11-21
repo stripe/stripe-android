@@ -12,6 +12,7 @@ import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.LegalDetailsBody
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
+import com.stripe.android.financialconnections.model.ServerLink
 
 @OptIn(ExperimentalMaterialApi::class)
 internal class ConsentPreviewParameterProvider :
@@ -122,6 +123,7 @@ internal class ConsentPreviewParameterProvider :
             " We never share your login details with them.",
         cta = "Agree",
         dataAccessNotice = DataAccessNotice(
+            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
             title = "Goldilocks uses Stripe to link your accounts",
             subtitle = "Goldilocks will use your account and routing number, balances and transactions:",
             body = DataAccessNoticeBody(
@@ -138,23 +140,26 @@ internal class ConsentPreviewParameterProvider :
                     ),
                 )
             ),
-            learnMore = "Learn more about data access",
+            disclaimer = "Learn more about data access",
             connectedAccountNotice = "Connected account placeholder",
             cta = "OK"
         ),
         legalDetailsNotice = LegalDetailsNotice(
-            title = "Stripe uses your account data as described in the Terms, including:",
+            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+            title = "Terms and privacy policy",
+            subtitle = "Stripe only uses your data and credentials as described in the Terms, " +
+                "such as to improve its services, manage loss, and mitigate fraud.",
             body = LegalDetailsBody(
-                bullets = listOf(
-                    Bullet(
-                        content = "To improve our services"
+                links = listOf(
+                    ServerLink(
+                        title = "Terms",
                     ),
-                    Bullet(
-                        content = "To manage fraud and loss risk of transactions"
+                    ServerLink(
+                        title = "Privacy Policy",
                     ),
                 )
             ),
-            learnMore = "Learn more",
+            disclaimer = "Learn more",
             cta = "OK"
         ),
     )

@@ -15,6 +15,7 @@ public abstract interface class com/stripe/android/customersheet/CustomerAdapter
 	public abstract fun retrieveSelectedPaymentOption (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun setSelectedPaymentOption (Lcom/stripe/android/customersheet/CustomerAdapter$PaymentOption;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun setupIntentClientSecretForCustomerAttach (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updatePaymentMethod (Ljava/lang/String;Lcom/stripe/android/model/PaymentMethodUpdateParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/stripe/android/customersheet/CustomerAdapter$Companion {
@@ -88,7 +89,7 @@ public final class com/stripe/android/customersheet/CustomerSheet$Companion {
 public final class com/stripe/android/customersheet/CustomerSheet$Configuration {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Companion;
-	public static final fun builder ()Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public static final fun builder (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun getAppearance ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;
 	public final fun getBillingDetailsCollectionConfiguration ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;
 	public final fun getDefaultBillingDetails ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;
@@ -106,15 +107,14 @@ public final class com/stripe/android/customersheet/CustomerSheet$Configuration$
 	public final fun defaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun googlePayEnabled (Z)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun headerTextForSelectionScreen (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
-	public final fun merchantDisplayName (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 }
 
 public final class com/stripe/android/customersheet/CustomerSheet$Configuration$Companion {
-	public final fun builder ()Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public final fun builder (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 }
 
 public final class com/stripe/android/customersheet/CustomerSheetComposeKt {
-	public static final fun rememberCustomerSheet (Lcom/stripe/android/customersheet/CustomerSheet$Configuration;Lcom/stripe/android/customersheet/CustomerAdapter;Lcom/stripe/android/customersheet/CustomerSheetResultCallback;Landroidx/compose/runtime/Composer;II)Lcom/stripe/android/customersheet/CustomerSheet;
+	public static final fun rememberCustomerSheet (Lcom/stripe/android/customersheet/CustomerSheet$Configuration;Lcom/stripe/android/customersheet/CustomerAdapter;Lcom/stripe/android/customersheet/CustomerSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/customersheet/CustomerSheet;
 }
 
 public abstract class com/stripe/android/customersheet/CustomerSheetResult {
@@ -1699,11 +1699,9 @@ public final class com/stripe/android/paymentsheet/state/PaymentSheetState$Loadi
 
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$EditPaymentMethodKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$EditPaymentMethodKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function3;
-	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentOptionsUIKt {

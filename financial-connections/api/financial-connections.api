@@ -370,13 +370,6 @@ public final class com/stripe/android/financialconnections/features/common/Compo
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/financialconnections/features/common/ComposableSingletons$ModalBottomSheetContentKt {
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/common/ComposableSingletons$ModalBottomSheetContentKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function3;
-	public fun <init> ()V
-	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-}
-
 public final class com/stripe/android/financialconnections/features/common/ComposableSingletons$SharedPartnerAuthKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/common/ComposableSingletons$SharedPartnerAuthKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
@@ -386,17 +379,21 @@ public final class com/stripe/android/financialconnections/features/common/Compo
 
 public final class com/stripe/android/financialconnections/features/institutionpicker/ComposableSingletons$InstitutionPickerScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/institutionpicker/ComposableSingletons$InstitutionPickerScreenKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function3;
-	public static field lambda-2 Lkotlin/jvm/functions/Function3;
-	public static field lambda-3 Lkotlin/jvm/functions/Function2;
-	public static field lambda-4 Lkotlin/jvm/functions/Function2;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public static field lambda-3 Lkotlin/jvm/functions/Function3;
+	public static field lambda-4 Lkotlin/jvm/functions/Function3;
 	public static field lambda-5 Lkotlin/jvm/functions/Function3;
+	public static field lambda-6 Lkotlin/jvm/functions/Function3;
+	public static field lambda-7 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
-	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-3$financial_connections_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-4$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-3$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-4$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-5$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-6$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-7$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/financialconnections/features/linkstepupverification/ComposableSingletons$LinkStepUpVerificationScreenKt {
@@ -1577,6 +1574,14 @@ public final class com/stripe/android/financialconnections/model/ReturningNetwor
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/model/ReturningNetworkingUserAccountPicker;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/financialconnections/model/ReturningNetworkingUserAccountPicker;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/financialconnections/model/ServerLink$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/model/ServerLink;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/model/ServerLink;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

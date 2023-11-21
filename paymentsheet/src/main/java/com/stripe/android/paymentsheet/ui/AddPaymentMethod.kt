@@ -204,7 +204,9 @@ internal fun FormFieldValues.transformToPaymentSelection(
     val options = transformToPaymentMethodOptionsParams(paymentMethod)
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
         PaymentSelection.New.Card(
-            paymentMethodOptionsParams = options,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = userRequestedReuse.setupFutureUsage
+            ),
             paymentMethodCreateParams = params,
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,

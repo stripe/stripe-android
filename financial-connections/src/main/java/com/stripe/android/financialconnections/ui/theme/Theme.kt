@@ -23,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
+import androidx.navigation.compose.rememberNavController
+import com.stripe.android.financialconnections.ui.LocalNavHostController
 
 @Deprecated("Use V3Colors instead")
 private val Colors = FinancialConnectionsColors(
@@ -65,6 +67,7 @@ private val V3Colors = FinancialConnectionsV3Colors(
     buttonSecondaryHover = Color(0xFFF5F6F8),
     buttonSecondaryPressed = Color(0xFFEBEEF1),
     background = Color(0xFFF5F6F8),
+    backgroundSurface = Color(0xFFFFFFFF),
     backgroundBrand = Color(0xFFF5F6F8),
     border = Color(0xFFD8DEE4),
     borderBrand = Color(0xFF675DFF)
@@ -244,6 +247,7 @@ private object FinancialConnectionsRippleTheme : RippleTheme {
 internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalFinancialConnectionsTypography provides Typography,
+        LocalNavHostController provides rememberNavController(),
         LocalV3Typography provides V3Typography,
         LocalFinancialConnectionsColors provides Colors,
         LocalV3Colors provides V3Colors

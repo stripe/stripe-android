@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
@@ -162,8 +164,10 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         onSettingsChanged: (PlaygroundSettings) -> Unit,
         onButtonClick: () -> Unit
     ) {
+        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
+                .verticalScroll(scrollState)
                 .padding(padding)
                 .padding(16.dp)
         ) {
@@ -193,20 +197,18 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             ) {
                 Text("Connect Accounts")
             }
-            LazyColumn {
-                items(state.status) { item ->
-                    Row(Modifier.padding(4.dp), verticalAlignment = Alignment.Top) {
-                        val primary = MaterialTheme.colors.primary
-                        Canvas(
-                            modifier = Modifier
-                                .padding(end = 8.dp, top = 6.dp)
-                                .size(6.dp)
-                        ) {
-                            drawCircle(primary)
-                        }
-                        SelectionContainer {
-                            Text(text = item, fontSize = 12.sp)
-                        }
+            state.status.forEach {
+                Row(Modifier.padding(4.dp), verticalAlignment = Alignment.Top) {
+                    val primary = MaterialTheme.colors.primary
+                    Canvas(
+                        modifier = Modifier
+                            .padding(end = 8.dp, top = 6.dp)
+                            .size(6.dp)
+                    ) {
+                        drawCircle(primary)
+                    }
+                    SelectionContainer {
+                        Text(text = it, fontSize = 12.sp)
                     }
                 }
             }

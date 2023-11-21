@@ -5,6 +5,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.R
@@ -92,6 +93,27 @@ internal class StripeCustomerAdapter @Inject constructor(
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey
                 ),
                 paymentMethodId = paymentMethodId
+            ).getOrElse {
+                return CustomerAdapter.Result.failure(
+                    cause = it,
+                    displayMessage = it.stripeErrorMessage(context),
+                )
+            }
+        }
+    }
+
+    override suspend fun updatePaymentMethod(
+        paymentMethodId: String,
+        params: PaymentMethodUpdateParams
+    ): CustomerAdapter.Result<PaymentMethod> {
+        return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
+            customerRepository.updatePaymentMethod(
+                customerConfig = PaymentSheet.CustomerConfiguration(
+                    id = customerEphemeralKey.customerId,
+                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey
+                ),
+                paymentMethodId = paymentMethodId,
+                params = params
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,

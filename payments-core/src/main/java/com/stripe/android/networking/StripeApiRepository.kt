@@ -544,6 +544,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     override suspend fun updatePaymentMethod(
+        paymentMethodId: String,
         paymentMethodUpdateParams: PaymentMethodUpdateParams,
         options: ApiRequest.Options,
     ): Result<PaymentMethod> {
@@ -551,16 +552,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
-                url = getPaymentMethodUrl(paymentMethodUpdateParams.paymentMethodId),
+                url = getPaymentMethodUrl(paymentMethodId),
                 options = options,
-                params = paymentMethodUpdateParams.toParamMap()
-                    .plus(buildPaymentUserAgentPair(paymentMethodUpdateParams.attribution))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                params = paymentMethodUpdateParams.toParamMap(),
             ),
             jsonParser = PaymentMethodJsonParser()
-        ) {
-            // TODO
-        }
+        )
     }
 
     /**

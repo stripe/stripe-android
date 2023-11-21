@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet
 
 /**
@@ -41,5 +42,11 @@ internal interface CustomerRepository {
     suspend fun attachPaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodId: String
+    ): Result<PaymentMethod>
+
+    suspend fun updatePaymentMethod(
+        customerConfig: PaymentSheet.CustomerConfiguration,
+        paymentMethodId: String,
+        params: PaymentMethodUpdateParams
     ): Result<PaymentMethod>
 }

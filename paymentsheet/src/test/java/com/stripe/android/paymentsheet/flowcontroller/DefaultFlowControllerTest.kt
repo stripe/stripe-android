@@ -35,6 +35,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
@@ -43,6 +44,7 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
+import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -58,6 +60,7 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -127,6 +130,8 @@ internal class DefaultFlowControllerTest {
         mock<ActivityResultLauncher<SepaMandateContract.Args>>()
 
     private val linkPaymentLauncher = mock<LinkPaymentLauncher>()
+
+    private val prefsRepository = FakePrefsRepository()
 
     private val lifeCycleOwner = mock<LifecycleOwner>()
 
@@ -1522,6 +1527,124 @@ internal class DefaultFlowControllerTest {
         )
     }
 
+    @Test
+    fun `On complete internal payment result in PI mode & should reuse, should save payment selection`() = runTest {
+        selectionSavedTest(
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+        ) { flowController ->
+            flowController.configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_12345"
+            ) { _, _ -> }
+        }
+    }
+
+    @Test
+    fun `On complete internal payment result in PI mode & should not reuse, should not save payment selection`() = runTest {
+        selectionSavedTest(shouldSave = false) { flowController ->
+            flowController.configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_12345"
+            ) { _, _ -> }
+        }
+    }
+
+    @Test
+    fun `On complete internal payment result in SI mode, should save payment selection`() = runTest {
+        selectionSavedTest { flowController ->
+            flowController.configureWithSetupIntent(
+                setupIntentClientSecret = "si_123456"
+            ) { _, _ -> }
+        }
+    }
+
+    @Test
+    fun `On complete internal payment result with intent config in PI mode, should not save payment selection`() = runTest {
+        selectionSavedTest(shouldSave = false) { flowController ->
+            flowController.configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 10L,
+                        currency = "USD"
+                    )
+                )
+            ) { _, _ -> }
+        }
+    }
+
+    @Test
+    fun `On complete internal payment result with intent config in PI+SFU mode, should save payment selection`() = runTest {
+        selectionSavedTest { flowController ->
+            flowController.configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 10L,
+                        currency = "USD",
+                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                    )
+                )
+            ) { _, _ -> }
+        }
+    }
+
+    @Test
+    fun `On complete internal payment result with intent config in SI mode, should save payment selection`() = runTest {
+        selectionSavedTest { flowController ->
+            flowController.configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(
+                        currency = "USD"
+                    )
+                )
+            ) { _, _ -> }
+        }
+    }
+
+    private suspend fun selectionSavedTest(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave =
+            PaymentSelection.CustomerRequestedSave.NoRequest,
+        shouldSave: Boolean = true,
+        configure: (PaymentSheet.FlowController) -> Unit
+    ) {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!
+        val flowController = createFlowController()
+
+        configure(flowController)
+
+        val selection = PaymentSelection.New.Card(
+            brand = CardBrand.Visa,
+            customerRequestedSave = customerRequestedSave,
+            paymentMethodCreateParams = PaymentMethodCreateParams.create(
+                card = PaymentMethodCreateParams.Card()
+            )
+        )
+
+        flowController.onPaymentOptionResult(PaymentOptionResult.Succeeded(selection))
+        flowController.onInternalPaymentResult(InternalPaymentResult.Completed(paymentIntent))
+
+        val savedSelection = PaymentSelection.Saved(paymentIntent.paymentMethod!!)
+
+        if (shouldSave) {
+            assertThat(prefsRepository.paymentSelectionArgs).containsExactly(savedSelection)
+
+            assertThat(
+                prefsRepository.getSavedSelection(
+                    isGooglePayAvailable = true,
+                    isLinkAvailable = true
+                )
+            ).isEqualTo(
+                SavedSelection.PaymentMethod(savedSelection.paymentMethod.id.orEmpty())
+            )
+        } else {
+            assertThat(prefsRepository.paymentSelectionArgs).isEmpty()
+
+            assertThat(
+                prefsRepository.getSavedSelection(
+                    isGooglePayAvailable = true,
+                    isLinkAvailable = true
+                )
+            ).isEqualTo(SavedSelection.None)
+        }
+    }
+
     private fun createAndConfigureFlowControllerForDeferredIntent(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
     ): DefaultFlowController {
@@ -1589,6 +1712,7 @@ internal class DefaultFlowControllerTest {
         enableLogging = ENABLE_LOGGING,
         productUsage = PRODUCT_USAGE,
         googlePayPaymentMethodLauncherFactory = createGooglePayPaymentMethodLauncherFactory(),
+        prefsRepositoryFactory = { prefsRepository },
         linkLauncher = linkPaymentLauncher,
         configurationHandler = FlowControllerConfigurationHandler(
             paymentSheetLoader = paymentSheetLoader,

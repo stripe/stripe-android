@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.image
 
 import androidx.annotation.RestrictTo
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
@@ -73,16 +74,21 @@ fun StripeImage(
                     state.value = Error
                 }
         }
-        when (val result = state.value) {
-            Error -> errorContent()
-            Loading -> loadingContent()
-            is Success -> Image(
-                modifier = modifier,
-                colorFilter = colorFilter,
-                contentDescription = contentDescription,
-                contentScale = contentScale,
-                painter = result.painter
-            )
+        AnimatedContent(
+            targetState = state.value,
+            label = "loading_image_animation"
+        ) {
+            when (it) {
+                Error -> errorContent()
+                Loading -> loadingContent()
+                is Success -> Image(
+                    modifier = modifier,
+                    colorFilter = colorFilter,
+                    contentDescription = contentDescription,
+                    contentScale = contentScale,
+                    painter = it.painter
+                )
+            }
         }
     }
 }

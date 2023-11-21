@@ -23,7 +23,8 @@ internal class FakeEditPaymentMethodInteractor(
             } ?: listOf(),
             selectedBrand = paymentMethod.card?.networks?.preferred?.let { code ->
                 EditPaymentMethodViewState.CardBrandChoice(CardBrand.fromCode(code))
-            } ?: EditPaymentMethodViewState.CardBrandChoice(CardBrand.Unknown)
+            } ?: EditPaymentMethodViewState.CardBrandChoice(CardBrand.Unknown),
+            displayName = "Card",
         )
     )
 
@@ -39,7 +40,8 @@ internal class FakeEditPaymentMethodInteractor(
         override fun create(
             initialPaymentMethod: PaymentMethod,
             removeExecutor: PaymentMethodRemoveOperation,
-            updateExecutor: PaymentMethodUpdateOperation
+            updateExecutor: PaymentMethodUpdateOperation,
+            displayName: String
         ): ModifiableEditPaymentMethodViewInteractor {
             return FakeEditPaymentMethodInteractor(initialPaymentMethod)
         }

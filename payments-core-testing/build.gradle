@@ -5,7 +5,9 @@ dependencies {
 
     implementation libs.androidx.viewModel
     implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
     implementation testLibs.junit
+    implementation testLibs.kotlin.coroutines
 
     androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
 }
