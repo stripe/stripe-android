@@ -122,7 +122,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                currentIntentId = null,
+                pendingIntentId = null,
             ).getOrThrow()
         ).isEqualTo(
             PaymentSheetState.Full(
@@ -157,7 +157,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                currentIntentId = null,
+                pendingIntentId = null,
             ).getOrThrow()
         ).isEqualTo(
             PaymentSheetState.Full(
@@ -189,7 +189,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         assertThat(state.paymentSelection).isEqualTo(
@@ -212,7 +212,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
@@ -233,7 +233,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         assertThat(result.paymentSelection).isNull()
@@ -264,7 +264,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                currentIntentId = null,
+                pendingIntentId = null,
             )
 
             verify(customerRepository).getPaymentMethods(
@@ -299,7 +299,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                currentIntentId = null,
+                pendingIntentId = null,
             )
 
             verify(customerRepository).getPaymentMethods(
@@ -326,7 +326,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                currentIntentId = null,
+                pendingIntentId = null,
             ).getOrThrow()
 
             assertThat(result.customerPaymentMethods)
@@ -353,7 +353,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                currentIntentId = null,
+                pendingIntentId = null,
             ).getOrThrow()
 
             assertThat(result.customerPaymentMethods)
@@ -389,7 +389,7 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
                 allowsDelayedPaymentMethods = true,
             ),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         assertThat(result.customerPaymentMethods)
@@ -412,7 +412,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            currentIntentId = null,
+            pendingIntentId = null,
         ).exceptionOrNull()
 
         assertThat(result).isEqualTo(PaymentSheetLoadingException.PaymentIntentInTerminalState(Succeeded))
@@ -429,7 +429,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).exceptionOrNull()
 
         assertThat(result).isEqualTo(PaymentSheetLoadingException.InvalidConfirmationMethod(Manual))
@@ -449,7 +449,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     ephemeralKeySecret = "some_key"
                 )
             ),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         val expectedPaymentMethod = requireNotNull(PAYMENT_METHODS.first())
@@ -463,7 +463,7 @@ internal class DefaultPaymentSheetLoaderTest {
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedIn)
@@ -476,7 +476,7 @@ internal class DefaultPaymentSheetLoaderTest {
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
@@ -489,7 +489,7 @@ internal class DefaultPaymentSheetLoaderTest {
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
@@ -502,7 +502,7 @@ internal class DefaultPaymentSheetLoaderTest {
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedOut)
@@ -522,7 +522,7 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = mockConfiguration(
                 defaultBillingDetails = billingDetails,
             ),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         val expectedLinkConfig = LinkConfiguration(
@@ -555,7 +555,7 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = mockConfiguration(
                 shippingDetails = shippingDetails,
             ),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         assertThat(result.linkState?.configuration?.shippingValues).isNotNull()
@@ -574,7 +574,7 @@ internal class DefaultPaymentSheetLoaderTest {
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         assertThat(result.linkState?.configuration?.passthroughModeEnabled).isTrue()
@@ -598,7 +598,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 shippingDetails = shippingDetails,
                 defaultBillingDetails = billingDetails,
             ),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         assertThat(result.linkState?.configuration?.customerPhone)
@@ -623,7 +623,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     ephemeralKeySecret = "key"
                 ),
             ),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         assertThat(result.linkState?.configuration?.customerEmail)
@@ -648,7 +648,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     ephemeralKeySecret = "key",
                 ),
             ),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         val observedElements = result.customerPaymentMethods
@@ -668,7 +668,7 @@ internal class DefaultPaymentSheetLoaderTest {
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).exceptionOrNull()
 
         assertThat(result).isEqualTo(
@@ -686,7 +686,7 @@ internal class DefaultPaymentSheetLoaderTest {
         loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            currentIntentId = null,
+            pendingIntentId = null,
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = false)
@@ -707,7 +707,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 ),
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            currentIntentId = null,
+            pendingIntentId = null,
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = true)
@@ -722,7 +722,7 @@ internal class DefaultPaymentSheetLoaderTest {
         loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            currentIntentId = null,
+            pendingIntentId = null,
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = false)
@@ -748,7 +748,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 ),
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            currentIntentId = null,
+            pendingIntentId = null,
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = true)
@@ -777,7 +777,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 ),
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            currentIntentId = null,
+            pendingIntentId = null,
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = true)
@@ -800,7 +800,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 clientSecret = intent.clientSecret!!,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            currentIntentId = null,
+            pendingIntentId = null,
         )
 
         verify(eventReporter).onLoadStarted(isDecoupling = false)
@@ -819,7 +819,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         assertThat(result.isEligibleForCardBrandChoice).isFalse()
@@ -836,7 +836,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            currentIntentId = null,
+            pendingIntentId = null,
         ).getOrThrow()
 
         assertThat(result.isEligibleForCardBrandChoice).isTrue()

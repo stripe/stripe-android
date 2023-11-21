@@ -301,13 +301,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             paymentSheetLoader.load(
                 initializationMode = args.initializationMode,
                 paymentSheetConfiguration = args.config,
-                currentIntentId = recoveryState?.pendingIntentId,
+                pendingIntentId = recoveryState?.pendingIntentId,
             )
         }
 
         result.fold(
             onSuccess = { state ->
-                if (isRecoveringFromProcessDeath) {
+                if (state.stripeIntent.isConfirmed && isRecoveringFromProcessDeath) {
                     processPayment(state.stripeIntent, PaymentResult.Completed, skipAnimation = true)
                 } else {
                     handlePaymentSheetStateLoaded(state)
@@ -615,10 +615,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }
 
                 if (skipAnimation) {
-                    emitPaymentSheetResult(PaymentSheetResult.Completed)
+                    _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
                 } else {
                     viewState.value = PaymentSheetViewState.FinishProcessing {
-                        emitPaymentSheetResult(PaymentSheetResult.Completed)
+                        _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
                     }
                 }
             }
@@ -638,10 +638,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 resetViewState(userErrorMessage = null)
             }
         }
-    }
-
-    private fun emitPaymentSheetResult(result: PaymentSheetResult) {
-        _paymentSheetResult.tryEmit(result)
     }
 
     internal fun onGooglePayResult(result: GooglePayPaymentMethodLauncher.Result) {
@@ -681,16 +677,16 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onFatal(throwable: Throwable) {
         logger.error("Payment Sheet error", throwable)
         mostRecentError = throwable
-        emitPaymentSheetResult(PaymentSheetResult.Failed(throwable))
+        _paymentSheetResult.tryEmit(PaymentSheetResult.Failed(throwable))
     }
 
     override fun onUserCancel() {
         reportDismiss(isDecoupling)
-        emitPaymentSheetResult(PaymentSheetResult.Canceled)
+        _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
     }
 
     override fun onFinish() {
-        emitPaymentSheetResult(PaymentSheetResult.Completed)
+        _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
     }
 
     override fun onError(@IntegerRes error: Int?) =

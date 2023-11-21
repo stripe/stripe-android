@@ -44,7 +44,7 @@ internal interface PaymentSheetLoader {
     suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration,
-        currentIntentId: String?,
+        pendingIntentId: String?,
     ): Result<PaymentSheetState.Full>
 }
 
@@ -64,7 +64,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration,
-        currentIntentId: String?,
+        pendingIntentId: String?,
     ): Result<PaymentSheetState.Full> = withContext(workContext) {
         val isDecoupling = initializationMode is DeferredIntent
 
@@ -73,7 +73,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val elementsSessionResult = retrieveElementsSession(
             initializationMode = initializationMode,
             configuration = paymentSheetConfiguration,
-            currentIntentId = currentIntentId,
+            pendingIntentId = pendingIntentId,
         )
 
         reportLoadResult(elementsSessionResult, isDecoupling)
@@ -231,7 +231,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration,
-        currentIntentId: String?,
+        pendingIntentId: String?,
     ): Result<ElementsSession> {
         return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
             val billingDetailsCollectionConfig =
@@ -253,7 +253,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             // If we're fetching the session for the current intent ID, it suggests that
             // the process was killed while we were processing the payment. We allow success state
             // in this case and immediately close PaymentSheet with a Completed result.
-            val allowSuccessState = elementsSession.stripeIntent.id == currentIntentId
+            val allowSuccessState = elementsSession.stripeIntent.id == pendingIntentId
             elementsSession.requireValidOrThrow(allowSuccessState)
         }
     }
