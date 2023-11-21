@@ -27,9 +27,8 @@ class CustomerSheetConfigurationTest {
         val headerTextForSelectionScreen = "Test"
         val preferredNetworks = listOf(CardBrand.AmericanExpress)
 
-        val configuration = CustomerSheet.Configuration.builder()
+        val configuration = CustomerSheet.Configuration.builder(merchantDisplayName)
             .googlePayEnabled(googlePayEnabled)
-            .merchantDisplayName(merchantDisplayName)
             .appearance(appearance)
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
             .defaultBillingDetails(defaultBillingDetails)
@@ -54,7 +53,7 @@ class CustomerSheetConfigurationTest {
 
     @Test
     fun `newBuilder returns a new builder with previous configuration`() {
-        val configuration = CustomerSheet.Configuration.builder()
+        val configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Example")
             .googlePayEnabled(true)
             .build()
 

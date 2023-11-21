@@ -121,8 +121,9 @@ internal sealed class CustomerSheetViewState(
         val editPaymentMethodInteractor: ModifiableEditPaymentMethodViewInteractor,
         override val isLiveMode: Boolean,
         override val cbcEligibility: CardBrandChoiceEligibility,
+        override val savedPaymentMethods: List<PaymentMethod>,
     ) : CustomerSheetViewState(
-        savedPaymentMethods = emptyList(),
+        savedPaymentMethods = savedPaymentMethods,
         isLiveMode = isLiveMode,
         isProcessing = false,
         isEditing = false,

@@ -172,7 +172,7 @@ internal class PlaygroundTestDriver(
         values: FieldPopulator.Values = FieldPopulator.Values(),
         populateCustomLpmFields: () -> Unit = {},
         verifyCustomLpmFields: () -> Unit = {},
-    ) {
+    ): PlaygroundState? {
         setup(
             testParameters.copyPlaygroundSettings { settings ->
                 settings[IntegrationTypeSettingsDefinition] = IntegrationType.FlowController
@@ -196,6 +196,8 @@ internal class PlaygroundTestDriver(
         )
         fieldPopulator.populateFields()
 
+        val result = playgroundState
+
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
@@ -209,6 +211,58 @@ internal class PlaygroundTestDriver(
         fieldPopulator.verifyFields()
 
         teardown()
+
+        return result
+    }
+
+    fun confirmCustomAndBuy(
+        testParameters: TestParameters,
+        values: FieldPopulator.Values = FieldPopulator.Values(),
+        populateCustomLpmFields: () -> Unit = {},
+        verifyCustomLpmFields: () -> Unit = {},
+        customerId: String? = null
+    ): PlaygroundState? {
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings[IntegrationTypeSettingsDefinition] = IntegrationType.FlowController
+
+                customerId?.let { id ->
+                    settings[CustomerSettingsDefinition] = CustomerType.Existing(id)
+                }
+            }
+        )
+        launchCustom()
+
+        if (isSelectPaymentMethodScreen()) {
+            // When Link is enabled we get the select screen, but we want to go to the add screen
+            // and click the payment method.
+            addPaymentMethodNode().performClick()
+        }
+        selectors.paymentSelection.click()
+
+        val fieldPopulator = FieldPopulator(
+            selectors,
+            testParameters,
+            populateCustomLpmFields,
+            verifyCustomLpmFields,
+            values,
+        )
+        fieldPopulator.populateFields()
+
+        val result = playgroundState
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        pressContinue()
+
+        selectors.playgroundBuyButton.click()
+
+        doAuthorization()
+
+        teardown()
+
+        return result
     }
 
     fun confirmCustomWithDefaultSavedPaymentMethod(

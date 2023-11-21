@@ -381,11 +381,13 @@ internal class CustomerSheetScreenshotTest {
         val editPaymentMethod = CustomerSheetViewState.EditPaymentMethod(
             editPaymentMethodInteractor = DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = paymentMethod,
-                removeExecutor = { true },
+                displayName = "Card",
+                removeExecutor = { null },
                 updateExecutor = { pm, _ -> Result.success(pm) },
             ),
             isLiveMode = true,
             cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
+            savedPaymentMethods = emptyList(),
         )
 
         paparazzi.snapshot {

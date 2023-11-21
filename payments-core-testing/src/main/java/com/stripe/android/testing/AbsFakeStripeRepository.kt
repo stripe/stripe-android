@@ -127,6 +127,7 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     }
 
     override suspend fun updatePaymentMethod(
+        paymentMethodId: String,
         paymentMethodUpdateParams: PaymentMethodUpdateParams,
         options: ApiRequest.Options
     ): Result<PaymentMethod> {

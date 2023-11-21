@@ -282,7 +282,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     private fun processExistingPaymentMethod(paymentSelection: PaymentSelection) {
-        prefsRepository.savePaymentSelection(paymentSelection)
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,
@@ -292,7 +291,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     private fun processNewPaymentMethod(paymentSelection: PaymentSelection) {
-        prefsRepository.savePaymentSelection(paymentSelection)
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,

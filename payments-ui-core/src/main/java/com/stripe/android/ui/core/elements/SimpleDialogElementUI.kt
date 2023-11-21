@@ -15,7 +15,7 @@ import com.stripe.android.uicore.elements.H6Text
 fun SimpleDialogElementUI(
     openDialog: Boolean,
     titleText: String,
-    messageText: String,
+    messageText: String?,
     confirmText: String,
     dismissText: String,
     destructive: Boolean = false,
@@ -31,8 +31,10 @@ fun SimpleDialogElementUI(
                 title = {
                     H4Text(text = titleText)
                 },
-                text = {
-                    H6Text(text = messageText)
+                text = messageText?.let {
+                    {
+                        H6Text(text = it)
+                    }
                 },
                 confirmButton = {
                     TextButton(

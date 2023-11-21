@@ -121,6 +121,7 @@ interface StripeRepository {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun updatePaymentMethod(
+        paymentMethodId: String,
         paymentMethodUpdateParams: PaymentMethodUpdateParams,
         options: ApiRequest.Options
     ): Result<PaymentMethod>

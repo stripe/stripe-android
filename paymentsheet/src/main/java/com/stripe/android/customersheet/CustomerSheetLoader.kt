@@ -131,8 +131,11 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
                     isFinancialConnectionsAvailable,
                 )
 
-                val isCbcEligible = (elementsSession?.isEligibleForCardBrandChoice ?: false) &&
-                    FeatureFlags.cardBrandChoice.isEnabled
+                val isCbcEligible = if (FeatureFlags.cardBrandChoice.isEnabled) {
+                    true
+                } else {
+                    (elementsSession?.isEligibleForCardBrandChoice ?: false) && FeatureFlags.cardBrandChoice.isEnabled
+                }
 
                 Result.success(
                     CustomerSheetState.Full(

@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -468,6 +469,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         bankName: String,
         linkAccountId: String,
     ): PaymentSelection.New.USBankAccount {
+        val customerRequestedSave = customerRequestedSave(
+            showCheckbox = args.formArgs.showCheckbox,
+            saveForFutureUse = saveForFutureUse.value
+        )
         return PaymentSelection.New.USBankAccount(
             labelResource = application.getString(
                 R.string.stripe_paymentsheet_payment_method_item_card_number,
@@ -487,16 +492,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     address = address.value,
                 )
             ),
-            paymentMethodOptionsParams = null,
-            customerRequestedSave = if (args.formArgs.showCheckbox) {
-                if (saveForFutureUse.value) {
-                    PaymentSelection.CustomerRequestedSave.RequestReuse
-                } else {
-                    PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                }
-            } else {
-                PaymentSelection.CustomerRequestedSave.NoRequest
-            },
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.USBankAccount(
+                setupFutureUsage = customerRequestedSave.setupFutureUsage
+            ),
+            customerRequestedSave = customerRequestedSave,
             screenState = currentScreenState.value,
             input = PaymentSelection.New.USBankAccount.Input(
                 name = name.value,
@@ -596,3 +595,18 @@ internal fun PaymentSheet.Address.asAddressModel() =
         country = country,
         postalCode = postalCode,
     )
+
+internal fun customerRequestedSave(
+    showCheckbox: Boolean,
+    saveForFutureUse: Boolean
+): PaymentSelection.CustomerRequestedSave {
+    return if (showCheckbox) {
+        if (saveForFutureUse) {
+            PaymentSelection.CustomerRequestedSave.RequestReuse
+        } else {
+            PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        }
+    } else {
+        PaymentSelection.CustomerRequestedSave.NoRequest
+    }
+}
