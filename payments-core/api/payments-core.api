@@ -4618,9 +4618,6 @@ public abstract class com/stripe/android/model/PaymentMethodUpdateParams : andro
 	public static final fun createCard (Ljava/lang/Integer;Ljava/lang/Integer;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
 	public static final fun createCard (Ljava/lang/Integer;Ljava/lang/Integer;Lcom/stripe/android/model/PaymentMethodUpdateParams$Card$Networks;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
 	public static final fun createCard (Ljava/lang/Integer;Ljava/lang/Integer;Lcom/stripe/android/model/PaymentMethodUpdateParams$Card$Networks;Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
-	public static final fun createUSBankAccount ()Lcom/stripe/android/model/PaymentMethodUpdateParams;
-	public static final fun createUSBankAccount (Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankAccountHolderType;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
-	public static final fun createUSBankAccount (Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankAccountHolderType;Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
 	public fun toParamMap ()Ljava/util/Map;
 }
 
@@ -4675,28 +4672,6 @@ public final class com/stripe/android/model/PaymentMethodUpdateParams$Companion 
 	public final fun createCard (Ljava/lang/Integer;Ljava/lang/Integer;Lcom/stripe/android/model/PaymentMethodUpdateParams$Card$Networks;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
 	public final fun createCard (Ljava/lang/Integer;Ljava/lang/Integer;Lcom/stripe/android/model/PaymentMethodUpdateParams$Card$Networks;Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
 	public static synthetic fun createCard$default (Lcom/stripe/android/model/PaymentMethodUpdateParams$Companion;Ljava/lang/Integer;Ljava/lang/Integer;Lcom/stripe/android/model/PaymentMethodUpdateParams$Card$Networks;Lcom/stripe/android/model/PaymentMethod$BillingDetails;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
-	public final fun createUSBankAccount ()Lcom/stripe/android/model/PaymentMethodUpdateParams;
-	public final fun createUSBankAccount (Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankAccountHolderType;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
-	public final fun createUSBankAccount (Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankAccountHolderType;Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
-	public static synthetic fun createUSBankAccount$default (Lcom/stripe/android/model/PaymentMethodUpdateParams$Companion;Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankAccountHolderType;Lcom/stripe/android/model/PaymentMethod$BillingDetails;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
-}
-
-public final class com/stripe/android/model/PaymentMethodUpdateParams$USBankAccount : com/stripe/android/model/PaymentMethodUpdateParams {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/model/PaymentMethodUpdateParams$USBankAccount$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethodUpdateParams$USBankAccount;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/model/PaymentMethodUpdateParams$USBankAccount;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/model/PaymentMethodsList$Creator : android/os/Parcelable$Creator {

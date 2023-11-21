@@ -105,44 +105,6 @@ sealed class PaymentMethodUpdateParams(
         }
     }
 
-    @Parcelize
-    class USBankAccount internal constructor(
-        internal val accountHolderType: PaymentMethod.USBankAccount.USBankAccountHolderType?,
-        override val billingDetails: PaymentMethod.BillingDetails?,
-    ) : PaymentMethodUpdateParams(PaymentMethod.Type.USBankAccount) {
-
-        override fun generateTypeParams(): Map<String, Any> {
-            return listOf(
-                PARAM_ACCOUNT_HOLDER_TYPE to accountHolderType,
-            ).mapNotNull {
-                it.second?.let { value ->
-                    it.first to value
-                }
-            }.toMap()
-        }
-
-        override fun equals(other: Any?): Boolean {
-            return other is USBankAccount &&
-                other.accountHolderType == accountHolderType &&
-                other.billingDetails == billingDetails
-        }
-
-        override fun hashCode(): Int {
-            return Objects.hash(accountHolderType, billingDetails)
-        }
-
-        override fun toString(): String {
-            return "PaymentMethodCreateParams.Card.(" +
-                "accountHolderType=$accountHolderType, " +
-                "billingDetails=$billingDetails" +
-                ")"
-        }
-
-        private companion object {
-            private const val PARAM_ACCOUNT_HOLDER_TYPE: String = "account_holder_type"
-        }
-    }
-
     companion object {
 
         private const val PARAM_BILLING_DETAILS = "billing_details"
@@ -156,15 +118,6 @@ sealed class PaymentMethodUpdateParams(
             billingDetails: PaymentMethod.BillingDetails? = null,
         ): PaymentMethodUpdateParams {
             return Card(expiryMonth, expiryYear, networks, billingDetails)
-        }
-
-        @JvmStatic
-        @JvmOverloads
-        fun createUSBankAccount(
-            accountHolderType: PaymentMethod.USBankAccount.USBankAccountHolderType? = null,
-            billingDetails: PaymentMethod.BillingDetails? = null,
-        ): PaymentMethodUpdateParams {
-            return USBankAccount(accountHolderType, billingDetails)
         }
     }
 }
