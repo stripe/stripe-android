@@ -149,7 +149,6 @@ private fun ModalBottomSheetContent(
         inModal = true,
         body = {
             item {
-
                 icon?.default?.let {
                     Spacer(modifier = Modifier.size(24.dp))
                     Box(
