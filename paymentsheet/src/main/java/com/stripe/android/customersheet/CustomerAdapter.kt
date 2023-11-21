@@ -3,6 +3,7 @@ package com.stripe.android.customersheet
 import android.content.Context
 import com.stripe.android.customersheet.injection.DaggerStripeCustomerAdapterComponent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 
@@ -48,6 +49,15 @@ interface CustomerAdapter {
      * @return the modified [PaymentMethod].
      */
     suspend fun detachPaymentMethod(paymentMethodId: String): Result<PaymentMethod>
+
+    /**
+     * Updates a payment method with the provided [PaymentMethodUpdateParams].
+     *
+     * @param paymentMethodId The payment method to update
+     * @param paymentMethodUpdateParams The [PaymentMethodUpdateParams]
+     * @return The updated [PaymentMethod]
+     */
+    suspend fun updatePaymentMethod(paymentMethodId: String, params: PaymentMethodUpdateParams): Result<PaymentMethod>
 
     /**
      * Saves the payment option to a data store.
