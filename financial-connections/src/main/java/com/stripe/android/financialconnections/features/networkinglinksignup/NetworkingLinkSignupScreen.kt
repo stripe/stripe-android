@@ -32,8 +32,8 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.common.BulletItem
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
+import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
@@ -155,7 +155,7 @@ private fun NetworkingLinkSignupLoaded(
             Title(payload.content.title)
             Spacer(modifier = Modifier.size(8.dp))
             payload.content.body.bullets.forEach {
-                BulletItem(
+                ListItem(
                     bullet = BulletUI.from(it),
                     onClickableTextClick = onClickableTextClick
                 )

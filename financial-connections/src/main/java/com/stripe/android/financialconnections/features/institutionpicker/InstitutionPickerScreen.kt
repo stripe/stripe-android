@@ -544,14 +544,13 @@ private fun FeaturedInstitutionsGrid(
 }
 
 @Composable
-private fun BoxScope.FeaturedInstitutionLoading() {
+private fun FeaturedInstitutionLoading() {
     LoadingShimmerEffect { shimmer ->
         Spacer(
-            modifier = Modifier.Companion
-                .align(Alignment.Center)
-                .height(20.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .fillMaxWidth(fraction = 0.5f)
                 .background(shimmer)
         )
     }
@@ -560,7 +559,8 @@ private fun BoxScope.FeaturedInstitutionLoading() {
 @Composable
 private fun BoxScope.FeaturedInstitutionPlaceholder(institution: FinancialConnectionsInstitution) {
     Text(
-        modifier = Modifier.Companion.align(Alignment.Center),
+        modifier = Modifier
+            .align(Alignment.Center),
         text = institution.name,
         color = FinancialConnectionsTheme.colors.textPrimary,
         style = FinancialConnectionsTheme.typography.bodyEmphasized,
