@@ -5,7 +5,6 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
@@ -160,7 +159,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
     }
 
     fun onInstitutionSelected(institution: FinancialConnectionsInstitution, fromFeatured: Boolean) {
-        clearSearch()
         suspend {
             delay(2000)
             eventTracker.track(
@@ -187,19 +185,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
             copy(
                 selectedInstitutionId = institution.id.takeIf { async is Loading },
                 selectInstitution = async
-            )
-        }
-    }
-
-    private fun clearSearch() {
-        setState {
-            copy(
-                searchInstitutions = Success(
-                    InstitutionResponse(
-                        data = emptyList(),
-                        showManualEntry = false
-                    )
-                ),
             )
         }
     }

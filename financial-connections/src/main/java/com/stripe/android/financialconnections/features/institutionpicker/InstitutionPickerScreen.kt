@@ -239,7 +239,10 @@ private fun LoadedContent(
                     )
                     if (institutions().showManualEntry == true) {
                         item {
-                            ManualEntryRow(onManualEntryClick)
+                            ManualEntryRow(
+                                enabled = selectedInstitutionId != null,
+                                onManualEntryClick = onManualEntryClick
+                            )
                         }
                     }
                 }
@@ -344,12 +347,18 @@ private fun SearchRow(
 }
 
 @Composable
-private fun ManualEntryRow(onManualEntryClick: () -> Unit) {
+private fun ManualEntryRow(enabled: Boolean, onManualEntryClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxSize()
-            .clickable(onClick = onManualEntryClick)
+            .clickable(
+                enabled = enabled,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onManualEntryClick
+            )
+            .alpha(if (enabled) 1f else 0.3f)
             .padding(vertical = 8.dp)
     ) {
         Icon(
