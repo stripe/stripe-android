@@ -19,4 +19,9 @@ sealed class Request {
     data class CreateParams(
         @field:Json(name = "payment_method_types") val paymentMethodTypes: List<String>,
     )
+
+    data class CreateEphemeralKeyParams(
+        @field:Json(name = "customer_id") val customerId: String,
+        @field:Json(name = "account") val account: String,
+    )
 }

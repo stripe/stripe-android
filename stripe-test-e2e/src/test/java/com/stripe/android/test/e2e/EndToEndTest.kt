@@ -6,9 +6,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
+import com.stripe.android.attachPaymentMethod
 import com.stripe.android.confirmPaymentIntent
 import com.stripe.android.confirmSetupIntent
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.createPaymentMethod
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -17,8 +19,10 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.updatePaymentMethod
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -551,6 +555,53 @@ internal class EndToEndTest {
         }
         assertThat(verifiedSetupIntent.status)
             .isEqualTo(StripeIntent.Status.Succeeded)
+    }
+
+    @Test
+    fun `Test update payment method`() = runTest {
+        val stripe = Stripe(context, settings.publishableKey)
+        val customerId = "cus_LvNOzX6BFQtXb5"
+
+        val card = PaymentMethodCreateParams.Card.Builder()
+            .setNumber("4000002500001001")
+            .setExpiryMonth(1)
+            .setExpiryYear(2028)
+            .setCvc("123")
+            .build()
+
+        val paymentMethod = stripe.createPaymentMethod(
+            paymentMethodCreateParams = PaymentMethodCreateParams.create(card),
+        )
+
+        val ephemeralKeySecret = service.createEphemeralKey(
+            request = Request.CreateEphemeralKeyParams(
+                customerId = customerId,
+                account = "fr",
+            )
+        ).ephemeralKeySecret
+
+        val attachResult = stripe.attachPaymentMethod(
+            paymentMethodId = paymentMethod.id!!,
+            customerId = customerId,
+            ephemeralKeySecret = ephemeralKeySecret,
+        )
+        assertThat(attachResult.isSuccess).isTrue()
+
+        val updateParams = PaymentMethodUpdateParams.createCard(
+            expiryMonth = 2,
+            networks = PaymentMethodUpdateParams.Card.Networks(
+                preferred = "visa",
+            ),
+        )
+
+        val updatedPaymentMethod = stripe.updatePaymentMethod(
+            paymentMethodId = paymentMethod.id!!,
+            paymentMethodUpdateParams = updateParams,
+            ephemeralKeySecret = ephemeralKeySecret,
+        )
+
+        assertThat(updatedPaymentMethod.card?.expiryMonth).isEqualTo(2)
+        assertThat(updatedPaymentMethod.card?.networks?.preferred).isEqualTo("visa")
     }
 
     private companion object {
