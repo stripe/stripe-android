@@ -54,10 +54,13 @@ interface CustomerAdapter {
      * Updates a payment method with the provided [PaymentMethodUpdateParams].
      *
      * @param paymentMethodId The payment method to update
-     * @param paymentMethodUpdateParams The [PaymentMethodUpdateParams]
+     * @param params The [PaymentMethodUpdateParams]
      * @return The updated [PaymentMethod]
      */
-    suspend fun updatePaymentMethod(paymentMethodId: String, params: PaymentMethodUpdateParams): Result<PaymentMethod>
+    suspend fun updatePaymentMethod(
+        paymentMethodId: String,
+        params: PaymentMethodUpdateParams,
+    ): Result<PaymentMethod>
 
     /**
      * Saves the payment option to a data store.
