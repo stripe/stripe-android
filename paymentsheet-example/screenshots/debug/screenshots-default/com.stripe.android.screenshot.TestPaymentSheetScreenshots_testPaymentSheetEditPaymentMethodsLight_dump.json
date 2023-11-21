@@ -1,0 +1,204 @@
+{
+  "viewHierarchy": {
+    "class": "com.android.internal.policy.DecorView",
+    "left": 0,
+    "top": 0,
+    "width": 1440,
+    "height": 2560,
+    "children": [
+      {
+        "class": "android.widget.LinearLayout",
+        "left": 0,
+        "top": 0,
+        "width": 1440,
+        "height": 2392,
+        "children": [
+          {
+            "class": "android.view.ViewStub",
+            "left": 0,
+            "top": 0,
+            "width": 0,
+            "height": 0
+          },
+          {
+            "class": "android.widget.FrameLayout",
+            "left": 0,
+            "top": 84,
+            "width": 1440,
+            "height": 2308,
+            "children": [
+              {
+                "class": "androidx.appcompat.widget.FitWindowsLinearLayout",
+                "left": 0,
+                "top": 84,
+                "width": 1440,
+                "height": 2308,
+                "children": [
+                  {
+                    "class": "androidx.appcompat.widget.ViewStubCompat",
+                    "left": 0,
+                    "top": 84,
+                    "width": 0,
+                    "height": 0
+                  },
+                  {
+                    "class": "androidx.appcompat.widget.ContentFrameLayout",
+                    "left": 0,
+                    "top": 84,
+                    "width": 1440,
+                    "height": 2308,
+                    "children": [
+                      {
+                        "class": "androidx.compose.ui.platform.ComposeView",
+                        "left": 0,
+                        "top": 84,
+                        "width": 1440,
+                        "height": 2308,
+                        "children": [
+                          {
+                            "class": "androidx.compose.ui.platform.AndroidComposeView",
+                            "left": 0,
+                            "top": 84,
+                            "width": 1440,
+                            "height": 2308,
+                            "children": [
+                              {
+                                "class": "androidx.compose.material.ripple.RippleContainer",
+                                "left": 0,
+                                "top": 84,
+                                "width": 0,
+                                "height": 0,
+                                "children": [
+                                  {
+                                    "class": "androidx.compose.material.ripple.RippleHostView",
+                                    "left": 0,
+                                    "top": 84,
+                                    "width": 119,
+                                    "height": 62
+                                  }
+                                ]
+                              },
+                              {
+                                "class": "androidx.compose.ui.platform.AndroidViewsHandler",
+                                "left": 0,
+                                "top": 84,
+                                "width": 1440,
+                                "height": 2308,
+                                "children": [
+                                  {
+                                    "class": "androidx.compose.ui.viewinterop.ViewFactoryHolder",
+                                    "left": 0,
+                                    "top": 2070,
+                                    "width": 1440,
+                                    "height": 203,
+                                    "children": [
+                                      {
+                                        "class": "androidx.fragment.app.FragmentContainerView",
+                                        "left": 0,
+                                        "top": 2070,
+                                        "width": 1440,
+                                        "height": 203,
+                                        "children": [
+                                          {
+                                            "class": "android.widget.FrameLayout",
+                                            "left": 0,
+                                            "top": 2070,
+                                            "width": 1440,
+                                            "height": 203,
+                                            "children": [
+                                              {
+                                                "class": "com.stripe.android.paymentsheet.ui.PrimaryButton",
+                                                "left": 70,
+                                                "top": 2105,
+                                                "width": 1300,
+                                                "height": 168,
+                                                "children": [
+                                                  {
+                                                    "class": "androidx.compose.ui.platform.ComposeView",
+                                                    "left": 84,
+                                                    "top": 2135,
+                                                    "width": 1272,
+                                                    "height": 108,
+                                                    "children": [
+                                                      {
+                                                        "class": "androidx.compose.ui.platform.AndroidComposeView",
+                                                        "left": 84,
+                                                        "top": 2135,
+                                                        "width": 1272,
+                                                        "height": 108,
+                                                        "children": [
+                                                          {
+                                                            "class": "androidx.compose.ui.platform.ViewLayerContainer",
+                                                            "left": 84,
+                                                            "top": 2135,
+                                                            "width": 0,
+                                                            "height": 0,
+                                                            "children": []
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "class": "androidx.appcompat.widget.AppCompatImageView",
+                                                    "left": 1293,
+                                                    "top": 2168,
+                                                    "width": 35,
+                                                    "height": 42
+                                                  },
+                                                  {
+                                                    "class": "com.google.android.material.progressindicator.CircularProgressIndicator",
+                                                    "left": 70,
+                                                    "top": 2105,
+                                                    "width": 0,
+                                                    "height": 0
+                                                  },
+                                                  {
+                                                    "class": "androidx.appcompat.widget.AppCompatImageView",
+                                                    "left": 1258,
+                                                    "top": 2154,
+                                                    "width": 70,
+                                                    "height": 70
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "class": "androidx.compose.ui.platform.ViewLayerContainer",
+                                "left": 0,
+                                "top": 84,
+                                "width": 0,
+                                "height": 0,
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "class": "android.view.View",
+        "left": 0,
+        "top": 0,
+        "width": 1440,
+        "height": 84
+      }
+    ]
+  },
+  "version": 1,
+  "axHierarchy": {}
+}
