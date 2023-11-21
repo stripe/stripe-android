@@ -188,10 +188,13 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `modifyPaymentMethod updates payment methods on successful update`() = runTest {
-        val paymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
-        val updatedPaymentMethod = paymentMethod.copy(
-            card = paymentMethod.card?.copy(
-                networks = paymentMethod.card?.networks?.copy(
+        val paymentMethods = PaymentMethodFixtures.createCards(5)
+
+        val firstPaymentMethod = paymentMethods.first()
+
+        val updatedPaymentMethod = firstPaymentMethod.copy(
+            card = firstPaymentMethod.card?.copy(
+                networks = firstPaymentMethod.card?.networks?.copy(
                     preferred = CardBrand.Visa.code
                 )
             )
@@ -205,14 +208,14 @@ internal class PaymentSheetViewModelTest {
             )
         )
         val viewModel = createViewModel(
-            customerPaymentMethods = listOf(paymentMethod),
+            customerPaymentMethods = paymentMethods,
             customerRepository = customerRepository
         )
 
         viewModel.currentScreen.test {
             awaitItem()
 
-            viewModel.modifyPaymentMethod(paymentMethod)
+            viewModel.modifyPaymentMethod(firstPaymentMethod)
 
             val currentScreen = awaitItem()
 
@@ -242,7 +245,7 @@ internal class PaymentSheetViewModelTest {
             paramsCaptor.capture()
         )
 
-        assertThat(idCaptor.firstValue).isEqualTo(paymentMethod.id!!)
+        assertThat(idCaptor.firstValue).isEqualTo(firstPaymentMethod.id!!)
 
         assertThat(
             paramsCaptor.firstValue.toParamMap()
@@ -254,7 +257,9 @@ internal class PaymentSheetViewModelTest {
             ).toParamMap()
         )
 
-        assertThat(viewModel.paymentMethods.value).contains(updatedPaymentMethod)
+        assertThat(viewModel.paymentMethods.value).isEqualTo(
+            listOf(updatedPaymentMethod) + paymentMethods.takeLast(4)
+        )
     }
 
     @Test
