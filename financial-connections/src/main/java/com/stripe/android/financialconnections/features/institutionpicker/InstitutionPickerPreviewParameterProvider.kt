@@ -19,7 +19,8 @@ internal class InstitutionPickerPreviewParameterProvider :
         searchModeNoResultsNoManualEntry(),
         searchModeFailed(),
         searchModeFailedNoManualEntry(),
-        noSearchMode()
+        noSearchMode(),
+        noSearchModeSelectedInstitution()
     )
 
     private fun initialLoading() = InstitutionPickerState(
@@ -95,6 +96,15 @@ internal class InstitutionPickerPreviewParameterProvider :
         searchMode = false,
     )
 
+    private fun noSearchModeSelectedInstitution() = InstitutionPickerState(
+        previewText = "Some query",
+        payload = Success(payload()),
+        searchInstitutions = Success(institutionResponse()),
+        selectedInstitutionId = "2",
+        selectInstitution = Loading(),
+        searchMode = false,
+    )
+
     private fun payload(manualEntry: Boolean = true) = InstitutionPickerState.Payload(
         featuredInstitutions = institutionResponse().copy(showManualEntry = manualEntry),
         searchDisabled = false,
@@ -106,7 +116,7 @@ internal class InstitutionPickerPreviewParameterProvider :
         listOf(
             FinancialConnectionsInstitution(
                 id = "1",
-                name = "Very very long institution 1",
+                name = "Very very long institution content does not fit - 1",
                 url = "institution 1 url",
                 featured = false,
                 featuredOrder = null,

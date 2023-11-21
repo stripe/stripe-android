@@ -162,6 +162,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     fun onInstitutionSelected(institution: FinancialConnectionsInstitution, fromFeatured: Boolean) {
         clearSearch()
         suspend {
+            delay(2000)
             eventTracker.track(
                 InstitutionSelected(
                     pane = Pane.INSTITUTION_PICKER,
@@ -182,7 +183,12 @@ internal class InstitutionPickerViewModel @Inject constructor(
             }
             // navigate to next step
             navigationManager.tryNavigateTo(PartnerAuth(referrer = Pane.INSTITUTION_PICKER))
-        }.execute { this }
+        }.execute { async ->
+            copy(
+                selectedInstitutionId = institution.id.takeIf { async is Loading },
+                selectInstitution = async
+            )
+        }
     }
 
     fun onCancelSearchClick() {
@@ -250,6 +256,7 @@ internal data class InstitutionPickerState(
     // This is just used to provide a text in Compose previews
     val previewText: String? = null,
     val searchMode: Boolean = false,
+    val selectedInstitutionId: String? = null,
     val payload: Async<Payload> = Uninitialized,
     val searchInstitutions: Async<InstitutionResponse> = Uninitialized,
     val selectInstitution: Async<Unit> = Uninitialized

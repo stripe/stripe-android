@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
@@ -62,6 +63,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
+import com.stripe.android.financialconnections.features.common.V3LoadingSpinner
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -103,6 +105,7 @@ internal fun InstitutionPickerScreen() {
         searchMode = state.searchMode,
         // This is just used to provide a text in Compose previews
         previewText = state.previewText,
+        selectedInstitutionId = state.selectedInstitutionId,
         onQueryChanged = viewModel::onQueryChanged,
         onInstitutionSelected = viewModel::onInstitutionSelected,
         onCancelSearchClick = viewModel::onCancelSearchClick,
@@ -119,6 +122,7 @@ private fun InstitutionPickerContent(
     institutions: Async<InstitutionResponse>,
     searchMode: Boolean,
     previewText: String?,
+    selectedInstitutionId: String?,
     onQueryChanged: (String) -> Unit,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     onCancelSearchClick: () -> Unit,
@@ -141,6 +145,7 @@ private fun InstitutionPickerContent(
             is Success -> LoadedContent(
                 searchMode = searchMode,
                 previewText = previewText,
+                selectedInstitutionId = selectedInstitutionId,
                 onQueryChanged = onQueryChanged,
                 onSearchFocused = onSearchFocused,
                 onCancelSearchClick = onCancelSearchClick,
@@ -159,6 +164,7 @@ private fun InstitutionPickerContent(
 private fun LoadedContent(
     searchMode: Boolean,
     previewText: String?,
+    selectedInstitutionId: String?,
     onQueryChanged: (String) -> Unit,
     onSearchFocused: () -> Unit,
     onCancelSearchClick: () -> Unit,
@@ -212,9 +218,12 @@ private fun LoadedContent(
                     key = { _, institution -> institution.id },
                     itemContent = { index, institution ->
                         InstitutionResultTile(
+                            loading = selectedInstitutionId == institution.id,
+                            enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
                             institution = institution,
-                            index = index
-                        ) { onInstitutionSelected(it, false) }
+                            index = index,
+                            onInstitutionSelected = { onInstitutionSelected(it, true) }
+                        )
                     }
                 )
             } else when (institutions) {
@@ -245,9 +254,12 @@ private fun LoadedContent(
                         key = { _, institution -> institution.id },
                         itemContent = { index, institution ->
                             InstitutionResultTile(
+                                loading = selectedInstitutionId == institution.id,
+                                enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
                                 institution = institution,
-                                index = index
-                            ) { onInstitutionSelected(it, false) }
+                                index = index,
+                                onInstitutionSelected = { onInstitutionSelected(it, false) }
+                            )
                         }
                     )
                     if (institutions().showManualEntry == true) {
@@ -402,6 +414,8 @@ private fun ManualEntryRow(onManualEntryClick: () -> Unit) {
 @Composable
 private fun InstitutionResultTile(
     institution: FinancialConnectionsInstitution,
+    loading: Boolean = false,
+    enabled: Boolean = true,
     index: Int,
     onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit
 ) {
@@ -412,9 +426,8 @@ private fun InstitutionResultTile(
             .semantics { testTagsAsResourceId = true }
             .testTag("search_result_$index")
             .clickableSingle { onInstitutionSelected(institution) }
-            .padding(
-                vertical = 8.dp
-            )
+            .alpha(if (enabled) 1f else 0.3f)
+            .padding(vertical = 8.dp)
     ) {
         val modifier = Modifier
             .size(56.dp)
@@ -434,19 +447,28 @@ private fun InstitutionResultTile(
             )
         }
         Spacer(modifier = Modifier.size(8.dp))
-        Column {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
             Text(
                 text = institution.name,
-                color = colors.textPrimary,
-                style = FinancialConnectionsTheme.typography.bodyEmphasized
+                maxLines = 1,
+                color = v3Colors.textDefault,
+                style = v3Typography.labelLargeEmphasized,
+                overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = institution.url ?: "",
-                color = colors.textDisabled,
-                style = FinancialConnectionsTheme.typography.captionTight,
+                color = v3Colors.textSubdued,
+                style = v3Typography.labelMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+        }
+        // add a trailing icon if this is the manual entry row
+        if (loading) {
+            Spacer(modifier = Modifier.size(8.dp))
+            V3LoadingSpinner(modifier = Modifier.size(24.dp))
         }
     }
 }
@@ -499,13 +521,13 @@ internal fun InstitutionPickerPreview(
             institutions = state.searchInstitutions,
             searchMode = state.searchMode,
             previewText = state.previewText,
+            selectedInstitutionId = state.selectedInstitutionId,
             onQueryChanged = {},
             onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {},
             onManualEntryClick = {},
-            onScrollChanged = {},
-        )
+        ) {}
     }
 }
