@@ -3,8 +3,6 @@ package com.stripe.android
 import android.app.Application
 import androidx.annotation.IntRange
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -22,6 +20,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 internal class PaymentSessionViewModel(
     application: Application,
@@ -70,40 +70,40 @@ internal class PaymentSessionViewModel(
     }
 
     @JvmSynthetic
-    fun fetchCustomer(isInitialFetch: Boolean = false): LiveData<FetchCustomerResult> {
-        _networkState.value = NetworkState.Active
+    suspend fun fetchCustomer(isInitialFetch: Boolean = false): FetchCustomerResult =
+        suspendCoroutine { continuation ->
+            _networkState.value = NetworkState.Active
 
-        val resultData: MutableLiveData<FetchCustomerResult> = MutableLiveData()
-        customerSession.retrieveCurrentCustomer(
-            productUsage = setOf(PaymentSession.PRODUCT_TOKEN),
-            listener = object : CustomerSession.CustomerRetrievalListener {
-                override fun onCustomerRetrieved(customer: Customer) {
-                    onCustomerRetrieved(
-                        customer.id,
-                        isInitialFetch
+            customerSession.retrieveCurrentCustomer(
+                productUsage = setOf(PaymentSession.PRODUCT_TOKEN),
+                listener = object : CustomerSession.CustomerRetrievalListener {
+                    override fun onCustomerRetrieved(customer: Customer) {
+                        onCustomerRetrieved(
+                            customer.id,
+                            isInitialFetch
+                        ) {
+                            _networkState.value = NetworkState.Inactive
+                            continuation.resume(FetchCustomerResult.Success)
+                        }
+                    }
+
+                    override fun onError(
+                        errorCode: Int,
+                        errorMessage: String,
+                        stripeError: StripeError?
                     ) {
                         _networkState.value = NetworkState.Inactive
-                        resultData.value = FetchCustomerResult.Success
+                        continuation.resume(
+                            FetchCustomerResult.Error(
+                                errorCode,
+                                errorMessage,
+                                stripeError
+                            )
+                        )
                     }
                 }
-
-                override fun onError(
-                    errorCode: Int,
-                    errorMessage: String,
-                    stripeError: StripeError?
-                ) {
-                    _networkState.value = NetworkState.Inactive
-                    resultData.value = FetchCustomerResult.Error(
-                        errorCode,
-                        errorMessage,
-                        stripeError
-                    )
-                }
-            }
-        )
-
-        return resultData
-    }
+            )
+        }
 
     @JvmSynthetic
     internal fun onCustomerRetrieved(
