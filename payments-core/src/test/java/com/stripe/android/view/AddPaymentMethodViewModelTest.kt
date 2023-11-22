@@ -12,12 +12,13 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.view.i18n.ErrorMessageTranslator
 import com.stripe.android.view.i18n.TranslatorManager
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
-import org.mockito.kotlin.KArgumentCaptor
-import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
@@ -27,7 +28,6 @@ class AddPaymentMethodViewModelTest {
     private val stripe = Stripe(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
     private val customerSession: CustomerSession = mock()
-    private val paymentMethodRetrievalCaptor: KArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener> = argumentCaptor()
 
     @Test
     fun `updatedPaymentMethodCreateParams should include expected attribution`() {
@@ -45,68 +45,78 @@ class AddPaymentMethodViewModelTest {
     }
 
     @Test
-    fun attachPaymentMethod_whenError_returnsError() {
-        var throwable: Throwable? = null
-        createViewModel()
-            .attachPaymentMethod(
-                customerSession,
-                PaymentMethodFixtures.CARD_PAYMENT_METHOD
-            ).observeForever {
-                throwable = it.exceptionOrNull()
-            }
+    fun attachPaymentMethod_whenError_returnsError() = runTest {
+        whenever(
+            customerSession.attachPaymentMethod(
+                paymentMethodId = any(),
+                productUsage = any(),
+                listener = any()
+            )
+        ).thenAnswer { invocation ->
+            val listener = invocation.arguments[2] as CustomerSession.PaymentMethodRetrievalListener
+            listener.onError(
+                402,
+                ERROR_MESSAGE,
+                StripeError(
+                    code = "incorrect_cvc",
+                    docUrl = "https://stripe.com/docs/error-codes/incorrect-cvc",
+                    message = ERROR_MESSAGE,
+                    param = "cvc",
+                    type = "card_error"
+                )
+            )
+        }
+
+        val result = createViewModel().attachPaymentMethod(
+            customerSession,
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
 
         verify(customerSession).attachPaymentMethod(
             eq("pm_123456789"),
             eq(EXPECTED_PRODUCT_USAGE),
-            paymentMethodRetrievalCaptor.capture()
+            any()
         )
 
-        paymentMethodRetrievalCaptor.firstValue.onError(
-            402,
-            ERROR_MESSAGE,
-            StripeError(
-                code = "incorrect_cvc",
-                docUrl = "https://stripe.com/docs/error-codes/incorrect-cvc",
-                message = ERROR_MESSAGE,
-                param = "cvc",
-                type = "card_error"
-            )
-        )
-
-        assertThat(throwable?.message)
+        assertThat(result.exceptionOrNull()?.message)
             .isEqualTo(ERROR_MESSAGE)
     }
 
     @Test
-    fun attachPaymentMethod_withCustomErrorMessageTranslator_whenError_returnsLocalizedError() {
-        var throwable: Throwable? = null
-        createViewModel(translator = TRANSLATOR)
-            .attachPaymentMethod(
-                customerSession,
-                PaymentMethodFixtures.CARD_PAYMENT_METHOD
-            ).observeForever {
-                throwable = it.exceptionOrNull()
-            }
+    fun attachPaymentMethod_withCustomErrorMessageTranslator_whenError_returnsLocalizedError() = runTest {
+        whenever(
+            customerSession.attachPaymentMethod(
+                paymentMethodId = any(),
+                productUsage = any(),
+                listener = any()
+            )
+        ).thenAnswer { invocation ->
+            val listener = invocation.arguments[2] as CustomerSession.PaymentMethodRetrievalListener
+            listener.onError(
+                402,
+                ERROR_MESSAGE,
+                StripeError(
+                    code = "incorrect_cvc",
+                    docUrl = "https://stripe.com/docs/error-codes/incorrect-cvc",
+                    message = ERROR_MESSAGE,
+                    param = "cvc",
+                    type = "card_error"
+                )
+            )
+        }
+
+        val result = createViewModel(translator = TRANSLATOR).attachPaymentMethod(
+            customerSession,
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
 
         verify(customerSession).attachPaymentMethod(
             eq("pm_123456789"),
             eq(EXPECTED_PRODUCT_USAGE),
-            paymentMethodRetrievalCaptor.capture()
+            any()
         )
 
-        paymentMethodRetrievalCaptor.firstValue.onError(
-            402,
-            ERROR_MESSAGE,
-            StripeError(
-                code = "incorrect_cvc",
-                docUrl = "https://stripe.com/docs/error-codes/incorrect-cvc",
-                message = ERROR_MESSAGE,
-                param = "cvc",
-                type = "card_error"
-            )
-        )
-
-        assertThat(throwable?.message)
+        assertThat(result.exceptionOrNull()?.message)
             .isEqualTo(ERROR_MESSAGE_LOCALIZED)
     }
 
