@@ -17,7 +17,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,12 +66,6 @@ internal fun DocumentScanScreen(
     identityViewModel: IdentityViewModel,
     identityScanViewModel: IdentityScanViewModel
 ) {
-    val changedDisplayState by identityScanViewModel.displayStateChangedFlow.collectAsState()
-    val newDisplayState by remember {
-        derivedStateOf {
-            changedDisplayState?.first
-        }
-    }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -105,51 +98,24 @@ internal fun DocumentScanScreen(
         LaunchedEffect(Unit) {
             identityScanViewModel.initializeScanFlowAndUpdateState(pageAndModelFiles, cameraManager)
         }
-
         val documentScannerState by identityScanViewModel.scannerState.collectAsState()
 
-        when (documentScannerState) {
-            IdentityScanViewModel.State.Initial -> {
-                LoadingScreen()
-            }
+        LiveCaptureLaunchedEffect(
+            scannerState = documentScannerState,
+            identityScanViewModel = identityScanViewModel,
+            identityViewModel = identityViewModel,
+            lifecycleOwner = lifecycleOwner,
+            verificationPage = pageAndModelFiles.page,
+            navController = navController
+        )
 
+        // UX based on documentScannerState
+        when (documentScannerState) {
             IdentityScanViewModel.State.Initializing -> {
                 LoadingScreen()
             }
-            // TODO(IDPROD-6555) - separate Initialized, Scanning and Scanned
-            else -> {
-                // TODO(IDPROD-6555) Remove this and handle toggling inside IdentityScanViewModel
-                LaunchedEffect(newDisplayState) {
-                    when (newDisplayState) {
-                        null -> {
-                            cameraManager.toggleInitial()
-                        }
-
-                        is IdentityScanState.Initial -> {
-                            cameraManager.toggleInitial()
-                        }
-
-                        is IdentityScanState.Found -> {
-                            cameraManager.toggleFound()
-                        }
-
-                        is IdentityScanState.Finished -> {
-                            identityScanViewModel.stopScan(lifecycleOwner)
-                            cameraManager.toggleFinished()
-                        }
-
-                        else -> {} // no-op
-                    }
-                }
-                CameraScreenLaunchedEffect(
-                    identityViewModel = identityViewModel,
-                    identityScanViewModel = identityScanViewModel,
-                    verificationPage = pageAndModelFiles.page,
-                    navController = navController
-                )
-
+            else -> { // can be Scanning or Scanned
                 DocumentCaptureScreen(
-                    newDisplayState,
                     documentScannerState,
                     targetScanType,
                     identityScanViewModel,
@@ -180,7 +146,6 @@ internal fun DocumentScanScreen(
 
 @Composable
 private fun DocumentCaptureScreen(
-    newDisplayState: IdentityScanState?,
     documentScannerState: IdentityScanViewModel.State,
     targetScanType: IdentityScanState.ScanType?,
     identityScanViewModel: IdentityScanViewModel,
@@ -190,10 +155,8 @@ private fun DocumentCaptureScreen(
     onContinueClick: () -> Unit
 ) {
     val collectedData by identityViewModel.collectedData.collectAsState()
-
     LaunchedEffect(Unit) {
         val shouldStartFromBack = collectedData.idDocumentFront != null
-        // start scan - this is only triggered once
         if (shouldStartFromBack) {
             startScanning(
                 scanType = IdentityScanState.ScanType.DOC_BACK,
@@ -217,27 +180,34 @@ private fun DocumentCaptureScreen(
         stringResource(id = R.string.stripe_back_of_id)
     }
 
-    val message = when (newDisplayState) {
-        is IdentityScanState.Finished -> stringResource(id = R.string.stripe_scanned)
-        is IdentityScanState.Found -> stringResource(id = R.string.stripe_hold_still)
-        is IdentityScanState.Initial -> {
-            if (targetScanType.isNullOrFront()) {
-                stringResource(id = R.string.stripe_position_id_front)
-            } else {
-                stringResource(id = R.string.stripe_position_id_back)
+    val message = when (documentScannerState) {
+        is IdentityScanViewModel.State.Scanning -> {
+            when (documentScannerState.scanState) {
+                is IdentityScanState.Finished -> stringResource(id = R.string.stripe_scanned)
+                is IdentityScanState.Found -> stringResource(id = R.string.stripe_hold_still)
+                is IdentityScanState.Initial -> {
+                    if (targetScanType.isNullOrFront()) {
+                        stringResource(id = R.string.stripe_position_id_front)
+                    } else {
+                        stringResource(id = R.string.stripe_position_id_back)
+                    }
+                }
+
+                is IdentityScanState.Satisfied -> stringResource(id = R.string.stripe_scanned)
+                is IdentityScanState.TimeOut -> ""
+                is IdentityScanState.Unsatisfied -> ""
+                null -> { // just initialized or start scanning, no scanState yet
+                    if (targetScanType.isNullOrFront()) {
+                        stringResource(id = R.string.stripe_position_id_front)
+                    } else {
+                        stringResource(id = R.string.stripe_position_id_back)
+                    }
+                }
             }
         }
 
-        is IdentityScanState.Satisfied -> stringResource(id = R.string.stripe_scanned)
-        is IdentityScanState.TimeOut -> ""
-        is IdentityScanState.Unsatisfied -> ""
-        null -> {
-            if (targetScanType.isNullOrFront()) {
-                stringResource(id = R.string.stripe_position_id_front)
-            } else {
-                stringResource(id = R.string.stripe_position_id_back)
-            }
-        }
+        is IdentityScanViewModel.State.Scanned -> stringResource(id = R.string.stripe_scanned)
+        else -> ""
     }
 
     Column(
@@ -288,7 +258,12 @@ private fun DocumentCaptureScreen(
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
-            CameraViewFinder(newDisplayState, cameraManager)
+
+            CameraViewFinder(
+                shouldShowFinished =
+                documentScannerState is IdentityScanViewModel.State.Scanned,
+                cameraManager = cameraManager
+            )
         }
         LoadingButton(
             modifier = Modifier.testTag(CONTINUE_BUTTON_TAG),
@@ -303,7 +278,7 @@ private fun DocumentCaptureScreen(
 
 @Composable
 private fun CameraViewFinder(
-    newScanState: IdentityScanState?,
+    shouldShowFinished: Boolean,
     cameraManager: IdentityCameraManager
 ) {
     Box(
@@ -326,7 +301,7 @@ private fun CameraViewFinder(
                 cameraManager.onCameraViewUpdate(it)
             }
         )
-        if (newScanState is IdentityScanState.Finished) {
+        if (shouldShowFinished) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()

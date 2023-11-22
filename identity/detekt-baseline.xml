@@ -2,13 +2,14 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>CyclomaticComplexMethod:DocumentScanScreen.kt$@Composable private fun DocumentCaptureScreen( documentScannerState: IdentityScanViewModel.State, targetScanType: IdentityScanState.ScanType?, identityScanViewModel: IdentityScanViewModel, identityViewModel: IdentityViewModel, lifecycleOwner: LifecycleOwner, cameraManager: IdentityCameraManager, onContinueClick: () -> Unit )</ID>
     <ID>CyclomaticComplexMethod:IdentityTopLevelDestination.kt$internal fun String.routeToScreenName(): String</ID>
     <ID>CyclomaticComplexMethod:OTPScreen.kt$@Composable internal fun OTPScreen( navController: NavController, identityViewModel: IdentityViewModel, otpViewModelFactory: ViewModelProvider.Factory = OTPViewModel.Factory( identityRepository = identityViewModel.identityRepository, verificationArgs = identityViewModel.verificationArgs ) )</ID>
+    <ID>CyclomaticComplexMethod:SelfieScreen.kt$@Composable private fun SelfieCaptureScreen( selfieScannerState: IdentityScanViewModel.State, successSelfieCapturePage: VerificationPageStaticContentSelfieCapturePage, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, navController: NavController, lifecycleOwner: LifecycleOwner, cameraManager: SelfieCameraManager, )</ID>
     <ID>CyclomaticComplexMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, )</ID>
     <ID>LargeClass:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
     <ID>LargeClass:IdentityViewModelTest.kt$IdentityViewModelTest</ID>
     <ID>LongMethod:AddressSection.kt$@Composable internal fun AddressSection( enabled: Boolean, identityViewModel: IdentityViewModel, addressCountries: List&lt;Country>, addressNotListedText: String, navController: NavController, onAddressCollected: (Resource&lt;RequiredInternationalAddress>) -> Unit )</ID>
-    <ID>LongMethod:CameraScreenLaunchedEffect.kt$@Composable internal fun CameraScreenLaunchedEffect( identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, verificationPage: VerificationPage, navController: NavController )</ID>
     <ID>LongMethod:ConfirmationScreen.kt$@Composable internal fun ConfirmationScreen( navController: NavController, identityViewModel: IdentityViewModel, verificationFlowFinishable: VerificationFlowFinishable )</ID>
     <ID>LongMethod:ConsentScreen.kt$@Composable private fun SuccessUI( merchantLogoUri: Uri, consentPage: VerificationPageStaticContentConsentPage, bottomSheets: Map&lt;String, VerificationPageStaticContentBottomSheetContent>?, visitedIndividualWelcomePage: Boolean, onConsentAgreed: () -> Unit, onConsentDeclined: () -> Unit )</ID>
     <ID>LongMethod:ConsentWelcomeHeader.kt$@Composable internal fun ConsentWelcomeHeader( modifier: Modifier = Modifier, merchantLogoUri: Uri, title: String?, showLogos: Boolean = true )</ID>
@@ -16,7 +17,7 @@
     <ID>LongMethod:DebugScreen.kt$@Composable internal fun DebugScreen( navController: NavController, identityViewModel: IdentityViewModel, verificationFlowFinishable: VerificationFlowFinishable )</ID>
     <ID>LongMethod:DocWarmupScreen.kt$@Composable internal fun DocWarmupView( documentSelectPage: VerificationPageStaticContentDocumentSelectPage, onContinueClick: () -> Unit )</ID>
     <ID>LongMethod:DocumentScanScreen.kt$@Composable internal fun DocumentScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel )</ID>
-    <ID>LongMethod:DocumentScanScreen.kt$@Composable private fun DocumentCaptureScreen( newDisplayState: IdentityScanState?, documentScannerState: IdentityScanViewModel.State, targetScanType: IdentityScanState.ScanType?, identityScanViewModel: IdentityScanViewModel, identityViewModel: IdentityViewModel, lifecycleOwner: LifecycleOwner, cameraManager: IdentityCameraManager, onContinueClick: () -> Unit )</ID>
+    <ID>LongMethod:DocumentScanScreen.kt$@Composable private fun DocumentCaptureScreen( documentScannerState: IdentityScanViewModel.State, targetScanType: IdentityScanState.ScanType?, identityScanViewModel: IdentityScanViewModel, identityViewModel: IdentityViewModel, lifecycleOwner: LifecycleOwner, cameraManager: IdentityCameraManager, onContinueClick: () -> Unit )</ID>
     <ID>LongMethod:ErrorScreen.kt$@Composable internal fun ErrorScreen( identityViewModel: IdentityViewModel, title: String, modifier: Modifier = Modifier, message1: String? = null, message2: String? = null, topButton: ErrorScreenButton? = null, bottomButton: ErrorScreenButton? = null, )</ID>
     <ID>LongMethod:IDDetectorAnalyzer.kt$IDDetectorAnalyzer$override suspend fun analyze( data: AnalyzerInput, state: IdentityScanState ): AnalyzerOutput</ID>
     <ID>LongMethod:IDNumberSection.kt$@Composable internal fun IDNumberSection( enabled: Boolean, idNumberCountries: List&lt;Country>, countryNotListedText: String, navController: NavController, onIdNumberCollected: (Resource&lt;IdNumberParam>) -> Unit )</ID>
@@ -32,7 +33,7 @@
     <ID>LongMethod:OTPScreen.kt$@Composable private fun OTPViewStateEffect( viewState: OTPViewState?, navController: NavController, identityViewModel: IdentityViewModel, viewModel: OTPViewModel, focusRequester: FocusRequester )</ID>
     <ID>LongMethod:SelfieScreen.kt$@Composable internal fun SelfieScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, )</ID>
     <ID>LongMethod:SelfieScreen.kt$@Composable private fun ResultView( displayState: IdentityScanState, allowImageCollectionHtml: String, isSubmittingSelfie: Boolean, allowImageCollection: Boolean, navController: NavController, onAllowImageCollectionChanged: (Boolean) -> Unit )</ID>
-    <ID>LongMethod:SelfieScreen.kt$@Composable private fun SelfieCaptureScreen( newDisplayState: IdentityScanState?, successSelfieCapturePage: VerificationPageStaticContentSelfieCapturePage, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, navController: NavController, lifecycleOwner: LifecycleOwner, cameraManager: SelfieCameraManager, )</ID>
+    <ID>LongMethod:SelfieScreen.kt$@Composable private fun SelfieCaptureScreen( selfieScannerState: IdentityScanViewModel.State, successSelfieCapturePage: VerificationPageStaticContentSelfieCapturePage, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, navController: NavController, lifecycleOwner: LifecycleOwner, cameraManager: SelfieCameraManager, )</ID>
     <ID>LongMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, )</ID>
     <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$100</ID>
     <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$5</ID>
@@ -73,6 +74,7 @@
     <ID>TooGenericExceptionCaught:LaplacianBlurDetector.kt$LaplacianBlurDetector$e: Exception</ID>
     <ID>TooManyFunctions:DefaultIdentityRepository.kt$DefaultIdentityRepository : IdentityRepository</ID>
     <ID>TooManyFunctions:IdentityAnalyticsRequestFactory.kt$IdentityAnalyticsRequestFactory</ID>
+    <ID>TooManyFunctions:IdentityCameraManager.kt$IdentityCameraManager</ID>
     <ID>TooManyFunctions:IdentityRepository.kt$IdentityRepository</ID>
     <ID>TooManyFunctions:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
     <ID>UnnecessaryAbstractClass:IdentityCommonModule.kt$IdentityCommonModule$IdentityCommonModule</ID>
