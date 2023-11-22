@@ -9,8 +9,10 @@ import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.Unknow
 internal sealed class PaymentSheetLoadingException : Throwable() {
 
     abstract val type: String
+    abstract val stripeIntent: StripeIntent?
 
     data class InvalidConfirmationMethod(
+        override val stripeIntent: StripeIntent,
         private val confirmationMethod: PaymentIntent.ConfirmationMethod,
     ) : PaymentSheetLoadingException() {
 
@@ -24,6 +26,7 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
     }
 
     data class NoPaymentMethodTypesAvailable(
+        override val stripeIntent: StripeIntent,
         private val requested: String,
         private val supported: String,
     ) : PaymentSheetLoadingException() {
@@ -36,6 +39,7 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
     }
 
     data class PaymentIntentInTerminalState(
+        override val stripeIntent: StripeIntent,
         private val status: StripeIntent.Status?,
     ) : PaymentSheetLoadingException() {
 
@@ -49,6 +53,7 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
     }
 
     data class SetupIntentInTerminalState(
+        override val stripeIntent: StripeIntent,
         private val status: StripeIntent.Status?,
     ) : PaymentSheetLoadingException() {
 
@@ -61,7 +66,9 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
             """.trimIndent()
     }
 
-    object MissingAmountOrCurrency : PaymentSheetLoadingException() {
+    data class MissingAmountOrCurrency(
+        override val stripeIntent: StripeIntent,
+    ) : PaymentSheetLoadingException() {
         override val type: String = "missingAmountOrCurrency"
         override val message: String = "PaymentIntent must contain amount and currency."
     }
@@ -74,6 +81,8 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
             get() = StripeException.create(cause).analyticsValue
 
         override val message: String? = cause.message
+
+        override val stripeIntent: StripeIntent? = null
     }
 }
 

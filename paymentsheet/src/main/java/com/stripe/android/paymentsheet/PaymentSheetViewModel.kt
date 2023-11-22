@@ -48,6 +48,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
@@ -174,6 +175,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             PaymentSheet.GooglePayConfiguration.ButtonType.Pay,
             null -> GooglePayButtonType.Pay
         }
+
+    private var pendingPaymentResult: InternalPaymentResult? = null
 
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
@@ -310,14 +313,23 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         result.fold(
-            onSuccess = { state ->
-                handlePaymentSheetStateLoaded(state)
-            },
-            onFailure = { error ->
-                setStripeIntent(null)
-                onFatal(error)
-            }
+            onSuccess = ::handlePaymentSheetStateLoaded,
+            onFailure = ::handlePaymentSheetStateLoadFailure,
         )
+    }
+
+    private fun handlePaymentSheetStateLoadFailure(error: Throwable) {
+        val stripeIntent = (error as? PaymentSheetLoadingException)?.stripeIntent
+        val pendingResult = pendingPaymentResult
+
+        if (stripeIntent != null && pendingResult is InternalPaymentResult.Completed) {
+            // If we just received a payment result after process death, we don't error if the payment intent is now
+            // in a success state.
+            handlePaymentCompleted(stripeIntent, finishImmediately = true)
+        } else {
+            setStripeIntent(null)
+            onFatal(error)
+        }
     }
 
     private fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
@@ -343,7 +355,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         linkHandler.setupLink(linkState)
 
-        resetViewState()
+        val pendingFailedPaymentResult = pendingPaymentResult as? InternalPaymentResult.Failed
+        val errorMessage = pendingFailedPaymentResult?.throwable?.stripeErrorMessage(getApplication())
+
+        resetViewState(errorMessage)
         transitionToFirstScreen()
     }
 
@@ -548,28 +563,68 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun onInternalPaymentResult(launcherResult: InternalPaymentResult) {
-        viewModelScope.launch {
-            runCatching {
-                requireNotNull(stripeIntent.value)
-            }.fold(
-                onSuccess = { originalIntent ->
-                    when (launcherResult) {
-                        is InternalPaymentResult.Completed -> processPayment(
-                            stripeIntent = launcherResult.intent,
-                            paymentResult = PaymentResult.Completed
-                        )
-                        is InternalPaymentResult.Failed -> processPayment(
-                            stripeIntent = originalIntent,
-                            paymentResult = PaymentResult.Failed(launcherResult.throwable)
-                        )
-                        is InternalPaymentResult.Canceled -> processPayment(
-                            stripeIntent = originalIntent,
-                            paymentResult = PaymentResult.Canceled
-                        )
-                    }
-                },
-                onFailure = ::onFatal
-            )
+        val intent = stripeIntent.value
+
+        if (intent == null) {
+            // We're recovering from process death. Wait for the pending payment result
+            // to be handled after re-loading.
+            pendingPaymentResult = launcherResult
+            return
+        }
+
+        when (launcherResult) {
+            is InternalPaymentResult.Completed -> {
+                processPayment(launcherResult.intent, PaymentResult.Completed)
+            }
+            is InternalPaymentResult.Failed -> {
+                processPayment(intent, PaymentResult.Failed(launcherResult.throwable))
+            }
+            is InternalPaymentResult.Canceled -> {
+                processPayment(intent, PaymentResult.Canceled)
+            }
+        }
+    }
+
+    private fun handlePaymentFailed(stripeIntent: StripeIntent, error: Throwable) {
+        processPayment(stripeIntent, PaymentResult.Failed(error))
+    }
+
+    private fun handlePaymentCanceled(stripeIntent: StripeIntent) {
+        processPayment(stripeIntent, PaymentResult.Canceled)
+    }
+
+    private fun handlePaymentCompleted(stripeIntent: StripeIntent, finishImmediately: Boolean) {
+        eventReporter.onPaymentSuccess(
+            paymentSelection = selection.value,
+            currency = stripeIntent.currency,
+            deferredIntentConfirmationType = deferredIntentConfirmationType,
+        )
+
+        // Reset after sending event
+        deferredIntentConfirmationType = null
+
+        /*
+         * Sets current selection as default payment method in future payment sheet usage. New payment
+         * methods are only saved if the payment sheet is in setup mode, is in payment intent with setup
+         * for usage, or the customer has requested the payment method be saved.
+         */
+        when (val currentSelection = selection.value) {
+            is PaymentSelection.New -> stripeIntent.paymentMethod.takeIf {
+                currentSelection.canSave(args.initializationMode)
+            }?.let { method ->
+                PaymentSelection.Saved(method)
+            }
+            else -> currentSelection
+        }?.let {
+            prefsRepository.savePaymentSelection(it)
+        }
+
+        if (finishImmediately) {
+            _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
+        } else {
+            viewState.value = PaymentSheetViewState.FinishProcessing {
+                _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
+            }
         }
     }
 
