@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.currency
@@ -161,6 +162,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private var deferredIntentConfirmationType: DeferredIntentConfirmationType? = null
 
+    private val googlePayButtonType: GooglePayButtonType =
+        when (args.config.googlePay?.buttonType) {
+            PaymentSheet.GooglePayConfiguration.ButtonType.Buy -> GooglePayButtonType.Buy
+            PaymentSheet.GooglePayConfiguration.ButtonType.Book -> GooglePayButtonType.Book
+            PaymentSheet.GooglePayConfiguration.ButtonType.Checkout -> GooglePayButtonType.Checkout
+            PaymentSheet.GooglePayConfiguration.ButtonType.Donate -> GooglePayButtonType.Donate
+            PaymentSheet.GooglePayConfiguration.ButtonType.Order -> GooglePayButtonType.Order
+            PaymentSheet.GooglePayConfiguration.ButtonType.Subscribe -> GooglePayButtonType.Subscribe
+            PaymentSheet.GooglePayConfiguration.ButtonType.Plain -> GooglePayButtonType.Plain
+            PaymentSheet.GooglePayConfiguration.ButtonType.Pay,
+            null -> GooglePayButtonType.Pay
+        }
+
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
         args.googlePayConfig?.let { config ->
@@ -213,6 +227,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodTypes,
             googlePayLauncherConfig = googlePayLauncherConfig,
+            googlePayButtonType = googlePayButtonType,
             screen = stack.last(),
         )
     }

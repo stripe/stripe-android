@@ -6,6 +6,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.BillingAddressConfig
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 
@@ -22,6 +23,7 @@ internal data class WalletsState(
 
     data class GooglePay(
         val buttonState: PaymentSheetViewState?,
+        val buttonType: GooglePayButtonType,
         val allowCreditCards: Boolean,
         val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?,
     )
@@ -33,6 +35,7 @@ internal data class WalletsState(
             linkEmail: String?,
             googlePayState: GooglePayState,
             googlePayButtonState: PaymentSheetViewState?,
+            googlePayButtonType: GooglePayButtonType,
             buttonsEnabled: Boolean,
             paymentMethodTypes: List<String>,
             googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?,
@@ -47,6 +50,7 @@ internal data class WalletsState(
             val googlePay = GooglePay(
                 buttonState = googlePayButtonState,
                 allowCreditCards = googlePayLauncherConfig?.allowCreditCards ?: false,
+                buttonType = googlePayButtonType,
                 billingAddressParameters = googlePayLauncherConfig?.let {
                     GooglePayJsonFactory.BillingAddressParameters(
                         isRequired = it.billingAddressConfig.isRequired,
