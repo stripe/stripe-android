@@ -12,7 +12,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.view.i18n.ErrorMessageTranslator
 import com.stripe.android.view.i18n.TranslatorManager
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 internal class AddPaymentMethodViewModel(
     private val stripe: Stripe,
@@ -28,16 +29,16 @@ internal class AddPaymentMethodViewModel(
 
     internal suspend fun createPaymentMethod(
         params: PaymentMethodCreateParams
-    ): Result<PaymentMethod> = suspendCancellableCoroutine { continuation ->
+    ): Result<PaymentMethod> = suspendCoroutine { continuation ->
         stripe.createPaymentMethod(
             paymentMethodCreateParams = updatedPaymentMethodCreateParams(params),
             callback = object : ApiResultCallback<PaymentMethod> {
                 override fun onSuccess(result: PaymentMethod) {
-                    continuation.resume(Result.success(result), onCancellation = null)
+                    continuation.resume(Result.success(result))
                 }
 
                 override fun onError(e: Exception) {
-                    continuation.resume(Result.failure(e), onCancellation = null)
+                    continuation.resume(Result.failure(e))
                 }
             }
         )
@@ -52,13 +53,13 @@ internal class AddPaymentMethodViewModel(
     internal suspend fun attachPaymentMethod(
         customerSession: CustomerSession,
         paymentMethod: PaymentMethod
-    ): Result<PaymentMethod> = suspendCancellableCoroutine { continuation ->
+    ): Result<PaymentMethod> = suspendCoroutine { continuation ->
         customerSession.attachPaymentMethod(
             paymentMethodId = paymentMethod.id.orEmpty(),
             productUsage = productUsage,
             listener = object : CustomerSession.PaymentMethodRetrievalListener {
                 override fun onPaymentMethodRetrieved(paymentMethod: PaymentMethod) {
-                    continuation.resume(Result.success(paymentMethod), onCancellation = null)
+                    continuation.resume(Result.success(paymentMethod))
                 }
 
                 override fun onError(
@@ -75,8 +76,7 @@ internal class AddPaymentMethodViewModel(
                                     stripeError
                                 )
                             )
-                        ),
-                        onCancellation = null
+                        )
                     )
                 }
             }
