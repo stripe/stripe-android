@@ -186,7 +186,11 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
             val supported = lpmRepository.values().joinToString(separator = ", ") { it.code }
 
-            throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested, supported)
+            throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(
+                paymentMethod = stripeIntent.paymentMethod,
+                requested = requested,
+                supported = supported,
+            )
         }
     }
 
