@@ -46,6 +46,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -751,6 +752,49 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP)
         assertThat(viewModel.googlePayLauncherConfig)
             .isNotNull()
+    }
+
+    @Test
+    fun `'buttonType' from 'GooglePayConfiguration' should be parsed to proper 'GooglePayButtonType'`() = runTest {
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Plain,
+            GooglePayButtonType.Plain
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Pay,
+            GooglePayButtonType.Pay
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Book,
+            GooglePayButtonType.Book
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Buy,
+            GooglePayButtonType.Buy
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Donate,
+            GooglePayButtonType.Donate
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
+            GooglePayButtonType.Checkout
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Order,
+            GooglePayButtonType.Order
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Subscribe,
+            GooglePayButtonType.Subscribe
+        )
     }
 
     @Test
@@ -1902,6 +1946,26 @@ internal class PaymentSheetViewModelTest {
             args = args.copy(initializationMode = InitializationMode.DeferredIntent(intentConfig)),
             stripeIntent = deferredIntent,
         )
+    }
+
+    private suspend fun testButtonTypeParsedToProperGooglePayButtonType(
+        buttonType: PaymentSheet.GooglePayConfiguration.ButtonType,
+        googlePayButtonType: GooglePayButtonType
+    ) {
+        val viewModel = createViewModel(
+            isGooglePayReady = true,
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
+                    googlePay = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.googlePayConfig?.copy(
+                        buttonType = buttonType
+                    )
+                )
+            )
+        )
+
+        viewModel.walletsState.test {
+            assertThat(awaitItem()?.googlePay?.buttonType).isEqualTo(googlePayButtonType)
+        }
     }
 
     private companion object {

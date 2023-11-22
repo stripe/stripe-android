@@ -15,6 +15,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.google.android.gms.wallet.button.ButtonConstants
+import com.google.android.gms.wallet.button.ButtonConstants.ButtonType
 import com.google.android.gms.wallet.button.ButtonOptions
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.paymentsheet.R
@@ -28,6 +29,7 @@ import org.json.JSONArray
 internal fun GooglePayButton(
     state: PrimaryButton.State?,
     allowCreditCards: Boolean,
+    @ButtonType buttonType: Int,
     billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?,
     isEnabled: Boolean,
     onPressed: () -> Unit,
@@ -46,6 +48,7 @@ internal fun GooglePayButton(
                 googlePayButton.initialize(
                     cornerRadius = cornerRadius,
                     allowCreditCards = allowCreditCards,
+                    buttonType = buttonType,
                     billingAddressParameters = billingAddressParameters
                 )
             }
@@ -78,7 +81,8 @@ internal class GooglePayButton @JvmOverloads constructor(
     fun initialize(
         cornerRadius: Int,
         allowCreditCards: Boolean,
-        billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?
+        @ButtonType buttonType: Int,
+        billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?,
     ) {
         initializePrimaryButton()
         val isDark = context.isSystemDarkTheme()
@@ -97,7 +101,7 @@ internal class GooglePayButton @JvmOverloads constructor(
                     ButtonConstants.ButtonTheme.DARK
                 }
             )
-            setButtonType(ButtonConstants.ButtonType.PAY)
+            setButtonType(buttonType)
             setAllowedPaymentMethods(allowedPaymentMethods)
             setCornerRadius(
                 // Corner radius of 0 is undefined in Google Pay
