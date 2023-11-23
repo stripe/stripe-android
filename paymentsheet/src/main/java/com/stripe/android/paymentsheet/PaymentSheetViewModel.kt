@@ -360,14 +360,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun restorePaymentSelectionAfterLoad() {
-        val paymentSelection = processDeathHandler.restorePaymentSelection(
-            supportedPaymentMethods = supportedPaymentMethods,
-            restoredPaymentSelection = newPaymentSelection,
-        )
-
         val screen = currentScreen.value
 
         if (screen is PaymentSheetScreen.AddFirstPaymentMethod || screen is PaymentSheetScreen.AddAnotherPaymentMethod) {
+            val paymentSelection = processDeathHandler.restorePaymentSelection(
+                supportedPaymentMethods = supportedPaymentMethods,
+                restoredPaymentSelection = newPaymentSelection,
+            )
+
             updateSelection(paymentSelection)
         }
     }

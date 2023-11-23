@@ -136,7 +136,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.state.customerPaymentMethods
         savedStateHandle[SAVE_PROCESSING] = false
 
-        updateSelection(args.state.paymentSelection)
+        val paymentSelection = processDeathHandler.restorePaymentSelection(
+            supportedPaymentMethods = supportedPaymentMethods,
+            restoredPaymentSelection = args.state.paymentSelection as? PaymentSelection.New,
+        )
+
+        updateSelection(args.state.paymentSelection ?: paymentSelection)
 
         cbcEligibility = when (args.state.isEligibleForCardBrandChoice) {
             true -> CardBrandChoiceEligibility.Eligible(
