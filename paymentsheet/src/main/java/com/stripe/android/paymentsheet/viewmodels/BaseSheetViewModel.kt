@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -44,6 +45,7 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -146,6 +148,8 @@ internal abstract class BaseSheetViewModel(
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
 
+    internal val newPaymentMethodSelection: StateFlow<String?> = savedStateHandle.getStateFlow("newPaymentMethodSelection", null)
+
     private val _editing = MutableStateFlow(false)
     internal val editing: StateFlow<Boolean> = _editing
 
@@ -172,6 +176,7 @@ internal abstract class BaseSheetViewModel(
      * save a new payment method that is added so that the payment data entered is recovered when
      * the user returns to that payment method type.
      */
+    // TODO Get rid of this!
     abstract var newPaymentSelection: PaymentSelection.New?
 
     abstract fun onFatal(throwable: Throwable)
@@ -311,7 +316,17 @@ internal abstract class BaseSheetViewModel(
         eventReporter.onDismiss(isDecoupling = isDecoupling)
     }
 
-    fun reportPaymentMethodTypeSelected(code: PaymentMethodCode) {
+    fun handlePaymentMethodTypeSelected(code: PaymentMethodCode) {
+        val current: PaymentMethodCode? = savedStateHandle["newPaymentMethodSelection"]
+        savedStateHandle["newPaymentMethodSelection"] = code
+
+        if (current != code) {
+            clearErrorMessages()
+            reportPaymentMethodTypeSelected(code)
+        }
+    }
+
+    private fun reportPaymentMethodTypeSelected(code: PaymentMethodCode) {
         eventReporter.onSelectPaymentMethod(
             code = code,
             isDecoupling = stripeIntent.value?.clientSecret == null,
@@ -410,7 +425,26 @@ internal abstract class BaseSheetViewModel(
             ?.showMandateAbovePrimaryButton == true
 
         updateMandateText(mandateText = mandateText, showAbove = showAbove)
-        clearErrorMessages()
+    }
+
+    fun handleFormFieldValuesChanged(formFieldValues: FormFieldValues?) {
+        if (formFieldValues != null) {
+            savedStateHandle["FormFieldValues"] = formFieldValues
+
+            val paymentMethod = lpmRepository.fromCode(newPaymentMethodSelection.value!!)
+
+            val newSelection = paymentMethod?.let {
+                formFieldValues.transformToPaymentSelection(
+                    resources = getApplication<Application>().resources,
+                    paymentMethod = it,
+                )
+            }
+
+            updateSelection(newSelection)
+        } else {
+            savedStateHandle.remove<FormFieldValues>("FormFieldValues")
+            updateSelection(null)
+        }
     }
 
     fun toggleEditing() {

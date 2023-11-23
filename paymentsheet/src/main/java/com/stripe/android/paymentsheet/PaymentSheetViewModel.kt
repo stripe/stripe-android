@@ -27,6 +27,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
@@ -37,6 +38,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
@@ -54,6 +56,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -352,14 +355,58 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         setStripeIntent(state.stripeIntent)
 
         val linkState = state.linkState
-
         linkHandler.setupLink(linkState)
 
-        val pendingFailedPaymentResult = pendingPaymentResult as? InternalPaymentResult.Failed
-        val errorMessage = pendingFailedPaymentResult?.throwable?.stripeErrorMessage(getApplication())
-
-        resetViewState(errorMessage)
+        resetViewState()
         transitionToFirstScreen()
+
+        restorePaymentSelectionAfterLoad()
+        restorePendingResultAfterLoad()
+    }
+
+    private fun restorePaymentSelectionAfterLoad() {
+        if (currentScreen.value is PaymentSheetScreen.AddFirstPaymentMethod || currentScreen.value is PaymentSheetScreen.AddAnotherPaymentMethod) {
+            val firstSelection = when (val selection = newPaymentSelection) {
+                is PaymentSelection.New.LinkInline -> {
+                    PaymentMethod.Type.Card.code
+                }
+                is PaymentSelection.New.Card,
+                is PaymentSelection.New.USBankAccount,
+                is PaymentSelection.New.GenericPaymentMethod -> {
+                    selection.paymentMethodCreateParams.typeCode
+                }
+                null -> {
+                    savedStateHandle["newPaymentMethodSelection"] ?: supportedPaymentMethods.first().code
+                }
+            }
+
+            savedStateHandle["newPaymentMethodSelection"] = firstSelection
+
+            val formFieldValues = savedStateHandle.get<FormFieldValues>("FormFieldValues")
+
+            val paymentMethod = lpmRepository.fromCode(newPaymentMethodSelection.value!!)
+
+            val paymentSelection = paymentMethod?.let {
+                formFieldValues?.transformToPaymentSelection(
+                    resources = getApplication<Application>().resources,
+                    paymentMethod = it,
+                )
+            }
+
+            updateSelection(paymentSelection)
+        }
+    }
+
+    private fun restorePendingResultAfterLoad() {
+        val pendingResult = pendingPaymentResult
+
+        if (selection.value != null) {
+//            updateSelection(selection.value)
+
+            if (pendingResult is InternalPaymentResult.Failed) {
+                onError(pendingResult.throwable.stripeErrorMessage(getApplication()))
+            }
+        }
     }
 
     fun setupGooglePay(
