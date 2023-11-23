@@ -305,7 +305,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     BacsMandateData.fromPaymentSelection(paymentSelection)?.let { data ->
                         bacsMandateConfirmationLauncher.launch(
                             data = data,
-                            appearance = viewModel.previousConfigureRequest?.configuration?.appearance
+                            appearance = getPaymentAppearance()
                         )
                     } ?: run {
                         paymentResultCallback.onPaymentSheetResult(
@@ -711,6 +711,10 @@ internal class DefaultFlowController @Inject internal constructor(
         is PaymentResult.Completed -> PaymentSheetResult.Completed
         is PaymentResult.Canceled -> PaymentSheetResult.Canceled
         is PaymentResult.Failed -> PaymentSheetResult.Failed(throwable)
+    }
+
+    private fun getPaymentAppearance(): PaymentSheet.Appearance {
+        return viewModel.previousConfigureRequest?.configuration?.appearance ?: PaymentSheet.Appearance()
     }
 
     class BacsMandateException(

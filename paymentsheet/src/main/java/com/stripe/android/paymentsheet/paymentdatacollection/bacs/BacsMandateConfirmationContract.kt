@@ -29,7 +29,7 @@ internal class BacsMandateConfirmationContract :
         val nameOnAccount: String,
         val sortCode: String,
         val accountNumber: String,
-        val appearance: PaymentSheet.Appearance?
+        val appearance: PaymentSheet.Appearance
     ) : Parcelable {
         companion object {
             fun fromIntent(intent: Intent): Args? {

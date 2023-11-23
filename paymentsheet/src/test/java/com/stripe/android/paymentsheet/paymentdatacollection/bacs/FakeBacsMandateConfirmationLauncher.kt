@@ -5,7 +5,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 internal class FakeBacsMandateConfirmationLauncher : BacsMandateConfirmationLauncher {
     override fun launch(
         data: BacsMandateData,
-        appearance: PaymentSheet.Appearance?
+        appearance: PaymentSheet.Appearance
     ) {
         // No-op
     }

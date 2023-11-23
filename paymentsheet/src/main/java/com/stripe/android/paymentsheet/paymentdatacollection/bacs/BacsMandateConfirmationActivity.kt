@@ -53,7 +53,7 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
             viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnBackPressed)
         }
 
-        starterArgs.appearance?.parseAppearance()
+        starterArgs.appearance.parseAppearance()
 
         setContent {
             StripeTheme {
