@@ -6,9 +6,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.CustomerSession
 import com.stripe.android.core.StripeError
 import com.stripe.android.model.Customer
@@ -16,6 +15,9 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.PaymentMethodsActivityStarter
 import com.stripe.example.R
 import com.stripe.example.databinding.CustomerSessionActivityBinding
+import kotlinx.coroutines.launch
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import com.stripe.android.R as StripeR
 
 /**
@@ -39,20 +41,17 @@ class CustomerSessionActivity : AppCompatActivity() {
         setTitle(R.string.customer_payment_data_example)
 
         viewBinding.progressBar.visibility = View.VISIBLE
-        viewModel.retrieveCustomer().observe(
-            this,
-            {
-                viewBinding.progressBar.visibility = View.INVISIBLE
-                viewBinding.selectPaymentMethodButton.isEnabled = it.isSuccess
 
-                it.fold(
-                    onSuccess = {},
-                    onFailure = { error ->
-                        snackbarController.show(error.message.orEmpty())
-                    }
-                )
+        lifecycleScope.launch {
+            val result = viewModel.retrieveCustomer()
+
+            viewBinding.progressBar.visibility = View.INVISIBLE
+            viewBinding.selectPaymentMethodButton.isEnabled = result.isSuccess
+
+            result.onFailure { error ->
+                snackbarController.show(error.message.orEmpty())
             }
-        )
+        }
 
         viewBinding.selectPaymentMethodButton.isEnabled = false
         viewBinding.selectPaymentMethodButton.setOnClickListener { launchWithCustomer() }
@@ -88,12 +87,11 @@ class CustomerSessionActivity : AppCompatActivity() {
     internal class ActivityViewModel : ViewModel() {
         private val customerSession = CustomerSession.getInstance()
 
-        fun retrieveCustomer(): LiveData<Result<Customer>> {
-            val liveData = MutableLiveData<Result<Customer>>()
+        suspend fun retrieveCustomer(): Result<Customer> = suspendCoroutine { continuation ->
             customerSession.retrieveCurrentCustomer(
                 object : CustomerSession.CustomerRetrievalListener {
                     override fun onCustomerRetrieved(customer: Customer) {
-                        liveData.value = Result.success(customer)
+                        continuation.resume(Result.success(customer))
                     }
 
                     override fun onError(
@@ -101,11 +99,10 @@ class CustomerSessionActivity : AppCompatActivity() {
                         errorMessage: String,
                         stripeError: StripeError?
                     ) {
-                        liveData.value = Result.failure(RuntimeException(errorMessage))
+                        continuation.resume(Result.failure(RuntimeException(errorMessage)))
                     }
                 }
             )
-            return liveData
         }
     }
 }

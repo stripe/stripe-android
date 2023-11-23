@@ -24,6 +24,7 @@ import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.LaunchPaymentSessionFragmentBinding
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
@@ -63,40 +64,48 @@ class FragmentExamplesFragment : Fragment() {
         viewBinding.launchPaymentAuth.setOnClickListener { createPaymentIntent() }
         viewBinding.launchSetupAuth.setOnClickListener { createSetupIntent() }
 
-        viewModel.paymentIntentResultLiveData.observe(
-            viewLifecycleOwner,
-            { result ->
-                result.fold(
-                    onSuccess = {
-                        val status = getString(
-                            R.string.payment_intent_status,
-                            it.intent.status
+        lifecycleScope.launch {
+            viewModel.paymentIntentResult.collectLatest { paymentIntentResult ->
+                when (paymentIntentResult) {
+                    is FragmentExamplesViewModel.FragmentExamplesIntentResult.Available -> {
+                        paymentIntentResult.result.fold(
+                            onSuccess = {
+                                val status = getString(
+                                    R.string.payment_intent_status,
+                                    it.intent.status
+                                )
+                                updateStatus("$status; Outcome: ${it.outcome}")
+                            },
+                            onFailure = ::onError
                         )
-                        updateStatus("$status; Outcome: ${it.outcome}")
-                    },
-                    onFailure = ::onError
-                )
-                onConfirmationComplete()
+                        onConfirmationComplete()
+                    }
+                    is FragmentExamplesViewModel.FragmentExamplesIntentResult.None -> Unit
+                }
             }
-        )
+        }
 
-        viewModel.setupIntentResultLiveData.observe(
-            viewLifecycleOwner,
-            { result ->
-                result.fold(
-                    onSuccess = {
-                        val paymentIntent = it.intent
-                        val status = getString(
-                            R.string.setup_intent_status,
-                            paymentIntent.status
+        lifecycleScope.launch {
+            viewModel.setupIntentResult.collectLatest { setupIntentResult ->
+                when (setupIntentResult) {
+                    is FragmentExamplesViewModel.FragmentExamplesIntentResult.Available -> {
+                        setupIntentResult.result.fold(
+                            onSuccess = {
+                                val paymentIntent = it.intent
+                                val status = getString(
+                                    R.string.setup_intent_status,
+                                    paymentIntent.status
+                                )
+                                updateStatus("$status; Outcome: ${it.outcome}")
+                            },
+                            onFailure = ::onError
                         )
-                        updateStatus("$status; Outcome: ${it.outcome}")
-                    },
-                    onFailure = ::onError
-                )
-                onConfirmationComplete()
+                        onConfirmationComplete()
+                    }
+                    is FragmentExamplesViewModel.FragmentExamplesIntentResult.None -> Unit
+                }
             }
-        )
+        }
     }
 
     override fun onCreateView(
@@ -130,17 +139,23 @@ class FragmentExamplesFragment : Fragment() {
 
         if (stripe.isPaymentResult(requestCode, data)) {
             lifecycleScope.launch {
-                viewModel.paymentIntentResultLiveData.value = runCatching {
-                    // stripe.isPaymentResult already verifies data is not null
-                    stripe.getPaymentIntentResult(requestCode, data!!)
-                }
+                viewModel.paymentIntentResult.value =
+                    FragmentExamplesViewModel.FragmentExamplesIntentResult.Available(
+                        runCatching {
+                            // stripe.isPaymentResult already verifies data is not null
+                            stripe.getPaymentIntentResult(requestCode, data!!)
+                        }
+                    )
             }
         } else if (stripe.isSetupResult(requestCode, data)) {
             lifecycleScope.launch {
-                viewModel.setupIntentResultLiveData.value = runCatching {
-                    // stripe.isSetupResult already verifies data is not null
-                    stripe.getSetupIntentResult(requestCode, data!!)
-                }
+                viewModel.setupIntentResult.value =
+                    FragmentExamplesViewModel.FragmentExamplesIntentResult.Available(
+                        runCatching {
+                            // stripe.isSetupResult already verifies data is not null
+                            stripe.getSetupIntentResult(requestCode, data!!)
+                        }
+                    )
             }
         }
     }
@@ -150,15 +165,12 @@ class FragmentExamplesFragment : Fragment() {
         viewBinding.launchPaymentAuth.isEnabled = false
         viewBinding.status.setText(R.string.creating_payment_intent)
 
-        viewModel.createPaymentIntent().observe(
-            viewLifecycleOwner,
-            {
-                it.fold(
-                    onSuccess = ::onCreatePaymentIntentResponse,
-                    onFailure = ::onError
-                )
-            }
-        )
+        lifecycleScope.launch {
+            viewModel.createPaymentIntent().fold(
+                onSuccess = ::onCreatePaymentIntentResponse,
+                onFailure = ::onError
+            )
+        }
     }
 
     private fun createSetupIntent() {
@@ -166,15 +178,12 @@ class FragmentExamplesFragment : Fragment() {
         viewBinding.launchSetupAuth.isEnabled = false
         viewBinding.status.setText(R.string.creating_setup_intent)
 
-        viewModel.createSetupIntent().observe(
-            viewLifecycleOwner,
-            {
-                it.fold(
-                    onSuccess = ::onCreateSetupIntentResponse,
-                    onFailure = ::onError
-                )
-            }
-        )
+        lifecycleScope.launch {
+            viewModel.createSetupIntent().fold(
+                onSuccess = ::onCreateSetupIntentResponse,
+                onFailure = ::onError
+            )
+        }
     }
 
     private fun onConfirmationComplete() {

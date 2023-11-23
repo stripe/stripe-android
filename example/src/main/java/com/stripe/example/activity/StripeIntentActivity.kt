@@ -3,6 +3,7 @@ package com.stripe.example.activity
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -13,6 +14,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.example.Settings
 import com.stripe.example.module.StripeIntentViewModel
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 /**
@@ -90,15 +92,13 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
         keyboardController.hide()
 
-        viewModel.createPaymentIntent(
-            country = country,
-            supportedPaymentMethods = supportedPaymentMethods,
-            customerId = customerId,
-            currency = currency,
-        ).observe(
-            this
-        ) { result ->
-            result.onSuccess {
+        lifecycleScope.launch {
+            viewModel.createPaymentIntent(
+                country = country,
+                supportedPaymentMethods = supportedPaymentMethods,
+                customerId = customerId,
+                currency = currency,
+            ).onSuccess {
                 handleCreatePaymentIntentResponse(
                     it,
                     paymentMethodCreateParams,
@@ -125,14 +125,12 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     ) {
         keyboardController.hide()
 
-        viewModel.createSetupIntent(
-            country = country,
-            supportedPaymentMethods = supportedPaymentMethods,
-            customerId = customerId,
-        ).observe(
-            this
-        ) { result ->
-            result.onSuccess {
+        lifecycleScope.launch {
+            viewModel.createSetupIntent(
+                country = country,
+                supportedPaymentMethods = supportedPaymentMethods,
+                customerId = customerId,
+            ).onSuccess {
                 handleCreateSetupIntentResponse(
                     it,
                     params,

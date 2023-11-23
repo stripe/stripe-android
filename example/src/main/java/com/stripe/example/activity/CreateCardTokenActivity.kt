@@ -9,8 +9,7 @@ import android.view.ViewGroup
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.liveData
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.createCardToken
@@ -20,6 +19,7 @@ import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.CreateCardTokenActivityBinding
 import com.stripe.example.databinding.TokenItemBinding
+import kotlinx.coroutines.launch
 
 class CreateCardTokenActivity : AppCompatActivity() {
     private val viewBinding: CreateCardTokenActivityBinding by lazy {
@@ -48,13 +48,16 @@ class CreateCardTokenActivity : AppCompatActivity() {
 
             viewBinding.cardInputWidget.cardParams?.let { cardParams ->
                 onRequestStart()
-                viewModel.createCardToken(cardParams).observe(
-                    this,
-                    {
-                        onRequestEnd()
-                        adapter.addToken(it)
-                    }
-                )
+
+                lifecycleScope.launch {
+                    viewModel.createCardToken(cardParams).fold(
+                        onSuccess = {
+                            onRequestEnd()
+                            adapter.addToken(it)
+                        },
+                        onFailure = {}
+                    )
+                }
             } ?: snackbarController.show(getString(R.string.invalid_card_details))
         }
 
@@ -118,19 +121,14 @@ class CreateCardTokenActivity : AppCompatActivity() {
     ) : AndroidViewModel(application) {
         private val stripe = StripeFactory(application).create()
 
-        fun createCardToken(cardParams: CardParams): LiveData<Token> = liveData {
-            runCatching {
+        suspend fun createCardToken(cardParams: CardParams): Result<Token> {
+            return runCatching {
                 stripe.createCardToken(cardParams)
             }.also {
                 BackgroundTaskTracker.onStop()
-            }.fold(
-                onSuccess = {
-                    emit(it)
-                },
-                onFailure = {
-                    Log.e("StripeExample", "Error while creating card token", it)
-                }
-            )
+            }.onFailure {
+                Log.e("StripeExample", "Error while creating card token", it)
+            }
         }
     }
 }

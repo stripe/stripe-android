@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -29,6 +30,7 @@ import com.stripe.android.payments.paymentlauncher.rememberPaymentLauncher
 import com.stripe.example.R
 import com.stripe.example.Settings
 import com.stripe.example.module.StripeIntentViewModel
+import kotlinx.coroutines.launch
 
 /**
  * An Activity to demonstrate [PaymentLauncher] with Jetpack Compose.
@@ -137,10 +139,8 @@ class ComposeExampleActivity : AppCompatActivity() {
         params: PaymentMethodCreateParams,
         onConfirm: (ConfirmPaymentIntentParams) -> Unit
     ) {
-        viewModel.createPaymentIntent("us").observe(
-            this
-        ) {
-            it.onSuccess { responseData ->
+        lifecycleScope.launch {
+            viewModel.createPaymentIntent("us").onSuccess { responseData ->
                 val confirmPaymentIntentParams =
                     ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                         paymentMethodCreateParams = params,

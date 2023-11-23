@@ -2,7 +2,6 @@ package com.stripe.example.activity
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.liveData
 import com.stripe.android.createSource
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
@@ -16,30 +15,24 @@ internal class SourceViewModel(
 
     internal var source: Source? = null
 
-    internal fun createSource(sourceParams: SourceParams) = liveData {
-        emit(
-            runCatching {
-                stripe.createSource(sourceParams)
-            }
-        )
+    internal suspend fun createSource(sourceParams: SourceParams): Result<Source> {
+        return runCatching {
+            stripe.createSource(sourceParams)
+        }
     }
 
-    internal fun fetchSource(source: Source?) = liveData {
-        if (source == null) {
-            emit(
-                Result.failure<Source>(
-                    IllegalArgumentException("Create and authenticate a Source before fetching it.")
-                )
+    internal suspend fun fetchSource(source: Source?): Result<Source> {
+        return if (source == null) {
+            Result.failure(
+                IllegalArgumentException("Create and authenticate a Source before fetching it.")
             )
         } else {
-            emit(
-                runCatching {
-                    stripe.retrieveSource(
-                        source.id.orEmpty(),
-                        source.clientSecret.orEmpty()
-                    )
-                }
-            )
+            runCatching {
+                stripe.retrieveSource(
+                    source.id.orEmpty(),
+                    source.clientSecret.orEmpty()
+                )
+            }
         }
     }
 }

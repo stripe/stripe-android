@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.Button
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.Stripe
 import com.stripe.android.getAuthenticateSourceResult
@@ -45,29 +44,24 @@ class KlarnaSourceActivity : AppCompatActivity() {
         viewBinding.createButton.setOnClickListener {
             viewBinding.sourceResult.text = ""
             disableUi()
-            createKlarnaSource().observe(
-                this,
-                { result ->
-                    result.fold(
-                        onSuccess = { source ->
-                            logSource(source)
-                            stripe.authenticateSource(this, source)
-                        },
-                        onFailure = ::logException
-                    )
-                }
-            )
+            lifecycleScope.launch {
+                createKlarnaSource().fold(
+                    onSuccess = { source ->
+                        logSource(source)
+                        stripe.authenticateSource(this@KlarnaSourceActivity, source)
+                    },
+                    onFailure = ::logException
+                )
+            }
         }
 
         viewBinding.fetchButton.setOnClickListener {
             disableUi()
-            viewModel.fetchSource(viewModel.source).observe(
-                this,
-                { result ->
-                    enableUi()
-                    result.fold(::logSource, ::logException)
-                }
-            )
+            lifecycleScope.launch {
+                val result = viewModel.fetchSource(viewModel.source)
+                enableUi()
+                result.fold(::logSource, ::logException)
+            }
         }
     }
 
@@ -120,7 +114,7 @@ class KlarnaSourceActivity : AppCompatActivity() {
         buttons.forEach { it.isEnabled = false }
     }
 
-    private fun createKlarnaSource(): LiveData<Result<Source>> {
+    private suspend fun createKlarnaSource(): Result<Source> {
         return viewModel.createSource(
             SourceParams.createKlarna(
                 returnUrl = RETURN_URL,

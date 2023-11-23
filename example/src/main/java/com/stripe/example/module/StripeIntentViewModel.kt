@@ -3,7 +3,6 @@ package com.stripe.example.module
 import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.liveData
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.example.R
 import com.stripe.example.activity.BaseViewModel
@@ -20,7 +19,7 @@ internal class StripeIntentViewModel(
 
     val paymentResultLiveData = MutableLiveData<PaymentResult>()
 
-    fun createPaymentIntent(
+    suspend fun createPaymentIntent(
         country: String,
         customerId: String? = null,
         supportedPaymentMethods: String? = null,
@@ -48,7 +47,7 @@ internal class StripeIntentViewModel(
         )
     }
 
-    fun createSetupIntent(
+    suspend fun createSetupIntent(
         country: String,
         customerId: String? = null,
         supportedPaymentMethods: String? = null,
@@ -71,11 +70,11 @@ internal class StripeIntentViewModel(
         )
     }
 
-    private fun makeBackendRequest(
+    private suspend fun makeBackendRequest(
         @StringRes creatingStringRes: Int,
         @StringRes resultStringRes: Int,
         apiMethod: suspend () -> ResponseBody
-    ) = liveData {
+    ): Result<JSONObject> {
         inProgress.postValue(true)
         status.postValue(resources.getString(creatingStringRes))
 
@@ -116,6 +115,6 @@ internal class StripeIntentViewModel(
             }
         )
 
-        emit(result)
+        return result
     }
 }
