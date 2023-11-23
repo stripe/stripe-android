@@ -74,6 +74,7 @@
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.IntentConfiguration.Mode.Payment$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.IntentConfiguration.Mode.Setup$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.IntentConfiguration.SetupFutureUse$*</ID>
+    <ID>MaxLineLength:PaymentSheetViewModel.kt$PaymentSheetViewModel$if</ID>
     <ID>MaxLineLength:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest$fun</ID>
     <ID>MaxLineLength:PrimaryButtonTest.kt$PrimaryButtonTest$primaryButton.setAppearanceConfiguration(StripeThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$* This will generate payment intent scenarios for all combinations of customers, lpm types in the intent, shipping, and SFU states</ID>
@@ -82,6 +83,7 @@
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.PaymentIntentTestInput.Companion$fun toCsvHeader()</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.TestOutput.Companion$formShowsSaveCheckbox == false &amp;&amp; formShowsCheckboxControlledFields == true -> "merchantRequiredSave"</ID>
     <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)</ID>
+    <ID>MaximumLineLength:com.stripe.android.paymentsheet.PaymentSheetViewModel.kt:365</ID>
     <ID>NestedBlockDepth:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$private fun generatePaymentIntentScenarios(): List&lt;PaymentIntentTestInput></ID>
     <ID>ReturnCount:AddressUtils.kt$internal fun CharSequence.levenshtein(other: CharSequence): Int</ID>
     <ID>ThrowsCount:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Configuration.validate()</ID>
