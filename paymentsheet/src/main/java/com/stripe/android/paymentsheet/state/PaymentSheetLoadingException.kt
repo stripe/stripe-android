@@ -12,9 +12,11 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
     abstract val stripeIntent: StripeIntent?
 
     data class InvalidConfirmationMethod(
-        override val stripeIntent: StripeIntent,
-        private val confirmationMethod: PaymentIntent.ConfirmationMethod,
+        override val stripeIntent: PaymentIntent,
     ) : PaymentSheetLoadingException() {
+
+        private val confirmationMethod: PaymentIntent.ConfirmationMethod
+            get() = stripeIntent.confirmationMethod
 
         override val type: String = "invalidConfirmationMethod"
 
@@ -27,9 +29,11 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
 
     data class NoPaymentMethodTypesAvailable(
         override val stripeIntent: StripeIntent,
-        private val requested: String,
         private val supported: String,
     ) : PaymentSheetLoadingException() {
+
+        private val requested: String
+            get() = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
 
         override val type: String = "noPaymentMethodTypesAvailable"
 
@@ -40,8 +44,10 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
 
     data class PaymentIntentInTerminalState(
         override val stripeIntent: StripeIntent,
-        private val status: StripeIntent.Status?,
     ) : PaymentSheetLoadingException() {
+
+        private val status: StripeIntent.Status?
+            get() = stripeIntent.status
 
         override val type: String = "paymentIntentInTerminalState"
 
@@ -54,8 +60,10 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
 
     data class SetupIntentInTerminalState(
         override val stripeIntent: StripeIntent,
-        private val status: StripeIntent.Status?,
     ) : PaymentSheetLoadingException() {
+
+        private val status: StripeIntent.Status?
+            get() = stripeIntent.status
 
         override val type: String = "setupIntentInTerminalState"
 
