@@ -90,23 +90,7 @@ internal fun PrimaryButton(
     label: String,
     locked: Boolean,
     enabled: Boolean,
-    onClick: () -> Unit,
-) {
-    PrimaryButton(
-        label = label,
-        processingState = PrimaryButtonProcessingState.Idle(null),
-        locked = locked,
-        enabled = enabled,
-        onClick = onClick,
-    )
-}
-
-@Composable
-internal fun PrimaryButton(
-    label: String,
-    processingState: PrimaryButtonProcessingState,
-    locked: Boolean,
-    enabled: Boolean,
+    processingState: PrimaryButtonProcessingState = PrimaryButtonProcessingState.Idle(null),
     onProcessingCompleted: () -> Unit = {},
     onClick: () -> Unit,
 ) {
@@ -132,7 +116,7 @@ internal fun PrimaryButton(
         animateColorAsState(
             targetValue = background,
             label = "BackgroundAnimation",
-            animationSpec = tween(durationMillis = 100, easing = LinearEasing)
+            animationSpec = tween(durationMillis = FADE_ANIMATION_DURATION, easing = LinearEasing)
         ).value
     }
 
@@ -180,7 +164,7 @@ private fun Content(
     onProcessingCompleted: () -> Unit,
 ) {
     AnimatedContent(
-        processingState is PrimaryButtonProcessingState.Completed,
+        targetState = processingState is PrimaryButtonProcessingState.Completed,
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Max),
@@ -193,9 +177,9 @@ private fun Content(
                 .padding(horizontal = 8.dp)
         ) {
             if (completed) {
-                Complete(onProcessingCompleted)
+                AnimatedCompleteProcessing(onProcessingCompleted)
             } else {
-                Incomplete(
+                StaticIncompleteProcessing(
                     text = when (processingState) {
                         is PrimaryButtonProcessingState.Idle -> label
                         else -> stringResource(R.string.stripe_paymentsheet_primary_button_processing)
@@ -209,7 +193,7 @@ private fun Content(
 }
 
 @Composable
-private fun BoxScope.Incomplete(
+private fun BoxScope.StaticIncompleteProcessing(
     text: String,
     processing: Boolean,
     locked: Boolean,
@@ -253,8 +237,8 @@ private fun BoxScope.Incomplete(
 }
 
 @Composable
-private fun BoxScope.Complete(
-    onProcessingCompleted: () -> Unit
+private fun BoxScope.AnimatedCompleteProcessing(
+    onAnimationCompleted: () -> Unit
 ) {
     val inInspectionMode = LocalInspectionMode.current
 
@@ -295,10 +279,10 @@ private fun BoxScope.Complete(
             alignment = CENTER_ALIGNED
         }
 
-        LaunchedEffect(animationCompleted, onProcessingCompleted) {
+        LaunchedEffect(animationCompleted, onAnimationCompleted) {
             if (animationCompleted) {
                 delay(POST_SUCCESS_ANIMATION_DELAY)
-                onProcessingCompleted()
+                onAnimationCompleted()
             }
         }
     }
