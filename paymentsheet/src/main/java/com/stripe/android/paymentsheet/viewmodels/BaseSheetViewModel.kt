@@ -91,6 +91,8 @@ internal abstract class BaseSheetViewModel(
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : AndroidViewModel(application) {
 
+    protected val processDeathHandler = ProcessDeathHandler(application, savedStateHandle)
+
     internal val customerConfig = config.customer
     internal val merchantName = config.merchantDisplayName
 
@@ -148,7 +150,7 @@ internal abstract class BaseSheetViewModel(
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
 
-    internal val newPaymentMethodSelection: StateFlow<String?> = savedStateHandle.getStateFlow("newPaymentMethodSelection", null)
+    internal val newPaymentMethodSelection: StateFlow<String?> = processDeathHandler.newPaymentMethodSelection
 
     private val _editing = MutableStateFlow(false)
     internal val editing: StateFlow<Boolean> = _editing
@@ -317,10 +319,9 @@ internal abstract class BaseSheetViewModel(
     }
 
     fun handlePaymentMethodTypeSelected(code: PaymentMethodCode) {
-        val current: PaymentMethodCode? = savedStateHandle["newPaymentMethodSelection"]
-        savedStateHandle["newPaymentMethodSelection"] = code
+        val didChange = processDeathHandler.handlePaymentMethodTypeSelected(code)
 
-        if (current != code) {
+        if (didChange) {
             clearErrorMessages()
             reportPaymentMethodTypeSelected(code)
         }
