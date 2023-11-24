@@ -1,10 +1,7 @@
 package com.stripe.android.view
 
-import android.app.Application
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.ViewGroup
@@ -55,7 +52,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows.shadowOf
 import java.util.Calendar
 import kotlin.coroutines.CoroutineContext
 import kotlin.test.AfterTest
@@ -109,15 +105,6 @@ internal class CardInputWidgetTest {
 
     @AfterTest
     fun cleanup() {
-        val application: Application = ApplicationProvider.getApplicationContext()
-        val activityInfo = ActivityInfo().apply {
-            name = CardInputWidgetTestActivity::class.java.name
-            packageName = application.packageName
-        }
-
-        val componentName = ComponentName(activityInfo.packageName, activityInfo.name)
-        shadowOf(application.packageManager).removeActivity(componentName)
-
         Dispatchers.resetMain()
     }
 
