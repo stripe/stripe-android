@@ -1,9 +1,7 @@
 package com.stripe.android.view
 
-import android.app.Application
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.ViewGroup
@@ -40,6 +38,7 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.CardInputWidgetTestHelper
 import com.stripe.android.utils.FeatureFlags
 import com.stripe.android.utils.TestUtils.idleLooper
+import com.stripe.android.utils.createTestActivityRule
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import kotlinx.coroutines.Dispatchers
@@ -53,7 +52,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows.shadowOf
 import java.util.Calendar
 import kotlin.coroutines.CoroutineContext
 import kotlin.test.AfterTest
@@ -68,6 +66,9 @@ internal class CardInputWidgetTest {
         featureFlag = FeatureFlags.cardBrandChoice,
         isEnabled = false,
     )
+
+    @get:Rule
+    val testActivityRule = createTestActivityRule<CardInputWidgetTestActivity>()
 
     @get:Rule
     val composeTestRule = createComposeRule()
@@ -1778,8 +1779,6 @@ internal class CardInputWidgetTest {
         afterRecreation: (CardInputWidget.() -> Unit)? = null,
         block: CardInputWidget.() -> Unit,
     ) {
-        registerTestActivity()
-
         val activityScenario = ActivityScenario.launch<CardInputWidgetTestActivity>(
             Intent(context, CardInputWidgetTestActivity::class.java).apply {
                 putExtra("args", CardInputWidgetTestActivity.Args(isCbcEligible = isCbcEligible))
@@ -1805,15 +1804,8 @@ internal class CardInputWidgetTest {
                 widget.afterRecreation()
             }
         }
-    }
 
-    private fun registerTestActivity() {
-        val application: Application = ApplicationProvider.getApplicationContext()
-        val activityInfo = ActivityInfo().apply {
-            name = CardInputWidgetTestActivity::class.java.name
-            packageName = application.packageName
-        }
-        shadowOf(application.packageManager).addOrUpdateActivity(activityInfo)
+        activityScenario.close()
     }
 
     private fun CardInputWidget.updateCardNumberAndIdle(cardNumber: String) {
