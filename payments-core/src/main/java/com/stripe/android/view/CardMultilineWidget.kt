@@ -17,6 +17,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
@@ -30,7 +31,6 @@ import com.stripe.android.model.DelicateCardDetailsApi
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.view.CardMultilineWidget.CardBrandIconSupplier
 import kotlin.properties.Delegates
 
 /**
@@ -55,6 +55,8 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     val cardNumberEditText = viewBinding.etCardNumber
+
+    internal val cardBrandView: CardBrandView = viewBinding.cardBrandView
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     val expiryDateEditText = viewBinding.etExpiry
@@ -115,14 +117,12 @@ class CardMultilineWidget @JvmOverloads constructor(
     private var customCvcLabel: String? = null
     private var customCvcPlaceholderText: String? = null
 
-    private var cardBrand: CardBrand = CardBrand.Unknown
-
     /**
      * A [CardBrand] matching the current card number inputted by the user.
      */
     val brand: CardBrand
         @JvmSynthetic
-        get() = cardBrand
+        get() = cardBrandView.brand
 
     /**
      * If [shouldShowPostalCode] is true and [postalCodeRequired] is true, then postal code is a
@@ -169,7 +169,8 @@ class CardMultilineWidget @JvmOverloads constructor(
                     cvc = it.cvc,
                     expiryMonth = it.expMonth,
                     expiryYear = it.expYear,
-                    attribution = it.attribution
+                    attribution = it.attribution,
+                    networks = cardBrandView.createNetworksParam(),
                 )
             }
         }
@@ -285,12 +286,6 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private var showCvcIconInCvcField: Boolean = false
 
-    internal var cardBrandIconSupplier: CardBrandIconSupplier by Delegates.observable(
-        DEFAULT_CARD_BRAND_ICON_SUPPLIER
-    ) { _, _, _ ->
-        updateBrandUi()
-    }
-
     internal var cardNumberErrorListener: StripeEditText.ErrorMessageListener by Delegates.observable(
         ErrorListener(cardNumberTextInputLayout)
     ) { _, _, newValue ->
@@ -335,6 +330,12 @@ class CardMultilineWidget @JvmOverloads constructor(
         postalCodeErrorListener = listener
     }
 
+    // TODO(tillh-stripe) Add docs and make public
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun setPreferredNetworks(preferredNetworks: List<CardBrand>) {
+        cardBrandView.merchantPreferredNetworks = preferredNetworks
+    }
+
     init {
         orientation = VERTICAL
 
@@ -350,14 +351,38 @@ class CardMultilineWidget @JvmOverloads constructor(
         initFocusChangeListeners()
         initDeleteEmptyListeners()
 
+        cardBrandView.reserveSpaceForCbcDropdown = false
+        cardBrandView.tintColorInt = cardNumberEditText.hintTextColors.defaultColor
+
         cardNumberEditText.completionCallback = {
             expiryDateEditText.requestFocus()
             cardInputListener?.onCardComplete()
         }
 
         cardNumberEditText.brandChangeCallback = { brand ->
-            cardBrand = brand
+            cardBrandView.brand = brand
             updateBrandUi()
+        }
+
+        cardNumberEditText.implicitCardBrandChangeCallback = { brand ->
+            // With co-branded cards, a card number can belong to multiple brands. Since we still
+            // need do validate based on the card's pan length and expected CVC length, we add this
+            // callback to perform the validations, but don't update the current brand.
+            updateCvc(brand)
+        }
+
+        cardNumberEditText.possibleCardBrandsCallback = { brands ->
+            val currentBrand = cardBrandView.brand
+            cardBrandView.possibleBrands = brands
+
+            if (currentBrand !in brands) {
+                cardBrandView.brand = CardBrand.Unknown
+            }
+
+            // We need to use a known card brand to set the correct expected CVC length. Since both
+            // brands of a co-branded card have the same CVC length, we can just choose the first one.
+            val brandForCvcLength = brands.firstOrNull() ?: CardBrand.Unknown
+            updateCvc(brand = brandForCvcLength)
         }
 
         expiryDateEditText.completionCallback = {
@@ -366,7 +391,12 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         cvcEditText.setAfterTextChangedListener { text ->
-            if (cardBrand.isMaxCvc(text)) {
+            val brand = cardNumberEditText.implicitCardBrandForCbc.takeUnless {
+                it == CardBrand.Unknown
+            } ?: cardNumberEditText.cardBrand
+
+            // TODO
+            if (brand.isMaxCvc(text)) {
                 updateBrandUi()
                 if (shouldShowPostalCode) {
                     postalCodeEditText.requestFocus()
@@ -388,7 +418,6 @@ class CardMultilineWidget @JvmOverloads constructor(
 
         cardNumberEditText.updateLengthFilter()
 
-        cardBrand = CardBrand.Unknown
         updateBrandUi()
 
         allFields.forEach { field ->
@@ -403,12 +432,27 @@ class CardMultilineWidget @JvmOverloads constructor(
 
         postalCodeEditText.config = PostalCodeEditText.Config.Global
         isEnabled = true
+
+        val cardBrandViewPadding = resources.getDimensionPixelSize(
+            R.dimen.stripe_card_form_view_text_input_layout_padding_horizontal
+        )
+
+        cardBrandView.addOnLayoutChangeListener { view, _, _, _, _, _, _, _, _ ->
+            val inset = view.width + cardBrandViewPadding
+            cardNumberEditText.updatePadding(right = inset)
+        }
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         // see https://github.com/stripe/stripe-android/pull/3154
         cvcEditText.hint = null
+
+        doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+            viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
+                cardBrandView.isCbcEligible = isCbcEligible
+            }
+        }
     }
 
     /**
@@ -423,8 +467,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         expiryDateEditText.shouldShowError = false
         cvcEditText.shouldShowError = false
         postalCodeEditText.shouldShowError = false
-
-        cardBrand = CardBrand.Unknown
+        cardBrandView.shouldShowErrorIcon = false
         updateBrandUi()
     }
 
@@ -661,21 +704,11 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     private fun flipToCvcIconIfNotFinished() {
-        if (cardBrand.isMaxCvc(cvcEditText.fieldText)) {
+        if (brand.isMaxCvc(cvcEditText.fieldText)) {
             return
         }
 
-        if (shouldShowErrorIcon) {
-            updateEndIcon(
-                iconResourceId = cardBrand.errorIcon,
-                editText = cardNumberEditText
-            )
-        } else {
-            updateEndIcon(
-                iconResourceId = cardBrand.cvcIcon,
-                editText = cardNumberEditText
-            )
-        }
+        cardBrandView.shouldShowErrorIcon = shouldShowErrorIcon
     }
 
     private fun initDeleteEmptyListeners() {
@@ -714,7 +747,7 @@ class CardMultilineWidget @JvmOverloads constructor(
                 }
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.Cvc)
             } else {
-                updateBrandUi()
+                cardBrandView.shouldShowErrorIcon = shouldShowErrorIcon
             }
         }
 
@@ -734,22 +767,11 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private fun updateBrandUi() {
         updateCvc()
-        if (shouldShowErrorIcon) {
-            updateEndIcon(
-                iconResourceId = cardBrand.errorIcon,
-                editText = cardNumberEditText
-            )
-        } else {
-            val cardBrandIcon = cardBrandIconSupplier.get(cardBrand)
-            updateEndIcon(
-                iconResourceId = cardBrandIcon.iconResourceId,
-                editText = cardNumberEditText
-            )
-        }
+        cardBrandView.shouldShowErrorIcon = shouldShowErrorIcon
     }
 
-    private fun updateCvc() {
-        cvcEditText.updateBrand(cardBrand, customCvcLabel, customCvcPlaceholderText, cvcInputLayout)
+    private fun updateCvc(brand: CardBrand = this.brand) {
+        cvcEditText.updateBrand(brand, customCvcLabel, customCvcPlaceholderText, cvcInputLayout)
     }
 
     private fun updateEndIcon(editText: StripeEditText, @DrawableRes iconResourceId: Int) {
@@ -762,21 +784,8 @@ class CardMultilineWidget @JvmOverloads constructor(
             )
         }
     }
-    internal fun interface CardBrandIconSupplier {
-        fun get(cardBrand: CardBrand): CardBrandIcon
-    }
-
-    internal data class CardBrandIcon(
-        val iconResourceId: Int
-    )
 
     private companion object {
         private const val CARD_MULTILINE_TOKEN = "CardMultilineView"
-
-        private val DEFAULT_CARD_BRAND_ICON_SUPPLIER = CardBrandIconSupplier { cardBrand ->
-            CardBrandIcon(
-                cardBrand.icon
-            )
-        }
     }
 }

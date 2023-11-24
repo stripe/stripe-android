@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -22,7 +23,9 @@ import com.stripe.android.databinding.StripeCardFormViewBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.CardElementTestHelper
+import com.stripe.android.utils.FeatureFlags
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
 import com.stripe.android.view.CardFormViewTestActivity.Companion.VIEW_ID
@@ -42,6 +45,12 @@ internal class CardFormViewTest {
 
     @get:Rule
     val testActivityRule = createTestActivityRule<CardFormViewTestActivity>(useMaterial = true)
+
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.cardBrandChoice,
+        isEnabled = false,
+    )
 
     @Before
     fun setup() {
@@ -186,7 +195,7 @@ internal class CardFormViewTest {
             // 2 additional horizontal dividers added to card_multiline_widget.xml, now it has 4 child views
             assertThat(it.cardMultilineWidget.childCount).isEqualTo(4)
             // tl_card_number
-            assertThat(it.cardMultilineWidget.getChildAt(0)).isInstanceOf(
+            assertThat((it.cardMultilineWidget.getChildAt(0) as FrameLayout).getChildAt(0)).isInstanceOf(
                 CardNumberTextInputLayout::class.java
             )
             // horizontal divider
@@ -233,7 +242,7 @@ internal class CardFormViewTest {
             // no child views added to card_multiline_widget.xml, it still has 2 child views
             assertThat(it.cardMultilineWidget.childCount).isEqualTo(2)
             // tl_card_number
-            assertThat(it.cardMultilineWidget.getChildAt(0)).isInstanceOf(
+            assertThat((it.cardMultilineWidget.getChildAt(0) as FrameLayout).getChildAt(0)).isInstanceOf(
                 CardNumberTextInputLayout::class.java
             )
             // second_row_layout
@@ -338,6 +347,44 @@ internal class CardFormViewTest {
                 .isTrue()
             assertThat(currentInvalidFields)
                 .isEmpty()
+        }
+    }
+
+    @Test
+    fun `Returns the correct create params when user selects no brand in CBC flow`() {
+        featureFlagTestRule.setEnabled(true)
+
+        runCardFormViewTest(isCbcEligible = true) {
+            binding.populate(
+                visa = "4000002500001001",
+                month = "12",
+                year = "2030",
+                cvc = "123",
+                zip = "12345"
+            )
+
+            val cardParams = cardFormView.paymentMethodCreateParams?.card
+            assertThat(cardParams?.networks?.preferred).isNull()
+        }
+    }
+
+    @Test
+    fun `Returns the correct create params when user selects a brand in CBC flow`() {
+        featureFlagTestRule.setEnabled(true)
+
+        runCardFormViewTest(isCbcEligible = true) {
+            binding.populate(
+                visa = "4000002500001001",
+                month = "12",
+                year = "2030",
+                cvc = "123",
+                zip = "12345"
+            )
+
+            binding.cardMultilineWidget.cardBrandView.brand = CardBrand.CartesBancaires
+
+            val cardParams = cardFormView.paymentMethodCreateParams?.card
+            assertThat(cardParams?.networks?.preferred).isNull()
         }
     }
 
