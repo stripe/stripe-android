@@ -22,7 +22,9 @@ import com.stripe.android.databinding.StripeCardFormViewBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.CardElementTestHelper
+import com.stripe.android.utils.FeatureFlags
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
 import com.stripe.android.view.CardFormViewTestActivity.Companion.VIEW_ID
@@ -42,6 +44,12 @@ internal class CardFormViewTest {
 
     @get:Rule
     val testActivityRule = createTestActivityRule<CardFormViewTestActivity>(useMaterial = true)
+
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.cardBrandChoice,
+        isEnabled = false,
+    )
 
     @Before
     fun setup() {
@@ -338,6 +346,44 @@ internal class CardFormViewTest {
                 .isTrue()
             assertThat(currentInvalidFields)
                 .isEmpty()
+        }
+    }
+
+    @Test
+    fun `Returns the correct create params when user selects no brand in CBC flow`() {
+        featureFlagTestRule.setEnabled(true)
+
+        runCardFormViewTest(isCbcEligible = true) {
+            binding.populate(
+                visa = "4000002500001001",
+                month = "12",
+                year = "2030",
+                cvc = "123",
+                zip = "12345"
+            )
+
+            val cardParams = cardFormView.paymentMethodCreateParams?.card
+            assertThat(cardParams?.networks?.preferred).isNull()
+        }
+    }
+
+    @Test
+    fun `Returns the correct create params when user selects a brand in CBC flow`() {
+        featureFlagTestRule.setEnabled(true)
+
+        runCardFormViewTest(isCbcEligible = true) {
+            binding.populate(
+                visa = "4000002500001001",
+                month = "12",
+                year = "2030",
+                cvc = "123",
+                zip = "12345"
+            )
+
+            binding.cardMultilineWidget.cardBrandView.brand = CardBrand.CartesBancaires
+
+            val cardParams = cardFormView.paymentMethodCreateParams?.card
+            assertThat(cardParams?.networks?.preferred).isNull()
         }
     }
 

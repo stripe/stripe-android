@@ -1205,6 +1205,36 @@ internal class CardMultilineWidgetTest {
         assertThat(cardMultilineWidget.brand).isEqualTo(CardBrand.DinersClub)
     }
 
+    @Test
+    fun `Returns the correct create params when user selects no brand in CBC flow`() {
+        featureFlagTestRule.setEnabled(true)
+
+        runCardMultilineWidgetTest(isCbcEligible = true) {
+            cardMultilineWidget.setCardNumber("4000002500001001")
+            cardMultilineWidget.setExpiryDate(12, 2030)
+            cardMultilineWidget.setCvcCode("123")
+
+            val cardParams = cardMultilineWidget.paymentMethodCard
+            assertThat(cardParams?.networks?.preferred).isNull()
+        }
+    }
+
+    @Test
+    fun `Returns the correct create params when user selects a brand in CBC flow`() {
+        featureFlagTestRule.setEnabled(true)
+
+        runCardMultilineWidgetTest(isCbcEligible = true) {
+            cardMultilineWidget.setCardNumber("4000002500001001")
+            cardMultilineWidget.setExpiryDate(12, 2030)
+            cardMultilineWidget.setCvcCode("123")
+
+            cardMultilineWidget.cardBrandView.brand = CardBrand.CartesBancaires
+
+            val cardParams = cardMultilineWidget.paymentMethodCard
+            assertThat(cardParams?.networks?.preferred).isEqualTo(CardBrand.CartesBancaires.code)
+        }
+    }
+
     private fun runCardMultilineWidgetTest(
         isCbcEligible: Boolean = false,
         block: TestContext.() -> Unit,
