@@ -35,7 +35,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.testing.FeatureFlagTestRule
-import com.stripe.android.utils.CardInputWidgetTestHelper
+import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.FeatureFlags
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
@@ -1873,7 +1873,7 @@ internal class CardInputWidgetTestActivity : AppCompatActivity() {
             layoutWidthCalculator = CardInputWidget.LayoutWidthCalculator { text, _ -> text.length * 10 }
             frameWidthSupplier = { 500 }
 
-            val storeOwner = CardInputWidgetTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
+            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
             viewModelStoreOwner = storeOwner
             cardNumberEditText.viewModelStoreOwner = storeOwner
 

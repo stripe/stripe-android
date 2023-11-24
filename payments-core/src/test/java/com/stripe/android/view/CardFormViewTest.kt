@@ -1,9 +1,14 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import android.os.Parcelable
 import android.view.View
 import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
@@ -17,9 +22,13 @@ import com.stripe.android.databinding.StripeCardFormViewBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
-import org.junit.After
+import com.stripe.android.utils.createTestActivityRule
+import com.stripe.android.view.CardFormViewTestActivity.Companion.VIEW_ID
+import kotlinx.parcelize.Parcelize
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
@@ -28,176 +37,152 @@ import java.util.Locale
 import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
-class CardFormViewTest {
+internal class CardFormViewTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val activityScenarioFactory = ActivityScenarioFactory(context)
-    private val standardCardFormView: CardFormView by lazy {
-        activityScenarioFactory.createView {
-            CardFormView(it)
-        }
-    }
 
-    private val borderLessCardFormView: CardFormView by lazy {
-        activityScenarioFactory.createView {
-            CardFormView(
-                context = it,
-                attrs = Robolectric.buildAttributeSet()
-                    .addAttribute(R.attr.cardFormStyle, "1")
-                    .build()
-            )
-        }
-    }
-
-    private var standardBinding: StripeCardFormViewBinding? = null
-    private var borderlessBinding: StripeCardFormViewBinding? = null
+    @get:Rule
+    val testActivityRule = createTestActivityRule<CardFormViewTestActivity>(useMaterial = true)
 
     @Before
     fun setup() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        standardBinding = StripeCardFormViewBinding.bind(standardCardFormView)
-        borderlessBinding = StripeCardFormViewBinding.bind(borderLessCardFormView)
-    }
-
-    @After
-    fun teardown() {
-        setLocale(Locale.US)
     }
 
     @Test
     fun `when locale is US then country should be US and postal config should be US`() {
-        setLocale(Locale.US)
-        val binding = StripeCardFormViewBinding.bind(
-            activityScenarioFactory.createView {
-                CardFormView(it)
-            }
-        )
+        runCardFormViewTest(locale = Locale.US) {
+            assertThat(
+                binding.countryLayout.countryAutocomplete.text.toString()
+            ).isEqualTo("United States")
 
-        assertThat(
-            binding.countryLayout.countryAutocomplete.text.toString()
-        ).isEqualTo("United States")
-
-        assertThat(
-            binding.postalCode.config
-        ).isEqualTo(PostalCodeEditText.Config.US)
+            assertThat(
+                binding.postalCode.config
+            ).isEqualTo(PostalCodeEditText.Config.US)
+        }
     }
 
     @Test
     fun `when locale is not US then country should not be US and postal config should be Global`() {
-        setLocale(Locale.CANADA)
-        val binding = StripeCardFormViewBinding.bind(
-            activityScenarioFactory.createView {
-                CardFormView(it)
-            }
-        )
+        runCardFormViewTest(locale = Locale.CANADA) {
+            assertThat(
+                binding.countryLayout.countryAutocomplete.text.toString()
+            ).isEqualTo("Canada")
 
-        assertThat(
-            binding.countryLayout.countryAutocomplete.text.toString()
-        ).isEqualTo("Canada")
-
-        assertThat(
-            binding.postalCode.config
-        ).isEqualTo(PostalCodeEditText.Config.Global)
+            assertThat(
+                binding.postalCode.config
+            ).isEqualTo(PostalCodeEditText.Config.Global)
+        }
     }
 
     @Test
     fun `when all fields are valid then cardParams should return correctly and errors is empty`() {
-        setValuesToStandardUI(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, VALID_US_ZIP)
+        runCardFormViewTest {
+            binding.populate(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, VALID_US_ZIP)
 
-        assertThat(standardCardFormView.cardParams)
-            .isEqualTo(
-                CardParams(
-                    brand = CardBrand.Visa,
-                    loggingTokens = setOf(CardFormView.CARD_FORM_VIEW),
-                    number = CardNumberFixtures.VISA_NO_SPACES,
-                    expMonth = 12,
-                    expYear = 2050,
-                    cvc = VALID_CVC,
-                    address = Address.Builder()
-                        .setCountryCode(CountryCode.US)
-                        .setPostalCode(VALID_US_ZIP)
-                        .build()
+            assertThat(cardFormView.cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.Visa,
+                        loggingTokens = setOf(CardFormView.CARD_FORM_VIEW),
+                        number = CardNumberFixtures.VISA_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2050,
+                        cvc = VALID_CVC,
+                        address = Address.Builder()
+                            .setCountryCode(CountryCode.US)
+                            .setPostalCode(VALID_US_ZIP)
+                            .build()
+                    )
                 )
-            )
 
-        idleLooper()
+            idleLooper()
 
-        standardBinding!!.let {
-            assertThat(it.errors.text).isEqualTo("")
-            assertThat(it.errors.isVisible).isFalse()
+            binding.let {
+                assertThat(it.errors.text).isEqualTo("")
+                assertThat(it.errors.isVisible).isFalse()
+            }
         }
     }
 
     @Test
     fun `when postal field is invalid then cardParams should return null and errors is not empty`() {
-        setValuesToStandardUI(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, INVALID_US_ZIP)
+        runCardFormViewTest {
+            binding.populate(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, INVALID_US_ZIP)
 
-        assertThat(standardCardFormView.cardParams).isNull()
+            assertThat(cardFormView.cardParams).isNull()
 
-        idleLooper()
+            idleLooper()
 
-        standardBinding!!.let {
-            assertThat(it.errors.text).isEqualTo(context.getString(UiCoreR.string.stripe_address_zip_invalid))
-            assertThat(it.errors.isVisible).isTrue()
+            binding.let {
+                assertThat(it.errors.text).isEqualTo(context.getString(UiCoreR.string.stripe_address_zip_invalid))
+                assertThat(it.errors.isVisible).isTrue()
+            }
         }
     }
 
     @Test
     fun `when card number is invalid then cardParams should return null and errors is not empty`() {
-        setValuesToStandardUI(INVALID_VISA, VALID_MONTH, VALID_YEAR, VALID_CVC, VALID_US_ZIP)
+        runCardFormViewTest {
+            binding.populate(INVALID_VISA, VALID_MONTH, VALID_YEAR, VALID_CVC, VALID_US_ZIP)
 
-        assertThat(standardCardFormView.cardParams).isNull()
+            assertThat(cardFormView.cardParams).isNull()
 
-        idleLooper()
+            idleLooper()
 
-        standardBinding!!.let {
-            assertThat(it.errors.text).isEqualTo(context.getString(R.string.stripe_invalid_card_number))
-            assertThat(it.errors.isVisible).isTrue()
+            binding.let {
+                assertThat(it.errors.text).isEqualTo(context.getString(R.string.stripe_invalid_card_number))
+                assertThat(it.errors.isVisible).isTrue()
+            }
         }
     }
 
     @Test
     fun `when expiration is invalid then cardParams should return null and errors is not empty`() {
-        setValuesToStandardUI(VISA_WITH_SPACES, VALID_MONTH, INVALID_YEAR, VALID_CVC, VALID_US_ZIP)
+        runCardFormViewTest {
+            binding.populate(VISA_WITH_SPACES, VALID_MONTH, INVALID_YEAR, VALID_CVC, VALID_US_ZIP)
 
-        assertThat(standardCardFormView.cardParams).isNull()
+            assertThat(cardFormView.cardParams).isNull()
 
-        idleLooper()
+            idleLooper()
 
-        standardBinding!!.let {
-            assertThat(it.errors.text).isEqualTo(context.getString(UiCoreR.string.stripe_invalid_expiry_year))
-            assertThat(it.errors.isVisible).isTrue()
+            binding.let {
+                assertThat(it.errors.text).isEqualTo(context.getString(UiCoreR.string.stripe_invalid_expiry_year))
+                assertThat(it.errors.isVisible).isTrue()
+            }
         }
     }
 
     @Test
     fun `when cvc is invalid then cardParams should return null and errors is not empty`() {
-        setValuesToStandardUI(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, INVALID_CVC, VALID_US_ZIP)
+        runCardFormViewTest {
+            binding.populate(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, INVALID_CVC, VALID_US_ZIP)
 
-        assertThat(standardCardFormView.cardParams).isNull()
+            assertThat(cardFormView.cardParams).isNull()
 
-        idleLooper()
+            idleLooper()
 
-        standardBinding!!.let {
-            assertThat(it.errors.text).isEqualTo(context.getString(R.string.stripe_invalid_cvc))
-            assertThat(it.errors.isVisible).isTrue()
+            binding.let {
+                assertThat(it.errors.text).isEqualTo(context.getString(R.string.stripe_invalid_cvc))
+                assertThat(it.errors.isVisible).isTrue()
+            }
         }
     }
 
     @Test
-    fun `when cvc becomes valid then postal should get focus`() {
-        setValuesToStandardUI(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, INVALID_CVC)
+    fun `when cvc becomes valid then postal should get focus`() = runCardFormViewTest {
+        binding.populate(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, INVALID_CVC)
 
-        assertThat(standardBinding!!.postalCode.hasFocus()).isFalse()
+        assertThat(binding.postalCode.hasFocus()).isFalse()
 
-        standardBinding!!.cardMultilineWidget.cvcEditText.append("3")
+        binding.cardMultilineWidget.cvcEditText.append("3")
 
-        assertThat(standardBinding!!.postalCode.hasFocus()).isTrue()
+        assertThat(binding.postalCode.hasFocus()).isTrue()
     }
 
     @Test
-    fun verifyStandardStyle() {
+    fun verifyStandardStyle() = runCardFormViewTest {
         idleLooper()
-        standardBinding!!.let {
+        binding.let {
             // 2 additional horizontal dividers added to card_multiline_widget.xml, now it has 4 child views
             assertThat(it.cardMultilineWidget.childCount).isEqualTo(4)
             // tl_card_number
@@ -242,9 +227,9 @@ class CardFormViewTest {
     }
 
     @Test
-    fun verifyBorderlessStyle() {
+    fun verifyBorderlessStyle() = runCardFormViewTest(borderless = true) {
         idleLooper()
-        borderlessBinding?.let {
+        binding.let {
             // no child views added to card_multiline_widget.xml, it still has 2 child views
             assertThat(it.cardMultilineWidget.childCount).isEqualTo(2)
             // tl_card_number
@@ -283,11 +268,11 @@ class CardFormViewTest {
     }
 
     @Test
-    fun testCardValidCallback() {
-        standardBinding!!.let {
+    fun testCardValidCallback() = runCardFormViewTest {
+        binding.let {
             var currentIsValid = false
             var currentInvalidFields = emptySet<CardValidCallback.Fields>()
-            standardCardFormView.setCardValidCallback { isValid, invalidFields ->
+            cardFormView.setCardValidCallback { isValid, invalidFields ->
                 currentIsValid = isValid
                 currentInvalidFields = invalidFields
             }
@@ -356,31 +341,53 @@ class CardFormViewTest {
         }
     }
 
-    private fun setValuesToStandardUI(
+    private fun StripeCardFormViewBinding.populate(
         visa: String,
         month: String,
         year: String,
         cvc: String,
         zip: String? = null
     ) {
-        standardBinding!!.let {
-            it.cardMultilineWidget.cardNumberEditText.setText(visa)
-            it.cardMultilineWidget.expiryDateEditText.append(month)
-            it.cardMultilineWidget.expiryDateEditText.append(year)
-            it.cardMultilineWidget.cvcEditText.append(cvc)
-            zip?.let { zipString ->
-                it.postalCode.setText(zipString)
-            }
+        cardMultilineWidget.cardNumberEditText.setText(visa)
+        cardMultilineWidget.expiryDateEditText.append(month)
+        cardMultilineWidget.expiryDateEditText.append(year)
+        cardMultilineWidget.cvcEditText.append(cvc)
+        zip?.let { zipString ->
+            postalCode.setText(zipString)
         }
     }
 
-    private fun setLocale(locale: Locale) {
+    private fun runCardFormViewTest(
+        isCbcEligible: Boolean = false,
+        borderless: Boolean = false,
+        locale: Locale = Locale.US,
+        block: TestContext.() -> Unit,
+    ) {
+        val originalLocale = Locale.getDefault()
         Locale.setDefault(locale)
-        context.resources.configuration.let { config ->
-            config.setLocale(locale)
-            context.resources.updateConfiguration(config, context.resources.displayMetrics)
+
+        val activityScenario = ActivityScenario.launch<CardFormViewTestActivity>(
+            Intent(context, CardFormViewTestActivity::class.java).apply {
+                putExtra("args", CardFormViewTestActivity.Args(isCbcEligible, borderless))
+            }
+        )
+
+        activityScenario.onActivity { activity ->
+            val cardFormView = activity.findViewById<CardFormView>(VIEW_ID)
+            val binding = StripeCardFormViewBinding.bind(cardFormView)
+
+            val testContext = TestContext(cardFormView, binding)
+            block(testContext)
         }
+
+        activityScenario.close()
+        Locale.setDefault(originalLocale)
     }
+
+    private class TestContext(
+        val cardFormView: CardFormView,
+        val binding: StripeCardFormViewBinding,
+    )
 
     companion object {
         const val VALID_MONTH = "12"
@@ -391,5 +398,47 @@ class CardFormViewTest {
         const val VALID_US_ZIP = "95051"
         const val INVALID_US_ZIP = "9505"
         const val INVALID_VISA = "1234 1234 1234 1234"
+    }
+}
+
+internal class CardFormViewTestActivity : AppCompatActivity() {
+
+    @Parcelize
+    data class Args(
+        val isCbcEligible: Boolean,
+        val borderless: Boolean,
+    ) : Parcelable
+
+    private val args: Args by lazy {
+        @Suppress("DEPRECATION")
+        intent.getParcelableExtra("args")!!
+    }
+
+    private val cardFormView: CardFormView by lazy {
+        val style = if (args.borderless) "1" else "0"
+        val attributes = Robolectric.buildAttributeSet()
+            .addAttribute(R.attr.cardFormStyle, style)
+            .build()
+
+        CardFormView(this, attributes).apply {
+            id = VIEW_ID
+
+            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
+            viewModelStoreOwner = storeOwner
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setTheme(R.style.StripeDefaultTheme)
+
+        val layout = LinearLayout(this).apply {
+            addView(cardFormView)
+        }
+        setContentView(layout)
+    }
+
+    companion object {
+        const val VIEW_ID = 12345
     }
 }

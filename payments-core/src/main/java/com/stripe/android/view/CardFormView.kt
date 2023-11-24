@@ -17,6 +17,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.R
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
@@ -95,6 +96,8 @@ class CardFormView @JvmOverloads constructor(
             cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
         }
     }
+
+    internal var viewModelStoreOwner: ViewModelStoreOwner? = null
 
     private enum class Style(
         internal val attrValue: Int
@@ -288,6 +291,9 @@ class CardFormView @JvmOverloads constructor(
         cardMultilineWidget.expiryTextInputLayout.hint = context.getString(UiCoreR.string.stripe_expiration_date_hint)
         cardMultilineWidget.cardNumberTextInputLayout.placeholderText = null
         cardMultilineWidget.setCvcPlaceholderText("")
+
+        cardMultilineWidget.viewModelStoreOwner = viewModelStoreOwner
+        cardMultilineWidget.cardNumberEditText.viewModelStoreOwner = viewModelStoreOwner
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
         cardMultilineWidget.setBackgroundResource(R.drawable.stripe_card_form_view_text_input_layout_background)

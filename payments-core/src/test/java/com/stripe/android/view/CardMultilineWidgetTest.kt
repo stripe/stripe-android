@@ -34,7 +34,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.testing.FeatureFlagTestRule
-import com.stripe.android.utils.CardInputWidgetTestHelper
+import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.FeatureFlags
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
@@ -1281,7 +1281,7 @@ internal class CardMultilineWidgetTestActivity : AppCompatActivity() {
         CardMultilineWidget(this, shouldShowPostalCode = true).apply {
             id = VIEW_ID
 
-            val storeOwner = CardInputWidgetTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
+            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
             viewModelStoreOwner = storeOwner
             cardNumberEditText.viewModelStoreOwner = storeOwner
         }
@@ -1291,7 +1291,7 @@ internal class CardMultilineWidgetTestActivity : AppCompatActivity() {
         CardMultilineWidget(this, shouldShowPostalCode = false).apply {
             id = NO_ZIP_VIEW_ID
 
-            val storeOwner = CardInputWidgetTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
+            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
             viewModelStoreOwner = storeOwner
             cardNumberEditText.viewModelStoreOwner = storeOwner
         }
