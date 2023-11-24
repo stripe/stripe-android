@@ -19,7 +19,7 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
-internal class  SepaMandateActivityTest {
+internal class SepaMandateActivityTest {
     @get:Rule
     val composeRule = createEmptyComposeRule()
 

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -194,7 +195,7 @@ internal class CardFormViewTest {
             // 2 additional horizontal dividers added to card_multiline_widget.xml, now it has 4 child views
             assertThat(it.cardMultilineWidget.childCount).isEqualTo(4)
             // tl_card_number
-            assertThat(it.cardMultilineWidget.getChildAt(0)).isInstanceOf(
+            assertThat((it.cardMultilineWidget.getChildAt(0) as FrameLayout).getChildAt(0)).isInstanceOf(
                 CardNumberTextInputLayout::class.java
             )
             // horizontal divider
@@ -241,7 +242,7 @@ internal class CardFormViewTest {
             // no child views added to card_multiline_widget.xml, it still has 2 child views
             assertThat(it.cardMultilineWidget.childCount).isEqualTo(2)
             // tl_card_number
-            assertThat(it.cardMultilineWidget.getChildAt(0)).isInstanceOf(
+            assertThat((it.cardMultilineWidget.getChildAt(0) as FrameLayout).getChildAt(0)).isInstanceOf(
                 CardNumberTextInputLayout::class.java
             )
             // second_row_layout
