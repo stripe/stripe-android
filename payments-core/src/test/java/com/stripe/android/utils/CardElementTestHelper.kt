@@ -9,7 +9,7 @@ import com.stripe.android.model.MobileCardElementConfig
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.view.CardWidgetViewModel
 
-internal object CardInputWidgetTestHelper {
+internal object CardElementTestHelper {
 
     fun createViewModelStoreOwner(
         isCbcEligible: Boolean,

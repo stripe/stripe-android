@@ -5,17 +5,21 @@ import android.app.Application
 import android.content.ComponentName
 import android.content.pm.ActivityInfo
 import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.R
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowPackageManager
 
-internal inline fun <reified T : Activity> createTestActivityRule(): TestActivityRule<T> {
-    return TestActivityRule(T::class.java)
+internal inline fun <reified T : Activity> createTestActivityRule(
+    useMaterial: Boolean = false,
+): TestActivityRule<T> {
+    return TestActivityRule(T::class.java, useMaterial)
 }
 
 internal class TestActivityRule<T : Activity>(
     private val testActivityClass: Class<T>,
+    private val useMaterial: Boolean,
 ) : TestWatcher() {
 
     private val application: Application
@@ -28,6 +32,7 @@ internal class TestActivityRule<T : Activity>(
         get() = ActivityInfo().apply {
             name = testActivityClass.name
             packageName = application.packageName
+            theme = R.style.StripePaymentSheetDefaultTheme
         }
 
     private val componentName: ComponentName
