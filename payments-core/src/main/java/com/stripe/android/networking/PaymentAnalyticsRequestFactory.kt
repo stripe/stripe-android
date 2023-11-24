@@ -98,13 +98,25 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createPaymentMethodCreation(
-        paymentMethodCode: PaymentMethodCode?,
+        paymentMethodCode: PaymentMethodCode,
         productUsageTokens: Set<String>
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.PaymentMethodCreate,
             sourceType = paymentMethodCode,
             productUsageTokens = productUsageTokens
+        )
+    }
+
+    @JvmSynthetic
+    internal fun createPaymentMethodUpdate(
+        paymentMethodCode: PaymentMethodCode?,
+        productUsageTokens: Set<String>,
+    ): AnalyticsRequest {
+        return createRequest(
+            PaymentAnalyticsEvent.PaymentMethodUpdate,
+            sourceType = paymentMethodCode,
+            productUsageTokens = productUsageTokens,
         )
     }
 

@@ -129,6 +129,36 @@ class PaymentAnalyticsRequestFactoryTest {
     }
 
     @Test
+    fun getPaymentMethodUpdateParams() {
+        assertThat(
+            analyticsRequestFactory
+                .createPaymentMethodUpdate(
+                    PaymentMethod.Type.Card.code,
+                    ATTRIBUTION
+                ).params
+        ).isEqualTo(
+            mapOf(
+                "analytics_ua" to "analytics.stripe_android-1.0",
+                "event" to "stripe_android.payment_method_update",
+                "publishable_key" to "pk_abc123",
+                "os_name" to "REL",
+                "os_release" to "11",
+                "os_version" to 30,
+                "device_type" to "robolectric_robolectric_robolectric",
+                "bindings_version" to StripeSdkVersion.VERSION_NAME,
+                "app_name" to "com.stripe.android.test",
+                "app_version" to 0,
+                "product_usage" to ATTRIBUTION.toList(),
+                "source_type" to "card",
+                "is_development" to true,
+                "session_id" to AnalyticsRequestFactory.sessionId,
+                "network_type" to "2G",
+                "locale" to "en_US",
+            )
+        )
+    }
+
+    @Test
     fun createPaymentIntentConfirmationParams_withValidInput_createsCorrectMap() {
         val loggingParams =
             analyticsRequestFactory.createPaymentIntentConfirmation(

@@ -9,6 +9,7 @@ internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
 
     // Payment Methods
     PaymentMethodCreate("payment_method_creation"),
+    PaymentMethodUpdate("payment_method_update"),
 
     // Customer
     CustomerRetrieve("retrieve_customer"),
