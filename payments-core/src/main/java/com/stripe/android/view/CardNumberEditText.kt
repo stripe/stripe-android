@@ -107,12 +107,20 @@ class CardNumberEditText internal constructor(
             callback(cardBrand)
         }
 
-    private var implicitCardBrandForCbcFlow: CardBrand = CardBrand.Unknown
+    internal var implicitCardBrandForCbc: CardBrand = CardBrand.Unknown
+        set(value) {
+            val prevBrands = field
+            field = value
+            if (value != prevBrands) {
+                implicitCardBrandChangeCallback(value)
+                updateLengthFilter()
+            }
+        }
 
     internal var implicitCardBrandChangeCallback: (CardBrand) -> Unit = {}
         set(callback) {
             field = callback
-            callback(implicitCardBrandForCbcFlow)
+            callback(implicitCardBrandForCbc)
         }
 
     internal var possibleCardBrands: List<CardBrand> = emptyList()
@@ -176,7 +184,7 @@ class CardNumberEditText internal constructor(
                 cardBrand = brands.singleOrNull() ?: CardBrand.Unknown
 
                 if (isCbcEligible) {
-                    implicitCardBrandForCbcFlow = brands.firstOrNull() ?: CardBrand.Unknown
+                    implicitCardBrandForCbc = brands.firstOrNull() ?: CardBrand.Unknown
                     possibleCardBrands = brands
                 }
             }
@@ -227,7 +235,7 @@ class CardNumberEditText internal constructor(
                 val brands = accountRangeService.accountRanges.map { it.brand }.distinct()
 
                 if (isCbcEligible) {
-                    implicitCardBrandForCbcFlow = brands.firstOrNull() ?: CardBrand.Unknown
+                    implicitCardBrandForCbc = brands.firstOrNull() ?: CardBrand.Unknown
                     possibleCardBrands = brands
                 } else {
                     cardBrand = brands.singleOrNull() ?: CardBrand.Unknown
