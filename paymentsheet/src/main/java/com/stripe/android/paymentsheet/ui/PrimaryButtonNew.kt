@@ -13,7 +13,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -43,15 +42,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -60,9 +56,6 @@ import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.getBackgroundColor
-import com.stripe.android.uicore.getBorderStrokeColor
-import com.stripe.android.uicore.getOnBackgroundColor
 import kotlinx.coroutines.delay
 
 private const val FADE_ANIMATION_DURATION = 100
@@ -94,19 +87,16 @@ internal fun PrimaryButton(
     onProcessingCompleted: () -> Unit = {},
     onClick: () -> Unit,
 ) {
-    val context = LocalContext.current
-
     val isProcessingCompleted = processingState is PrimaryButtonProcessingState.Completed
 
-    val style = StripeTheme.primaryButtonStyle
+    val colors = PrimaryButtonTheme.colors
+    val shape = PrimaryButtonTheme.shape
 
-    val processSuccessBackground = colorResource(id = R.color.stripe_paymentsheet_primary_button_success_background)
-
-    val background = remember(isProcessingCompleted) {
+    val background = remember(isProcessingCompleted, colors) {
         if (isProcessingCompleted) {
-            processSuccessBackground
+            colors.successBackground
         } else {
-            Color(style.getBackgroundColor(context))
+            colors.background
         }
     }
 
@@ -119,9 +109,6 @@ internal fun PrimaryButton(
             animationSpec = tween(durationMillis = FADE_ANIMATION_DURATION, easing = LinearEasing)
         ).value
     }
-
-    val borderStroke = BorderStroke(style.shape.borderStrokeWidth.dp, Color(style.getBorderStrokeColor(context)))
-    val shape = RoundedCornerShape(style.shape.cornerRadius.dp)
 
     CompositionLocalProvider(
         LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled,
@@ -138,8 +125,8 @@ internal fun PrimaryButton(
                         minHeight = dimensionResource(id = R.dimen.stripe_paymentsheet_primary_button_height)
                     ),
                 enabled = enabled,
-                shape = shape,
-                border = borderStroke,
+                shape = RoundedCornerShape(shape.cornerRadius),
+                border = BorderStroke(shape.borderStrokeWidth, colors.border),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = animatedBackground,
                     disabledBackgroundColor = animatedBackground,
@@ -198,18 +185,16 @@ private fun BoxScope.StaticIncompleteProcessing(
     processing: Boolean,
     locked: Boolean,
 ) {
-    val context = LocalContext.current
-    val style = StripeTheme.primaryButtonStyle
+    val colors = PrimaryButtonTheme.colors
+    val typography = PrimaryButtonTheme.typography
 
     val textStyle = TextStyle(
-        fontFamily = style.typography.fontFamily?.let { fontFamilyId ->
-            FontFamily(Font(fontFamilyId))
-        } ?: FontFamily.Default,
-        fontSize = style.typography.fontSize,
+        fontFamily = typography.fontFamily ?: FontFamily.Default,
+        fontSize = typography.fontSize,
         fontWeight = FontWeight.Medium,
     )
 
-    val onBackground = Color(style.getOnBackgroundColor(context)).copy(LocalContentAlpha.current)
+    val onBackground = colors.onBackground.copy(LocalContentAlpha.current)
 
     Text(
         text = text,
@@ -241,12 +226,6 @@ private fun BoxScope.AnimatedCompleteProcessing(
     onAnimationCompleted: () -> Unit
 ) {
     val inInspectionMode = LocalInspectionMode.current
-
-    val tint = if (isSystemInDarkTheme()) {
-        Color.Black
-    } else {
-        Color.White
-    }
 
     var animationCompleted by remember {
         mutableStateOf(false)
@@ -295,7 +274,7 @@ private fun BoxScope.AnimatedCompleteProcessing(
                 verticalBias = CENTER_ALIGNED
             )
         ),
-        tint = tint,
+        tint = PrimaryButtonTheme.colors.onSuccessBackground,
         contentDescription = null
     )
 }
