@@ -591,6 +591,9 @@ internal class PaymentOptionsViewModelTest {
         val editViewState = screenTurbine.awaitItem() as PaymentSheetScreen.EditPaymentMethod
         editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
 
+        screenTurbine.expectNoEvents()
+        editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemoveConfirmed)
+
         assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
 
         // The list of payment methods should not be updated until we're back on the SPM screen
