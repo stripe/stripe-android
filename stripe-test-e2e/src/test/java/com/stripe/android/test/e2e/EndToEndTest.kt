@@ -32,6 +32,8 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.test.Test
 
+private const val FrenchPublishableKey = "pk_test_51JtgfQKG6vc7r7YCU0qQNOkDaaHrEgeHgGKrJMNfuWwaKgXMLzPUA1f8ZlCNPonIROLOnzpUnJK1C1xFH3M3Mz8X00Q6O4GfUt"
+
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 internal class EndToEndTest {
@@ -559,7 +561,7 @@ internal class EndToEndTest {
 
     @Test
     fun `Test update payment method`() = runTest {
-        val stripe = Stripe(context, settings.publishableKey)
+        val stripe = Stripe(context, FrenchPublishableKey)
         val customerId = "cus_LvNOzX6BFQtXb5"
 
         val card = PaymentMethodCreateParams.Card.Builder()
