@@ -714,7 +714,7 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun getPaymentAppearance(): PaymentSheet.Appearance {
-        return viewModel.previousConfigureRequest?.configuration?.appearance ?: PaymentSheet.Appearance()
+        return viewModel.state?.config?.appearance ?: PaymentSheet.Appearance()
     }
 
     class BacsMandateException(
