@@ -121,7 +121,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
 
         assertThat(interactor.currentStatus()).isEqualTo(EditPaymentMethodViewState.Status.Idle)
 
-        interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
+        interactor.handleViewAction(EditPaymentMethodViewAction.OnRemoveConfirmed)
 
         testDispatcher.scheduler.advanceTimeBy(50)
 
@@ -144,7 +144,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
 
         val interactor = createInteractor(onRemove = onRemove, workContext = testDispatcher)
 
-        interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
+        interactor.handleViewAction(EditPaymentMethodViewAction.OnRemoveConfirmed)
 
         testDispatcher.scheduler.advanceUntilIdle()
 
