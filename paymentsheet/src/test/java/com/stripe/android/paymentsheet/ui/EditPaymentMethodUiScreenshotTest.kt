@@ -71,6 +71,20 @@ class EditPaymentMethodUiScreenshotTest {
     }
 
     @Test
+    fun testRemovalConfirmationState() {
+        paparazziRule.snapshot {
+            EditPaymentMethodUi(
+                viewState = createViewState(
+                    status = EditPaymentMethodViewState.Status.Idle,
+                    canUpdate = false,
+                    confirmRemoval = true,
+                ),
+                viewActionHandler = {}
+            )
+        }
+    }
+
+    @Test
     fun testRemovingState() {
         paparazziRule.snapshot {
             EditPaymentMethodUi(
@@ -87,6 +101,7 @@ class EditPaymentMethodUiScreenshotTest {
         status: EditPaymentMethodViewState.Status,
         canUpdate: Boolean,
         error: String? = null,
+        confirmRemoval: Boolean = false,
     ): EditPaymentMethodViewState {
         return EditPaymentMethodViewState(
             status = status,
@@ -104,6 +119,7 @@ class EditPaymentMethodUiScreenshotTest {
                 )
             ),
             displayName = "Card",
+            confirmRemoval = confirmRemoval,
             error = error?.let { resolvableString(it) },
         )
     }
