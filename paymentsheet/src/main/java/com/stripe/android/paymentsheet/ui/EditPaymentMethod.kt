@@ -147,10 +147,16 @@ internal fun EditPaymentMethodUi(
             viewState.displayName,
         )
 
+        val message = stringResource(
+            StripeR.string.stripe_card_ending_in,
+            viewState.selectedBrand.brand.displayName,
+            viewState.last4,
+        )
+
         SimpleDialogElementUI(
             openDialog = showRemoveConfirmationDialog.value,
             titleText = title,
-            messageText = null,
+            messageText = message,
             confirmText = stringResource(StripeR.string.stripe_remove),
             dismissText = stringResource(StripeR.string.stripe_cancel),
             destructive = true,

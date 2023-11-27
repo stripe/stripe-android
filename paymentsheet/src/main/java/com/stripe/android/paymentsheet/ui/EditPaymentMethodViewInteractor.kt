@@ -146,9 +146,7 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
     }
 
     private fun PaymentMethod.getPreferredChoice(): EditPaymentMethodViewState.CardBrandChoice {
-        return getCard().networks?.preferred?.let { preferredCode ->
-            CardBrand.fromCode(preferredCode).toChoice()
-        } ?: CardBrand.Unknown.toChoice()
+        return (getCard().displayBrand?.type ?: CardBrand.Unknown).toChoice()
     }
 
     private fun PaymentMethod.getAvailableNetworks(): List<EditPaymentMethodViewState.CardBrandChoice> {
