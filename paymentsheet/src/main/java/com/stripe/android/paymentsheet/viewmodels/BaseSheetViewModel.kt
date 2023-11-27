@@ -503,7 +503,8 @@ internal abstract class BaseSheetViewModel(
             params = PaymentMethodUpdateParams.createCard(
                 networks = PaymentMethodUpdateParams.Card.Networks(
                     preferred = brand.code
-                )
+                ),
+                productUsageTokens = setOf("PaymentSheet"),
             )
         ).onSuccess { updatedMethod ->
             savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods

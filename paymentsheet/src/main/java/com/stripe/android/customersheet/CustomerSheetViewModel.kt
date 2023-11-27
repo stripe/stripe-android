@@ -438,7 +438,8 @@ internal class CustomerSheetViewModel @Inject constructor(
             params = PaymentMethodUpdateParams.createCard(
                 networks = PaymentMethodUpdateParams.Card.Networks(
                     preferred = brand.code
-                )
+                ),
+                productUsageTokens = setOf("CustomerSheet"),
             )
         ).onSuccess { updatedMethod ->
             onBackPressed()

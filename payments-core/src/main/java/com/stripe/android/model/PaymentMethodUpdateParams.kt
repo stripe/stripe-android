@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import java.util.Objects
 
@@ -14,6 +15,7 @@ sealed class PaymentMethodUpdateParams(
 ) : StripeParamsModel, Parcelable {
 
     internal abstract val billingDetails: PaymentMethod.BillingDetails?
+    internal abstract val productUsageTokens: Set<String>
 
     internal abstract fun generateTypeParams(): Map<String, Any>
 
@@ -33,6 +35,7 @@ sealed class PaymentMethodUpdateParams(
         val expiryYear: Int? = null,
         val networks: Networks? = null,
         override val billingDetails: PaymentMethod.BillingDetails?,
+        override val productUsageTokens: Set<String> = emptySet(),
     ) : PaymentMethodUpdateParams(PaymentMethod.Type.Card) {
 
         override fun generateTypeParams(): Map<String, Any> {
@@ -118,6 +121,19 @@ sealed class PaymentMethodUpdateParams(
             billingDetails: PaymentMethod.BillingDetails? = null,
         ): PaymentMethodUpdateParams {
             return Card(expiryMonth, expiryYear, networks, billingDetails)
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @JvmStatic
+        @JvmOverloads
+        fun createCard(
+            expiryMonth: Int? = null,
+            expiryYear: Int? = null,
+            networks: Card.Networks? = null,
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            productUsageTokens: Set<String>,
+        ): PaymentMethodUpdateParams {
+            return Card(expiryMonth, expiryYear, networks, billingDetails, productUsageTokens)
         }
     }
 }
