@@ -21,70 +21,44 @@ fun SimpleDialogElementUI(
     onConfirmListener: () -> Unit,
     onDismissListener: () -> Unit,
 ) {
-    SimpleDialogElementUI(
-        openDialog = true,
-        titleText = titleText,
-        messageText = messageText,
-        confirmText = confirmText,
-        dismissText = dismissText,
-        destructive = destructive,
-        onConfirmListener = onConfirmListener,
-        onDismissListener = onDismissListener,
-    )
-}
-
-@Composable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun SimpleDialogElementUI(
-    openDialog: Boolean,
-    titleText: String,
-    messageText: String?,
-    confirmText: String,
-    dismissText: String,
-    destructive: Boolean = false,
-    onConfirmListener: () -> Unit,
-    onDismissListener: () -> Unit,
-) {
-    if (openDialog) {
-        StripeTheme {
-            AlertDialog(
-                onDismissRequest = {
-                    onDismissListener()
-                },
-                title = {
-                    H4Text(text = titleText)
-                },
-                text = messageText?.let {
-                    {
-                        H6Text(text = it)
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            onConfirmListener()
-                        }
-                    ) {
-                        Text(
-                            text = confirmText,
-                            color = if (destructive) {
-                                MaterialTheme.colors.error
-                            } else {
-                                Color.Unspecified
-                            }
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            onDismissListener()
-                        }
-                    ) {
-                        Text(dismissText)
-                    }
+    StripeTheme {
+        AlertDialog(
+            onDismissRequest = {
+                onDismissListener()
+            },
+            title = {
+                H4Text(text = titleText)
+            },
+            text = messageText?.let {
+                {
+                    H6Text(text = it)
                 }
-            )
-        }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onConfirmListener()
+                    }
+                ) {
+                    Text(
+                        text = confirmText,
+                        color = if (destructive) {
+                            MaterialTheme.colors.error
+                        } else {
+                            Color.Unspecified
+                        }
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        onDismissListener()
+                    }
+                ) {
+                    Text(dismissText)
+                }
+            }
+        )
     }
 }

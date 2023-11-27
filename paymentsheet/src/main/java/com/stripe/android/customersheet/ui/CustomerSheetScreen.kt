@@ -228,20 +228,21 @@ internal fun AddPaymentMethodWithPaymentElement(
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    SimpleDialogElementUI(
-        openDialog = viewState.displayDismissConfirmationModal,
-        titleText = stringResource(id = R.string.stripe_confirm_close_form_title),
-        messageText = stringResource(id = R.string.stripe_confirm_close_form_body),
-        confirmText = stringResource(id = R.string.stripe_paymentsheet_close),
-        dismissText = stringResource(id = PaymentsCoreR.string.stripe_cancel),
-        destructive = true,
-        onDismissListener = {
-            viewActionHandler(CustomerSheetViewAction.OnCancelClose)
-        },
-        onConfirmListener = {
-            viewActionHandler(CustomerSheetViewAction.OnDismissed)
-        }
-    )
+    if (viewState.displayDismissConfirmationModal) {
+        SimpleDialogElementUI(
+            titleText = stringResource(id = R.string.stripe_confirm_close_form_title),
+            messageText = stringResource(id = R.string.stripe_confirm_close_form_body),
+            confirmText = stringResource(id = R.string.stripe_paymentsheet_close),
+            dismissText = stringResource(id = PaymentsCoreR.string.stripe_cancel),
+            destructive = true,
+            onDismissListener = {
+                viewActionHandler(CustomerSheetViewAction.OnCancelClose)
+            },
+            onConfirmListener = {
+                viewActionHandler(CustomerSheetViewAction.OnDismissed)
+            }
+        )
+    }
 
     // TODO (jameswoo) make sure that the spacing is consistent with paymentsheet
     Column {
