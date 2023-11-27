@@ -13,6 +13,29 @@ import com.stripe.android.uicore.elements.H6Text
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun SimpleDialogElementUI(
+    titleText: String,
+    messageText: String?,
+    confirmText: String,
+    dismissText: String,
+    destructive: Boolean = false,
+    onConfirmListener: () -> Unit,
+    onDismissListener: () -> Unit,
+) {
+    SimpleDialogElementUI(
+        openDialog = true,
+        titleText = titleText,
+        messageText = messageText,
+        confirmText = confirmText,
+        dismissText = dismissText,
+        destructive = destructive,
+        onConfirmListener = onConfirmListener,
+        onDismissListener = onDismissListener,
+    )
+}
+
+@Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun SimpleDialogElementUI(
     openDialog: Boolean,
     titleText: String,
     messageText: String?,

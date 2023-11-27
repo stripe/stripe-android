@@ -54,6 +54,7 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
     private val choice = MutableStateFlow(initialPaymentMethod.getPreferredChoice())
     private val status = MutableStateFlow(EditPaymentMethodViewState.Status.Idle)
     private val paymentMethod = MutableStateFlow(initialPaymentMethod)
+    private val confirmRemoval = MutableStateFlow(false)
     private val error = MutableStateFlow<ResolvableString?>(null)
 
     override val coroutineContext: CoroutineContext = workContext + SupervisorJob()
@@ -62,8 +63,9 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
         paymentMethod,
         choice,
         status,
-        error
-    ) { paymentMethod, choice, status, error ->
+        confirmRemoval,
+        error,
+    ) { paymentMethod, choice, status, confirmDeletion, error ->
         val savedChoice = paymentMethod.getPreferredChoice()
         val availableChoices = paymentMethod.getAvailableNetworks()
 
@@ -75,6 +77,7 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
             status = status,
             displayName = displayName,
             error = error,
+            confirmRemoval = confirmDeletion,
         )
     }.stateIn(
         scope = this,
@@ -92,8 +95,10 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
     override fun handleViewAction(viewAction: EditPaymentMethodViewAction) {
         when (viewAction) {
             is EditPaymentMethodViewAction.OnRemovePressed -> onRemovePressed()
+            is EditPaymentMethodViewAction.OnRemoveConfirmed -> onRemoveConfirmed()
             is EditPaymentMethodViewAction.OnUpdatePressed -> onUpdatePressed()
             is EditPaymentMethodViewAction.OnBrandChoiceChanged -> onBrandChoiceChanged(viewAction.choice)
+            is EditPaymentMethodViewAction.OnRemoveConfirmationDismissed -> onRemoveConfirmationDismissed()
         }
     }
 
@@ -102,6 +107,12 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
     }
 
     private fun onRemovePressed() {
+        confirmRemoval.value = true
+    }
+
+    private fun onRemoveConfirmed() {
+        confirmRemoval.value = false
+
         launch {
             error.emit(null)
             status.emit(EditPaymentMethodViewState.Status.Removing)
@@ -138,6 +149,10 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
 
     private fun onBrandChoiceChanged(choice: EditPaymentMethodViewState.CardBrandChoice) {
         this.choice.value = choice
+    }
+
+    private fun onRemoveConfirmationDismissed() {
+        confirmRemoval.value = false
     }
 
     private fun PaymentMethod.getLast4(): String {

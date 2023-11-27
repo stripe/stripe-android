@@ -29,7 +29,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,6 +44,8 @@ import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemoveConfirmationDismissed
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemoveConfirmed
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemovePressed
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnUpdatePressed
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
@@ -84,7 +85,6 @@ internal fun EditPaymentMethodUi(
     val padding = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     val isIdle = viewState.status == EditPaymentMethodViewState.Status.Idle
-    val showRemoveConfirmationDialog = rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = modifier.padding(
@@ -137,11 +137,11 @@ internal fun EditPaymentMethodUi(
         RemoveButton(
             idle = isIdle,
             removing = viewState.status == EditPaymentMethodViewState.Status.Removing,
-            onRemove = { showRemoveConfirmationDialog.value = true },
+            onRemove = { viewActionHandler(OnRemovePressed) },
         )
     }
 
-    if (showRemoveConfirmationDialog.value) {
+    if (viewState.confirmRemoval) {
         val title = stringResource(
             R.string.stripe_paymentsheet_remove_pm,
             viewState.displayName,
@@ -154,17 +154,13 @@ internal fun EditPaymentMethodUi(
         )
 
         SimpleDialogElementUI(
-            openDialog = showRemoveConfirmationDialog.value,
             titleText = title,
             messageText = message,
             confirmText = stringResource(StripeR.string.stripe_remove),
             dismissText = stringResource(StripeR.string.stripe_cancel),
             destructive = true,
-            onConfirmListener = {
-                showRemoveConfirmationDialog.value = false
-                viewActionHandler.invoke(OnRemovePressed)
-            },
-            onDismissListener = { showRemoveConfirmationDialog.value = false }
+            onConfirmListener = { viewActionHandler(OnRemoveConfirmed) },
+            onDismissListener = { viewActionHandler(OnRemoveConfirmationDismissed) },
         )
     }
 }

@@ -7,5 +7,9 @@ internal sealed interface EditPaymentMethodViewAction {
 
     object OnRemovePressed : EditPaymentMethodViewAction
 
+    object OnRemoveConfirmed : EditPaymentMethodViewAction
+
     object OnUpdatePressed : EditPaymentMethodViewAction
+
+    object OnRemoveConfirmationDismissed : EditPaymentMethodViewAction
 }
