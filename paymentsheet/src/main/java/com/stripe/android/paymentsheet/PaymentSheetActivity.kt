@@ -15,7 +15,6 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.uicore.StripeTheme
@@ -56,13 +55,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             registerForActivityResult(
                 GooglePayPaymentMethodLauncherContractV2(),
                 viewModel::onGooglePayResult
-            )
-        )
-
-        viewModel.setupBacsMandateConfirmation(
-            registerForActivityResult(
-                BacsMandateConfirmationContract(),
-                viewModel::onBacsMandateResult
             )
         )
 

@@ -371,12 +371,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    fun setupBacsMandateConfirmation(
-        activityLauncher: ActivityResultLauncher<BacsMandateConfirmationContract.Args>
-    ) {
-        bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncherFactory.create(activityLauncher)
-    }
-
     private fun resetViewState(userErrorMessage: String? = null) {
         viewState.value =
             PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
@@ -521,6 +515,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     ) {
         linkHandler.registerFromActivity(activityResultCaller)
 
+        val bacsActivityResultLauncher = activityResultCaller.registerForActivityResult(
+            BacsMandateConfirmationContract(),
+            ::onBacsMandateResult
+        )
+
+        bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncherFactory.create(
+            bacsActivityResultLauncher
+        )
+
         paymentLauncher = paymentLauncherFactory.create(
             publishableKey = { lazyPaymentConfig.get().publishableKey },
             stripeAccountId = { lazyPaymentConfig.get().stripeAccountId },
@@ -536,6 +539,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     paymentLauncher = null
+                    bacsMandateConfirmationLauncher = null
+                    bacsActivityResultLauncher.unregister()
                     linkHandler.unregisterFromActivity()
                     super.onDestroy(owner)
                 }
@@ -698,7 +703,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    internal fun onBacsMandateResult(result: BacsMandateConfirmationResult) {
+    private fun onBacsMandateResult(result: BacsMandateConfirmationResult) {
         when (result) {
             is BacsMandateConfirmationResult.Confirmed -> {
                 val paymentSelection = selection.value
