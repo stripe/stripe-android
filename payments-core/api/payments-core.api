@@ -968,6 +968,10 @@ public final class com/stripe/android/Stripe {
 	public static synthetic fun retrieveSourceSynchronous$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/Source;
 	public static final fun setAdvancedFraudSignalsEnabled (Z)V
 	public static final fun setAppInfo (Lcom/stripe/android/core/AppInfo;)V
+	public final fun updatePaymentMethod (Ljava/lang/String;Lcom/stripe/android/model/PaymentMethodUpdateParams;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
+	public final fun updatePaymentMethod (Ljava/lang/String;Lcom/stripe/android/model/PaymentMethodUpdateParams;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
+	public final fun updatePaymentMethod (Ljava/lang/String;Lcom/stripe/android/model/PaymentMethodUpdateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
+	public static synthetic fun updatePaymentMethod$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethodUpdateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;ILjava/lang/Object;)V
 	public final fun verifyPaymentIntentWithMicrodeposits (Ljava/lang/String;IILcom/stripe/android/ApiResultCallback;)V
 	public final fun verifyPaymentIntentWithMicrodeposits (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun verifySetupIntentWithMicrodeposits (Ljava/lang/String;IILcom/stripe/android/ApiResultCallback;)V
@@ -1050,6 +1054,8 @@ public final class com/stripe/android/StripeKtxKt {
 	public static synthetic fun retrieveSetupIntent$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun retrieveSource (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun retrieveSource$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun updatePaymentMethod (Lcom/stripe/android/Stripe;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethodUpdateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun updatePaymentMethod$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethodUpdateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun verifyPaymentIntentWithMicrodeposits (Lcom/stripe/android/Stripe;Ljava/lang/String;IILkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun verifyPaymentIntentWithMicrodeposits (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun verifySetupIntentWithMicrodeposits (Lcom/stripe/android/Stripe;Ljava/lang/String;IILkotlin/coroutines/Continuation;)Ljava/lang/Object;
