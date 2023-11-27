@@ -6,15 +6,15 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.isUnspecified
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.isUnspecified
+import androidx.compose.ui.unit.takeOrElse
+import androidx.core.content.ContextCompat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
@@ -71,9 +71,6 @@ internal object PrimaryButtonTheme {
         val localColors = LocalPrimaryButtonColors.current
         val isDarkTheme = isSystemInDarkTheme()
 
-        val defaultSuccessBackground =
-            colorResource(id = R.color.stripe_paymentsheet_primary_button_success_background)
-
         return remember(
             style,
             context,
@@ -81,35 +78,30 @@ internal object PrimaryButtonTheme {
             isDarkTheme
         ) {
             PrimaryButtonColors(
-                background = if (localColors.background.isUnspecified) {
+                background = localColors.background.takeOrElse {
                     Color(style.getBackgroundColor(context))
-                } else {
-                    localColors.background
                 },
-                onBackground = if (localColors.onBackground.isUnspecified) {
+                onBackground = localColors.onBackground.takeOrElse {
                     Color(style.getOnBackgroundColor(context))
-                } else {
-                    localColors.onBackground
                 },
-                successBackground = if (localColors.successBackground.isUnspecified) {
-                    defaultSuccessBackground
-                } else {
-                    localColors.successBackground
+                successBackground = localColors.successBackground.takeOrElse {
+                    Color(
+                        ContextCompat.getColor(
+                            context,
+                            R.color.stripe_paymentsheet_primary_button_success_background
+                        )
+                    )
                 },
-                onSuccessBackground = if (localColors.onSuccessBackground.isUnspecified) {
+                onSuccessBackground = localColors.onSuccessBackground.takeOrElse {
                     if (isDarkTheme) {
                         Color.Black
                     } else {
                         Color.White
                     }
-                } else {
-                    localColors.onSuccessBackground
                 },
-                border = if (localColors.border.isUnspecified) {
+                border = localColors.border.takeOrElse {
                     Color(style.getBorderStrokeColor(context))
-                } else {
-                    localColors.border
-                }
+                },
             )
         }
     }
@@ -121,15 +113,11 @@ internal object PrimaryButtonTheme {
 
         return remember(style, localShape) {
             PrimaryButtonShape(
-                cornerRadius = if (localShape.cornerRadius.isUnspecified) {
+                cornerRadius = localShape.cornerRadius.takeOrElse {
                     style.shape.cornerRadius.dp
-                } else {
-                    localShape.cornerRadius
                 },
-                borderStrokeWidth = if (localShape.borderStrokeWidth.isUnspecified) {
+                borderStrokeWidth = localShape.borderStrokeWidth.takeOrElse {
                     style.shape.borderStrokeWidth.dp
-                } else {
-                    localShape.borderStrokeWidth
                 }
             )
         }
@@ -146,10 +134,8 @@ internal object PrimaryButtonTheme {
                     ?: style.typography.fontFamily?.let { fontFamily ->
                         FontFamily(Font(fontFamily))
                     },
-                fontSize = if (localTypography.fontSize.isUnspecified) {
+                fontSize = localTypography.fontSize.takeOrElse {
                     style.typography.fontSize
-                } else {
-                    localTypography.fontSize
                 }
             )
         }
