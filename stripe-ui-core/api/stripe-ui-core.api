@@ -269,6 +269,14 @@ public final class com/stripe/android/uicore/elements/TextFieldUIKt {
 public final class com/stripe/android/uicore/elements/menu/CheckboxKt {
 }
 
+public final class com/stripe/android/uicore/forms/FormFieldEntry$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/uicore/forms/FormFieldEntry;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/uicore/forms/FormFieldEntry;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/uicore/image/ComposableSingletons$StripeImageKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/image/ComposableSingletons$StripeImageKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
