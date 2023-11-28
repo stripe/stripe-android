@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnBrandChoiceChanged
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemoveConfirmed
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemovePressed
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnUpdatePressed
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
@@ -2441,6 +2442,9 @@ class CustomerSheetViewModelTest {
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
             editViewState.editPaymentMethodInteractor.handleViewAction(OnRemovePressed)
 
+            expectNoEvents()
+            editViewState.editPaymentMethodInteractor.handleViewAction(OnRemoveConfirmed)
+
             // Confirm that nothing has changed yet. We're waiting to remove the payment method
             // once we return to the SPM screen.
             val updatedViewState = awaitViewState<SelectPaymentMethod>()
@@ -2473,6 +2477,9 @@ class CustomerSheetViewModelTest {
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
             editViewState.editPaymentMethodInteractor.handleViewAction(OnRemovePressed)
+
+            expectNoEvents()
+            editViewState.editPaymentMethodInteractor.handleViewAction(OnRemoveConfirmed)
 
             // Confirm that nothing has changed yet. We're waiting to remove the payment method
             // once we return to the SPM screen.
