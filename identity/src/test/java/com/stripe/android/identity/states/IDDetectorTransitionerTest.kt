@@ -37,7 +37,7 @@ internal class IDDetectorTransitionerTest {
         transitioner.timeoutAt = mockNeverTimeoutClockMark
 
         val foundState = IdentityScanState.Found(
-            ScanType.ID_FRONT,
+            ScanType.DOC_FRONT,
             transitioner,
             mockReachedStateAt
         )
@@ -64,7 +64,7 @@ internal class IDDetectorTransitionerTest {
         transitioner.timeoutAt = mockNeverTimeoutClockMark
 
         val foundState = IdentityScanState.Found(
-            ScanType.ID_FRONT,
+            ScanType.DOC_FRONT,
             transitioner,
             mockReachedStateAt
         )
@@ -94,7 +94,7 @@ internal class IDDetectorTransitionerTest {
             transitioner.timeoutAt = mockNeverTimeoutClockMark
 
             val mockFoundState = mock<IdentityScanState.Found>().also {
-                whenever(it.type).thenReturn(ScanType.ID_FRONT)
+                whenever(it.type).thenReturn(ScanType.DOC_FRONT)
                 whenever(it.reachedStateAt).thenReturn(mockReachedStateAt)
                 whenever(it.transitioner).thenReturn(transitioner)
             }
@@ -121,7 +121,7 @@ internal class IDDetectorTransitionerTest {
 
             assertThat(resultState).isInstanceOf(IdentityScanState.Satisfied::class.java)
             assertThat((resultState as IdentityScanState.Satisfied).type).isEqualTo(
-                ScanType.ID_FRONT
+                ScanType.DOC_FRONT
             )
         }
 
@@ -142,7 +142,7 @@ internal class IDDetectorTransitionerTest {
             whenever(mockReachedStateAt.elapsedSince()).thenReturn((timeRequired - 10).milliseconds)
 
             val foundState = IdentityScanState.Found(
-                ScanType.ID_FRONT,
+                ScanType.DOC_FRONT,
                 transitioner,
                 mockReachedStateAt
             )
@@ -186,7 +186,7 @@ internal class IDDetectorTransitionerTest {
             // never meets required time
             whenever(mockReachedStateAt.elapsedSince()).thenReturn((timeRequired - 10).milliseconds)
             val mockFoundState = mock<IdentityScanState.Found>().also {
-                whenever(it.type).thenReturn(ScanType.ID_FRONT)
+                whenever(it.type).thenReturn(ScanType.DOC_FRONT)
                 whenever(it.reachedStateAt).thenReturn(mockReachedStateAt)
                 whenever(it.transitioner).thenReturn(transitioner)
             }
@@ -222,9 +222,9 @@ internal class IDDetectorTransitionerTest {
 
             assertThat(resultState).isInstanceOf(IdentityScanState.Unsatisfied::class.java)
             assertThat((resultState as IdentityScanState.Unsatisfied).reason).isEqualTo(
-                "Type ${Category.ID_BACK} doesn't match ${ScanType.ID_FRONT}"
+                "Type ${Category.ID_BACK} doesn't match ${ScanType.DOC_FRONT}"
             )
-            assertThat(resultState.type).isEqualTo(ScanType.ID_FRONT)
+            assertThat(resultState.type).isEqualTo(ScanType.DOC_FRONT)
         }
 
     @Test
@@ -243,7 +243,7 @@ internal class IDDetectorTransitionerTest {
             // never meets required time
             whenever(mockReachedStateAt.elapsedSince()).thenReturn((timeRequired - 10).milliseconds)
             val mockFoundState = mock<IdentityScanState.Found>().also {
-                whenever(it.type).thenReturn(ScanType.ID_FRONT)
+                whenever(it.type).thenReturn(ScanType.DOC_FRONT)
                 whenever(it.reachedStateAt).thenReturn(mockReachedStateAt)
                 whenever(it.transitioner).thenReturn(transitioner)
             }
@@ -280,7 +280,7 @@ internal class IDDetectorTransitionerTest {
             )
 
             assertThat(resultState).isInstanceOf(IdentityScanState.Satisfied::class.java)
-            assertThat(resultState.type).isEqualTo(ScanType.ID_FRONT)
+            assertThat(resultState.type).isEqualTo(ScanType.DOC_FRONT)
         }
 
     @Test
@@ -292,7 +292,7 @@ internal class IDDetectorTransitionerTest {
         transitioner.timeoutAt = mockAlwaysTimeoutClockMark
 
         val initialState = IdentityScanState.Initial(
-            ScanType.ID_FRONT,
+            ScanType.DOC_FRONT,
             transitioner
         )
 
@@ -314,7 +314,7 @@ internal class IDDetectorTransitionerTest {
         transitioner.timeoutAt = mockNeverTimeoutClockMark
 
         val initialState = IdentityScanState.Initial(
-            ScanType.ID_FRONT,
+            ScanType.DOC_FRONT,
             transitioner
         )
 
@@ -336,7 +336,7 @@ internal class IDDetectorTransitionerTest {
         transitioner.timeoutAt = mockNeverTimeoutClockMark
 
         val initialState = IdentityScanState.Initial(
-            ScanType.ID_FRONT,
+            ScanType.DOC_FRONT,
             transitioner
         )
 
@@ -365,7 +365,7 @@ internal class IDDetectorTransitionerTest {
             assertThat(
                 transitioner.transitionFromSatisfied(
                     IdentityScanState.Satisfied(
-                        ScanType.ID_FRONT,
+                        ScanType.DOC_FRONT,
                         transitioner,
                         reachedStateAt = mockReachAtClockMark
                     ),
@@ -390,7 +390,7 @@ internal class IDDetectorTransitionerTest {
 
             val satisfiedState =
                 IdentityScanState.Satisfied(
-                    ScanType.ID_FRONT,
+                    ScanType.DOC_FRONT,
                     transitioner,
                     reachedStateAt = mockReachAtClockMark
                 )
@@ -413,7 +413,7 @@ internal class IDDetectorTransitionerTest {
             transitioner.transitionFromUnsatisfied(
                 IdentityScanState.Unsatisfied(
                     "reason",
-                    ScanType.ID_FRONT,
+                    ScanType.DOC_FRONT,
                     transitioner
                 ),
                 mock(),
@@ -438,7 +438,7 @@ internal class IDDetectorTransitionerTest {
             val unsatisfiedState =
                 IdentityScanState.Unsatisfied(
                     "reason",
-                    ScanType.ID_FRONT,
+                    ScanType.DOC_FRONT,
                     transitioner,
                     reachedStateAt = mockReachAtClockMark
                 )
@@ -471,7 +471,7 @@ internal class IDDetectorTransitionerTest {
             val unsatisfiedState =
                 IdentityScanState.Unsatisfied(
                     "reason",
-                    ScanType.ID_FRONT,
+                    ScanType.DOC_FRONT,
                     transitionerSpy,
                     reachedStateAt = mockReachAtClockMark
                 )

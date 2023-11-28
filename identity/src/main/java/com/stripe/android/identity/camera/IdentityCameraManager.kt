@@ -40,6 +40,13 @@ internal abstract class IdentityCameraManager {
      */
     protected open fun onInitialized() {}
 
+    open fun toggleInitial() {}
+    open fun toggleFound() {}
+    open fun toggleSatisfied() {}
+    open fun toggleUnsatisfied() {}
+    open fun toggleTimeOut() {}
+    open fun toggleFinished() {}
+
     protected companion object {
         val MINIMUM_RESOLUTION = Size(1440, 1080)
     }
