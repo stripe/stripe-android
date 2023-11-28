@@ -19,7 +19,6 @@ dependencies {
     implementation libs.androidx.browser
     implementation libs.androidx.constraintLayout
     implementation libs.androidx.fragment
-    implementation libs.androidx.liveDataKtx
     implementation libs.androidx.recyclerView
     implementation libs.androidx.savedState
     implementation libs.androidx.viewModel

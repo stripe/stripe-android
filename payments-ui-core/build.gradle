@@ -15,7 +15,6 @@ dependencies {
     implementation libs.androidx.coreKtx
     implementation libs.androidx.annotation
     implementation libs.androidx.appCompat
-    implementation libs.androidx.liveDataKtx
     implementation libs.material
     implementation libs.dagger
     ksp libs.daggerCompiler
@@ -25,7 +24,6 @@ dependencies {
     implementation libs.compose.material
     implementation libs.compose.materialIcons
     implementation libs.compose.activity
-    implementation libs.compose.liveData
     implementation libs.accompanist.flowLayout
     implementation libs.compose.uiToolingPreview
 
