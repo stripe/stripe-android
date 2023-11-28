@@ -12,7 +12,6 @@ internal fun ScanDestinationEffect(
 ) {
     DisposableEffect(Unit) {
         onDispose {
-            identityScanViewModel.clearDisplayStateChangedFlow()
             identityScanViewModel.stopScan(lifecycleOwner)
         }
     }

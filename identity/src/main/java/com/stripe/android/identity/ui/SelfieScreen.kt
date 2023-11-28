@@ -28,7 +28,6 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -93,12 +92,6 @@ internal fun SelfieScanScreen(
     identityViewModel: IdentityViewModel,
     identityScanViewModel: IdentityScanViewModel,
 ) {
-    val changedDisplayState by identityScanViewModel.displayStateChangedFlow.collectAsState()
-    val newDisplayState by remember {
-        derivedStateOf {
-            changedDisplayState?.first
-        }
-    }
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraManager = remember {
@@ -129,15 +122,20 @@ internal fun SelfieScanScreen(
 
         val selfieScannerState by identityScanViewModel.scannerState.collectAsState()
 
-        when (selfieScannerState) {
-            IdentityScanViewModel.State.Initial -> {
-                LoadingScreen()
-            }
+        LiveCaptureLaunchedEffect(
+            scannerState = selfieScannerState,
+            identityScanViewModel = identityScanViewModel,
+            identityViewModel = identityViewModel,
+            lifecycleOwner = lifecycleOwner,
+            verificationPage = pageAndModelFiles.page,
+            navController = navController
+        )
 
+        when (selfieScannerState) {
             IdentityScanViewModel.State.Initializing -> {
                 LoadingScreen()
             }
-            // TODO(IDPROD-6555) - separate Initialized, Scanning and Scanned
+
             else -> {
                 val successSelfieCapturePage =
                     remember {
@@ -148,21 +146,8 @@ internal fun SelfieScanScreen(
                             navController.navigateToErrorScreenWithDefaultValues(context)
                         }
                     }
-
-                LaunchedEffect(newDisplayState) {
-                    if (newDisplayState is IdentityScanState.Finished) {
-                        identityScanViewModel.stopScan(lifecycleOwner)
-                    }
-                }
-
-                CameraScreenLaunchedEffect(
-                    identityViewModel = identityViewModel,
-                    identityScanViewModel = identityScanViewModel,
-                    verificationPage = pageAndModelFiles.page,
-                    navController = navController
-                )
                 SelfieCaptureScreen(
-                    newDisplayState = newDisplayState,
+                    selfieScannerState = selfieScannerState,
                     successSelfieCapturePage = successSelfieCapturePage,
                     identityViewModel = identityViewModel,
                     identityScanViewModel = identityScanViewModel,
@@ -177,7 +162,7 @@ internal fun SelfieScanScreen(
 
 @Composable
 private fun SelfieCaptureScreen(
-    newDisplayState: IdentityScanState?,
+    selfieScannerState: IdentityScanViewModel.State,
     successSelfieCapturePage: VerificationPageStaticContentSelfieCapturePage,
     identityViewModel: IdentityViewModel,
     identityScanViewModel: IdentityScanViewModel,
@@ -207,9 +192,15 @@ private fun SelfieCaptureScreen(
     var flashed by remember {
         mutableStateOf(false)
     }
-
     val imageAlpha: Float by animateFloatAsState(
-        targetValue = if (!flashed && newDisplayState is IdentityScanState.Found) FLASH_MAX_ALPHA else 0f,
+        targetValue = if (
+            !flashed && selfieScannerState is IdentityScanViewModel.State.Scanning &&
+            selfieScannerState.scanState is IdentityScanState.Found
+        ) {
+            FLASH_MAX_ALPHA
+        } else {
+            0f
+        },
         animationSpec = tween(
             durationMillis = FLASH_ANIMATION_TIME,
             easing = LinearEasing,
@@ -220,24 +211,31 @@ private fun SelfieCaptureScreen(
         label = "flashAnimation"
     )
 
-    val message = when (newDisplayState) {
-        is IdentityScanState.Finished ->
-            stringResource(id = R.string.stripe_selfie_capture_complete)
+    val message = when (selfieScannerState) {
+        is IdentityScanViewModel.State.Scanning -> {
+            when (selfieScannerState.scanState) {
+                is IdentityScanState.Finished ->
+                    stringResource(id = R.string.stripe_selfie_capture_complete)
 
-        is IdentityScanState.Found ->
-            stringResource(id = R.string.stripe_capturing)
+                is IdentityScanState.Found ->
+                    stringResource(id = R.string.stripe_capturing)
 
-        is IdentityScanState.Initial ->
-            stringResource(id = R.string.stripe_position_selfie)
+                is IdentityScanState.Initial ->
+                    stringResource(id = R.string.stripe_position_selfie)
 
-        is IdentityScanState.Satisfied ->
-            stringResource(id = R.string.stripe_selfie_capture_complete)
+                is IdentityScanState.Satisfied ->
+                    stringResource(id = R.string.stripe_selfie_capture_complete)
 
-        is IdentityScanState.TimeOut -> ""
-        is IdentityScanState.Unsatisfied -> ""
-        null -> {
-            stringResource(id = R.string.stripe_position_selfie)
+                is IdentityScanState.TimeOut -> ""
+                is IdentityScanState.Unsatisfied -> ""
+                null -> {
+                    stringResource(id = R.string.stripe_position_selfie)
+                }
+            }
         }
+
+        is IdentityScanViewModel.State.Scanned -> stringResource(id = R.string.stripe_selfie_capture_complete)
+        else -> ""
     }
 
     Column(
@@ -282,9 +280,9 @@ private fun SelfieCaptureScreen(
                 maxLines = 3
             )
 
-            if (newDisplayState is IdentityScanState.Finished) {
+            if (selfieScannerState is IdentityScanViewModel.State.Scanned) {
                 ResultView(
-                    displayState = newDisplayState,
+                    displayState = selfieScannerState.result.identityState,
                     allowImageCollectionHtml = successSelfieCapturePage.consentText,
                     isSubmittingSelfie = isSubmittingSelfie,
                     allowImageCollection = allowImageCollection,
@@ -296,9 +294,9 @@ private fun SelfieCaptureScreen(
                 SelfieCameraViewFinder(imageAlpha, cameraManager)
             }
         }
-        var loadingButtonState by remember(newDisplayState) {
+        var loadingButtonState by remember(selfieScannerState) {
             mutableStateOf(
-                if (newDisplayState is IdentityScanState.Finished) {
+                if (selfieScannerState is IdentityScanViewModel.State.Scanned) {
                     LoadingButtonState.Idle
                 } else {
                     LoadingButtonState.Disabled
@@ -317,9 +315,9 @@ private fun SelfieCaptureScreen(
             coroutineScope.launch {
                 identityViewModel.collectDataForSelfieScreen(
                     navController = navController,
-                    faceDetectorTransitioner =
-                    requireNotNull(
-                        newDisplayState?.transitioner as? FaceDetectorTransitioner
+                    faceDetectorTransitioner = requireNotNull(
+                        (selfieScannerState as? IdentityScanViewModel.State.Scanned)
+                            ?.result?.identityState?.transitioner as FaceDetectorTransitioner
                     ) {
                         "Failed to retrieve final result for Selfie"
                     },

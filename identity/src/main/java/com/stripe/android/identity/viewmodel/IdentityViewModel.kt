@@ -27,7 +27,6 @@ import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.analytics.AnalyticsState
-import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
@@ -109,7 +108,6 @@ internal class IdentityViewModel constructor(
     private val identityModelFetcher: IdentityModelFetcher,
     private val identityIO: IdentityIO,
     internal val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
-    internal val fpsTracker: FPSTracker,
     internal val screenTracker: ScreenTracker,
     internal val imageHandler: IdentityImageHandler,
     internal val addressSchemaRepository: AddressSchemaRepository,
@@ -1755,7 +1753,6 @@ internal class IdentityViewModel constructor(
                 subcomponent.identityModelFetcher,
                 subcomponent.identityIO,
                 subcomponent.identityAnalyticsRequestFactory,
-                subcomponent.fpsTracker,
                 subcomponent.screenTracker,
                 subcomponent.identityImageHandler,
                 subcomponent.addressRepository,
