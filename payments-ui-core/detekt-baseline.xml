@@ -40,6 +40,7 @@
     <ID>MagicNumber:Menu.kt$0.8f</ID>
     <ID>MaxLineLength:AddressElementTest.kt$AddressElementTest$fun</ID>
     <ID>MaxLineLength:AndroidMenu.kt$*</ID>
+    <ID>MaxLineLength:CardDetailsControllerTest.kt$CardDetailsControllerTest$fun</ID>
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.determineState(CardBrand.Visa, "", CardBrand.Visa.getMaxLengthForCardNumber("")))</ID>
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.AMEX_NO_SPACES)).text)</ID>
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES)).text)</ID>
@@ -53,6 +54,7 @@
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Visa, "1234567890123456789", CardBrand.Visa.getMaxLengthForCardNumber("1234567890123456789"))</ID>
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Visa, "4242424242424242", CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242"))</ID>
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Visa, "4242424242424243", CardBrand.Visa.getMaxLengthForCardNumber("4242424242424243"))</ID>
+    <ID>MaxLineLength:CardNumberControllerTest.kt$CardNumberControllerTest$fun</ID>
     <ID>MaxLineLength:LpmRepository.kt$LpmRepository.SupportedPaymentMethod$/** This describes the image in the LPM selector. These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */</ID>
     <ID>MaxLineLength:LpmRepositoryTest.kt$LpmRepositoryTest$fun</ID>
     <ID>MaxLineLength:NextActionSpec.kt$PostConfirmHandlingPiStatusSpecsSerializer$override</ID>
