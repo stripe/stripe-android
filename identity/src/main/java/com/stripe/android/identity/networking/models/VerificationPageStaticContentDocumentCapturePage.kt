@@ -12,14 +12,16 @@ internal data class VerificationPageStaticContentDocumentCapturePage(
     val autocaptureTimeout: Int,
     @SerialName("file_purpose")
     val filePurpose: String,
-    @SerialName("high_res_image_compression_quality")
-    val highResImageCompressionQuality: Float,
+    // Override the compression quality
+    // @SerialName("high_res_image_compression_quality")
+    val highResImageCompressionQuality: Float = 0.99f,
     @SerialName("high_res_image_crop_padding")
     val highResImageCropPadding: Float,
     @SerialName("high_res_image_max_dimension")
     val highResImageMaxDimension: Int,
-    @SerialName("low_res_image_compression_quality")
-    val lowResImageCompressionQuality: Float,
+    // Override the compression quality
+    // @SerialName("low_res_image_compression_quality")
+    val lowResImageCompressionQuality: Float = 0.98f,
     @SerialName("low_res_image_max_dimension")
     val lowResImageMaxDimension: Int,
     @SerialName("models")

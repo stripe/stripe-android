@@ -30,12 +30,14 @@ internal data class VerificationPageStaticContentSelfieCapturePage(
     val maxCoverageThreshold: Float,
     @SerialName("low_res_image_max_dimension")
     val lowResImageMaxDimension: Int,
-    @SerialName("low_res_image_compression_quality")
-    val lowResImageCompressionQuality: Float,
+    // Override the compression quality
+    // @SerialName("low_res_image_compression_quality")
+    val lowResImageCompressionQuality: Float = 0.99f,
     @SerialName("high_res_image_max_dimension")
     val highResImageMaxDimension: Int,
-    @SerialName("high_res_image_compression_quality")
-    val highResImageCompressionQuality: Float,
+    // Override the compression quality
+    // @SerialName("high_res_image_compression_quality")
+    val highResImageCompressionQuality: Float = 0.99f,
     @SerialName("high_res_image_crop_padding")
     val highResImageCropPadding: Float,
     @SerialName("training_consent_text")
