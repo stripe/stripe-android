@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.35.0 - 2023-11-28
+
 ### PaymentSheet
 * [ADDED][7249](https://github.com/stripe/stripe-android/pull/7249) PaymentSheet now supports configuring the Google Pay button type.
 * [ADDED][7644](https://github.com/stripe/stripe-android/pull/7644) Added support for updating a payment method in the experimental CustomerAdapter interface.
