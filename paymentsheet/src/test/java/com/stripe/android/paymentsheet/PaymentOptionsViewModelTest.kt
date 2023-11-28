@@ -711,7 +711,7 @@ internal class PaymentOptionsViewModelTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
         private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
-            state = PaymentSheetState.Full(
+            state = PaymentSheetState(
                 stripeIntent = PAYMENT_INTENT,
                 customerPaymentMethods = emptyList(),
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,

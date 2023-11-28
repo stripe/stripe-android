@@ -23,7 +23,7 @@ import javax.inject.Named
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal interface CustomerSheetLoader {
-    suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full>
+    suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState>
 }
 
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -35,7 +35,7 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
     private val lpmRepository: LpmRepository,
     private val customerAdapter: CustomerAdapter,
 ) : CustomerSheetLoader {
-    override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full> {
+    override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState> {
         val elementsSession = if (customerAdapter.canCreateSetupIntents) {
             retrieveElementsSession(configuration).getOrElse {
                 return Result.failure(it)
@@ -138,7 +138,7 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
                 }
 
                 Result.success(
-                    CustomerSheetState.Full(
+                    CustomerSheetState(
                         config = configuration,
                         stripeIntent = elementsSession?.stripeIntent,
                         supportedPaymentMethods = validSupportedPaymentMethods,

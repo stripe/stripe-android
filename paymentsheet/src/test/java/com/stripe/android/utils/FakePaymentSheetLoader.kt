@@ -31,13 +31,13 @@ internal class FakePaymentSheetLoader(
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration
-    ): Result<PaymentSheetState.Full> {
+    ): Result<PaymentSheetState> {
         delay(delay)
         return if (shouldFail) {
             Result.failure(IllegalStateException("oh no"))
         } else {
             Result.success(
-                PaymentSheetState.Full(
+                PaymentSheetState(
                     config = paymentSheetConfiguration,
                     stripeIntent = stripeIntent,
                     customerPaymentMethods = customerPaymentMethods,

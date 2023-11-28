@@ -26,7 +26,7 @@ internal class FlowControllerViewModel(
     @Volatile
     var previousConfigureRequest: FlowControllerConfigurationHandler.ConfigureRequest? = null
 
-    var state: PaymentSheetState.Full?
+    var state: PaymentSheetState?
         get() = handle[STATE_KEY]
         set(value) {
             handle[STATE_KEY] = value

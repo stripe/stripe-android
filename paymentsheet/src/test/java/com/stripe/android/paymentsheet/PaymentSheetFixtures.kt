@@ -103,7 +103,7 @@ internal object PaymentSheetFixtures {
     )
 
     internal val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
-        state = PaymentSheetState.Full(
+        state = PaymentSheetState(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             customerPaymentMethods = emptyList(),
             config = CONFIG_GOOGLEPAY,

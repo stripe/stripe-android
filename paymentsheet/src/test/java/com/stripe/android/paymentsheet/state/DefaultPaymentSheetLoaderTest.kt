@@ -124,7 +124,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             ).getOrThrow()
         ).isEqualTo(
-            PaymentSheetState.Full(
+            PaymentSheetState(
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                 customerPaymentMethods = PAYMENT_METHODS,
@@ -158,7 +158,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             ).getOrThrow()
         ).isEqualTo(
-            PaymentSheetState.Full(
+            PaymentSheetState(
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                 customerPaymentMethods = PAYMENT_METHODS,

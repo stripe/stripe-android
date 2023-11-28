@@ -247,10 +247,10 @@ class PaymentSelectionUpdaterTest {
         paymentSelection: PaymentSelection? = null,
         customerPaymentMethods: List<PaymentMethod> = emptyList(),
         config: PaymentSheet.Configuration = PaymentSheet.Configuration("Some name"),
-    ): PaymentSheetState.Full {
+    ): PaymentSheetState {
         val intent = PAYMENT_INTENT
 
-        return PaymentSheetState.Full(
+        return PaymentSheetState(
             config = config,
             stripeIntent = intent.copy(
                 paymentMethodTypes = paymentMethodTypes ?: intent.paymentMethodTypes,
@@ -268,10 +268,10 @@ class PaymentSelectionUpdaterTest {
         paymentSelection: PaymentSelection? = null,
         customerPaymentMethods: List<PaymentMethod> = emptyList(),
         config: PaymentSheet.Configuration = defaultPaymentSheetConfiguration,
-    ): PaymentSheetState.Full {
+    ): PaymentSheetState {
         val intent = SETUP_INTENT
 
-        return PaymentSheetState.Full(
+        return PaymentSheetState(
             config = config,
             stripeIntent = intent.copy(
                 paymentMethodTypes = paymentMethodTypes ?: intent.paymentMethodTypes,

@@ -11,7 +11,7 @@ internal fun interface PaymentSelectionUpdater {
     operator fun invoke(
         currentSelection: PaymentSelection?,
         previousConfig: PaymentSheet.Configuration?,
-        newState: PaymentSheetState.Full,
+        newState: PaymentSheetState,
     ): PaymentSelection?
 }
 
@@ -22,7 +22,7 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor(
     override operator fun invoke(
         currentSelection: PaymentSelection?,
         previousConfig: PaymentSheet.Configuration?,
-        newState: PaymentSheetState.Full,
+        newState: PaymentSheetState,
     ): PaymentSelection? {
         val didConfigChange = previousConfig != newState.config
 
@@ -33,7 +33,7 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor(
 
     private fun canUseSelection(
         selection: PaymentSelection,
-        state: PaymentSheetState.Full,
+        state: PaymentSheetState,
     ): Boolean {
         // The types that are allowed for this intent, as returned by the backend
         val allowedTypes = state.stripeIntent.paymentMethodTypes

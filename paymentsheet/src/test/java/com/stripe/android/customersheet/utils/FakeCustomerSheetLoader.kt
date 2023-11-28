@@ -28,13 +28,13 @@ internal class FakeCustomerSheetLoader(
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
 ) : CustomerSheetLoader {
 
-    override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full> {
+    override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState> {
         delay(delay)
         return if (shouldFail) {
             Result.failure(IllegalStateException("failed to load"))
         } else {
             Result.success(
-                CustomerSheetState.Full(
+                CustomerSheetState(
                     config = configuration,
                     stripeIntent = stripeIntent,
                     supportedPaymentMethods = supportedPaymentMethods,

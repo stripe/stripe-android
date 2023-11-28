@@ -396,7 +396,7 @@ internal class DefaultFlowControllerTest {
         flowController.presentPaymentOptions()
 
         val expectedArgs = PaymentOptionContract.Args(
-            state = PaymentSheetState.Full(
+            state = PaymentSheetState(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = emptyList(),
                 config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
@@ -570,7 +570,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirmPaymentSelection(
             NEW_CARD_PAYMENT_SELECTION,
-            PaymentSheetState.Full(
+            PaymentSheetState(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
@@ -608,7 +608,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirmPaymentSelection(
             GENERIC_PAYMENT_SELECTION,
-            PaymentSheetState.Full(
+            PaymentSheetState(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
@@ -649,7 +649,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirmPaymentSelection(
             paymentSelection,
-            PaymentSheetState.Full(
+            PaymentSheetState(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,

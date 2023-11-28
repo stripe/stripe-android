@@ -44,7 +44,7 @@ internal interface PaymentSheetLoader {
     suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration
-    ): Result<PaymentSheetState.Full>
+    ): Result<PaymentSheetState>
 }
 
 @Singleton
@@ -63,7 +63,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration
-    ): Result<PaymentSheetState.Full> = withContext(workContext) {
+    ): Result<PaymentSheetState> = withContext(workContext) {
         val isDecoupling = initializationMode is DeferredIntent
 
         eventReporter.onLoadStarted(isDecoupling = isDecoupling)
@@ -108,7 +108,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         elementsSession: ElementsSession,
         config: PaymentSheet.Configuration,
         isGooglePayReady: Boolean,
-    ): PaymentSheetState.Full = coroutineScope {
+    ): PaymentSheetState = coroutineScope {
         val customerConfig = config.customer
         val prefsRepository = prefsRepositoryFactory(customerConfig)
 
@@ -181,7 +181,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         warnUnactivatedIfNeeded(stripeIntent)
 
         if (supportsIntent(stripeIntent, config)) {
-            PaymentSheetState.Full(
+            PaymentSheetState(
                 config = config,
                 stripeIntent = stripeIntent,
                 customerPaymentMethods = sortedPaymentMethods.await(),

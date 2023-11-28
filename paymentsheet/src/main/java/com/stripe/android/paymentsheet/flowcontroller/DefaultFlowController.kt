@@ -307,7 +307,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @VisibleForTesting
     fun confirmPaymentSelection(
         paymentSelection: PaymentSelection?,
-        state: PaymentSheetState.Full,
+        state: PaymentSheetState,
     ) {
         viewModelScope.launch {
             val stripeIntent = requireNotNull(state.stripeIntent)
@@ -590,7 +590,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun confirmLink(
         paymentSelection: PaymentSelection,
-        state: PaymentSheetState.Full
+        state: PaymentSheetState
     ) {
         val linkConfig = requireNotNull(state.linkState).configuration
 
@@ -603,7 +603,7 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun launchGooglePay(state: PaymentSheetState.Full) {
+    private fun launchGooglePay(state: PaymentSheetState) {
         // state.config.googlePay is guaranteed not to be null or GooglePay would be disabled
         val googlePayConfig = requireNotNull(state.config.googlePay)
         val googlePayPaymentLauncherConfig = GooglePayPaymentMethodLauncher.Config(

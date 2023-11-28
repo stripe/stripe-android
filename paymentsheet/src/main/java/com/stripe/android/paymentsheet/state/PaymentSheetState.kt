@@ -7,23 +7,17 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.parcelize.Parcelize
 
-internal sealed interface PaymentSheetState : Parcelable {
+@Parcelize
+internal data class PaymentSheetState(
+    val config: PaymentSheet.Configuration,
+    val stripeIntent: StripeIntent,
+    val customerPaymentMethods: List<PaymentMethod>,
+    val isGooglePayReady: Boolean,
+    val linkState: LinkState?,
+    val isEligibleForCardBrandChoice: Boolean,
+    val paymentSelection: PaymentSelection?,
+) : Parcelable {
 
-    @Parcelize
-    object Loading : PaymentSheetState
-
-    @Parcelize
-    data class Full(
-        val config: PaymentSheet.Configuration,
-        val stripeIntent: StripeIntent,
-        val customerPaymentMethods: List<PaymentMethod>,
-        val isGooglePayReady: Boolean,
-        val linkState: LinkState?,
-        val isEligibleForCardBrandChoice: Boolean,
-        val paymentSelection: PaymentSelection?,
-    ) : PaymentSheetState {
-
-        val hasPaymentOptions: Boolean
-            get() = isGooglePayReady || linkState != null || customerPaymentMethods.isNotEmpty()
-    }
+    val hasPaymentOptions: Boolean
+        get() = isGooglePayReady || linkState != null || customerPaymentMethods.isNotEmpty()
 }

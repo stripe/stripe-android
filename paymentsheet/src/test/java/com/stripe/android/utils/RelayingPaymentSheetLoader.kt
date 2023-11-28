@@ -9,14 +9,14 @@ import kotlinx.coroutines.channels.Channel
 
 internal class RelayingPaymentSheetLoader : PaymentSheetLoader {
 
-    private val results = Channel<Result<PaymentSheetState.Full>>(capacity = 1)
+    private val results = Channel<Result<PaymentSheetState>>(capacity = 1)
 
     fun enqueueSuccess(
         stripeIntent: StripeIntent = PaymentIntentFactory.create(),
     ) {
         enqueue(
             Result.success(
-                PaymentSheetState.Full(
+                PaymentSheetState(
                     stripeIntent = stripeIntent,
                     customerPaymentMethods = emptyList(),
                     config = PaymentSheet.Configuration("Example"),
@@ -34,14 +34,14 @@ internal class RelayingPaymentSheetLoader : PaymentSheetLoader {
         enqueue(Result.failure(error))
     }
 
-    private fun enqueue(result: Result<PaymentSheetState.Full>) {
+    private fun enqueue(result: Result<PaymentSheetState>) {
         results.trySend(result)
     }
 
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration
-    ): Result<PaymentSheetState.Full> {
+    ): Result<PaymentSheetState> {
         return results.receive()
     }
 }

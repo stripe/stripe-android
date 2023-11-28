@@ -99,7 +99,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     }
 
     private suspend fun onInitSuccess(
-        state: PaymentSheetState.Full,
+        state: PaymentSheetState,
         configureRequest: ConfigureRequest,
     ) {
         val isDecoupling = configureRequest.initializationMode is DeferredIntent

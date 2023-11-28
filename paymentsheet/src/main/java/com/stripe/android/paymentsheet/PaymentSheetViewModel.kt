@@ -320,7 +320,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
-    private fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
+    private fun handlePaymentSheetStateLoaded(state: PaymentSheetState) {
         cbcEligibility = when (state.isEligibleForCardBrandChoice) {
             true -> CardBrandChoiceEligibility.Eligible(
                 preferredNetworks = state.config.preferredNetworks

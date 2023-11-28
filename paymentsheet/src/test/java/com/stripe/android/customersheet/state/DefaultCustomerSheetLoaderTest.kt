@@ -121,7 +121,7 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(
             loader.load(config).getOrThrow()
         ).isEqualTo(
-            CustomerSheetState.Full(
+            CustomerSheetState(
                 config = config,
                 stripeIntent = STRIPE_INTENT,
                 customerPaymentMethods = listOf(
@@ -182,7 +182,7 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(
             loader.load(config).getOrThrow()
         ).isEqualTo(
-            CustomerSheetState.Full(
+            CustomerSheetState(
                 config = config,
                 stripeIntent = null,
                 customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
@@ -218,7 +218,7 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(
             loader.load(config).getOrThrow()
         ).isEqualTo(
-            CustomerSheetState.Full(
+            CustomerSheetState(
                 config = config,
                 stripeIntent = STRIPE_INTENT,
                 customerPaymentMethods = listOf(
@@ -258,7 +258,7 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(
             loader.load(config).getOrThrow()
         ).isEqualTo(
-            CustomerSheetState.Full(
+            CustomerSheetState(
                 config = config,
                 stripeIntent = STRIPE_INTENT,
                 customerPaymentMethods = listOf(

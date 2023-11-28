@@ -27,7 +27,7 @@ internal class PaymentOptionContract :
 
     @Parcelize
     internal data class Args(
-        val state: PaymentSheetState.Full,
+        val state: PaymentSheetState,
         @ColorInt val statusBarColor: Int?,
         val enableLogging: Boolean,
         val productUsage: Set<String>
