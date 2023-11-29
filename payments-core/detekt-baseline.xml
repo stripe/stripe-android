@@ -92,7 +92,6 @@
     <ID>MaxLineLength:AccountParams.kt$AccountParams.BusinessTypeParams.Individual.Builder$*</ID>
     <ID>MaxLineLength:AccountParams.kt$AccountParams.Companion$*</ID>
     <ID>MaxLineLength:AddPaymentMethodActivityStarter.kt$AddPaymentMethodActivityStarter.Args.Builder$*</ID>
-    <ID>MaxLineLength:AddPaymentMethodViewModelTest.kt$AddPaymentMethodViewModelTest$private val paymentMethodRetrievalCaptor: KArgumentCaptor&lt;CustomerSession.PaymentMethodRetrievalListener> = argumentCaptor()</ID>
     <ID>MaxLineLength:AlipayRedirectTest.kt$AlipayRedirectTest$"&amp;notify_url=https%3A%2F%2Fhooks.stripe.com%2Falipay%2Falipay%2Fhook%2F6255d30b067c8f7a162c79c654483646%2Fsrc_1Gt188KlwPmebFhp4SWhZwn1"</ID>
     <ID>MaxLineLength:AlipayRedirectTest.kt$AlipayRedirectTest$"&amp;return_url=https%3A%2F%2Fhooks.stripe.com%2Fadapter%2Falipay%2Fredirect%2Fcomplete%2Fsrc_1Gt188KlwPmebFhp4SWhZwn1%2Fsrc_client_secret_RMaQKPfAmHOdUwcNhXEjolR4"</ID>
     <ID>MaxLineLength:AlipayRedirectTest.kt$AlipayRedirectTest$"https://hooks.stripe.com/adapter/alipay/redirect/complete/src_1Gt188KlwPmebFhp4SWhZwn1/src_client_secret_RMaQKPfAmHOdUwcNhXEjolR4"</ID>

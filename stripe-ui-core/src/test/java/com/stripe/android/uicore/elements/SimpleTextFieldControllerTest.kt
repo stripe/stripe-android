@@ -3,12 +3,15 @@ package com.stripe.android.uicore.elements
 import android.os.Build
 import android.os.Looper.getMainLooper
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.asLiveData
+import app.cash.turbine.test
+import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Invalid
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid.Full
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid.Limitless
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,6 +23,7 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import com.stripe.android.core.R as CoreR
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
 internal class SimpleTextFieldControllerTest {
@@ -27,184 +31,147 @@ internal class SimpleTextFieldControllerTest {
     val rule = InstantTaskExecutorRule()
 
     @Test
-    fun `verify onValueChange sets the paramValue`() {
+    fun `verify onValueChange sets the paramValue`() = runTest {
         val controller = createControllerWithState()
 
-        var paramValue: String? = null
-        controller.fieldValue.asLiveData()
-            .observeForever {
-                paramValue = it
-            }
-        controller.onValueChange("limitless")
-        assertThat(paramValue).isEqualTo("limitless")
+        controller.fieldValue.test {
+            assertThat(awaitItem()).isEmpty()
+            controller.onValueChange("limitless")
+            assertThat(awaitItem()).isEqualTo("limitless")
+        }
     }
 
     @Test
-    fun `verify the error message is set when should be visible`() {
+    fun `verify the error message is set when should be visible`() = runTest {
         val controller = createControllerWithState()
 
-        var fieldError: FieldError? = FieldError(5)
-        controller.error.asLiveData()
-            .observeForever {
-                fieldError = it
-            }
-
-        controller.onValueChange("showWhenNoFocus")
-        shadowOf(getMainLooper()).idle()
-        assertThat(fieldError).isEqualTo(ShowWhenNoFocus.getError())
+        controller.error.test {
+            assertThat(awaitItem()).isNull()
+            controller.onValueChange("showWhenNoFocus")
+            shadowOf(getMainLooper()).idle()
+            assertThat(awaitItem()).isEqualTo(ShowWhenNoFocus.getError())
+        }
     }
 
     @Test
-    fun `Verify is full set when the controller field state changes`() {
+    fun `Verify is full set when the controller field state changes`() = runTest {
         val controller = createControllerWithState()
 
-        var isFull = false
-        controller.fieldState.asLiveData()
-            .observeForever {
-                isFull = it.isFull()
-            }
+        controller.fieldState.test {
+            assertThat(awaitItem().isFull()).isEqualTo(false)
 
-        controller.onValueChange("full")
-        assertThat(isFull).isEqualTo(true)
+            controller.onValueChange("full")
+            assertThat(awaitItem().isFull()).isEqualTo(true)
+        }
     }
 
     @Test
-    fun `Verify is not full set when the controller field state changes`() {
+    fun `Verify is not full set when the controller field state changes`() = runTest {
         val controller = createControllerWithState()
 
-        var isFull = false
-        controller.fieldState.asLiveData()
-            .observeForever {
-                isFull = it.isFull()
-            }
-
-        controller.onValueChange("limitless")
-        assertThat(isFull).isEqualTo(false)
+        controller.fieldState.test {
+            skipItems(1)
+            controller.onValueChange("limitless")
+            assertThat(awaitItem().isFull()).isEqualTo(false)
+        }
     }
 
     @Test
-    fun `Verify is not complete set when the controller field state changes`() {
+    fun `Verify is not complete set when the controller field state changes`() = runTest {
         val controller = createControllerWithState()
         controller.onValueChange("full")
 
-        var isComplete = true
-        controller.isComplete.asLiveData()
-            .observeForever {
-                isComplete = it
-            }
-
-        assertThat(isComplete).isEqualTo(true)
-        controller.onValueChange("invalid")
-        assertThat(isComplete).isEqualTo(false)
+        controller.isComplete.test {
+            assertThat(awaitItem()).isEqualTo(true)
+            controller.onValueChange("invalid")
+            assertThat(awaitItem()).isEqualTo(false)
+        }
     }
 
     @Test
-    fun `Verify is complete set when the controller field state changes`() {
+    fun `Verify is complete set when the controller field state changes`() = runTest {
         val controller = createControllerWithState()
 
-        var isComplete = false
-        controller.isComplete.asLiveData()
-            .observeForever {
-                isComplete = it
-            }
+        controller.isComplete.test {
+            assertThat(awaitItem()).isEqualTo(false)
+            controller.onValueChange("invalid")
+            assertThat(awaitItem()).isEqualTo(false)
 
-        controller.onValueChange("invalid")
-        assertThat(isComplete).isEqualTo(false)
-
-        controller.onValueChange("limitless")
-        assertThat(isComplete).isEqualTo(true)
+            controller.onValueChange("limitless")
+            assertThat(awaitItem()).isEqualTo(true)
+        }
     }
 
     @Test
-    fun `Verify is blank optional fields are considered complete`() {
+    fun `Verify is blank optional fields are considered complete`() = runTest {
         val controller = createControllerWithState(showOptionalLabel = true)
         controller.onValueChange("invalid")
 
-        var isComplete = true
-        controller.isComplete.asLiveData()
-            .observeForever {
-                isComplete = it
-            }
-
-        assertThat(isComplete).isEqualTo(false)
-        controller.onValueChange("")
-        assertThat(isComplete).isEqualTo(true)
-    }
-
-    @Test
-    fun `Verify is visible error is true when onValueChange and shouldShowError returns true`() {
-        val controller = createControllerWithState()
-        var visibleError = false
-        controller.visibleError.asLiveData().observeForever {
-            visibleError = it
+        controller.isComplete.test {
+            assertThat(awaitItem()).isEqualTo(false)
+            controller.onValueChange("")
+            assertThat(awaitItem()).isEqualTo(true)
         }
-
-        controller.onValueChange("full")
-        assertThat(visibleError).isEqualTo(false)
-
-        createControllerWithState()
-        controller.onValueChange("invalid")
-        shadowOf(getMainLooper()).idle()
-        assertThat(visibleError).isEqualTo(true)
     }
 
     @Test
-    fun `Verify is visible error set when the controller field state changes`() {
+    fun `Verify is visible error is true when onValueChange and shouldShowError returns true`() = runTest {
+        val controller = createControllerWithState()
+        controller.visibleError.test {
+            assertThat(awaitItem()).isEqualTo(false)
+
+            controller.onValueChange("full")
+            assertThat(awaitItem()).isEqualTo(false)
+
+            createControllerWithState()
+            controller.onValueChange("invalid")
+            shadowOf(getMainLooper()).idle()
+            assertThat(awaitItem()).isEqualTo(true)
+        }
+    }
+
+    @Test
+    fun `Verify is visible error set when the controller field state changes`() = runTest {
         // We check both the visible state and the error object.  In the case of
         // an incomplete field the error object should be null when the visible error goes away.
 
         val controller = createControllerWithState()
 
-        var visibleError = false
-        controller.visibleError.asLiveData()
-            .observeForever {
-                visibleError = it
-            }
+        val visibleErrors = controller.visibleError.testIn(backgroundScope)
 
-        val error = mutableListOf<FieldError?>()
-        controller.error.asLiveData()
-            .observeForever {
-                error.add(it)
-            }
+        val errors = controller.error.testIn(backgroundScope)
 
-        assertThat(visibleError).isEqualTo(false)
-        assertThat(error.size).isEqualTo(1)
-        assertThat(error[0]).isNull()
+        assertThat(visibleErrors.awaitItem()).isEqualTo(false)
+        assertThat(errors.awaitItem()).isNull()
 
         controller.onValueChange("invalid")
         shadowOf(getMainLooper()).idle()
 
-        assertThat(visibleError).isEqualTo(true)
-        assertThat(error.size).isEqualTo(2)
-        assertThat(error[1]).isNotNull()
+        assertThat(visibleErrors.awaitItem()).isEqualTo(true)
+        assertThat(errors.awaitItem()).isNotNull()
 
         controller.onValueChange("full")
         shadowOf(getMainLooper()).idle()
 
-        assertThat(visibleError).isEqualTo(false)
-        assertThat(error.size).isEqualTo(3)
-        assertThat(error[2]).isNull()
+        assertThat(visibleErrors.awaitItem()).isEqualTo(false)
+        assertThat(errors.awaitItem()).isNull()
     }
 
     @Test
-    fun `Verify correct value passed to config should show error`() {
+    fun `Verify correct value passed to config should show error`() = runTest {
         val controller = createControllerWithState()
 
         // Initialize the fieldState
         controller.onValueChange("showWhenNoFocus")
 
-        var visibleError = false
-        controller.visibleError.asLiveData()
-            .observeForever {
-                visibleError = it
-            }
+        controller.visibleError.test {
+            controller.onFocusChange(false)
+            assertThat(awaitItem()).isEqualTo(true)
 
-        controller.onFocusChange(false)
-        assertThat(visibleError).isEqualTo(true)
-
-        controller.onFocusChange(true)
-        shadowOf(getMainLooper()).idle()
-        assertThat(visibleError).isEqualTo(false)
+            controller.onFocusChange(true)
+            shadowOf(getMainLooper()).idle()
+            assertThat(awaitItem()).isEqualTo(false)
+        }
     }
 
     @Test

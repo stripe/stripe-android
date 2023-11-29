@@ -1,10 +1,11 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.lifecycle.asLiveData
+import app.cash.turbine.test
+import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -14,62 +15,58 @@ import org.robolectric.annotation.Config
 internal class PhoneNumberControllerTest {
 
     @Test
-    fun `when new country is selected then phoneNumberFormatter is updated`() {
+    fun `when new country is selected then phoneNumberFormatter is updated`() = runTest {
         val phoneNumberController = PhoneNumberController(
             initiallySelectedCountryCode = "US",
             overrideCountryCodes = setOf("US", "BR")
         )
 
-        val rawValue = mutableListOf<String>()
-        phoneNumberController.rawFieldValue.asLiveData().observeForever {
-            rawValue.add(it)
-        }
-        phoneNumberController.onValueChange("1234567890")
-        idleLooper()
-        assertThat(rawValue.last()).isEqualTo("+11234567890")
+        phoneNumberController.rawFieldValue.test {
+            assertThat(awaitItem()).isEqualTo("+1")
 
-        phoneNumberController.onSelectedCountryIndex(1)
-        idleLooper()
-        // Input value remains the same, but now with country code +55
-        assertThat(rawValue.last()).isEqualTo("+551234567890")
+            phoneNumberController.onValueChange("1234567890")
+            idleLooper()
+            assertThat(awaitItem()).isEqualTo("+11234567890")
+
+            phoneNumberController.onSelectedCountryIndex(1)
+            idleLooper()
+            // Input value remains the same, but now with country code +55
+            assertThat(awaitItem()).isEqualTo("+551234567890")
+        }
     }
 
     @Test
-    fun `when any number was input then isComplete is true`() {
+    fun `when any number was input then isComplete is true`() = runTest {
         val phoneNumberController = PhoneNumberController()
 
-        val isComplete = mutableListOf<Boolean>()
-        phoneNumberController.isComplete.asLiveData().observeForever {
-            isComplete.add(it)
+        phoneNumberController.isComplete.test {
+            assertThat(awaitItem()).isFalse()
+
+            phoneNumberController.onValueChange("1")
+            idleLooper()
+            assertThat(awaitItem()).isFalse()
+
+            phoneNumberController.onValueChange("")
+            idleLooper()
+            assertThat(awaitItem()).isFalse()
         }
-        assertThat(isComplete.last()).isFalse()
-
-        phoneNumberController.onValueChange("1")
-        idleLooper()
-        assertThat(isComplete.last()).isFalse()
-
-        phoneNumberController.onValueChange("")
-        idleLooper()
-        assertThat(isComplete.last()).isFalse()
     }
 
     @Test
-    fun `any input is marked complete if field is optional`() {
+    fun `any input is marked complete if field is optional`() = runTest {
         val phoneNumberController = PhoneNumberController(showOptionalLabel = true)
 
-        val isComplete = mutableListOf<Boolean>()
-        phoneNumberController.isComplete.asLiveData().observeForever {
-            isComplete.add(it)
+        phoneNumberController.isComplete.test {
+            assertThat(awaitItem()).isTrue()
+
+            phoneNumberController.onValueChange("1")
+            idleLooper()
+            assertThat(awaitItem()).isTrue()
+
+            phoneNumberController.onValueChange("")
+            idleLooper()
+            assertThat(awaitItem()).isTrue()
         }
-        assertThat(isComplete.last()).isTrue()
-
-        phoneNumberController.onValueChange("1")
-        idleLooper()
-        assertThat(isComplete.last()).isTrue()
-
-        phoneNumberController.onValueChange("")
-        idleLooper()
-        assertThat(isComplete.last()).isTrue()
     }
 
     @Test
@@ -116,32 +113,37 @@ internal class PhoneNumberControllerTest {
     }
 
     @Test
-    fun `when phone number is less than expected length error is emitted`() {
+    fun `when phone number is less than expected length error is emitted`() = runTest {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initiallySelectedCountryCode = "US"
         )
 
-        val isComplete = mutableListOf<Boolean>()
-        phoneNumberController.isComplete.asLiveData().observeForever {
-            isComplete.add(it)
-        }
+        val isComplete = phoneNumberController.isComplete.testIn(backgroundScope)
 
-        val error = mutableListOf<FieldError?>()
-        phoneNumberController.error.asLiveData().observeForever {
-            error.add(it)
-        }
+        val error = phoneNumberController.error.testIn(backgroundScope)
 
-        assertThat(isComplete.last()).isFalse()
-        assertThat(error.last()).isNull()
+        assertThat(isComplete.awaitItem()).isFalse()
+        assertThat(error.awaitItem()).isNull()
+
+        isComplete.ensureAllEventsConsumed()
+        error.ensureAllEventsConsumed()
 
         phoneNumberController.onValueChange("1")
         idleLooper()
-        assertThat(isComplete.last()).isFalse()
-        assertThat(error.last()).isNotNull()
+        assertThat(isComplete.awaitItem()).isFalse()
+        error.skipItems(1)
+        assertThat(error.awaitItem()).isNotNull()
+
+        isComplete.ensureAllEventsConsumed()
+        error.ensureAllEventsConsumed()
 
         phoneNumberController.onValueChange("1234567891")
         idleLooper()
-        assertThat(isComplete.last()).isTrue()
-        assertThat(error.last()).isNull()
+        assertThat(isComplete.awaitItem()).isTrue()
+        error.skipItems(1)
+        assertThat(error.awaitItem()).isNull()
+
+        isComplete.ensureAllEventsConsumed()
+        error.ensureAllEventsConsumed()
     }
 }
