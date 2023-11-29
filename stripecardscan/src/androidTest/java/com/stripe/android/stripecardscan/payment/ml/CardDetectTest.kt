@@ -9,26 +9,21 @@ import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.util.toRect
 import com.stripe.android.stripecardscan.framework.ResourceFetcher
 import com.stripe.android.stripecardscan.test.R
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CardDetectTest {
     private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
     private val testContext = InstrumentationRegistry.getInstrumentation().context
 
-    /**
-     * TODO: this method should use runBlockingTest instead of runBlocking. However, an issue with
-     * runBlockingTest currently fails when functions under test use withContext(Dispatchers.IO) or
-     * withContext(Dispatchers.Default).
-     *
-     * See https://github.com/Kotlin/kotlinx.coroutines/issues/1204 for details.
-     */
     @Test
     @MediumTest
-    fun cardDetect_pan() = runBlocking {
+    fun cardDetect_pan() = runTest {
         val bitmap = testContext.resources.getDrawable(R.drawable.card_pan, null)
             .toBitmap()
             .scale(Size(224, 224))
@@ -52,19 +47,13 @@ class CardDetectTest {
             Unit
         )
         assertNotNull(prediction)
+
         assertEquals(CardDetect.Prediction.Side.PAN, prediction.side)
     }
 
-    /**
-     * TODO: this method should use runBlockingTest instead of runBlocking. However, an issue with
-     * runBlockingTest currently fails when functions under test use withContext(Dispatchers.IO) or
-     * withContext(Dispatchers.Default).
-     *
-     * See https://github.com/Kotlin/kotlinx.coroutines/issues/1204 for details.
-     */
     @Test
     @MediumTest
-    fun cardDetect_noPan() = runBlocking {
+    fun cardDetect_noPan() = runTest {
         val bitmap = testContext.resources.getDrawable(R.drawable.card_no_pan, null)
             .toBitmap()
             .scale(Size(224, 224))
@@ -88,19 +77,13 @@ class CardDetectTest {
             Unit
         )
         assertNotNull(prediction)
+
         assertEquals(CardDetect.Prediction.Side.NO_PAN, prediction.side)
     }
 
-    /**
-     * TODO: this method should use runBlockingTest instead of runBlocking. However, an issue with
-     * runBlockingTest currently fails when functions under test use withContext(Dispatchers.IO) or
-     * withContext(Dispatchers.Default).
-     *
-     * See https://github.com/Kotlin/kotlinx.coroutines/issues/1204 for details.
-     */
     @Test
     @MediumTest
-    fun cardDetect_noCard() = runBlocking {
+    fun cardDetect_noCard() = runTest {
         val bitmap = testContext.resources.getDrawable(R.drawable.card_no_card, null)
             .toBitmap()
             .scale(Size(224, 224))
@@ -124,6 +107,7 @@ class CardDetectTest {
             Unit
         )
         assertNotNull(prediction)
+
         assertEquals(CardDetect.Prediction.Side.NO_CARD, prediction.side)
     }
 }
