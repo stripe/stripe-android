@@ -5,7 +5,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,7 +57,7 @@ internal class CvcControllerTest {
     @Test
     fun `Verify error is visible based on the focus`() = runTest {
         // incomplete
-        cvcController.visibleError.distinctUntilChanged().test {
+        cvcController.visibleError.test {
             cvcController.onFocusChange(true)
             cvcController.onValueChange("12")
             idleLooper()

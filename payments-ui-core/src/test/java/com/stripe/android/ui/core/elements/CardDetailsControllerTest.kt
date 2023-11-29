@@ -9,7 +9,6 @@ import com.stripe.android.stripecardscan.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,7 +26,7 @@ class CardDetailsControllerTest {
     fun `Verify the first field in error is returned in error flow`() = runTest {
         val cardController = CardDetailsController(context, emptyMap())
 
-        cardController.error.distinctUntilChanged().test {
+        cardController.error.test {
             assertThat(awaitItem()).isNull()
 
             cardController.numberElement.controller.onValueChange("4242424242424243")

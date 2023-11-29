@@ -19,6 +19,7 @@ import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import java.util.UUID
 
 internal class CardDetailsController(
@@ -105,7 +106,7 @@ internal class CardDetailsController(
             .map { it.error }
     ) {
         it.filterNotNull().firstOrNull()
-    }
+    }.distinctUntilChanged()
 
     @Composable
     override fun ComposeUI(
