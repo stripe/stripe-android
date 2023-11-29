@@ -377,7 +377,9 @@ internal fun TrailingIcon(
 ) {
     if (loading) {
         CircularProgressIndicator(
-            modifier = modifier.progressSemantics().height(LOADING_INDICATOR_SIZE.dp)
+            modifier = modifier
+                .progressSemantics()
+                .height(LOADING_INDICATOR_SIZE.dp)
         )
     } else if (trailingIcon.isTintable) {
         Icon(
@@ -410,14 +412,15 @@ private fun TrailingDropdown(
 
     val show = !loading && !icon.hide
 
-    Box {
+    Box(
+        modifier = Modifier
+            .clickable {
+                expanded = true
+            }
+            .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
+    ) {
         Row(
-            modifier = Modifier
-                .padding(10.dp)
-                .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-                .clickable(enabled = show) {
-                    expanded = true
-                },
+            modifier = Modifier.padding(10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {

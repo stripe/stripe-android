@@ -11,11 +11,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -132,8 +135,6 @@ internal fun EditPaymentMethodUi(
             onButtonClick = { viewActionHandler.invoke(OnUpdatePressed) },
         )
 
-        Spacer(modifier = Modifier.requiredHeight(4.dp))
-
         RemoveButton(
             idle = isIdle,
             removing = viewState.status == EditPaymentMethodViewState.Status.Removing,
@@ -178,6 +179,7 @@ private fun Label(
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun RemoveButton(
     idle: Boolean,
@@ -188,26 +190,34 @@ private fun RemoveButton(
         LocalContentAlpha provides if (removing) ContentAlpha.disabled else ContentAlpha.high,
         LocalRippleTheme provides ErrorRippleTheme
     ) {
-        TextButton(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.stripeShapes.roundedCornerShape,
-            enabled = idle && !removing,
-            onClick = onRemove
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 8.dp,
+                    end = 8.dp
+                ).offset(y = 8.dp),
         ) {
-            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
-                Text(
-                    text = stringResource(id = R.string.stripe_paymentsheet_remove_card),
-                    color = MaterialTheme.colors.error.copy(LocalContentAlpha.current),
-                    style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
+            CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+                TextButton(
                     modifier = Modifier.align(Alignment.Center),
-                )
-
-                if (removing) {
-                    LoadingIndicator(
-                        modifier = Modifier.align(Alignment.CenterEnd),
-                        color = MaterialTheme.colors.error
+                    shape = MaterialTheme.stripeShapes.roundedCornerShape,
+                    enabled = idle && !removing,
+                    onClick = onRemove,
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.stripe_paymentsheet_remove_card),
+                        color = MaterialTheme.colors.error.copy(LocalContentAlpha.current),
+                        style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
                     )
                 }
+            }
+
+            if (removing) {
+                LoadingIndicator(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    color = MaterialTheme.colors.error,
+                )
             }
         }
     }
@@ -222,14 +232,15 @@ private fun Dropdown(
         mutableStateOf(false)
     }
 
-    Box {
+    Box(
+        modifier = Modifier
+            .clickable {
+                expanded = true
+            }
+            .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
+    ) {
         Row(
-            modifier = Modifier
-                .padding(10.dp)
-                .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-                .clickable {
-                    expanded = true
-                },
+            modifier = Modifier.padding(10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
