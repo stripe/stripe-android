@@ -414,7 +414,7 @@ private fun TrailingDropdown(
 
     Box(
         modifier = Modifier
-            .clickable {
+            .clickable(enabled = show) {
                 expanded = true
             }
             .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
