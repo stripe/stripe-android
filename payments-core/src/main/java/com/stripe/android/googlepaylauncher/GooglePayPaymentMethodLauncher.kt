@@ -249,14 +249,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          *
          * Default: The credit card class is supported for the card networks specified.
          */
-        var allowCreditCards: Boolean = true,
-
-        /**
-         * Flag to indicate whether Google Pay collect the customer's phone number.
-         *
-         * Default to `false`.
-         */
-        val isPhoneRequired: Boolean = false,
+        var allowCreditCards: Boolean = true
     ) : Parcelable {
 
         internal val isJcbEnabled: Boolean

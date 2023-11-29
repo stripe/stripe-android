@@ -670,6 +670,14 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun launchGooglePay(state: PaymentSheetState.Full) {
         // state.config.googlePay is guaranteed not to be null or GooglePay would be disabled
         val googlePayConfig = requireNotNull(state.config.googlePay)
+
+        val collectPhone = state.config.billingDetailsCollectionConfiguration.collectsPhone
+        val billingAddressConfig = GooglePayPaymentMethodLauncher.BillingAddressConfig(
+            isRequired = collectPhone,
+            format = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
+            isPhoneNumberRequired = collectPhone,
+        )
+
         val googlePayPaymentLauncherConfig = GooglePayPaymentMethodLauncher.Config(
             environment = when (googlePayConfig.environment) {
                 PaymentSheet.GooglePayConfiguration.Environment.Production ->
@@ -680,7 +688,7 @@ internal class DefaultFlowController @Inject internal constructor(
             merchantCountryCode = googlePayConfig.countryCode,
             merchantName = state.config.merchantDisplayName,
             isEmailRequired = state.config.billingDetailsCollectionConfiguration.collectsEmail,
-            isPhoneRequired = state.config.billingDetailsCollectionConfiguration.collectsPhone,
+            billingAddressConfig = billingAddressConfig,
         )
 
         googlePayPaymentMethodLauncherFactory.create(
