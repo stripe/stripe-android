@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.IdlingResource
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -29,33 +30,11 @@ internal class FlowControllerTestRunnerContext(
     }
 }
 
-internal fun runFlowControllerTest(
+internal fun ActivityScenarioRule<MainActivity>.runFlowControllerTest(
+    integrationType: IntegrationType,
     createIntentCallback: CreateIntentCallback? = null,
     paymentOptionCallback: PaymentOptionCallback,
     resultCallback: PaymentSheetResultCallback,
-    block: (FlowControllerTestRunnerContext) -> Unit,
-) {
-    runFlowControllerTest(
-        createIntentCallback = createIntentCallback,
-        paymentOptionCallback = paymentOptionCallback,
-        resultCallback = resultCallback,
-        integrationType = FlowControllerTestFactory.IntegrationType.Activity,
-        block = block
-    )
-    runFlowControllerTest(
-        createIntentCallback = createIntentCallback,
-        paymentOptionCallback = paymentOptionCallback,
-        resultCallback = resultCallback,
-        integrationType = FlowControllerTestFactory.IntegrationType.Compose,
-        block = block
-    )
-}
-
-private fun runFlowControllerTest(
-    createIntentCallback: CreateIntentCallback? = null,
-    paymentOptionCallback: PaymentOptionCallback,
-    resultCallback: PaymentSheetResultCallback,
-    integrationType: FlowControllerTestFactory.IntegrationType,
     block: (FlowControllerTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
@@ -77,12 +56,11 @@ private fun runFlowControllerTest(
     )
 }
 
-private fun runFlowControllerTest(
+private fun ActivityScenarioRule<MainActivity>.runFlowControllerTest(
     countDownLatch: CountDownLatch,
     makeFlowController: (ComponentActivity) -> PaymentSheet.FlowController,
     block: (FlowControllerTestRunnerContext) -> Unit,
 ) {
-    val scenario = ActivityScenario.launch(MainActivity::class.java)
     scenario.moveToState(Lifecycle.State.CREATED)
 
     scenario.onActivity {
@@ -100,7 +78,6 @@ private fun runFlowControllerTest(
     block(testContext)
 
     assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
-    scenario.close()
 }
 
 internal class SynchronizedTestFlowController(

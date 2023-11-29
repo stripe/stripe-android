@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.utils
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -36,39 +37,36 @@ internal class PaymentSheetTestRunnerContext(
     }
 }
 
-internal fun runPaymentSheetTest(
+internal fun ActivityScenarioRule<MainActivity>.runPaymentSheetTest(
+    integrationType: IntegrationType,
     createIntentCallback: CreateIntentCallback? = null,
     resultCallback: PaymentSheetResultCallback,
     block: (PaymentSheetTestRunnerContext) -> Unit,
 ) {
-    for (integrationType in PaymentSheetTestFactory.IntegrationType.values()) {
-        val countDownLatch = CountDownLatch(1)
+    val countDownLatch = CountDownLatch(1)
 
-        val factory = PaymentSheetTestFactory(
-            integrationType = integrationType,
-            createIntentCallback = createIntentCallback,
-            resultCallback = { result ->
-                resultCallback.onPaymentSheetResult(result)
-                countDownLatch.countDown()
-            }
-        )
+    val factory = PaymentSheetTestFactory(
+        integrationType = integrationType,
+        createIntentCallback = createIntentCallback,
+        resultCallback = { result ->
+            resultCallback.onPaymentSheetResult(result)
+            countDownLatch.countDown()
+        }
+    )
 
-        runPaymentSheetTestInternal(
-            countDownLatch = countDownLatch,
-            makePaymentSheet = factory::make,
-            block = block,
-        )
-    }
+    runPaymentSheetTestInternal(
+        countDownLatch = countDownLatch,
+        makePaymentSheet = factory::make,
+        block = block,
+    )
 }
 
-private fun runPaymentSheetTestInternal(
+private fun ActivityScenarioRule<MainActivity>.runPaymentSheetTestInternal(
     countDownLatch: CountDownLatch,
     makePaymentSheet: (ComponentActivity) -> PaymentSheet,
     block: (PaymentSheetTestRunnerContext) -> Unit,
 ) {
-    val scenario = ActivityScenario.launch(MainActivity::class.java)
     scenario.moveToState(Lifecycle.State.CREATED)
-
     scenario.onActivity {
         PaymentConfiguration.init(it, "pk_test_123")
     }
@@ -84,5 +82,4 @@ private fun runPaymentSheetTestInternal(
     block(testContext)
 
     assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
-    scenario.close()
 }
