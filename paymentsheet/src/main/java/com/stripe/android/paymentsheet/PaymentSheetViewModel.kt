@@ -198,7 +198,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             GooglePayEnvironment.Test
                     },
                     merchantCountryCode = config.countryCode,
-                    merchantName = merchantName
+                    merchantName = merchantName,
+                    isEmailRequired = args.config.billingDetailsCollectionConfiguration.collectsEmail,
+                    isPhoneRequired = args.config.billingDetailsCollectionConfiguration.collectsPhone,
                 )
             }
         }
@@ -785,3 +787,9 @@ private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean
             intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
         }
     }
+
+private val PaymentSheet.BillingDetailsCollectionConfiguration.collectsEmail: Boolean
+    get() = email == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+
+private val PaymentSheet.BillingDetailsCollectionConfiguration.collectsPhone: Boolean
+    get() = phone == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
