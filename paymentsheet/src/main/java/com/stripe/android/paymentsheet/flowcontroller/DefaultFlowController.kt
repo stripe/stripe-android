@@ -46,6 +46,8 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.collectsEmail
+import com.stripe.android.paymentsheet.collectsPhone
 import com.stripe.android.paymentsheet.intercept
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
@@ -676,7 +678,9 @@ internal class DefaultFlowController @Inject internal constructor(
                     GooglePayEnvironment.Test
             },
             merchantCountryCode = googlePayConfig.countryCode,
-            merchantName = state.config.merchantDisplayName
+            merchantName = state.config.merchantDisplayName,
+            isEmailRequired = state.config.billingDetailsCollectionConfiguration.collectsEmail,
+            isPhoneRequired = state.config.billingDetailsCollectionConfiguration.collectsPhone,
         )
 
         googlePayPaymentMethodLauncherFactory.create(

@@ -1378,3 +1378,9 @@ class PaymentSheet internal constructor(
         }
     }
 }
+
+internal val PaymentSheet.BillingDetailsCollectionConfiguration.collectsEmail: Boolean
+    get() = email == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+
+internal val PaymentSheet.BillingDetailsCollectionConfiguration.collectsPhone: Boolean
+    get() = phone == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always

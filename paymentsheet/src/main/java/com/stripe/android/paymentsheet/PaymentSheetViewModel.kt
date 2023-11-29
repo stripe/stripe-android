@@ -787,9 +787,3 @@ private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean
             intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
         }
     }
-
-private val PaymentSheet.BillingDetailsCollectionConfiguration.collectsEmail: Boolean
-    get() = email == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
-
-private val PaymentSheet.BillingDetailsCollectionConfiguration.collectsPhone: Boolean
-    get() = phone == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
