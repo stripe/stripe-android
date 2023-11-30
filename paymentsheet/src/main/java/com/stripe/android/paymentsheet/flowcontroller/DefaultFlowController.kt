@@ -51,6 +51,11 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.currency
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
@@ -88,6 +93,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
+    bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
     private val linkLauncher: LinkPaymentLauncher,
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
@@ -96,6 +102,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val googlePayActivityLauncher:
         ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
+    private val bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher
 
     /**
      * [FlowControllerComponent] is hold to inject into [Activity]s and created
@@ -145,11 +152,21 @@ internal class DefaultFlowController @Inject internal constructor(
             ::onSepaMandateResult,
         )
 
+        val bacsMandateConfirmationActivityLauncher = activityResultRegistryOwner.register(
+            BacsMandateConfirmationContract(),
+            ::onBacsMandateResult
+        )
+
+        bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncherFactory.create(
+            bacsMandateConfirmationActivityLauncher
+        )
+
         val activityResultLaunchers = setOf(
             paymentLauncherActivityResultLauncher,
             paymentOptionActivityLauncher,
             googlePayActivityLauncher,
             sepaMandateActivityLauncher,
+            bacsMandateConfirmationActivityLauncher
         )
 
         linkLauncher.register(
@@ -283,6 +300,26 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSelection.GooglePay -> launchGooglePay(state)
             is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
+            is PaymentSelection.New.GenericPaymentMethod -> {
+                if (paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code) {
+                    BacsMandateData.fromPaymentSelection(paymentSelection)?.let { data ->
+                        bacsMandateConfirmationLauncher.launch(
+                            data = data,
+                            appearance = getPaymentAppearance()
+                        )
+                    } ?: run {
+                        paymentResultCallback.onPaymentSheetResult(
+                            PaymentSheetResult.Failed(
+                                BacsMandateException(
+                                    type = BacsMandateException.Type.MissingInformation
+                                )
+                            )
+                        )
+                    }
+                } else {
+                    confirmPaymentSelection(paymentSelection, state)
+                }
+            }
             is PaymentSelection.New,
             null -> confirmPaymentSelection(paymentSelection, state)
             is PaymentSelection.Saved -> {
@@ -434,6 +471,44 @@ internal class DefaultFlowController @Inject internal constructor(
                 // don't log cancellations as failures
                 paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Canceled)
             }
+        }
+    }
+
+    internal fun onBacsMandateResult(
+        result: BacsMandateConfirmationResult
+    ) {
+        when (result) {
+            is BacsMandateConfirmationResult.Confirmed -> {
+                runCatching {
+                    requireNotNull(viewModel.state)
+                }.fold(
+                    onSuccess = { state ->
+                        val currentSelection = viewModel.paymentSelection
+
+                        if (
+                            currentSelection is PaymentSelection.New.GenericPaymentMethod &&
+                            currentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code
+                        ) {
+                            confirmPaymentSelection(currentSelection, state)
+                        } else {
+                            paymentResultCallback.onPaymentSheetResult(
+                                PaymentSheetResult.Failed(
+                                    BacsMandateException(
+                                        type = BacsMandateException.Type.IncorrectSelection
+                                    )
+                                )
+                            )
+                        }
+                    },
+                    onFailure = { error ->
+                        paymentResultCallback.onPaymentSheetResult(
+                            PaymentSheetResult.Failed(error)
+                        )
+                    }
+                )
+            }
+            is BacsMandateConfirmationResult.ModifyDetails -> presentPaymentOptions()
+            is BacsMandateConfirmationResult.Cancelled -> Unit
         }
     }
 
@@ -636,6 +711,25 @@ internal class DefaultFlowController @Inject internal constructor(
         is PaymentResult.Completed -> PaymentSheetResult.Completed
         is PaymentResult.Canceled -> PaymentSheetResult.Canceled
         is PaymentResult.Failed -> PaymentSheetResult.Failed(throwable)
+    }
+
+    private fun getPaymentAppearance(): PaymentSheet.Appearance {
+        return viewModel.state?.config?.appearance ?: PaymentSheet.Appearance()
+    }
+
+    class BacsMandateException(
+        val type: Type
+    ) : Exception() {
+        override val message: String = when (type) {
+            Type.MissingInformation ->
+                "Bacs requires the account's name, email, sort code, and account number be provided!"
+            Type.IncorrectSelection -> "Cannot confirm non-Bacs payment method with Bacs mandate"
+        }
+
+        enum class Type {
+            MissingInformation,
+            IncorrectSelection
+        }
     }
 
     class GooglePayException(
