@@ -39,6 +39,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillNode
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
@@ -414,9 +415,8 @@ private fun TrailingDropdown(
 
     Box(
         modifier = Modifier
-            .clickable(enabled = show) {
-                expanded = true
-            }
+            .focusProperties { canFocus = false }
+            .clickable(enabled = show) { expanded = true }
             .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
     ) {
         Row(
