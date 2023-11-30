@@ -232,6 +232,11 @@ internal class CustomerSheetViewModel @Inject constructor(
                             primaryButtonLabel = resources.getString(
                                 R.string.stripe_paymentsheet_confirm
                             ),
+                            mandateText = viewState.paymentSelection?.mandateText(
+                                context = application,
+                                merchantName = configuration.merchantDisplayName,
+                                isSaveForFutureUseSelected = false,
+                                isSetupFlow = false)
                         )
                     } ?: viewState
                 }
@@ -571,7 +576,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                             context = application,
                             merchantName = configuration.merchantDisplayName,
                             isSaveForFutureUseSelected = false,
-                            isSetupFlow = true,
+                            isSetupFlow = false,
                         )?.takeIf { primaryButtonVisible },
                     )
                 }
