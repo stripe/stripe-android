@@ -35,12 +35,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -80,6 +83,7 @@ import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.Brand100
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun InstitutionPickerScreen() {
@@ -160,6 +164,8 @@ private fun LoadedContent(
     val listState = rememberLazyListState()
     var input by remember { mutableStateOf(TextFieldValue(previewText ?: "")) }
     var shouldEmitScrollEvent by remember { mutableStateOf(true) }
+    val searchInputFocusRequester = remember { FocusRequester() }
+    val coroutineScope = rememberCoroutineScope()
 
     // Scroll event should be emitted just once per search
     LaunchedEffect(institutions) { shouldEmitScrollEvent = true }
@@ -182,11 +188,12 @@ private fun LoadedContent(
             Modifier.padding(horizontal = 16.dp),
             state = listState,
             content = {
-                item { SearchTitle() }
+                item { SearchTitle(modifier = Modifier.padding(horizontal = 8.dp)) }
                 item { Spacer(modifier = Modifier.height(24.dp)) }
                 if (payload.searchDisabled.not()) {
                     stickyHeader(key = "searchRow") {
                         SearchRow(
+                            focusRequester = searchInputFocusRequester,
                             query = input,
                             onQueryChanged = {
                                 input = it
@@ -203,7 +210,12 @@ private fun LoadedContent(
                     selectedInstitutionId = selectedInstitutionId,
                     onInstitutionSelected = onInstitutionSelected,
                     institutions = institutions,
-                    onManualEntryClick = onManualEntryClick
+                    onManualEntryClick = onManualEntryClick,
+                    onSearchMoreClick = {
+                        // Scroll to the top of the list and focus on the search input
+                        coroutineScope.launch { listState.animateScrollToItem(index = 1) }
+                        searchInputFocusRequester.requestFocus()
+                    }
                 )
             }
         )
@@ -217,28 +229,39 @@ private fun LazyListScope.searchResults(
     selectedInstitutionId: String?,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     institutions: Async<InstitutionResponse>,
-    onManualEntryClick: () -> Unit
+    onManualEntryClick: () -> Unit,
+    onSearchMoreClick: () -> Unit
 ) {
     when {
         // No input: Display featured institutions.
-        isInputEmpty -> itemsIndexed(
-            items = payload.featuredInstitutions.data,
-            key = { _, institution -> institution.id },
-            itemContent = { index, institution ->
-                InstitutionResultTile(
-                    loading = selectedInstitutionId == institution.id,
-                    enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
-                    institution = institution,
-                    index = index,
-                    onInstitutionSelected = { onInstitutionSelected(it, true) }
+        isInputEmpty -> {
+            itemsIndexed(
+                items = payload.featuredInstitutions.data,
+                key = { _, institution -> institution.id },
+                itemContent = { index, institution ->
+                    InstitutionResultTile(
+                        modifier = Modifier.padding(8.dp),
+                        loading = selectedInstitutionId == institution.id,
+                        enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
+                        institution = institution,
+                        index = index,
+                        onInstitutionSelected = { onInstitutionSelected(it, true) }
+                    )
+                }
+            )
+            item(key = "search_more") {
+                SearchMoreRow(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = onSearchMoreClick
                 )
             }
-        )
+        }
 
         else -> when (institutions) {
             // Load failure: Display error message.
             is Fail -> item {
                 NoResultsTile(
+                    modifier = Modifier.padding(8.dp),
                     showManualEntry = payload.featuredInstitutions.showManualEntry,
                     onManualEntryClick = onManualEntryClick
                 )
@@ -248,7 +271,7 @@ private fun LazyListScope.searchResults(
             is Uninitialized,
             is Loading -> items((0..10).toList()) {
                 InstitutionResultShimmer(
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    modifier = Modifier.padding(8.dp)
                 )
             }
 
@@ -257,6 +280,7 @@ private fun LazyListScope.searchResults(
                 // NO RESULTS CASE
                 item {
                     NoResultsTile(
+                        modifier = Modifier.padding(8.dp),
                         showManualEntry = institutions().showManualEntry,
                         onManualEntryClick = onManualEntryClick
                     )
@@ -268,6 +292,7 @@ private fun LazyListScope.searchResults(
                     key = { _, institution -> institution.id },
                     itemContent = { index, institution ->
                         InstitutionResultTile(
+                            modifier = Modifier.padding(8.dp),
                             loading = selectedInstitutionId == institution.id,
                             enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
                             institution = institution,
@@ -279,7 +304,7 @@ private fun LazyListScope.searchResults(
                 if (institutions().showManualEntry == true) {
                     item {
                         ManualEntryRow(
-                            modifier = Modifier.padding(vertical = 8.dp),
+                            modifier = Modifier.padding(8.dp),
                             enabled = selectedInstitutionId == null,
                             onManualEntryClick = onManualEntryClick
                         )
@@ -337,21 +362,25 @@ private fun SearchTitle(modifier: Modifier = Modifier) {
 @Composable
 private fun SearchRow(
     modifier: Modifier = Modifier,
+    focusRequester: FocusRequester,
     query: TextFieldValue,
     onQueryChanged: (TextFieldValue) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    Box(
-        modifier = modifier.fillMaxWidth()
-    ) {
-        // Top background-colored rectangle to prevent scrolled items from being visible above the search bar
+    Box {
+        // Adds a top background to prevent search results from showing through the search bar
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
-                .background(v3Colors.backgroundSurface)
+                .align(Alignment.TopCenter)
                 .height(12.dp)
+                .background(v3Colors.backgroundSurface)
         )
         FinancialConnectionsOutlinedTextField(
+            modifier = modifier
+                .padding(horizontal = 6.dp)
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
             leadingIcon = if (query.text.isNotEmpty()) {
                 {
                     Icon(
@@ -432,6 +461,40 @@ private fun ManualEntryRow(
     }
 }
 
+@Composable
+private fun SearchMoreRow(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .fillMaxSize()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick
+            )
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Search,
+            tint = v3Colors.iconBrand,
+            modifier = Modifier
+                .size(56.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(Brand100)
+                .padding(8.dp),
+            contentDescription = "Add icon"
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        Text(
+            text = stringResource(R.string.stripe_institutionpicker_search_more_title),
+            color = v3Colors.textDefault,
+            style = v3Typography.labelLargeEmphasized,
+        )
+    }
+}
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun InstitutionResultTile(
@@ -454,7 +517,6 @@ private fun InstitutionResultTile(
                 indication = null,
             ) { onInstitutionSelected(institution) }
             .alpha(if (enabled) 1f else DISABLED_DEPTH_ALPHA)
-            .padding(vertical = 8.dp)
     ) {
         InstitutionIcon(institution.icon?.default)
         Spacer(modifier = Modifier.size(8.dp))

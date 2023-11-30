@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ProgressIndicatorDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +34,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 
@@ -121,10 +122,7 @@ internal fun LoadingSpinner() {
 @Composable
 internal fun FullScreenGenericLoading() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(
-            strokeWidth = 2.dp,
-            color = FinancialConnectionsTheme.colors.textSecondary,
-        )
+        V3LoadingSpinner(Modifier.size(52.dp))
     }
 }
 
@@ -184,6 +182,9 @@ private const val LOADING_SPINNER_ROTATION_MS = 1000
 @Composable
 internal fun LoadingSpinnerPreview() {
     FinancialConnectionsPreview {
-        FullScreenGenericLoading()
+        FinancialConnectionsScaffold(
+            topBar = { FinancialConnectionsTopAppBar(onCloseClick = {}) },
+            content = { FullScreenGenericLoading() }
+        )
     }
 }

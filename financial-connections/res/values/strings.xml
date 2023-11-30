@@ -6,8 +6,9 @@
     <string name="stripe_ok">OK</string>
     <string name="stripe_prepane_title">Link with %1$s</string>
     <string name="stripe_prepane_continue">Continue</string>
-    <string name="stripe_institutionpicker_pane_select_bank">Select your bank</string>
+    <string name="stripe_institutionpicker_pane_select_bank">Select bank</string>
     <string name="stripe_institutionpicker_manual_entry_title">Don’t see your bank?</string>
+    <string name="stripe_institutionpicker_search_more_title">Search for more banks</string>
     <string name="stripe_institutionpicker_manual_entry_desc">Enter your account and routing numbers</string>
     <string name="stripe_institutionpicker_pane_error_title">No results</string>
     <string name="stripe_institutionpicker_pane_error_desc">Try searching another bank</string>
