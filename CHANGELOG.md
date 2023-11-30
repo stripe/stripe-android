@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [CHANGED][7683](https://github.com/stripe/stripe-android/pull/7683) A PaymentIntent or SetupIntent confirmed with Google Pay now includes your customer's email address and phone number if the respective `CollectionMode` in `BillingDetailsCollectionConfiguration` is set to `Always`.
+
 ## 20.35.1 - 2023-12-04
 
 ### Identity
