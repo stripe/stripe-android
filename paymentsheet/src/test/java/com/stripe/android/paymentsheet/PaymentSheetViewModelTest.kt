@@ -1778,6 +1778,74 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `Requires email and phone with Google Pay when collection mode is set to always`() {
+        val expectedLabel = "My custom label"
+        val expectedAmount = 1234L
+
+        val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "CA",
+                    currencyCode = "CAD",
+                    amount = expectedAmount,
+                    label = expectedLabel,
+                )
+            )
+        )
+
+        val viewModel = createViewModel(
+            args = args,
+            isGooglePayReady = true,
+            stripeIntent = SETUP_INTENT,
+        )
+
+        val isEmailRequired = viewModel.googlePayLauncherConfig?.isEmailRequired
+        val isPhoneRequired = viewModel.googlePayLauncherConfig?.billingAddressConfig?.isPhoneNumberRequired
+
+        assertThat(isEmailRequired).isTrue()
+        assertThat(isPhoneRequired).isTrue()
+    }
+
+    @Test
+    fun `Does not require email and phone with Google Pay when collection mode is not set to always`() {
+        val expectedLabel = "My custom label"
+        val expectedAmount = 1234L
+
+        val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                ),
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "CA",
+                    currencyCode = "CAD",
+                    amount = expectedAmount,
+                    label = expectedLabel,
+                )
+            )
+        )
+
+        val viewModel = createViewModel(
+            args = args,
+            isGooglePayReady = true,
+            stripeIntent = SETUP_INTENT,
+        )
+
+        val isEmailRequired = viewModel.googlePayLauncherConfig?.isEmailRequired
+        val isPhoneRequired = viewModel.googlePayLauncherConfig?.billingAddressConfig?.isPhoneNumberRequired
+
+        assertThat(isEmailRequired).isFalse()
+        assertThat(isPhoneRequired).isFalse()
+    }
+
+    @Test
     fun `On complete payment launcher result in PI mode & should reuse, should save payment selection`() = runTest {
         selectionSavedTest(
             initializationMode = InitializationMode.PaymentIntent(
