@@ -87,7 +87,19 @@ class PrimaryButtonScreenshotTest {
         paparazziRule.snapshot {
             PrimaryButton(
                 label = "Pay $50.99",
-                processingState = PrimaryButtonProcessingState.Processing,
+                processingState = PrimaryButtonProcessingState.Processing(),
+                locked = false,
+                enabled = true
+            ) {}
+        }
+    }
+
+    @Test
+    fun testProcessingNotSubdued() {
+        paparazziRule.snapshot {
+            PrimaryButton(
+                label = "Processing...",
+                processingState = PrimaryButtonProcessingState.Processing(subdueText = false),
                 locked = false,
                 enabled = true
             ) {}
@@ -98,8 +110,8 @@ class PrimaryButtonScreenshotTest {
     fun testProcessingDisabled() {
         paparazziRule.snapshot {
             PrimaryButton(
-                label = "Pay $50.99",
-                processingState = PrimaryButtonProcessingState.Processing,
+                label = "Processing...",
+                processingState = PrimaryButtonProcessingState.Processing(),
                 locked = false,
                 enabled = false
             ) {}
@@ -147,7 +159,7 @@ class PrimaryButtonScreenshotTest {
         customThemePaparazziRule.snapshotWithCustomTheme {
             PrimaryButton(
                 label = "Pay $50.99",
-                processingState = PrimaryButtonProcessingState.Processing,
+                processingState = PrimaryButtonProcessingState.Processing(),
                 locked = false,
                 enabled = true
             ) {}
