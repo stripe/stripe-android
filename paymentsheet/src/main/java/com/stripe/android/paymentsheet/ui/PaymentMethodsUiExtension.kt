@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import android.content.res.Resources
 import androidx.annotation.DrawableRes
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
@@ -11,7 +12,10 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 @DrawableRes
 internal fun PaymentMethod.getSavedPaymentMethodIcon(): Int {
     return when (type) {
-        PaymentMethod.Type.Card -> (card?.displayBrand?.type ?: card?.brand)?.getCardBrandIcon()
+        PaymentMethod.Type.Card -> {
+            val brand = card?.displayBrand?.type?.takeIf { it != Unknown } ?: card?.brand
+            brand?.getCardBrandIcon()
+        }
         PaymentMethod.Type.SepaDebit -> StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_sepa_debit
         PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
         else -> null
@@ -28,7 +32,7 @@ internal fun CardBrand.getCardBrandIcon(): Int = when (this) {
     CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard
     CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay
     CardBrand.CartesBancaires -> R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires
-    CardBrand.Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
+    Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
 }
 
 internal fun PaymentMethod.getLabel(resources: Resources): String? = when (type) {
