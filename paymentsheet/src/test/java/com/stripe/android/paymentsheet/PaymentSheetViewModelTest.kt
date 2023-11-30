@@ -1805,10 +1805,47 @@ internal class PaymentSheetViewModelTest {
         )
 
         val isEmailRequired = viewModel.googlePayLauncherConfig?.isEmailRequired
+        val isBillingRequired = viewModel.googlePayLauncherConfig?.billingAddressConfig?.isRequired
         val isPhoneRequired = viewModel.googlePayLauncherConfig?.billingAddressConfig?.isPhoneNumberRequired
 
         assertThat(isEmailRequired).isTrue()
+        assertThat(isBillingRequired).isTrue()
         assertThat(isPhoneRequired).isTrue()
+    }
+
+    @Test
+    fun `Requires full billing details with Google Pay when collection mode is set to full`() {
+        val expectedLabel = "My custom label"
+        val expectedAmount = 1234L
+
+        val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                ),
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "CA",
+                    currencyCode = "CAD",
+                    amount = expectedAmount,
+                    label = expectedLabel,
+                )
+            )
+        )
+
+        val viewModel = createViewModel(
+            args = args,
+            isGooglePayReady = true,
+            stripeIntent = SETUP_INTENT,
+        )
+
+        val isBillingRequired = viewModel.googlePayLauncherConfig?.billingAddressConfig?.isRequired
+        val format = viewModel.googlePayLauncherConfig?.billingAddressConfig?.format
+        val isPhoneRequired = viewModel.googlePayLauncherConfig?.billingAddressConfig?.isPhoneNumberRequired
+
+        assertThat(isBillingRequired).isTrue()
+        assertThat(format).isEqualTo(GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full)
+        assertThat(isPhoneRequired).isFalse()
     }
 
     @Test
@@ -1820,7 +1857,7 @@ internal class PaymentSheetViewModelTest {
             config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                     phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
                 ),
                 googlePay = PaymentSheet.GooglePayConfiguration(
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
@@ -1839,9 +1876,41 @@ internal class PaymentSheetViewModelTest {
         )
 
         val isEmailRequired = viewModel.googlePayLauncherConfig?.isEmailRequired
+        val isBillingRequired = viewModel.googlePayLauncherConfig?.billingAddressConfig?.isRequired
         val isPhoneRequired = viewModel.googlePayLauncherConfig?.billingAddressConfig?.isPhoneNumberRequired
 
         assertThat(isEmailRequired).isFalse()
+        assertThat(isBillingRequired).isFalse()
+        assertThat(isPhoneRequired).isFalse()
+    }
+
+    @Test
+    fun `Does not require billing details with Google Pay when collection mode is set to never`() {
+        val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                ),
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "CA",
+                    currencyCode = "CAD",
+                )
+            )
+        )
+
+        val viewModel = createViewModel(
+            args = args,
+            isGooglePayReady = true,
+            stripeIntent = SETUP_INTENT,
+        )
+
+        val isEmailRequired = viewModel.googlePayLauncherConfig?.isEmailRequired
+        val isBillingRequired = viewModel.googlePayLauncherConfig?.billingAddressConfig?.isRequired
+        val isPhoneRequired = viewModel.googlePayLauncherConfig?.billingAddressConfig?.isPhoneNumberRequired
+
+        assertThat(isEmailRequired).isFalse()
+        assertThat(isBillingRequired).isFalse()
         assertThat(isPhoneRequired).isFalse()
     }
 
