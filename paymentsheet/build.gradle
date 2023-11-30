@@ -97,6 +97,7 @@ dependencies {
     androidTestImplementation testLibs.mockito.core
     androidTestImplementation testLibs.mockito.inline
     androidTestImplementation testLibs.mockito.kotlin
+    androidTestImplementation testLibs.testParameterInjector
     androidTestImplementation testLibs.truth
 
     androidTestUtil testLibs.testOrchestrator
