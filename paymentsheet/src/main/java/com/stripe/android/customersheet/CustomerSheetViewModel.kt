@@ -236,7 +236,8 @@ internal class CustomerSheetViewModel @Inject constructor(
                                 context = application,
                                 merchantName = configuration.merchantDisplayName,
                                 isSaveForFutureUseSelected = false,
-                                isSetupFlow = false)
+                                isSetupFlow = false,
+                            )
                         )
                     } ?: viewState
                 }
