@@ -3,9 +3,9 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
-internal object AttachDefaultsSettingsDefinition : BooleanSettingsDefinition(
+internal object AttachBillingDetailsToPaymentMethodSettingsDefinition : BooleanSettingsDefinition(
     key = "attachDefaults",
-    displayName = "Attach Defaults",
+    displayName = "Attach Billing Details to Payment Method",
     defaultValue = true,
 ) {
     override fun configure(
