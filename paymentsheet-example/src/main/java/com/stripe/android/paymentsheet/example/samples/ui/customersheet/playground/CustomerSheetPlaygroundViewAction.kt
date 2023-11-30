@@ -11,4 +11,5 @@ sealed class CustomerSheetPlaygroundViewAction {
     data class UpdateBillingEmailCollection(val value: String) : CustomerSheetPlaygroundViewAction()
     data class UpdateBillingPhoneCollection(val value: String) : CustomerSheetPlaygroundViewAction()
     data class UpdateBillingAddressCollection(val value: String) : CustomerSheetPlaygroundViewAction()
+    data class UpdateMerchantCountryCode(val code: String) : CustomerSheetPlaygroundViewAction()
 }

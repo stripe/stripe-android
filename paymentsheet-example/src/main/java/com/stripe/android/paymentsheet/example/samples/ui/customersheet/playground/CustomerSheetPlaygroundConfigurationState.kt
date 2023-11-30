@@ -10,5 +10,11 @@ data class CustomerSheetPlaygroundConfigurationState(
     val attachDefaultBillingAddress: Boolean = true,
     val achEnabled: Boolean = true,
     val billingCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
-        PaymentSheet.BillingDetailsCollectionConfiguration()
-)
+        PaymentSheet.BillingDetailsCollectionConfiguration(),
+    val merchantCountry: String = "US",
+    val currency: String = "usd",
+) {
+
+    val customerId: String
+        get() = if (isExistingCustomer) "returning" else "new"
+}

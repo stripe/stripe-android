@@ -48,6 +48,7 @@ import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.samples.ui.customersheet.playground.CustomerSheetPlaygroundViewAction.UpdateMerchantCountryCode
 import com.stripe.android.paymentsheet.example.samples.ui.shared.MultiToggleButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.utils.rememberDrawablePainter
@@ -533,6 +534,23 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                             CustomerSheetPlaygroundViewAction.UpdateBillingAddressCollection(it)
                         )
                     }
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 2.dp)
+            ) {
+                Text(
+                    text = "Merchant Country",
+                    color = MaterialTheme.colors.onBackground,
+                )
+                MultiToggleButton(
+                    currentSelection = configurationState.merchantCountry,
+                    toggleStates = listOf("US", "FR"),
+                    onToggleChange = { viewActionHandler(UpdateMerchantCountryCode(it)) },
                 )
             }
         }
