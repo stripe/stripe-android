@@ -1051,12 +1051,22 @@ class PaymentSheet internal constructor(
             get() = email == CollectionMode.Always
 
         internal fun toBillingAddressConfig(): GooglePayPaymentMethodLauncher.BillingAddressConfig {
-            val collectAddress = address != AddressCollectionMode.Never
+            val collectAddress = address == AddressCollectionMode.Full
             val collectPhone = phone == CollectionMode.Always
+
+            val format = when (address) {
+                AddressCollectionMode.Never,
+                AddressCollectionMode.Automatic -> {
+                    GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Min
+                }
+                AddressCollectionMode.Full -> {
+                    GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full
+                }
+            }
 
             return GooglePayPaymentMethodLauncher.BillingAddressConfig(
                 isRequired = collectAddress || collectPhone,
-                format = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
+                format = format,
                 isPhoneNumberRequired = collectPhone,
             )
         }
