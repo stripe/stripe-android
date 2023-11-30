@@ -82,7 +82,7 @@ internal class InstitutionPickerViewModelTest {
         val viewModel = buildViewModel(InstitutionPickerState())
 
         withState(viewModel) { state ->
-            assertEquals(state.payload()!!.featuredInstitutions, institutionResponse.data)
+            assertEquals(state.payload()!!.featuredInstitutions, institutionResponse)
             assertIs<Uninitialized>(state.searchInstitutions)
         }
     }
@@ -126,8 +126,8 @@ internal class InstitutionPickerViewModelTest {
         advanceUntilIdle()
 
         withState(viewModel) { state ->
-            assertEquals(state.payload()!!.featuredInstitutions, featuredResults.data)
-            assertEquals(state.searchInstitutions()!!.data, searchResults.data)
+            assertEquals(state.payload()!!.featuredInstitutions, featuredResults)
+            assertEquals(state.searchInstitutions()!!, searchResults)
             eventTracker.assertContainsEvent(
                 expectedEventName = "linked_accounts.search.succeeded",
                 expectedParams = mapOf(

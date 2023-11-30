@@ -3,6 +3,7 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,11 +17,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -28,6 +30,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,14 +41,11 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,8 +60,10 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
+import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
+import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
+import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.V3LoadingSpinner
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -69,7 +71,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
@@ -77,12 +78,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.Brand100
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
-import com.stripe.android.financialconnections.ui.theme.Layout
-import com.stripe.android.uicore.image.StripeImage
 
 @Composable
 internal fun InstitutionPickerScreen() {
@@ -100,7 +97,8 @@ internal fun InstitutionPickerScreen() {
         onInstitutionSelected = viewModel::onInstitutionSelected,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.INSTITUTION_PICKER) },
         onManualEntryClick = viewModel::onManualEntryClick,
-        onScrollChanged = viewModel::onScrollChanged
+        onScrollChanged = viewModel::onScrollChanged,
+        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
 
@@ -113,6 +111,7 @@ private fun InstitutionPickerContent(
     onQueryChanged: (String) -> Unit,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     onCloseClick: () -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit,
     onManualEntryClick: () -> Unit,
     onScrollChanged: () -> Unit
 ) {
@@ -124,9 +123,14 @@ private fun InstitutionPickerContent(
         }
     ) {
         when (payload) {
-            Uninitialized -> {} //TODO
-            is Fail -> {} //TODO
-            is Loading -> {} //TODO
+            is Uninitialized,
+            is Loading -> FullScreenGenericLoading()
+
+            is Fail -> UnclassifiedErrorContent(
+                error = payload.error,
+                onCloseFromErrorClick = onCloseFromErrorClick
+            )
+
             is Success -> LoadedContent(
                 previewText = previewText,
                 selectedInstitutionId = selectedInstitutionId,
@@ -153,43 +157,114 @@ private fun LoadedContent(
     onManualEntryClick: () -> Unit,
     onScrollChanged: () -> Unit,
 ) {
-    var input by remember { mutableStateOf(TextFieldValue(previewText ?: "")) }
     val listState = rememberLazyListState()
-    val shouldEmitScrollEvent = remember { mutableStateOf(true) }
+    var input by remember { mutableStateOf(TextFieldValue(previewText ?: "")) }
+    var shouldEmitScrollEvent by remember { mutableStateOf(true) }
 
     // Scroll event should be emitted just once per search
-    LaunchedEffect(institutions) { shouldEmitScrollEvent.value = true }
+    LaunchedEffect(institutions) { shouldEmitScrollEvent = true }
     // Trigger onScrollChanged with the list of institutions when scrolling stops (true -> false)
     LaunchedEffect(listState.isScrollInProgress) {
         if (institutions()?.data?.isNotEmpty() == true &&
             !listState.isScrollInProgress &&
-            shouldEmitScrollEvent.value
+            shouldEmitScrollEvent
         ) {
             onScrollChanged()
-            shouldEmitScrollEvent.value = false
+            shouldEmitScrollEvent = false
         }
     }
 
-    Layout(
-        lazyListState = listState,
-        content = {
-            item { SearchTitle() }
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-            if (payload.searchDisabled.not()) {
-                stickyHeader {
-                    SearchRow(
-                        query = input,
-                        onQueryChanged = {
-                            input = it
-                            onQueryChanged(input.text)
-                        },
-                    )
+    CompositionLocalProvider(
+        // Disable overscroll as it does not play well with sticky headers.
+        LocalOverscrollConfiguration provides null
+    ) {
+        LazyColumn(
+            Modifier.padding(horizontal = 16.dp),
+            state = listState,
+            content = {
+                item { SearchTitle() }
+                item { Spacer(modifier = Modifier.height(24.dp)) }
+                if (payload.searchDisabled.not()) {
+                    stickyHeader(key = "searchRow") {
+                        SearchRow(
+                            query = input,
+                            onQueryChanged = {
+                                input = it
+                                onQueryChanged(input.text)
+                            },
+                        )
+                    }
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
                 }
+
+                searchResults(
+                    isInputEmpty = input.text.isBlank(),
+                    payload = payload,
+                    selectedInstitutionId = selectedInstitutionId,
+                    onInstitutionSelected = onInstitutionSelected,
+                    institutions = institutions,
+                    onManualEntryClick = onManualEntryClick
+                )
+            }
+        )
+    }
+}
+
+@Suppress("MagicNumber", "NestedBlockDepth")
+private fun LazyListScope.searchResults(
+    isInputEmpty: Boolean,
+    payload: Payload,
+    selectedInstitutionId: String?,
+    onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
+    institutions: Async<InstitutionResponse>,
+    onManualEntryClick: () -> Unit
+) {
+    when {
+        // No input: Display featured institutions.
+        isInputEmpty -> itemsIndexed(
+            items = payload.featuredInstitutions.data,
+            key = { _, institution -> institution.id },
+            itemContent = { index, institution ->
+                InstitutionResultTile(
+                    loading = selectedInstitutionId == institution.id,
+                    enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
+                    institution = institution,
+                    index = index,
+                    onInstitutionSelected = { onInstitutionSelected(it, true) }
+                )
+            }
+        )
+
+        else -> when (institutions) {
+            // Load failure: Display error message.
+            is Fail -> item {
+                NoResultsTile(
+                    showManualEntry = payload.featuredInstitutions.showManualEntry,
+                    onManualEntryClick = onManualEntryClick
+                )
             }
 
-            if (input.text.isBlank()) {
+            // Loading: Display shimmer.
+            is Uninitialized,
+            is Loading -> items((0..10).toList()) {
+                InstitutionResultShimmer(
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
+            // Success: Display search results.
+            is Success -> if (institutions().data.isEmpty()) {
+                // NO RESULTS CASE
+                item {
+                    NoResultsTile(
+                        showManualEntry = institutions().showManualEntry,
+                        onManualEntryClick = onManualEntryClick
+                    )
+                }
+            } else {
+                // RESULTS CASE: Institution List + Manual Entry final row if needed.
                 itemsIndexed(
-                    items = payload.featuredInstitutions.data,
+                    items = institutions().data,
                     key = { _, institution -> institution.id },
                     itemContent = { index, institution ->
                         InstitutionResultTile(
@@ -197,68 +272,32 @@ private fun LoadedContent(
                             enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
                             institution = institution,
                             index = index,
-                            onInstitutionSelected = { onInstitutionSelected(it, true) }
+                            onInstitutionSelected = { onInstitutionSelected(it, false) }
                         )
                     }
                 )
-            } else when (institutions) {
-                is Fail -> item {
-                    NoResultsTile(
-                        showManualEntry = payload.featuredInstitutions.showManualEntry,
-                        onManualEntryClick = onManualEntryClick
-                    )
-                }
-
-                Uninitialized,
-                is Loading -> items((0..10).toList()) {
-                    InstitutionResultShimmer()
-                }
-
-                is Success -> if (institutions().data.isEmpty()) {
-                    // NO RESULTS CASE
+                if (institutions().showManualEntry == true) {
                     item {
-                        NoResultsTile(
-                            showManualEntry = institutions().showManualEntry,
+                        ManualEntryRow(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            enabled = selectedInstitutionId == null,
                             onManualEntryClick = onManualEntryClick
                         )
-                    }
-                } else {
-                    // RESULTS CASE: Institution List + Manual Entry final row if needed.
-                    itemsIndexed(
-                        items = institutions().data,
-                        key = { _, institution -> institution.id },
-                        itemContent = { index, institution ->
-                            InstitutionResultTile(
-                                loading = selectedInstitutionId == institution.id,
-                                enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
-                                institution = institution,
-                                index = index,
-                                onInstitutionSelected = { onInstitutionSelected(it, false) }
-                            )
-                        }
-                    )
-                    if (institutions().showManualEntry == true) {
-                        item {
-                            ManualEntryRow(
-                                enabled = selectedInstitutionId != null,
-                                onManualEntryClick = onManualEntryClick
-                            )
-                        }
                     }
                 }
             }
         }
-    )
+    }
 }
 
 @Composable
 private fun NoResultsTile(
+    modifier: Modifier = Modifier,
     showManualEntry: Boolean?,
     onManualEntryClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .padding(top = 32.dp)
+        modifier = modifier
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -287,9 +326,9 @@ private fun NoResultsTile(
 }
 
 @Composable
-private fun SearchTitle() {
+private fun SearchTitle(modifier: Modifier = Modifier) {
     Text(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         text = stringResource(R.string.stripe_institutionpicker_pane_select_bank),
         style = v3Typography.headingXLarge
     )
@@ -297,29 +336,31 @@ private fun SearchTitle() {
 
 @Composable
 private fun SearchRow(
+    modifier: Modifier = Modifier,
     query: TextFieldValue,
     onQueryChanged: (TextFieldValue) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(color = colors.backgroundSurface),
+    Box(
+        modifier = modifier.fillMaxWidth()
     ) {
+        // Top background-colored rectangle to prevent scrolled items from being visible above the search bar
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(v3Colors.backgroundSurface)
+                .height(12.dp)
+        )
         FinancialConnectionsOutlinedTextField(
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done
-            ),
             leadingIcon = if (query.text.isNotEmpty()) {
                 {
                     Icon(
                         Icons.Filled.ArrowBack,
-                        tint = colors.textPrimary,
+                        tint = v3Colors.iconDefault,
                         contentDescription = "Back button",
                         modifier = Modifier.clickable {
-                            onQueryChanged(TextFieldValue(""))
                             focusManager.clearFocus()
+                            onQueryChanged(TextFieldValue(""))
                         }
                     )
                 }
@@ -327,7 +368,7 @@ private fun SearchRow(
                 {
                     Icon(
                         Icons.Filled.Search,
-                        tint = colors.textPrimary,
+                        tint = v3Colors.iconDefault,
                         contentDescription = "Search icon",
                     )
                 }
@@ -335,22 +376,25 @@ private fun SearchRow(
             placeholder = {
                 Text(
                     text = stringResource(id = R.string.stripe_search),
-                    style = FinancialConnectionsTheme.typography.body,
-                    color = colors.textDisabled
+                    style = v3Typography.labelLarge,
+                    color = v3Colors.textSubdued
                 )
             },
             value = query,
             onValueChange = { onQueryChanged(it) }
         )
-        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
 @Composable
-private fun ManualEntryRow(enabled: Boolean, onManualEntryClick: () -> Unit) {
+private fun ManualEntryRow(
+    modifier: Modifier = Modifier,
+    enabled: Boolean,
+    onManualEntryClick: () -> Unit
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .clickable(
                 enabled = enabled,
@@ -358,8 +402,7 @@ private fun ManualEntryRow(enabled: Boolean, onManualEntryClick: () -> Unit) {
                 indication = null,
                 onClick = onManualEntryClick
             )
-            .alpha(if (enabled) 1f else 0.3f)
-            .padding(vertical = 8.dp)
+            .alpha(if (enabled) 1f else DISABLED_DEPTH_ALPHA)
     ) {
         Icon(
             imageVector = Icons.Filled.Add,
@@ -392,6 +435,7 @@ private fun ManualEntryRow(enabled: Boolean, onManualEntryClick: () -> Unit) {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun InstitutionResultTile(
+    modifier: Modifier = Modifier,
     institution: FinancialConnectionsInstitution,
     loading: Boolean = false,
     enabled: Boolean = true,
@@ -400,8 +444,7 @@ private fun InstitutionResultTile(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .semantics { testTagsAsResourceId = true }
             .testTag("search_result_$index")
@@ -410,26 +453,10 @@ private fun InstitutionResultTile(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
             ) { onInstitutionSelected(institution) }
-            .alpha(if (enabled) 1f else 0.3f)
+            .alpha(if (enabled) 1f else DISABLED_DEPTH_ALPHA)
             .padding(vertical = 8.dp)
     ) {
-        val modifier = Modifier
-            .size(56.dp)
-            .clip(RoundedCornerShape(6.dp))
-        when {
-            institution.icon?.default.isNullOrEmpty() -> InstitutionPlaceholder(modifier)
-            else -> StripeImage(
-                url = requireNotNull(institution.icon?.default),
-                imageLoader = LocalImageLoader.current,
-                contentDescription = null,
-                modifier = modifier,
-                contentScale = ContentScale.Crop,
-                loadingContent = {
-                    LoadingShimmerEffect { Box(modifier = modifier.background(it)) }
-                },
-                errorContent = { InstitutionPlaceholder(modifier) }
-            )
-        }
+        InstitutionIcon(institution.icon?.default)
         Spacer(modifier = Modifier.size(8.dp))
         Column(
             modifier = Modifier.weight(1f)
@@ -458,18 +485,19 @@ private fun InstitutionResultTile(
 }
 
 @Composable
-private fun InstitutionResultShimmer() {
+@Suppress("MagicNumber")
+private fun InstitutionResultShimmer(modifier: Modifier) {
     LoadingShimmerEffect { shimmer ->
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(vertical = 8.dp)
+            modifier = modifier.fillMaxSize()
         ) {
-            val modifier = Modifier
-                .size(56.dp)
-                .clip(RoundedCornerShape(6.dp))
-            Box(modifier = modifier.background(shimmer))
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(shimmer)
+            )
             Spacer(modifier = Modifier.size(8.dp))
             Column {
                 Box(
@@ -493,6 +521,8 @@ private fun InstitutionResultShimmer() {
     }
 }
 
+private const val DISABLED_DEPTH_ALPHA = 0.3f
+
 @Preview(group = "Institution Picker Pane")
 @Composable
 internal fun InstitutionPickerPreview(
@@ -509,6 +539,7 @@ internal fun InstitutionPickerPreview(
             onInstitutionSelected = { _, _ -> },
             onCloseClick = {},
             onManualEntryClick = {},
+            onCloseFromErrorClick = {},
         ) {}
     }
 }

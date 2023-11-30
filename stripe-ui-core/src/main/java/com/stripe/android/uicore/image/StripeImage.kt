@@ -52,7 +52,7 @@ fun StripeImage(
     errorContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
     loadingContent: @Composable BoxWithConstraintsScope.() -> Unit = {}
 ) {
-    BoxWithConstraints(modifier) {
+    BoxWithConstraints {
         val debugMode = LocalInspectionMode.current
         val (width, height) = calculateBoxSize()
         val state: MutableState<StripeImageState> = remember {

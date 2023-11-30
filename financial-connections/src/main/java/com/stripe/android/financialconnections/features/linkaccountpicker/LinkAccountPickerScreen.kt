@@ -44,7 +44,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
 import com.stripe.android.financialconnections.features.common.AccountItem
-import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
+import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.PaneFooter
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
@@ -208,21 +208,7 @@ private fun NetworkedAccountItem(
         account = partnerAccount,
         networkedAccount = networkedAccount
     ) {
-        val modifier = Modifier
-            .size(24.dp)
-            .clip(RoundedCornerShape(3.dp))
-        val institutionIcon = partnerAccount.institution?.icon?.default
-        when {
-            institutionIcon.isNullOrEmpty() -> InstitutionPlaceholder(modifier)
-            else -> StripeImage(
-                url = institutionIcon,
-                imageLoader = LocalImageLoader.current,
-                contentDescription = null,
-                modifier = modifier,
-                contentScale = ContentScale.Crop,
-                errorContent = { InstitutionPlaceholder(modifier) }
-            )
-        }
+        InstitutionIcon(institutionIcon = partnerAccount.institution?.icon?.default)
     }
 }
 

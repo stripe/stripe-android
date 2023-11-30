@@ -57,22 +57,26 @@ internal class InstitutionPickerViewModel @Inject constructor(
         logErrors()
         suspend {
             val manifest = getManifest()
-            val (featuredInstitutions, duration) =
-                kotlin.runCatching {
-                    measureTimeMillis {
-                        featuredInstitutions(
-                            clientSecret = configuration.financialConnectionsSessionClientSecret
-                        )
-                    }
-                }.onFailure {
-                    eventTracker.logError(
-                        extraMessage = "Error fetching featured institutions",
-                        error = it,
-                        pane = Pane.INSTITUTION_PICKER,
-                        logger = logger
+            val (featuredInstitutions: InstitutionResponse, duration: Long) = runCatching {
+                measureTimeMillis {
+                    featuredInstitutions(
+                        clientSecret = configuration.financialConnectionsSessionClientSecret
                     )
-                }.getOrThrow()
-
+                }
+            }.onFailure {
+                eventTracker.logError(
+                    extraMessage = "Error fetching featured institutions",
+                    error = it,
+                    pane = Pane.INSTITUTION_PICKER,
+                    logger = logger
+                )
+            }.getOrElse {
+                // Allow users to search for institutions even if featured institutions fails.
+                InstitutionResponse(
+                    data = emptyList(),
+                    showManualEntry = manifest.allowManualEntry
+                ) to 0L
+            }
             Payload(
                 featuredInstitutionsDuration = duration,
                 featuredInstitutions = featuredInstitutions,
@@ -160,7 +164,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
 
     fun onInstitutionSelected(institution: FinancialConnectionsInstitution, fromFeatured: Boolean) {
         suspend {
-            delay(2000)
             eventTracker.track(
                 InstitutionSelected(
                     pane = Pane.INSTITUTION_PICKER,

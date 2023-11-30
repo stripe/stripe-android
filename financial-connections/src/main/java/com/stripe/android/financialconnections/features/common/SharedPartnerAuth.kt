@@ -30,7 +30,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
@@ -284,16 +283,7 @@ private fun InstitutionalPrePaneContent(
             )
     ) {
         content.institutionIcon?.default?.let {
-            val institutionIconModifier = Modifier
-                .size(36.dp)
-                .clip(RoundedCornerShape(6.dp))
-            StripeImage(
-                url = it,
-                contentDescription = null,
-                imageLoader = LocalImageLoader.current,
-                errorContent = { InstitutionPlaceholder(institutionIconModifier) },
-                modifier = institutionIconModifier
-            )
+            InstitutionIcon(institutionIcon = it)
             Spacer(modifier = Modifier.size(16.dp))
         }
         AnnotatedText(

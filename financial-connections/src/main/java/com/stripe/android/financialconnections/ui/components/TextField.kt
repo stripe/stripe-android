@@ -10,6 +10,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuDefaults.outlinedTextFieldColors
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextRange
@@ -35,29 +36,31 @@ internal fun FinancialConnectionsOutlinedTextField(
     label: @Composable (() -> Unit)? = null
 ) {
     OutlinedTextField(
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(12.dp),
         modifier = modifier.fillMaxWidth(),
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         placeholder = placeholder,
+        maxLines = 1,
         visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions,
         readOnly = readOnly,
         isError = isError,
         value = value,
         colors = outlinedTextFieldColors(
-            focusedBorderColor = FinancialConnectionsTheme.colors.textBrand,
-            unfocusedBorderColor = FinancialConnectionsTheme.colors.borderDefault,
-            disabledBorderColor = FinancialConnectionsTheme.colors.textDisabled,
-            unfocusedLabelColor = FinancialConnectionsTheme.colors.textSecondary,
-            errorBorderColor = FinancialConnectionsTheme.colors.textCritical,
-            focusedLabelColor = FinancialConnectionsTheme.colors.textBrand,
-            cursorColor = FinancialConnectionsTheme.colors.textBrand,
-            errorCursorColor = FinancialConnectionsTheme.colors.textCritical,
-            errorLabelColor = FinancialConnectionsTheme.colors.textCritical,
-            errorTrailingIconColor = FinancialConnectionsTheme.colors.textCritical,
-            trailingIconColor = FinancialConnectionsTheme.colors.borderDefault,
-            focusedTrailingIconColor = FinancialConnectionsTheme.colors.borderDefault
+            backgroundColor = FinancialConnectionsTheme.v3Colors.backgroundSurface,
+            focusedBorderColor = FinancialConnectionsTheme.v3Colors.borderBrand,
+            unfocusedBorderColor = FinancialConnectionsTheme.v3Colors.border,
+            disabledBorderColor = FinancialConnectionsTheme.v3Colors.textDisabled,
+            unfocusedLabelColor = FinancialConnectionsTheme.v3Colors.textSubdued,
+            errorBorderColor = FinancialConnectionsTheme.v3Colors.textCritical,
+            focusedLabelColor = FinancialConnectionsTheme.v3Colors.textSubdued,
+            cursorColor = FinancialConnectionsTheme.v3Colors.borderBrand,
+            errorCursorColor = FinancialConnectionsTheme.v3Colors.textCritical,
+            errorLabelColor = FinancialConnectionsTheme.v3Colors.textCritical,
+            errorTrailingIconColor = FinancialConnectionsTheme.v3Colors.textCritical,
+            trailingIconColor = FinancialConnectionsTheme.v3Colors.iconDefault,
+            focusedTrailingIconColor = FinancialConnectionsTheme.v3Colors.iconDefault
         ),
         onValueChange = onValueChange,
         label = label
@@ -83,7 +86,15 @@ private fun TextRange.adjustForFilter(
 internal fun FinancialConnectionsOutlinedTextFieldPreview() {
     FinancialConnectionsPreview {
         Column {
-            FinancialConnectionsOutlinedTextField(value = TextFieldValue("test"), onValueChange = {})
+            FinancialConnectionsOutlinedTextField(
+                value = TextFieldValue("test"),
+                onValueChange = {}
+            )
+            FinancialConnectionsOutlinedTextField(
+                value = TextFieldValue(""),
+                label = { Text("label") },
+                onValueChange = {}
+            )
         }
     }
 }
