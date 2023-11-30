@@ -10,6 +10,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.CookieStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -1046,6 +1047,20 @@ class PaymentSheet internal constructor(
         val attachDefaultsToPaymentMethod: Boolean = false,
     ) : Parcelable {
 
+        internal val collectsEmail: Boolean
+            get() = email == CollectionMode.Always
+
+        internal fun toBillingAddressConfig(): GooglePayPaymentMethodLauncher.BillingAddressConfig {
+            val collectAddress = address != AddressCollectionMode.Never
+            val collectPhone = phone == CollectionMode.Always
+
+            return GooglePayPaymentMethodLauncher.BillingAddressConfig(
+                isRequired = collectAddress || collectPhone,
+                format = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
+                isPhoneNumberRequired = collectPhone,
+            )
+        }
+
         /**
          * Billing details fields collection options.
          */
@@ -1378,9 +1393,3 @@ class PaymentSheet internal constructor(
         }
     }
 }
-
-internal val PaymentSheet.BillingDetailsCollectionConfiguration.collectsEmail: Boolean
-    get() = email == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
-
-internal val PaymentSheet.BillingDetailsCollectionConfiguration.collectsPhone: Boolean
-    get() = phone == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always

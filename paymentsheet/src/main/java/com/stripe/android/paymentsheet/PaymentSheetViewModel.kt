@@ -190,13 +190,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 )
                 null
             } else {
-                val collectPhone = args.config.billingDetailsCollectionConfiguration.collectsPhone
-                val billingAddressConfig = GooglePayPaymentMethodLauncher.BillingAddressConfig(
-                    isRequired = collectPhone,
-                    format = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
-                    isPhoneNumberRequired = collectPhone,
-                )
-
                 GooglePayPaymentMethodLauncher.Config(
                     environment = when (config.environment) {
                         PaymentSheet.GooglePayConfiguration.Environment.Production ->
@@ -207,7 +200,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     merchantCountryCode = config.countryCode,
                     merchantName = merchantName,
                     isEmailRequired = args.config.billingDetailsCollectionConfiguration.collectsEmail,
-                    billingAddressConfig = billingAddressConfig,
+                    billingAddressConfig = args.config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
                 )
             }
         }

@@ -46,8 +46,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.collectsEmail
-import com.stripe.android.paymentsheet.collectsPhone
 import com.stripe.android.paymentsheet.intercept
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
@@ -671,13 +669,6 @@ internal class DefaultFlowController @Inject internal constructor(
         // state.config.googlePay is guaranteed not to be null or GooglePay would be disabled
         val googlePayConfig = requireNotNull(state.config.googlePay)
 
-        val collectPhone = state.config.billingDetailsCollectionConfiguration.collectsPhone
-        val billingAddressConfig = GooglePayPaymentMethodLauncher.BillingAddressConfig(
-            isRequired = collectPhone,
-            format = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
-            isPhoneNumberRequired = collectPhone,
-        )
-
         val googlePayPaymentLauncherConfig = GooglePayPaymentMethodLauncher.Config(
             environment = when (googlePayConfig.environment) {
                 PaymentSheet.GooglePayConfiguration.Environment.Production ->
@@ -688,7 +679,7 @@ internal class DefaultFlowController @Inject internal constructor(
             merchantCountryCode = googlePayConfig.countryCode,
             merchantName = state.config.merchantDisplayName,
             isEmailRequired = state.config.billingDetailsCollectionConfiguration.collectsEmail,
-            billingAddressConfig = billingAddressConfig,
+            billingAddressConfig = state.config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
         )
 
         googlePayPaymentMethodLauncherFactory.create(
