@@ -171,7 +171,7 @@ internal class PaymentSheetViewModelTest {
         createViewModel()
         verify(eventReporter).onInit(
             configuration = eq(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY),
-            isDecoupling = eq(false),
+            isDeferred = eq(false),
         )
 
         // Creating the view model should regenerate the analytics sessionId.
@@ -1180,7 +1180,7 @@ internal class PaymentSheetViewModelTest {
             customerPaymentMethods = PaymentMethodFixtures.createCards(1),
         )
 
-        verify(eventReporter).onInit(configuration = anyOrNull(), isDecoupling = any())
+        verify(eventReporter).onInit(configuration = anyOrNull(), isDeferred = any())
 
         verify(eventReporter).onShowExistingPaymentOptions(
             linkEnabled = eq(false),
@@ -1446,7 +1446,7 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
-            isDecoupling = eq(false),
+            isDeferred = eq(false),
         )
     }
 
@@ -1460,7 +1460,7 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
-            isDecoupling = eq(true),
+            isDeferred = eq(true),
         )
     }
 
@@ -1475,7 +1475,7 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
-            isDecoupling = eq(true),
+            isDeferred = eq(true),
         )
     }
 

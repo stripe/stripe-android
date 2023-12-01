@@ -53,7 +53,7 @@ class DefaultEventReporterTest {
     fun `onInit() should fire analytics request with expected event value`() {
         completeEventReporter.onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            isDecoupling = false,
+            isDeferred = false,
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
