@@ -13,73 +13,54 @@ internal interface EventReporter {
      */
     fun onInit(
         configuration: PaymentSheet.Configuration,
-        isDecoupling: Boolean,
+        isDeferred: Boolean,
     )
 
     /**
      * PaymentSheet or FlowController have started loading.
      */
-    fun onLoadStarted(
-        isDecoupling: Boolean,
-    )
+    fun onLoadStarted()
 
     /**
      * PaymentSheet or FlowController have successfully loaded the information required to be
      * rendered.
      */
     fun onLoadSucceeded(
-        isDecoupling: Boolean,
+        linkEnabled: Boolean,
+        currency: String?,
     )
 
     /**
      * PaymentSheet or FlowController have failed to load.
      */
-    fun onLoadFailed(
-        isDecoupling: Boolean,
-        error: Throwable,
-    )
+    fun onLoadFailed(error: Throwable)
 
     /**
      * PaymentSheet or FlowController have failed to load from the Elements session endpoint.
      */
-    fun onElementsSessionLoadFailed(
-        isDecoupling: Boolean,
-        error: Throwable,
-    )
+    fun onElementsSessionLoadFailed(error: Throwable)
 
     /**
      * PaymentSheet has been dismissed by pressing the close button.
      */
-    fun onDismiss(
-        isDecoupling: Boolean,
-    )
+    fun onDismiss()
 
     /**
      * PaymentSheet is now being displayed and its first screen shows the customer's saved payment
      * methods.
      */
-    fun onShowExistingPaymentOptions(
-        linkEnabled: Boolean,
-        currency: String?,
-        isDecoupling: Boolean,
-    )
+    fun onShowExistingPaymentOptions()
 
     /**
      * PaymentSheet is now being displayed and its first screen shows the payment method form.
      */
-    fun onShowNewPaymentOptionForm(
-        linkEnabled: Boolean,
-        currency: String?,
-        isDecoupling: Boolean,
-    )
+    fun onShowNewPaymentOptionForm()
 
     /**
      * The customer has selected one of the available payment methods in the payment method form.
      */
     fun onSelectPaymentMethod(
         code: PaymentMethodCode,
-        currency: String?,
-        isDecoupling: Boolean,
     )
 
     /**
@@ -87,24 +68,18 @@ internal interface EventReporter {
      */
     fun onSelectPaymentOption(
         paymentSelection: PaymentSelection,
-        currency: String?,
-        isDecoupling: Boolean,
     )
 
     /**
      * The customer has pressed the confirm button.
      */
-    fun onPressConfirmButton(
-        currency: String?,
-        isDecoupling: Boolean,
-    )
+    fun onPressConfirmButton()
 
     /**
      * Payment or setup have succeeded.
      */
     fun onPaymentSuccess(
         paymentSelection: PaymentSelection?,
-        currency: String?,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     )
 
@@ -113,24 +88,19 @@ internal interface EventReporter {
      */
     fun onPaymentFailure(
         paymentSelection: PaymentSelection?,
-        currency: String?,
-        isDecoupling: Boolean,
         error: PaymentSheetConfirmationError,
     )
 
     /**
      * The client was unable to parse the response from LUXE.
      */
-    fun onLpmSpecFailure(
-        isDecoupling: Boolean,
-    )
+    fun onLpmSpecFailure()
 
     /**
      * The user has auto-filled a text field.
      */
     fun onAutofill(
         type: String,
-        isDecoupling: Boolean,
     )
 
     enum class Mode(val code: String) {

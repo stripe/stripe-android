@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.FakeDurationProvider
@@ -23,6 +24,7 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.io.IOException
 import kotlin.test.Test
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -36,25 +38,18 @@ class DefaultEventReporterTest {
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
 
-    private val eventReporterFactory: (EventReporter.Mode) -> EventReporter = { mode ->
-        DefaultEventReporter(
-            mode,
-            analyticsRequestExecutor,
-            analyticsRequestFactory,
-            durationProvider,
-            testDispatcher
-        )
-    }
-
-    private val completeEventReporter = eventReporterFactory(EventReporter.Mode.Complete)
-    private val customEventReporter = eventReporterFactory(EventReporter.Mode.Custom)
+    private val configuration: PaymentSheet.Configuration
+        get() = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
 
     @Test
     fun `onInit() should fire analytics request with expected event value`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete)
+
         completeEventReporter.onInit(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            isDecoupling = false,
+            configuration = configuration,
+            isDeferred = false,
         )
+
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_init_customer_googlepay" &&
@@ -65,11 +60,11 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onShowExistingPaymentOptions() should fire analytics request with expected event value`() {
-        completeEventReporter.onShowExistingPaymentOptions(
-            linkEnabled = true,
-            currency = "usd",
-            isDecoupling = false,
-        )
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateSuccessfulSetup()
+        }
+
+        completeEventReporter.onShowExistingPaymentOptions()
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
@@ -83,11 +78,11 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onShowNewPaymentOptionForm() should fire analytics request with expected event value`() {
-        completeEventReporter.onShowNewPaymentOptionForm(
-            linkEnabled = false,
-            currency = "usd",
-            isDecoupling = false,
-        )
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateSuccessfulSetup(linkEnabled = false)
+        }
+
+        completeEventReporter.onShowNewPaymentOptionForm()
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
@@ -101,20 +96,14 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onPaymentSuccess() should fire analytics request with expected event value`() {
-        durationProvider.enqueueDuration(1.seconds)
-
         // Log initial event so that duration is tracked
-        completeEventReporter.onShowExistingPaymentOptions(
-            linkEnabled = false,
-            currency = "usd",
-            isDecoupling = false,
-        )
-
-        reset(analyticsRequestExecutor)
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateSuccessfulSetup()
+            onShowExistingPaymentOptions()
+        }
 
         completeEventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            currency = "usd",
             deferredIntentConfirmationType = null,
         )
 
@@ -130,23 +119,20 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onPaymentSuccess() for Google Pay payment should fire analytics request with expected event value`() {
-        durationProvider.enqueueDuration(2.seconds)
-
         // Log initial event so that duration is tracked
-        completeEventReporter.onShowExistingPaymentOptions(
-            linkEnabled = false,
-            currency = "usd",
-            isDecoupling = false,
-        )
-
-        reset(analyticsRequestExecutor)
+        val completeEventReporter = createEventReporter(
+            mode = EventReporter.Mode.Complete,
+            duration = 2.seconds,
+        ) {
+            simulateSuccessfulSetup()
+            onShowExistingPaymentOptions()
+        }
 
         completeEventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 walletType = PaymentSelection.Saved.WalletType.GooglePay,
             ),
-            currency = "usd",
             deferredIntentConfirmationType = null,
         )
 
@@ -160,23 +146,20 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onPaymentSuccess() for Link payment should fire analytics request with expected event value`() {
-        durationProvider.enqueueDuration(123.milliseconds)
-
         // Log initial event so that duration is tracked
-        completeEventReporter.onShowExistingPaymentOptions(
-            linkEnabled = true,
-            currency = "usd",
-            isDecoupling = false,
-        )
-
-        reset(analyticsRequestExecutor)
+        val completeEventReporter = createEventReporter(
+            mode = EventReporter.Mode.Complete,
+            duration = 123.milliseconds,
+        ) {
+            simulateSuccessfulSetup()
+            onShowExistingPaymentOptions()
+        }
 
         completeEventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 walletType = PaymentSelection.Saved.WalletType.Link,
             ),
-            currency = "usd",
             deferredIntentConfirmationType = null,
         )
 
@@ -190,21 +173,17 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onPaymentFailure() should fire analytics request with expected event value`() {
-        durationProvider.enqueueDuration(456.milliseconds)
-
         // Log initial event so that duration is tracked
-        completeEventReporter.onShowExistingPaymentOptions(
-            linkEnabled = false,
-            currency = "usd",
-            isDecoupling = false,
-        )
-
-        reset(analyticsRequestExecutor)
+        val completeEventReporter = createEventReporter(
+            mode = EventReporter.Mode.Complete,
+            duration = 456.milliseconds,
+        ) {
+            simulateSuccessfulSetup()
+            onShowExistingPaymentOptions()
+        }
 
         completeEventReporter.onPaymentFailure(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            currency = "usd",
-            isDecoupling = false,
             error = PaymentSheetConfirmationError.Stripe(APIException())
         )
 
@@ -221,11 +200,14 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onSelectPaymentOption() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
         customEventReporter.onSelectPaymentOption(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            currency = "usd",
-            isDecoupling = false,
         )
+
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_custom_paymentoption_savedpm_select" &&
@@ -250,8 +232,11 @@ class DefaultEventReporterTest {
 
     @Test
     fun `Send correct error_message for server errors`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
         completeEventReporter.onLoadFailed(
-            isDecoupling = false,
             error = JSONException("Server did something bad"),
         )
 
@@ -264,8 +249,11 @@ class DefaultEventReporterTest {
 
     @Test
     fun `Send correct error_message for network errors`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
         completeEventReporter.onLoadFailed(
-            isDecoupling = false,
             error = IOException("Internet no good"),
         )
 
@@ -278,8 +266,11 @@ class DefaultEventReporterTest {
 
     @Test
     fun `Send correct error_message for invalid requests`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
         completeEventReporter.onLoadFailed(
-            isDecoupling = false,
             error = IllegalArgumentException("This ain't valid"),
         )
 
@@ -288,5 +279,38 @@ class DefaultEventReporterTest {
 
         val errorType = argumentCaptor.firstValue.params["error_message"] as String
         assertThat(errorType).isEqualTo("invalidRequestError")
+    }
+
+    private fun createEventReporter(
+        mode: EventReporter.Mode,
+        duration: Duration = 1.seconds,
+        configure: EventReporter.() -> Unit = {},
+    ): EventReporter {
+        val reporter = DefaultEventReporter(
+            mode = mode,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            durationProvider = FakeDurationProvider(duration),
+            workContext = testDispatcher,
+        )
+
+        reporter.configure()
+
+        reset(analyticsRequestExecutor)
+
+        return reporter
+    }
+
+    private fun EventReporter.simulateInit() {
+        onInit(configuration, isDeferred = false)
+    }
+
+    private fun EventReporter.simulateSuccessfulSetup(
+        linkEnabled: Boolean = true,
+        currency: String? = "usd",
+    ) {
+        onInit(configuration, isDeferred = false)
+        onLoadStarted()
+        onLoadSucceeded(linkEnabled, currency)
     }
 }

@@ -42,7 +42,6 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -664,8 +663,8 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
-        verify(eventReporter).onLoadStarted(isDecoupling = false)
-        verify(eventReporter).onLoadSucceeded(isDecoupling = false)
+        verify(eventReporter).onLoadStarted()
+        verify(eventReporter).onLoadSucceeded(linkEnabled = true, currency = "usd")
     }
 
     @Test
@@ -684,8 +683,8 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
-        verify(eventReporter).onLoadStarted(isDecoupling = true)
-        verify(eventReporter).onLoadSucceeded(isDecoupling = true)
+        verify(eventReporter).onLoadStarted()
+        verify(eventReporter).onLoadSucceeded(linkEnabled = true, currency = "usd")
     }
 
     @Test
@@ -698,12 +697,8 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
-        verify(eventReporter).onLoadStarted(isDecoupling = false)
-
-        verify(eventReporter).onLoadFailed(
-            isDecoupling = eq(false),
-            error = eq(error),
-        )
+        verify(eventReporter).onLoadStarted()
+        verify(eventReporter).onLoadFailed(error)
     }
 
     @Test
@@ -723,12 +718,8 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
-        verify(eventReporter).onLoadStarted(isDecoupling = true)
-
-        verify(eventReporter).onLoadFailed(
-            isDecoupling = eq(true),
-            error = eq(error),
-        )
+        verify(eventReporter).onLoadStarted()
+        verify(eventReporter).onLoadFailed(error)
     }
 
     @Test
@@ -751,12 +742,8 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
-        verify(eventReporter).onLoadStarted(isDecoupling = true)
-
-        verify(eventReporter).onLoadFailed(
-            isDecoupling = true,
-            error = PaymentSheetLoadingException.InvalidConfirmationMethod(Manual),
-        )
+        verify(eventReporter).onLoadStarted()
+        verify(eventReporter).onLoadFailed(PaymentSheetLoadingException.InvalidConfirmationMethod(Manual))
     }
 
     @Test
@@ -773,11 +760,8 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
-        verify(eventReporter).onLoadStarted(isDecoupling = false)
-        verify(eventReporter).onElementsSessionLoadFailed(
-            isDecoupling = false,
-            error = error,
-        )
+        verify(eventReporter).onLoadStarted()
+        verify(eventReporter).onElementsSessionLoadFailed(error)
     }
 
     @Test

@@ -171,7 +171,7 @@ internal class PaymentSheetViewModelTest {
         createViewModel()
         verify(eventReporter).onInit(
             configuration = eq(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY),
-            isDecoupling = eq(false),
+            isDeferred = eq(false),
         )
 
         // Creating the view model should regenerate the analytics sessionId.
@@ -531,7 +531,6 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter)
                 .onPaymentSuccess(
                     paymentSelection = selection,
-                    currency = "usd",
                     deferredIntentConfirmationType = null,
                 )
             assertThat(prefsRepository.paymentSelectionArgs)
@@ -580,7 +579,6 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter)
                 .onPaymentSuccess(
                     paymentSelection = selection,
-                    currency = "usd",
                     deferredIntentConfirmationType = null,
                 )
 
@@ -609,8 +607,6 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter)
                 .onPaymentFailure(
                     paymentSelection = selection,
-                    currency = "usd",
-                    isDecoupling = false,
                     error = PaymentSheetConfirmationError.Stripe(error),
                 )
 
@@ -1118,11 +1114,7 @@ internal class PaymentSheetViewModelTest {
 
         val receiver = viewModel.currentScreen.testIn(this)
 
-        verify(eventReporter).onShowNewPaymentOptionForm(
-            linkEnabled = eq(false),
-            currency = eq("usd"),
-            isDecoupling = eq(false),
-        )
+        verify(eventReporter).onShowNewPaymentOptionForm()
 
         receiver.cancelAndIgnoreRemainingEvents()
     }
@@ -1141,11 +1133,7 @@ internal class PaymentSheetViewModelTest {
 
         val receiver = viewModel.currentScreen.testIn(this)
 
-        verify(eventReporter).onShowNewPaymentOptionForm(
-            linkEnabled = eq(true),
-            currency = eq("usd"),
-            isDecoupling = eq(false),
-        )
+        verify(eventReporter).onShowNewPaymentOptionForm()
 
         receiver.cancelAndIgnoreRemainingEvents()
     }
@@ -1164,11 +1152,7 @@ internal class PaymentSheetViewModelTest {
 
         val receiver = viewModel.currentScreen.testIn(this)
 
-        verify(eventReporter).onShowNewPaymentOptionForm(
-            linkEnabled = eq(true),
-            currency = eq("usd"),
-            isDecoupling = eq(false),
-        )
+        verify(eventReporter).onShowNewPaymentOptionForm()
 
         receiver.cancelAndIgnoreRemainingEvents()
     }
@@ -1180,13 +1164,9 @@ internal class PaymentSheetViewModelTest {
             customerPaymentMethods = PaymentMethodFixtures.createCards(1),
         )
 
-        verify(eventReporter).onInit(configuration = anyOrNull(), isDecoupling = any())
+        verify(eventReporter).onInit(configuration = anyOrNull(), isDeferred = any())
 
-        verify(eventReporter).onShowExistingPaymentOptions(
-            linkEnabled = eq(false),
-            currency = eq("usd"),
-            isDecoupling = eq(false),
-        )
+        verify(eventReporter).onShowExistingPaymentOptions()
 
         viewModel.transitionToAddPaymentScreen()
 
@@ -1446,7 +1426,7 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
-            isDecoupling = eq(false),
+            isDeferred = eq(false),
         )
     }
 
@@ -1460,7 +1440,7 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
-            isDecoupling = eq(true),
+            isDeferred = eq(true),
         )
     }
 
@@ -1475,7 +1455,7 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
-            isDecoupling = eq(true),
+            isDeferred = eq(true),
         )
     }
 
@@ -1503,7 +1483,6 @@ internal class PaymentSheetViewModelTest {
 
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
-                currency = anyOrNull(),
                 deferredIntentConfirmationType = eq(deferredIntentConfirmationType),
             )
         }
@@ -1529,7 +1508,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
-            currency = anyOrNull(),
             deferredIntentConfirmationType = isNull(),
         )
     }
@@ -1557,7 +1535,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
-            currency = anyOrNull(),
             deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Client),
         )
     }
@@ -1577,7 +1554,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
-            currency = anyOrNull(),
             deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Server),
         )
     }
@@ -1586,14 +1562,14 @@ internal class PaymentSheetViewModelTest {
     fun `Sends dismiss event when the user cancels the flow with non-deferred intent`() = runTest {
         val viewModel = createViewModel()
         viewModel.onUserCancel()
-        verify(eventReporter).onDismiss(isDecoupling = false)
+        verify(eventReporter).onDismiss()
     }
 
     @Test
     fun `Sends dismiss event when the user cancels the flow with deferred intent`() = runTest {
         val viewModel = createViewModelForDeferredIntent()
         viewModel.onUserCancel()
-        verify(eventReporter).onDismiss(isDecoupling = true)
+        verify(eventReporter).onDismiss()
     }
 
     @Test
@@ -1624,10 +1600,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.handleConfirmUSBankAccount(newPaymentSelection)
 
-        verify(eventReporter).onPressConfirmButton(
-            currency = "usd",
-            isDecoupling = false,
-        )
+        verify(eventReporter).onPressConfirmButton()
     }
 
     @Test
@@ -1666,10 +1639,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.checkout()
 
-        verify(eventReporter, never()).onPressConfirmButton(
-            currency = "usd",
-            isDecoupling = false,
-        )
+        verify(eventReporter, never()).onPressConfirmButton()
     }
 
     @Test
@@ -2060,7 +2030,6 @@ internal class PaymentSheetViewModelTest {
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP =
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
-        private val ARGS_WITHOUT_CUSTOMER = PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER
 
         private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 

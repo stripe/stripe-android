@@ -44,7 +44,6 @@ import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
@@ -160,9 +159,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val isProcessingPaymentIntent
         get() = args.initializationMode.isProcessingPayment
 
-    private val isDecoupling: Boolean
-        get() = args.initializationMode is PaymentSheet.InitializationMode.DeferredIntent
-
     override var newPaymentSelection: PaymentSelection.New? = null
 
     private var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
@@ -251,9 +247,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         AnalyticsRequestFactory.regenerateSessionId()
+
+        val isDeferred = args.initializationMode is PaymentSheet.InitializationMode.DeferredIntent
+
         eventReporter.onInit(
             configuration = config,
-            isDecoupling = isDecoupling,
+            isDeferred = isDeferred,
         )
 
         viewModelScope.launch {
@@ -624,7 +623,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is PaymentResult.Completed -> {
                 eventReporter.onPaymentSuccess(
                     paymentSelection = selection.value,
-                    currency = stripeIntent.currency,
                     deferredIntentConfirmationType = deferredIntentConfirmationType,
                 )
 
@@ -654,8 +652,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is PaymentResult.Failed -> {
                 eventReporter.onPaymentFailure(
                     paymentSelection = selection.value,
-                    currency = stripeIntent.currency,
-                    isDecoupling = isDecoupling,
                     error = PaymentSheetConfirmationError.Stripe(paymentResult.throwable),
                 )
 
@@ -685,8 +681,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 logger.error("Error processing Google Pay payment", result.error)
                 eventReporter.onPaymentFailure(
                     paymentSelection = PaymentSelection.GooglePay,
-                    currency = stripeIntent.value?.currency,
-                    isDecoupling = isDecoupling,
                     error = PaymentSheetConfirmationError.GooglePay(result.errorCode),
                 )
                 onError(
@@ -727,7 +721,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override fun onUserCancel() {
-        reportDismiss(isDecoupling)
+        reportDismiss()
         _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
     }
 

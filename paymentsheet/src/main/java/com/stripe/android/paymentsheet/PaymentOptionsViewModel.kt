@@ -17,7 +17,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
@@ -105,9 +104,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(),
         initialValue = null,
     )
-
-    private val isDecoupling: Boolean
-        get() = args.state.stripeIntent.clientSecret == null
 
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (args.state.isGooglePayReady) {
@@ -200,7 +196,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onUserCancel() {
-        reportDismiss(isDecoupling)
+        reportDismiss()
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Canceled(
                 mostRecentError = mostRecentError,
@@ -242,11 +238,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         selection.value?.let { paymentSelection ->
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
-            eventReporter.onSelectPaymentOption(
-                paymentSelection = paymentSelection,
-                currency = stripeIntent.value?.currency,
-                isDecoupling = isDecoupling,
-            )
+            eventReporter.onSelectPaymentOption(paymentSelection)
 
             when (paymentSelection) {
                 is PaymentSelection.Saved,
