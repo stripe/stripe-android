@@ -940,10 +940,7 @@ internal class PaymentSheetActivityTest {
             composeTestRule.waitForIdle()
         }
 
-        verify(eventReporter).onPressConfirmButton(
-            currency = "CAD",
-            isDecoupling = false,
-        )
+        verify(eventReporter).onPressConfirmButton()
     }
 
     private fun activityScenario(

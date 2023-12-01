@@ -250,7 +250,6 @@ internal class DefaultFlowControllerTest {
         verify(eventReporter)
             .onPaymentSuccess(
                 paymentSelection = isA<PaymentSelection.New>(),
-                currency = eq("usd"),
                 deferredIntentConfirmationType = isNull(),
             )
     }
@@ -274,8 +273,6 @@ internal class DefaultFlowControllerTest {
         verify(eventReporter)
             .onPaymentFailure(
                 paymentSelection = isA<PaymentSelection.New>(),
-                currency = eq("usd"),
-                isDecoupling = eq(false),
                 error = eq(PaymentSheetConfirmationError.Stripe(error)),
             )
     }
@@ -300,8 +297,6 @@ internal class DefaultFlowControllerTest {
 
         verify(eventReporter).onPaymentFailure(
             paymentSelection = isA<PaymentSelection.GooglePay>(),
-            currency = eq("usd"),
-            isDecoupling = eq(false),
             error = eq(PaymentSheetConfirmationError.GooglePay(errorCode)),
         )
     }
@@ -323,8 +318,6 @@ internal class DefaultFlowControllerTest {
 
         verify(eventReporter).onPaymentFailure(
             paymentSelection = isA<PaymentSelection.GooglePay>(),
-            currency = isNull(),
-            isDecoupling = eq(false),
             error = eq(PaymentSheetConfirmationError.InvalidState),
         )
     }
@@ -1386,7 +1379,6 @@ internal class DefaultFlowControllerTest {
 
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
-                currency = anyOrNull(),
                 deferredIntentConfirmationType = eq(deferredIntentConfirmationType),
             )
         }
@@ -1416,7 +1408,6 @@ internal class DefaultFlowControllerTest {
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
-            currency = anyOrNull(),
             deferredIntentConfirmationType = isNull(),
         )
     }
@@ -1446,7 +1437,6 @@ internal class DefaultFlowControllerTest {
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
-            currency = anyOrNull(),
             deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Client),
         )
     }
@@ -1468,7 +1458,6 @@ internal class DefaultFlowControllerTest {
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
-            currency = anyOrNull(),
             deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Server),
         )
     }
