@@ -252,7 +252,8 @@ private fun LazyListScope.searchResults(
             item(key = "search_more") {
                 SearchMoreRow(
                     modifier = Modifier.padding(8.dp),
-                    onClick = onSearchMoreClick
+                    onClick = onSearchMoreClick,
+                    enabled = selectedInstitutionId == null,
                 )
             }
         }
@@ -469,17 +470,20 @@ private fun ManualEntryRow(
 @Composable
 private fun SearchMoreRow(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    enabled: Boolean
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxSize()
             .clickable(
+                enabled = enabled,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick
             )
+            .alpha(if (enabled) 1f else DISABLED_DEPTH_ALPHA)
     ) {
         Icon(
             imageVector = Icons.Filled.Search,
