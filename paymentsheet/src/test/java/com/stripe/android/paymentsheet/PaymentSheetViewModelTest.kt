@@ -1779,9 +1779,6 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Requires email and phone with Google Pay when collection mode is set to always`() {
-        val expectedLabel = "My custom label"
-        val expectedAmount = 1234L
-
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
             config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -1792,8 +1789,6 @@ internal class PaymentSheetViewModelTest {
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                     countryCode = "CA",
                     currencyCode = "CAD",
-                    amount = expectedAmount,
-                    label = expectedLabel,
                 )
             )
         )
@@ -1815,9 +1810,6 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Requires full billing details with Google Pay when collection mode is set to full`() {
-        val expectedLabel = "My custom label"
-        val expectedAmount = 1234L
-
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
             config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -1827,8 +1819,6 @@ internal class PaymentSheetViewModelTest {
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                     countryCode = "CA",
                     currencyCode = "CAD",
-                    amount = expectedAmount,
-                    label = expectedLabel,
                 )
             )
         )
@@ -1850,9 +1840,6 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Does not require email and phone with Google Pay when collection mode is not set to always`() {
-        val expectedLabel = "My custom label"
-        val expectedAmount = 1234L
-
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
             config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -1863,8 +1850,6 @@ internal class PaymentSheetViewModelTest {
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                     countryCode = "CA",
                     currencyCode = "CAD",
-                    amount = expectedAmount,
-                    label = expectedLabel,
                 )
             )
         )
