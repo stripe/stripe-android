@@ -53,12 +53,20 @@ internal class ElementsSessionJsonParser(
         )
 
         val merchantCountry = json.optString(FIELD_MERCHANT_COUNTRY)
-        val isEligibleForCardBrandChoice = if (params is ElementsSessionParams.PaymentIntentType) {
-            parseCardBrandChoiceEligibility(json)
-        } else {
-            false
+
+        val supportsCbcForIntent = when (params) {
+            is ElementsSessionParams.PaymentIntentType -> {
+                true
+            }
+            is ElementsSessionParams.SetupIntentType -> {
+                false
+            }
+            is ElementsSessionParams.DeferredIntentType -> {
+                params.deferredIntentParams.mode is DeferredIntentParams.Mode.Payment
+            }
         }
 
+        val isEligibleForCardBrandChoice = supportsCbcForIntent && parseCardBrandChoiceEligibility(json)
         val googlePayPreference = json.optString(FIELD_GOOGLE_PAY_PREFERENCE)
 
         return if (stripeIntent != null) {
