@@ -22,12 +22,13 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -44,7 +45,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -366,7 +366,6 @@ private fun SearchRow(
     query: TextFieldValue,
     onQueryChanged: (TextFieldValue) -> Unit,
 ) {
-    val focusManager = LocalFocusManager.current
     Box {
         // Adds a top background to prevent search results from showing through the search bar
         Box(
@@ -381,27 +380,33 @@ private fun SearchRow(
                 .padding(horizontal = 6.dp)
                 .fillMaxWidth()
                 .focusRequester(focusRequester),
-            leadingIcon = if (query.text.isNotEmpty()) {
-                {
-                    Icon(
-                        Icons.Filled.ArrowBack,
-                        tint = v3Colors.iconDefault,
-                        contentDescription = "Back button",
-                        modifier = Modifier.clickable {
-                            focusManager.clearFocus()
-                            onQueryChanged(TextFieldValue(""))
-                        }
-                    )
-                }
-            } else {
-                {
-                    Icon(
-                        Icons.Filled.Search,
-                        tint = v3Colors.iconDefault,
-                        contentDescription = "Search icon",
-                    )
-                }
+            leadingIcon = {
+                Icon(
+                    Icons.Filled.Search,
+                    tint = v3Colors.iconDefault,
+                    contentDescription = "Search icon",
+                )
             },
+            trailingIcon = if (query.text.isNotEmpty()) {
+                {
+                    Box(
+                        Modifier
+                            .size(16.dp)
+                            .clickable { onQueryChanged(TextFieldValue("")) }
+                            .background(
+                                color = v3Colors.border,
+                                shape = CircleShape
+                            )
+                            .padding(2.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.Clear,
+                            tint = v3Colors.backgroundSurface,
+                            contentDescription = "Clear search",
+                        )
+                    }
+                }
+            } else null,
             placeholder = {
                 Text(
                     text = stringResource(id = R.string.stripe_search),
