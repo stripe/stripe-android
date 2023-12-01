@@ -29,13 +29,11 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.uicore.image.StripeImage
 
 private const val COLLAPSE_ACCOUNTS_THRESHOLD = 5
 
@@ -106,18 +104,8 @@ private fun AccountRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val modifier = Modifier
-                .size(24.dp)
-                .clip(RoundedCornerShape(4.dp))
-            when {
-                iconUrl.isNullOrEmpty() -> InstitutionPlaceholder(modifier)
-                else -> StripeImage(
-                    url = iconUrl,
-                    imageLoader = LocalImageLoader.current,
-                    contentDescription = null,
-                    modifier = modifier,
-                    errorContent = { InstitutionPlaceholder(modifier) }
-                )
+            Box(modifier = Modifier.size(24.dp)) {
+                InstitutionIcon(institutionIcon = iconUrl)
             }
             Text(
                 text,

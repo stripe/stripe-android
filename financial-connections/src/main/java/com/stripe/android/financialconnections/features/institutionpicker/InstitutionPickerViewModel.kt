@@ -5,7 +5,6 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
@@ -58,28 +57,30 @@ internal class InstitutionPickerViewModel @Inject constructor(
         logErrors()
         suspend {
             val manifest = getManifest()
-            val result: Result<Pair<List<FinancialConnectionsInstitution>, Long>> =
-                kotlin.runCatching {
-                    measureTimeMillis {
-                        featuredInstitutions(
-                            clientSecret = configuration.financialConnectionsSessionClientSecret
-                        ).data
-                    }
-                }.onFailure {
-                    eventTracker.logError(
-                        extraMessage = "Error fetching featured institutions",
-                        error = it,
-                        pane = Pane.INSTITUTION_PICKER,
-                        logger = logger
+            val (featuredInstitutions: InstitutionResponse, duration: Long) = runCatching {
+                measureTimeMillis {
+                    featuredInstitutions(
+                        clientSecret = configuration.financialConnectionsSessionClientSecret
                     )
                 }
-
-            val (institutions, duration) = result.getOrNull() ?: Pair(emptyList(), 0L)
+            }.onFailure {
+                eventTracker.logError(
+                    extraMessage = "Error fetching featured institutions",
+                    error = it,
+                    pane = Pane.INSTITUTION_PICKER,
+                    logger = logger
+                )
+            }.getOrElse {
+                // Allow users to search for institutions even if featured institutions fails.
+                InstitutionResponse(
+                    data = emptyList(),
+                    showManualEntry = manifest.allowManualEntry
+                ) to 0L
+            }
             Payload(
                 featuredInstitutionsDuration = duration,
-                featuredInstitutions = institutions,
+                featuredInstitutions = featuredInstitutions,
                 searchDisabled = manifest.institutionSearchDisabled,
-                allowManualEntry = manifest.allowManualEntry
             )
         }.execute { copy(payload = it) }
     }
@@ -93,7 +94,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                     FeaturedInstitutionsLoaded(
                         pane = Pane.INSTITUTION_PICKER,
                         duration = payload.featuredInstitutionsDuration,
-                        institutionIds = payload.featuredInstitutions.map { it.id }.toSet()
+                        institutionIds = payload.featuredInstitutions.data.map { it.id }.toSet()
                     )
                 )
             },
@@ -162,7 +163,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
     }
 
     fun onInstitutionSelected(institution: FinancialConnectionsInstitution, fromFeatured: Boolean) {
-        clearSearch()
         suspend {
             eventTracker.track(
                 InstitutionSelected(
@@ -184,30 +184,11 @@ internal class InstitutionPickerViewModel @Inject constructor(
             }
             // navigate to next step
             navigationManager.tryNavigateTo(PartnerAuth(referrer = Pane.INSTITUTION_PICKER))
-        }.execute { this }
-    }
-
-    fun onCancelSearchClick() {
-        clearSearch()
-    }
-
-    private fun clearSearch() {
-        setState {
+        }.execute { async ->
             copy(
-                searchInstitutions = Success(
-                    InstitutionResponse(
-                        data = emptyList(),
-                        showManualEntry = false
-                    )
-                ),
-                searchMode = false
+                selectedInstitutionId = institution.id.takeIf { async is Loading },
+                selectInstitution = async
             )
-        }
-    }
-
-    fun onSearchFocused() {
-        setState {
-            copy(searchMode = true)
         }
     }
 
@@ -251,15 +232,14 @@ internal class InstitutionPickerViewModel @Inject constructor(
 internal data class InstitutionPickerState(
     // This is just used to provide a text in Compose previews
     val previewText: String? = null,
-    val searchMode: Boolean = false,
+    val selectedInstitutionId: String? = null,
     val payload: Async<Payload> = Uninitialized,
     val searchInstitutions: Async<InstitutionResponse> = Uninitialized,
     val selectInstitution: Async<Unit> = Uninitialized
 ) : MavericksState {
 
     data class Payload(
-        val featuredInstitutions: List<FinancialConnectionsInstitution>,
-        val allowManualEntry: Boolean,
+        val featuredInstitutions: InstitutionResponse,
         val searchDisabled: Boolean,
         val featuredInstitutionsDuration: Long
     )

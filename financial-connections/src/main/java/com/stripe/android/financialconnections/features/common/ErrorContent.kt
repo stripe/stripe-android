@@ -2,9 +2,6 @@
 
 package com.stripe.android.financialconnections.features.common
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,20 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
@@ -40,12 +28,10 @@ import com.stripe.android.financialconnections.exception.InstitutionPlannedDownt
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.uicore.image.StripeImage
 import java.text.SimpleDateFormat
 
 @Composable
@@ -251,10 +237,6 @@ internal fun AccountNumberRetrievalErrorContent(
 @Composable
 internal fun ErrorContent(
     iconUrl: String?,
-    badge: Pair<Painter, Shape> = Pair(
-        painterResource(id = R.drawable.stripe_ic_warning_circle),
-        CircleShape
-    ),
     title: String,
     content: String,
     primaryCta: Pair<String, () -> Unit>? = null,
@@ -276,7 +258,7 @@ internal fun ErrorContent(
                 .weight(1f)
                 .verticalScroll(scrollState)
         ) {
-            BadgedInstitutionImage(iconUrl, badge)
+            InstitutionIcon(iconUrl)
             Spacer(modifier = Modifier.size(16.dp))
             Text(
                 text = title,
@@ -309,44 +291,6 @@ internal fun ErrorContent(
                 Text(text = text)
             }
         }
-    }
-}
-
-@Composable
-private fun BadgedInstitutionImage(
-    institutionIconUrl: String?,
-    badge: Pair<Painter, Shape>
-) {
-    Box(
-        modifier = Modifier
-            .size(40.dp)
-    ) {
-        val modifier = Modifier
-            .size(36.dp)
-            .align(Alignment.BottomStart)
-            .clip(RoundedCornerShape(6.dp))
-        when {
-            institutionIconUrl.isNullOrEmpty() -> InstitutionPlaceholder(modifier)
-            else -> StripeImage(
-                url = institutionIconUrl,
-                imageLoader = LocalImageLoader.current,
-                errorContent = { InstitutionPlaceholder(modifier) },
-                contentDescription = null,
-                modifier = modifier
-            )
-        }
-        Icon(
-            painter = badge.first,
-            contentDescription = "",
-            tint = FinancialConnectionsTheme.colors.textCritical,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .size(12.dp)
-                .clip(badge.second)
-                // draws a background with padding around the badge to simulate a border.
-                .background(FinancialConnectionsTheme.colors.textWhite)
-                .padding(1.dp)
-        )
     }
 }
 
@@ -422,14 +366,4 @@ internal fun NoAccountsAvailableErrorContentPreview() {
             )
         }
     }
-}
-
-@Composable
-internal fun InstitutionPlaceholder(modifier: Modifier) {
-    Image(
-        modifier = modifier,
-        painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
-        contentDescription = "Bank icon placeholder",
-        contentScale = ContentScale.Crop
-    )
 }
