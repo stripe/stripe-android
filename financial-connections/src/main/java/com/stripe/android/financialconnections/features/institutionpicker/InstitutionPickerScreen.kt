@@ -387,7 +387,7 @@ private fun SearchRow(
                     contentDescription = "Search icon",
                 )
             },
-            trailingIcon = if (query.text.isNotEmpty()) {
+            trailingIcon = query.text.takeIf { it.isNotEmpty() }?.let {
                 {
                     Box(
                         Modifier
@@ -406,7 +406,7 @@ private fun SearchRow(
                         )
                     }
                 }
-            } else null,
+            },
             placeholder = {
                 Text(
                     text = stringResource(id = R.string.stripe_search),
