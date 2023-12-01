@@ -45,6 +45,7 @@ internal open class FakeCustomerRepository(
 
     override suspend fun updatePaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,
+        paymentMethodId: String,
         params: PaymentMethodUpdateParams
     ): Result<PaymentMethod> = onUpdatePaymentMethod()
 }

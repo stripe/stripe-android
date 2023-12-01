@@ -5,24 +5,23 @@ import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
 import com.stripe.android.PaymentSessionFixtures
-import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
-import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
-import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentFlowViewModelTest {
     private val customerSession: CustomerSession = mock()
-    private val customerRetrievalListener = argumentCaptor<CustomerSession.CustomerRetrievalListener>()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val viewModel = PaymentFlowViewModel(
@@ -32,45 +31,44 @@ class PaymentFlowViewModelTest {
     )
 
     @Test
-    fun saveCustomerShippingInformation_onSuccess_returnsExpectedData() {
+    fun saveCustomerShippingInformation_onSuccess_returnsExpectedData() = runTest {
+        whenever(
+            customerSession.setCustomerShippingInformation(
+                any(),
+                any(),
+                any()
+            )
+        ).thenAnswer { invocation ->
+            val listener = invocation.arguments[2] as CustomerSession.CustomerRetrievalListener
+            listener.onCustomerRetrieved(CustomerFixtures.CUSTOMER)
+        }
+
         assertThat(viewModel.isShippingInfoSubmitted)
             .isFalse()
 
-        val result =
-            viewModel.saveCustomerShippingInformation(ShippingInfoFixtures.DEFAULT)
+        val result = viewModel.saveCustomerShippingInformation(ShippingInfoFixtures.DEFAULT)
+
         verify(customerSession).setCustomerShippingInformation(
             eq(ShippingInfoFixtures.DEFAULT),
             eq(PaymentFlowViewModel.PRODUCT_USAGE),
-            customerRetrievalListener.capture()
+            any()
         )
 
-        var customer: Customer? = null
-        result.observeForever {
-            customer = it.getOrThrow()
-        }
-        customerRetrievalListener.firstValue.onCustomerRetrieved(CustomerFixtures.CUSTOMER)
-
-        assertThat(customer)
+        assertThat(result.getOrNull())
             .isNotNull()
         assertThat(viewModel.isShippingInfoSubmitted)
             .isTrue()
     }
 
     @Test
-    fun validateShippingInformation_withValidShippingInfo_createsExpectedShippingMethods() {
+    fun validateShippingInformation_withValidShippingInfo_createsExpectedShippingMethods() = runTest {
         val result = viewModel.validateShippingInformation(
             FakeShippingInformationValidator(),
             FakeShippingMethodsFactory(),
             ShippingInfoFixtures.DEFAULT
         )
 
-        var shippingMethods: List<ShippingMethod>? = null
-        result.observeForever {
-            shippingMethods = it.getOrThrow()
-        }
-        idleLooper()
-
-        assertThat(shippingMethods)
+        assertThat(result.getOrNull())
             .isEqualTo(SHIPPING_METHODS)
 
         assertThat(viewModel.shippingMethods)
@@ -78,40 +76,29 @@ class PaymentFlowViewModelTest {
     }
 
     @Test
-    fun validateShippingInformation_withValidShippingInfoAndNoShippingMethodsFactory_createsEmptyShippingMethods() {
-        val result = viewModel.validateShippingInformation(
-            FakeShippingInformationValidator(),
-            null,
-            ShippingInfoFixtures.DEFAULT
-        )
+    fun validateShippingInformation_withValidShippingInfoAndNoShippingMethodsFactory_createsEmptyShippingMethods() =
+        runTest {
+            val result = viewModel.validateShippingInformation(
+                FakeShippingInformationValidator(),
+                null,
+                ShippingInfoFixtures.DEFAULT
+            )
 
-        var shippingMethods: List<ShippingMethod>? = null
-        result.observeForever {
-            shippingMethods = it.getOrThrow()
+            assertThat(result.getOrNull())
+                .isEmpty()
+            assertThat(viewModel.shippingMethods)
+                .isEmpty()
         }
-        idleLooper()
-
-        assertThat(shippingMethods)
-            .isEmpty()
-        assertThat(viewModel.shippingMethods)
-            .isEmpty()
-    }
 
     @Test
-    fun validateShippingInformation_withInvalidValidShippingInfo_createsEmptyShippingMethods() {
+    fun validateShippingInformation_withInvalidValidShippingInfo_createsEmptyShippingMethods() = runTest {
         val result = viewModel.validateShippingInformation(
             FailingShippingInformationValidator(),
             ThrowingShippingMethodsFactory(),
             ShippingInfoFixtures.DEFAULT
         )
 
-        var throwable: Throwable? = null
-        result.observeForever {
-            throwable = it.exceptionOrNull()
-        }
-        idleLooper()
-
-        assertThat(throwable?.message)
+        assertThat(result.exceptionOrNull()?.message)
             .isEqualTo(SHIPPING_ERROR_MESSAGE)
     }
 

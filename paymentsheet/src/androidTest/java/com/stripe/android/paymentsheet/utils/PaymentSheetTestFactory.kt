@@ -13,11 +13,6 @@ internal class PaymentSheetTestFactory(
     private val resultCallback: PaymentSheetResultCallback,
 ) {
 
-    enum class IntegrationType {
-        Activity,
-        Compose,
-    }
-
     fun make(activity: ComponentActivity): PaymentSheet {
         return when (integrationType) {
             IntegrationType.Activity -> forActivity(activity)

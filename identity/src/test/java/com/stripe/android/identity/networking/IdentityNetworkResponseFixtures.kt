@@ -10,8 +10,7 @@ internal val VERIFICATION_PAGE_DATA_JSON_STRING = """
         ],
         "missing": [
           "id_document_front",
-          "id_document_back",
-          "id_document_type"
+          "id_document_back"
         ]
       },
       "status": "requires_input",
@@ -25,13 +24,82 @@ internal val VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
       "id": "vs_1KgNstEAjaOkiuGMpFXVTocU",
       "object": "identity.verification_page",
       "biometric_consent": {
-        "accept_button_text": "Accept and continue",
-        "body": "\u003Cp\u003E\u003Cb\u003EHow Stripe will verify your identity\u003C/b\u003E\u003C/p\u003E\u003Cp\u003EStripe will use biometric technology (on images of you and your IDs) and other data sources to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with mlgb.band.\u003C/p\u003E\u003Cp\u003E\u003Ca href='https://stripe.com/about'\u003ELearn about Stripe\u003C/a\u003E\u003C/p\u003E\u003Cp\u003E\u003Ca href='https://stripe.com/privacy-center/legal#stripe-identity'\u003ELearn how Stripe Identity works\u003C/a\u003E\u003C/p\u003E",
-        "decline_button_text": "No, don't verify",
-        "privacy_policy": "Data will be stored and may be used according to the \u003Ca href='https://stripe.com/privacy'\u003EStripe Privacy Policy\u003C/a\u003E and mlgb.band Privacy Policy.",
-        "time_estimate": "Takes about 1–2 minutes.",
-        "title": "mlgb.band uses Stripe to verify your identity",
-        "scroll_to_continue_button_text": "Scroll to consent"
+        "accept_button_text": "Agree and continue",
+        "body": null,
+        "decline_button_text": "Decline",
+        "lines": [
+          {
+            "content": "You'll scan a valid <a href='stripe_bottomsheet://open/consent_photo_id'>photo ID</a>.",
+            "icon": "camera"
+          },
+          {
+            "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+            "icon": "dispute_protection"
+          },
+          {
+            "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+            "icon": "lock"
+          }
+        ],
+        "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
+        "scroll_to_continue_button_text": "Scroll to continue",
+        "time_estimate": null,
+        "title": "Andrew's Audio works with Stripe to verify your identity"
+      },
+      "bottomsheet": {
+        "consent_identity": {
+          "bottomsheet_id": "consent_identity",
+          "lines": [
+            {
+              "content": "We leverage Stripe's own verification service to verify your identity through your document and selfie.",
+              "icon": "cloud",
+              "title": "Stripe technology"
+            },
+            {
+              "content": "We also work with trusted partners, including document issuers and authorized record holders, to help us verify your identity.",
+              "icon": "moved",
+              "title": "Third party partners"
+            }
+          ],
+          "title": "How we verify you"
+        },
+        "consent_photo_id": {
+          "bottomsheet_id": "consent_photo_id",
+          "lines": [
+            {
+              "content": "<ul><li>Drivers license</li><li>Passport</li><li>National ID</li><li>Valid government-issued identification that clearly shows your face</li></ul>",
+              "icon": "wallet",
+              "title": "Accepted forms of identification"
+            }
+          ],
+          "title": "Types of photo ID"
+        },
+        "consent_verification_data": {
+          "bottomsheet_id": "consent_verification_data",
+          "lines": [
+            {
+              "content": "Stripe handles billions of dollars in payments annually. The same infrastructure keeps identity verification data safe as well.",
+              "icon": "lock",
+              "title": "Your data is encrypted"
+            },
+            {
+              "content": "Stripe will use and store your data under Stripe’s privacy policy, including to manage loss and for legal compliance.  <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>.",
+              "icon": "lock",
+              "title": "Stripe data use"
+            },
+            {
+              "content": "Andrew's Audio will have access to the information you submit and the status of your verification, and may use your information under its privacy policy.",
+              "icon": "moved",
+              "title": "Andrew's Audio access"
+            },
+            {
+              "content": "You can delete your data by contacting Andrew's Audio.",
+              "icon": "document",
+              "title": "Manage your data"
+            }
+          ],
+          "title": "Your data"
+        }
       },
       "country_not_listed": {
         "address_from_other_country_text_button_text": "Have an Address from another country?",
@@ -116,19 +184,32 @@ internal val VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
         }
       },
       "individual_welcome": {
-        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
-        "get_started_button_text": "Get started",
-        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
-        "time_estimate": "Takes less than 1 minute.",
-        "title": "Tora's catfood partners with Stripe for secure Identity verification"
+    "body": null,
+    "get_started_button_text": "Get started",
+    "lines": [
+      {
+        "content": "You'll provide personal information including your name and phone number.",
+        "icon": "document"
+      },
+      {
+        "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+        "icon": "dispute_protection"
+      },
+      {
+        "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+        "icon": "lock"
+      }
+    ],
+    "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
+    "time_estimate": null,
+    "title": "Andrew's Audio works with Stripe to verify your identity"
       },
       "livemode": false,
       "requirements": {
         "missing": [
           "biometric_consent",
           "id_document_front",
-          "id_document_back",
-          "id_document_type"
+          "id_document_back"
         ]
       },
       "status": "requires_input",
@@ -148,13 +229,27 @@ internal val VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
       "id": "vs_1KgNstEAjaOkiuGMpFXVTocU",
       "object": "identity.verification_page",
       "biometric_consent": {
-        "accept_button_text": "Accept and continue",
-        "body": "\u003Cp\u003E\u003Cb\u003EHow Stripe will verify your identity\u003C/b\u003E\u003C/p\u003E\u003Cp\u003EStripe will use biometric technology (on images of you and your IDs) and other data sources to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with mlgb.band.\u003C/p\u003E\u003Cp\u003E\u003Ca href='https://stripe.com/about'\u003ELearn about Stripe\u003C/a\u003E\u003C/p\u003E\u003Cp\u003E\u003Ca href='https://stripe.com/privacy-center/legal#stripe-identity'\u003ELearn how Stripe Identity works\u003C/a\u003E\u003C/p\u003E",
-        "decline_button_text": "No, don't verify",
-        "privacy_policy": "Data will be stored and may be used according to the \u003Ca href='https://stripe.com/privacy'\u003EStripe Privacy Policy\u003C/a\u003E and mlgb.band Privacy Policy.",
-        "time_estimate": "Takes about 1–2 minutes.",
-        "title": "mlgb.band uses Stripe to verify your identity",
-        "scroll_to_continue_button_text": "Scroll to consent"
+        "accept_button_text": "Agree and continue",
+        "body": null,
+        "decline_button_text": "Decline",
+        "lines": [
+          {
+            "content": "You'll scan a valid <a href='stripe_bottomsheet://open/consent_photo_id'>photo ID</a>.",
+            "icon": "camera"
+          },
+          {
+            "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+            "icon": "dispute_protection"
+          },
+          {
+            "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+            "icon": "lock"
+          }
+        ],
+        "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
+        "scroll_to_continue_button_text": "Scroll to continue",
+        "time_estimate": null,
+        "title": "Andrew's Audio works with Stripe to verify your identity"
       },
       "country_not_listed": {
         "address_from_other_country_text_button_text": "Have an Address from another country?",
@@ -239,19 +334,32 @@ internal val VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
         }
       },
       "individual_welcome": {
-        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
-        "get_started_button_text": "Get started",
-        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
-        "time_estimate": "Takes less than 1 minute.",
-        "title": "Tora's catfood partners with Stripe for secure Identity verification"
+    "body": null,
+    "get_started_button_text": "Get started",
+    "lines": [
+      {
+        "content": "You'll provide personal information including your name and phone number.",
+        "icon": "document"
+      },
+      {
+        "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+        "icon": "dispute_protection"
+      },
+      {
+        "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+        "icon": "lock"
+      }
+    ],
+    "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
+    "time_estimate": null,
+    "title": "Andrew's Audio works with Stripe to verify your identity"
       },
       "livemode": false,
       "requirements": {
         "missing": [
           "biometric_consent",
           "id_document_front",
-          "id_document_back",
-          "id_document_type"
+          "id_document_back"
         ]
       },
       "status": "requires_input",
@@ -271,13 +379,27 @@ internal val VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING = """
       "id": "vs_1M8UU5GMZYGNxJkBN55D3nva",
       "object": "identity.verification_page",
       "biometric_consent": {
-        "accept_button_text": "Accept and continue",
-        "body": "<p><b>How Stripe will verify your identity</b></p><p><a href='https://stripe.com/about'>Stripe</a> will use biometric technology (on images of you and your IDs), as well as other data sources and our service providers, to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with Andrew's Audio. You can subsequently opt-out by contacting Stripe. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a></p>",
-        "decline_button_text": "No, don't verify",
-        "privacy_policy": "Data will be stored and may be used according to the <a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Andrew's Audio Privacy Policy.",
+        "accept_button_text": "Agree and continue",
+        "body": null,
+        "decline_button_text": "Decline",
+        "lines": [
+          {
+            "content": "You'll scan a valid <a href='stripe_bottomsheet://open/consent_photo_id'>photo ID</a>.",
+            "icon": "camera"
+          },
+          {
+            "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+            "icon": "dispute_protection"
+          },
+          {
+            "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+            "icon": "lock"
+          }
+        ],
+        "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
         "scroll_to_continue_button_text": "Scroll to continue",
-        "time_estimate": "Takes about 1–2 minutes.",
-        "title": "Andrew's Audio uses Stripe to verify your identity"
+        "time_estimate": null,
+        "title": "Andrew's Audio works with Stripe to verify your identity"
       },
       "country_not_listed": {
         "address_from_other_country_text_button_text": "Have an Address from another country?",
@@ -367,11 +489,25 @@ internal val VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING = """
         }
       },
       "individual_welcome": {
-        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
-        "get_started_button_text": "Get started",
-        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
-        "time_estimate": "Takes less than 1 minute.",
-        "title": "Tora's catfood partners with Stripe for secure Identity verification"
+    "body": null,
+    "get_started_button_text": "Get started",
+    "lines": [
+      {
+        "content": "You'll provide personal information including your name and phone number.",
+        "icon": "document"
+      },
+      {
+        "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+        "icon": "dispute_protection"
+      },
+      {
+        "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+        "icon": "lock"
+      }
+    ],
+    "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
+    "time_estimate": null,
+    "title": "Andrew's Audio works with Stripe to verify your identity"
       },
       "livemode": true,
       "requirements": {
@@ -379,8 +515,7 @@ internal val VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING = """
           "biometric_consent",
           "face",
           "id_document_front",
-          "id_document_back",
-          "id_document_type"
+          "id_document_back"
         ]
       },
       "selfie": {
@@ -450,13 +585,27 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING = """
       "id": "vs_1MOrPwEGkPhabJTjzCzKF4DM",
       "object": "identity.verification_page",
       "biometric_consent": {
-        "accept_button_text": "Accept and continue",
-        "body": "<p><b>How Stripe will verify your identity</b></p><p><a href='https://stripe.com/about'>Stripe</a> will use biometric technology (on images of you and your IDs), as well as other data sources and our service providers, to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with Tora's catfood. You can subsequently opt-out by contacting Stripe. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a></p>",
-        "decline_button_text": "No, don't verify",
-        "privacy_policy": "Data will be stored and may be used according to the <a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "accept_button_text": "Agree and continue",
+        "body": null,
+        "decline_button_text": "Decline",
+        "lines": [
+          {
+            "content": "You'll scan a valid <a href='stripe_bottomsheet://open/consent_photo_id'>photo ID</a>.",
+            "icon": "camera"
+          },
+          {
+            "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+            "icon": "dispute_protection"
+          },
+          {
+            "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+            "icon": "lock"
+          }
+        ],
+        "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
         "scroll_to_continue_button_text": "Scroll to continue",
-        "time_estimate": "Takes about 1–2 minutes.",
-        "title": "Tora's catfood uses Stripe to verify your identity"
+        "time_estimate": null,
+        "title": "Andrew's Audio works with Stripe to verify your identity"
       },
       "country_not_listed": {
         "address_from_other_country_text_button_text": "Have an Address from another country?",
@@ -546,11 +695,25 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING = """
         }
       },
       "individual_welcome": {
-        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
-        "get_started_button_text": "Get started",
-        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
-        "time_estimate": "Takes less than 1 minute.",
-        "title": "Tora's catfood partners with Stripe for secure Identity verification"
+    "body": null,
+    "get_started_button_text": "Get started",
+    "lines": [
+      {
+        "content": "You'll provide personal information including your name and phone number.",
+        "icon": "document"
+      },
+      {
+        "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+        "icon": "dispute_protection"
+      },
+      {
+        "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+        "icon": "lock"
+      }
+    ],
+    "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
+    "time_estimate": null,
+    "title": "Andrew's Audio works with Stripe to verify your identity"
       },
       "livemode": false,
       "requirements": {
@@ -558,7 +721,6 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING = """
           "biometric_consent",
           "id_document_front",
           "id_document_back",
-          "id_document_type",
           "id_number"
         ]
       },
@@ -581,13 +743,27 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING = """
       "id": "vs_1MRjwTEGkPhabJTjIEKiUmmS",
       "object": "identity.verification_page",
       "biometric_consent": {
-        "accept_button_text": "Accept and continue",
-        "body": "<p><b>How Stripe will verify your identity</b></p><p><a href='https://stripe.com/about'>Stripe</a> will use biometric technology (on images of you and your IDs), as well as other data sources and our service providers, to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with Tora's catfood. You can subsequently opt-out by contacting Stripe. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a></p>",
-        "decline_button_text": "No, don't verify",
-        "privacy_policy": "Data will be stored and may be used according to the <a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "accept_button_text": "Agree and continue",
+        "body": null,
+        "decline_button_text": "Decline",
+        "lines": [
+          {
+            "content": "You'll scan a valid <a href='stripe_bottomsheet://open/consent_photo_id'>photo ID</a>.",
+            "icon": "camera"
+          },
+          {
+            "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+            "icon": "dispute_protection"
+          },
+          {
+            "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+            "icon": "lock"
+          }
+        ],
+        "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
         "scroll_to_continue_button_text": "Scroll to continue",
-        "time_estimate": "Takes about 1–2 minutes.",
-        "title": "Tora's catfood uses Stripe to verify your identity"
+        "time_estimate": null,
+        "title": "Andrew's Audio works with Stripe to verify your identity"
       },
       "country_not_listed": {
         "address_from_other_country_text_button_text": "Have an Address from another country?",
@@ -677,11 +853,25 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING = """
         }
       },
       "individual_welcome": {
-        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
-        "get_started_button_text": "Get started",
-        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
-        "time_estimate": "Takes less than 1 minute.",
-        "title": "Tora's catfood partners with Stripe for secure Identity verification"
+    "body": null,
+    "get_started_button_text": "Get started",
+    "lines": [
+      {
+        "content": "You'll provide personal information including your name and phone number.",
+        "icon": "document"
+      },
+      {
+        "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+        "icon": "dispute_protection"
+      },
+      {
+        "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+        "icon": "lock"
+      }
+    ],
+    "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
+    "time_estimate": null,
+    "title": "Andrew's Audio works with Stripe to verify your identity"
       },
       "livemode": true,
       "requirements": {
@@ -689,8 +879,7 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING = """
           "address",
           "biometric_consent",
           "id_document_front",
-          "id_document_back",
-          "id_document_type"
+          "id_document_back"
         ]
       },
       "selfie": null,
@@ -711,13 +900,27 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_AND_ID_NUMBER_JSON_
       "id": "vs_1MTb71EGkPhabJTjK2kJQ5xI",
       "object": "identity.verification_page",
       "biometric_consent": {
-        "accept_button_text": "Accept and continue",
-        "body": "<p><b>How Stripe will verify your identity</b></p><p><a href='https://stripe.com/about'>Stripe</a> will use biometric technology (on images of you and your IDs), as well as other data sources and our service providers, to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with Tora's catfood. You can subsequently opt-out by contacting Stripe. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a></p>",
-        "decline_button_text": "No, don't verify",
-        "privacy_policy": "Data will be stored and may be used according to the <a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "accept_button_text": "Agree and continue",
+        "body": null,
+        "decline_button_text": "Decline",
+        "lines": [
+          {
+            "content": "You'll scan a valid <a href='stripe_bottomsheet://open/consent_photo_id'>photo ID</a>.",
+            "icon": "camera"
+          },
+          {
+            "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+            "icon": "dispute_protection"
+          },
+          {
+            "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+            "icon": "lock"
+          }
+        ],
+        "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
         "scroll_to_continue_button_text": "Scroll to continue",
-        "time_estimate": "Takes about 1–2 minutes.",
-        "title": "Tora's catfood uses Stripe to verify your identity"
+        "time_estimate": null,
+        "title": "Andrew's Audio works with Stripe to verify your identity"
       },
       "country_not_listed": {
         "address_from_other_country_text_button_text": "Have an Address from another country?",
@@ -807,11 +1010,25 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_AND_ID_NUMBER_JSON_
         }
       },
       "individual_welcome": {
-        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
-        "get_started_button_text": "Get started",
-        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
-        "time_estimate": "Takes less than 1 minute.",
-        "title": "Tora's catfood partners with Stripe for secure Identity verification"
+    "body": null,
+    "get_started_button_text": "Get started",
+    "lines": [
+      {
+        "content": "You'll provide personal information including your name and phone number.",
+        "icon": "document"
+      },
+      {
+        "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+        "icon": "dispute_protection"
+      },
+      {
+        "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+        "icon": "lock"
+      }
+    ],
+    "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
+    "time_estimate": null,
+    "title": "Andrew's Audio works with Stripe to verify your identity"
       },
       "livemode": false,
       "requirements": {
@@ -820,7 +1037,6 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_AND_ID_NUMBER_JSON_
           "biometric_consent",
           "id_document_front",
           "id_document_back",
-          "id_document_type",
           "id_number"
         ]
       },
@@ -842,13 +1058,27 @@ internal val VERIFICATION_PAGE_TYPE_ID_NUMBER_JSON_STRING = """
       "id": "vs_1MOrMgEGkPhabJTjkbUNVfh6",
       "object": "identity.verification_page",
       "biometric_consent": {
-        "accept_button_text": "Accept and continue",
-        "body": "<p><b>How Stripe will verify your identity</b></p><p><a href='https://stripe.com/about'>Stripe</a> will use biometric technology (on images of you and your IDs), as well as other data sources and our service providers, to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with Tora's catfood. You can subsequently opt-out by contacting Stripe. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a></p>",
-        "decline_button_text": "No, don't verify",
-        "privacy_policy": "Data will be stored and may be used according to the <a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "accept_button_text": "Agree and continue",
+        "body": null,
+        "decline_button_text": "Decline",
+        "lines": [
+          {
+            "content": "You'll scan a valid <a href='stripe_bottomsheet://open/consent_photo_id'>photo ID</a>.",
+            "icon": "camera"
+          },
+          {
+            "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+            "icon": "dispute_protection"
+          },
+          {
+            "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+            "icon": "lock"
+          }
+        ],
+        "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
         "scroll_to_continue_button_text": "Scroll to continue",
-        "time_estimate": "Takes about 1–2 minutes.",
-        "title": "Tora's catfood uses Stripe to verify your identity"
+        "time_estimate": null,
+        "title": "Andrew's Audio works with Stripe to verify your identity"
       },
       "country_not_listed": {
         "address_from_other_country_text_button_text": "Have an Address from another country?",
@@ -938,11 +1168,25 @@ internal val VERIFICATION_PAGE_TYPE_ID_NUMBER_JSON_STRING = """
         }
       },
       "individual_welcome": {
-        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
-        "get_started_button_text": "Get started",
-        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
-        "time_estimate": "Takes less than 1 minute.",
-        "title": "Tora's catfood partners with Stripe for secure Identity verification"
+    "body": null,
+    "get_started_button_text": "Get started",
+    "lines": [
+      {
+        "content": "You'll provide personal information including your name and phone number.",
+        "icon": "document"
+      },
+      {
+        "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+        "icon": "dispute_protection"
+      },
+      {
+        "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+        "icon": "lock"
+      }
+    ],
+    "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
+    "time_estimate": null,
+    "title": "Andrew's Audio works with Stripe to verify your identity"
       },
       "livemode": false,
       "requirements": {
@@ -970,13 +1214,27 @@ internal val VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING = """
       "id": "vs_1MOrKBEGkPhabJTjBA2ohFAW",
       "object": "identity.verification_page",
       "biometric_consent": {
-        "accept_button_text": "Accept and continue",
-        "body": "<p><b>How Stripe will verify your identity</b></p><p><a href='https://stripe.com/about'>Stripe</a> will use biometric technology (on images of you and your IDs), as well as other data sources and our service providers, to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with Tora's catfood. You can subsequently opt-out by contacting Stripe. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a></p>",
-        "decline_button_text": "No, don't verify",
-        "privacy_policy": "Data will be stored and may be used according to the <a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "accept_button_text": "Agree and continue",
+        "body": null,
+        "decline_button_text": "Decline",
+        "lines": [
+          {
+            "content": "You'll scan a valid <a href='stripe_bottomsheet://open/consent_photo_id'>photo ID</a>.",
+            "icon": "camera"
+          },
+          {
+            "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+            "icon": "dispute_protection"
+          },
+          {
+            "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+            "icon": "lock"
+          }
+        ],
+        "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
         "scroll_to_continue_button_text": "Scroll to continue",
-        "time_estimate": "Takes about 1–2 minutes.",
-        "title": "Tora's catfood uses Stripe to verify your identity"
+        "time_estimate": null,
+        "title": "Andrew's Audio works with Stripe to verify your identity"
       },
       "country_not_listed": {
         "address_from_other_country_text_button_text": "Have an Address from another country?",
@@ -1066,11 +1324,25 @@ internal val VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING = """
         }
       },
       "individual_welcome": {
-        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "body": null,
         "get_started_button_text": "Get started",
-        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
-        "time_estimate": "Takes less than 1 minute.",
-        "title": "Tora's catfood partners with Stripe for secure Identity verification"
+        "lines": [
+          {
+            "content": "You'll provide personal information including your name and phone number.",
+            "icon": "document"
+          },
+          {
+            "content": "The information you provide Stripe will help us <a href='stripe_bottomsheet://open/consent_identity'>confirm your identity</a>.",
+            "icon": "dispute_protection"
+          },
+          {
+            "content": "Andrew's Audio will only have access to this <a href='stripe_bottomsheet://open/consent_verification_data'>verification data</a>.",
+            "icon": "lock"
+          }
+        ],
+        "privacy_policy": "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • <a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>",
+        "time_estimate": null,
+        "title": "Andrew's Audio works with Stripe to verify your identity"
       },
       "livemode": false,
       "requirements": {

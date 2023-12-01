@@ -46,6 +46,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -54,6 +55,11 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherP
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
@@ -82,6 +88,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
@@ -188,10 +195,13 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `modifyPaymentMethod updates payment methods on successful update`() = runTest {
-        val paymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
-        val updatedPaymentMethod = paymentMethod.copy(
-            card = paymentMethod.card?.copy(
-                networks = paymentMethod.card?.networks?.copy(
+        val paymentMethods = PaymentMethodFixtures.createCards(5)
+
+        val firstPaymentMethod = paymentMethods.first()
+
+        val updatedPaymentMethod = firstPaymentMethod.copy(
+            card = firstPaymentMethod.card?.copy(
+                networks = firstPaymentMethod.card?.networks?.copy(
                     preferred = CardBrand.Visa.code
                 )
             )
@@ -205,14 +215,14 @@ internal class PaymentSheetViewModelTest {
             )
         )
         val viewModel = createViewModel(
-            customerPaymentMethods = listOf(paymentMethod),
+            customerPaymentMethods = paymentMethods,
             customerRepository = customerRepository
         )
 
         viewModel.currentScreen.test {
             awaitItem()
 
-            viewModel.modifyPaymentMethod(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
+            viewModel.modifyPaymentMethod(firstPaymentMethod)
 
             val currentScreen = awaitItem()
 
@@ -233,25 +243,30 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
         }
 
+        val idCaptor = argumentCaptor<String>()
         val paramsCaptor = argumentCaptor<PaymentMethodUpdateParams>()
 
         verify(customerRepository).updatePaymentMethod(
             any(),
+            idCaptor.capture(),
             paramsCaptor.capture()
         )
+
+        assertThat(idCaptor.firstValue).isEqualTo(firstPaymentMethod.id!!)
 
         assertThat(
             paramsCaptor.firstValue.toParamMap()
         ).isEqualTo(
             PaymentMethodUpdateParams.createCard(
-                paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
                 networks = PaymentMethodUpdateParams.Card.Networks(
                     preferred = CardBrand.Visa.code
                 )
             ).toParamMap()
         )
 
-        assertThat(viewModel.paymentMethods.value).contains(updatedPaymentMethod)
+        assertThat(viewModel.paymentMethods.value).isEqualTo(
+            listOf(updatedPaymentMethod) + paymentMethods.takeLast(4)
+        )
     }
 
     @Test
@@ -743,6 +758,49 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP)
         assertThat(viewModel.googlePayLauncherConfig)
             .isNotNull()
+    }
+
+    @Test
+    fun `'buttonType' from 'GooglePayConfiguration' should be parsed to proper 'GooglePayButtonType'`() = runTest {
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Plain,
+            GooglePayButtonType.Plain
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Pay,
+            GooglePayButtonType.Pay
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Book,
+            GooglePayButtonType.Book
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Buy,
+            GooglePayButtonType.Buy
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Donate,
+            GooglePayButtonType.Donate
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
+            GooglePayButtonType.Checkout
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Order,
+            GooglePayButtonType.Order
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Subscribe,
+            GooglePayButtonType.Subscribe
+        )
     }
 
     @Test
@@ -1690,6 +1748,66 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `Launch confirmation form when Bacs debit is selected and filled & succeeds payment`() = runTest {
+        fakeIntentConfirmationInterceptor.enqueueCompleteStep()
+
+        val onResult = argumentCaptor<ActivityResultCallback<BacsMandateConfirmationResult>>()
+        val launcher = mock<BacsMandateConfirmationLauncher> {
+            on { launch(any(), any()) } doAnswer {
+                onResult.firstValue.onActivityResult(BacsMandateConfirmationResult.Confirmed)
+            }
+        }
+        val launcherFactory = mock<BacsMandateConfirmationLauncherFactory> {
+            on { create(any()) } doReturn launcher
+        }
+        val activityResultCaller = mock<ActivityResultCaller> {
+            onGeneric {
+                registerForActivityResult<BacsMandateConfirmationContract.Args, BacsMandateConfirmationResult>(
+                    any(),
+                    any()
+                )
+            } doReturn mock()
+        }
+
+        val viewModel = createViewModel(
+            bacsMandateConfirmationLauncherFactory = launcherFactory
+        ).apply {
+            registerFromActivity(activityResultCaller, TestLifecycleOwner())
+        }
+
+        verify(activityResultCaller).registerForActivityResult(
+            any<BacsMandateConfirmationContract>(),
+            onResult.capture()
+        )
+
+        verify(launcherFactory).create(any())
+
+        viewModel.updateSelection(
+            createBacsPaymentSelection()
+        )
+
+        viewModel.checkout()
+
+        verify(launcher).launch(
+            eq(
+                BacsMandateData(
+                    name = BACS_NAME,
+                    email = BACS_EMAIL,
+                    sortCode = BACS_SORT_CODE,
+                    accountNumber = BACS_ACCOUNT_NUMBER,
+                )
+            ),
+            eq(PaymentSheet.Appearance())
+        )
+
+        viewModel.viewState.test {
+            val viewState = awaitItem()
+
+            assertThat(viewState).isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
+        }
+    }
+
+    @Test
     fun `On complete payment launcher result in PI mode & should reuse, should save payment selection`() = runTest {
         selectionSavedTest(
             initializationMode = InitializationMode.PaymentIntent(
@@ -1845,6 +1963,7 @@ internal class PaymentSheetViewModelTest {
         isGooglePayReady: Boolean = false,
         delay: Duration = Duration.ZERO,
         lpmRepository: LpmRepository = this.lpmRepository,
+        bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return TestViewModelFactory.create(
@@ -1868,6 +1987,7 @@ internal class PaymentSheetViewModelTest {
                 lpmRepository = lpmRepository,
                 paymentLauncherFactory = paymentLauncherFactory,
                 googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
+                bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
@@ -1896,6 +2016,46 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
+    private suspend fun testButtonTypeParsedToProperGooglePayButtonType(
+        buttonType: PaymentSheet.GooglePayConfiguration.ButtonType,
+        googlePayButtonType: GooglePayButtonType
+    ) {
+        val viewModel = createViewModel(
+            isGooglePayReady = true,
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
+                    googlePay = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.googlePayConfig?.copy(
+                        buttonType = buttonType
+                    )
+                )
+            )
+        )
+
+        viewModel.walletsState.test {
+            assertThat(awaitItem()?.googlePay?.buttonType).isEqualTo(googlePayButtonType)
+        }
+    }
+
+    private fun createBacsPaymentSelection(): PaymentSelection {
+        return PaymentSelection.New.GenericPaymentMethod(
+            labelResource = "Test",
+            iconResource = 0,
+            paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
+                bacsDebit = PaymentMethodCreateParams.BacsDebit(
+                    accountNumber = BACS_ACCOUNT_NUMBER,
+                    sortCode = BACS_SORT_CODE
+                ),
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = BACS_NAME,
+                    email = BACS_EMAIL
+                )
+            ),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+        )
+    }
+
     private companion object {
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP =
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
@@ -1907,5 +2067,10 @@ internal class PaymentSheetViewModelTest {
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         val PAYMENT_INTENT_WITH_PAYMENT_METHOD = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD
         val SETUP_INTENT = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+
+        private const val BACS_ACCOUNT_NUMBER = "00012345"
+        private const val BACS_SORT_CODE = "108800"
+        private const val BACS_NAME = "John Doe"
+        private const val BACS_EMAIL = "johndoe@email.com"
     }
 }

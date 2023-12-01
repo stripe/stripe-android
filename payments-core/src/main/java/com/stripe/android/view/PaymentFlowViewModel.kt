@@ -1,10 +1,7 @@
 package com.stripe.android.view
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.liveData
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.PaymentSessionConfig
@@ -16,6 +13,8 @@ import com.stripe.android.model.ShippingMethod
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 internal class PaymentFlowViewModel(
     private val customerSession: CustomerSession,
@@ -31,18 +30,17 @@ internal class PaymentFlowViewModel(
     internal var currentPage: Int = 0
 
     @JvmSynthetic
-    internal fun saveCustomerShippingInformation(
+    internal suspend fun saveCustomerShippingInformation(
         shippingInformation: ShippingInformation
-    ): LiveData<Result<Customer>> {
+    ): Result<Customer> = suspendCoroutine { continuation ->
         submittedShippingInfo = shippingInformation
-        val resultData = MutableLiveData<Result<Customer>>()
         customerSession.setCustomerShippingInformation(
             shippingInformation = shippingInformation,
             productUsage = PRODUCT_USAGE,
             listener = object : CustomerSession.CustomerRetrievalListener {
                 override fun onCustomerRetrieved(customer: Customer) {
                     isShippingInfoSubmitted = true
-                    resultData.value = Result.success(customer)
+                    continuation.resume(Result.success(customer))
                 }
 
                 override fun onError(
@@ -51,11 +49,12 @@ internal class PaymentFlowViewModel(
                     stripeError: StripeError?
                 ) {
                     isShippingInfoSubmitted = false
-                    resultData.value = Result.failure(RuntimeException(errorMessage))
+                    continuation.resume(
+                        Result.failure(RuntimeException(errorMessage))
+                    )
                 }
             }
         )
-        return resultData
     }
 
     /**
@@ -63,11 +62,11 @@ internal class PaymentFlowViewModel(
      * [shippingMethodsFactory] to create the [ShippingMethod] options.
      */
     @JvmSynthetic
-    internal fun validateShippingInformation(
+    internal suspend fun validateShippingInformation(
         shippingInfoValidator: PaymentSessionConfig.ShippingInformationValidator,
         shippingMethodsFactory: PaymentSessionConfig.ShippingMethodsFactory?,
         shippingInformation: ShippingInformation
-    ) = liveData {
+    ): Result<List<ShippingMethod>> {
         val result = withContext(workContext) {
             val isValid = shippingInfoValidator.isValid(shippingInformation)
             if (isValid) {
@@ -85,8 +84,10 @@ internal class PaymentFlowViewModel(
                 }
             }
         }
+
         shippingMethods = result.getOrDefault(emptyList())
-        emit(result)
+
+        return result
     }
 
     internal class Factory(

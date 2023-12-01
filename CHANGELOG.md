@@ -2,9 +2,17 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.35.0 - 2023-11-28
+
 ### PaymentSheet
+* [ADDED][7249](https://github.com/stripe/stripe-android/pull/7249) PaymentSheet now supports configuring the Google Pay button type in the `GooglePayConfiguration`.
+* [FIXED][7623](https://github.com/stripe/stripe-android/pull/7623) Fixed an issue where FlowController did not save a newly added payment method as the default method.
+* [FIXED][7496](https://github.com/stripe/stripe-android/pull/7496) Fixed an issue where PaymentSheet did not save a newly added payment method as the default method.
 * [FIXED][7584](https://github.com/stripe/stripe-android/pull/7584) Fixed an issue where PaymentSheet would render with a lightened surface color in dark mode.
 * [FIXED][7635](https://github.com/stripe/stripe-android/pull/7635) Fixed an issue where PaymentSheet wouldn't accept valid Mexican phone numbers.
+
+### CustomerSheet
+* [ADDED][7644](https://github.com/stripe/stripe-android/pull/7644) Added support for updating a payment method in the experimental `CustomerAdapter` interface.
 * [CHANGED][7627](https://github.com/stripe/stripe-android/pull/7627) Updated the experimental CustomerSheet.Configuration to require a merchant name.
 
 ## 20.34.4 - 2023-11-02

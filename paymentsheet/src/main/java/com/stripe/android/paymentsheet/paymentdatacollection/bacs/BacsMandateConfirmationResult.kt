@@ -11,6 +11,9 @@ internal sealed interface BacsMandateConfirmationResult : Parcelable {
     object Confirmed : BacsMandateConfirmationResult
 
     @Parcelize
+    object ModifyDetails : BacsMandateConfirmationResult
+
+    @Parcelize
     object Cancelled : BacsMandateConfirmationResult
 
     companion object {

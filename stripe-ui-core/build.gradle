@@ -52,7 +52,6 @@ dependencies {
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.compose.uiTooling
 
-    testImplementation libs.androidx.liveDataKtx
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.junitKtx

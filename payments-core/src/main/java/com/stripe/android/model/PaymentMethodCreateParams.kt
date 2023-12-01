@@ -505,9 +505,31 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
-        private companion object {
+        internal companion object {
             private const val PARAM_ACCOUNT_NUMBER: String = "account_number"
             private const val PARAM_SORT_CODE: String = "sort_code"
+
+            internal fun fromParams(params: PaymentMethodCreateParams): BacsDebit? {
+                val code = PaymentMethod.Type.BacsDebit.code
+
+                val bacsParams = params.toParamMap()[code] as? Map<*, *>
+
+                val accountNumber = bacsParams?.get(
+                    PARAM_ACCOUNT_NUMBER
+                ) as? String
+
+                val sortCode = bacsParams?.get(
+                    PARAM_SORT_CODE
+                ) as? String
+
+                return when {
+                    accountNumber != null && sortCode != null -> BacsDebit(
+                        accountNumber = accountNumber,
+                        sortCode = sortCode
+                    )
+                    else -> null
+                }
+            }
         }
     }
 
@@ -1090,6 +1112,43 @@ data class PaymentMethodCreateParams internal constructor(
                 overrideParamMap = overrideParamMap,
                 productUsage = productUsage
             )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun createBacsFromParams(
+            params: PaymentMethodCreateParams
+        ): BacsDebit? {
+            return BacsDebit.fromParams(params)
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun getNameFromParams(
+            params: PaymentMethodCreateParams
+        ): String? {
+            return params.billingDetails?.name ?: getBillingDetailsValueFromOverrideParams(
+                params,
+                PaymentMethod.BillingDetails.PARAM_NAME
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun getEmailFromParams(
+            params: PaymentMethodCreateParams
+        ): String? {
+            return params.billingDetails?.email ?: getBillingDetailsValueFromOverrideParams(
+                params,
+                PaymentMethod.BillingDetails.PARAM_EMAIL
+            )
+        }
+
+        private fun getBillingDetailsValueFromOverrideParams(
+            params: PaymentMethodCreateParams,
+            key: String
+        ): String? {
+            val billingDetailsParams = params.overrideParamMap
+                ?.get(PARAM_BILLING_DETAILS) as? Map<*, *>
+
+            return billingDetailsParams?.get(key) as? String
         }
     }
 }

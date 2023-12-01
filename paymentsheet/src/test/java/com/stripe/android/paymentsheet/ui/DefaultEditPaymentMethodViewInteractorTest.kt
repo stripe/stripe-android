@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.ui
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.exception.LocalStripeException
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -13,7 +15,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import kotlin.coroutines.CoroutineContext
@@ -103,9 +104,11 @@ class DefaultEditPaymentMethodViewInteractorTest {
     }
 
     @Test
-    fun `on remove pressed, should invoke 'onRemove' to begin removal process`() = runTest {
-        val removeOperation: (paymentMethod: PaymentMethod) -> Boolean = mock {
-            onGeneric { invoke(any()) } doReturn true
+    fun `on remove pressed, should invoke 'onRemove' & succeed removal process`() = runTest {
+        val removeOperation: (paymentMethod: PaymentMethod) -> Throwable? = mock {
+            onGeneric { invoke(any()) }.thenAnswer {
+                null
+            }
         }
 
         val onRemove: PaymentMethodRemoveOperation = { paymentMethod ->
@@ -118,7 +121,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
 
         assertThat(interactor.currentStatus()).isEqualTo(EditPaymentMethodViewState.Status.Idle)
 
-        interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
+        interactor.handleViewAction(EditPaymentMethodViewAction.OnRemoveConfirmed)
 
         testDispatcher.scheduler.advanceTimeBy(50)
 
@@ -129,6 +132,27 @@ class DefaultEditPaymentMethodViewInteractorTest {
         assertThat(interactor.currentStatus()).isEqualTo(EditPaymentMethodViewState.Status.Idle)
 
         verify(removeOperation).invoke(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+    }
+
+    @Test
+    fun `on remove pressed, should fail removal process`() = runTest {
+        val onRemove: (paymentMethod: PaymentMethod) -> Throwable? = mock {
+            onGeneric { invoke(any()) }.thenAnswer {
+                LocalStripeException("Failed to remove")
+            }
+        }
+
+        val interactor = createInteractor(onRemove = onRemove, workContext = testDispatcher)
+
+        interactor.handleViewAction(EditPaymentMethodViewAction.OnRemoveConfirmed)
+
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        interactor.viewState.test {
+            val viewState = awaitItem()
+
+            assertThat(viewState.error).isEqualTo(resolvableString("Failed to remove"))
+        }
     }
 
     @Test
@@ -177,8 +201,35 @@ class DefaultEditPaymentMethodViewInteractorTest {
         verify(updateOperation).invoke(CARD_WITH_NETWORKS_PAYMENT_METHOD, CardBrand.Visa)
     }
 
+    @Test
+    fun `on update pressed, should fail update process`() = runTest {
+        val onUpdate: (paymentMethod: PaymentMethod, brand: CardBrand) -> Result<PaymentMethod> = mock {
+            onGeneric { invoke(any(), any()) }.thenAnswer {
+                Result.failure<PaymentMethod>(
+                    LocalStripeException("Failed to update")
+                )
+            }
+        }
+
+        val interactor = createInteractor(onUpdate = onUpdate, workContext = testDispatcher)
+
+        interactor.handleViewAction(
+            EditPaymentMethodViewAction.OnBrandChoiceChanged(VISA_BRAND_CHOICE)
+        )
+
+        interactor.handleViewAction(EditPaymentMethodViewAction.OnUpdatePressed)
+
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        interactor.viewState.test {
+            val viewState = awaitItem()
+
+            assertThat(viewState.error).isEqualTo(resolvableString("Failed to update"))
+        }
+    }
+
     private fun createInteractor(
-        onRemove: PaymentMethodRemoveOperation = { true },
+        onRemove: PaymentMethodRemoveOperation = { null },
         onUpdate: PaymentMethodUpdateOperation = { _, _ -> Result.success(CARD_WITH_NETWORKS_PAYMENT_METHOD) },
         workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): DefaultEditPaymentMethodViewInteractor {

@@ -13,7 +13,6 @@ import com.stripe.android.uicore.elements.H6Text
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun SimpleDialogElementUI(
-    openDialog: Boolean,
     titleText: String,
     messageText: String?,
     confirmText: String,
@@ -22,46 +21,44 @@ fun SimpleDialogElementUI(
     onConfirmListener: () -> Unit,
     onDismissListener: () -> Unit,
 ) {
-    if (openDialog) {
-        StripeTheme {
-            AlertDialog(
-                onDismissRequest = {
-                    onDismissListener()
-                },
-                title = {
-                    H4Text(text = titleText)
-                },
-                text = messageText?.let {
-                    {
-                        H6Text(text = it)
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            onConfirmListener()
-                        }
-                    ) {
-                        Text(
-                            text = confirmText,
-                            color = if (destructive) {
-                                MaterialTheme.colors.error
-                            } else {
-                                Color.Unspecified
-                            }
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            onDismissListener()
-                        }
-                    ) {
-                        Text(dismissText)
-                    }
+    StripeTheme {
+        AlertDialog(
+            onDismissRequest = {
+                onDismissListener()
+            },
+            title = {
+                H4Text(text = titleText)
+            },
+            text = messageText?.let {
+                {
+                    H6Text(text = it)
                 }
-            )
-        }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onConfirmListener()
+                    }
+                ) {
+                    Text(
+                        text = confirmText,
+                        color = if (destructive) {
+                            MaterialTheme.colors.error
+                        } else {
+                            Color.Unspecified
+                        }
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        onDismissListener()
+                    }
+                ) {
+                    Text(dismissText)
+                }
+            }
+        )
     }
 }

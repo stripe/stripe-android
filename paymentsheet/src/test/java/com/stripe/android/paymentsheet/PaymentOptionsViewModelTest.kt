@@ -5,9 +5,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
+import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -22,32 +24,50 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.Loading
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
+import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.utils.FakeCustomerRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.Before
 import org.junit.Rule
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsViewModelTest {
+
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
     private val testDispatcher = StandardTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
     private val prefsRepository = FakePrefsRepository()
-    private val customerRepository = FakeCustomerRepository()
-    private val paymentMethodRepository = FakeCustomerRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
+    private val customerRepository = mock<CustomerRepository>()
+
+    @Before
+    fun before() {
+        Dispatchers.resetMain()
+    }
 
     @Test
     fun `onUserSelection() when selection has been made should set the view state to process result`() =
@@ -103,7 +123,6 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `onUserSelection() new card with save should complete with succeeded view state`() =
         runTest {
-            paymentMethodRepository.savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             val viewModel = createViewModel()
             viewModel.paymentOptionResult.test {
                 viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
@@ -537,10 +556,108 @@ internal class PaymentOptionsViewModelTest {
         }
     }
 
+    @Test
+    fun `Correctly updates state when removing payment method in edit screen succeeds`() = runTest(testDispatcher) {
+        Dispatchers.setMain(testDispatcher)
+
+        val cards = PaymentMethodFactory.cards(3)
+        val paymentMethodToRemove = cards.first()
+
+        whenever(customerRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id!!))).thenReturn(
+            Result.success(paymentMethodToRemove)
+        )
+
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
+                customerPaymentMethods = cards,
+            ),
+        )
+
+        val viewModel = createViewModel(
+            args = args,
+            editInteractorFactory = DefaultEditPaymentMethodViewInteractor.Factory,
+        )
+
+        val screenTurbine = viewModel.currentScreen.testIn(this)
+        val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
+
+        assertThat(screenTurbine.awaitItem()).isEqualTo(Loading)
+        assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+
+        assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
+
+        viewModel.modifyPaymentMethod(paymentMethodToRemove)
+
+        val editViewState = screenTurbine.awaitItem() as PaymentSheetScreen.EditPaymentMethod
+        editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
+
+        screenTurbine.expectNoEvents()
+        editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemoveConfirmed)
+
+        assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+
+        // The list of payment methods should not be updated until we're back on the SPM screen
+        paymentMethodsTurbine.expectNoEvents()
+        testScheduler.advanceUntilIdle()
+
+        assertThat(paymentMethodsTurbine.awaitItem()).containsExactly(cards[1], cards[2]).inOrder()
+
+        screenTurbine.ensureAllEventsConsumed()
+        screenTurbine.cancelAndIgnoreRemainingEvents()
+
+        paymentMethodsTurbine.ensureAllEventsConsumed()
+        paymentMethodsTurbine.cancelAndIgnoreRemainingEvents()
+    }
+
+    @Test
+    fun `Correctly updates state when removing payment method in edit screen fails`() = runTest(testDispatcher) {
+        Dispatchers.setMain(testDispatcher)
+
+        val cards = PaymentMethodFactory.cards(3)
+        val paymentMethodToRemove = cards.first()
+
+        whenever(customerRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id!!))).thenReturn(
+            Result.failure(APIConnectionException())
+        )
+
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
+                customerPaymentMethods = cards,
+            ),
+        )
+
+        val viewModel = createViewModel(
+            args = args,
+            editInteractorFactory = DefaultEditPaymentMethodViewInteractor.Factory,
+        )
+
+        val screenTurbine = viewModel.currentScreen.testIn(this)
+        val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
+
+        assertThat(screenTurbine.awaitItem()).isEqualTo(Loading)
+        assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+
+        assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
+
+        viewModel.modifyPaymentMethod(paymentMethodToRemove)
+
+        val editViewState = screenTurbine.awaitItem() as PaymentSheetScreen.EditPaymentMethod
+        editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
+
+        testScheduler.advanceUntilIdle()
+
+        screenTurbine.ensureAllEventsConsumed()
+        screenTurbine.cancelAndIgnoreRemainingEvents()
+
+        paymentMethodsTurbine.ensureAllEventsConsumed()
+        paymentMethodsTurbine.cancelAndIgnoreRemainingEvents()
+    }
+
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,
-        lpmRepository: LpmRepository = createLpmRepository()
+        lpmRepository: LpmRepository = createLpmRepository(),
+        editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory = mock(),
     ) = TestViewModelFactory.create { linkHandler, linkInteractor, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(state = args.state.copy(linkState = linkState)),
@@ -555,7 +672,7 @@ internal class PaymentOptionsViewModelTest {
             linkHandler = linkHandler,
             linkConfigurationCoordinator = linkInteractor,
             formViewModelSubComponentBuilderProvider = mock(),
-            editInteractorFactory = mock()
+            editInteractorFactory = editInteractorFactory,
         )
     }
 
@@ -607,8 +724,6 @@ internal class PaymentOptionsViewModelTest {
             enableLogging = false,
             productUsage = mock()
         )
-        private val PAYMENT_METHOD_REPOSITORY_PARAMS =
-            listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     }
 
     private class MyHostActivity : AppCompatActivity()

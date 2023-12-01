@@ -13,6 +13,7 @@ import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.view.ViewCompat
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
@@ -21,6 +22,7 @@ import com.stripe.android.databinding.StripeAddPaymentMethodActivityBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.utils.argsAreInvalid
+import kotlinx.coroutines.launch
 
 /**
  * Activity used to display a [AddPaymentMethodView] and receive the resulting
@@ -189,24 +191,21 @@ class AddPaymentMethodActivity : StripeActivity() {
 
         isProgressBarVisible = true
 
-        viewModel.createPaymentMethod(params).observe(
-            this,
-            { result ->
-                result.fold(
-                    onSuccess = {
-                        if (shouldAttachToCustomer) {
-                            attachPaymentMethodToCustomer(it)
-                        } else {
-                            finishWithPaymentMethod(it)
-                        }
-                    },
-                    onFailure = {
-                        isProgressBarVisible = false
-                        showError(it.message.orEmpty())
+        lifecycleScope.launch {
+            viewModel.createPaymentMethod(params).fold(
+                onSuccess = {
+                    if (shouldAttachToCustomer) {
+                        attachPaymentMethodToCustomer(it)
+                    } else {
+                        finishWithPaymentMethod(it)
                     }
-                )
-            }
-        )
+                },
+                onFailure = {
+                    isProgressBarVisible = false
+                    showError(it.message.orEmpty())
+                }
+            )
+        }
     }
 
     private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {
@@ -214,21 +213,18 @@ class AddPaymentMethodActivity : StripeActivity() {
             CustomerSession.getInstance()
         }.fold(
             onSuccess = { customerSession ->
-                viewModel.attachPaymentMethod(
-                    customerSession,
-                    paymentMethod
-                ).observe(
-                    this,
-                    { result ->
-                        result.fold(
-                            onSuccess = ::finishWithPaymentMethod,
-                            onFailure = {
-                                isProgressBarVisible = false
-                                showError(it.message.orEmpty())
-                            }
-                        )
-                    }
-                )
+                lifecycleScope.launch {
+                    viewModel.attachPaymentMethod(
+                        customerSession,
+                        paymentMethod
+                    ).fold(
+                        onSuccess = ::finishWithPaymentMethod,
+                        onFailure = {
+                            isProgressBarVisible = false
+                            showError(it.message.orEmpty())
+                        }
+                    )
+                }
             },
             onFailure = {
                 finishWithResult(AddPaymentMethodActivityStarter.Result.Failure(it))

@@ -13,7 +13,6 @@ dependencies {
     implementation libs.androidx.appCompat
     implementation libs.androidx.browser
     implementation libs.androidx.constraintLayout
-    implementation libs.androidx.liveDataKtx
     implementation libs.androidx.security
     implementation libs.androidx.viewModel
     implementation libs.dagger

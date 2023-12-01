@@ -53,7 +53,9 @@ internal data class VerificationPage(
     @SerialName("unsupported_client")
     val unsupportedClient: Boolean,
     @SerialName("welcome")
-    val welcome: VerificationPageStaticContentTextPage? = null
+    val welcome: VerificationPageStaticContentTextPage? = null,
+    @SerialName("bottomsheet")
+    val bottomSheet: Map<String, VerificationPageStaticContentBottomSheetContent>? = null
 ) : Parcelable {
     @Serializable
     internal enum class Status {

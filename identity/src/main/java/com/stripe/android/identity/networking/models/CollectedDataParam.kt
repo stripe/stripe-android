@@ -5,12 +5,6 @@ import android.os.Parcelable
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.identity.R
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
-import com.stripe.android.identity.navigation.DriverLicenseScanDestination
-import com.stripe.android.identity.navigation.DriverLicenseUploadDestination
-import com.stripe.android.identity.navigation.IDScanDestination
-import com.stripe.android.identity.navigation.IDUploadDestination
-import com.stripe.android.identity.navigation.PassportScanDestination
-import com.stripe.android.identity.navigation.PassportUploadDestination
 import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.ui.DRIVING_LICENSE_KEY
 import com.stripe.android.identity.ui.ID_CARD_KEY
@@ -25,8 +19,6 @@ import kotlinx.serialization.json.Json
 internal data class CollectedDataParam(
     @SerialName("biometric_consent")
     val biometricConsent: Boolean? = null,
-    @SerialName("id_document_type")
-    val idDocumentType: Type? = null,
     @SerialName("id_document_front")
     val idDocumentFront: DocumentUploadParam? = null,
     @SerialName("id_document_back")
@@ -85,7 +77,6 @@ internal data class CollectedDataParam(
             ).toMap()
 
         fun createFromFrontUploadedResultsForAutoCapture(
-            type: Type,
             frontHighResResult: UploadedResult,
             frontLowResResult: UploadedResult
         ): CollectedDataParam =
@@ -106,12 +97,10 @@ internal data class CollectedDataParam(
                         "front low res image id is null"
                     },
                     uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
-                ),
-                idDocumentType = type
+                )
             )
 
         fun createFromBackUploadedResultsForAutoCapture(
-            type: Type,
             backHighResResult: UploadedResult,
             backLowResResult: UploadedResult
         ): CollectedDataParam =
@@ -132,8 +121,7 @@ internal data class CollectedDataParam(
                         "back low res image id is null"
                     },
                     uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
-                ),
-                idDocumentType = type
+                )
             )
 
         fun createForSelfie(
@@ -166,7 +154,6 @@ internal data class CollectedDataParam(
             return another?.let {
                 this.copy(
                     biometricConsent = another.biometricConsent ?: this.biometricConsent,
-                    idDocumentType = another.idDocumentType ?: this.idDocumentType,
                     idDocumentFront = another.idDocumentFront ?: this.idDocumentFront,
                     idDocumentBack = another.idDocumentBack ?: this.idDocumentBack,
                     face = another.face ?: this.face,
@@ -185,7 +172,6 @@ internal data class CollectedDataParam(
                 Requirement.BIOMETRICCONSENT -> this.copy(biometricConsent = null)
                 Requirement.IDDOCUMENTBACK -> this.copy(idDocumentBack = null)
                 Requirement.IDDOCUMENTFRONT -> this.copy(idDocumentFront = null)
-                Requirement.IDDOCUMENTTYPE -> this.copy(idDocumentType = null)
                 Requirement.FACE -> this.copy(face = null)
                 Requirement.IDNUMBER -> this.copy(idNumber = null)
                 Requirement.DOB -> this.copy(dob = null)
@@ -200,9 +186,6 @@ internal data class CollectedDataParam(
             val requirements = mutableSetOf<Requirement>()
             this.biometricConsent?.let {
                 requirements.add(Requirement.BIOMETRICCONSENT)
-            }
-            this.idDocumentType?.let {
-                requirements.add(Requirement.IDDOCUMENTTYPE)
             }
             this.idDocumentFront?.let {
                 requirements.add(Requirement.IDDOCUMENTFRONT)
@@ -234,47 +217,20 @@ internal data class CollectedDataParam(
             return requirements
         }
 
-        fun Type.toUploadDestination(
-            shouldPopUpToDocSelection: Boolean = false
-        ) = when (this) {
-            Type.IDCARD -> IDUploadDestination(shouldPopUpToDocSelection = shouldPopUpToDocSelection)
-            Type.DRIVINGLICENSE -> DriverLicenseUploadDestination(shouldPopUpToDocSelection = shouldPopUpToDocSelection)
-            Type.PASSPORT -> PassportUploadDestination(shouldPopUpToDocSelection = shouldPopUpToDocSelection)
-            else -> throw java.lang.IllegalStateException("Invalid CollectedDataParam.Type")
-        }
-        fun Type.toScanDestination(
-            shouldStartFromBack: Boolean = false,
-            shouldPopUpToDocSelection: Boolean = false
-        ) = when (this) {
-            Type.IDCARD -> IDScanDestination(
-                shouldStartFromBack,
-                shouldPopUpToDocSelection
-            )
-
-            Type.PASSPORT -> PassportScanDestination(
-                shouldStartFromBack,
-                shouldPopUpToDocSelection
-            )
-
-            Type.DRIVINGLICENSE -> DriverLicenseScanDestination(
-                shouldStartFromBack,
-                shouldPopUpToDocSelection
-            )
-
-            else -> throw IllegalStateException("Invalid CollectedDataParam.Type")
-        }
-
         fun Type.getDisplayName(context: Context) =
             when (this) {
                 Type.IDCARD -> {
                     context.getString(R.string.stripe_id_card)
                 }
+
                 Type.DRIVINGLICENSE -> {
                     context.getString(R.string.stripe_driver_license)
                 }
+
                 Type.PASSPORT -> {
                     context.getString(R.string.stripe_passport)
                 }
+
                 else -> throw java.lang.IllegalStateException("Invalid CollectedDataParam.Type")
             }
     }

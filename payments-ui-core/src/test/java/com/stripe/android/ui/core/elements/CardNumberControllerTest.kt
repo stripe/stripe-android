@@ -1,6 +1,6 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.lifecycle.asLiveData
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -9,15 +9,15 @@ import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
-import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.TextFieldIcon
-import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,66 +44,56 @@ internal class CardNumberControllerTest {
     }
 
     @Test
-    fun `When invalid card number verify visible error`() {
-        val errorFlowValues = mutableListOf<FieldError?>()
-        cardNumberController.error.asLiveData()
-            .observeForever {
-                errorFlowValues.add(it)
-            }
+    fun `When invalid card number verify visible error`() = runTest {
+        cardNumberController.error.distinctUntilChanged().test {
+            assertThat(awaitItem()).isNull()
 
-        cardNumberController.onValueChange("012")
-        idleLooper()
+            cardNumberController.onValueChange("012")
+            idleLooper()
 
-        assertThat(errorFlowValues[errorFlowValues.size - 1]?.errorMessage)
-            .isEqualTo(StripeR.string.stripe_invalid_card_number)
+            skipItems(2)
+
+            assertThat(awaitItem()?.errorMessage)
+                .isEqualTo(StripeR.string.stripe_invalid_card_number)
+        }
     }
 
     @Test
-    fun `Verify get the form field value correctly`() {
-        val formFieldValuesFlow = mutableListOf<FormFieldEntry?>()
-        cardNumberController.formFieldValue.asLiveData()
-            .observeForever {
-                formFieldValuesFlow.add(it)
-            }
+    fun `Verify get the form field value correctly`() = runTest {
+        cardNumberController.formFieldValue.distinctUntilChanged().test {
+            cardNumberController.onValueChange("4242")
+            idleLooper()
 
-        cardNumberController.onValueChange("4242")
-        idleLooper()
+            assertThat(awaitItem().isComplete)
+                .isFalse()
+            assertThat(awaitItem().value)
+                .isEqualTo("4242")
 
-        assertThat(formFieldValuesFlow[formFieldValuesFlow.size - 1]?.isComplete)
-            .isFalse()
-        assertThat(formFieldValuesFlow[formFieldValuesFlow.size - 1]?.value)
-            .isEqualTo("4242")
+            cardNumberController.onValueChange("4242424242424242")
+            idleLooper()
 
-        cardNumberController.onValueChange("4242424242424242")
-        idleLooper()
-
-        assertThat(formFieldValuesFlow[formFieldValuesFlow.size - 1]?.isComplete)
-            .isTrue()
-        assertThat(formFieldValuesFlow[formFieldValuesFlow.size - 1]?.value)
-            .isEqualTo("4242424242424242")
+            assertThat(awaitItem().isComplete)
+                .isTrue()
+            assertThat(awaitItem().value)
+                .isEqualTo("4242424242424242")
+        }
     }
 
     @Test
-    fun `Verify error is visible based on the focus`() {
+    fun `Verify error is visible based on the focus`() = runTest {
         // incomplete
-        val visibleErrorFlow = mutableListOf<Boolean>()
-        cardNumberController.visibleError.asLiveData()
-            .observeForever {
-                visibleErrorFlow.add(it)
-            }
+        cardNumberController.visibleError.distinctUntilChanged().test {
+            cardNumberController.onFocusChange(true)
+            cardNumberController.onValueChange("4242")
+            idleLooper()
 
-        cardNumberController.onFocusChange(true)
-        cardNumberController.onValueChange("4242")
-        idleLooper()
+            assertThat(awaitItem()).isFalse()
 
-        assertThat(visibleErrorFlow[visibleErrorFlow.size - 1])
-            .isFalse()
+            cardNumberController.onFocusChange(false)
+            idleLooper()
 
-        cardNumberController.onFocusChange(false)
-        idleLooper()
-
-        assertThat(visibleErrorFlow[visibleErrorFlow.size - 1])
-            .isTrue()
+            assertThat(awaitItem()).isTrue()
+        }
     }
 
     @Test
@@ -157,50 +147,46 @@ internal class CardNumberControllerTest {
     }
 
     @Test
-    fun `trailingIcon should have multi trailing icons when field is empty`() {
-        val trailingIcons = mutableListOf<TextFieldIcon?>()
-        cardNumberController.trailingIcon.asLiveData().observeForever {
-            trailingIcons.add(it)
-        }
-        cardNumberController.onValueChange("")
-        idleLooper()
-        assertThat(trailingIcons.first() as TextFieldIcon.MultiTrailing)
-            .isEqualTo(
-                TextFieldIcon.MultiTrailing(
-                    staticIcons = listOf(
-                        TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false),
-                        TextFieldIcon.Trailing(CardBrand.MasterCard.icon, isTintable = false),
-                        TextFieldIcon.Trailing(CardBrand.AmericanExpress.icon, isTintable = false)
-                    ),
-                    animatedIcons = listOf(
-                        TextFieldIcon.Trailing(CardBrand.Discover.icon, isTintable = false),
-                        TextFieldIcon.Trailing(CardBrand.JCB.icon, isTintable = false),
-                        TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
-                        TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false)
+    fun `trailingIcon should have multi trailing icons when field is empty`() = runTest {
+        cardNumberController.trailingIcon.test {
+            cardNumberController.onValueChange("")
+            idleLooper()
+            assertThat(awaitItem() as TextFieldIcon.MultiTrailing)
+                .isEqualTo(
+                    TextFieldIcon.MultiTrailing(
+                        staticIcons = listOf(
+                            TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.MasterCard.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.AmericanExpress.icon, isTintable = false)
+                        ),
+                        animatedIcons = listOf(
+                            TextFieldIcon.Trailing(CardBrand.Discover.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.JCB.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false)
+                        )
                     )
                 )
-            )
-    }
-
-    @Test
-    fun `trailingIcon should have trailing icon when field matches bin`() {
-        val trailingIcons = mutableListOf<TextFieldIcon?>()
-        cardNumberController.trailingIcon.asLiveData().observeForever {
-            trailingIcons.add(it)
         }
-        cardNumberController.onValueChange("4")
-        idleLooper()
-        cardNumberController.onValueChange("")
-        idleLooper()
-
-        assertThat(trailingIcons).hasSize(3)
-        assertThat(trailingIcons[0]).isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
-        assertThat(trailingIcons[1]).isEqualTo(TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false))
-        assertThat(trailingIcons[2]).isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
     }
 
     @Test
-    fun `trailingIcon should be dropdown if card brand choice eligible`() {
+    fun `trailingIcon should have trailing icon when field matches bin`() = runTest {
+        cardNumberController.trailingIcon.test {
+            cardNumberController.onValueChange("4")
+            idleLooper()
+            cardNumberController.onValueChange("")
+            idleLooper()
+
+            skipItems(1)
+            assertThat(awaitItem()).isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
+            assertThat(awaitItem()).isEqualTo(TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false))
+            assertThat(awaitItem()).isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
+        }
+    }
+
+    @Test
+    fun `trailingIcon should be dropdown if card brand choice eligible`() = runTest {
         val cardNumberController = DefaultCardNumberController(
             CardNumberConfig(),
             FakeCardAccountRangeRepository(),
@@ -213,40 +199,39 @@ internal class CardNumberControllerTest {
             )
         )
 
-        val trailingIcons = mutableListOf<TextFieldIcon?>()
-        cardNumberController.trailingIcon.asLiveData().observeForever {
-            trailingIcons.add(it)
-        }
-        cardNumberController.onValueChange("4000002500001001")
-        idleLooper()
-        assertThat(trailingIcons.last() as TextFieldIcon.Dropdown)
-            .isEqualTo(
-                TextFieldIcon.Dropdown(
-                    title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
-                    currentItem = TextFieldIcon.Dropdown.Item(
-                        id = CardBrand.Unknown.code,
-                        label = resolvableString(R.string.stripe_card_brand_choice_no_selection),
-                        icon = CardBrand.Unknown.icon
-                    ),
-                    items = listOf(
-                        TextFieldIcon.Dropdown.Item(
-                            id = CardBrand.CartesBancaires.code,
-                            label = resolvableString("Cartes Bancaires"),
-                            icon = CardBrand.CartesBancaires.icon
+        cardNumberController.trailingIcon.test {
+            cardNumberController.onValueChange("4000002500001001")
+            idleLooper()
+            skipItems(2)
+            assertThat(awaitItem() as TextFieldIcon.Dropdown)
+                .isEqualTo(
+                    TextFieldIcon.Dropdown(
+                        title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
+                        currentItem = TextFieldIcon.Dropdown.Item(
+                            id = CardBrand.Unknown.code,
+                            label = resolvableString(R.string.stripe_card_brand_choice_no_selection),
+                            icon = CardBrand.Unknown.icon
                         ),
-                        TextFieldIcon.Dropdown.Item(
-                            id = CardBrand.Visa.code,
-                            label = resolvableString("Visa"),
-                            icon = CardBrand.Visa.icon
+                        items = listOf(
+                            TextFieldIcon.Dropdown.Item(
+                                id = CardBrand.CartesBancaires.code,
+                                label = resolvableString("Cartes Bancaires"),
+                                icon = CardBrand.CartesBancaires.icon
+                            ),
+                            TextFieldIcon.Dropdown.Item(
+                                id = CardBrand.Visa.code,
+                                label = resolvableString("Visa"),
+                                icon = CardBrand.Visa.icon
+                            ),
                         ),
-                    ),
-                    hide = false
+                        hide = false
+                    )
                 )
-            )
+        }
     }
 
     @Test
-    fun `on cbc eligible with preferred brands, should use the preferred brand if none are initially selected`() {
+    fun `on cbc eligible with preferred brands, should use the preferred brand if none are initially selected`() = runTest {
         val cardNumberController = DefaultCardNumberController(
             CardNumberConfig(),
             FakeCardAccountRangeRepository(),
@@ -259,40 +244,39 @@ internal class CardNumberControllerTest {
             )
         )
 
-        val trailingIcons = mutableListOf<TextFieldIcon?>()
-        cardNumberController.trailingIcon.asLiveData().observeForever {
-            trailingIcons.add(it)
-        }
-        cardNumberController.onValueChange("4000002500001001")
-        idleLooper()
-        assertThat(trailingIcons.last() as TextFieldIcon.Dropdown)
-            .isEqualTo(
-                TextFieldIcon.Dropdown(
-                    title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
-                    currentItem = TextFieldIcon.Dropdown.Item(
-                        id = CardBrand.CartesBancaires.code,
-                        label = resolvableString("Cartes Bancaires"),
-                        icon = CardBrand.CartesBancaires.icon
-                    ),
-                    items = listOf(
-                        TextFieldIcon.Dropdown.Item(
+        cardNumberController.trailingIcon.test {
+            cardNumberController.onValueChange("4000002500001001")
+            idleLooper()
+            skipItems(3)
+            assertThat(awaitItem() as TextFieldIcon.Dropdown)
+                .isEqualTo(
+                    TextFieldIcon.Dropdown(
+                        title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
+                        currentItem = TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = resolvableString("Cartes Bancaires"),
                             icon = CardBrand.CartesBancaires.icon
                         ),
-                        TextFieldIcon.Dropdown.Item(
-                            id = CardBrand.Visa.code,
-                            label = resolvableString("Visa"),
-                            icon = CardBrand.Visa.icon
+                        items = listOf(
+                            TextFieldIcon.Dropdown.Item(
+                                id = CardBrand.CartesBancaires.code,
+                                label = resolvableString("Cartes Bancaires"),
+                                icon = CardBrand.CartesBancaires.icon
+                            ),
+                            TextFieldIcon.Dropdown.Item(
+                                id = CardBrand.Visa.code,
+                                label = resolvableString("Visa"),
+                                icon = CardBrand.Visa.icon
+                            ),
                         ),
-                    ),
-                    hide = false
+                        hide = false
+                    )
                 )
-            )
+        }
     }
 
     @Test
-    fun `on dropdown item click, card brand should have been changed`() {
+    fun `on dropdown item click, card brand should have been changed`() = runTest {
         val cardNumberController = DefaultCardNumberController(
             CardNumberConfig(),
             FakeCardAccountRangeRepository(),
@@ -305,47 +289,46 @@ internal class CardNumberControllerTest {
             )
         )
 
-        val trailingIcons = mutableListOf<TextFieldIcon?>()
-        cardNumberController.trailingIcon.asLiveData().observeForever {
-            trailingIcons.add(it)
-        }
-        cardNumberController.onValueChange("4000002500001001")
-        cardNumberController.onDropdownItemClicked(
-            TextFieldIcon.Dropdown.Item(
-                id = CardBrand.CartesBancaires.code,
-                label = resolvableString("Cartes Bancaires"),
-                icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+        cardNumberController.trailingIcon.test {
+            cardNumberController.onValueChange("4000002500001001")
+            cardNumberController.onDropdownItemClicked(
+                TextFieldIcon.Dropdown.Item(
+                    id = CardBrand.CartesBancaires.code,
+                    label = resolvableString("Cartes Bancaires"),
+                    icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+                )
             )
-        )
-        idleLooper()
-        assertThat(trailingIcons.last() as TextFieldIcon.Dropdown)
-            .isEqualTo(
-                TextFieldIcon.Dropdown(
-                    title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
-                    currentItem = TextFieldIcon.Dropdown.Item(
-                        id = CardBrand.CartesBancaires.code,
-                        label = resolvableString("Cartes Bancaires"),
-                        icon = CardBrand.CartesBancaires.icon
-                    ),
-                    items = listOf(
-                        TextFieldIcon.Dropdown.Item(
+            idleLooper()
+            skipItems(3)
+            assertThat(awaitItem() as TextFieldIcon.Dropdown)
+                .isEqualTo(
+                    TextFieldIcon.Dropdown(
+                        title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
+                        currentItem = TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = resolvableString("Cartes Bancaires"),
                             icon = CardBrand.CartesBancaires.icon
                         ),
-                        TextFieldIcon.Dropdown.Item(
-                            id = CardBrand.Visa.code,
-                            label = resolvableString("Visa"),
-                            icon = CardBrand.Visa.icon
+                        items = listOf(
+                            TextFieldIcon.Dropdown.Item(
+                                id = CardBrand.CartesBancaires.code,
+                                label = resolvableString("Cartes Bancaires"),
+                                icon = CardBrand.CartesBancaires.icon
+                            ),
+                            TextFieldIcon.Dropdown.Item(
+                                id = CardBrand.Visa.code,
+                                label = resolvableString("Visa"),
+                                icon = CardBrand.Visa.icon
+                            ),
                         ),
-                    ),
-                    hide = false
+                        hide = false
+                    )
                 )
-            )
+        }
     }
 
     @Test
-    fun `on number updated after update to number with no brands, user choice should be re-used if possible`() {
+    fun `on number updated after update to number with no brands, user choice should be re-used if possible`() = runTest {
         val cardNumberController = DefaultCardNumberController(
             CardNumberConfig(),
             FakeCardAccountRangeRepository(),
@@ -358,45 +341,44 @@ internal class CardNumberControllerTest {
             )
         )
 
-        val trailingIcons = mutableListOf<TextFieldIcon?>()
-        cardNumberController.trailingIcon.asLiveData().observeForever {
-            trailingIcons.add(it)
-        }
-        cardNumberController.onValueChange("4000002500001001")
-        cardNumberController.onDropdownItemClicked(
-            TextFieldIcon.Dropdown.Item(
-                id = CardBrand.CartesBancaires.code,
-                label = resolvableString("Cartes Bancaires"),
-                icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+        cardNumberController.trailingIcon.test {
+            cardNumberController.onValueChange("4000002500001001")
+            cardNumberController.onDropdownItemClicked(
+                TextFieldIcon.Dropdown.Item(
+                    id = CardBrand.CartesBancaires.code,
+                    label = resolvableString("Cartes Bancaires"),
+                    icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+                )
             )
-        )
-        cardNumberController.onValueChange("400000250000100")
-        cardNumberController.onValueChange("4000002500001001")
-        idleLooper()
-        assertThat(trailingIcons.last() as TextFieldIcon.Dropdown)
-            .isEqualTo(
-                TextFieldIcon.Dropdown(
-                    title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
-                    currentItem = TextFieldIcon.Dropdown.Item(
-                        id = CardBrand.CartesBancaires.code,
-                        label = resolvableString("Cartes Bancaires"),
-                        icon = CardBrand.CartesBancaires.icon
-                    ),
-                    items = listOf(
-                        TextFieldIcon.Dropdown.Item(
+            cardNumberController.onValueChange("400000250000100")
+            skipItems(3)
+            cardNumberController.onValueChange("4000002500001001")
+            idleLooper()
+            assertThat(awaitItem() as TextFieldIcon.Dropdown)
+                .isEqualTo(
+                    TextFieldIcon.Dropdown(
+                        title = resolvableString(R.string.stripe_card_brand_choice_selection_header),
+                        currentItem = TextFieldIcon.Dropdown.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = resolvableString("Cartes Bancaires"),
                             icon = CardBrand.CartesBancaires.icon
                         ),
-                        TextFieldIcon.Dropdown.Item(
-                            id = CardBrand.Visa.code,
-                            label = resolvableString("Visa"),
-                            icon = CardBrand.Visa.icon
+                        items = listOf(
+                            TextFieldIcon.Dropdown.Item(
+                                id = CardBrand.CartesBancaires.code,
+                                label = resolvableString("Cartes Bancaires"),
+                                icon = CardBrand.CartesBancaires.icon
+                            ),
+                            TextFieldIcon.Dropdown.Item(
+                                id = CardBrand.Visa.code,
+                                label = resolvableString("Visa"),
+                                icon = CardBrand.Visa.icon
+                            ),
                         ),
-                    ),
-                    hide = false
+                        hide = false
+                    )
                 )
-            )
+        }
     }
 
     private class FakeCardAccountRangeRepository : CardAccountRangeRepository {

@@ -30,8 +30,6 @@ class PaymentSessionViewModelTest {
 
     private val paymentMethodsListenerCaptor =
         argumentCaptor<CustomerSession.PaymentMethodsRetrievalListener>()
-    private val customerRetrievalListenerCaptor =
-        argumentCaptor<CustomerSession.CustomerRetrievalListener>()
 
     private val viewModel: PaymentSessionViewModel = createViewModel()
 
@@ -249,26 +247,27 @@ class PaymentSessionViewModelTest {
         viewModel.networkState.test {
             assertThat(awaitItem()).isEqualTo(PaymentSessionViewModel.NetworkState.Inactive) // Initial Value
 
-            doNothing().whenever(customerSession).retrieveCurrentCustomer(
-                listener = any()
-            )
+            whenever(
+                customerSession.retrieveCurrentCustomer(
+                    productUsage = any(),
+                    listener = any()
+                )
+            ).thenAnswer { invocation ->
+                val listener = invocation.arguments[1] as CustomerSession.CustomerRetrievalListener
 
-            val results: MutableList<PaymentSessionViewModel.FetchCustomerResult> = mutableListOf()
-            viewModel.fetchCustomer().observeForever {
-                results.add(it)
+                listener.onCustomerRetrieved(CustomerFixtures.CUSTOMER)
             }
+
+            val result = viewModel.fetchCustomer()
 
             assertThat(awaitItem()).isEqualTo(PaymentSessionViewModel.NetworkState.Active)
 
             verify(customerSession).retrieveCurrentCustomer(
                 eq(setOf(PaymentSession.PRODUCT_TOKEN)),
-                customerRetrievalListenerCaptor.capture()
+                any()
             )
-            customerRetrievalListenerCaptor.firstValue
-                .onCustomerRetrieved(CustomerFixtures.CUSTOMER)
 
-            assertThat(results)
-                .containsExactly(PaymentSessionViewModel.FetchCustomerResult.Success)
+            assertThat(result).isEqualTo(PaymentSessionViewModel.FetchCustomerResult.Success)
 
             assertThat(awaitItem()).isEqualTo(PaymentSessionViewModel.NetworkState.Inactive)
         }
@@ -279,26 +278,28 @@ class PaymentSessionViewModelTest {
         viewModel.networkState.test {
             assertThat(awaitItem()).isEqualTo(PaymentSessionViewModel.NetworkState.Inactive) // Initial Value
 
-            doNothing().whenever(customerSession).retrieveCurrentCustomer(
-                listener = any()
-            )
+            whenever(
+                customerSession.retrieveCurrentCustomer(
+                    productUsage = any(),
+                    listener = any()
+                )
+            ).thenAnswer { invocation ->
+                val listener = invocation.arguments[1] as CustomerSession.CustomerRetrievalListener
 
-            val results: MutableList<PaymentSessionViewModel.FetchCustomerResult> = mutableListOf()
-            viewModel.fetchCustomer().observeForever {
-                results.add(it)
+                listener.onError(500, "error", StripeErrorFixtures.INVALID_REQUEST_ERROR)
             }
+
+            val result = viewModel.fetchCustomer()
 
             assertThat(awaitItem()).isEqualTo(PaymentSessionViewModel.NetworkState.Active)
 
             verify(customerSession).retrieveCurrentCustomer(
                 eq(setOf(PaymentSession.PRODUCT_TOKEN)),
-                customerRetrievalListenerCaptor.capture()
+                any()
             )
-            customerRetrievalListenerCaptor.firstValue
-                .onError(500, "error", StripeErrorFixtures.INVALID_REQUEST_ERROR)
 
-            assertThat(results)
-                .containsExactly(
+            assertThat(result)
+                .isEqualTo(
                     PaymentSessionViewModel.FetchCustomerResult.Error(
                         500,
                         "error",

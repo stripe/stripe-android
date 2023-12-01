@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
+import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -424,32 +425,37 @@ internal abstract class BaseSheetViewModel(
         val paymentMethodId = paymentMethod.id ?: return
 
         viewModelScope.launch {
-            val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
-            val didRemoveSelectedItem = currentSelection == paymentMethodId
+            removeDeletedPaymentMethodFromState(paymentMethodId)
+            removePaymentMethodInternal(paymentMethodId)
+        }
+    }
 
-            if (didRemoveSelectedItem) {
-                // Remove the current selection. The new selection will be set when we're computing
-                // the next PaymentOptionsState.
-                updateSelection(null)
-            }
+    private suspend fun removePaymentMethodInternal(paymentMethodId: String): Result<PaymentMethod> {
+        val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
+        val didRemoveSelectedItem = currentSelection == paymentMethodId
 
-            savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods.value?.filter {
-                it.id != paymentMethodId
-            }
+        if (didRemoveSelectedItem) {
+            // Remove the current selection. The new selection will be set when we're computing
+            // the next PaymentOptionsState.
+            updateSelection(null)
+        }
 
-            customerConfig?.let {
-                customerRepository.detachPaymentMethod(
-                    it,
-                    paymentMethodId
-                )
-            }
+        return customerRepository.detachPaymentMethod(
+            customerConfig!!,
+            paymentMethodId
+        )
+    }
 
-            val shouldResetToAddPaymentMethodForm = paymentMethods.value.isNullOrEmpty() &&
-                currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
+    private fun removeDeletedPaymentMethodFromState(paymentMethodId: String) {
+        savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods.value?.filter {
+            it.id != paymentMethodId
+        }
 
-            if (shouldResetToAddPaymentMethodForm) {
-                resetTo(listOf(AddFirstPaymentMethod))
-            }
+        val shouldResetToAddPaymentMethodForm = paymentMethods.value.isNullOrEmpty() &&
+            currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
+
+        if (shouldResetToAddPaymentMethodForm) {
+            resetTo(listOf(AddFirstPaymentMethod))
         }
     }
 
@@ -459,10 +465,8 @@ internal abstract class BaseSheetViewModel(
                 editInteractorFactory.create(
                     initialPaymentMethod = paymentMethod,
                     displayName = providePaymentMethodName(paymentMethod.type?.code),
-                    removeExecutor = {
-                        // TODO(samer-stripe): Replace with remove operation
-                        delay(TEMP_DELAY)
-                        true
+                    removeExecutor = { method ->
+                        removePaymentMethodInEditScreen(method)
                     },
                     updateExecutor = { method, brand ->
                         modifyCardPaymentMethod(method, brand)
@@ -472,20 +476,35 @@ internal abstract class BaseSheetViewModel(
         )
     }
 
+    private suspend fun removePaymentMethodInEditScreen(paymentMethod: PaymentMethod): Throwable? {
+        val paymentMethodId = paymentMethod.id!!
+        val result = removePaymentMethodInternal(paymentMethodId)
+
+        if (result.isSuccess) {
+            viewModelScope.launch {
+                onUserBack()
+                delay(PaymentMethodRemovalDelayMillis)
+                removeDeletedPaymentMethodFromState(paymentMethodId = paymentMethodId)
+            }
+        }
+
+        return result.exceptionOrNull()
+    }
+
     private suspend fun modifyCardPaymentMethod(
         paymentMethod: PaymentMethod,
         brand: CardBrand
     ): Result<PaymentMethod> {
         val customerConfig = config.customer
-        val paymentMethodId = paymentMethod.id
 
         return customerRepository.updatePaymentMethod(
             customerConfig = customerConfig!!,
+            paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(
-                paymentMethodId = paymentMethodId!!,
                 networks = PaymentMethodUpdateParams.Card.Networks(
                     preferred = brand.code
-                )
+                ),
+                productUsageTokens = setOf("PaymentSheet"),
             )
         ).onSuccess { updatedMethod ->
             savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods
@@ -498,15 +517,12 @@ internal abstract class BaseSheetViewModel(
                         if (updatedId != null && savedId != null && updatedId == savedId) {
                             updatedMethod
                         } else {
-                            paymentMethod
+                            savedMethod
                         }
                     }
                 }
 
             handleBackPressed()
-        }.onFailure {
-            // TODO(samer-stripe): Localize error message with proper strings.
-            onError("Failed to update payment method")
         }
     }
 
@@ -617,8 +633,5 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
-
-        // TODO(samer-stripe): Remove after replacing placeholder update and remove payment method operations
-        private const val TEMP_DELAY = 2000L
     }
 }

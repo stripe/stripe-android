@@ -10,8 +10,6 @@ import android.widget.TextView
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -21,14 +19,18 @@ import com.stripe.android.PaymentSession
 import com.stripe.android.R
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -117,7 +119,10 @@ class AddPaymentMethodActivityTest {
                 assertThat(progressBar.isGone)
                     .isTrue()
                 activity.createPaymentMethod(viewModel, null)
-                verify(viewModel, never()).createPaymentMethod(any())
+
+                runBlocking {
+                    verify(viewModel, never()).createPaymentMethod(any())
+                }
             }
         }
     }
@@ -132,8 +137,10 @@ class AddPaymentMethodActivityTest {
                 assertThat(progressBar.isGone)
                     .isTrue()
 
-                whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
-                    .thenReturn(createSuccessLiveData(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+                stubCreatePaymentMethod(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                )
                 activity.createPaymentMethod(
                     viewModel,
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD
@@ -153,8 +160,10 @@ class AddPaymentMethodActivityTest {
                 assertThat(progressBar.isGone)
                     .isTrue()
 
-                whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_FPX))
-                    .thenReturn(createSuccessLiveData(PaymentMethodFixtures.FPX_PAYMENT_METHOD))
+                stubCreatePaymentMethod(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_FPX,
+                    Result.success(PaymentMethodFixtures.FPX_PAYMENT_METHOD)
+                )
                 activity.createPaymentMethod(viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_FPX)
 
                 val expectedPaymentMethod = PaymentMethodFixtures.FPX_PAYMENT_METHOD
@@ -247,8 +256,10 @@ class AddPaymentMethodActivityTest {
                 assertThat(cardMultilineWidget.isEnabled)
                     .isTrue()
 
-                whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
-                    .thenReturn(createSuccessLiveData(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+                stubCreatePaymentMethod(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                )
                 activity.createPaymentMethod(viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
                 assertThat(progressBar.isVisible)
                     .isTrue()
@@ -287,8 +298,10 @@ class AddPaymentMethodActivityTest {
                 assertThat(progressBar.isGone)
                     .isTrue()
 
-                whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
-                    .thenReturn(createErrorLiveData())
+                stubCreatePaymentMethod(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    Result.failure(RuntimeException(ERROR_MESSAGE))
+                )
                 activity.createPaymentMethod(
                     viewModel,
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD
@@ -327,8 +340,10 @@ class AddPaymentMethodActivityTest {
                 assertThat(cardMultilineWidget.isEnabled)
                     .isTrue()
 
-                whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
-                    .thenReturn(createSuccessLiveData(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+                stubCreatePaymentMethod(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                )
                 activity.createPaymentMethod(viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
 
                 assertThat(progressBar.isVisible)
@@ -376,8 +391,10 @@ class AddPaymentMethodActivityTest {
     fun `createPaymentMethod when CustomerSession is null and should attach should finish Activity`() {
         CustomerSession.instance = null
 
-        whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
-            .thenReturn(createSuccessLiveData(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+        stubCreatePaymentMethod(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
 
         activityScenarioFactory.createForResult<AddPaymentMethodActivity>(
             createArgs(PaymentMethod.Type.Card)
@@ -436,6 +453,17 @@ class AddPaymentMethodActivityTest {
             .build()
     }
 
+    private fun stubCreatePaymentMethod(
+        params: PaymentMethodCreateParams,
+        result: Result<PaymentMethod>
+    ) {
+        viewModel.stub {
+            onBlocking {
+                createPaymentMethod(params)
+            }.doReturn(result)
+        }
+    }
+
     private companion object {
         private const val ERROR_MESSAGE = "Oh no! An Error!"
 
@@ -445,17 +473,5 @@ class AddPaymentMethodActivityTest {
                 .build()
 
         private val EXPECTED_PAYMENT_METHOD = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-
-        private fun createSuccessLiveData(
-            paymentMethod: PaymentMethod
-        ): LiveData<Result<PaymentMethod>> {
-            return MutableLiveData(Result.success(paymentMethod))
-        }
-
-        private fun createErrorLiveData(): LiveData<Result<PaymentMethod>> {
-            return MutableLiveData(
-                Result.failure(RuntimeException(ERROR_MESSAGE))
-            )
-        }
     }
 }

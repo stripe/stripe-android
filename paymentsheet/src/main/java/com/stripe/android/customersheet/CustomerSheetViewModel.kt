@@ -18,11 +18,13 @@ import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
@@ -66,8 +68,6 @@ import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.ui.core.R as UiCoreR
-
-private const val TempDelay = 2000L
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSheetViewModelScope
@@ -232,6 +232,12 @@ internal class CustomerSheetViewModel @Inject constructor(
                             primaryButtonLabel = resources.getString(
                                 R.string.stripe_paymentsheet_confirm
                             ),
+                            mandateText = viewState.paymentSelection?.mandateText(
+                                context = application,
+                                merchantName = configuration.merchantDisplayName,
+                                isSaveForFutureUseSelected = false,
+                                isSetupFlow = false,
+                            )
                         )
                     } ?: viewState
                 }
@@ -429,6 +435,24 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
+    private suspend fun modifyCardPaymentMethod(
+        paymentMethod: PaymentMethod,
+        brand: CardBrand
+    ): CustomerAdapter.Result<PaymentMethod> {
+        return customerAdapter.updatePaymentMethod(
+            paymentMethodId = paymentMethod.id!!,
+            params = PaymentMethodUpdateParams.createCard(
+                networks = PaymentMethodUpdateParams.Card.Networks(
+                    preferred = brand.code
+                ),
+                productUsageTokens = setOf("CustomerSheet"),
+            )
+        ).onSuccess { updatedMethod ->
+            onBackPressed()
+            updatePaymentMethodInState(updatedMethod)
+        }
+    }
+
     private fun handlePaymentMethodRemoved(paymentMethod: PaymentMethod) {
         val currentViewState = viewState.value
         val newSavedPaymentMethods = currentViewState.savedPaymentMethods.filter { it.id != paymentMethod.id!! }
@@ -478,16 +502,16 @@ internal class CustomerSheetViewModel @Inject constructor(
                     initialPaymentMethod = paymentMethod,
                     displayName = providePaymentMethodName(paymentMethod.type?.code),
                     removeExecutor = { pm ->
-                        val result = removePaymentMethod(pm).onSuccess {
+                        removePaymentMethod(pm).onSuccess {
                             onBackPressed()
                             removePaymentMethodFromState(pm)
-                        }
-                        result is CustomerAdapter.Result.Success
+                        }.failureOrNull()?.cause
                     },
-                    updateExecutor = { _, _ ->
-                        // TODO(tillh-stripe): Replace with update operation
-                        delay(TempDelay)
-                        Result.success(paymentMethod)
+                    updateExecutor = { method, brand ->
+                        when (val result = modifyCardPaymentMethod(method, brand)) {
+                            is CustomerAdapter.Result.Success -> Result.success(result.value)
+                            is CustomerAdapter.Result.Failure -> Result.failure(result.cause)
+                        }
                     },
                 ),
                 isLiveMode = currentViewState.isLiveMode,
@@ -513,6 +537,25 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
+    private fun updatePaymentMethodInState(updatedMethod: PaymentMethod) {
+        viewModelScope.launch {
+            val newSavedPaymentMethods = viewState.value.savedPaymentMethods.map { savedMethod ->
+                val savedId = savedMethod.id
+                val updatedId = updatedMethod.id
+
+                if (updatedId != null && savedId != null && updatedId == savedId) {
+                    updatedMethod
+                } else {
+                    savedMethod
+                }
+            }
+
+            updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                it.copy(savedPaymentMethods = newSavedPaymentMethods)
+            }
+        }
+    }
+
     private fun onItemSelected(paymentSelection: PaymentSelection?) {
         // TODO (jameswoo) consider clearing the error message onItemSelected, currently the only
         // error source is when the payment methods cannot be loaded
@@ -534,7 +577,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                             context = application,
                             merchantName = configuration.merchantDisplayName,
                             isSaveForFutureUseSelected = false,
-                            isSetupFlow = true,
+                            isSetupFlow = false,
                         )?.takeIf { primaryButtonVisible },
                     )
                 }

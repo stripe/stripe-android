@@ -108,14 +108,14 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
     }
 
     /**
-     * Retrieves a PIN for a given card
+     * Updates a PIN for a given card
      *
      * @param cardId the ID of the card (looks like ic_abcdef1234)
      * @param newPin the new desired PIN
      * @param verificationId the ID of the verification that was sent to the cardholder
      * (typically server-side, through /v1/issuing/verifications)
      * @param userOneTimeCode the one-time code that was sent to the cardholder through sms or email
-     * @param listener a listener for either the PIN, or any error that can occur
+     * @param listener a listener for either success or any error that can occur
      */
     fun updatePin(
         cardId: String,

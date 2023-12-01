@@ -67,7 +67,7 @@ class BacsMandateConfirmationViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.result.test {
-            viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnCancelPressed)
+            viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnBackPressed)
 
             assertThat(awaitItem()).isEqualTo(BacsMandateConfirmationResult.Cancelled)
         }

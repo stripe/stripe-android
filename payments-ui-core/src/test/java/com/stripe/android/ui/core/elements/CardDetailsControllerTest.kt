@@ -1,15 +1,15 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.appcompat.view.ContextThemeWrapper
-import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -23,35 +23,35 @@ class CardDetailsControllerTest {
         ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeCardScanDefaultTheme)
 
     @Test
-    fun `Verify the first field in error is returned in error flow`() {
+    fun `Verify the first field in error is returned in error flow`() = runTest {
         val cardController = CardDetailsController(context, emptyMap())
 
-        val flowValues = mutableListOf<FieldError?>()
-        cardController.error.asLiveData()
-            .observeForever {
-                flowValues.add(it)
-            }
+        cardController.error.test {
+            assertThat(awaitItem()).isNull()
 
-        cardController.numberElement.controller.onValueChange("4242424242424243")
-        cardController.cvcElement.controller.onValueChange("123")
-        cardController.expirationDateElement.controller.onValueChange("13")
+            cardController.numberElement.controller.onValueChange("4242424242424243")
+            cardController.cvcElement.controller.onValueChange("123")
+            cardController.expirationDateElement.controller.onValueChange("13")
 
-        idleLooper()
+            idleLooper()
 
-        assertThat(flowValues[flowValues.size - 1]?.errorMessage).isEqualTo(
-            StripeR.string.stripe_invalid_card_number
-        )
+            assertThat(awaitItem()?.errorMessage).isEqualTo(
+                StripeR.string.stripe_invalid_card_number
+            )
 
-        cardController.numberElement.controller.onValueChange("4242424242424242")
-        idleLooper()
+            cardController.numberElement.controller.onValueChange("4242424242424242")
+            idleLooper()
 
-        assertThat(flowValues[flowValues.size - 1]?.errorMessage).isEqualTo(
-            UiCoreR.string.stripe_incomplete_expiry_date
-        )
+            skipItems(1)
+
+            assertThat(awaitItem()?.errorMessage).isEqualTo(
+                UiCoreR.string.stripe_incomplete_expiry_date
+            )
+        }
     }
 
     @Test
-    fun `When eligible for card brand choice and preferred card brand is passed, initial value should have been set`() {
+    fun `When eligible for card brand choice and preferred card brand is passed, initial value should have been set`() = runTest {
         val cardController = CardDetailsController(
             context,
             mapOf(
@@ -61,12 +61,8 @@ class CardDetailsControllerTest {
             cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf())
         )
 
-        val flowValues = mutableListOf<CardBrand?>()
-        cardController.numberElement.controller.cardBrandFlow.asLiveData()
-            .observeForever {
-                flowValues.add(it)
-            }
-
-        assertThat(flowValues[flowValues.size - 1]).isEqualTo(CardBrand.CartesBancaires)
+        cardController.numberElement.controller.cardBrandFlow.test {
+            assertThat(awaitItem()).isEqualTo(CardBrand.CartesBancaires)
+        }
     }
 }

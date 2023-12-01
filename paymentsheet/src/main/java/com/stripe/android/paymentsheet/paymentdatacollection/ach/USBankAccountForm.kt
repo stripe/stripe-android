@@ -17,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -445,7 +446,7 @@ private fun AccountDetailsForm(
     saveForFutureUseElement: SaveForFutureUseElement,
     onRemoveAccount: () -> Unit,
 ) {
-    val openDialog = remember { mutableStateOf(false) }
+    var openDialog by remember { mutableStateOf(false) }
     val bankIcon = TransformToBankIcon(bankName)
 
     Column(
@@ -488,7 +489,7 @@ private fun AccountDetailsForm(
                         .alpha(if (isProcessing) 0.5f else 1f)
                         .clickable {
                             if (!isProcessing) {
-                                openDialog.value = true
+                                openDialog = true
                             }
                         }
                 )
@@ -502,9 +503,9 @@ private fun AccountDetailsForm(
             )
         }
     }
-    last4?.let {
+
+    if (openDialog && last4 != null) {
         SimpleDialogElementUI(
-            openDialog = openDialog.value,
             titleText = stringResource(
                 id = R.string.stripe_paymentsheet_remove_bank_account_title
             ),
@@ -520,11 +521,11 @@ private fun AccountDetailsForm(
             ),
             destructive = true,
             onConfirmListener = {
-                openDialog.value = false
+                openDialog = false
                 onRemoveAccount()
             },
             onDismissListener = {
-                openDialog.value = false
+                openDialog = false
             }
         )
     }

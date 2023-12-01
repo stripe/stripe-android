@@ -1,9 +1,11 @@
 package com.stripe.android.identity.ui
 
 import android.os.Build
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -15,6 +17,8 @@ import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.navigation.INDIVIDUAL
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPageIconType
+import com.stripe.android.identity.networking.models.VerificationPageStaticConsentLineContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentIndividualWelcomePage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import org.junit.Rule
@@ -46,10 +50,18 @@ class IndividualWelcomeScreenTest {
                     whenever(it.individualWelcome).thenReturn(
                         VerificationPageStaticContentIndividualWelcomePage(
                             getStartedButtonText = INDIVIDUAL_WELCOME_GET_STARTED_TEXT,
-                            body = INDIVIDUAL_WELCOME_BODY,
                             title = INDIVIDUAL_WELCOME_TITLE,
                             privacyPolicy = INDIVIDUAL_WELCOME_PRIVACY_POLICY,
-                            timeEstimate = INDIVIDUAL_WELCOME_TIME_ESTIMATE
+                            lines = listOf(
+                                VerificationPageStaticConsentLineContent(
+                                    icon = VerificationPageIconType.CAMERA,
+                                    content = INDIVIDUAL_WELCOME_CAMERA_LINE
+                                ),
+                                VerificationPageStaticConsentLineContent(
+                                    icon = VerificationPageIconType.CLOUD,
+                                    content = INDIVIDUAL_WELCOME_CLOUD_LINE
+                                )
+                            )
                         )
                     )
                 }
@@ -65,13 +77,10 @@ class IndividualWelcomeScreenTest {
     fun verifyUIIsBoundCorrectly() {
         testIndividualWelcome {
             onNodeWithTag(INDIVIDUAL_WELCOME_TITLE_TAG).assertTextEquals(INDIVIDUAL_WELCOME_TITLE)
-            onNodeWithTag(INDIVIDUAL_WELCOME_BODY_TAG).assertTextEquals(INDIVIDUAL_WELCOME_BODY)
             onNodeWithTag(INDIVIDUAL_WELCOME_GET_STARTED_BUTTON_TAG).onChildAt(0).assertTextEquals(
                 INDIVIDUAL_WELCOME_GET_STARTED_TEXT.uppercase()
             )
-            onNodeWithTag(INDIVIDUAL_WELCOME_TIME_ESTIMATE_TAG).assertTextEquals(
-                INDIVIDUAL_WELCOME_TIME_ESTIMATE
-            )
+            onAllNodesWithTag(CONSENT_LINE_TAG).assertCountEquals(2)
             onNodeWithTag(INDIVIDUAL_WELCOME_PRIVACY_POLICY_TAG).assertTextEquals(
                 INDIVIDUAL_WELCOME_PRIVACY_POLICY
             )
@@ -105,8 +114,8 @@ class IndividualWelcomeScreenTest {
     private companion object {
         const val INDIVIDUAL_WELCOME_TITLE = "title"
         const val INDIVIDUAL_WELCOME_PRIVACY_POLICY = "privacy policy"
-        const val INDIVIDUAL_WELCOME_TIME_ESTIMATE = "time estimate"
-        const val INDIVIDUAL_WELCOME_BODY = "this is the consent body"
         const val INDIVIDUAL_WELCOME_GET_STARTED_TEXT = "get started"
+        const val INDIVIDUAL_WELCOME_CAMERA_LINE = "content for camera line"
+        const val INDIVIDUAL_WELCOME_CLOUD_LINE = "content for cloud line"
     }
 }

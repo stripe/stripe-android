@@ -1001,6 +1001,7 @@ internal class PaymentSheetActivityTest {
                 lpmRepository,
                 stripePaymentLauncherAssistedFactory,
                 googlePayPaymentMethodLauncherFactory,
+                mock(),
                 Logger.noop(),
                 testDispatcher,
                 savedStateHandle = savedStateHandle,

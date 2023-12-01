@@ -382,7 +382,7 @@ internal class CustomerSheetScreenshotTest {
             editPaymentMethodInteractor = DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = paymentMethod,
                 displayName = "Card",
-                removeExecutor = { true },
+                removeExecutor = { null },
                 updateExecutor = { pm, _ -> Result.success(pm) },
             ),
             isLiveMode = true,
