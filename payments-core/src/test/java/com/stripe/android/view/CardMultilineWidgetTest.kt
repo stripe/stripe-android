@@ -1,9 +1,7 @@
 package com.stripe.android.view
 
-import android.app.Application
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
@@ -35,17 +33,20 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
-import com.stripe.android.utils.CardInputWidgetTestHelper
+import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.utils.CardElementTestHelper
+import com.stripe.android.utils.FeatureFlags
 import com.stripe.android.utils.TestUtils.idleLooper
+import com.stripe.android.utils.createTestActivityRule
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.parcelize.Parcelize
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows
 import java.util.Calendar
 import kotlin.coroutines.CoroutineContext
 import kotlin.test.BeforeTest
@@ -65,6 +66,15 @@ internal class CardMultilineWidgetTest {
     private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     private val accountRangeStore = DefaultCardAccountRangeStore(context)
+
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.cardBrandChoice,
+        isEnabled = false,
+    )
+
+    @get:Rule
+    val testActivityRule = createTestActivityRule<CardMultilineWidgetTestActivity>()
 
     @BeforeTest
     fun setup() {
@@ -1172,16 +1182,6 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
-    fun `cardNumberEditText's drawable should be on the end`() = runCardMultilineWidgetTest {
-        assertThat(
-            cardMultilineWidget.cardNumberEditText.compoundDrawables[0]
-        ).isNull()
-        assertThat(
-            cardMultilineWidget.cardNumberEditText.compoundDrawables[2]
-        ).isNotNull()
-    }
-
-    @Test
     fun `getBrand returns the right brands`() = runCardMultilineWidgetTest {
         cardMultilineWidget.setCardNumber(null)
         assertThat(cardMultilineWidget.brand).isEqualTo(CardBrand.Unknown)
@@ -1205,12 +1205,40 @@ internal class CardMultilineWidgetTest {
         assertThat(cardMultilineWidget.brand).isEqualTo(CardBrand.DinersClub)
     }
 
+    @Test
+    fun `Returns the correct create params when user selects no brand in CBC flow`() {
+        featureFlagTestRule.setEnabled(true)
+
+        runCardMultilineWidgetTest(isCbcEligible = true) {
+            cardMultilineWidget.setCardNumber("4000002500001001")
+            cardMultilineWidget.setExpiryDate(12, 2030)
+            cardMultilineWidget.setCvcCode("123")
+
+            val cardParams = cardMultilineWidget.paymentMethodCard
+            assertThat(cardParams?.networks?.preferred).isNull()
+        }
+    }
+
+    @Test
+    fun `Returns the correct create params when user selects a brand in CBC flow`() {
+        featureFlagTestRule.setEnabled(true)
+
+        runCardMultilineWidgetTest(isCbcEligible = true) {
+            cardMultilineWidget.setCardNumber("4000002500001001")
+            cardMultilineWidget.setExpiryDate(12, 2030)
+            cardMultilineWidget.setCvcCode("123")
+
+            cardMultilineWidget.cardBrandView.brand = CardBrand.CartesBancaires
+
+            val cardParams = cardMultilineWidget.paymentMethodCard
+            assertThat(cardParams?.networks?.preferred).isEqualTo(CardBrand.CartesBancaires.code)
+        }
+    }
+
     private fun runCardMultilineWidgetTest(
         isCbcEligible: Boolean = false,
         block: TestContext.() -> Unit,
     ) {
-        registerTestActivity()
-
         val activityScenario = ActivityScenario.launch<CardMultilineWidgetTestActivity>(
             Intent(context, CardMultilineWidgetTestActivity::class.java).apply {
                 putExtra("args", CardMultilineWidgetTestActivity.Args(isCbcEligible = isCbcEligible))
@@ -1229,6 +1257,8 @@ internal class CardMultilineWidgetTest {
             val testContext = TestContext(cardMultilineWidget, noZipWidget, activity.fullGroup, activity.noZipGroup)
             block(testContext)
         }
+
+        activityScenario.close()
     }
 
     private class TestContext(
@@ -1237,15 +1267,6 @@ internal class CardMultilineWidgetTest {
         val fullGroup: WidgetControlGroup,
         val noZipGroup: WidgetControlGroup,
     )
-
-    private fun registerTestActivity() {
-        val application: Application = ApplicationProvider.getApplicationContext()
-        val activityInfo = ActivityInfo().apply {
-            name = CardMultilineWidgetTestActivity::class.java.name
-            packageName = application.packageName
-        }
-        Shadows.shadowOf(application.packageManager).addOrUpdateActivity(activityInfo)
-    }
 
     internal class WidgetControlGroup(
         widget: CardMultilineWidget,
@@ -1290,7 +1311,7 @@ internal class CardMultilineWidgetTestActivity : AppCompatActivity() {
         CardMultilineWidget(this, shouldShowPostalCode = true).apply {
             id = VIEW_ID
 
-            val storeOwner = CardInputWidgetTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
+            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
             viewModelStoreOwner = storeOwner
             cardNumberEditText.viewModelStoreOwner = storeOwner
         }
@@ -1300,7 +1321,7 @@ internal class CardMultilineWidgetTestActivity : AppCompatActivity() {
         CardMultilineWidget(this, shouldShowPostalCode = false).apply {
             id = NO_ZIP_VIEW_ID
 
-            val storeOwner = CardInputWidgetTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
+            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
             viewModelStoreOwner = storeOwner
             cardNumberEditText.viewModelStoreOwner = storeOwner
         }

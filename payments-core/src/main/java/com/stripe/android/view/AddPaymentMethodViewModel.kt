@@ -1,8 +1,6 @@
 package com.stripe.android.view
 
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
@@ -14,6 +12,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.view.i18n.ErrorMessageTranslator
 import com.stripe.android.view.i18n.TranslatorManager
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 internal class AddPaymentMethodViewModel(
     private val stripe: Stripe,
@@ -27,23 +27,21 @@ internal class AddPaymentMethodViewModel(
         PaymentSession.PRODUCT_TOKEN.takeIf { args.isPaymentSessionActive }
     ).toSet()
 
-    internal fun createPaymentMethod(
+    internal suspend fun createPaymentMethod(
         params: PaymentMethodCreateParams
-    ): LiveData<Result<PaymentMethod>> {
-        val resultData = MutableLiveData<Result<PaymentMethod>>()
+    ): Result<PaymentMethod> = suspendCoroutine { continuation ->
         stripe.createPaymentMethod(
             paymentMethodCreateParams = updatedPaymentMethodCreateParams(params),
             callback = object : ApiResultCallback<PaymentMethod> {
                 override fun onSuccess(result: PaymentMethod) {
-                    resultData.value = Result.success(result)
+                    continuation.resume(Result.success(result))
                 }
 
                 override fun onError(e: Exception) {
-                    resultData.value = Result.failure(e)
+                    continuation.resume(Result.failure(e))
                 }
             }
         )
-        return resultData
     }
 
     @VisibleForTesting
@@ -52,17 +50,16 @@ internal class AddPaymentMethodViewModel(
     ) = params.copy(productUsage = productUsage)
 
     @JvmSynthetic
-    internal fun attachPaymentMethod(
+    internal suspend fun attachPaymentMethod(
         customerSession: CustomerSession,
         paymentMethod: PaymentMethod
-    ): LiveData<Result<PaymentMethod>> {
-        val resultData = MutableLiveData<Result<PaymentMethod>>()
+    ): Result<PaymentMethod> = suspendCoroutine { continuation ->
         customerSession.attachPaymentMethod(
             paymentMethodId = paymentMethod.id.orEmpty(),
             productUsage = productUsage,
             listener = object : CustomerSession.PaymentMethodRetrievalListener {
                 override fun onPaymentMethodRetrieved(paymentMethod: PaymentMethod) {
-                    resultData.value = Result.success(paymentMethod)
+                    continuation.resume(Result.success(paymentMethod))
                 }
 
                 override fun onError(
@@ -70,19 +67,20 @@ internal class AddPaymentMethodViewModel(
                     errorMessage: String,
                     stripeError: StripeError?
                 ) {
-                    resultData.value = Result.failure(
-                        RuntimeException(
-                            errorMessageTranslator.translate(
-                                errorCode,
-                                errorMessage,
-                                stripeError
+                    continuation.resume(
+                        Result.failure(
+                            RuntimeException(
+                                errorMessageTranslator.translate(
+                                    errorCode,
+                                    errorMessage,
+                                    stripeError
+                                )
                             )
                         )
                     )
                 }
             }
         )
-        return resultData
     }
 
     internal class Factory(

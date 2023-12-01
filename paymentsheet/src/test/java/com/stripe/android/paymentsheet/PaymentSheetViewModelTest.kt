@@ -46,6 +46,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -54,6 +55,11 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherP
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
@@ -82,6 +88,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
@@ -164,7 +171,7 @@ internal class PaymentSheetViewModelTest {
         createViewModel()
         verify(eventReporter).onInit(
             configuration = eq(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY),
-            isDecoupling = eq(false),
+            isDeferred = eq(false),
         )
 
         // Creating the view model should regenerate the analytics sessionId.
@@ -524,7 +531,6 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter)
                 .onPaymentSuccess(
                     paymentSelection = selection,
-                    currency = "usd",
                     deferredIntentConfirmationType = null,
                 )
             assertThat(prefsRepository.paymentSelectionArgs)
@@ -573,7 +579,6 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter)
                 .onPaymentSuccess(
                     paymentSelection = selection,
-                    currency = "usd",
                     deferredIntentConfirmationType = null,
                 )
 
@@ -602,8 +607,6 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter)
                 .onPaymentFailure(
                     paymentSelection = selection,
-                    currency = "usd",
-                    isDecoupling = false,
                     error = PaymentSheetConfirmationError.Stripe(error),
                 )
 
@@ -751,6 +754,49 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP)
         assertThat(viewModel.googlePayLauncherConfig)
             .isNotNull()
+    }
+
+    @Test
+    fun `'buttonType' from 'GooglePayConfiguration' should be parsed to proper 'GooglePayButtonType'`() = runTest {
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Plain,
+            GooglePayButtonType.Plain
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Pay,
+            GooglePayButtonType.Pay
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Book,
+            GooglePayButtonType.Book
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Buy,
+            GooglePayButtonType.Buy
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Donate,
+            GooglePayButtonType.Donate
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
+            GooglePayButtonType.Checkout
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Order,
+            GooglePayButtonType.Order
+        )
+
+        testButtonTypeParsedToProperGooglePayButtonType(
+            PaymentSheet.GooglePayConfiguration.ButtonType.Subscribe,
+            GooglePayButtonType.Subscribe
+        )
     }
 
     @Test
@@ -1068,11 +1114,7 @@ internal class PaymentSheetViewModelTest {
 
         val receiver = viewModel.currentScreen.testIn(this)
 
-        verify(eventReporter).onShowNewPaymentOptionForm(
-            linkEnabled = eq(false),
-            currency = eq("usd"),
-            isDecoupling = eq(false),
-        )
+        verify(eventReporter).onShowNewPaymentOptionForm()
 
         receiver.cancelAndIgnoreRemainingEvents()
     }
@@ -1091,11 +1133,7 @@ internal class PaymentSheetViewModelTest {
 
         val receiver = viewModel.currentScreen.testIn(this)
 
-        verify(eventReporter).onShowNewPaymentOptionForm(
-            linkEnabled = eq(true),
-            currency = eq("usd"),
-            isDecoupling = eq(false),
-        )
+        verify(eventReporter).onShowNewPaymentOptionForm()
 
         receiver.cancelAndIgnoreRemainingEvents()
     }
@@ -1114,11 +1152,7 @@ internal class PaymentSheetViewModelTest {
 
         val receiver = viewModel.currentScreen.testIn(this)
 
-        verify(eventReporter).onShowNewPaymentOptionForm(
-            linkEnabled = eq(true),
-            currency = eq("usd"),
-            isDecoupling = eq(false),
-        )
+        verify(eventReporter).onShowNewPaymentOptionForm()
 
         receiver.cancelAndIgnoreRemainingEvents()
     }
@@ -1130,13 +1164,9 @@ internal class PaymentSheetViewModelTest {
             customerPaymentMethods = PaymentMethodFixtures.createCards(1),
         )
 
-        verify(eventReporter).onInit(configuration = anyOrNull(), isDecoupling = any())
+        verify(eventReporter).onInit(configuration = anyOrNull(), isDeferred = any())
 
-        verify(eventReporter).onShowExistingPaymentOptions(
-            linkEnabled = eq(false),
-            currency = eq("usd"),
-            isDecoupling = eq(false),
-        )
+        verify(eventReporter).onShowExistingPaymentOptions()
 
         viewModel.transitionToAddPaymentScreen()
 
@@ -1396,7 +1426,7 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
-            isDecoupling = eq(false),
+            isDeferred = eq(false),
         )
     }
 
@@ -1410,7 +1440,7 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
-            isDecoupling = eq(true),
+            isDeferred = eq(true),
         )
     }
 
@@ -1425,7 +1455,7 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
-            isDecoupling = eq(true),
+            isDeferred = eq(true),
         )
     }
 
@@ -1453,7 +1483,6 @@ internal class PaymentSheetViewModelTest {
 
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
-                currency = anyOrNull(),
                 deferredIntentConfirmationType = eq(deferredIntentConfirmationType),
             )
         }
@@ -1479,7 +1508,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
-            currency = anyOrNull(),
             deferredIntentConfirmationType = isNull(),
         )
     }
@@ -1507,7 +1535,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
-            currency = anyOrNull(),
             deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Client),
         )
     }
@@ -1527,7 +1554,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
-            currency = anyOrNull(),
             deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Server),
         )
     }
@@ -1536,14 +1562,14 @@ internal class PaymentSheetViewModelTest {
     fun `Sends dismiss event when the user cancels the flow with non-deferred intent`() = runTest {
         val viewModel = createViewModel()
         viewModel.onUserCancel()
-        verify(eventReporter).onDismiss(isDecoupling = false)
+        verify(eventReporter).onDismiss()
     }
 
     @Test
     fun `Sends dismiss event when the user cancels the flow with deferred intent`() = runTest {
         val viewModel = createViewModelForDeferredIntent()
         viewModel.onUserCancel()
-        verify(eventReporter).onDismiss(isDecoupling = true)
+        verify(eventReporter).onDismiss()
     }
 
     @Test
@@ -1574,10 +1600,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.handleConfirmUSBankAccount(newPaymentSelection)
 
-        verify(eventReporter).onPressConfirmButton(
-            currency = "usd",
-            isDecoupling = false,
-        )
+        verify(eventReporter).onPressConfirmButton()
     }
 
     @Test
@@ -1616,10 +1639,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.checkout()
 
-        verify(eventReporter, never()).onPressConfirmButton(
-            currency = "usd",
-            isDecoupling = false,
-        )
+        verify(eventReporter, never()).onPressConfirmButton()
     }
 
     @Test
@@ -1695,6 +1715,66 @@ internal class PaymentSheetViewModelTest {
             transactionId = anyOrNull(),
             label = eq(expectedLabel),
         )
+    }
+
+    @Test
+    fun `Launch confirmation form when Bacs debit is selected and filled & succeeds payment`() = runTest {
+        fakeIntentConfirmationInterceptor.enqueueCompleteStep()
+
+        val onResult = argumentCaptor<ActivityResultCallback<BacsMandateConfirmationResult>>()
+        val launcher = mock<BacsMandateConfirmationLauncher> {
+            on { launch(any(), any()) } doAnswer {
+                onResult.firstValue.onActivityResult(BacsMandateConfirmationResult.Confirmed)
+            }
+        }
+        val launcherFactory = mock<BacsMandateConfirmationLauncherFactory> {
+            on { create(any()) } doReturn launcher
+        }
+        val activityResultCaller = mock<ActivityResultCaller> {
+            onGeneric {
+                registerForActivityResult<BacsMandateConfirmationContract.Args, BacsMandateConfirmationResult>(
+                    any(),
+                    any()
+                )
+            } doReturn mock()
+        }
+
+        val viewModel = createViewModel(
+            bacsMandateConfirmationLauncherFactory = launcherFactory
+        ).apply {
+            registerFromActivity(activityResultCaller, TestLifecycleOwner())
+        }
+
+        verify(activityResultCaller).registerForActivityResult(
+            any<BacsMandateConfirmationContract>(),
+            onResult.capture()
+        )
+
+        verify(launcherFactory).create(any())
+
+        viewModel.updateSelection(
+            createBacsPaymentSelection()
+        )
+
+        viewModel.checkout()
+
+        verify(launcher).launch(
+            eq(
+                BacsMandateData(
+                    name = BACS_NAME,
+                    email = BACS_EMAIL,
+                    sortCode = BACS_SORT_CODE,
+                    accountNumber = BACS_ACCOUNT_NUMBER,
+                )
+            ),
+            eq(PaymentSheet.Appearance())
+        )
+
+        viewModel.viewState.test {
+            val viewState = awaitItem()
+
+            assertThat(viewState).isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
+        }
     }
 
     @Test
@@ -1853,6 +1933,7 @@ internal class PaymentSheetViewModelTest {
         isGooglePayReady: Boolean = false,
         delay: Duration = Duration.ZERO,
         lpmRepository: LpmRepository = this.lpmRepository,
+        bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return TestViewModelFactory.create(
@@ -1876,6 +1957,7 @@ internal class PaymentSheetViewModelTest {
                 lpmRepository = lpmRepository,
                 paymentLauncherFactory = paymentLauncherFactory,
                 googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
+                bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
@@ -1904,16 +1986,60 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
+    private suspend fun testButtonTypeParsedToProperGooglePayButtonType(
+        buttonType: PaymentSheet.GooglePayConfiguration.ButtonType,
+        googlePayButtonType: GooglePayButtonType
+    ) {
+        val viewModel = createViewModel(
+            isGooglePayReady = true,
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
+                    googlePay = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.googlePayConfig?.copy(
+                        buttonType = buttonType
+                    )
+                )
+            )
+        )
+
+        viewModel.walletsState.test {
+            assertThat(awaitItem()?.googlePay?.buttonType).isEqualTo(googlePayButtonType)
+        }
+    }
+
+    private fun createBacsPaymentSelection(): PaymentSelection {
+        return PaymentSelection.New.GenericPaymentMethod(
+            labelResource = "Test",
+            iconResource = 0,
+            paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
+                bacsDebit = PaymentMethodCreateParams.BacsDebit(
+                    accountNumber = BACS_ACCOUNT_NUMBER,
+                    sortCode = BACS_SORT_CODE
+                ),
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = BACS_NAME,
+                    email = BACS_EMAIL
+                )
+            ),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+        )
+    }
+
     private companion object {
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP =
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
-        private val ARGS_WITHOUT_CUSTOMER = PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER
 
         private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         val PAYMENT_INTENT_WITH_PAYMENT_METHOD = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD
         val SETUP_INTENT = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+
+        private const val BACS_ACCOUNT_NUMBER = "00012345"
+        private const val BACS_SORT_CODE = "108800"
+        private const val BACS_NAME = "John Doe"
+        private const val BACS_EMAIL = "johndoe@email.com"
     }
 }

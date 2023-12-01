@@ -147,19 +147,19 @@ class CustomerSheetPlaygroundViewModel(
     )
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             fetchClientSecret()
         }
     }
 
     private suspend fun fetchClientSecret(
-        customerId: String = "returning"
+        customerId: String = configurationState.value.customerId,
     ): Result<PlaygroundCustomerSheetResponse, FuelError> {
         val request = PlaygroundCustomerSheetRequest(
             customerId = customerId,
             mode = "payment",
-            merchantCountryCode = "US",
-            currency = "usd",
+            merchantCountryCode = configurationState.value.merchantCountry,
+            currency = configurationState.value.currency,
         )
 
         val requestBody = Json.encodeToString(
@@ -240,6 +240,9 @@ class CustomerSheetPlaygroundViewModel(
                 updateBillingNameCollection(viewAction.value)
             is CustomerSheetPlaygroundViewAction.UpdateBillingPhoneCollection ->
                 updateBillingPhoneCollection(viewAction.value)
+            is CustomerSheetPlaygroundViewAction.UpdateMerchantCountryCode -> {
+                updateMerchantCountry(viewAction.code)
+            }
         }
     }
 
@@ -301,14 +304,8 @@ class CustomerSheetPlaygroundViewModel(
             )
         }
 
-        viewModelScope.launch {
-            fetchClientSecret(
-                if (configurationState.value.isExistingCustomer) {
-                    "returning"
-                } else {
-                    "new"
-                }
-            )
+        viewModelScope.launch(Dispatchers.IO) {
+            fetchClientSecret()
         }
     }
 
@@ -386,6 +383,21 @@ class CustomerSheetPlaygroundViewModel(
                     )
                 )
             )
+        }
+    }
+
+    private fun updateMerchantCountry(code: String) {
+        val currency = if (code == "FR") "eur" else "usd"
+
+        updateConfiguration {
+            it.copy(
+                merchantCountry = code,
+                currency = currency,
+            )
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            fetchClientSecret()
         }
     }
 

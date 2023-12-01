@@ -12,7 +12,8 @@ internal data class EditPaymentMethodViewState constructor(
     val canUpdate: Boolean,
     val selectedBrand: CardBrandChoice,
     val availableBrands: List<CardBrandChoice>,
-    val error: ResolvableString? = null
+    val confirmRemoval: Boolean = false,
+    val error: ResolvableString? = null,
 ) {
     enum class Status {
         Idle,

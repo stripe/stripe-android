@@ -1,8 +1,8 @@
 package com.stripe.android.ui.core.elements
 
 import android.app.Application
-import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.CountryConfig
@@ -12,6 +12,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -57,51 +58,38 @@ internal class CardBillingAddressElementTest {
     }
 
     @Test
-    fun `Verify that when US is selected postal is not hidden`() {
-        val hiddenIdFlowValues = mutableListOf<Set<IdentifierSpec>>()
-        cardBillingElement.hiddenIdentifiers.asLiveData()
-            .observeForever {
-                hiddenIdFlowValues.add(it)
-            }
-
-        dropdownFieldController.onRawValueChange("US")
-        verifyPostalShown(hiddenIdFlowValues[0])
+    fun `Verify that when US is selected postal is not hidden`() = runTest {
+        cardBillingElement.hiddenIdentifiers.test {
+            dropdownFieldController.onRawValueChange("US")
+            verifyPostalShown(awaitItem())
+        }
     }
 
     @Test
-    fun `Verify that when GB is selected postal is not hidden`() {
-        val hiddenIdFlowValues = mutableListOf<Set<IdentifierSpec>>()
-        cardBillingElement.hiddenIdentifiers.asLiveData()
-            .observeForever {
-                hiddenIdFlowValues.add(it)
-            }
-
-        dropdownFieldController.onRawValueChange("GB")
-        verifyPostalShown(hiddenIdFlowValues[1])
+    fun `Verify that when GB is selected postal is not hidden`() = runTest {
+        cardBillingElement.hiddenIdentifiers.test {
+            skipItems(1)
+            dropdownFieldController.onRawValueChange("GB")
+            verifyPostalShown(awaitItem())
+        }
     }
 
     @Test
-    fun `Verify that when CA is selected postal is not hidden`() {
-        val hiddenIdFlowValues = mutableListOf<Set<IdentifierSpec>>()
-        cardBillingElement.hiddenIdentifiers.asLiveData()
-            .observeForever {
-                hiddenIdFlowValues.add(it)
-            }
-
-        dropdownFieldController.onRawValueChange("CA")
-        verifyPostalShown(hiddenIdFlowValues[0])
+    fun `Verify that when CA is selected postal is not hidden`() = runTest {
+        cardBillingElement.hiddenIdentifiers.test {
+            skipItems(1)
+            dropdownFieldController.onRawValueChange("CA")
+            verifyPostalShown(awaitItem())
+        }
     }
 
     @Test
-    fun `Verify that when DE is selected postal IS hidden`() {
-        val hiddenIdFlowValues = mutableListOf<Set<IdentifierSpec>>()
-        cardBillingElement.hiddenIdentifiers.asLiveData()
-            .observeForever {
-                hiddenIdFlowValues.add(it)
-            }
-
-        dropdownFieldController.onRawValueChange("DE")
-        verifyPostalHidden(hiddenIdFlowValues[1])
+    fun `Verify that when DE is selected postal IS hidden`() = runTest {
+        cardBillingElement.hiddenIdentifiers.test {
+            skipItems(1)
+            dropdownFieldController.onRawValueChange("DE")
+            verifyPostalHidden(awaitItem())
+        }
     }
 
     fun verifyPostalShown(hiddenIdentifiers: Set<IdentifierSpec>) {

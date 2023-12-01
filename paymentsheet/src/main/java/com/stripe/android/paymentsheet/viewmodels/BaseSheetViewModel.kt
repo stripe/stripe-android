@@ -29,7 +29,6 @@ import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave.RequestReuse
-import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
@@ -269,18 +268,10 @@ internal abstract class BaseSheetViewModel(
                 // Nothing to do here
             }
             is PaymentSheetScreen.SelectSavedPaymentMethods -> {
-                eventReporter.onShowExistingPaymentOptions(
-                    linkEnabled = linkHandler.isLinkEnabled.value == true,
-                    currency = stripeIntent.value?.currency,
-                    isDecoupling = stripeIntent.value?.clientSecret == null,
-                )
+                eventReporter.onShowExistingPaymentOptions()
             }
             is AddFirstPaymentMethod -> {
-                eventReporter.onShowNewPaymentOptionForm(
-                    linkEnabled = linkHandler.isLinkEnabled.value == true,
-                    currency = stripeIntent.value?.currency,
-                    isDecoupling = stripeIntent.value?.clientSecret == null,
-                )
+                eventReporter.onShowNewPaymentOptionForm()
             }
             is PaymentSheetScreen.EditPaymentMethod -> {
                 // TODO(tillh-stripe) Add reporting
@@ -289,10 +280,7 @@ internal abstract class BaseSheetViewModel(
     }
 
     protected fun reportConfirmButtonPressed() {
-        eventReporter.onPressConfirmButton(
-            currency = stripeIntent.value?.currency,
-            isDecoupling = stripeIntent.value?.clientSecret == null,
-        )
+        eventReporter.onPressConfirmButton()
     }
 
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
@@ -307,16 +295,12 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    protected fun reportDismiss(isDecoupling: Boolean) {
-        eventReporter.onDismiss(isDecoupling = isDecoupling)
+    protected fun reportDismiss() {
+        eventReporter.onDismiss()
     }
 
     fun reportPaymentMethodTypeSelected(code: PaymentMethodCode) {
-        eventReporter.onSelectPaymentMethod(
-            code = code,
-            isDecoupling = stripeIntent.value?.clientSecret == null,
-            currency = stripeIntent.value?.currency,
-        )
+        eventReporter.onSelectPaymentMethod(code)
     }
 
     abstract fun clearErrorMessages()
@@ -503,7 +487,8 @@ internal abstract class BaseSheetViewModel(
             params = PaymentMethodUpdateParams.createCard(
                 networks = PaymentMethodUpdateParams.Card.Networks(
                     preferred = brand.code
-                )
+                ),
+                productUsageTokens = setOf("PaymentSheet"),
             )
         ).onSuccess { updatedMethod ->
             savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods
@@ -614,7 +599,7 @@ internal abstract class BaseSheetViewModel(
     }
 
     fun reportAutofillEvent(type: String) {
-        eventReporter.onAutofill(type, isDecoupling = stripeIntent.value?.clientSecret == null)
+        eventReporter.onAutofill(type)
     }
 
     abstract fun onPaymentResult(paymentResult: PaymentResult)

@@ -16,6 +16,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import com.stripe.android.R as StripeR
 
@@ -63,7 +64,7 @@ class CvcController constructor(
     override val visibleError: Flow<Boolean> =
         combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
             fieldState.shouldShowError(hasFocus)
-        }
+        }.distinctUntilChanged()
 
     /**
      * An error must be emitted if it is visible or not visible.

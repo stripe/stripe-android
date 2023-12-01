@@ -557,7 +557,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 params = paymentMethodUpdateParams.toParamMap(),
             ),
             jsonParser = PaymentMethodJsonParser()
-        )
+        ) {
+            fireAnalyticsRequest(
+                paymentAnalyticsRequestFactory.createPaymentMethodUpdate(
+                    paymentMethodCode = paymentMethodUpdateParams.type.code,
+                    productUsageTokens = paymentMethodUpdateParams.productUsageTokens,
+                )
+            )
+        }
     }
 
     /**

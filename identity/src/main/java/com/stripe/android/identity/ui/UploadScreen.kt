@@ -1,6 +1,5 @@
 package com.stripe.android.identity.ui
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,13 +48,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_FILE_UPLOAD
+import com.stripe.android.identity.navigation.DocumentUploadDestination
 import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
-import com.stripe.android.identity.navigation.routeToScreenName
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.Status
-import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.Requirement
-import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.text.dimensionResourceSp
 import kotlinx.coroutines.launch
@@ -71,24 +69,10 @@ internal enum class UploadMethod {
     TAKE_PHOTO, CHOOSE_PHOTO
 }
 
-internal data class DocumentUploadSideInfo(
-    @StringRes
-    val descriptionRes: Int,
-    @StringRes
-    val checkmarkContentDescriptionRes: Int,
-    val scanType: IdentityScanState.ScanType
-)
-
 @Composable
 internal fun UploadScreen(
     navController: NavController,
     identityViewModel: IdentityViewModel,
-    collectedDataParamType: CollectedDataParam.Type,
-    route: String,
-    @StringRes titleRes: Int,
-    @StringRes contextRes: Int,
-    frontInfo: DocumentUploadSideInfo,
-    backInfo: DocumentUploadSideInfo?
 ) {
     val localContext = LocalContext.current
     val verificationState by identityViewModel.verificationPage.observeAsState(Resource.loading())
@@ -113,8 +97,6 @@ internal fun UploadScreen(
             launch {
                 identityViewModel.collectDataForDocumentUploadScreen(
                     navController,
-                    collectedDataParamType,
-                    route,
                     isFront = true
                 )
             }
@@ -122,8 +104,6 @@ internal fun UploadScreen(
             launch {
                 identityViewModel.collectDataForDocumentUploadScreen(
                     navController,
-                    collectedDataParamType,
-                    route,
                     isFront = false
                 )
             }
@@ -131,8 +111,7 @@ internal fun UploadScreen(
 
         ScreenTransitionLaunchedEffect(
             identityViewModel = identityViewModel,
-            screenName = route.routeToScreenName(),
-            scanType = frontInfo.scanType
+            screenName = SCREEN_NAME_FILE_UPLOAD
         )
 
         Column(
@@ -148,7 +127,7 @@ internal fun UploadScreen(
                 .testTag(SCROLLABLE_COLUMN_TAG)
         ) {
             Text(
-                text = stringResource(id = titleRes),
+                text = stringResource(id = R.string.stripe_upload_your_photo_id),
                 fontSize = dimensionResourceSp(id = R.dimen.stripe_upload_title_text_size),
 
                 modifier = Modifier.padding(
@@ -156,7 +135,7 @@ internal fun UploadScreen(
                 )
             )
             Text(
-                text = stringResource(id = contextRes),
+                text = stringResource(id = R.string.stripe_file_upload_content_id),
                 modifier = Modifier.padding(
                     bottom = 32.dp
                 )
@@ -181,13 +160,13 @@ internal fun UploadScreen(
             var shouldShowFrontDialog by remember { mutableStateOf(false) }
             SingleSideUploadRow(
                 modifier = Modifier.testTag(FRONT_ROW_TAG),
+                isFront = true,
                 uploadUiState = frontUploadedUiState,
-                uploadInfo = frontInfo,
             ) { shouldShowFrontDialog = true }
 
             if (shouldShowFrontDialog) {
                 UploadImageDialog(
-                    uploadInfo = frontInfo,
+                    isFront = true,
                     shouldShowTakePhoto = cameraPermissionGranted,
                     shouldShowChoosePhoto = shouldShowChoosePhoto,
                     onPhotoSelected = { uploadMethod ->
@@ -195,6 +174,7 @@ internal fun UploadScreen(
                             UploadMethod.TAKE_PHOTO -> {
                                 identityViewModel.imageHandler.takePhotoFront(localContext)
                             }
+
                             UploadMethod.CHOOSE_PHOTO -> {
                                 identityViewModel.imageHandler.chooseImageFront()
                             }
@@ -213,11 +193,10 @@ internal fun UploadScreen(
                         true
                     }
                     // Otherwise show back when all the follows are true
-                    //  * backInfo is not null - e.g not a passport scan where backInfo is null
                     //  * collectedData.idDocumentFront not null - front is already scanned
                     //  * missing BACK - front already scanned and server returns missing back
                     else {
-                        backInfo != null && collectedData.idDocumentFront != null && missings.contains(
+                        collectedData.idDocumentFront != null && missings.contains(
                             Requirement.IDDOCUMENTBACK
                         )
                     }
@@ -248,13 +227,13 @@ internal fun UploadScreen(
                 }
                 SingleSideUploadRow(
                     modifier = Modifier.testTag(BACK_ROW_TAG),
+                    isFront = false,
                     uploadUiState = backUploadedUiState,
-                    uploadInfo = requireNotNull(backInfo),
                 ) { shouldShowBackDialog = true }
 
                 if (shouldShowBackDialog) {
                     UploadImageDialog(
-                        uploadInfo = backInfo,
+                        isFront = false,
                         shouldShowTakePhoto = cameraPermissionGranted,
                         shouldShowChoosePhoto = shouldShowChoosePhoto,
                         onPhotoSelected = { uploadMethod ->
@@ -262,6 +241,7 @@ internal fun UploadScreen(
                                 UploadMethod.TAKE_PHOTO -> {
                                     identityViewModel.imageHandler.takePhotoBack(localContext)
                                 }
+
                                 UploadMethod.CHOOSE_PHOTO -> {
                                     identityViewModel.imageHandler.chooseImageBack()
                                 }
@@ -296,7 +276,7 @@ internal fun UploadScreen(
                 coroutineScope.launch {
                     identityViewModel.navigateToSelfieOrSubmit(
                         navController,
-                        route
+                        DocumentUploadDestination.ROUTE.route
                     )
                 }
             }
@@ -306,7 +286,7 @@ internal fun UploadScreen(
 
 @Composable
 internal fun UploadImageDialog(
-    uploadInfo: DocumentUploadSideInfo,
+    isFront: Boolean,
     shouldShowTakePhoto: Boolean,
     shouldShowChoosePhoto: Boolean,
     onPhotoSelected: (UploadMethod) -> Unit,
@@ -333,7 +313,9 @@ internal fun UploadImageDialog(
                         start = 24.dp,
                         end = 24.dp
                     ),
-                    text = getTitleFromScanType(scanType = uploadInfo.scanType),
+                    text = stringResource(
+                        id = if (isFront) R.string.stripe_front_of_id else R.string.stripe_back_of_id
+                    ),
                     style = MaterialTheme.typography.subtitle1,
                     fontWeight = FontWeight.Bold
                 )
@@ -388,30 +370,6 @@ private fun DialogListItem(
     }
 }
 
-@Composable
-private fun getTitleFromScanType(scanType: IdentityScanState.ScanType): String {
-    return when (scanType) {
-        IdentityScanState.ScanType.ID_FRONT -> {
-            stringResource(R.string.stripe_front_of_id)
-        }
-        IdentityScanState.ScanType.ID_BACK -> {
-            stringResource(R.string.stripe_back_of_id)
-        }
-        IdentityScanState.ScanType.DL_FRONT -> {
-            stringResource(R.string.stripe_front_of_dl)
-        }
-        IdentityScanState.ScanType.DL_BACK -> {
-            stringResource(R.string.stripe_back_of_dl)
-        }
-        IdentityScanState.ScanType.PASSPORT -> {
-            stringResource(R.string.stripe_passport)
-        }
-        else -> {
-            throw java.lang.IllegalArgumentException("invalid scan type: $scanType")
-        }
-    }
-}
-
 private enum class DocumentUploadUIState {
     Idle, Loading, Done
 }
@@ -419,8 +377,8 @@ private enum class DocumentUploadUIState {
 @Composable
 private fun SingleSideUploadRow(
     modifier: Modifier = Modifier,
+    isFront: Boolean,
     uploadUiState: DocumentUploadUIState,
-    uploadInfo: DocumentUploadSideInfo,
     onSelectButtonClicked: () -> Unit
 ) {
     Row(
@@ -431,7 +389,7 @@ private fun SingleSideUploadRow(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = stringResource(id = uploadInfo.descriptionRes),
+            text = stringResource(id = if (isFront) R.string.stripe_front_of_id else R.string.stripe_back_of_id),
             modifier = Modifier.align(CenterVertically)
         )
         when (uploadUiState) {
@@ -442,6 +400,7 @@ private fun SingleSideUploadRow(
                     Text(text = stringResource(id = R.string.stripe_select).uppercase())
                 }
             }
+
             DocumentUploadUIState.Loading -> {
                 CircularProgressIndicator(
                     modifier = Modifier
@@ -450,10 +409,13 @@ private fun SingleSideUploadRow(
                     strokeWidth = 3.dp
                 )
             }
+
             DocumentUploadUIState.Done -> {
                 Image(
                     painter = painterResource(id = R.drawable.stripe_check_mark),
-                    contentDescription = stringResource(id = uploadInfo.checkmarkContentDescriptionRes),
+                    contentDescription = stringResource(
+                        id = if (isFront) R.string.stripe_front_of_id_selected else R.string.stripe_back_of_id_selected
+                    ),
                     modifier = Modifier
                         .height(18.dp)
                         .width(18.dp)

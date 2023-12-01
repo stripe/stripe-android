@@ -88,8 +88,6 @@ internal class PaymentOptionsViewModelTest {
             verify(eventReporter)
                 .onSelectPaymentOption(
                     paymentSelection = SELECTION_SAVED_PAYMENT_METHOD,
-                    currency = "usd",
-                    isDecoupling = false,
                 )
         }
 
@@ -113,8 +111,6 @@ internal class PaymentOptionsViewModelTest {
             verify(eventReporter)
                 .onSelectPaymentOption(
                     paymentSelection = NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION,
-                    currency = "usd",
-                    isDecoupling = false,
                 )
             assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(SavedSelection.None)
@@ -134,8 +130,6 @@ internal class PaymentOptionsViewModelTest {
                 verify(eventReporter)
                     .onSelectPaymentOption(
                         paymentSelection = paymentOptionResultSucceeded.paymentSelection,
-                        currency = "usd",
-                        isDecoupling = false,
                     )
                 ensureAllEventsConsumed()
             }
@@ -517,7 +511,7 @@ internal class PaymentOptionsViewModelTest {
     fun `Sends dismiss event when the user cancels the flow with non-deferred intent`() = runTest {
         val viewModel = createViewModel()
         viewModel.onUserCancel()
-        verify(eventReporter).onDismiss(isDecoupling = false)
+        verify(eventReporter).onDismiss()
     }
 
     @Test
@@ -528,7 +522,7 @@ internal class PaymentOptionsViewModelTest {
 
         val viewModel = createViewModel(args = deferredIntentArgs)
         viewModel.onUserCancel()
-        verify(eventReporter).onDismiss(isDecoupling = true)
+        verify(eventReporter).onDismiss()
     }
 
     @Test
@@ -590,6 +584,9 @@ internal class PaymentOptionsViewModelTest {
 
         val editViewState = screenTurbine.awaitItem() as PaymentSheetScreen.EditPaymentMethod
         editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
+
+        screenTurbine.expectNoEvents()
+        editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemoveConfirmed)
 
         assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
 

@@ -10,15 +10,13 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.navigation.NavController
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.identity.R
 import com.stripe.android.identity.TestApplication
-import com.stripe.android.identity.navigation.IDScanDestination
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -34,7 +32,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -49,53 +46,50 @@ class DocumentScanScreenTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val mockNavController = mock<NavController>()
 
-    private val verificationPageLiveData =
-        MutableLiveData(Resource.success(mock<VerificationPage>()))
-    private val targetScanTypeFlow = MutableStateFlow<IdentityScanState.ScanType?>(null)
-    private val displayStateChangedFlow =
-        MutableStateFlow<Pair<IdentityScanState, IdentityScanState?>?>(null)
-
+    private val targetScanTypeFlow =
+        MutableStateFlow<IdentityScanState.ScanType?>(null)
+    private val scannerStateFlow =
+        MutableStateFlow<IdentityScanViewModel.State>(IdentityScanViewModel.State.Initializing)
+    private val collectedDataFlow = MutableStateFlow(CollectedDataParam())
     private val mockIdentityViewModel = mock<IdentityViewModel> {
-        on { verificationPage } doReturn verificationPageLiveData
-        on { pageAndModelFiles } doReturn mock()
         on { identityAnalyticsRequestFactory } doReturn mock()
         on { workContext } doReturn UnconfinedTestDispatcher()
         on { screenTracker } doReturn mock()
+        on { pageAndModelFiles } doReturn MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>(
+            Resource.success(
+                IdentityViewModel.PageAndModelFiles(mock(), mock(), null)
+            )
+        )
+        on { collectedData } doReturn collectedDataFlow
     }
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel> {
         on { targetScanTypeFlow } doReturn targetScanTypeFlow
-        on { displayStateChangedFlow } doReturn displayStateChangedFlow
-        on { interimResults } doReturn mock()
-        on { finalResult } doReturn mock()
+        on { fpsTracker } doReturn mock()
+        on { scannerState } doReturn scannerStateFlow
     }
 
     @Test
-    fun verifyNullState() {
-        testDocumentScanScreen {
-            verify(mockIdentityViewModel, times(0)).resetDocumentUploadedState()
-            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
-            onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_id_front))
-            onNodeWithTag(CHECK_MARK_TAG).assertDoesNotExist()
-            onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
-        }
-    }
-
-    @Test
-    fun verifyNullStateWithShouldStartFromBack() {
-        testDocumentScanScreen(shouldStartFromBack = true) {
-            verify(mockIdentityViewModel).resetDocumentUploadedState()
-            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
-            onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_id_front))
-            onNodeWithTag(CHECK_MARK_TAG).assertDoesNotExist()
-            onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
-        }
-    }
-
-    @Test
-    fun verifyInitialStateWithFrontType() {
+    fun verifyLoading() {
         testDocumentScanScreen(
-            displayState = mock<IdentityScanState.Initial>(),
-            targetScanType = IdentityScanState.ScanType.ID_FRONT
+            scannerState = IdentityScanViewModel.State.Initializing
+        ) {
+            onNodeWithTag(LOADING_SCREEN_TAG).assertExists()
+        }
+    }
+
+    @Test
+    fun verifyInitializingState() {
+        testDocumentScanScreen(
+            scannerState = IdentityScanViewModel.State.Initializing
+        ) {
+            onNodeWithTag(LOADING_SCREEN_TAG).assertExists()
+        }
+    }
+
+    @Test
+    fun verifyScanningNullState() {
+        testDocumentScanScreen(
+            scannerState = IdentityScanViewModel.State.Scanning(),
         ) {
             onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
             onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_id_front))
@@ -105,11 +99,33 @@ class DocumentScanScreenTest {
     }
 
     @Test
-    fun verifyInitialStateWithBackType() {
+    fun verifyScanningStateWithFrontType() {
         testDocumentScanScreen(
-            displayState = mock<IdentityScanState.Initial>(),
-            targetScanType = IdentityScanState.ScanType.ID_BACK
+            targetScanType = IdentityScanState.ScanType.DOC_FRONT,
+            scannerState = IdentityScanViewModel.State.Scanning(mock<IdentityScanState.Initial>())
         ) {
+            verify(mockIdentityScanViewModel).startScan(
+                eq(IdentityScanState.ScanType.DOC_FRONT),
+                any()
+            )
+            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
+            onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_id_front))
+            onNodeWithTag(CHECK_MARK_TAG).assertDoesNotExist()
+            onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
+        }
+    }
+
+    @Test
+    fun verifyScanningStateWithBackType() {
+        testDocumentScanScreen(
+            targetScanType = IdentityScanState.ScanType.DOC_BACK,
+            shouldStartFromBack = true,
+            scannerState = IdentityScanViewModel.State.Scanning(mock<IdentityScanState.Initial>())
+        ) {
+            verify(mockIdentityScanViewModel).startScan(
+                eq(IdentityScanState.ScanType.DOC_BACK),
+                any()
+            )
             onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_back_of_id))
             onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_id_back))
             onNodeWithTag(CHECK_MARK_TAG).assertDoesNotExist()
@@ -118,10 +134,10 @@ class DocumentScanScreenTest {
     }
 
     @Test
-    fun verifyFinishedState() {
+    fun verifyScannedState() {
         testDocumentScanScreen(
-            displayState = mock<IdentityScanState.Finished>(),
-            targetScanType = IdentityScanState.ScanType.ID_FRONT
+            targetScanType = IdentityScanState.ScanType.DOC_FRONT,
+            scannerState = IdentityScanViewModel.State.Scanned(mock())
         ) {
             verify(mockIdentityScanViewModel).stopScan(any())
             onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
@@ -134,8 +150,6 @@ class DocumentScanScreenTest {
                 verify(mockIdentityViewModel).collectDataForDocumentScanScreen(
                     eq(mockNavController),
                     eq(true),
-                    eq(CollectedDataParam.Type.IDCARD),
-                    eq(IDScanDestination.ROUTE.route),
                     any()
                 )
             }
@@ -143,31 +157,27 @@ class DocumentScanScreenTest {
     }
 
     private fun testDocumentScanScreen(
-        displayState: IdentityScanState? = null,
         targetScanType: IdentityScanState.ScanType? = null,
         shouldStartFromBack: Boolean = false,
+        scannerState: IdentityScanViewModel.State,
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
         targetScanTypeFlow.update { targetScanType }
-        displayState?.let {
-            displayStateChangedFlow.update { displayState to mock() }
+        collectedDataFlow.update {
+            if (shouldStartFromBack) {
+                CollectedDataParam(
+                    idDocumentFront = mock()
+                )
+            } else {
+                CollectedDataParam()
+            }
         }
+        scannerStateFlow.update { scannerState }
         composeTestRule.setContent {
             DocumentScanScreen(
                 navController = mockNavController,
                 identityViewModel = mockIdentityViewModel,
                 identityScanViewModel = mockIdentityScanViewModel,
-                frontScanType = IdentityScanState.ScanType.ID_FRONT,
-                backScanType = IdentityScanState.ScanType.ID_BACK,
-                shouldStartFromBack = shouldStartFromBack,
-                messageRes = DocumentScanMessageRes(
-                    R.string.stripe_front_of_id,
-                    R.string.stripe_back_of_id,
-                    R.string.stripe_position_id_front,
-                    R.string.stripe_position_id_back
-                ),
-                collectedDataParamType = CollectedDataParam.Type.IDCARD,
-                route = IDScanDestination.ROUTE.route
             )
         }
         with(composeTestRule, testBlock)

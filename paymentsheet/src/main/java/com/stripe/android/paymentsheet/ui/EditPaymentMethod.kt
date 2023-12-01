@@ -11,11 +11,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -29,7 +32,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,6 +47,8 @@ import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemoveConfirmationDismissed
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemoveConfirmed
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemovePressed
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnUpdatePressed
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
@@ -84,7 +88,6 @@ internal fun EditPaymentMethodUi(
     val padding = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     val isIdle = viewState.status == EditPaymentMethodViewState.Status.Idle
-    val showRemoveConfirmationDialog = rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = modifier.padding(
@@ -132,33 +135,33 @@ internal fun EditPaymentMethodUi(
             onButtonClick = { viewActionHandler.invoke(OnUpdatePressed) },
         )
 
-        Spacer(modifier = Modifier.requiredHeight(4.dp))
-
         RemoveButton(
             idle = isIdle,
             removing = viewState.status == EditPaymentMethodViewState.Status.Removing,
-            onRemove = { showRemoveConfirmationDialog.value = true },
+            onRemove = { viewActionHandler(OnRemovePressed) },
         )
     }
 
-    if (showRemoveConfirmationDialog.value) {
+    if (viewState.confirmRemoval) {
         val title = stringResource(
             R.string.stripe_paymentsheet_remove_pm,
             viewState.displayName,
         )
 
+        val message = stringResource(
+            StripeR.string.stripe_card_ending_in,
+            viewState.selectedBrand.brand.displayName,
+            viewState.last4,
+        )
+
         SimpleDialogElementUI(
-            openDialog = showRemoveConfirmationDialog.value,
             titleText = title,
-            messageText = null,
+            messageText = message,
             confirmText = stringResource(StripeR.string.stripe_remove),
             dismissText = stringResource(StripeR.string.stripe_cancel),
             destructive = true,
-            onConfirmListener = {
-                showRemoveConfirmationDialog.value = false
-                viewActionHandler.invoke(OnRemovePressed)
-            },
-            onDismissListener = { showRemoveConfirmationDialog.value = false }
+            onConfirmListener = { viewActionHandler(OnRemoveConfirmed) },
+            onDismissListener = { viewActionHandler(OnRemoveConfirmationDismissed) },
         )
     }
 }
@@ -176,6 +179,7 @@ private fun Label(
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun RemoveButton(
     idle: Boolean,
@@ -186,26 +190,34 @@ private fun RemoveButton(
         LocalContentAlpha provides if (removing) ContentAlpha.disabled else ContentAlpha.high,
         LocalRippleTheme provides ErrorRippleTheme
     ) {
-        TextButton(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.stripeShapes.roundedCornerShape,
-            enabled = idle && !removing,
-            onClick = onRemove
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 8.dp,
+                    end = 8.dp
+                ).offset(y = 8.dp),
         ) {
-            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
-                Text(
-                    text = stringResource(id = R.string.stripe_paymentsheet_remove_card),
-                    color = MaterialTheme.colors.error.copy(LocalContentAlpha.current),
-                    style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
+            CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+                TextButton(
                     modifier = Modifier.align(Alignment.Center),
-                )
-
-                if (removing) {
-                    LoadingIndicator(
-                        modifier = Modifier.align(Alignment.CenterEnd),
-                        color = MaterialTheme.colors.error
+                    shape = MaterialTheme.stripeShapes.roundedCornerShape,
+                    enabled = idle && !removing,
+                    onClick = onRemove,
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.stripe_paymentsheet_remove_card),
+                        color = MaterialTheme.colors.error.copy(LocalContentAlpha.current),
+                        style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
                     )
                 }
+            }
+
+            if (removing) {
+                LoadingIndicator(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    color = MaterialTheme.colors.error,
+                )
             }
         }
     }
@@ -220,14 +232,15 @@ private fun Dropdown(
         mutableStateOf(false)
     }
 
-    Box {
+    Box(
+        modifier = Modifier
+            .clickable {
+                expanded = true
+            }
+            .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
+    ) {
         Row(
-            modifier = Modifier
-                .padding(10.dp)
-                .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-                .clickable {
-                    expanded = true
-                },
+            modifier = Modifier.padding(10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {

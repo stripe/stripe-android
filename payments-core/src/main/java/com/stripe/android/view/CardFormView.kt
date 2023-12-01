@@ -10,13 +10,16 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
+import android.widget.FrameLayout
 import android.widget.LinearLayout
+import androidx.annotation.RestrictTo
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.R
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
@@ -26,6 +29,8 @@ import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.DelicateCardDetailsApi
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.view.CardFormView.Style
 import com.stripe.android.view.CardValidCallback.Fields
 import com.stripe.android.uicore.R as UiCoreR
@@ -96,6 +101,8 @@ class CardFormView @JvmOverloads constructor(
         }
     }
 
+    internal var viewModelStoreOwner: ViewModelStoreOwner? = null
+
     private enum class Style(
         internal val attrValue: Int
     ) {
@@ -138,7 +145,7 @@ class CardFormView @JvmOverloads constructor(
                 requireNotNull(cardMultilineWidget.expiryDateEditText.validatedDate)
 
             return CardParams(
-                brand = cardMultilineWidget.brand,
+                brand = brand,
                 loggingTokens = setOf(CARD_FORM_VIEW),
                 number = cardMultilineWidget.validatedCardNumber?.value.orEmpty(),
                 expMonth = expirationDate.month,
@@ -150,6 +157,32 @@ class CardFormView @JvmOverloads constructor(
                     .build()
             )
         }
+
+    /**
+     * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
+     * otherwise `null`
+     */
+    private val paymentMethodCard: PaymentMethodCreateParams.Card?
+        @OptIn(DelicateCardDetailsApi::class)
+        get() {
+            return cardParams?.let {
+                PaymentMethodCreateParams.Card(
+                    number = it.number,
+                    cvc = it.cvc,
+                    expiryMonth = it.expMonth,
+                    expiryYear = it.expYear,
+                    attribution = it.attribution,
+                    networks = cardMultilineWidget.cardBrandView.createNetworksParam(),
+                )
+            }
+        }
+
+    /**
+     * A [PaymentMethodCreateParams] representing the card details and postal code if all fields
+     * are valid; otherwise `null`
+     */
+    val paymentMethodCreateParams: PaymentMethodCreateParams?
+        get() = paymentMethodCard?.let { PaymentMethodCreateParams.create(it) }
 
     init {
         orientation = VERTICAL
@@ -289,6 +322,9 @@ class CardFormView @JvmOverloads constructor(
         cardMultilineWidget.cardNumberTextInputLayout.placeholderText = null
         cardMultilineWidget.setCvcPlaceholderText("")
 
+        cardMultilineWidget.viewModelStoreOwner = viewModelStoreOwner
+        cardMultilineWidget.cardNumberEditText.viewModelStoreOwner = viewModelStoreOwner
+
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
         cardMultilineWidget.setBackgroundResource(R.drawable.stripe_card_form_view_text_input_layout_background)
         cardMultilineWidget.cvcEditText.doAfterTextChanged { cvcText ->
@@ -301,19 +337,26 @@ class CardFormView @JvmOverloads constructor(
             resources.getDimensionPixelSize(R.dimen.stripe_card_form_view_text_margin_horizontal)
         val layoutMarginVertical =
             resources.getDimensionPixelSize(R.dimen.stripe_card_form_view_text_margin_vertical)
+
+        cardMultilineWidget.cardNumberTextInputLayout.updateLayoutParams<FrameLayout.LayoutParams> {
+            marginStart = layoutMarginHorizontal
+            marginEnd = layoutMarginHorizontal
+            topMargin = layoutMarginVertical
+            bottomMargin = layoutMarginVertical
+        }
+
         setOf(
-            cardMultilineWidget.cardNumberTextInputLayout,
             cardMultilineWidget.expiryTextInputLayout,
             cardMultilineWidget.cvcInputLayout
-        ).forEach { layout ->
-            layout.updateLayoutParams<LayoutParams> {
+        ).forEach { frameLayout ->
+            frameLayout.updateLayoutParams<LayoutParams> {
                 marginStart = layoutMarginHorizontal
                 marginEnd = layoutMarginHorizontal
                 topMargin = layoutMarginVertical
                 bottomMargin = layoutMarginVertical
             }
-            layout.isErrorEnabled = false
-            layout.error = null
+            frameLayout.isErrorEnabled = false
+            frameLayout.error = null
         }
 
         cardMultilineWidget.setCvcIcon(PaymentsModelR.drawable.stripe_ic_cvc)
@@ -365,6 +408,12 @@ class CardFormView @JvmOverloads constructor(
         } else {
             super.onRestoreInstanceState(state)
         }
+    }
+
+    // TODO(tillh-stripe) Add docs and make public
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun setPreferredNetworks(preferredNetworks: List<CardBrand>) {
+        cardMultilineWidget.cardBrandView.merchantPreferredNetworks = preferredNetworks
     }
 
     private fun applyStandardStyle() {

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
 import android.graphics.Color
+import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.ActivityResultRegistryOwner
@@ -61,6 +62,11 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -86,6 +92,8 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
 import org.mockito.kotlin.isNull
@@ -202,6 +210,14 @@ internal class DefaultFlowControllerTest {
             )
         ).thenReturn(mock())
 
+        whenever(
+            activityResultRegistry.register(
+                any(),
+                any<BacsMandateConfirmationContract>(),
+                any()
+            )
+        ).thenReturn(mock())
+
         whenever(paymentLauncherAssistedFactory.create(any(), any(), anyOrNull(), any(), any()))
             .thenReturn(paymentLauncher)
 
@@ -234,7 +250,6 @@ internal class DefaultFlowControllerTest {
         verify(eventReporter)
             .onPaymentSuccess(
                 paymentSelection = isA<PaymentSelection.New>(),
-                currency = eq("usd"),
                 deferredIntentConfirmationType = isNull(),
             )
     }
@@ -258,8 +273,6 @@ internal class DefaultFlowControllerTest {
         verify(eventReporter)
             .onPaymentFailure(
                 paymentSelection = isA<PaymentSelection.New>(),
-                currency = eq("usd"),
-                isDecoupling = eq(false),
                 error = eq(PaymentSheetConfirmationError.Stripe(error)),
             )
     }
@@ -284,8 +297,6 @@ internal class DefaultFlowControllerTest {
 
         verify(eventReporter).onPaymentFailure(
             paymentSelection = isA<PaymentSelection.GooglePay>(),
-            currency = eq("usd"),
-            isDecoupling = eq(false),
             error = eq(PaymentSheetConfirmationError.GooglePay(errorCode)),
         )
     }
@@ -307,8 +318,6 @@ internal class DefaultFlowControllerTest {
 
         verify(eventReporter).onPaymentFailure(
             paymentSelection = isA<PaymentSelection.GooglePay>(),
-            currency = isNull(),
-            isDecoupling = eq(false),
             error = eq(PaymentSheetConfirmationError.InvalidState),
         )
     }
@@ -1370,7 +1379,6 @@ internal class DefaultFlowControllerTest {
 
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
-                currency = anyOrNull(),
                 deferredIntentConfirmationType = eq(deferredIntentConfirmationType),
             )
         }
@@ -1400,7 +1408,6 @@ internal class DefaultFlowControllerTest {
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
-            currency = anyOrNull(),
             deferredIntentConfirmationType = isNull(),
         )
     }
@@ -1430,7 +1437,6 @@ internal class DefaultFlowControllerTest {
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
-            currency = anyOrNull(),
             deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Client),
         )
     }
@@ -1452,7 +1458,6 @@ internal class DefaultFlowControllerTest {
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
-            currency = anyOrNull(),
             deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Server),
         )
     }
@@ -1525,6 +1530,61 @@ internal class DefaultFlowControllerTest {
             transactionId = anyOrNull(),
             label = eq(expectedLabel),
         )
+    }
+
+    @Test
+    fun `Launches Bacs with name, email, sort code and account number & succeeds payment`() = runTest {
+        fakeIntentConfirmationInterceptor.enqueueCompleteStep()
+
+        val onResult = argumentCaptor<ActivityResultCallback<BacsMandateConfirmationResult>>()
+        val launcher = mock<BacsMandateConfirmationLauncher> {
+            on { launch(any(), any()) } doAnswer {
+                onResult.firstValue.onActivityResult(BacsMandateConfirmationResult.Confirmed)
+            }
+        }
+        val launcherFactory = mock<BacsMandateConfirmationLauncherFactory> {
+            on { create(any()) } doReturn launcher
+        }
+
+        whenever(
+            activityResultRegistry.register(
+                any(),
+                any<BacsMandateConfirmationContract>(),
+                onResult.capture()
+            )
+        ).thenReturn(mock())
+
+        val flowController = createFlowController(
+            bacsMandateConfirmationLauncherFactory = launcherFactory
+        )
+
+        verify(launcherFactory).create(any())
+
+        flowController.configureExpectingSuccess(
+            clientSecret = PaymentSheetFixtures.SETUP_CLIENT_SECRET
+        )
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(
+                createBacsPaymentSelection()
+            )
+        )
+
+        flowController.confirm()
+
+        verify(launcher).launch(
+            eq(
+                BacsMandateData(
+                    name = BACS_NAME,
+                    email = BACS_EMAIL,
+                    sortCode = BACS_SORT_CODE,
+                    accountNumber = BACS_ACCOUNT_NUMBER,
+                )
+            ),
+            eq(PaymentSheet.Appearance())
+        )
+
+        verify(paymentResultCallback).onPaymentSheetResult(eq(PaymentSheetResult.Completed))
     }
 
     @Test
@@ -1676,6 +1736,7 @@ internal class DefaultFlowControllerTest {
             loginState = LinkState.LoginState.LoggedIn,
         ),
         viewModel: FlowControllerViewModel = createViewModel(),
+        bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock()
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentSheetLoader(
@@ -1684,13 +1745,15 @@ internal class DefaultFlowControllerTest {
                 paymentSelection = paymentSelection,
                 linkState = linkState,
             ),
-            viewModel
+            viewModel,
+            bacsMandateConfirmationLauncherFactory
         )
     }
 
     private fun createFlowController(
         paymentSheetLoader: PaymentSheetLoader,
         viewModel: FlowControllerViewModel = createViewModel(),
+        bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock()
     ) = DefaultFlowController(
         viewModelScope = testScope,
         lifecycleOwner = lifeCycleOwner,
@@ -1713,6 +1776,7 @@ internal class DefaultFlowControllerTest {
         productUsage = PRODUCT_USAGE,
         googlePayPaymentMethodLauncherFactory = createGooglePayPaymentMethodLauncherFactory(),
         prefsRepositoryFactory = { prefsRepository },
+        bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
         linkLauncher = linkPaymentLauncher,
         configurationHandler = FlowControllerConfigurationHandler(
             paymentSheetLoader = paymentSheetLoader,
@@ -1743,6 +1807,26 @@ internal class DefaultFlowControllerTest {
                 return googlePayPaymentMethodLauncher
             }
         }
+
+    private fun createBacsPaymentSelection(): PaymentSelection {
+        return PaymentSelection.New.GenericPaymentMethod(
+            labelResource = "Test",
+            iconResource = 0,
+            paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
+                bacsDebit = PaymentMethodCreateParams.BacsDebit(
+                    accountNumber = BACS_ACCOUNT_NUMBER,
+                    sortCode = BACS_SORT_CODE
+                ),
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = BACS_NAME,
+                    email = BACS_EMAIL
+                )
+            ),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+        )
+    }
 
     private companion object {
         private val NEW_CARD_PAYMENT_SELECTION = PaymentSelection.New.Card(
@@ -1775,6 +1859,11 @@ internal class DefaultFlowControllerTest {
         private val PRODUCT_USAGE = setOf("TestProductUsage")
 
         private val STATUS_BAR_COLOR = Color.GREEN
+
+        private const val BACS_ACCOUNT_NUMBER = "00012345"
+        private const val BACS_SORT_CODE = "108800"
+        private const val BACS_NAME = "John Doe"
+        private const val BACS_EMAIL = "johndoe@email.com"
     }
 }
 

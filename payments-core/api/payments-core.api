@@ -4609,12 +4609,52 @@ public final class com/stripe/android/model/PaymentMethodPreference$Creator : an
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public abstract class com/stripe/android/model/PaymentMethodUpdateParams : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/model/PaymentMethodUpdateParams$Companion;
+	public synthetic fun <init> (Lcom/stripe/android/model/PaymentMethod$Type;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun createCard ()Lcom/stripe/android/model/PaymentMethodUpdateParams;
+	public static final fun createCard (Ljava/lang/Integer;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
+	public static final fun createCard (Ljava/lang/Integer;Ljava/lang/Integer;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
+	public static final fun createCard (Ljava/lang/Integer;Ljava/lang/Integer;Lcom/stripe/android/model/PaymentMethodUpdateParams$Card$Networks;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
+	public static final fun createCard (Ljava/lang/Integer;Ljava/lang/Integer;Lcom/stripe/android/model/PaymentMethodUpdateParams$Card$Networks;Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
+	public fun toParamMap ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/model/PaymentMethodUpdateParams$Card : com/stripe/android/model/PaymentMethodUpdateParams {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExpiryMonth ()Ljava/lang/Integer;
+	public final fun getExpiryYear ()Ljava/lang/Integer;
+	public final fun getNetworks ()Lcom/stripe/android/model/PaymentMethodUpdateParams$Card$Networks;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public final class com/stripe/android/model/PaymentMethodUpdateParams$Card$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethodUpdateParams$Card;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/PaymentMethodUpdateParams$Card;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/PaymentMethodUpdateParams$Card$Networks : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPreferred ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toParamMap ()Ljava/util/Map;
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/model/PaymentMethodUpdateParams$Card$Networks$Creator : android/os/Parcelable$Creator {
@@ -4625,12 +4665,13 @@ public final class com/stripe/android/model/PaymentMethodUpdateParams$Card$Netwo
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethodUpdateParams$USBankAccount$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethodUpdateParams$USBankAccount;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/model/PaymentMethodUpdateParams$USBankAccount;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
+public final class com/stripe/android/model/PaymentMethodUpdateParams$Companion {
+	public final fun createCard ()Lcom/stripe/android/model/PaymentMethodUpdateParams;
+	public final fun createCard (Ljava/lang/Integer;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
+	public final fun createCard (Ljava/lang/Integer;Ljava/lang/Integer;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
+	public final fun createCard (Ljava/lang/Integer;Ljava/lang/Integer;Lcom/stripe/android/model/PaymentMethodUpdateParams$Card$Networks;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
+	public final fun createCard (Ljava/lang/Integer;Ljava/lang/Integer;Lcom/stripe/android/model/PaymentMethodUpdateParams$Card$Networks;Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
+	public static synthetic fun createCard$default (Lcom/stripe/android/model/PaymentMethodUpdateParams$Companion;Ljava/lang/Integer;Ljava/lang/Integer;Lcom/stripe/android/model/PaymentMethodUpdateParams$Card$Networks;Lcom/stripe/android/model/PaymentMethod$BillingDetails;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodUpdateParams;
 }
 
 public final class com/stripe/android/model/PaymentMethodsList$Creator : android/os/Parcelable$Creator {
@@ -7217,6 +7258,7 @@ public final class com/stripe/android/view/CardFormView : android/widget/LinearL
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getBrand ()Lcom/stripe/android/model/CardBrand;
 	public final fun getCardParams ()Lcom/stripe/android/model/CardParams;
+	public final fun getPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun setCardValidCallback (Lcom/stripe/android/view/CardValidCallback;)V
 	public fun setEnabled (Z)V
 }

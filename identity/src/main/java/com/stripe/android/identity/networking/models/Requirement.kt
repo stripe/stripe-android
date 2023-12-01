@@ -3,17 +3,13 @@ package com.stripe.android.identity.networking.models
 import android.content.Context
 import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.ConsentDestination
-import com.stripe.android.identity.navigation.DocSelectionDestination
-import com.stripe.android.identity.navigation.DriverLicenseScanDestination
-import com.stripe.android.identity.navigation.DriverLicenseUploadDestination
-import com.stripe.android.identity.navigation.IDScanDestination
-import com.stripe.android.identity.navigation.IDUploadDestination
+import com.stripe.android.identity.navigation.DocWarmupDestination
+import com.stripe.android.identity.navigation.DocumentScanDestination
+import com.stripe.android.identity.navigation.DocumentUploadDestination
 import com.stripe.android.identity.navigation.IdentityTopLevelDestination
 import com.stripe.android.identity.navigation.IndividualDestination
 import com.stripe.android.identity.navigation.IndividualWelcomeDestination
 import com.stripe.android.identity.navigation.OTPDestination
-import com.stripe.android.identity.navigation.PassportScanDestination
-import com.stripe.android.identity.navigation.PassportUploadDestination
 import com.stripe.android.identity.navigation.SelfieDestination
 import com.stripe.android.identity.navigation.finalErrorDestination
 import kotlinx.serialization.SerialName
@@ -29,9 +25,6 @@ internal enum class Requirement {
 
     @SerialName("id_document_front")
     IDDOCUMENTFRONT,
-
-    @SerialName("id_document_type")
-    IDDOCUMENTTYPE,
 
     @SerialName("face")
     FACE,
@@ -55,14 +48,6 @@ internal enum class Requirement {
     PHONE_OTP;
 
     internal companion object {
-        private val SCAN_UPLOAD_ROUTE_SET = setOf(
-            DriverLicenseUploadDestination.ROUTE,
-            IDUploadDestination.ROUTE,
-            PassportUploadDestination.ROUTE,
-            DriverLicenseScanDestination.ROUTE,
-            IDScanDestination.ROUTE,
-            PassportScanDestination.ROUTE
-        )
 
         val INDIVIDUAL_REQUIREMENT_SET = setOf(
             NAME,
@@ -86,19 +71,13 @@ internal enum class Requirement {
                 }
 
                 IDDOCUMENTBACK -> {
-                    SCAN_UPLOAD_ROUTE_SET.any {
-                        it.route == fromRoute
-                    }
+                    fromRoute == DocumentScanDestination.ROUTE.route ||
+                        fromRoute == DocumentUploadDestination.ROUTE.route
                 }
 
                 IDDOCUMENTFRONT -> {
-                    SCAN_UPLOAD_ROUTE_SET.any {
-                        it.route == fromRoute
-                    }
-                }
-
-                IDDOCUMENTTYPE -> {
-                    fromRoute == DocSelectionDestination.ROUTE.route
+                    fromRoute == DocumentScanDestination.ROUTE.route ||
+                        fromRoute == DocumentUploadDestination.ROUTE.route
                 }
 
                 FACE -> {
@@ -127,8 +106,8 @@ internal enum class Requirement {
                     ConsentDestination
                 }
 
-                intersect(listOf(IDDOCUMENTTYPE, IDDOCUMENTFRONT, IDDOCUMENTBACK)).isNotEmpty() -> {
-                    DocSelectionDestination
+                intersect(listOf(IDDOCUMENTFRONT, IDDOCUMENTBACK)).isNotEmpty() -> {
+                    DocWarmupDestination
                 }
 
                 contains(FACE) -> {

@@ -76,7 +76,7 @@ internal class CardWidgetViewModel(
 }
 
 internal fun View.doWithCardWidgetViewModel(
-    viewModelStoreOwner: ViewModelStoreOwner?,
+    viewModelStoreOwner: ViewModelStoreOwner? = null,
     action: LifecycleOwner.(CardWidgetViewModel) -> Unit,
 ) {
     if (!isAttachedToWindow && DEBUG) {

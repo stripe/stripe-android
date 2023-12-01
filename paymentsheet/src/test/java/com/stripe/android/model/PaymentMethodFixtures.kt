@@ -26,9 +26,12 @@ internal object PaymentMethodFixtures {
     )
 
     private val CARD_WITH_NETWORKS = CARD.copy(
+        displayBrand = PaymentMethod.Card.DisplayBrand(
+            type = CardBrand.CartesBancaires,
+        ),
         networks = PaymentMethod.Card.Networks(
             available = setOf("visa", "cartes_bancaires"),
-            preferred = "cartes_bancaires"
+            preferred = "cartes_bancaires",
         )
     )
 

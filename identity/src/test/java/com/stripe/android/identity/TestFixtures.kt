@@ -65,18 +65,6 @@ internal val CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA = Verificatio
     closed = true
 )
 
-internal val VERIFICATION_PAGE_DATA_MISSING_FRONT = VerificationPageData(
-    id = "id",
-    objectType = "type",
-    requirements = VerificationPageDataRequirements(
-        errors = emptyList(),
-        missings = listOf(Requirement.IDDOCUMENTFRONT)
-    ),
-    status = VerificationPageData.Status.REQUIRESINPUT,
-    submitted = false,
-    closed = false
-)
-
 internal val VERIFICATION_PAGE_DATA_MISSING_BACK = VerificationPageData(
     id = "id",
     objectType = "type",
@@ -107,18 +95,6 @@ internal val VERIFICATION_PAGE_DATA_MISSING_CONSENT = VerificationPageData(
     requirements = VerificationPageDataRequirements(
         errors = emptyList(),
         missings = listOf(Requirement.BIOMETRICCONSENT)
-    ),
-    status = VerificationPageData.Status.REQUIRESINPUT,
-    submitted = false,
-    closed = false
-)
-
-internal val VERIFICATION_PAGE_DATA_MISSING_DOCTYPE = VerificationPageData(
-    id = "id",
-    objectType = "type",
-    requirements = VerificationPageDataRequirements(
-        errors = emptyList(),
-        missings = listOf(Requirement.IDDOCUMENTTYPE)
     ),
     status = VerificationPageData.Status.REQUIRESINPUT,
     submitted = false,
