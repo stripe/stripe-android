@@ -90,11 +90,7 @@ internal fun EditPaymentMethodUi(
     val isIdle = viewState.status == EditPaymentMethodViewState.Status.Idle
 
     Column(
-        modifier = modifier.padding(
-            top = padding,
-            start = padding,
-            end = padding
-        )
+        modifier = modifier.padding(horizontal = padding)
     ) {
         SectionCard {
             val colors = TextFieldColors(false)

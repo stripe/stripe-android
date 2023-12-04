@@ -66,7 +66,7 @@ internal fun PaymentElement(
                 paymentMethods = supportedPaymentMethods,
                 onItemSelectedListener = onItemSelectedListener,
                 imageLoader = imageLoader,
-                modifier = Modifier.padding(top = 26.dp, bottom = 12.dp),
+                modifier = Modifier.padding(bottom = 12.dp),
             )
         }
 

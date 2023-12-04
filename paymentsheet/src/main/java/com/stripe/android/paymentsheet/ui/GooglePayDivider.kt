@@ -12,24 +12,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 
+internal val WalletDividerSpacing = 16.dp
+
 @Composable
-internal fun GooglePayDividerUi(
-    text: String = stringResource(R.string.stripe_paymentsheet_or_pay_with_card)
-) {
+internal fun WalletsDivider(text: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 18.dp)
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        GooglePayDividerLine(
+        WalletsDividerLine(
             modifier = Modifier.weight(1f),
         )
 
@@ -40,14 +36,14 @@ internal fun GooglePayDividerUi(
             modifier = Modifier.padding(horizontal = 8.dp),
         )
 
-        GooglePayDividerLine(
+        WalletsDividerLine(
             modifier = Modifier.weight(1f),
         )
     }
 }
 
 @Composable
-internal fun GooglePayDividerLine(
+private fun WalletsDividerLine(
     modifier: Modifier = Modifier,
 ) {
     val color = if (MaterialTheme.colors.surface.shouldUseDarkDynamicColor()) {
