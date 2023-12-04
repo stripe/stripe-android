@@ -2,6 +2,11 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.35.1 - 2023-12-04
+
+### Identity
+* [CHANGED][7407](https://github.com/stripe/stripe-android/pull/7407) Updated the UX for Consent and DocSelection page.
+
 ## 20.35.0 - 2023-11-28
 
 ### PaymentSheet
