@@ -162,7 +162,7 @@ private fun SharedPartnerAuthContent(
 private fun SharedPartnerLoading() {
     LoadingShimmerEffect { shimmerBrush ->
         Column(
-            Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
+            Modifier.padding(horizontal = 24.dp)
         ) {
             Spacer(modifier = Modifier.size(16.dp))
             Box(
@@ -203,6 +203,7 @@ private fun SharedPartnerLoading() {
                     .background(shimmerBrush, RoundedCornerShape(8.dp))
 
             )
+            Spacer(modifier = Modifier.size(16.dp))
         }
     }
 }

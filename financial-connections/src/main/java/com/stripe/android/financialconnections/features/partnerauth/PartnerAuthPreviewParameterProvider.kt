@@ -22,6 +22,7 @@ internal class PartnerAuthPreviewParameterProvider :
     PreviewParameterProvider<SharedPartnerAuthState> {
     override val values = sequenceOf(
         canonical(),
+        prepaneLoading(),
         browserLoading()
     )
 
@@ -45,6 +46,14 @@ internal class PartnerAuthPreviewParameterProvider :
                 isStripeDirect = false
             )
         ),
+        authenticationStatus = Uninitialized,
+        viewEffect = null,
+        activeAuthSession = null,
+        pane = Pane.PARTNER_AUTH
+    )
+
+    private fun prepaneLoading() = SharedPartnerAuthState(
+        payload = Loading(),
         authenticationStatus = Uninitialized,
         viewEffect = null,
         activeAuthSession = null,
