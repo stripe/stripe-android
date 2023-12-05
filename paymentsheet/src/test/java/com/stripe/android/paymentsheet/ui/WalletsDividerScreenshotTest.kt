@@ -9,7 +9,7 @@ import com.stripe.android.utils.screenshots.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 
-class GooglePayDividerScreenshotTest {
+class WalletsDividerScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
