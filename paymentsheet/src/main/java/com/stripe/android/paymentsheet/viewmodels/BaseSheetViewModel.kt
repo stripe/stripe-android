@@ -516,15 +516,11 @@ internal abstract class BaseSheetViewModel(
         googlePayState: GooglePayState,
         supportedPaymentMethods: List<PaymentMethodCode>,
     ): Int? {
-        return if (screen != null) {
-            headerTextFactory.create(
-                screen = screen,
-                isWalletEnabled = isLinkAvailable || googlePayState is GooglePayState.Available,
-                types = supportedPaymentMethods,
-            )
-        } else {
-            null
-        }
+        return headerTextFactory.create(
+            screen = screen,
+            isWalletEnabled = isLinkAvailable || googlePayState is GooglePayState.Available,
+            types = supportedPaymentMethods,
+        )
     }
 
     abstract val shouldCompleteLinkFlowInline: Boolean

@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.ui.res.stringResource
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.utils.screenshots.FontSize
 import com.stripe.android.utils.screenshots.PaparazziRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
@@ -7,7 +9,7 @@ import com.stripe.android.utils.screenshots.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 
-class GooglePayDividerScreenshotTest {
+class WalletsDividerScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
@@ -19,7 +21,9 @@ class GooglePayDividerScreenshotTest {
     @Test
     fun testDefault() {
         paparazziRule.snapshot {
-            GooglePayDividerUi()
+            WalletsDivider(
+                text = stringResource(R.string.stripe_paymentsheet_or_pay_with_card),
+            )
         }
     }
 }

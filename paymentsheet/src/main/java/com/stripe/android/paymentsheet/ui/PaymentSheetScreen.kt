@@ -26,6 +26,7 @@ import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentSheetPrimaryButtonBinding
+import com.stripe.android.paymentsheet.navigation.topContentPadding
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.elements.H4Text
@@ -89,16 +90,18 @@ internal fun PaymentSheetScreenContent(
             H4Text(
                 text = stringResource(text),
                 modifier = Modifier
-                    .padding(bottom = 2.dp)
+                    .padding(bottom = 16.dp)
                     .padding(horizontal = horizontalPadding),
             )
         }
 
         walletsState?.let { state ->
+            val bottomSpacing = WalletDividerSpacing - currentScreen.topContentPadding
             Wallet(
                 state = state,
                 onGooglePayPressed = viewModel::checkoutWithGooglePay,
                 onLinkPressed = viewModel::handleLinkPressed,
+                modifier = Modifier.padding(bottom = bottomSpacing),
             )
         }
 
@@ -179,8 +182,10 @@ internal fun Wallet(
             )
         }
 
+        Spacer(modifier = Modifier.requiredHeight(WalletDividerSpacing))
+
         val text = stringResource(state.dividerTextResource)
-        GooglePayDividerUi(text)
+        WalletsDivider(text)
     }
 }
 
