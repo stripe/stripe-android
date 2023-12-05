@@ -27,13 +27,13 @@ internal object StripeIntentValidator {
 
         val exception = when {
             stripeIntent is PaymentIntent && stripeIntent.confirmationMethod != Automatic -> {
-                PaymentSheetLoadingException.InvalidConfirmationMethod(paymentMethod, stripeIntent.confirmationMethod)
+                PaymentSheetLoadingException.InvalidConfirmationMethod(stripeIntent.confirmationMethod)
             }
             stripeIntent is PaymentIntent && stripeIntent.isInTerminalState -> {
                 PaymentSheetLoadingException.PaymentIntentInTerminalState(paymentMethod, stripeIntent.status)
             }
             stripeIntent is PaymentIntent && (stripeIntent.amount == null || stripeIntent.currency == null) -> {
-                PaymentSheetLoadingException.MissingAmountOrCurrency(paymentMethod)
+                PaymentSheetLoadingException.MissingAmountOrCurrency
             }
             stripeIntent is SetupIntent && stripeIntent.isInTerminalState -> {
                 PaymentSheetLoadingException.SetupIntentInTerminalState(paymentMethod, stripeIntent.status)

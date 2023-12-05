@@ -332,7 +332,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         if (pendingResult is InternalPaymentResult.Completed) {
             // If we just received a transaction result after process death, we don't error. Instead, we dismiss
             // PaymentSheet and return a `Completed` result to the caller.
-            val usedPaymentMethod = error.asPaymentSheetLoadingException.paymentMethod
+            val usedPaymentMethod = error.asPaymentSheetLoadingException.usedPaymentMethod
             handlePaymentCompleted(usedPaymentMethod, finishImmediately = true)
         } else {
             setStripeIntent(null)

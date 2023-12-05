@@ -10,12 +10,13 @@ import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.Unknow
 internal sealed class PaymentSheetLoadingException : Throwable() {
 
     abstract val type: String
-    abstract val paymentMethod: PaymentMethod?
+    abstract val usedPaymentMethod: PaymentMethod?
 
     data class InvalidConfirmationMethod(
-        override val paymentMethod: PaymentMethod?,
         private val confirmationMethod: PaymentIntent.ConfirmationMethod,
     ) : PaymentSheetLoadingException() {
+
+        override val usedPaymentMethod: PaymentMethod? = null
 
         override val type: String = "invalidConfirmationMethod"
 
@@ -27,10 +28,11 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
     }
 
     data class NoPaymentMethodTypesAvailable(
-        override val paymentMethod: PaymentMethod?,
         private val requested: String,
         private val supported: String,
     ) : PaymentSheetLoadingException() {
+
+        override val usedPaymentMethod: PaymentMethod? = null
 
         override val type: String = "noPaymentMethodTypesAvailable"
 
@@ -40,7 +42,7 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
     }
 
     data class PaymentIntentInTerminalState(
-        override val paymentMethod: PaymentMethod?,
+        override val usedPaymentMethod: PaymentMethod?,
         private val status: StripeIntent.Status?,
     ) : PaymentSheetLoadingException() {
 
@@ -54,7 +56,7 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
     }
 
     data class SetupIntentInTerminalState(
-        override val paymentMethod: PaymentMethod?,
+        override val usedPaymentMethod: PaymentMethod?,
         private val status: StripeIntent.Status?,
     ) : PaymentSheetLoadingException() {
 
@@ -67,9 +69,8 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
             """.trimIndent()
     }
 
-    data class MissingAmountOrCurrency(
-        override val paymentMethod: PaymentMethod?,
-    ) : PaymentSheetLoadingException() {
+    object MissingAmountOrCurrency : PaymentSheetLoadingException() {
+        override val usedPaymentMethod: PaymentMethod? = null
         override val type: String = "missingAmountOrCurrency"
         override val message: String = "PaymentIntent must contain amount and currency."
     }
@@ -83,7 +84,7 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
 
         override val message: String? = cause.message
 
-        override val paymentMethod: PaymentMethod? = null
+        override val usedPaymentMethod: PaymentMethod? = null
     }
 }
 
