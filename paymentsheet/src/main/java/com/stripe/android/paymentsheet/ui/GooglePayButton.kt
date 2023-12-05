@@ -1,29 +1,25 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.content.Context
-import android.content.res.ColorStateList
-import android.util.AttributeSet
-import android.view.LayoutInflater
-import android.widget.FrameLayout
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
-import com.google.android.gms.wallet.button.ButtonConstants
+import com.google.android.gms.wallet.button.ButtonConstants.ButtonTheme
 import com.google.android.gms.wallet.button.ButtonConstants.ButtonType
 import com.google.android.gms.wallet.button.ButtonOptions
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.convertDpToPx
-import com.stripe.android.uicore.isSystemDarkTheme
 import org.json.JSONArray
+import com.google.android.gms.wallet.button.PayButton as GmsWalletPayButton
 
 @Composable
 internal fun GooglePayButton(
@@ -35,172 +31,136 @@ internal fun GooglePayButton(
     onPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val cornerRadius = LocalContext.current.convertDpToPx(
-        StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
-    ).toInt()
-
+    val context = LocalContext.current
     val isInspectionMode = LocalInspectionMode.current
 
-    AndroidView(
-        factory = { context -> GooglePayButton(context) },
-        update = { googlePayButton ->
-            if (!isInspectionMode) {
-                googlePayButton.initialize(
-                    cornerRadius = cornerRadius,
-                    allowCreditCards = allowCreditCards,
-                    buttonType = buttonType,
-                    billingAddressParameters = billingAddressParameters
-                )
-            }
-            googlePayButton.isEnabled = isEnabled
-            googlePayButton.updateState(state)
-            googlePayButton.viewBinding.googlePayPaymentButton.setOnClickListener { onPressed() }
-        },
-        modifier = modifier.testTag(GooglePayButton.TEST_TAG),
-    )
-}
-
-internal class GooglePayButton @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr) {
-    internal val viewBinding = StripeGooglePayButtonBinding.inflate(
-        LayoutInflater.from(context),
-        this
-    )
-
-    private var state: PrimaryButton.State? = null
-
-    init {
-        // Call super so we don't inadvertently effect the primary button as well.
-        super.setClickable(true)
-        super.setEnabled(true)
-    }
-
-    fun initialize(
-        cornerRadius: Int,
-        allowCreditCards: Boolean,
-        @ButtonType buttonType: Int,
-        billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?,
+    val allowedPaymentMethods = remember(
+        context,
+        isInspectionMode,
+        billingAddressParameters,
+        allowCreditCards
     ) {
-        initializePrimaryButton()
-        val isDark = context.isSystemDarkTheme()
-        val allowedPaymentMethods = JSONArray().put(
-            GooglePayJsonFactory(context).createCardPaymentMethod(
-                billingAddressParameters = billingAddressParameters,
-                allowCreditCards = allowCreditCards
-            )
-        ).toString()
-
-        val options = with(ButtonOptions.newBuilder()) {
-            setButtonTheme(
-                if (isDark) {
-                    ButtonConstants.ButtonTheme.LIGHT
-                } else {
-                    ButtonConstants.ButtonTheme.DARK
-                }
-            )
-            setButtonType(buttonType)
-            setAllowedPaymentMethods(allowedPaymentMethods)
-            setCornerRadius(
-                // Corner radius of 0 is undefined in Google Pay
-                if (cornerRadius <= 0) {
-                    1
-                } else {
-                    cornerRadius
-                }
-            )
-            build()
-        }
-
-        viewBinding.googlePayPaymentButton.initialize(options)
-    }
-
-    private fun initializePrimaryButton() {
-        with(viewBinding.googlePayPrimaryButton) {
-            setAppearanceConfiguration(
-                StripeTheme.primaryButtonStyle,
-                null
-            )
-            val backgroundColor = ContextCompat.getColor(
-                context,
-                R.color.stripe_paymentsheet_googlepay_primary_button_background_color
-            )
-            finishedBackgroundColor = backgroundColor
-            backgroundTintList = ColorStateList.valueOf(backgroundColor)
-            setLockIconDrawable(
-                R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_lock
-            )
-            setIndicatorColor(
-                ContextCompat.getColor(
-                    context,
-                    R.color.stripe_paymentsheet_googlepay_primary_button_tint_color,
+        if (isInspectionMode) {
+            ""
+        } else {
+            JSONArray().put(
+                GooglePayJsonFactory(context).createCardPaymentMethod(
+                    billingAddressParameters = billingAddressParameters,
+                    allowCreditCards = allowCreditCards
                 )
-            )
-            setConfirmedIconDrawable(
-                R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_checkmark
-            )
-            setDefaultLabelColor(
-                ContextCompat.getColor(
-                    context,
-                    R.color.stripe_paymentsheet_googlepay_primary_button_tint_color
-                )
-            )
+            ).toString()
         }
     }
 
-    private fun onReadyState() {
-        viewBinding.googlePayPrimaryButton.isVisible = false
-        viewBinding.googlePayPaymentButton.isVisible = true
+    val buttonTheme = if (isSystemInDarkTheme()) {
+        ButtonTheme.LIGHT
+    } else {
+        ButtonTheme.DARK
     }
 
-    private fun onStartProcessing() {
-        viewBinding.googlePayPrimaryButton.isVisible = true
-        viewBinding.googlePayPaymentButton.isVisible = false
-    }
-
-    private fun onFinishProcessing() {
-        viewBinding.googlePayPrimaryButton.isVisible = true
-        viewBinding.googlePayPaymentButton.isVisible = false
-    }
-
-    override fun setEnabled(enabled: Boolean) {
-        super.setEnabled(enabled)
-        viewBinding.googlePayPrimaryButton.isEnabled = enabled
-        viewBinding.googlePayPaymentButton.isEnabled = enabled
-        updateAlpha()
-    }
-
-    private fun updateAlpha() {
-        viewBinding.googlePayButtonLayout.alpha =
-            if ((state == null || state is PrimaryButton.State.Ready) && !isEnabled) {
-                0.5f
-            } else {
-                1.0f
-            }
-    }
-
-    fun updateState(state: PrimaryButton.State?) {
-        viewBinding.googlePayPrimaryButton.updateState(state)
-        this.state = state
-        updateAlpha()
-
-        when (state) {
-            is PrimaryButton.State.Ready -> {
-                onReadyState()
-            }
-            PrimaryButton.State.StartProcessing -> {
-                onStartProcessing()
-            }
-            is PrimaryButton.State.FinishProcessing -> {
-                onFinishProcessing()
-            }
-            null -> {}
-        }
-    }
-
-    internal companion object {
-        const val TEST_TAG = "google-pay-button"
+    when (state) {
+        null,
+        is PrimaryButton.State.Ready -> ComposePayButton(
+            modifier = modifier,
+            allowedPaymentMethods = allowedPaymentMethods,
+            buttonType = buttonType,
+            buttonTheme = buttonTheme,
+            radius = PrimaryButtonTheme.shape.cornerRadius,
+            enabled = isEnabled,
+            onPressed = onPressed,
+        )
+        is PrimaryButton.State.StartProcessing,
+        is PrimaryButton.State.FinishProcessing -> GooglePrimaryButton(
+            modifier = modifier,
+            state = state,
+        )
     }
 }
+
+@Composable
+private fun ComposePayButton(
+    allowedPaymentMethods: String,
+    @ButtonType buttonType: Int,
+    @ButtonTheme buttonTheme: Int,
+    radius: Dp,
+    enabled: Boolean,
+    onPressed: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    AndroidView(
+        modifier = modifier.fillMaxWidth().testTag(GOOGLE_PAY_BUTTON_TEST_TAG),
+        factory = { context -> GmsWalletPayButton(context) },
+        update = { button ->
+            button.apply {
+                initialize(
+                    ButtonOptions.newBuilder()
+                        .setButtonType(buttonType)
+                        .setButtonTheme(buttonTheme)
+                        .setCornerRadius(button.context.convertDpToPx(radius).toInt())
+                        .setAllowedPaymentMethods(allowedPaymentMethods)
+                        .build()
+                )
+
+                alpha = if (enabled) FULL_ALPHA else HALF_ALPHA
+                isEnabled = enabled
+
+                if (enabled) {
+                    setOnClickListener {
+                        onPressed()
+                    }
+                } else {
+                    setOnClickListener(null)
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun GooglePrimaryButton(
+    modifier: Modifier = Modifier,
+    state: PrimaryButton.State
+) {
+    val processingState = if (state is PrimaryButton.State.FinishProcessing) {
+        PrimaryButtonProcessingState.Completed
+    } else {
+        PrimaryButtonProcessingState.Processing
+    }
+
+    PrimaryButtonTheme(
+        colors = PrimaryButtonColors(
+            background = colorResource(
+                id = R.color.stripe_paymentsheet_googlepay_primary_button_background_color
+            ),
+            onBackground = colorResource(
+                id = R.color.stripe_paymentsheet_googlepay_primary_button_tint_color
+            ),
+            successBackground = colorResource(
+                id = R.color.stripe_paymentsheet_googlepay_primary_button_background_color
+            ),
+            onSuccessBackground = colorResource(
+                id = R.color.stripe_paymentsheet_googlepay_primary_button_tint_color
+            ),
+        )
+    ) {
+        Box(modifier = modifier.testTag(GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG)) {
+            PrimaryButton(
+                label = "",
+                locked = true,
+                enabled = true,
+                processingState = processingState,
+                onProcessingCompleted = {
+                    if (state is PrimaryButton.State.FinishProcessing) {
+                        state.onComplete()
+                    }
+                }
+            ) {}
+        }
+    }
+}
+
+private const val FULL_ALPHA = 1f
+private const val HALF_ALPHA = 0.5f
+
+internal const val GOOGLE_PAY_BUTTON_TEST_TAG = "google-pay-button"
+internal const val GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG = "google-pay-primary-button"
