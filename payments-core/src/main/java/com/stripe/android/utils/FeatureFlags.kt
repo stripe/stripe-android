@@ -1,7 +1,6 @@
 package com.stripe.android.utils
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.BuildConfig
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object FeatureFlags {
@@ -15,11 +14,7 @@ class FeatureFlag {
     private var overrideInTest: Boolean? = null
 
     val isEnabled: Boolean
-        get() = if (BuildConfig.DEBUG) {
-            overrideInTest ?: true
-        } else {
-            false
-        }
+        get() = overrideInTest ?: true
 
     fun setEnabled(isEnabled: Boolean) {
         overrideInTest = isEnabled
