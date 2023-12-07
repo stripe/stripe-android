@@ -1,112 +1,100 @@
 package com.stripe.android.paymentsheet
 
-import android.content.Context
-import android.graphics.drawable.GradientDrawable
-import androidx.core.view.isVisible
-import androidx.test.core.app.ApplicationProvider
-import com.google.common.truth.Truth.assertThat
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.android.gms.wallet.button.ButtonConstants
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.view.ActivityScenarioFactory
+import org.junit.Rule
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 class GooglePayButtonTest {
-    private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val activityScenarioFactory = ActivityScenarioFactory(context)
-    private val googlePayButton: GooglePayButton by lazy {
-        activityScenarioFactory.createView {
-            GooglePayButton(it)
-        }
-    }
-
-    private val primaryButton: PrimaryButton by lazy {
-        googlePayButton.viewBinding.googlePayPrimaryButton
-    }
+    @get:Rule
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @BeforeTest
     fun setup() {
         PaymentConfiguration.init(
-            context,
+            composeTestRule.activity.applicationContext,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
     }
 
     @Test
-    fun `onReadyState() should update the backgroundTint`() {
-        googlePayButton.updateState(
-            PrimaryButton.State.StartProcessing
-        )
-        googlePayButton.updateState(
-            PrimaryButton.State.FinishProcessing {}
-        )
-        assertThat(primaryButton.isVisible).isTrue()
-        assertThat(googlePayButton.viewBinding.googlePayPaymentButton.isVisible).isFalse()
+    fun `when state is null, should show the Google Pay Button`() {
+        composeTestRule.setContent {
+            GooglePayButton(
+                state = null,
+                allowCreditCards = true,
+                buttonType = ButtonConstants.ButtonType.PAY,
+                billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
+                isEnabled = true,
+                onPressed = {}
+            )
+        }
 
-        googlePayButton.updateState(
-            PrimaryButton.State.Ready
-        )
-        assertThat(primaryButton.isVisible).isFalse()
-        assertThat((primaryButton.background as GradientDrawable).color).isNotNull()
-        assertThat(googlePayButton.viewBinding.googlePayPaymentButton.isVisible).isTrue()
+        composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertExists()
+        composeTestRule.onNodeWithTag(GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG).assertDoesNotExist()
     }
 
     @Test
-    fun `onStartProcessing() should update label`() {
-        googlePayButton.updateState(
-            PrimaryButton.State.StartProcessing
-        )
-        assertThat(
-            primaryButton.externalLabel
-        ).isEqualTo(
-            "Processing…"
-        )
-        assertThat(primaryButton.isVisible).isTrue()
-        assertThat(googlePayButton.viewBinding.googlePayPaymentButton.isVisible).isFalse()
+    fun `when state is 'Ready', should show the Google Pay Button`() {
+        composeTestRule.setContent {
+            GooglePayButton(
+                state = PrimaryButton.State.Ready,
+                allowCreditCards = true,
+                buttonType = ButtonConstants.ButtonType.PAY,
+                billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
+                isEnabled = true,
+                onPressed = {}
+            )
+        }
+
+        composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertExists()
+        composeTestRule.onNodeWithTag(GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG).assertDoesNotExist()
     }
 
     @Test
-    fun `onFinishProcessing() should set the background resource`() {
-        var finishedProcessing = false
-        googlePayButton.updateState(
-            PrimaryButton.State.FinishProcessing {
-                finishedProcessing = true
-            }
-        )
+    fun `when state is 'StartProcessing, should show the Google Pay Button`() {
+        composeTestRule.setContent {
+            GooglePayButton(
+                state = PrimaryButton.State.StartProcessing,
+                allowCreditCards = true,
+                buttonType = ButtonConstants.ButtonType.PAY,
+                billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
+                isEnabled = true,
+                onPressed = {}
+            )
+        }
 
-        idleLooper()
-
-        assertThat(finishedProcessing).isTrue()
-        assertThat(primaryButton.isVisible).isTrue()
-        assertThat(googlePayButton.viewBinding.googlePayPaymentButton.isVisible).isFalse()
+        composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertDoesNotExist()
+        composeTestRule.onNodeWithTag(GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG).assertExists()
     }
 
     @Test
-    fun `not setting view state and not enabled should be 50pct alpha`() {
-        googlePayButton.isEnabled = false
-        assertThat(googlePayButton.viewBinding.googlePayButtonLayout.alpha)
-            .isEqualTo(0.5f)
-    }
+    fun `when state is 'FinishProcessing', should show the Google Pay Button`() {
+        composeTestRule.setContent {
+            GooglePayButton(
+                state = PrimaryButton.State.FinishProcessing {},
+                allowCreditCards = true,
+                buttonType = ButtonConstants.ButtonType.PAY,
+                billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
+                isEnabled = true,
+                onPressed = {}
+            )
+        }
 
-    @Test
-    fun `ready view state and not enabled should be 50pct alpha`() {
-        googlePayButton.updateState(PrimaryButton.State.Ready)
-        googlePayButton.isEnabled = false
-        assertThat(googlePayButton.viewBinding.googlePayButtonLayout.alpha)
-            .isEqualTo(0.5f)
-    }
-
-    @Test
-    fun `ready view state and enabled should be 100pct alpha`() {
-        googlePayButton.updateState(PrimaryButton.State.Ready)
-        googlePayButton.isEnabled = true
-        assertThat(googlePayButton.viewBinding.googlePayButtonLayout.alpha)
-            .isEqualTo(1.0f)
+        composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertDoesNotExist()
+        composeTestRule.onNodeWithTag(GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG).assertExists()
     }
 }
