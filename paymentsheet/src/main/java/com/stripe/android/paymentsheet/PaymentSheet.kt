@@ -321,7 +321,7 @@ class PaymentSheet internal constructor(
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    data class Configuration internal constructor(
+    data class Configuration(
         /**
          * Your customer-facing business name.
          *
@@ -430,36 +430,8 @@ class PaymentSheet internal constructor(
          * be used. If no preferred network is applicable, Stripe will select
          * the network.
          */
-        val preferredNetworks: List<CardBrand> = listOf(),
+        val preferredNetworks: List<CardBrand> = emptyList(),
     ) : Parcelable {
-        @JvmOverloads
-        constructor(
-            merchantDisplayName: String,
-            customer: CustomerConfiguration? = null,
-            googlePay: GooglePayConfiguration? = null,
-            primaryButtonColor: ColorStateList? = null,
-            defaultBillingDetails: BillingDetails? = null,
-            shippingDetails: AddressDetails? = null,
-            allowsDelayedPaymentMethods: Boolean = false,
-            allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
-            appearance: Appearance = Appearance(),
-            primaryButtonLabel: String? = null,
-            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
-                BillingDetailsCollectionConfiguration(),
-        ) : this(
-            merchantDisplayName = merchantDisplayName,
-            customer = customer,
-            googlePay = googlePay,
-            primaryButtonColor = primaryButtonColor,
-            defaultBillingDetails = defaultBillingDetails,
-            shippingDetails = shippingDetails,
-            allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
-            appearance = appearance,
-            primaryButtonLabel = primaryButtonLabel,
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-            preferredNetworks = listOf()
-        )
 
         /**
          * [Configuration] builder for cleaner object creation from Java.
@@ -528,10 +500,6 @@ class PaymentSheet internal constructor(
                 this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
             }
 
-            /*
-             * TODO(samer-stripe): Make this function public prior to release
-             */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun preferredNetworks(
                 preferredNetworks: List<CardBrand>
             ) = apply {
