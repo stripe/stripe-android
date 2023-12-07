@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [FIXED][7683](https://github.com/stripe/stripe-android/pull/7683) Fixed an issue where PaymentSheet didn't correctly consider `BillingDetailsCollectionConfiguration` when transacting with Google Pay.
+
 ## 20.35.1 - 2023-12-04
 
 ### Identity
