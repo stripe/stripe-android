@@ -2,7 +2,6 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
-=======
 ### PaymentSheet
 * [ADDED][7713](https://github.com/stripe/stripe-android/pull/7713) PaymentSheet now supports card brand choice for eligible merchants and transactions. To provide a list of preferred networks, use `PaymentSheet.Configuration.preferredNetworks`.
 
