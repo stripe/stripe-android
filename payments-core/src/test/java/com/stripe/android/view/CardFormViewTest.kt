@@ -46,12 +46,6 @@ internal class CardFormViewTest {
     @get:Rule
     val testActivityRule = createTestActivityRule<CardFormViewTestActivity>(useMaterial = true)
 
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.cardBrandChoice,
-        isEnabled = false,
-    )
-
     @Before
     fun setup() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -352,8 +346,6 @@ internal class CardFormViewTest {
 
     @Test
     fun `Returns the correct create params when user selects no brand in CBC flow`() {
-        featureFlagTestRule.setEnabled(true)
-
         runCardFormViewTest(isCbcEligible = true) {
             binding.populate(
                 visa = "4000002500001001",
@@ -370,8 +362,6 @@ internal class CardFormViewTest {
 
     @Test
     fun `Returns the correct create params when user selects a brand in CBC flow`() {
-        featureFlagTestRule.setEnabled(true)
-
         runCardFormViewTest(isCbcEligible = true) {
             binding.populate(
                 visa = "4000002500001001",

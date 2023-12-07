@@ -26,17 +26,14 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
-import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
@@ -53,12 +50,6 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultPaymentSheetLoaderTest {
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.cardBrandChoice,
-        isEnabled = false,
-    )
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val eventReporter = mock<EventReporter>()
@@ -770,23 +761,7 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
-    fun `Doesn't include card brand choice state if feature is disabled`() = runTest {
-        val loader = createPaymentSheetLoader(isCbcEligible = true)
-
-        val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-        ).getOrThrow()
-
-        assertThat(result.isEligibleForCardBrandChoice).isFalse()
-    }
-
-    @Test
     fun `Includes card brand choice state if feature is enabled`() = runTest {
-        featureFlagTestRule.setEnabled(true)
-
         val loader = createPaymentSheetLoader(isCbcEligible = true)
 
         val result = loader.load(

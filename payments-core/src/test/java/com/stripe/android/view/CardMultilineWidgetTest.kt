@@ -68,12 +68,6 @@ internal class CardMultilineWidgetTest {
     private val accountRangeStore = DefaultCardAccountRangeStore(context)
 
     @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.cardBrandChoice,
-        isEnabled = false,
-    )
-
-    @get:Rule
     val testActivityRule = createTestActivityRule<CardMultilineWidgetTestActivity>()
 
     @BeforeTest
@@ -1207,8 +1201,6 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun `Returns the correct create params when user selects no brand in CBC flow`() {
-        featureFlagTestRule.setEnabled(true)
-
         runCardMultilineWidgetTest(isCbcEligible = true) {
             cardMultilineWidget.setCardNumber("4000002500001001")
             cardMultilineWidget.setExpiryDate(12, 2030)
@@ -1221,8 +1213,6 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun `Returns the correct create params when user selects a brand in CBC flow`() {
-        featureFlagTestRule.setEnabled(true)
-
         runCardMultilineWidgetTest(isCbcEligible = true) {
             cardMultilineWidget.setCardNumber("4000002500001001")
             cardMultilineWidget.setExpiryDate(12, 2030)
