@@ -225,14 +225,16 @@ internal class CustomerSheetViewModel @Inject constructor(
                     unconfirmedPaymentMethod?.let { method ->
                         unconfirmedPaymentMethod = null
 
+                        val newPaymentSelection = PaymentSelection.Saved(paymentMethod = method)
+
                         viewState.copy(
                             savedPaymentMethods = listOf(method) + viewState.savedPaymentMethods,
-                            paymentSelection = PaymentSelection.Saved(paymentMethod = method),
+                            paymentSelection = newPaymentSelection,
                             primaryButtonVisible = true,
                             primaryButtonLabel = resources.getString(
                                 R.string.stripe_paymentsheet_confirm
                             ),
-                            mandateText = viewState.paymentSelection?.mandateText(
+                            mandateText = newPaymentSelection.mandateText(
                                 context = application,
                                 merchantName = configuration.merchantDisplayName,
                                 isSaveForFutureUseSelected = false,
