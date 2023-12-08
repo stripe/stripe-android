@@ -32,6 +32,5 @@ tags:
 - tapOn:
     text: "Continue"
     retryTapIfNoChange: false
-- tapOn: "Done"
 - assertVisible: ".*Completed!.*"
 - stopRecording
