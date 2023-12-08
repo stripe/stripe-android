@@ -21,7 +21,6 @@ sealed class Request {
     )
 
     data class CreateEphemeralKeyParams(
-        @field:Json(name = "customer_id") val customerId: String,
         @field:Json(name = "account") val account: String,
     )
 }

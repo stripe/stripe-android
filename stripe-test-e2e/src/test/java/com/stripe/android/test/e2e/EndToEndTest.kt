@@ -562,7 +562,6 @@ internal class EndToEndTest {
     @Test
     fun `Test update payment method`() = runTest {
         val stripe = Stripe(context, FrenchPublishableKey)
-        val customerId = "cus_LvNOzX6BFQtXb5"
 
         val card = PaymentMethodCreateParams.Card.Builder()
             .setNumber("4000002500001001")
@@ -575,17 +574,14 @@ internal class EndToEndTest {
             paymentMethodCreateParams = PaymentMethodCreateParams.create(card),
         )
 
-        val ephemeralKeySecret = service.createEphemeralKey(
-            request = Request.CreateEphemeralKeyParams(
-                customerId = customerId,
-                account = "fr",
-            )
-        ).ephemeralKeySecret
+        val createEphemeralKeyResponse = service.createEphemeralKey(
+            request = Request.CreateEphemeralKeyParams(account = "fr"),
+        )
 
         val attachResult = stripe.attachPaymentMethod(
             paymentMethodId = paymentMethod.id!!,
-            customerId = customerId,
-            ephemeralKeySecret = ephemeralKeySecret,
+            customerId = createEphemeralKeyResponse.customerId,
+            ephemeralKeySecret = createEphemeralKeyResponse.ephemeralKeySecret,
         )
         assertThat(attachResult.isSuccess).isTrue()
 
@@ -599,7 +595,7 @@ internal class EndToEndTest {
         val updatedPaymentMethod = stripe.updatePaymentMethod(
             paymentMethodId = paymentMethod.id!!,
             paymentMethodUpdateParams = updateParams,
-            ephemeralKeySecret = ephemeralKeySecret,
+            ephemeralKeySecret = createEphemeralKeyResponse.ephemeralKeySecret,
         )
 
         assertThat(updatedPaymentMethod.card?.expiryMonth).isEqualTo(2)

@@ -41,6 +41,7 @@ sealed class Response {
     ) : Response()
 
     data class CreatedEphemeralKey(
+        @field:Json(name = "customer") val customerId: String,
         @field:Json(name = "ephemeral_key_secret") val ephemeralKeySecret: String,
     )
 }
