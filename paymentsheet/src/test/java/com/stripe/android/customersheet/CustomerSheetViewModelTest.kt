@@ -2554,6 +2554,35 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `Removing the current and original payment selection results in the selection being null`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            isFinancialConnectionsAvailable = { true },
+            savedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD),
+            initialBackStack = listOf(
+                selectPaymentMethodViewState.copy(
+                    savedPaymentMethods = listOf(CARD_PAYMENT_METHOD, US_BANK_ACCOUNT),
+                    paymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD),
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            val initialViewState = awaitViewState<SelectPaymentMethod>()
+            assertThat(initialViewState.savedPaymentMethods)
+                .containsExactly(CARD_PAYMENT_METHOD, US_BANK_ACCOUNT).inOrder()
+            assertThat(initialViewState.paymentSelection)
+                .isEqualTo(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(CARD_PAYMENT_METHOD))
+
+            val finalViewState = awaitViewState<SelectPaymentMethod>()
+            assertThat(finalViewState.savedPaymentMethods).containsExactly(US_BANK_ACCOUNT).inOrder()
+            assertThat(finalViewState.paymentSelection).isNull()
+        }
+    }
+
     private fun mockUSBankAccountResult(
         isVerified: Boolean
     ): CollectBankAccountResultInternal.Completed {
