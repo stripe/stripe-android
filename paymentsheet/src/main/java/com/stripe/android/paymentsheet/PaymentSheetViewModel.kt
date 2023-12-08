@@ -338,6 +338,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             setStripeIntent(null)
             onFatal(error)
         }
+
+        pendingPaymentResult = null
     }
 
     private fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
