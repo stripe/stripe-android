@@ -1419,7 +1419,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 params = null,
             ),
             jsonParser = MobileCardElementConfigParser(),
-        )
+        ).onFailure {
+            fireAnalyticsRequest(PaymentAnalyticsEvent.MobileCardElementLoadFailure)
+        }
     }
 
     private suspend fun retrieveElementsSession(

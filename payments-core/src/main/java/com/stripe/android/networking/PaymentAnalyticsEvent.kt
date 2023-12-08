@@ -97,7 +97,9 @@ internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
 
     CardMetadataLoadedTooSlow("card_metadata_loaded_too_slow"),
     CardMetadataLoadFailure("card_metadata_load_failure"),
-    CardMetadataMissingRange("card_metadata_missing_range");
+    CardMetadataMissingRange("card_metadata_missing_range"),
+
+    MobileCardElementLoadFailure("card_element_config_load_failure");
 
     @Keep
     override fun toString(): String {
