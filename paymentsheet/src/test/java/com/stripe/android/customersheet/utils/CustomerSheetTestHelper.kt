@@ -227,7 +227,7 @@ internal object CustomerSheetTestHelper {
             application = application,
             initialBackStack = initialBackStack,
             workContext = workContext,
-            savedPaymentSelection = savedPaymentSelection,
+            originalPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
             formViewModelSubcomponentBuilderProvider = formViewModelSubcomponentBuilderProvider,
             resources = application.resources,
