@@ -305,6 +305,29 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = emptyMap()
     }
 
+    data class CardBrandChoiceDropdownDisplayed(
+        override val isDeferred: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_display_cbc_dropdown"
+        override val additionalParams: Map<String, Any?> = emptyMap()
+    }
+
+    data class CardBrandChoiceDropdownOpened(
+        val initialSelection: String?,
+        override val isDeferred: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_display_cbc_dropdown"
+        override val additionalParams: Map<String, Any?> = emptyMap()
+    }
+
+    data class CardBrandChoiceDropdownClosed(
+        val selection: String?,
+        override val isDeferred: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_display_cbc_dropdown"
+        override val additionalParams: Map<String, Any?> = emptyMap()
+    }
+
     private fun standardParams(
         isDecoupled: Boolean,
     ): Map<String, Any?> = mapOf(

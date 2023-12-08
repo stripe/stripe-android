@@ -103,6 +103,16 @@ internal interface EventReporter {
         type: String,
     )
 
+    fun onCardBrandChoiceDropdownDisplayed()
+
+    fun onCardBrandChoiceDropdownOpened(
+        initialSelection: String?,
+    )
+
+    fun onCardBrandChoiceDropdownClosed(
+        selection: String?,
+    )
+
     enum class Mode(val code: String) {
         Complete("complete"),
         Custom("custom");

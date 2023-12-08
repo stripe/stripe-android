@@ -32,7 +32,7 @@ import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.elements.ApiParameterDestination
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.LocalAutofillEventReporter
+import com.stripe.android.uicore.elements.LocalUiEventReporter
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -92,7 +92,7 @@ internal fun AddPaymentMethod(
 
     Column(modifier = modifier.fillMaxWidth()) {
         CompositionLocalProvider(
-            LocalAutofillEventReporter provides sheetViewModel::reportAutofillEvent
+            LocalUiEventReporter provides sheetViewModel::reportUiEvent
         ) {
             val initializationMode = (sheetViewModel as? PaymentSheetViewModel)
                 ?.args

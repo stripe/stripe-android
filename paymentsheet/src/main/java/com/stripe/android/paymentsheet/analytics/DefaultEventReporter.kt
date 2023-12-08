@@ -7,6 +7,9 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.CardBrandChoiceDropdownClosed
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.CardBrandChoiceDropdownDisplayed
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.CardBrandChoiceDropdownOpened
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 import kotlinx.coroutines.CoroutineScope
@@ -213,6 +216,18 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isDeferred = isDeferred,
             )
         )
+    }
+
+    override fun onCardBrandChoiceDropdownDisplayed() {
+        fireEvent(CardBrandChoiceDropdownDisplayed(isDeferred))
+    }
+
+    override fun onCardBrandChoiceDropdownOpened(initialSelection: String?) {
+        fireEvent(CardBrandChoiceDropdownOpened(initialSelection, isDeferred))
+    }
+
+    override fun onCardBrandChoiceDropdownClosed(selection: String?) {
+        fireEvent(CardBrandChoiceDropdownClosed(selection, isDeferred))
     }
 
     private fun fireEvent(event: PaymentSheetEvent) {

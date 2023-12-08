@@ -33,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -60,22 +59,10 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.stripe.android.core.Logger
-import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.stripeColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val LocalAutofillEventReporter = staticCompositionLocalOf(::defaultAutofillEventReporter)
-
-private fun defaultAutofillEventReporter(): (String) -> Unit {
-    return { autofillType ->
-        Logger.getInstance(BuildConfig.DEBUG)
-            .debug("LocalAutofillEventReporter $autofillType event not reported")
-    }
-}
 
 /**
  * This is focused on converting an [TextFieldController] into what is displayed in a section
@@ -156,14 +143,14 @@ fun TextField(
         }
     }
 
-    val autofillReporter = LocalAutofillEventReporter.current
+    val uiEventReporter = LocalUiEventReporter.current
 
     val autofillNode = remember {
         AutofillNode(
             autofillTypes = listOfNotNull(textFieldController.autofillType),
             onFill = {
                 textFieldController.autofillType?.let { type ->
-                    autofillReporter(type.name)
+                    uiEventReporter(UiEvent.Autofill(type.name))
                 }
                 textFieldController.onValueChange(it)
             }
@@ -407,16 +394,18 @@ private fun TrailingDropdown(
     loading: Boolean,
     onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit
 ) {
-    var expanded by remember {
-        mutableStateOf(false)
-    }
+    val uiEventReporter = LocalUiEventReporter.current
 
+    var expanded by remember { mutableStateOf(false) }
     val show = !loading && !icon.hide
 
     Box(
         modifier = Modifier
             .focusProperties { canFocus = false }
-            .clickable(enabled = show) { expanded = true }
+            .clickable(enabled = show) {
+                uiEventReporter(UiEvent.CardBrandChoiceDropdownOpened(icon.currentItem.id))
+                expanded = true
+            }
             .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
     ) {
         Row(
@@ -433,6 +422,10 @@ private fun TrailingDropdown(
             )
 
             if (show) {
+                LaunchedEffect(Unit) {
+                    uiEventReporter(UiEvent.CardBrandChoiceDropdownDisplayed)
+                }
+
                 CompositionLocalProvider(
                     LocalContentColor
                         provides
@@ -459,10 +452,11 @@ private fun TrailingDropdown(
             optionTextColor = MaterialTheme.stripeColors.onComponent,
             onChoiceSelected = { item ->
                 onDropdownItemClicked(item)
-
+                uiEventReporter(UiEvent.CardBrandChoiceDropdownClosed(item.id))
                 expanded = false
             },
             onDismiss = {
+                uiEventReporter(UiEvent.CardBrandChoiceDropdownClosed(null))
                 expanded = false
             }
         )

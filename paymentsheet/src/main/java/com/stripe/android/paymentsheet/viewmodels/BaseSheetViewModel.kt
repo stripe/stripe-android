@@ -47,6 +47,7 @@ import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.uicore.elements.UiEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -594,8 +595,21 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    fun reportAutofillEvent(type: String) {
-        eventReporter.onAutofill(type)
+    fun reportUiEvent(event: UiEvent) {
+        when (event) {
+            is UiEvent.Autofill -> {
+                eventReporter.onAutofill(event.type)
+            }
+            is UiEvent.CardBrandChoiceDropdownDisplayed -> {
+                eventReporter.onCardBrandChoiceDropdownDisplayed()
+            }
+            is UiEvent.CardBrandChoiceDropdownOpened -> {
+                eventReporter.onCardBrandChoiceDropdownOpened(event.selection)
+            }
+            is UiEvent.CardBrandChoiceDropdownClosed -> {
+                eventReporter.onCardBrandChoiceDropdownClosed(event.selection)
+            }
+        }
     }
 
     abstract fun onPaymentResult(paymentResult: PaymentResult)
