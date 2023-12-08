@@ -33,7 +33,7 @@ class FinancialConnectionsWebviewExampleActivity : AppCompatActivity() {
                 Button(
                     onClick = { onButtonClick() },
                 ) {
-                    Text("Connect Accounts!")
+                    Text("Launch Webview-based app")
                 }
                 Divider(modifier = Modifier.padding(vertical = 5.dp))
             }
