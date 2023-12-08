@@ -140,16 +140,18 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                         .name,
                 )
 
+                val preferredNetworks = configuration.preferredNetworks.joinToString(", ") { it.code }
+
                 @Suppress("DEPRECATION")
                 val configurationMap = mapOf(
                     FIELD_CUSTOMER to (configuration.customer != null),
                     FIELD_GOOGLE_PAY to (configuration.googlePay != null),
                     FIELD_PRIMARY_BUTTON_COLOR to (configuration.primaryButtonColor != null),
                     FIELD_BILLING to (configuration.defaultBillingDetails != null),
-                    FIELD_DELAYED_PMS to (configuration.allowsDelayedPaymentMethods),
+                    FIELD_DELAYED_PMS to configuration.allowsDelayedPaymentMethods,
                     FIELD_APPEARANCE to appearanceConfigMap,
-                    FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
-                        billingDetailsCollectionConfigMap,
+                    FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to billingDetailsCollectionConfigMap,
+                    FIELD_PREFERRED_NETWORKS to "[$preferredNetworks]",
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -354,6 +356,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_CURRENCY = "currency"
         const val FIELD_SELECTED_LPM = "selected_lpm"
         const val FIELD_ERROR_MESSAGE = "error_message"
+        const val FIELD_PREFERRED_NETWORKS = "preferred_networks"
     }
 }
 
