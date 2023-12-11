@@ -12,7 +12,6 @@ import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import android.widget.LinearLayout
-import androidx.annotation.RestrictTo
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import androidx.core.os.bundleOf

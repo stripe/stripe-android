@@ -23,9 +23,7 @@ import com.stripe.android.databinding.StripeCardFormViewBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.CardElementTestHelper
-import com.stripe.android.utils.FeatureFlags
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
 import com.stripe.android.view.CardFormViewTestActivity.Companion.VIEW_ID

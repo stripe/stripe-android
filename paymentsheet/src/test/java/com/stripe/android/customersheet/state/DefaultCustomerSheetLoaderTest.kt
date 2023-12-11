@@ -493,14 +493,14 @@ class DefaultCustomerSheetLoaderTest {
     }
 
     @Test
-    fun `Loads correct CBC eligibility if feature enabled`() = runTest {
+    fun `Loads correct CBC eligibility`() = runTest {
         val loader = createCustomerSheetLoader(isCbcEligible = true)
         val state = loader.load(CustomerSheet.Configuration(merchantDisplayName = "Example")).getOrThrow()
         assertThat(state.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Eligible(emptyList()))
     }
 
     @Test
-    fun `Loads correct CBC eligibility and merchant-preferred networks if feature enabled`() = runTest {
+    fun `Loads correct CBC eligibility and merchant-preferred networks`() = runTest {
         val loader = createCustomerSheetLoader(isCbcEligible = true)
 
         val state = loader.load(
@@ -513,13 +513,6 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(state.cbcEligibility).isEqualTo(
             CardBrandChoiceEligibility.Eligible(preferredNetworks = listOf(CardBrand.CartesBancaires))
         )
-    }
-
-    @Test
-    fun `Does not load CBC eligibility if feature disabled`() = runTest {
-        val loader = createCustomerSheetLoader(isCbcEligible = true)
-        val state = loader.load(CustomerSheet.Configuration(merchantDisplayName = "Example")).getOrThrow()
-        assertThat(state.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
     }
 
     private fun createCustomerSheetLoader(
