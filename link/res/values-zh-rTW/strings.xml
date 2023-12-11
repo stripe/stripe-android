@@ -27,7 +27,7 @@
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_header">輸入您的驗證碼</string>
   <!-- Two factor authentication screen heading -->
-  <string name="stripe_verification_header_inline">登錄您的 Link 帳戶</string>
+  <string name="stripe_verification_header_inline">登入您的 Link 帳戶</string>
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_header_prefilled">用您保存的資訊，更快結帳</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->

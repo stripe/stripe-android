@@ -125,7 +125,7 @@
   <string name="stripe_expiry_date_hint">月份/年份</string>
   <string name="stripe_expiry_label_short">有效期</string>
   <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">连接我们的支付提供商时出现了问题。请检查网络连接，然后重试。</string>
+  <string name="stripe_failure_connection_error">连接我们的支付服务商时出现了问题。请检查网络连接，然后重试。</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">我们未能验证您的支付方式。请选择另一支付方式并重试。</string>
   <!-- Error when 3DS2 authentication timed out. -->
