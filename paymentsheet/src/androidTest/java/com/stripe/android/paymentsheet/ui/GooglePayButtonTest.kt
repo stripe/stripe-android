@@ -5,10 +5,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import com.google.android.gms.wallet.button.ButtonConstants.ButtonType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.paymentsheet.MainActivity
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import org.junit.Rule
 import org.junit.Test
 
@@ -30,7 +30,7 @@ class GooglePayButtonTest {
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 onPressed = { didCallOnPressed = true },
                 modifier = Modifier.testTag(testTag),
-                buttonType = ButtonType.PAY
+                buttonType = GooglePayButtonType.Pay
             )
         }
 
@@ -56,7 +56,7 @@ class GooglePayButtonTest {
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 onPressed = { didCallOnPressed = true },
                 modifier = Modifier.testTag(testTag),
-                buttonType = ButtonType.PAY
+                buttonType = GooglePayButtonType.Pay
             )
         }
 
