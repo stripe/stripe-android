@@ -25,9 +25,7 @@ import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
-import com.stripe.android.hcaptcha.DefaultIsHCaptchaAvailable
 import com.stripe.android.hcaptcha.HCaptchaProxy
-import com.stripe.android.hcaptcha.IsHCaptchaAvailable
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.BankAccount
 import com.stripe.android.model.BankAccountTokenParams
