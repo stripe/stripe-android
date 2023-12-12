@@ -811,7 +811,7 @@ internal class CustomerSheetViewModel @Inject constructor(
             if (customerAdapter.canCreateSetupIntents) {
                 attachWithSetupIntent(paymentMethod = paymentMethod)
             } else {
-                attachPaymentMethod(paymentMethod = paymentMethod)
+                attachPaymentMethod(id = paymentMethod.id!!)
             }
         }
     }
@@ -961,16 +961,16 @@ internal class CustomerSheetViewModel @Inject constructor(
         )
     }
 
-    private suspend fun attachPaymentMethod(paymentMethod: PaymentMethod) {
-        customerAdapter.attachPaymentMethod(paymentMethod.id!!)
-            .onSuccess {
+    private suspend fun attachPaymentMethod(id: String) {
+        customerAdapter.attachPaymentMethod(id)
+            .onSuccess { attachedPaymentMethod ->
                 eventReporter.onAttachPaymentMethodSucceeded(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
                 )
                 safeUpdateSelectPaymentMethodState {
                     it.copy(
-                        savedPaymentMethods = listOf(paymentMethod) + it.savedPaymentMethods,
-                        paymentSelection = PaymentSelection.Saved(paymentMethod = paymentMethod),
+                        savedPaymentMethods = listOf(attachedPaymentMethod) + it.savedPaymentMethods,
+                        paymentSelection = PaymentSelection.Saved(attachedPaymentMethod),
                         primaryButtonVisible = true,
                         primaryButtonLabel = resources.getString(
                             R.string.stripe_paymentsheet_confirm
@@ -983,7 +983,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
                 )
                 logger.error(
-                    msg = "Failed to attach payment method to Customer: $paymentMethod",
+                    msg = "Failed to attach payment method $id to customer",
                     t = cause,
                 )
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
