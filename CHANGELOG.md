@@ -11,6 +11,8 @@
 ### Payments
 * [ADDED][7713](https://github.com/stripe/stripe-android/pull/7713) `CardInputWidget`, `CardMultilineWidget`, and `CardFormView` now support [card brand choice](https://stripe.com/docs/card-brand-choice) for eligible merchants. To provide a list of preferred networks, use `setPreferredNetworks()`.
 
+* [DEPRECATED][7723](https://github.com/stripe/stripe-android/pull/7723) IssuingCardPinService
+
 ## 20.35.2 - 2023-12-11
 
 ### PaymentSheet
