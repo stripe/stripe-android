@@ -1,10 +1,10 @@
 package com.stripe.android.ui.core
 
-internal interface IsHCaptchaAvailable {
+internal interface IsStripeCardScanAvailable {
     operator fun invoke(): Boolean
 }
 
-internal class DefaultIsHCaptchaAvailable : IsHCaptchaAvailable {
+internal class DefaultIsStripeCardScanAvailable : IsStripeCardScanAvailable {
     override fun invoke(): Boolean {
         return try {
             Class.forName("com.stripe.android.stripecardscan.cardscan.CardScanSheet")
