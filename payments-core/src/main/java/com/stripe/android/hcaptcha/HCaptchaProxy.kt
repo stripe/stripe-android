@@ -7,6 +7,8 @@ import com.hcaptcha.sdk.HCaptchaConfig.HCaptchaConfigBuilder
 import com.hcaptcha.sdk.HCaptchaError
 import com.hcaptcha.sdk.HCaptchaSize
 
+private const val HCAPTCHA_UNAVAILABLE_REASON = "Invalid hCaptcha"
+
 /**
  * Proxy to access hcaptcha android sdk code safely
  *
@@ -33,7 +35,7 @@ internal interface HCaptchaProxy {
             return if (isHCaptchaAvailable()) {
                 provider()
             } else {
-                UnsupportedHCaptchaProxy()
+                UnsupportedHCaptchaProxy(onComplete)
             }
         }
     }
@@ -62,12 +64,16 @@ internal class DefaultHCaptchaProxy(
     }
 }
 
-internal class UnsupportedHCaptchaProxy : HCaptchaProxy {
+internal class UnsupportedHCaptchaProxy(
+    private val onComplete: (hcaptchaToken: String) -> Unit,
+) : HCaptchaProxy {
     override fun performPassiveHCaptcha() {
         if (BuildConfig.DEBUG) {
             throw IllegalStateException(
                 "Missing hcaptcha android SDK dependency, please add it to your apps build.gradle"
             )
+        } else {
+            onComplete(HCAPTCHA_UNAVAILABLE_REASON)
         }
     }
 }

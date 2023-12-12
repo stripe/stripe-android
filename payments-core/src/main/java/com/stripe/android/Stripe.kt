@@ -78,8 +78,7 @@ class Stripe internal constructor(
     internal val paymentController: PaymentController,
     publishableKey: String,
     internal val stripeAccountId: String? = null,
-    private val workContext: CoroutineContext = Dispatchers.IO,
-    private val isHCaptchaAvailable: IsHCaptchaAvailable = DefaultIsHCaptchaAvailable()
+    private val workContext: CoroutineContext = Dispatchers.IO
 ) {
     internal val publishableKey: String = ApiKeyValidator().requireValid(publishableKey)
 
@@ -1695,28 +1694,32 @@ class Stripe internal constructor(
                 )
             ).flatMap { radarSession ->
                 val siteKey = radarSession.passiveCaptchaSiteKey
-                if (!siteKey.isNullOrEmpty() && isHCaptchaAvailable() && activity != null) {
-                    val hCaptchaToken = suspendCancellableCoroutine { continuation ->
-                        HCaptchaProxy.create(
-                            activity = activity,
-                            siteKey = siteKey,
-                            rqdata = radarSession.passiveCaptchaRqdata,
-                            onComplete = { continuation.resume(it) { _ -> } }
-                        ).performPassiveHCaptcha()
-                    }
-
-                    return@flatMap stripeRepository.attachHCaptchaToRadarSession(
-                        radarSessionToken = radarSession.id,
-                        hcaptchaToken = hCaptchaToken,
-                        hcaptchaEKey = null,
-                        ApiRequest.Options(
-                            apiKey = publishableKey,
-                            stripeAccount = stripeAccountId
-                        )
+                if (activity == null && BuildConfig.DEBUG) {
+                    throw IllegalStateException(
+                        "An activity was not provided when creating a radar session. Please provide a valid activity."
                     )
-                } else {
+                } else if (activity == null || siteKey.isNullOrEmpty()) {
                     return@flatMap Result.success(radarSession)
                 }
+
+                val hCaptchaToken = suspendCancellableCoroutine { continuation ->
+                    HCaptchaProxy.create(
+                        activity = activity,
+                        siteKey = siteKey,
+                        rqdata = radarSession.passiveCaptchaRqdata,
+                        onComplete = { continuation.resume(it) { _ -> } }
+                    ).performPassiveHCaptcha()
+                }
+
+                return@flatMap stripeRepository.attachHCaptchaToRadarSession(
+                    radarSessionToken = radarSession.id,
+                    hcaptchaToken = hCaptchaToken,
+                    hcaptchaEKey = null, // TODO (awush): we don't yet get this value from hCaptcha
+                    ApiRequest.Options(
+                        apiKey = publishableKey,
+                        stripeAccount = stripeAccountId
+                    )
+                )
             }
         }
     }
