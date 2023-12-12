@@ -58,7 +58,7 @@ internal fun PaymentOptionsScreenContent(
             H4Text(
                 text = stringResource(text),
                 modifier = Modifier
-                    .padding(bottom = 2.dp)
+                    .padding(bottom = 16.dp)
                     .padding(horizontal = horizontalPadding),
             )
         }
