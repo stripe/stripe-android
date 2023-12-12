@@ -91,7 +91,7 @@ internal fun PaymentOptions(
     }
 }
 
-@Preview
+@Preview(widthDp = 700)
 @Composable
 private fun PaymentOptionsPreview() {
     DefaultStripeTheme {
@@ -104,7 +104,7 @@ private fun PaymentOptionsPreview() {
                     PaymentOptionsItem.SavedPaymentMethod(
                         displayName = "4242",
                         paymentMethod = PaymentMethod(
-                            id = "id",
+                            id = "001",
                             created = null,
                             liveMode = false,
                             code = PaymentMethod.Type.Card.code,
@@ -113,6 +113,16 @@ private fun PaymentOptionsPreview() {
                                 brand = CardBrand.Visa,
                                 last4 = "4242",
                             )
+                        )
+                    ),
+                    PaymentOptionsItem.SavedPaymentMethod(
+                        displayName = "4242",
+                        paymentMethod = PaymentMethod(
+                            id = "002",
+                            created = null,
+                            liveMode = false,
+                            code = PaymentMethod.Type.SepaDebit.code,
+                            type = PaymentMethod.Type.SepaDebit,
                         )
                     ),
                 ),
