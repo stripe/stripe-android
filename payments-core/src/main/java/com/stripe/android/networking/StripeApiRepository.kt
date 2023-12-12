@@ -1006,6 +1006,30 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    override suspend fun attachHCaptchaToRadarSession(
+        radarSessionToken: String,
+        hcaptchaToken: String,
+        hcaptchaEKey: String?,
+        requestOptions: ApiRequest.Options
+    ): Result<RadarSession> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getApiUrl("radar/session/%s/attach_hcaptcha_token", radarSessionToken),
+                options = requestOptions,
+                params = mapOf(
+                    "passive_captcha_token" to hcaptchaToken
+                ).plus(
+                    hcaptchaEKey?.let {
+                        mapOf(
+                            "passive_captcha_ekey" to hcaptchaEKey
+                        )
+                    } ?: emptyMap()
+                )
+            ),
+            jsonParser = RadarSessionJsonParser(),
+        )
+    }
+
     /**
      * Creates a new Link account for the credentials provided.
      */

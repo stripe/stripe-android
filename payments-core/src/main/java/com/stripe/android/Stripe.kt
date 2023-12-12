@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.Size
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.ApiKeyValidator
@@ -24,6 +25,9 @@ import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
+import com.stripe.android.hcaptcha.DefaultIsHCaptchaAvailable
+import com.stripe.android.hcaptcha.HCaptchaProxy
+import com.stripe.android.hcaptcha.IsHCaptchaAvailable
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.BankAccount
 import com.stripe.android.model.BankAccountTokenParams
@@ -53,6 +57,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
@@ -73,7 +78,8 @@ class Stripe internal constructor(
     internal val paymentController: PaymentController,
     publishableKey: String,
     internal val stripeAccountId: String? = null,
-    private val workContext: CoroutineContext = Dispatchers.IO
+    private val workContext: CoroutineContext = Dispatchers.IO,
+    private val isHCaptchaAvailable: IsHCaptchaAvailable = DefaultIsHCaptchaAvailable()
 ) {
     internal val publishableKey: String = ApiKeyValidator().requireValid(publishableKey)
 
@@ -1672,12 +1678,14 @@ class Stripe internal constructor(
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
+     * @param activity the owning activity. This will be used to identify fraud via a passive (invisible) hCaptcha
      */
     @UiThread
     @JvmOverloads
     fun createRadarSession(
         stripeAccountId: String? = this.stripeAccountId,
-        callback: ApiResultCallback<RadarSession>
+        callback: ApiResultCallback<RadarSession>,
+        activity: AppCompatActivity? = null
     ) {
         executeAsyncForResult(callback) {
             stripeRepository.createRadarSession(
@@ -1685,7 +1693,31 @@ class Stripe internal constructor(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
                 )
-            )
+            ).flatMap { radarSession ->
+                val siteKey = radarSession.passiveCaptchaSiteKey
+                if (!siteKey.isNullOrEmpty() && isHCaptchaAvailable() && activity != null) {
+                    val hCaptchaToken = suspendCancellableCoroutine { continuation ->
+                        HCaptchaProxy.create(
+                            activity = activity,
+                            siteKey = siteKey,
+                            rqdata = radarSession.passiveCaptchaRqdata,
+                            onComplete = { continuation.resume(it) { _ -> } }
+                        ).performPassiveHCaptcha()
+                    }
+
+                    return@flatMap stripeRepository.attachHCaptchaToRadarSession(
+                        radarSessionToken = radarSession.id,
+                        hcaptchaToken = hCaptchaToken,
+                        hcaptchaEKey = null,
+                        ApiRequest.Options(
+                            apiKey = publishableKey,
+                            stripeAccount = stripeAccountId
+                        )
+                    )
+                } else {
+                    return@flatMap Result.success(radarSession)
+                }
+            }
         }
     }
 
@@ -1868,6 +1900,12 @@ class Stripe internal constructor(
                 callback.onError(StripeException.create(it))
             }
         )
+    }
+
+    inline fun <T, R> Result<T>.flatMap(block: (T) -> (Result<R>)): Result<R> {
+        return this.mapCatching {
+            block(it).getOrThrow()
+        }
     }
 
     companion object {

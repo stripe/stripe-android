@@ -44,6 +44,8 @@ allprojects {
         gradlePluginPortal()
         // until Dokka 1.8.0 is released and we no longer need dev builds
         maven { url "https://maven.pkg.jetbrains.space/kotlin/p/dokka/dev" }
+        // required for hcaptcha
+        maven { url 'https://jitpack.io' }
     }
 }
 

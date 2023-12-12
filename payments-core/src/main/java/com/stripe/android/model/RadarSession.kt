@@ -5,5 +5,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class RadarSession(
-    val id: String
+    val id: String,
+    val passiveCaptchaSiteKey: String?,
+    val passiveCaptchaRqdata: String?
 ) : StripeModel

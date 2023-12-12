@@ -10,6 +10,8 @@ dependencies {
     implementation project(":stripe-ui-core")
     compileOnly project(':financial-connections')
 
+    compileOnly libs.hcaptchaAndroidSdk
+
     implementation libs.accompanist.appCompatThemeAdapter
     implementation libs.accompanist.materialThemeAdapter
     implementation libs.accompanist.material3ThemeAdapter

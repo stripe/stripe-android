@@ -254,6 +254,14 @@ interface StripeRepository {
         requestOptions: ApiRequest.Options
     ): Result<RadarSession>
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun attachHCaptchaToRadarSession(
+        radarSessionToken: String,
+        hcaptchaToken: String,
+        hcaptchaEKey: String?,
+        requestOptions: ApiRequest.Options
+    ): Result<RadarSession>
+
     // Link endpoints
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Suppress("LongParameterList")
