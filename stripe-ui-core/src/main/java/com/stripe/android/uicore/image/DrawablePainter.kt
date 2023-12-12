@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.getValue
@@ -140,6 +141,7 @@ internal class DrawablePainter(
  * This function tries to dispatch lifecycle events to [drawable] as much as possible from
  * within Compose.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 fun rememberDrawablePainter(drawable: Drawable?): Painter = remember(drawable) {
     when (drawable) {
