@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -58,12 +60,14 @@ internal fun PaymentOptionsScreenContent(
             H4Text(
                 text = stringResource(text),
                 modifier = Modifier
-                    .padding(bottom = 2.dp)
+                    .padding(bottom = 16.dp)
                     .padding(horizontal = horizontalPadding),
             )
         }
 
-        currentScreen.Content(viewModel)
+        Box(modifier = Modifier.animateContentSize()) {
+            currentScreen.Content(viewModel)
+        }
 
         if (mandateText?.showAbovePrimaryButton == true) {
             Mandate(
