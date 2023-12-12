@@ -74,7 +74,7 @@ import com.stripe.android.ui.core.R as UiCoreR
 internal class CustomerSheetViewModel @Inject constructor(
     private val application: Application, // TODO (jameswoo) remove application
     initialBackStack: @JvmSuppressWildcards List<CustomerSheetViewState>,
-    private var savedPaymentSelection: PaymentSelection?,
+    private var originalPaymentSelection: PaymentSelection?,
     private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
     private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
@@ -225,14 +225,16 @@ internal class CustomerSheetViewModel @Inject constructor(
                     unconfirmedPaymentMethod?.let { method ->
                         unconfirmedPaymentMethod = null
 
+                        val newPaymentSelection = PaymentSelection.Saved(paymentMethod = method)
+
                         viewState.copy(
                             savedPaymentMethods = listOf(method) + viewState.savedPaymentMethods,
-                            paymentSelection = PaymentSelection.Saved(paymentMethod = method),
+                            paymentSelection = newPaymentSelection,
                             primaryButtonVisible = true,
                             primaryButtonLabel = resources.getString(
                                 R.string.stripe_paymentsheet_confirm
                             ),
-                            mandateText = viewState.paymentSelection?.mandateText(
+                            mandateText = newPaymentSelection.mandateText(
                                 context = application,
                                 merchantName = configuration.merchantDisplayName,
                                 isSaveForFutureUseSelected = false,
@@ -268,7 +270,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 supportedPaymentMethods.clear()
                 supportedPaymentMethods.addAll(state.supportedPaymentMethods)
 
-                savedPaymentSelection = state.paymentSelection
+                originalPaymentSelection = state.paymentSelection
                 isGooglePayReadyAndEnabled = state.isGooglePayReady
                 stripeIntent = state.stripeIntent
 
@@ -316,14 +318,14 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private fun onDismissed() {
         _result.update {
-            InternalCustomerSheetResult.Canceled(savedPaymentSelection)
+            InternalCustomerSheetResult.Canceled(originalPaymentSelection)
         }
     }
 
     private fun onBackPressed() {
         if (backStack.value.size == 1) {
             _result.tryEmit(
-                InternalCustomerSheetResult.Canceled(savedPaymentSelection)
+                InternalCustomerSheetResult.Canceled(originalPaymentSelection)
             )
         } else {
             backStack.update {
@@ -342,7 +344,7 @@ internal class CustomerSheetViewModel @Inject constructor(
             val isEditing = !it.isEditing
             it.copy(
                 isEditing = isEditing,
-                primaryButtonVisible = !isEditing && savedPaymentSelection != it.paymentSelection,
+                primaryButtonVisible = !isEditing && originalPaymentSelection != it.paymentSelection,
             )
         }
     }
@@ -459,18 +461,24 @@ internal class CustomerSheetViewModel @Inject constructor(
 
         if (currentViewState is CustomerSheetViewState.SelectPaymentMethod) {
             updateViewState<CustomerSheetViewState.SelectPaymentMethod> { viewState ->
+                val originalSelection = originalPaymentSelection
+
+                val didRemoveCurrentSelection = viewState.paymentSelection is PaymentSelection.Saved &&
+                    viewState.paymentSelection.paymentMethod.id == paymentMethod.id
+
+                val didRemoveOriginalSelection = viewState.paymentSelection is PaymentSelection.Saved &&
+                    originalSelection is PaymentSelection.Saved &&
+                    viewState.paymentSelection.paymentMethod.id == originalSelection.paymentMethod.id
+
+                if (didRemoveOriginalSelection) {
+                    originalPaymentSelection = null
+                }
+
                 viewState.copy(
                     savedPaymentMethods = newSavedPaymentMethods,
-                    paymentSelection = viewState.paymentSelection.takeUnless { selection ->
-                        val removedPaymentSelection = selection is PaymentSelection.Saved &&
-                            selection.paymentMethod == paymentMethod
-
-                        if (removedPaymentSelection && savedPaymentSelection == selection) {
-                            savedPaymentSelection = null
-                        }
-
-                        removedPaymentSelection
-                    } ?: savedPaymentSelection,
+                    paymentSelection = viewState.paymentSelection.takeUnless {
+                        didRemoveCurrentSelection
+                    } ?: originalPaymentSelection,
                 )
             }
         }
@@ -566,7 +574,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 }
 
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                    val primaryButtonVisible = savedPaymentSelection != paymentSelection
+                    val primaryButtonVisible = originalPaymentSelection != paymentSelection
                     it.copy(
                         paymentSelection = paymentSelection,
                         primaryButtonVisible = primaryButtonVisible,
