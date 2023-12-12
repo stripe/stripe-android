@@ -1,3 +1,5 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.uicore.image
 
 import android.graphics.drawable.Animatable
@@ -141,7 +143,6 @@ internal class DrawablePainter(
  * This function tries to dispatch lifecycle events to [drawable] as much as possible from
  * within Compose.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 fun rememberDrawablePainter(drawable: Drawable?): Painter = remember(drawable) {
     when (drawable) {
