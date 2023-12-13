@@ -104,7 +104,9 @@ data class PrimaryButtonStyle(
 data class PrimaryButtonColors(
     val background: Color,
     val onBackground: Color,
-    val border: Color
+    val border: Color,
+    val successBackground: Color,
+    val onSuccessBackground: Color?
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -119,6 +121,9 @@ data class PrimaryButtonTypography(
     val fontFamily: Int?,
     val fontSize: TextUnit
 )
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR = Color(0xFF24B47E)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object StripeThemeDefaults {
@@ -184,12 +189,16 @@ object StripeThemeDefaults {
         colorsLight = PrimaryButtonColors(
             background = colors(false).materialColors.primary,
             onBackground = Color.White,
-            border = Color.Transparent
+            border = Color.Transparent,
+            successBackground = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR,
+            onSuccessBackground = null
         ),
         colorsDark = PrimaryButtonColors(
             background = colors(true).materialColors.primary,
             onBackground = Color.White,
-            border = Color.Transparent
+            border = Color.Transparent,
+            successBackground = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR,
+            onSuccessBackground = null
         ),
         shape = PrimaryButtonShape(
             cornerRadius = shapes.cornerRadius,
@@ -499,9 +508,23 @@ fun PrimaryButtonStyle.getBackgroundColor(context: Context): Int {
 
 @ColorInt
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PrimaryButtonStyle.getSuccessBackgroundColor(context: Context): Int {
+    val isDark = context.isSystemDarkTheme()
+    return (if (isDark) colorsDark else colorsLight).successBackground.toArgb()
+}
+
+@ColorInt
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PrimaryButtonStyle.getOnBackgroundColor(context: Context): Int {
     val isDark = context.isSystemDarkTheme()
     return (if (isDark) colorsDark else colorsLight).onBackground.toArgb()
+}
+
+@ColorInt
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PrimaryButtonStyle.getOnSuccessBackgroundColor(context: Context): Int? {
+    val isDark = context.isSystemDarkTheme()
+    return (if (isDark) colorsDark else colorsLight).onSuccessBackground?.toArgb()
 }
 
 @ColorInt

@@ -82,12 +82,20 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         colorsLight = PrimaryButtonColors(
             background = Color(primaryButton.colorsLight.background ?: colorsLight.primary),
             onBackground = Color(primaryButton.colorsLight.onBackground),
-            border = Color(primaryButton.colorsLight.border)
+            border = Color(primaryButton.colorsLight.border),
+            successBackground = Color(primaryButton.colorsLight.successBackgroundColor),
+            onSuccessBackground = primaryButton.colorsLight.onSuccessBackgroundColor?.let {
+                Color(it)
+            },
         ),
         colorsDark = PrimaryButtonColors(
             background = Color(primaryButton.colorsDark.background ?: colorsDark.primary),
             onBackground = Color(primaryButton.colorsDark.onBackground),
-            border = Color(primaryButton.colorsDark.border)
+            border = Color(primaryButton.colorsDark.border),
+            successBackground = Color(primaryButton.colorsDark.successBackgroundColor),
+            onSuccessBackground = primaryButton.colorsDark.onSuccessBackgroundColor?.let {
+                Color(it)
+            },
         ),
         shape = PrimaryButtonShape(
             cornerRadius = primaryButton.shape.cornerRadiusDp ?: shapes.cornerRadiusDp,
