@@ -23,17 +23,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.ui.LinkButton
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentOptionsPrimaryButtonBinding
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentSheetPrimaryButtonBinding
 import com.stripe.android.paymentsheet.navigation.topContentPadding
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
+import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Custom
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.H4Text
 
 @Composable
 internal fun PaymentSheetScreen(
-    viewModel: PaymentSheetViewModel,
+    viewModel: BaseSheetViewModel,
+    type: PaymentSheetFlowType,
     modifier: Modifier = Modifier,
 ) {
     val contentVisible by viewModel.contentVisible.collectAsState()
@@ -53,7 +57,7 @@ internal fun PaymentSheetScreen(
         },
         content = {
             AnimatedVisibility(visible = contentVisible) {
-                PaymentSheetScreenContent(viewModel = viewModel)
+                PaymentSheetScreenContent(viewModel, type)
             }
         },
         modifier = modifier,
@@ -74,12 +78,13 @@ private fun DismissKeyboardOnProcessing(processing: Boolean) {
 
 @Composable
 internal fun PaymentSheetScreenContent(
-    viewModel: PaymentSheetViewModel,
+    viewModel: BaseSheetViewModel,
+    type: PaymentSheetFlowType,
     modifier: Modifier = Modifier,
 ) {
     val headerText by viewModel.headerText.collectAsState(null)
     val walletsState by viewModel.walletsState.collectAsState()
-    val buyButtonState by viewModel.buyButtonState.collectAsState(initial = null)
+    val error by viewModel.error.collectAsState()
     val currentScreen by viewModel.currentScreen.collectAsState()
     val mandateText by viewModel.mandateText.collectAsState()
 
@@ -99,8 +104,8 @@ internal fun PaymentSheetScreenContent(
             val bottomSpacing = WalletDividerSpacing - currentScreen.topContentPadding
             Wallet(
                 state = state,
-                onGooglePayPressed = viewModel::checkoutWithGooglePay,
-                onLinkPressed = viewModel::handleLinkPressed,
+                onGooglePayPressed = state.onGooglePayPressed,
+                onLinkPressed = state.onLinkPressed,
                 modifier = Modifier.padding(bottom = bottomSpacing),
             )
         }
@@ -119,22 +124,34 @@ internal fun PaymentSheetScreenContent(
             )
         }
 
-        buyButtonState?.errorMessage?.let { error ->
+        error?.let { error ->
             ErrorMessage(
-                error = error.message,
-                modifier = Modifier.padding(vertical = 2.dp, horizontal = 20.dp),
+                error = error,
+                modifier = Modifier.padding(vertical = 2.dp, horizontal = horizontalPadding),
             )
         }
 
-        AndroidViewBinding(
-            factory = StripeFragmentPaymentSheetPrimaryButtonBinding::inflate,
-            modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
-        )
+        when (type) {
+            Complete -> {
+                AndroidViewBinding(
+                    factory = StripeFragmentPaymentSheetPrimaryButtonBinding::inflate,
+                    modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
+                )
+            }
+            Custom -> {
+                AndroidViewBinding(
+                    factory = StripeFragmentPaymentOptionsPrimaryButtonBinding::inflate,
+                    modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
+                )
+            }
+        }
 
         if (mandateText?.showAbovePrimaryButton == false) {
             Mandate(
                 mandateText = mandateText?.text,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .padding(horizontal = horizontalPadding),
             )
         }
 
