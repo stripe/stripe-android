@@ -885,25 +885,25 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonCol
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Companion;
-	public synthetic fun <init> (Landroidx/compose/ui/graphics/Color;JJJLandroidx/compose/ui/graphics/Color;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Landroidx/compose/ui/graphics/Color;JJJLandroidx/compose/ui/graphics/Color;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Landroidx/compose/ui/graphics/Color;JJJJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Landroidx/compose/ui/graphics/Color;JJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Landroidx/compose/ui/graphics/Color;JJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/lang/Integer;II)V
-	public fun <init> (Ljava/lang/Integer;IIILjava/lang/Integer;)V
-	public synthetic fun <init> (Ljava/lang/Integer;IIILjava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/Integer;IIII)V
+	public synthetic fun <init> (Ljava/lang/Integer;IIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/Integer;
 	public final fun component2 ()I
 	public final fun component3 ()I
 	public final fun component4 ()I
-	public final fun component5 ()Ljava/lang/Integer;
-	public final fun copy (Ljava/lang/Integer;IIILjava/lang/Integer;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;Ljava/lang/Integer;IIILjava/lang/Integer;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
+	public final fun component5 ()I
+	public final fun copy (Ljava/lang/Integer;IIII)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;Ljava/lang/Integer;IIIIILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBackground ()Ljava/lang/Integer;
 	public final fun getBorder ()I
 	public final fun getOnBackground ()I
-	public final fun getOnSuccessBackgroundColor ()Ljava/lang/Integer;
+	public final fun getOnSuccessBackgroundColor ()I
 	public final fun getSuccessBackgroundColor ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;

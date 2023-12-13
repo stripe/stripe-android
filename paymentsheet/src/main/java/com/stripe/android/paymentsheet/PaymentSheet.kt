@@ -840,17 +840,17 @@ class PaymentSheet internal constructor(
         @ColorInt
         val border: Int,
         /**
-         * The background color for the primary button when in a success state. If null,
-         * defaults to base green background color.
+         * The background color for the primary button when in a success state. Defaults
+         * to base green background color.
          */
         @ColorInt
         val successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
         /**
-         * The success color for the primary button text when in a success state. If null,
-         * defaults to `onBackground` value.
+         * The success color for the primary button text when in a success state. Defaults
+         * to `onBackground`.
          */
         @ColorInt
-        val onSuccessBackgroundColor: Int? = null,
+        val onSuccessBackgroundColor: Int = onBackground,
     ) : Parcelable {
         constructor(
             background: Int?,
@@ -861,7 +861,7 @@ class PaymentSheet internal constructor(
             onBackground = onBackground,
             border = border,
             successBackgroundColor = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
-            onSuccessBackgroundColor = null,
+            onSuccessBackgroundColor = onBackground,
         )
 
         constructor(
@@ -879,13 +879,13 @@ class PaymentSheet internal constructor(
             onBackground: Color,
             border: Color,
             successBackgroundColor: Color = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR,
-            onSuccessBackgroundColor: Color? = null,
+            onSuccessBackgroundColor: Color = onBackground,
         ) : this(
             background = background?.toArgb(),
             onBackground = onBackground.toArgb(),
             border = border.toArgb(),
             successBackgroundColor = successBackgroundColor.toArgb(),
-            onSuccessBackgroundColor = onSuccessBackgroundColor?.toArgb(),
+            onSuccessBackgroundColor = onSuccessBackgroundColor.toArgb(),
         )
 
         companion object {
@@ -894,14 +894,14 @@ class PaymentSheet internal constructor(
                 onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
                 border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
                 successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.successBackground.toArgb(),
-                onSuccessBackgroundColor = null,
+                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
             )
             val defaultDark = PrimaryButtonColors(
                 background = null,
                 onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
                 border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
                 successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.successBackground.toArgb(),
-                onSuccessBackgroundColor = null,
+                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
             )
         }
     }

@@ -78,7 +78,6 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     private var finishedOnBackgroundColor =
         StripeThemeDefaults.primaryButtonStyle.getOnSuccessBackgroundColor(context)
-            ?: StripeThemeDefaults.primaryButtonStyle.getOnBackgroundColor(context)
 
     init {
         // This is only needed if the button is inside a fragment
@@ -107,7 +106,6 @@ internal class PrimaryButton @JvmOverloads constructor(
         backgroundTintList = tintList
         finishedBackgroundColor = primaryButtonStyle.getSuccessBackgroundColor(context)
         finishedOnBackgroundColor = primaryButtonStyle.getOnSuccessBackgroundColor(context)
-            ?: primaryButtonStyle.getOnBackgroundColor(context)
     }
 
     fun setDefaultLabelColor(@ColorInt color: Int) {

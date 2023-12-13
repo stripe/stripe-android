@@ -106,7 +106,7 @@ data class PrimaryButtonColors(
     val onBackground: Color,
     val border: Color,
     val successBackground: Color,
-    val onSuccessBackground: Color?
+    val onSuccessBackground: Color
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -191,14 +191,14 @@ object StripeThemeDefaults {
             onBackground = Color.White,
             border = Color.Transparent,
             successBackground = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR,
-            onSuccessBackground = null
+            onSuccessBackground = Color.White
         ),
         colorsDark = PrimaryButtonColors(
             background = colors(true).materialColors.primary,
             onBackground = Color.White,
             border = Color.Transparent,
             successBackground = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR,
-            onSuccessBackground = null
+            onSuccessBackground = Color.White
         ),
         shape = PrimaryButtonShape(
             cornerRadius = shapes.cornerRadius,
@@ -522,9 +522,9 @@ fun PrimaryButtonStyle.getOnBackgroundColor(context: Context): Int {
 
 @ColorInt
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PrimaryButtonStyle.getOnSuccessBackgroundColor(context: Context): Int? {
+fun PrimaryButtonStyle.getOnSuccessBackgroundColor(context: Context): Int {
     val isDark = context.isSystemDarkTheme()
-    return (if (isDark) colorsDark else colorsLight).onSuccessBackground?.toArgb()
+    return (if (isDark) colorsDark else colorsLight).onSuccessBackground.toArgb()
 }
 
 @ColorInt
