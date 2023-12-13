@@ -25,7 +25,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.utils.TestNavigationManager
-import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -294,7 +293,7 @@ internal class PartnerAuthViewModelTest {
             logger = logger,
             initialState = initialState,
             browserManager = mock(),
-            uriUtils = UriUtils(Logger.noop(), mock()),
+            clickHandler = mock(),
             applicationId = applicationId
         )
     }

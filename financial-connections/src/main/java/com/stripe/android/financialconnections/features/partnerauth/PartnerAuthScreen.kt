@@ -17,7 +17,7 @@ internal fun PartnerAuthScreen() {
 
     SharedPartnerAuth(
         state = state.value,
-        onContinueClick = viewModel::onLaunchAuthClick,
+        onPrepaneContinueClick = viewModel::onLaunchAuthClick,
         onSelectAnotherBank = viewModel::onSelectAnotherBank,
         onEnterDetailsManually = viewModel::onEnterDetailsManuallyClick,
         onClickableTextClick = viewModel::onClickableTextClick,

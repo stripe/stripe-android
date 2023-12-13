@@ -29,9 +29,19 @@ internal data class SharedPartnerAuthState(
         get() = payload()?.authSession?.display?.text?.oauthPrepane?.dataAccessNotice
 
     data class Payload(
+        val authSession: FinancialConnectionsAuthorizationSession,
         val isStripeDirect: Boolean,
         val institution: FinancialConnectionsInstitution,
-        val authSession: FinancialConnectionsAuthorizationSession
+        /**
+         * Just for repair flows, null otherwise.
+         */
+        val repairPayload: RepairPayload? = null
+    )
+
+    data class RepairPayload(
+        val consumerSession: String,
+        val selectedAccountId: String,
+        val coreAuthorization: String
     )
 
     val canNavigateBack: Boolean

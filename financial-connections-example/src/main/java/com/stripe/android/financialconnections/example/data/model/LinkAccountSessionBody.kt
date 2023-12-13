@@ -17,6 +17,8 @@ data class LinkAccountSessionBody(
     val permissions: String? = null,
     @SerialName("customer_email")
     val customerEmail: String? = null,
+    @SerialName("permissions")
+    val permissions: String? = null,
     @SerialName("test_environment")
     val testEnvironment: String? = null
 )
