@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.parcelize.Parcelize
@@ -837,8 +838,32 @@ class PaymentSheet internal constructor(
          * The border color of the primary button.
          */
         @ColorInt
-        val border: Int
+        val border: Int,
+        /**
+         * The background color for the primary button when in a success state. Defaults
+         * to base green background color.
+         */
+        @ColorInt
+        val successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
+        /**
+         * The success color for the primary button text when in a success state. Defaults
+         * to `onBackground`.
+         */
+        @ColorInt
+        val onSuccessBackgroundColor: Int = onBackground,
     ) : Parcelable {
+        constructor(
+            background: Int?,
+            onBackground: Int,
+            border: Int
+        ) : this(
+            background = background,
+            onBackground = onBackground,
+            border = border,
+            successBackgroundColor = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
+            onSuccessBackgroundColor = onBackground,
+        )
+
         constructor(
             background: Color?,
             onBackground: Color,
@@ -846,21 +871,37 @@ class PaymentSheet internal constructor(
         ) : this(
             background = background?.toArgb(),
             onBackground = onBackground.toArgb(),
-            border = border.toArgb()
+            border = border.toArgb(),
+        )
+
+        constructor(
+            background: Color?,
+            onBackground: Color,
+            border: Color,
+            successBackgroundColor: Color = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR,
+            onSuccessBackgroundColor: Color = onBackground,
+        ) : this(
+            background = background?.toArgb(),
+            onBackground = onBackground.toArgb(),
+            border = border.toArgb(),
+            successBackgroundColor = successBackgroundColor.toArgb(),
+            onSuccessBackgroundColor = onSuccessBackgroundColor.toArgb(),
         )
 
         companion object {
             val defaultLight = PrimaryButtonColors(
                 background = null,
-                onBackground =
-                StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb()
+                onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
+                successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.successBackground.toArgb(),
+                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
             )
             val defaultDark = PrimaryButtonColors(
                 background = null,
-                onBackground =
-                StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb()
+                onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
+                successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.successBackground.toArgb(),
+                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
             )
         }
     }

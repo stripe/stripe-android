@@ -487,6 +487,49 @@ private fun PrimaryButton(
         updateAppearance = updateAppearance,
     )
 
+    Divider()
+
+    ColorItem(
+        label = "successBackground",
+        currentColor = Color(currentButton.colorsLight.successBackgroundColor),
+        onColorPicked = {
+            currentAppearance.copy(
+                primaryButton = currentButton.copy(
+                    colorsLight = currentButton.colorsLight.copy(
+                        successBackgroundColor = it.toArgb()
+                    ),
+                    colorsDark = currentButton.colorsDark.copy(
+                        successBackgroundColor = it.toArgb()
+                    )
+                )
+            )
+        },
+        updateAppearance = updateAppearance,
+    )
+
+    Divider()
+
+    ColorItem(
+        label = "onSuccessBackground",
+        currentColor = Color(
+            color = currentButton.colorsLight.onSuccessBackgroundColor
+                ?: currentButton.colorsLight.onBackground
+        ),
+        onColorPicked = {
+            currentAppearance.copy(
+                primaryButton = currentButton.copy(
+                    colorsLight = currentButton.colorsLight.copy(
+                        onSuccessBackgroundColor = it.toArgb()
+                    ),
+                    colorsDark = currentButton.colorsDark.copy(
+                        onSuccessBackgroundColor = it.toArgb()
+                    )
+                )
+            )
+        },
+        updateAppearance = updateAppearance,
+    )
+
     val currentCornerRadius = currentButton.shape.cornerRadiusDp
         ?: currentAppearance.shapes.cornerRadiusDp
     Divider()
