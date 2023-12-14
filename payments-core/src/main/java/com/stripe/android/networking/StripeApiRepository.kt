@@ -1025,6 +1025,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options = requestOptions,
                 params = mapOf(
                     "request_surface" to "android_payment_element",
+                    "country_inferring_method" to "PHONE_NUMBER",
                     "email_address" to email.lowercase(),
                     "phone_number" to phoneNumber,
                     "country" to country,
