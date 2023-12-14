@@ -1,0 +1,4 @@
+<resources>
+    <string name="logo_description" translatable="false">hcaptcha logo</string>
+    <string name="loading_text">Verifying you are human</string>
+</resources>
