@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import android.content.Context
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.autofill.AutofillType
@@ -17,7 +16,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
-import com.stripe.android.ui.core.BuildConfig
 import com.stripe.android.ui.core.asIndividualDigits
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.SectionFieldErrorController
@@ -282,11 +280,6 @@ internal class DefaultCardNumberController(
 
     init {
         onRawValueChange(initialValue ?: "")
-
-        // TODO(tillh-stripe)
-        if (BuildConfig.DEBUG) {
-            Log.d("CardNumberController", "Is eligible for CBC: $isEligibleForCardBrandChoice")
-        }
     }
 
     /**

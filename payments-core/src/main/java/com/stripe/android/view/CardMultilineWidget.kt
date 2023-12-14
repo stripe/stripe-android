@@ -330,8 +330,13 @@ class CardMultilineWidget @JvmOverloads constructor(
         postalCodeErrorListener = listener
     }
 
-    // TODO(tillh-stripe) Add docs and make public
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    /**
+     * A list of preferred networks that should be used to process payments made with a co-branded
+     * card if your user hasn't selected a network themselves.
+     *
+     * The first preferred network that matches any available network will be used. If no preferred
+     * network is applicable, Stripe will select the network.
+     */
     fun setPreferredNetworks(preferredNetworks: List<CardBrand>) {
         cardBrandView.merchantPreferredNetworks = preferredNetworks
     }

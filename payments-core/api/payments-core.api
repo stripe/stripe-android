@@ -4096,6 +4096,7 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Card$Build
 	public final fun setCvc (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Builder;
 	public final fun setExpiryMonth (Ljava/lang/Integer;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Builder;
 	public final fun setExpiryYear (Ljava/lang/Integer;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Builder;
+	public final fun setNetworks (Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Networks;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Builder;
 	public final fun setNumber (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Builder;
 }
 
@@ -4109,6 +4110,22 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Card$Creat
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/PaymentMethodCreateParams$Card;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/PaymentMethodCreateParams$Card$Networks : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field PARAM_PREFERRED Ljava/lang/String;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPreferred ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toParamMap ()Ljava/util/Map;
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/model/PaymentMethodCreateParams$Card$Networks$Creator : android/os/Parcelable$Creator {
@@ -7267,6 +7284,7 @@ public final class com/stripe/android/view/CardFormView : android/widget/LinearL
 	public final fun getPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun setCardValidCallback (Lcom/stripe/android/view/CardValidCallback;)V
 	public fun setEnabled (Z)V
+	public final fun setPreferredNetworks (Ljava/util/List;)V
 }
 
 public abstract interface class com/stripe/android/view/CardInputListener {
@@ -7316,6 +7334,7 @@ public final class com/stripe/android/view/CardInputWidget : android/widget/Line
 	public final fun setPostalCodeEnabled (Z)V
 	public final fun setPostalCodeRequired (Z)V
 	public fun setPostalCodeTextWatcher (Landroid/text/TextWatcher;)V
+	public final fun setPreferredNetworks (Ljava/util/List;)V
 	public final fun setUsZipCodeRequired (Z)V
 }
 
@@ -7350,6 +7369,7 @@ public final class com/stripe/android/view/CardMultilineWidget : android/widget/
 	public fun setExpiryDateTextWatcher (Landroid/text/TextWatcher;)V
 	public final fun setPostalCodeRequired (Z)V
 	public fun setPostalCodeTextWatcher (Landroid/text/TextWatcher;)V
+	public final fun setPreferredNetworks (Ljava/util/List;)V
 	public final fun setShouldShowPostalCode (Z)V
 	public final fun setUsZipCodeRequired (Z)V
 	public final fun validateAllFields ()Z

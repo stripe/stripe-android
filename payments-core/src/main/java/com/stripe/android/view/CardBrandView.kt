@@ -39,7 +39,6 @@ import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
 import com.stripe.android.utils.AppCompatOrMdcTheme
-import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.parcelize.Parcelize
@@ -180,7 +179,7 @@ internal class CardBrandView @JvmOverloads constructor(
         return PaymentMethodCreateParams.Card.Networks(
             preferred = brand.takeIf { it != Unknown }?.code,
         ).takeIf {
-            FeatureFlags.cardBrandChoice.isEnabled && isCbcEligible && possibleBrands.size > 1
+            isCbcEligible && possibleBrands.size > 1
         }
     }
 
