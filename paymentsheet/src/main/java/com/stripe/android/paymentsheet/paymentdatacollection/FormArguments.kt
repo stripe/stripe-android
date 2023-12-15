@@ -9,8 +9,8 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.convertToFormValuesMap
-import com.stripe.android.uicore.elements.ApiParameterDestination
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.ParameterDestination
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -38,7 +38,7 @@ internal fun FormArguments.getInitialValuesMap(): Map<IdentifierSpec, String?> {
 
     val initialExtras = initialPaymentMethodExtraParams?.let {
         convertToFormValuesMap(it.toParamMap()).mapKeys { entry ->
-            entry.key.copy(apiParameterDestination = ApiParameterDestination.Extras)
+            entry.key.copy(destination = ParameterDestination.Local.Extras)
         }
     } ?: emptyMap()
 

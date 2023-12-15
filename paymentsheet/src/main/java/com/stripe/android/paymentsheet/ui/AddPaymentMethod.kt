@@ -31,9 +31,9 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.uicore.elements.ApiParameterDestination
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
+import com.stripe.android.uicore.elements.ParameterDestination
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -177,7 +177,7 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
 ): PaymentMethodCreateParams {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
         fieldValuePairs = fieldValuePairs.filter { entry ->
-            entry.key.apiParameterDestination == ApiParameterDestination.Params
+            entry.key.destination == ParameterDestination.Api.Params
         }.filterNot { entry ->
             entry.key == IdentifierSpec.SaveForFutureUse || entry.key == IdentifierSpec.CardBrand
         },
@@ -191,7 +191,7 @@ internal fun FormFieldValues.transformToPaymentMethodOptionsParams(
 ): PaymentMethodOptionsParams? {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodOptionsParams(
         fieldValuePairs = fieldValuePairs.filter { entry ->
-            entry.key.apiParameterDestination == ApiParameterDestination.Options
+            entry.key.destination == ParameterDestination.Api.Options
         },
         code = paymentMethod.code,
     )
@@ -202,7 +202,7 @@ internal fun FormFieldValues.transformToExtraParams(
 ): PaymentMethodExtraParams? {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodExtraParams(
         fieldValuePairs = fieldValuePairs.filter { entry ->
-            entry.key.apiParameterDestination == ApiParameterDestination.Extras
+            entry.key.destination == ParameterDestination.Local.Extras
         },
         code = paymentMethod.code,
     )
