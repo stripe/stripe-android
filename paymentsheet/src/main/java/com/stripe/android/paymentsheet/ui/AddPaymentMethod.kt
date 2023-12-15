@@ -21,6 +21,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
@@ -196,12 +197,24 @@ internal fun FormFieldValues.transformToPaymentMethodOptionsParams(
     )
 }
 
+internal fun FormFieldValues.transformToExtraParams(
+    paymentMethod: LpmRepository.SupportedPaymentMethod
+): PaymentMethodExtraParams? {
+    return FieldValuesToParamsMapConverter.transformToPaymentMethodExtraParams(
+        fieldValuePairs = fieldValuePairs.filter { entry ->
+            entry.key.apiParameterDestination == ApiParameterDestination.Extras
+        },
+        code = paymentMethod.code,
+    )
+}
+
 internal fun FormFieldValues.transformToPaymentSelection(
     resources: Resources,
     paymentMethod: LpmRepository.SupportedPaymentMethod
 ): PaymentSelection.New {
     val params = transformToPaymentMethodCreateParams(paymentMethod)
     val options = transformToPaymentMethodOptionsParams(paymentMethod)
+    val extras = transformToExtraParams(paymentMethod)
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
         PaymentSelection.New.Card(
             paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
@@ -219,6 +232,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
             paymentMethodCreateParams = params,
             paymentMethodOptionsParams = options,
+            paymentMethodExtraParams = extras,
             customerRequestedSave = userRequestedReuse,
         )
     }

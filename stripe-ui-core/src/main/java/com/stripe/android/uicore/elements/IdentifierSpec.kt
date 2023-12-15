@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 enum class ApiParameterDestination {
     Params,
+    Extras,
     Options
 }
 
@@ -84,6 +85,12 @@ data class IdentifierSpec(
         val KonbiniConfirmationNumber = IdentifierSpec(
             v1 = "konbini[confirmation_number]",
             apiParameterDestination = ApiParameterDestination.Options
+        )
+
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val BacsDebitConfirmed = IdentifierSpec(
+            "bacs_debit[confirmed]",
+            apiParameterDestination = ApiParameterDestination.Extras
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
