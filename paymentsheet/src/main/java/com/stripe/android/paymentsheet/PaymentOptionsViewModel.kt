@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPay
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -35,6 +36,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -92,7 +94,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
     internal val paymentOptionResult: SharedFlow<PaymentOptionResult> = _paymentOptionResult
 
     private val _error = MutableStateFlow<String?>(null)
-    internal val error: StateFlow<String?> = _error
+    override val error: StateFlow<String?> = _error
+
+    override val walletsState: StateFlow<WalletsState?> = MutableStateFlow(null).asStateFlow()
 
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.

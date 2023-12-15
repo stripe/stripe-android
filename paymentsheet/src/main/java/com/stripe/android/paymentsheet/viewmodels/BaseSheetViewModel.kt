@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPay
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
@@ -160,6 +161,8 @@ internal abstract class BaseSheetViewModel(
     protected val customPrimaryButtonUiState = MutableStateFlow<PrimaryButton.UIState?>(null)
 
     abstract val primaryButtonUiState: StateFlow<PrimaryButton.UIState?>
+    abstract val error: StateFlow<String?>
+    abstract val walletsState: StateFlow<WalletsState?>
 
     private val _mandateText = MutableStateFlow<MandateText?>(null)
     internal val mandateText: StateFlow<MandateText?> = _mandateText

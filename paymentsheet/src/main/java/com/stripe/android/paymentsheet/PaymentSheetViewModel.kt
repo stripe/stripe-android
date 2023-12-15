@@ -75,6 +75,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -214,13 +215,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         initialValue = null,
     )
 
+    override val error: StateFlow<String?> = buyButtonState.map { it?.errorMessage?.message }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = null,
+    )
+
     private val linkEmailFlow: StateFlow<String?> = linkConfigurationCoordinator.emailFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
         initialValue = null,
     )
 
-    internal val walletsState: StateFlow<WalletsState?> = combineStateFlows(
+    override val walletsState: StateFlow<WalletsState?> = combineStateFlows(
         linkHandler.isLinkEnabled,
         linkEmailFlow,
         googlePayState,
@@ -239,6 +246,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             googlePayLauncherConfig = googlePayLauncherConfig,
             googlePayButtonType = googlePayButtonType,
             screen = stack.last(),
+            onGooglePayPressed = this::checkoutWithGooglePay,
+            onLinkPressed = linkHandler::launchLink,
         )
     }
 
@@ -266,10 +275,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override val shouldCompleteLinkFlowInline: Boolean = true
-
-    fun handleLinkPressed() {
-        linkHandler.launchLink()
-    }
 
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
