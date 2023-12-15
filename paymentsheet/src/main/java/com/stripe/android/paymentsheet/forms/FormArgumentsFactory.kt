@@ -25,24 +25,32 @@ internal object FormArgumentsFactory {
     ): FormArguments {
         val layoutFormDescriptor = paymentMethod.getPMAddForm(stripeIntent, config)
 
-        val originalParams = (
-            (newLpm as? PaymentSelection.New.LinkInline)
-                ?.linkPaymentDetails as? LinkPaymentDetails.New
-            )?.originalParams
-        val initialParams = originalParams
-            ?: newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {
-                it == paymentMethod.code
-            }?.let {
-                when (newLpm) {
-                    is PaymentSelection.New.GenericPaymentMethod ->
-                        newLpm.paymentMethodCreateParams
-
-                    is PaymentSelection.New.Card ->
-                        newLpm.paymentMethodCreateParams
-
-                    else -> null
+        val initialParams = when (newLpm) {
+            is PaymentSelection.New.LinkInline -> {
+                (newLpm.linkPaymentDetails as? LinkPaymentDetails.New)?.originalParams
+            }
+            is PaymentSelection.New.GenericPaymentMethod,
+            is PaymentSelection.New.Card -> {
+                if (newLpm.paymentMethodCreateParams.typeCode == paymentMethod.code) {
+                    newLpm.paymentMethodCreateParams
+                } else {
+                    null
                 }
             }
+            else -> null
+        }
+
+        val initialExtraParams = when (newLpm) {
+            is PaymentSelection.New.GenericPaymentMethod,
+            is PaymentSelection.New.Card -> {
+                if (newLpm.paymentMethodExtraParams?.type?.code == paymentMethod.code) {
+                    newLpm.paymentMethodExtraParams
+                } else {
+                    null
+                }
+            }
+            else -> null
+        }
 
         val showCheckboxControlledFields = if (newLpm != null) {
             newLpm.customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse
@@ -59,6 +67,7 @@ internal object FormArgumentsFactory {
             billingDetails = config.defaultBillingDetails,
             shippingDetails = config.shippingDetails,
             initialPaymentMethodCreateParams = initialParams,
+            initialPaymentMethodExtraParams = initialExtraParams,
             billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
             cbcEligibility = cbcEligibility,
             requiresMandate = paymentMethod.requiresMandate,
