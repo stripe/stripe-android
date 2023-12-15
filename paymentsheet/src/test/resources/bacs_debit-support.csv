@@ -1,0 +1,49 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+bacs_debit, true, true, off_session, false, card/bacs_debit, false, false, not available, false
+bacs_debit, true, true, off_session, false, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, true, false, off_session, false, card/bacs_debit, false, false, not available, false
+bacs_debit, true, false, off_session, false, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, true, true, on_session, false, card/bacs_debit, false, false, not available, false
+bacs_debit, true, true, on_session, false, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, true, false, on_session, false, card/bacs_debit, false, false, not available, false
+bacs_debit, true, false, on_session, false, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, true, true, null, false, card/bacs_debit, false, true, oneTime, true
+bacs_debit, true, true, null, false, card/eps/bacs_debit, false, true, oneTime, true
+bacs_debit, true, false, null, false, card/bacs_debit, false, false, not available, false
+bacs_debit, true, false, null, false, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, false, true, off_session, false, card/bacs_debit, false, false, not available, false
+bacs_debit, false, true, off_session, false, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, false, false, off_session, false, card/bacs_debit, false, false, not available, false
+bacs_debit, false, false, off_session, false, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, false, true, on_session, false, card/bacs_debit, false, false, not available, false
+bacs_debit, false, true, on_session, false, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, false, false, on_session, false, card/bacs_debit, false, false, not available, false
+bacs_debit, false, false, on_session, false, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, false, true, null, false, card/bacs_debit, false, true, oneTime, true
+bacs_debit, false, true, null, false, card/eps/bacs_debit, false, true, oneTime, true
+bacs_debit, false, false, null, false, card/bacs_debit, false, false, not available, false
+bacs_debit, false, false, null, false, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, true, true, off_session, true, card/bacs_debit, false, false, not available, false
+bacs_debit, true, true, off_session, true, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, true, false, off_session, true, card/bacs_debit, false, false, not available, false
+bacs_debit, true, false, off_session, true, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, true, true, on_session, true, card/bacs_debit, false, false, not available, false
+bacs_debit, true, true, on_session, true, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, true, false, on_session, true, card/bacs_debit, false, false, not available, false
+bacs_debit, true, false, on_session, true, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, true, true, null, true, card/bacs_debit, false, true, oneTime, true
+bacs_debit, true, true, null, true, card/eps/bacs_debit, false, true, oneTime, true
+bacs_debit, true, false, null, true, card/bacs_debit, false, false, not available, false
+bacs_debit, true, false, null, true, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, false, true, off_session, true, card/bacs_debit, false, false, not available, false
+bacs_debit, false, true, off_session, true, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, false, false, off_session, true, card/bacs_debit, false, false, not available, false
+bacs_debit, false, false, off_session, true, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, false, true, on_session, true, card/bacs_debit, false, false, not available, false
+bacs_debit, false, true, on_session, true, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, false, false, on_session, true, card/bacs_debit, false, false, not available, false
+bacs_debit, false, false, on_session, true, card/eps/bacs_debit, false, false, not available, false
+bacs_debit, false, true, null, true, card/bacs_debit, false, true, oneTime, true
+bacs_debit, false, true, null, true, card/eps/bacs_debit, false, true, oneTime, true
+bacs_debit, false, false, null, true, card/bacs_debit, false, false, not available, false
+bacs_debit, false, false, null, true, card/eps/bacs_debit, false, false, not available, false

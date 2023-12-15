@@ -14,6 +14,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
+import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
+import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
 import com.stripe.android.ui.core.elements.BoletoTaxIdSpec
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
@@ -99,6 +101,8 @@ internal class FieldPopulator(
         val cardCvc: String = "321",
         val auBecsBsbNumber: String = "000000",
         val auBecsAccountNumber: String = "000123456",
+        val bacsSortCode: String = "108800",
+        val bacsAccountNumber: String = "00012345",
         val boletoTaxId: String = "00000000000",
     )
 
@@ -156,6 +160,16 @@ internal class FieldPopulator(
                     selectors.getAuAccountNumber()
                         .assertContentDescriptionEquals(values.auBecsAccountNumber)
                 }
+                is BacsDebitBankAccountSpec -> {
+                    selectors.getBacsAccountNumber()
+                        .assertContentDescriptionEquals(values.bacsAccountNumber)
+                    selectors.getBacsSortCode()
+                        .assertContentDescriptionEquals(values.bacsSortCode)
+                }
+                is BacsDebitConfirmSpec -> {
+                    selectors.getBacsConfirmed()
+                        .assertIsOn()
+                }
                 is DropdownSpec -> {}
                 is IbanSpec -> {}
                 is KlarnaCountrySpec -> {}
@@ -211,6 +225,17 @@ internal class FieldPopulator(
                     selectors.getAuAccountNumber().apply {
                         performTextInput(values.auBecsAccountNumber)
                     }
+                }
+                is BacsDebitBankAccountSpec -> {
+                    selectors.getBacsAccountNumber()
+                        .performTextInput(values.bacsAccountNumber)
+                    selectors.getBacsSortCode()
+                        .performTextInput(values.bacsSortCode)
+                }
+                is BacsDebitConfirmSpec -> {
+                    selectors.getBacsConfirmed()
+                        .performScrollTo()
+                        .performClick()
                 }
                 is IbanSpec -> {}
                 is KlarnaCountrySpec -> {}

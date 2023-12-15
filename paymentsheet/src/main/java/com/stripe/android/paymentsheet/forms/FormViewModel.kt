@@ -69,7 +69,7 @@ internal class FormViewModel @Inject internal constructor(
             lpmRepository.fromCode(formArguments.paymentMethodCode)
         ).formSpec.items
 
-        // Cards are a special case and already contain specs based on the configuration.
+        // Cards & Bacs debit are a special case and already contain specs based on the configuration.
         if (formArguments.paymentMethodCode != PaymentMethod.Type.Card.code) {
             specs = specsForConfiguration(
                 configuration = formArguments.billingDetailsCollectionConfiguration,

@@ -4,6 +4,7 @@
 
 ### PaymentSheet
 * [ADDED][7713](https://github.com/stripe/stripe-android/pull/7713) PaymentSheet now supports [card brand choice](https://stripe.com/docs/card-brand-choice) for eligible merchants and transactions. To provide a list of preferred networks, use `PaymentSheet.Configuration.preferredNetworks`.
+* [ADDED][7447](https://github.com/stripe/stripe-android/pull/7447) PaymentSheet now supports [Bacs Direct Debit](https://stripe.com/docs/payments/payment-methods/bacs-debit) for PaymentIntents.
 
 ### CustomerSheet
 * [ADDED][7713](https://github.com/stripe/stripe-android/pull/7713) CustomerSheet now supports [card brand choice](https://stripe.com/docs/card-brand-choice) for eligible merchants and transactions. To provide a list of preferred networks, use `PaymentSheet.Configuration.preferredNetworks`.
