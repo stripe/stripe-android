@@ -281,6 +281,7 @@ class HCaptchaDialogFragment : DialogFragment(), IHCaptchaVerifier {
          * @param listener the listener
          * @return a new instance
          */
+        @JvmStatic
         fun newInstance(
             config: HCaptchaConfig,
             internalConfig: HCaptchaInternalConfig,
@@ -289,6 +290,11 @@ class HCaptchaDialogFragment : DialogFragment(), IHCaptchaVerifier {
             val hCaptchaDialogFragment = HCaptchaDialogFragment()
             hCaptchaDialogFragment.arguments = HCaptchaCompat.storeValues(config, internalConfig, listener)
             return hCaptchaDialogFragment
+        }
+
+        @JvmStatic
+        fun test(): HCaptchaDialogFragment {
+            TODO("Not yet implemented")
         }
     }
 }

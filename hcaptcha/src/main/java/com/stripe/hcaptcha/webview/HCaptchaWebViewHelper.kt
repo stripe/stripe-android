@@ -86,7 +86,7 @@ internal class HCaptchaWebViewHelper(
     }
 
     fun shouldRetry(exception: HCaptchaException?): Boolean {
-        return config.retryPredicate(config, exception)
+        return config.retryPredicate?.let { it(config, exception) } ?: false
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

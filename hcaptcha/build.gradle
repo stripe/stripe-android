@@ -12,7 +12,9 @@ dependencies {
     implementation libs.kotlin.serialization
 
     testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.test
     testImplementation testLibs.mockito.inline
+    testImplementation testLibs.mockito.kotlin
 }
 
 android {

@@ -20,13 +20,9 @@ internal class HCaptchaJSInterface(
     @field:Transient private val captchaVerifier: IHCaptchaVerifier
 ) : Serializable {
 
-    private val config: String by lazy {
+    @get:JavascriptInterface
+    val config: String by lazy {
         encodeToJson(HCaptchaConfig.serializer(), config)
-    }
-
-    @JavascriptInterface
-    fun getConfig(): String {
-        return config
     }
 
     @JavascriptInterface

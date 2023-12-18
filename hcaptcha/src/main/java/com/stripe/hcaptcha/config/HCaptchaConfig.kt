@@ -2,8 +2,9 @@ package com.stripe.hcaptcha.config
 
 import androidx.annotation.RestrictTo
 import com.stripe.hcaptcha.HCaptchaException
+import com.stripe.hcaptcha.encode.DurationSerializer
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import java.io.Serializable
 import java.util.Locale
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -12,14 +13,14 @@ import kotlin.time.Duration.Companion.seconds
  * hCaptcha config builder which allows further customization of UI and other logic.
  * [.siteKey] is the only mandatory property.
  */
-@kotlinx.serialization.Serializable
+@Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class HCaptchaConfig(
 
     /**
      * The site key. Get one here [hcaptcha.com](https://www.hcaptcha.com)
      */
-    val siteKey: String? = null,
+    val siteKey: String,
 
     /**
      * Enable / Disable sentry error reporting.
@@ -107,15 +108,16 @@ data class HCaptchaConfig(
      * The lambda will decide should we retry or not
      */
     @Transient
-    val retryPredicate: (HCaptchaConfig, HCaptchaException?) -> Boolean = { _, _ -> false },
+    val retryPredicate: ((HCaptchaConfig, HCaptchaException?) -> Boolean)? = null,
 
     /**
      * hCaptcha token expiration timeout (seconds)
      */
+    @Serializable(with = DurationSerializer::class)
     val tokenExpiration: Duration = 120.seconds,
 
     /**
      * Disable hardware acceleration for WebView
      */
     val disableHardwareAcceleration: Boolean = true,
-) : Serializable
+) : java.io.Serializable

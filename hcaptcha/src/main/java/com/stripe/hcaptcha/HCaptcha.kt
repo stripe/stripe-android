@@ -71,7 +71,7 @@ interface IHCaptcha {
 class HCaptcha private constructor(
     private val activity: FragmentActivity,
     private val internalConfig: HCaptchaInternalConfig
-) : Task<HCaptchaTokenResponse?>(), IHCaptcha {
+) : Task<HCaptchaTokenResponse>(), IHCaptcha {
 
     private var captchaVerifier: IHCaptchaVerifier? = null
 
