@@ -2,6 +2,7 @@ package com.stripe.hcaptcha
 
 import androidx.annotation.RestrictTo
 
+
 /**
  * A checked exception which contains an [HCaptchaError] id and message.
  */
