@@ -14,7 +14,6 @@ import com.stripe.hcaptcha.R
 import com.stripe.hcaptcha.config.HCaptchaConfig
 import com.stripe.hcaptcha.config.HCaptchaInternalConfig
 
-
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class HCaptchaHeadlessWebView(
     activity: FragmentActivity,
@@ -38,7 +37,13 @@ internal class HCaptchaHeadlessWebView(
         }
 
         webViewHelper = HCaptchaWebViewHelper(
-            Handler(Looper.getMainLooper()), activity, config, internalConfig, this, listener, webView
+            Handler(Looper.getMainLooper()),
+            activity,
+            config,
+            internalConfig,
+            this,
+            listener,
+            webView
         )
     }
 

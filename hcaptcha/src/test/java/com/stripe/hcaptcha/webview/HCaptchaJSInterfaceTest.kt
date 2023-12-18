@@ -11,9 +11,7 @@ import com.stripe.hcaptcha.config.HCaptchaTheme
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import kotlinx.serialization.json.putJsonObject
 import org.json.JSONException
-import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -27,7 +25,6 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
-
 
 @OptIn(ExperimentalSerializationApi::class)
 class HCaptchaJSInterfaceTest {

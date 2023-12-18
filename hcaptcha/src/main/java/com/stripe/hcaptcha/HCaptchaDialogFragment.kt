@@ -89,7 +89,12 @@ class HCaptchaDialogFragment : DialogFragment(), IHCaptchaVerifier {
 
             webViewHelper = HCaptchaWebViewHelper(
                 Handler(Looper.getMainLooper()),
-                requireContext(), config, internalConfig, this, listener, webView
+                requireContext(),
+                config,
+                internalConfig,
+                this,
+                listener,
+                webView
             )
 
             readyForInteraction = false
@@ -148,7 +153,8 @@ class HCaptchaDialogFragment : DialogFragment(), IHCaptchaVerifier {
                         override fun onAnimationEnd(animation: Animator) {
                             visibility = View.GONE
                         }
-                    })
+                    }
+                )
             }
         } else {
             // Add back dialog shadow in case the checkbox or challenge is shown

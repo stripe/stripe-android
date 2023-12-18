@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-
 /**
  * The hCaptcha challenge orientation
  */

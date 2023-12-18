@@ -9,7 +9,6 @@ import com.stripe.hcaptcha.config.HCaptchaSize
 import com.stripe.hcaptcha.task.Task
 import com.stripe.hcaptcha.webview.HCaptchaHeadlessWebView
 
-
 /**
  * hCaptcha client which allows invoking of challenge completion and listening for the result.
  *

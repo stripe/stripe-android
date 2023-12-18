@@ -4,7 +4,6 @@ import com.stripe.hcaptcha.encode.encodeToJson
 import org.junit.Test
 import kotlin.test.assertEquals
 
-
 class HCaptchaThemeTest {
     @Test
     fun serializes_to_json_value() {

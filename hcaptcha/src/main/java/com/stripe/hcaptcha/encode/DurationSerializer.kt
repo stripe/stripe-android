@@ -9,7 +9,6 @@ import kotlinx.serialization.encoding.Encoder
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-
 object DurationSerializer : KSerializer<Duration> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("DurationInSeconds", PrimitiveKind.LONG)
 

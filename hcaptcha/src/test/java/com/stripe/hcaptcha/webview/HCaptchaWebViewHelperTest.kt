@@ -22,7 +22,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
 import org.mockito.Mockito.mockStatic
 
-
 class HCaptchaWebViewHelperTest {
 
     private val context = mock<Context>()
@@ -75,10 +74,7 @@ class HCaptchaWebViewHelperTest {
     fun test_config_host_pased() {
         val host = "https://my.awesome.host"
         whenever(config.host).thenReturn(host)
-        HCaptchaWebViewHelper(
-            handler, context, config, internalConfig, captchaVerifier,
-            stateListener, webView
-        )
+        HCaptchaWebViewHelper(handler, context, config, internalConfig, captchaVerifier, stateListener, webView)
         verify(webView).loadDataWithBaseURL(host, MOCK_HTML, "text/html", "UTF-8", null)
     }
 

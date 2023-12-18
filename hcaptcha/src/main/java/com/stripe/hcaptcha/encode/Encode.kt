@@ -4,21 +4,12 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
-import kotlin.time.Duration
-
-
-//val module = SerializersModule {
-//    contextual(Duration::class, DurationSerializer)
-//}
-
 
 @VisibleForTesting
 internal val json = Json {
     ignoreUnknownKeys = true
     isLenient = true
     encodeDefaults = true
-//    serializersModule = module
 }
 
 /**
