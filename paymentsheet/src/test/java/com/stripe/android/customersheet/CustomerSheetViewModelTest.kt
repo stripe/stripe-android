@@ -1648,6 +1648,47 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `Payment method user selection saved after returning to add screen`() = runTest(testDispatcher) {
+        featureFlagTestRule.setEnabled(true)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+        )
+
+        viewModel.viewState.test {
+            assertThat(
+                awaitViewState<AddPaymentMethod>().selectedPaymentMethod.code
+            ).isEqualTo("card")
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepository.hardCodedUsBankAccount
+                )
+            )
+
+            assertThat(
+                awaitViewState<AddPaymentMethod>().selectedPaymentMethod.code
+            ).isEqualTo("us_bank_account")
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
+
+            assertThat(
+                awaitViewState<SelectPaymentMethod>()
+            ).isInstanceOf(SelectPaymentMethod::class.java)
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            assertThat(
+                awaitViewState<AddPaymentMethod>().selectedPaymentMethod.code
+            ).isEqualTo("us_bank_account")
+        }
+    }
+
+    @Test
     fun `When the payment method form is us bank account, the primary button label is continue`() = runTest(testDispatcher) {
         featureFlagTestRule.setEnabled(true)
 
