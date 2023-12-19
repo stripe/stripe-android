@@ -96,9 +96,10 @@ internal class TestCard : BasePlaygroundTest() {
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
-                    hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+                    matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
-                        .and(hasText(cardNumber.takeLast(4), substring = true))
+                        .and(hasText(cardNumber.takeLast(4), substring = true)),
+                    timeoutMillis = 5000L
                 )
             },
         )
@@ -142,9 +143,10 @@ internal class TestCard : BasePlaygroundTest() {
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
-                    hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+                    matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
-                        .and(hasText(secondCardNumber.takeLast(4), substring = true))
+                        .and(hasText(secondCardNumber.takeLast(4), substring = true)),
+                    timeoutMillis = 5000L
                 )
             },
         )
@@ -179,8 +181,9 @@ internal class TestCard : BasePlaygroundTest() {
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
-                    hasTestTag(PAYMENT_METHOD_SELECTOR_TEST_TAG)
-                        .and(hasText(cardNumber.takeLast(4), substring = true))
+                    matcher = hasTestTag(PAYMENT_METHOD_SELECTOR_TEST_TAG)
+                        .and(hasText(cardNumber.takeLast(4), substring = true)),
+                    timeoutMillis = 5000L
                 )
             },
         )
@@ -226,8 +229,9 @@ internal class TestCard : BasePlaygroundTest() {
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
-                    hasTestTag(PAYMENT_METHOD_SELECTOR_TEST_TAG)
-                        .and(hasText(secondCardNumber.takeLast(4), substring = true))
+                    matcher = hasTestTag(PAYMENT_METHOD_SELECTOR_TEST_TAG)
+                        .and(hasText(secondCardNumber.takeLast(4), substring = true)),
+                    timeoutMillis = 5000L
                 )
             },
         )
