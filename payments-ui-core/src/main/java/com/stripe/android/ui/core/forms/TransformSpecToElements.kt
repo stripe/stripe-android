@@ -74,7 +74,7 @@ class TransformSpecToElements(
                 is MandateTextSpec -> it.transform(merchantName)
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
                 is BacsDebitBankAccountSpec -> it.transform(initialValues)
-                is BacsDebitConfirmSpec -> it.transform(merchantName)
+                is BacsDebitConfirmSpec -> it.transform(merchantName, initialValues)
                 is CardDetailsSectionSpec -> it.transform(
                     context = context,
                     cbcEligibility = cbcEligibility,

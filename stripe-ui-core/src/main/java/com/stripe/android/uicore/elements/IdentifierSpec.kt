@@ -55,6 +55,8 @@ data class IdentifierSpec(
 
         val CardExpYear = IdentifierSpec("card[exp_year]")
 
+        val BillingAddress = IdentifierSpec("billing_details[address]")
+
         val Email = IdentifierSpec("billing_details[email]")
 
         val Phone = IdentifierSpec("billing_details[phone]")

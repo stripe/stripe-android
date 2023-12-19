@@ -770,7 +770,15 @@ internal class PlaygroundTestDriver(
                             }.isSuccess
                         }
                     }
-
+                    is AuthorizeAction.Bacs.Confirm -> {}
+                    is AuthorizeAction.Bacs.ModifyDetails -> {
+                        buyButton.apply {
+                            scrollTo()
+                            waitProcessingComplete()
+                            isEnabled()
+                            isDisplayed()
+                        }
+                    }
                     null -> {}
                 }
             } else {
