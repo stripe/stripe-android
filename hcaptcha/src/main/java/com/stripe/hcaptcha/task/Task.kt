@@ -11,7 +11,7 @@ import kotlin.time.Duration
  *
  * @param TResult The result type of the task.
  */
-abstract class Task<TResult> protected constructor() {
+open class Task<TResult> protected constructor() {
     /**
      * @return if current task is complete or not
      */

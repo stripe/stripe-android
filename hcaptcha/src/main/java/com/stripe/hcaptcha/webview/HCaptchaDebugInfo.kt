@@ -5,7 +5,6 @@ import android.os.Build
 import android.util.Log
 import android.webkit.JavascriptInterface
 import androidx.annotation.RestrictTo
-import com.stripe.hcaptcha.BuildConfig
 import com.stripe.hcaptcha.encode.encodeToJson
 import dalvik.system.DexFile
 import kotlinx.serialization.builtins.ListSerializer
@@ -72,7 +71,6 @@ internal class HCaptchaDebugInfo(private val context: Context) : Serializable {
         result.add("deps_" + String.format(hexFormat, BigInteger(1, depsMd5.digest())))
         result.add("app_" + String.format(hexFormat, BigInteger(1, appMd5.digest())))
         result.add("aver_" + Build.VERSION.RELEASE)
-        result.add("sdk_" + BuildConfig.VERSION_NAME.replace('.', '_'))
         return result
     }
 

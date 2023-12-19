@@ -16,11 +16,11 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.times
-import org.mockito.kotlin.whenever
 import org.mockito.Mockito.mockStatic
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 class HCaptchaWebViewHelperTest {
 
@@ -56,7 +56,8 @@ class HCaptchaWebViewHelperTest {
 
     @Test
     fun test_destroy() {
-        val webViewHelper = HCaptchaWebViewHelper(handler, context, config, internalConfig, captchaVerifier, stateListener, webView)
+        val webViewHelper =
+            HCaptchaWebViewHelper(handler, context, config, internalConfig, captchaVerifier, stateListener, webView)
         val viewParent = mock<ViewGroup>(extraInterfaces = arrayOf(ViewParent::class))
         whenever(webView.parent).thenReturn(viewParent)
         webViewHelper.destroy()
@@ -66,7 +67,8 @@ class HCaptchaWebViewHelperTest {
 
     @Test
     fun test_destroy_webview_parent_null() {
-        val webViewHelper = HCaptchaWebViewHelper(handler, context, config, internalConfig, captchaVerifier, stateListener, webView)
+        val webViewHelper =
+            HCaptchaWebViewHelper(handler, context, config, internalConfig, captchaVerifier, stateListener, webView)
         webViewHelper.destroy()
     }
 

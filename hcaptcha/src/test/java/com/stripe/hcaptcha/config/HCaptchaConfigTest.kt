@@ -44,10 +44,10 @@ class HCaptchaConfigTest {
         val disableHWAccel = false
         val customTheme = (
             "{ \"palette\": {" +
-            "\"mode\": \"light\", \"primary\": { \"main\": \"#F16622\" }," +
-            "\"warn\": {  \"main\": \"#F16622\" }," +
-            "\"text\": { \"heading\": \"#F16622\", \"body\": \"#F16622\" } } }"
-        )
+                "\"mode\": \"light\", \"primary\": { \"main\": \"#F16622\" }," +
+                "\"warn\": {  \"main\": \"#F16622\" }," +
+                "\"text\": { \"heading\": \"#F16622\", \"body\": \"#F16622\" } } }"
+            )
 
         val config = HCaptchaConfig(
             siteKey = MOCK_SITE_KEY,

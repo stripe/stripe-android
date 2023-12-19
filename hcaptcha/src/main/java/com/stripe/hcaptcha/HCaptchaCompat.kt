@@ -29,7 +29,11 @@ object HCaptchaCompat {
      */
     private const val KEY_LISTENER = "hCaptchaDialogListener"
 
-    fun storeValues(config: HCaptchaConfig, internalConfig: HCaptchaInternalConfig, listener: HCaptchaStateListener): Bundle {
+    fun storeValues(
+        config: HCaptchaConfig,
+        internalConfig: HCaptchaInternalConfig,
+        listener: HCaptchaStateListener
+    ): Bundle {
         val args = Bundle()
         args.putSerializable(KEY_CONFIG, config)
         args.putSerializable(KEY_INTERNAL_CONFIG, internalConfig)

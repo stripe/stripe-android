@@ -12,7 +12,6 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.annotation.RequiresApi
 import androidx.annotation.RestrictTo
 import com.stripe.hcaptcha.HCaptchaError
 import com.stripe.hcaptcha.HCaptchaException
@@ -89,15 +88,10 @@ internal class HCaptchaWebViewHelper(
         return config.retryPredicate?.let { it(config, exception) } ?: false
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    private inner class HCaptchaWebClient internal constructor(
+    private inner class HCaptchaWebClient(
         private val handler: Handler,
         private val listener: HCaptchaStateListener
     ) : WebViewClient() {
-        private fun stripUrl(url: String): String {
-            return url.split("[?#]".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0] + "..."
-        }
-
         override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
             val requestUri = request.url
             if (requestUri != null && requestUri.scheme != null && requestUri.scheme == "http") {
