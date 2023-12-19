@@ -5,20 +5,6 @@ public final class com/stripe/hcaptcha/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/hcaptcha/HCaptcha$Companion {
-	public final fun getClient (Landroidx/fragment/app/FragmentActivity;)Lcom/stripe/hcaptcha/HCaptcha;
-	public final fun getClient (Landroidx/fragment/app/FragmentActivity;Lcom/stripe/hcaptcha/config/HCaptchaInternalConfig;)Lcom/stripe/hcaptcha/HCaptcha;
-}
-
-public final class com/stripe/hcaptcha/HCaptchaDialogFragment$Companion {
-	public final fun newInstance (Lcom/stripe/hcaptcha/config/HCaptchaConfig;Lcom/stripe/hcaptcha/config/HCaptchaInternalConfig;Lcom/stripe/hcaptcha/HCaptchaStateListener;)Lcom/stripe/hcaptcha/HCaptchaDialogFragment;
-	public final fun test ()Lcom/stripe/hcaptcha/HCaptchaDialogFragment;
-}
-
-public final class com/stripe/hcaptcha/HCaptchaError$Companion {
-	public final fun fromId (I)Lcom/stripe/hcaptcha/HCaptchaError;
-}
-
 public final class com/stripe/hcaptcha/HCaptchaHtmlKt {
 }
 
@@ -41,10 +27,6 @@ public final class com/stripe/hcaptcha/config/HCaptchaConfig$$serializer : kotli
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/hcaptcha/config/HCaptchaConfig$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
 public final class com/stripe/hcaptcha/config/HCaptchaOrientation$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
@@ -64,40 +46,5 @@ public final class com/stripe/hcaptcha/encode/DurationSerializer : kotlinx/seria
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize-HG0u8IE (Lkotlinx/serialization/encoding/Encoder;J)V
-}
-
-public final class com/stripe/hcaptcha/encode/EncodeKt {
-}
-
-public abstract interface class com/stripe/hcaptcha/task/OnFailureListener {
-	public abstract fun onFailure (Lcom/stripe/hcaptcha/HCaptchaException;)V
-}
-
-public abstract interface class com/stripe/hcaptcha/task/OnLoadedListener {
-	public abstract fun onLoaded ()V
-}
-
-public abstract interface class com/stripe/hcaptcha/task/OnOpenListener {
-	public abstract fun onOpen ()V
-}
-
-public abstract interface class com/stripe/hcaptcha/task/OnSuccessListener {
-	public abstract fun onSuccess (Ljava/lang/Object;)V
-}
-
-public class com/stripe/hcaptcha/task/Task {
-	protected fun <init> ()V
-	public final fun addOnFailureListener (Lcom/stripe/hcaptcha/task/OnFailureListener;)Lcom/stripe/hcaptcha/task/Task;
-	public final fun addOnOpenListener (Lcom/stripe/hcaptcha/task/OnOpenListener;)Lcom/stripe/hcaptcha/task/Task;
-	public final fun addOnSuccessListener (Lcom/stripe/hcaptcha/task/OnSuccessListener;)Lcom/stripe/hcaptcha/task/Task;
-	protected final fun captchaOpened ()V
-	protected final fun getHandler ()Landroid/os/Handler;
-	public final fun removeAllListeners ()Lcom/stripe/hcaptcha/task/Task;
-	public final fun removeOnFailureListener (Lcom/stripe/hcaptcha/task/OnFailureListener;)Lcom/stripe/hcaptcha/task/Task;
-	public final fun removeOnOpenListener (Lcom/stripe/hcaptcha/task/OnOpenListener;)Lcom/stripe/hcaptcha/task/Task;
-	public final fun removeOnSuccessListener (Lcom/stripe/hcaptcha/task/OnSuccessListener;)Lcom/stripe/hcaptcha/task/Task;
-	protected final fun scheduleCaptchaExpired-LRDsOJo (J)V
-	protected final fun setException (Lcom/stripe/hcaptcha/HCaptchaException;)V
-	protected final fun setResult (Ljava/lang/Object;)V
 }
 

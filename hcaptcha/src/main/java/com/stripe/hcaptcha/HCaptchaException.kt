@@ -19,4 +19,9 @@ data class HCaptchaException @JvmOverloads constructor(
 
     val statusCode: Int
         get() = hCaptchaError.errorId
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        private const val serialVersionUID: Long = -6219797459363514791L
+    }
 }

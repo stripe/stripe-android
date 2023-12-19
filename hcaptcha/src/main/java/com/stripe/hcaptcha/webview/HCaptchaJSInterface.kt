@@ -46,7 +46,9 @@ internal class HCaptchaJSInterface(
         handler.post { captchaVerifier.onOpen() }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        private const val serialVersionUID: Long = -4830797392637553617L
         const val JS_INTERFACE_TAG = "JSInterface"
     }
 }

@@ -16,10 +16,10 @@ import com.stripe.hcaptcha.webview.HCaptchaHeadlessWebView
  * Usage example:
  * 1. Get a client either using the site key or customize by passing a config:
  * client = HCaptcha.getClient(this).verifyWithHCaptcha(YOUR_API_SITE_KEY)
- * client = HCaptcha.getClient(this).verifyWithHCaptcha([com.stripe.hcaptcha.HCaptchaConfig])
+ * client = HCaptcha.getClient(this).verifyWithHCaptcha([com.stripe.hcaptcha.config.HCaptchaConfig])
  *
  * // Improve cold start by setting up the hCaptcha client
- * client = HCaptcha.getClient(this).setup([com.stripe.hcaptcha.HCaptchaConfig])
+ * client = HCaptcha.getClient(this).setup([com.stripe.hcaptcha.config.HCaptchaConfig])
  * // ui rendering...
  * // user form fill up...
  * // ready for human verification
@@ -123,6 +123,7 @@ class HCaptcha private constructor(
         return this
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         /**
          * Constructs a new client which allows to display a challenge dialog

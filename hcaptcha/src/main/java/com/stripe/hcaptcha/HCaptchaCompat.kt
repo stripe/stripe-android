@@ -53,7 +53,7 @@ object HCaptchaCompat {
         return getParcelable(bundle, KEY_LISTENER, HCaptchaStateListener::class.java)
     }
 
-    @Suppress("deprecation")
+    @Suppress("deprecation", "UNCHECKED_CAST")
     private fun <T : Serializable?> getSerializable(bundle: Bundle, key: String, clazz: Class<T>): T? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             bundle.getSerializable(key, clazz)
@@ -62,7 +62,7 @@ object HCaptchaCompat {
         }
     }
 
-    @Suppress("deprecation")
+    @Suppress("deprecation", "UNCHECKED_CAST", "SameParameterValue")
     private fun <T : Parcelable?> getParcelable(bundle: Bundle, key: String, clazz: Class<T>): T? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             bundle.getParcelable(key, clazz)

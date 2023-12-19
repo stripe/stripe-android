@@ -120,4 +120,10 @@ data class HCaptchaConfig(
      * Disable hardware acceleration for WebView
      */
     val disableHardwareAcceleration: Boolean = true,
-) : java.io.Serializable
+) : java.io.Serializable {
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        private const val serialVersionUID: Long = 6277779472462415908L
+    }
+}

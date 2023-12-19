@@ -107,7 +107,9 @@ internal class HCaptchaDebugInfo(private val context: Context) : Serializable {
         return props
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        private const val serialVersionUID: Long = -2969617621043154137L
         const val JS_INTERFACE_TAG = "JSDI"
 
         private const val GET_PROP_BIN = "/system/bin/getprop"

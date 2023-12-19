@@ -203,8 +203,8 @@ class HCaptchaDialogFragment : DialogFragment(), IHCaptchaVerifier {
         webViewHelper?.listener?.onSuccess?.let { it(result) }
     }
 
-    override fun startVerification(fragmentActivity: FragmentActivity) {
-        val fragmentManager = fragmentActivity.supportFragmentManager
+    override fun startVerification(activity: FragmentActivity) {
+        val fragmentManager = activity.supportFragmentManager
         val oldFragment = fragmentManager.findFragmentByTag(TAG)
 
         if (oldFragment?.isAdded == true) {
@@ -274,6 +274,7 @@ class HCaptchaDialogFragment : DialogFragment(), IHCaptchaVerifier {
         return webView
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         /**
          * Static TAG String
@@ -296,11 +297,6 @@ class HCaptchaDialogFragment : DialogFragment(), IHCaptchaVerifier {
             val hCaptchaDialogFragment = HCaptchaDialogFragment()
             hCaptchaDialogFragment.arguments = HCaptchaCompat.storeValues(config, internalConfig, listener)
             return hCaptchaDialogFragment
-        }
-
-        @JvmStatic
-        fun test(): HCaptchaDialogFragment {
-            TODO("Not yet implemented")
         }
     }
 }

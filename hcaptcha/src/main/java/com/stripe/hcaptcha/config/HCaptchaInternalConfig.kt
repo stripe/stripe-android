@@ -13,4 +13,10 @@ data class HCaptchaInternalConfig(
      * HTML Provider
      */
     val htmlProvider: () -> String = HCAPTCHA_WEBVIEW_HTML_PROVIDER
-) : Serializable
+) : Serializable {
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        private const val serialVersionUID: Long = -7902994431534465881L
+    }
+}

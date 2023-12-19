@@ -83,6 +83,7 @@ enum class HCaptchaError(
         return message
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         /**
          * Finds the enum based on the integer encoding

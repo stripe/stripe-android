@@ -2,6 +2,7 @@ package com.stripe.hcaptcha.task
 
 import android.os.Handler
 import android.os.Looper
+import androidx.annotation.RestrictTo
 import com.stripe.hcaptcha.HCaptchaError
 import com.stripe.hcaptcha.HCaptchaException
 import kotlin.time.Duration
@@ -11,6 +12,7 @@ import kotlin.time.Duration
  *
  * @param TResult The result type of the task.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 open class Task<TResult> protected constructor() {
     /**
      * @return if current task is complete or not

@@ -52,10 +52,7 @@ internal class HCaptchaWebViewHelper(
         settings.allowFileAccess = false
         settings.allowContentAccess = false
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            webView.webViewClient = HCaptchaWebClient(handler, listener)
-        }
-
+        webView.webViewClient = HCaptchaWebClient(handler, listener)
         webView.setBackgroundColor(Color.TRANSPARENT)
         if (config.disableHardwareAcceleration) {
             webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
