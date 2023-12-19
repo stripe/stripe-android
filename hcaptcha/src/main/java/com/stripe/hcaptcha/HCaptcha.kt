@@ -103,10 +103,6 @@ class HCaptcha private constructor(
     }
 
     override fun verifyWithHCaptcha(): HCaptcha {
-        if (captchaVerifier == null) {
-            // Cold start at verification time.
-            throw IllegalStateException("verifyWithHCaptcha must not be called before setup.")
-        }
         return startVerification()
     }
 
@@ -118,10 +114,11 @@ class HCaptcha private constructor(
     }
 
     private fun startVerification(): HCaptcha {
+        val captchaVerifier = captchaVerifier
+            ?: // Cold start at verification time.
+            throw IllegalStateException("verifyWithHCaptcha must not be called before setup.")
         handler.removeCallbacksAndMessages(null)
-        captchaVerifier?.startVerification(activity) ?: {
-            setException(HCaptchaException(HCaptchaError.ERROR))
-        }
+        captchaVerifier.startVerification(activity)
         return this
     }
 
