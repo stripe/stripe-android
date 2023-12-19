@@ -80,7 +80,7 @@ internal class HCaptchaWebViewHelper(
         webView.loadUrl("javascript:reset();")
     }
 
-    fun shouldRetry(exception: HCaptchaException?): Boolean {
+    fun shouldRetry(exception: HCaptchaException): Boolean {
         return config.retryPredicate?.let { it(config, exception) } ?: false
     }
 

@@ -108,7 +108,7 @@ data class HCaptchaConfig(
      * The lambda will decide should we retry or not
      */
     @Transient
-    val retryPredicate: ((HCaptchaConfig, HCaptchaException?) -> Boolean)? = null,
+    val retryPredicate: ((HCaptchaConfig, HCaptchaException) -> Boolean)? = null,
 
     /**
      * hCaptcha token expiration timeout (seconds)
