@@ -5,9 +5,6 @@ public final class com/stripe/hcaptcha/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/hcaptcha/HCaptchaHtmlKt {
-}
-
 public final class com/stripe/hcaptcha/HCaptchaStateListener$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/hcaptcha/HCaptchaStateListener;
