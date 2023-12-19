@@ -1,11 +1,9 @@
 package com.stripe.hcaptcha.webview
 
 import android.content.Context
-import android.os.Build
 import android.os.Looper
 import android.util.AttributeSet
 import android.webkit.WebView
-import androidx.annotation.RequiresApi
 import androidx.annotation.RestrictTo
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

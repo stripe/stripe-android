@@ -3,7 +3,6 @@ package com.stripe.hcaptcha.webview
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
-import android.os.Build
 import android.os.Handler
 import android.view.View
 import android.view.ViewGroup

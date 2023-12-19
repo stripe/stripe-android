@@ -18,10 +18,7 @@
     <ID>MagicNumber:HCaptchaError.kt$HCaptchaError.TOKEN_TIMEOUT$16</ID>
     <ID>NestedBlockDepth:HCaptchaDebugInfo.kt$HCaptchaDebugInfo$@Throws(IOException::class) private fun roBuildProps(): Map&lt;String, String></ID>
     <ID>ReturnCount:HCaptchaDialogFragment.kt$HCaptchaDialogFragment$override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? ): View?</ID>
-    <ID>SerialVersionUIDInSerializableClass:HCaptchaDebugInfo.kt$HCaptchaDebugInfo : Serializable</ID>
     <ID>SerialVersionUIDInSerializableClass:HCaptchaError.kt$HCaptchaError : Serializable</ID>
-    <ID>SerialVersionUIDInSerializableClass:HCaptchaInternalConfig.kt$HCaptchaInternalConfig : Serializable</ID>
-    <ID>SerialVersionUIDInSerializableClass:HCaptchaJSInterface.kt$HCaptchaJSInterface : Serializable</ID>
     <ID>SwallowedException:HCaptcha.kt$HCaptcha$e: AndroidRuntimeException</ID>
     <ID>SwallowedException:HCaptchaDebugInfo.kt$HCaptchaDebugInfo$e: IOException</ID>
     <ID>SwallowedException:HCaptchaDialogFragment.kt$HCaptchaDialogFragment$e: AssertionError</ID>
