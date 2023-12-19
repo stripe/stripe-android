@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.hcaptcha.sdk.HCaptchaWebView
+    <com.stripe.hcaptcha.webview.HCaptchaWebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
@@ -24,8 +24,8 @@
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
-            android:src="@drawable/ic_hcaptcha_logo"
-            android:contentDescription="@string/logo_description" />
+            android:src="@drawable/stripe_ic_hcaptcha_logo"
+            android:contentDescription="@string/stripe_hcaptcha_logo_description" />
 
         <ProgressBar
             android:layout_gravity="center"
@@ -39,7 +39,7 @@
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/loading_text" />
+            android:text="@string/stripe_hcaptcha_loading_text" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -234,7 +234,7 @@ class HCaptchaDialogFragment : DialogFragment(), IHCaptchaVerifier {
         container: ViewGroup?,
         config: HCaptchaConfig
     ): View {
-        val rootView: View = inflater.inflate(R.layout.hcaptcha_fragment, container, false)
+        val rootView: View = inflater.inflate(R.layout.stripe_hcaptcha_fragment, container, false)
         rootView.isFocusableInTouchMode = true
         rootView.requestFocus()
 

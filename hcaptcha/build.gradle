@@ -18,36 +18,8 @@ dependencies {
 }
 
 android {
-    compileSdk 34
-    namespace 'com.stripe.hcaptcha'
-
     buildFeatures {
         buildConfig true
-    }
-
-    defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 34
-
-        // See https://developer.android.com/studio/publish/versioning
-        // versionCode must be integer and be incremented by one for every new update
-        // android system uses this to prevent downgrades
-        versionCode 37
-
-        // version number visible to the user
-        // should follow semantic versioning (See https://semver.org)
-        versionName "3.10.0"
-
-        buildConfigField 'String', 'VERSION_NAME', "\"${defaultConfig.versionName}_${defaultConfig.versionCode}\""
-
-        consumerProguardFiles "consumer-rules.pro"
-        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled true
-        }
     }
 
     testOptions {
@@ -57,15 +29,9 @@ android {
             includeAndroidResources = true
         }
     }
-
-    publishing {
-        singleVariant('release') {
-            withSourcesJar()
-            withJavadocJar()
-        }
-    }
 }
 
+// Generate the HTML class for hCaptcha
 android.libraryVariants.all { variant ->
     def variantName = variant.name.capitalize()
     def packageName = "com.stripe.hcaptcha"

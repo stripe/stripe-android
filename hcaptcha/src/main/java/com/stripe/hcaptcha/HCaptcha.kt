@@ -54,7 +54,8 @@ interface IHCaptcha {
     fun setup(config: HCaptchaConfig): HCaptcha?
 
     /**
-     * Shows a captcha challenge dialog to be completed by the user
+     * Presents a captcha challenge. Depending on the configuration passed in setup, this will be either a passive
+     * challenge or a dialog to be completed by the user.
      *
      * @return [HCaptcha]
      */

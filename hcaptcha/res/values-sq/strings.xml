@@ -1,3 +1,3 @@
 <resources>
-	<string name="loading_text">Duke verifikuar se jeni njerëzor</string>
+	<string name="stripe_hcaptcha_loading_text">Duke verifikuar se jeni njerëzor</string>
 </resources>

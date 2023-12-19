@@ -1,3 +1,3 @@
 <resources>
-	<string name="loading_text">Ověření, že jste člověk</string>
+	<string name="stripe_hcaptcha_loading_text">Ověření, že jste člověk</string>
 </resources>
