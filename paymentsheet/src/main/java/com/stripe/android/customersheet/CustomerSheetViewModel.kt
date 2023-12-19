@@ -103,6 +103,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private var isGooglePayReadyAndEnabled: Boolean = false
     private var paymentLauncher: PaymentLauncher? = null
 
+    private var previouslySelectedPaymentMethod: LpmRepository.SupportedPaymentMethod? = null
     private var unconfirmedPaymentMethod: PaymentMethod? = null
     private var stripeIntent: StripeIntent? = null
     private var supportedPaymentMethods = mutableListOf<LpmRepository.SupportedPaymentMethod>()
@@ -364,6 +365,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                 return
             }
         }
+
+        previouslySelectedPaymentMethod = paymentMethod
+
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
                 paymentMethodCode = paymentMethod.code,
@@ -667,10 +671,11 @@ internal class CustomerSheetViewModel @Inject constructor(
         isFirstPaymentMethod: Boolean,
         cbcEligibility: CardBrandChoiceEligibility = viewState.value.cbcEligibility,
     ) {
-        val paymentMethodCode = PaymentMethod.Type.Card.code
+        val paymentMethodCode = previouslySelectedPaymentMethod?.code
+            ?: PaymentMethod.Type.Card.code
 
         val formArguments = FormArgumentsFactory.create(
-            paymentMethod = card,
+            paymentMethod = previouslySelectedPaymentMethod ?: card,
             configuration = configuration,
             merchantName = configuration.merchantDisplayName,
             cbcEligibility = cbcEligibility,
@@ -682,7 +687,8 @@ internal class CustomerSheetViewModel @Inject constructor(
             onFormDataUpdated = ::onFormDataUpdated
         )
 
-        val selectedPaymentMethod = requireNotNull(lpmRepository.fromCode(paymentMethodCode))
+        val selectedPaymentMethod = previouslySelectedPaymentMethod
+            ?: requireNotNull(lpmRepository.fromCode(paymentMethodCode))
 
         transition(
             to = CustomerSheetViewState.AddPaymentMethod(
