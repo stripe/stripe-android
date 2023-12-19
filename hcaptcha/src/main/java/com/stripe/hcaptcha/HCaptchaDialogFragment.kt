@@ -298,10 +298,5 @@ class HCaptchaDialogFragment : DialogFragment(), IHCaptchaVerifier {
             hCaptchaDialogFragment.arguments = HCaptchaCompat.storeValues(config, internalConfig, listener)
             return hCaptchaDialogFragment
         }
-
-        @JvmStatic
-        fun test(): HCaptchaDialogFragment {
-            TODO("Not yet implemented")
-        }
     }
 }
