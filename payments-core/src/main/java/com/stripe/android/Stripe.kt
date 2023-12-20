@@ -55,7 +55,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
@@ -1700,14 +1699,11 @@ class Stripe internal constructor(
                     return@flatMap Result.success(radarSession)
                 }
 
-                val hCaptchaToken = suspendCancellableCoroutine { continuation ->
-                    performPassiveHCaptcha(
-                        activity = activity,
-                        siteKey = siteKey,
-                        rqdata = radarSession.passiveCaptchaRqdata,
-                        onComplete = { continuation.resume(it) { _ -> } }
-                    )
-                }
+                val hCaptchaToken = performPassiveHCaptcha(
+                    activity = activity,
+                    siteKey = siteKey,
+                    rqdata = radarSession.passiveCaptchaRqdata
+                )
 
                 return@flatMap stripeRepository.attachHCaptchaToRadarSession(
                     radarSessionToken = radarSession.id,

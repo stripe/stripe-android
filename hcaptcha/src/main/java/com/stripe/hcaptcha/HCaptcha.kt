@@ -72,7 +72,6 @@ class HCaptcha private constructor(
     private val activity: FragmentActivity,
     private val internalConfig: HCaptchaInternalConfig
 ) : Task<HCaptchaTokenResponse>(), IHCaptcha {
-
     private var captchaVerifier: IHCaptchaVerifier? = null
 
     override fun setup(config: HCaptchaConfig): HCaptcha {
@@ -127,13 +126,10 @@ class HCaptcha private constructor(
          * @param activity The current activity
          * @return new [HCaptcha] object
          */
-        fun getClient(activity: FragmentActivity): HCaptcha {
-            return HCaptcha(activity, HCaptchaInternalConfig())
-        }
-
+        @JvmOverloads
         fun getClient(
             activity: FragmentActivity,
-            internalConfig: HCaptchaInternalConfig
+            internalConfig: HCaptchaInternalConfig = HCaptchaInternalConfig()
         ): HCaptcha {
             return HCaptcha(activity, internalConfig)
         }

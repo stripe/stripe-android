@@ -279,12 +279,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun attachHCaptchaToRadarSession(
-        requestOptions: ApiRequest.Options
-    ): Result<RadarSession> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun consumerSignUp(
         email: String,
         phoneNumber: String,
