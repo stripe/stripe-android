@@ -290,7 +290,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 
     internal companion object {
         val EXPAND_PAYMENT_METHOD = listOf("payment_method")
-        const val MAX_RETRIES = 3
+        const val MAX_RETRIES = 4
     }
 }
 
