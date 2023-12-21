@@ -3,8 +3,6 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,7 +40,6 @@ import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -213,10 +209,8 @@ private fun AccountPickerLoaded(
 
                 SelectionMode.CHECKBOXES -> MultiSelectContent(
                     accounts = accounts,
-                    allAccountsSelected = allAccountsSelected,
                     selectedIds = selectedIds,
-                    onAccountClicked = onAccountClicked,
-                    onSelectAllAccountsClicked = onSelectAllAccountsClicked
+                    onAccountClicked = onAccountClicked
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -263,11 +257,6 @@ private fun SingleSelectContent(
                 selected = selectedIds.contains(account.id),
                 onAccountClicked = onAccountClicked,
                 account = account,
-                selectorContent = {
-                    FinancialConnectionRadioButton(
-                        checked = selectedIds.contains(account.id),
-                    )
-                },
             )
         }
     }
@@ -277,81 +266,19 @@ private fun SingleSelectContent(
 private fun MultiSelectContent(
     accounts: List<PartnerAccount>,
     selectedIds: Set<String>,
-    onAccountClicked: (PartnerAccount) -> Unit,
-    onSelectAllAccountsClicked: () -> Unit,
-    allAccountsSelected: Boolean
+    onAccountClicked: (PartnerAccount) -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(bottom = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item("select_all_accounts") {
-            AccountItem(
-                selected = allAccountsSelected,
-                onAccountClicked = { onSelectAllAccountsClicked() },
-                account = PartnerAccount(
-                    id = "select_all_accounts",
-                    _allowSelection = true,
-                    allowSelectionMessage = "",
-                    authorization = "",
-                    category = FinancialConnectionsAccount.Category.UNKNOWN,
-                    subcategory = FinancialConnectionsAccount.Subcategory.UNKNOWN,
-                    name = stringResource(R.string.stripe_account_picker_select_all_accounts),
-                    supportedPaymentMethodTypes = emptyList()
-                ),
-            ) {
-                FinancialConnectionCheckbox(
-                    allAccountsSelected,
-                )
-            }
-        }
         items(accounts, key = { it.id }) { account ->
             AccountItem(
                 selected = selectedIds.contains(account.id),
                 onAccountClicked = onAccountClicked,
                 account = account
-            ) {
-                FinancialConnectionCheckbox(
-                    checked = selectedIds.contains(account.id),
-                )
-            }
+            )
         }
-    }
-}
-
-@Composable
-private fun FinancialConnectionCheckbox(
-    checked: Boolean,
-) {
-    Crossfade(targetState = checked) {
-        Image(
-            painter = painterResource(
-                if (it) {
-                    R.drawable.stripe_ic_checkbox_yes
-                } else {
-                    R.drawable.stripe_ic_checkbox_no
-                },
-            ),
-            contentDescription = null,
-        )
-    }
-}
-
-@Composable
-private fun FinancialConnectionRadioButton(
-    checked: Boolean,
-) {
-    Crossfade(targetState = checked) {
-        Image(
-            painter = painterResource(
-                if (it) {
-                    R.drawable.stripe_ic_radio_yes
-                } else {
-                    R.drawable.stripe_ic_radio_no
-                },
-            ),
-            contentDescription = null,
-        )
     }
 }
 

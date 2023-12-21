@@ -44,7 +44,6 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
 import com.stripe.android.financialconnections.features.common.AccountItem
-import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.PaneFooter
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
@@ -207,9 +206,7 @@ private fun NetworkedAccountItem(
         onAccountClicked = onAccountClicked,
         account = partnerAccount,
         networkedAccount = networkedAccount
-    ) {
-        InstitutionIcon(institutionIcon = partnerAccount.institution?.icon?.default)
-    }
+    )
 }
 
 @Composable
