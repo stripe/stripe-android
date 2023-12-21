@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### Payments
+* [CHANGED][7737](https://github.com/stripe/stripe-android/pull/7737) Increased the maximum number of retries from 3 to 4 when waiting for an intent to update to a terminal state, this impacts Cash App Pay and 3DS2.
+
 ## 20.36.0 - 2023-12-18
 
 ### PaymentSheet
