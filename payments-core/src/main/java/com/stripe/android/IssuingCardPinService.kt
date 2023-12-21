@@ -19,6 +19,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Methods for retrieval / update of a Stripe Issuing card
  */
+@Deprecated("Please use Issuing Elements instead: https://stripe.com/docs/issuing/elements")
 class IssuingCardPinService @VisibleForTesting internal constructor(
     keyProvider: EphemeralKeyProvider,
     private val stripeRepository: StripeRepository,
@@ -325,6 +326,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         )
     }
 
+    @Suppress("DEPRECATION")
     companion object {
         private val TAG = IssuingCardPinService::class.java.name
 
@@ -361,6 +363,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
             stripeAccountId: String? = null,
             keyProvider: EphemeralKeyProvider
         ): IssuingCardPinService {
+            Log.w(TAG, "Please use Issuing Elements instead: https://stripe.com/docs/issuing/elements")
             return IssuingCardPinService(
                 keyProvider,
                 StripeApiRepository(
