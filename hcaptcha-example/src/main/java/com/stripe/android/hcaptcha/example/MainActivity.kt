@@ -6,8 +6,7 @@ import android.webkit.WebView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
-import com.stripe.android.Stripe
-import com.stripe.android.createRadarSession
+import com.stripe.android.hcaptcha.example.databinding.ActivityMainBinding
 import com.stripe.hcaptcha.HCaptcha
 import com.stripe.hcaptcha.HCaptchaError
 import com.stripe.hcaptcha.HCaptchaException
@@ -18,9 +17,6 @@ import com.stripe.hcaptcha.task.OnFailureListener
 import com.stripe.hcaptcha.task.OnOpenListener
 import com.stripe.hcaptcha.task.OnSuccessListener
 import kotlin.time.Duration.Companion.seconds
-import com.stripe.android.hcaptcha.example.databinding.ActivityMainBinding
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.suspendCancellableCoroutine
 
 class MainActivity : FragmentActivity() {
     private val viewBinding by lazy {
