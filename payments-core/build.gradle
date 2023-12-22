@@ -67,16 +67,13 @@ dependencies {
     testImplementation testLibs.turbine
 
     androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
+    androidTestImplementation project(':payments-core-testing')
     androidTestImplementation testLibs.androidx.coreKtx
     androidTestImplementation testLibs.androidx.testRules
     androidTestImplementation testLibs.androidx.testRunner
     androidTestImplementation testLibs.espresso.core
     androidTestImplementation testLibs.kotlin.coroutines
     androidTestImplementation testLibs.kotlin.junit
-    androidTestImplementation testLibs.mockito.android
-    androidTestImplementation testLibs.mockito.core
-//    androidTestImplementation testLibs.mockito.inline
-    androidTestImplementation testLibs.mockito.kotlin
 
     androidTestUtil testLibs.testOrchestrator
 }
@@ -120,6 +117,15 @@ android {
 
     composeOptions {
         kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
+    }
+
+    packagingOptions {
+        resources {
+            pickFirsts += [
+                "mockito-extensions/org.mockito.plugins.MemberAccessor",
+                "mockito-extensions/org.mockito.plugins.MockMaker"
+            ]
+        }
     }
 }
 

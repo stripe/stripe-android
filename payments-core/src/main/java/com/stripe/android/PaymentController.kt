@@ -17,7 +17,7 @@ import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.view.AuthActivityStarterHost
 
-internal interface PaymentController {
+interface PaymentController {
     /**
      * Confirm the Stripe Intent and resolve any next actions
      */
