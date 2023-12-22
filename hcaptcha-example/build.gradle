@@ -1,0 +1,30 @@
+apply from: configs.androidApplication
+
+dependencies {
+    implementation project(':hcaptcha')
+    implementation project(':payments-core')
+
+    implementation libs.androidx.activity
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.coreKtx
+
+    testImplementation testLibs.junit
+
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.espresso.core
+
+    debugImplementation libs.leakCanary
+}
+
+android {
+    defaultConfig {
+        applicationId "com.stripe.android.hcaptcha.example"
+        versionCode 1
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+}
