@@ -128,33 +128,33 @@ internal class HCaptchaWebViewHelper(
         }
 
         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-            Log.d(LOG_TAG, "[webview] onPageStarted " + stripUrl(url))
+            Log.d(LOG_TAG, "[webview] onPageStarted ${stripUrl(url)}")
         }
 
         override fun onLoadResource(view: WebView?, url: String?) {
-            Log.d(LOG_TAG, "[webview] onLoadResource " + stripUrl(url))
+            Log.d(LOG_TAG, "[webview] onLoadResource ${stripUrl(url)}")
         }
 
         override fun onPageFinished(view: WebView?, url: String?) {
-            Log.d(LOG_TAG, "[webview] onPageFinished " + stripUrl(url))
+            Log.d(LOG_TAG, "[webview] onPageFinished ${stripUrl(url)}")
         }
 
         override fun onReceivedError(view: WebView, request: WebResourceRequest?, error: WebResourceError?) {
             super.onReceivedError(view, request, error)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Log.d(LOG_TAG, String.format("[webview] onReceivedError \"%s\" (%d)", error?.description, error?.errorCode))
+                Log.d(LOG_TAG, "[webview] onReceivedError \"${error?.description}\" (${error?.errorCode})")
             }
         }
     }
 
     private class HCaptchaWebChromeClient : WebChromeClient() {
         override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
-            Log.d(LOG_TAG, "[webview] onConsoleMessage " + consoleMessage.message())
+            Log.d(LOG_TAG, "[webview] onConsoleMessage ${consoleMessage.message()}")
             return true
         }
 
         override fun onProgressChanged(view: WebView, newProgress: Int) {
-            Log.d(LOG_TAG, String.format("[webview] onProgressChanged %d%%", newProgress))
+            Log.d(LOG_TAG, "[webview] onProgressChanged $newProgress%")
         }
     }
 
