@@ -50,6 +50,7 @@ dependencies {
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.coreKtx
     testImplementation testLibs.androidx.fragment
     testImplementation testLibs.androidx.junit
     testImplementation testLibs.androidx.lifecycle
@@ -66,9 +67,16 @@ dependencies {
     testImplementation testLibs.turbine
 
     androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
-    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation testLibs.androidx.coreKtx
     androidTestImplementation testLibs.androidx.testRules
     androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation testLibs.kotlin.coroutines
+    androidTestImplementation testLibs.kotlin.junit
+    androidTestImplementation testLibs.mockito.android
+    androidTestImplementation testLibs.mockito.core
+//    androidTestImplementation testLibs.mockito.inline
+    androidTestImplementation testLibs.mockito.kotlin
 
     androidTestUtil testLibs.testOrchestrator
 }
@@ -91,6 +99,7 @@ android {
         unitTests {
             // Note: without this, all Robolectric tests using BuildConfig will fail.
             includeAndroidResources = true
+            returnDefaultValues = true
             all {
                 maxHeapSize = "1024m"
             }

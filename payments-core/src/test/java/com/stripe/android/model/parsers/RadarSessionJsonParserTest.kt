@@ -12,7 +12,9 @@ class RadarSessionJsonParserTest {
         assertThat(RadarSessionJsonParser().parse(JSON))
             .isEqualTo(
                 RadarSession(
-                    id = "rse_abc123"
+                    id = "rse_abc123",
+                    passiveCaptchaSiteKey = null,
+                    passiveCaptchaRqdata = null
                 )
             )
     }

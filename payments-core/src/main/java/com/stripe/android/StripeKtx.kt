@@ -495,11 +495,13 @@ suspend fun Stripe.createRadarSession(
             )
         ).flatMap { radarSession ->
             val siteKey = radarSession.passiveCaptchaSiteKey
-            if (activity == null && BuildConfig.DEBUG) {
+            if (siteKey.isNullOrEmpty()) {
+                return@flatMap Result.success(radarSession)
+            } else if (activity == null && BuildConfig.DEBUG) {
                 throw IllegalStateException(
                     "An activity was not provided when creating a radar session. Please provide a valid activity."
                 )
-            } else if (activity == null || siteKey.isNullOrEmpty()) {
+            } else if (activity == null) {
                 return@flatMap Result.success(radarSession)
             }
 
