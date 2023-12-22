@@ -1,5 +1,6 @@
 package com.stripe.hcaptcha.webview
 
+import android.app.Activity
 import android.os.Handler
 import android.os.Looper
 import android.view.View
@@ -16,7 +17,7 @@ import com.stripe.hcaptcha.config.HCaptchaInternalConfig
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class HCaptchaHeadlessWebView(
-    activity: FragmentActivity,
+    activity: Activity,
     config: HCaptchaConfig,
     internalConfig: HCaptchaInternalConfig,
     private val listener: HCaptchaStateListener

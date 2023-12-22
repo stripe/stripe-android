@@ -95,9 +95,10 @@ internal class HCaptchaWebViewHelper(
         private val handler: Handler,
         private val listener: HCaptchaStateListener
     ) : WebViewClient() {
-        private fun stripUrl(url: String): String {
-            return url.split("[?#]".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0] + "..."
-        }
+        private fun stripUrl(url: String?): String =
+            url?.let {
+                it.split("[?#]".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0] + "..."
+            } ?: "null"
 
         override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
             val requestUri = request.url
@@ -126,22 +127,22 @@ internal class HCaptchaWebViewHelper(
             Log.d(LOG_TAG, "[webview] onReceivedHttpError")
         }
 
-        override fun onPageStarted(view: WebView, url: String, favicon: Bitmap) {
+        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
             Log.d(LOG_TAG, "[webview] onPageStarted " + stripUrl(url))
         }
 
-        override fun onLoadResource(view: WebView, url: String) {
+        override fun onLoadResource(view: WebView?, url: String?) {
             Log.d(LOG_TAG, "[webview] onLoadResource " + stripUrl(url))
         }
 
-        override fun onPageFinished(view: WebView, url: String) {
+        override fun onPageFinished(view: WebView?, url: String?) {
             Log.d(LOG_TAG, "[webview] onPageFinished " + stripUrl(url))
         }
 
-        override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
+        override fun onReceivedError(view: WebView, request: WebResourceRequest?, error: WebResourceError?) {
             super.onReceivedError(view, request, error)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Log.d(LOG_TAG, String.format("[webview] onReceivedError \"%s\" (%d)", error.description, error.errorCode))
+                Log.d(LOG_TAG, String.format("[webview] onReceivedError \"%s\" (%d)", error?.description, error?.errorCode))
             }
         }
     }
@@ -156,7 +157,6 @@ internal class HCaptchaWebViewHelper(
             Log.d(LOG_TAG, String.format("[webview] onProgressChanged %d%%", newProgress))
         }
     }
-
 
     private companion object {
         private const val LOG_TAG = "hCaptchaWebView"
