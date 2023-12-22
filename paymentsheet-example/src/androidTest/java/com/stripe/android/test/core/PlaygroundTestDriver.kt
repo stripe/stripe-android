@@ -5,6 +5,7 @@ import android.app.Application
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -673,9 +674,26 @@ internal class PlaygroundTestDriver(
     }
 
     internal fun launchComplete() {
-        selectors.reload.click()
-        selectors.complete.waitForEnabled()
-        selectors.complete.click()
+        var remainingTries = 3
+
+        while (remainingTries > 0) {
+            remainingTries--
+
+            selectors.reload.click()
+
+            try {
+                selectors.complete.waitForEnabled()
+            } catch (exception: ComposeTimeoutException) {
+                if (remainingTries == 0) {
+                    throw exception
+                } else {
+                    continue
+                }
+            }
+
+            selectors.complete.click()
+            break
+        }
 
         // PaymentSheetActivity is now on screen
         waitForNotPlaygroundActivity()
