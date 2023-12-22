@@ -6,4 +6,6 @@ package ${packageName}
 
 import androidx.annotation.RestrictTo
 
-val HCAPTCHA_WEBVIEW_HTML_PROVIDER = { """${htmlContent}""" }
+val HCAPTCHA_WEBVIEW_HTML_PROVIDER = { """
+${htmlContent}
+""" }

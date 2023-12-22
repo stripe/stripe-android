@@ -2,10 +2,16 @@ package com.stripe.hcaptcha.webview
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.os.Build
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.ConsoleMessage
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
@@ -52,6 +58,7 @@ internal class HCaptchaWebViewHelper(
         settings.allowContentAccess = false
 
         webView.webViewClient = HCaptchaWebClient(handler, listener)
+        webView.webChromeClient = HCaptchaWebChromeClient()
         webView.setBackgroundColor(Color.TRANSPARENT)
         if (config.disableHardwareAcceleration) {
             webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
@@ -88,6 +95,10 @@ internal class HCaptchaWebViewHelper(
         private val handler: Handler,
         private val listener: HCaptchaStateListener
     ) : WebViewClient() {
+        private fun stripUrl(url: String): String {
+            return url.split("[?#]".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0] + "..."
+        }
+
         override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
             val requestUri = request.url
             if (requestUri != null && requestUri.scheme != null && requestUri.scheme == "http") {
@@ -105,5 +116,49 @@ internal class HCaptchaWebViewHelper(
 
             return super.shouldInterceptRequest(view, request)
         }
+
+        override fun onReceivedHttpError(
+            view: WebView?,
+            request: WebResourceRequest?,
+            errorResponse: WebResourceResponse?
+        ) {
+            super.onReceivedHttpError(view, request, errorResponse)
+            Log.d(LOG_TAG, "[webview] onReceivedHttpError")
+        }
+
+        override fun onPageStarted(view: WebView, url: String, favicon: Bitmap) {
+            Log.d(LOG_TAG, "[webview] onPageStarted " + stripUrl(url))
+        }
+
+        override fun onLoadResource(view: WebView, url: String) {
+            Log.d(LOG_TAG, "[webview] onLoadResource " + stripUrl(url))
+        }
+
+        override fun onPageFinished(view: WebView, url: String) {
+            Log.d(LOG_TAG, "[webview] onPageFinished " + stripUrl(url))
+        }
+
+        override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
+            super.onReceivedError(view, request, error)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Log.d(LOG_TAG, String.format("[webview] onReceivedError \"%s\" (%d)", error.description, error.errorCode))
+            }
+        }
+    }
+
+    private class HCaptchaWebChromeClient : WebChromeClient() {
+        override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
+            Log.d(LOG_TAG, "[webview] onConsoleMessage " + consoleMessage.message())
+            return true
+        }
+
+        override fun onProgressChanged(view: WebView, newProgress: Int) {
+            Log.d(LOG_TAG, String.format("[webview] onProgressChanged %d%%", newProgress))
+        }
+    }
+
+
+    private companion object {
+        private const val LOG_TAG = "hCaptchaWebView"
     }
 }

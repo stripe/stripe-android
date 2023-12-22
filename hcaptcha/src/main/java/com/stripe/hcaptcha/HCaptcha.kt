@@ -104,7 +104,12 @@ class HCaptcha private constructor(
     }
 
     override fun verifyWithHCaptcha(): HCaptcha {
-        return startVerification()
+        val captchaVerifier = captchaVerifier
+            ?: // Cold start at verification time.
+            throw IllegalStateException("verifyWithHCaptcha must not be called before setup.")
+        handler.removeCallbacksAndMessages(null)
+        captchaVerifier.startVerification(activity)
+        return this
     }
 
     override fun reset() {
@@ -112,15 +117,6 @@ class HCaptcha private constructor(
             it.reset()
             captchaVerifier = null
         }
-    }
-
-    private fun startVerification(): HCaptcha {
-        val captchaVerifier = captchaVerifier
-            ?: // Cold start at verification time.
-            throw IllegalStateException("verifyWithHCaptcha must not be called before setup.")
-        handler.removeCallbacksAndMessages(null)
-        captchaVerifier.startVerification(activity)
-        return this
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

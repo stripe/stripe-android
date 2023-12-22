@@ -3,6 +3,8 @@ package com.stripe.hcaptcha.webview
 import android.content.Context
 import android.os.Looper
 import android.util.AttributeSet
+import android.util.Log
+import android.view.ContentInfo
 import android.webkit.WebView
 import androidx.annotation.RestrictTo
 
@@ -34,5 +36,10 @@ class HCaptchaWebView : WebView {
 
     override fun performClick(): Boolean {
         return false
+    }
+
+    override fun onReceiveContent(payload: ContentInfo): ContentInfo? {
+        Log.d("TEST", "got content")
+        return super.onReceiveContent(payload)
     }
 }
