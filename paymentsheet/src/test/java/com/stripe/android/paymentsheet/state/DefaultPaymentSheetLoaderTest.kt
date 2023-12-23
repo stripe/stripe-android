@@ -25,16 +25,15 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
-import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
@@ -42,7 +41,6 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -52,12 +50,6 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultPaymentSheetLoaderTest {
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.cardBrandChoice,
-        isEnabled = false,
-    )
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val eventReporter = mock<EventReporter>()
@@ -393,10 +385,13 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @Test
     fun `load() when PaymentIntent has invalid status should return null`() = runTest {
+        val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+            paymentMethod = PaymentMethodFactory.card(),
+        )
+        val paymentMethod = paymentIntent.paymentMethod!!
+
         val result = createPaymentSheetLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                status = Succeeded,
-            ),
+            stripeIntent = paymentIntent,
         ).load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
@@ -404,7 +399,7 @@ internal class DefaultPaymentSheetLoaderTest {
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ).exceptionOrNull()
 
-        assertThat(result).isEqualTo(PaymentSheetLoadingException.PaymentIntentInTerminalState(Succeeded))
+        assertThat(result).isEqualTo(PaymentIntentInTerminalState(paymentMethod, Succeeded))
     }
 
     @Test
@@ -664,8 +659,8 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
-        verify(eventReporter).onLoadStarted(isDecoupling = false)
-        verify(eventReporter).onLoadSucceeded(isDecoupling = false)
+        verify(eventReporter).onLoadStarted()
+        verify(eventReporter).onLoadSucceeded(linkEnabled = true, currency = "usd")
     }
 
     @Test
@@ -684,8 +679,8 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
-        verify(eventReporter).onLoadStarted(isDecoupling = true)
-        verify(eventReporter).onLoadSucceeded(isDecoupling = true)
+        verify(eventReporter).onLoadStarted()
+        verify(eventReporter).onLoadSucceeded(linkEnabled = true, currency = "usd")
     }
 
     @Test
@@ -698,17 +693,13 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
-        verify(eventReporter).onLoadStarted(isDecoupling = false)
-
-        verify(eventReporter).onLoadFailed(
-            isDecoupling = eq(false),
-            error = eq(error),
-        )
+        verify(eventReporter).onLoadStarted()
+        verify(eventReporter).onLoadFailed(error)
     }
 
     @Test
     fun `Emits correct events when loading fails for deferred intent`() = runTest {
-        val error = PaymentSheetLoadingException.PaymentIntentInTerminalState(status = Canceled)
+        val error = PaymentIntentInTerminalState(usedPaymentMethod = null, status = Canceled)
         val loader = createPaymentSheetLoader(error = error)
 
         loader.load(
@@ -723,12 +714,8 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
-        verify(eventReporter).onLoadStarted(isDecoupling = true)
-
-        verify(eventReporter).onLoadFailed(
-            isDecoupling = eq(true),
-            error = eq(error),
-        )
+        verify(eventReporter).onLoadStarted()
+        verify(eventReporter).onLoadFailed(error)
     }
 
     @Test
@@ -751,12 +738,8 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
-        verify(eventReporter).onLoadStarted(isDecoupling = true)
-
-        verify(eventReporter).onLoadFailed(
-            isDecoupling = true,
-            error = PaymentSheetLoadingException.InvalidConfirmationMethod(Manual),
-        )
+        verify(eventReporter).onLoadStarted()
+        verify(eventReporter).onLoadFailed(PaymentSheetLoadingException.InvalidConfirmationMethod(Manual))
     }
 
     @Test
@@ -773,31 +756,12 @@ internal class DefaultPaymentSheetLoaderTest {
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
         )
 
-        verify(eventReporter).onLoadStarted(isDecoupling = false)
-        verify(eventReporter).onElementsSessionLoadFailed(
-            isDecoupling = false,
-            error = error,
-        )
-    }
-
-    @Test
-    fun `Doesn't include card brand choice state if feature is disabled`() = runTest {
-        val loader = createPaymentSheetLoader(isCbcEligible = true)
-
-        val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-        ).getOrThrow()
-
-        assertThat(result.isEligibleForCardBrandChoice).isFalse()
+        verify(eventReporter).onLoadStarted()
+        verify(eventReporter).onElementsSessionLoadFailed(error)
     }
 
     @Test
     fun `Includes card brand choice state if feature is enabled`() = runTest {
-        featureFlagTestRule.setEnabled(true)
-
         val loader = createPaymentSheetLoader(isCbcEligible = true)
 
         val result = loader.load(

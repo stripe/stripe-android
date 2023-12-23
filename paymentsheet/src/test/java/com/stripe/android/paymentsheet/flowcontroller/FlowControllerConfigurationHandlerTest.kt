@@ -98,7 +98,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(viewModel.state).isNotNull()
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            isDecoupling = false,
+            isDeferred = false,
         )
         // Configure should regenerate the analytics sessionId.
         assertThat(beforeSessionId).isNotEqualTo(AnalyticsRequestFactory.sessionId)
@@ -136,7 +136,7 @@ class FlowControllerConfigurationHandlerTest {
         // We're running ONLY the second config run, so we don't expect any interactions.
         verify(eventReporter, never()).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            isDecoupling = false,
+            isDeferred = false,
         )
 
         // Configure should not regenerate the analytics sessionId when using the same configuration.
@@ -176,7 +176,7 @@ class FlowControllerConfigurationHandlerTest {
         // We're running a new config, so we DO expect an interaction.
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            isDecoupling = false,
+            isDeferred = false,
         )
     }
 
@@ -214,7 +214,7 @@ class FlowControllerConfigurationHandlerTest {
         // We're running a new config, so we DO expect an interaction.
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            isDecoupling = false,
+            isDeferred = false,
         )
     }
 
@@ -430,7 +430,7 @@ class FlowControllerConfigurationHandlerTest {
 
         verify(eventReporter).onInit(
             configuration = any(),
-            isDecoupling = eq(false),
+            isDeferred = eq(false),
         )
     }
 
@@ -462,7 +462,7 @@ class FlowControllerConfigurationHandlerTest {
 
         verify(eventReporter).onInit(
             configuration = any(),
-            isDecoupling = eq(true),
+            isDeferred = eq(true),
         )
     }
 
@@ -495,7 +495,7 @@ class FlowControllerConfigurationHandlerTest {
 
         verify(eventReporter).onInit(
             configuration = any(),
-            isDecoupling = eq(true),
+            isDeferred = eq(true),
         )
     }
 

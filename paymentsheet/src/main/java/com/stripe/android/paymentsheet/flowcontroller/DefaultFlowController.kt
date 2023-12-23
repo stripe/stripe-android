@@ -50,7 +50,6 @@ import com.stripe.android.paymentsheet.intercept
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
@@ -114,9 +113,6 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private val initializationMode: PaymentSheet.InitializationMode?
         get() = viewModel.previousConfigureRequest?.initializationMode
-
-    private val isDecoupling: Boolean
-        get() = initializationMode is PaymentSheet.InitializationMode.DeferredIntent
 
     override var shippingDetails: AddressDetails?
         get() = viewModel.state?.config?.shippingDetails
@@ -442,8 +438,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     onFailure = { error ->
                         eventReporter.onPaymentFailure(
                             paymentSelection = PaymentSelection.GooglePay,
-                            currency = viewModel.state?.stripeIntent?.currency,
-                            isDecoupling = isDecoupling,
                             error = PaymentSheetConfirmationError.InvalidState,
                         )
                         paymentResultCallback.onPaymentSheetResult(
@@ -455,8 +449,6 @@ internal class DefaultFlowController @Inject internal constructor(
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
                 eventReporter.onPaymentFailure(
                     paymentSelection = PaymentSelection.GooglePay,
-                    currency = viewModel.state?.stripeIntent?.currency,
-                    isDecoupling = isDecoupling,
                     error = PaymentSheetConfirmationError.GooglePay(googlePayResult.errorCode),
                 )
                 paymentResultCallback.onPaymentSheetResult(
@@ -533,8 +525,6 @@ internal class DefaultFlowController @Inject internal constructor(
                 onFailure = { error ->
                     eventReporter.onPaymentFailure(
                         paymentSelection = PaymentSelection.Link,
-                        currency = viewModel.state?.stripeIntent?.currency,
-                        isDecoupling = isDecoupling,
                         error = PaymentSheetConfirmationError.InvalidState,
                     )
                     paymentResultCallback.onPaymentSheetResult(
@@ -644,7 +634,6 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentResult.Completed -> {
                 eventReporter.onPaymentSuccess(
                     paymentSelection = viewModel.paymentSelection,
-                    currency = viewModel.state?.stripeIntent?.currency,
                     deferredIntentConfirmationType = viewModel.deferredIntentConfirmationType,
                 )
                 viewModel.deferredIntentConfirmationType = null
@@ -652,8 +641,6 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentResult.Failed -> {
                 eventReporter.onPaymentFailure(
                     paymentSelection = viewModel.paymentSelection,
-                    currency = viewModel.state?.stripeIntent?.currency,
-                    isDecoupling = isDecoupling,
                     error = PaymentSheetConfirmationError.Stripe(paymentResult.throwable),
                 )
             }
@@ -681,6 +668,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun launchGooglePay(state: PaymentSheetState.Full) {
         // state.config.googlePay is guaranteed not to be null or GooglePay would be disabled
         val googlePayConfig = requireNotNull(state.config.googlePay)
+
         val googlePayPaymentLauncherConfig = GooglePayPaymentMethodLauncher.Config(
             environment = when (googlePayConfig.environment) {
                 PaymentSheet.GooglePayConfiguration.Environment.Production ->
@@ -689,7 +677,9 @@ internal class DefaultFlowController @Inject internal constructor(
                     GooglePayEnvironment.Test
             },
             merchantCountryCode = googlePayConfig.countryCode,
-            merchantName = state.config.merchantDisplayName
+            merchantName = state.config.merchantDisplayName,
+            isEmailRequired = state.config.billingDetailsCollectionConfiguration.collectsEmail,
+            billingAddressConfig = state.config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
         )
 
         googlePayPaymentMethodLauncherFactory.create(

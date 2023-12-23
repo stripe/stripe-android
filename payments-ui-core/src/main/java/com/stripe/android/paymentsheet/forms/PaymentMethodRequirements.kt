@@ -227,6 +227,15 @@ internal val AuBecsDebitRequirement = PaymentMethodRequirements(
     confirmPMFromCustomer = true
 )
 
+/**
+ * This defines the requirements for usage as a Payment Method.
+ */
+internal val BacsDebitRequirement = PaymentMethodRequirements(
+    piRequirements = setOf(Delayed),
+    siRequirements = null,
+    confirmPMFromCustomer = null
+)
+
 internal val ZipRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
     siRequirements = null,

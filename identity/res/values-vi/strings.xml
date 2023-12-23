@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- title for accepted types of ids prefix -->
+  <string name="stripe_accepted_forms_of_id_include">Các loại ID được chấp nhận bao gồm</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">Cài đặt Ứng dụng</string>
   <!-- Description of back of driver's license image -->
@@ -51,6 +53,8 @@
   <string name="stripe_description_time_estimate">biểu tượng thời gian ước tính để hoàn thành xác minh</string>
   <!-- Label for Date of birth field -->
   <string name="stripe_dob">Ngày sinh</string>
+  <!-- Title for doc front warmup page -->
+  <string name="stripe_doc_front_warmup_title">Chuẩn bị quét ID có ảnh</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">Bằng lái xe</string>
   <!-- Text for error labels -->
@@ -85,6 +89,8 @@
   <string name="stripe_id_card">ID</string>
   <!-- Label for ID number section -->
   <string name="stripe_id_number">Số ID</string>
+  <!-- I'm ready button text -->
+  <string name="stripe_im_ready">Đã sẵn sàng</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">Số ID bạn đã nhập chưa đầy đủ.</string>
   <!-- Label for the ID field to collect individual CPF for Brazilian ID -->

@@ -5,6 +5,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -60,6 +61,19 @@ class FieldValuesToParamsMapConverter {
                 }
             }
             return null
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun transformToPaymentMethodExtraParams(
+            fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
+            code: PaymentMethodCode,
+        ): PaymentMethodExtraParams? {
+            return when (code) {
+                PaymentMethod.Type.BacsDebit.code -> PaymentMethodExtraParams.BacsDebit(
+                    confirmed = fieldValuePairs[IdentifierSpec.BacsDebitConfirmed]?.value?.toBoolean()
+                )
+                else -> null
+            }
         }
 
         /**

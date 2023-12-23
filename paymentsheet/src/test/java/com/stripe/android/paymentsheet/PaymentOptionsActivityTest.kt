@@ -55,7 +55,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -343,14 +342,10 @@ internal class PaymentOptionsActivityTest {
         // We don't want the initial selection to be reported, as it's not a user selection
         verify(eventReporter, never()).onSelectPaymentMethod(
             code = eq(PaymentMethod.Type.Card.code),
-            currency = anyOrNull(),
-            isDecoupling = any(),
         )
 
         verify(eventReporter).onSelectPaymentMethod(
             code = eq(PaymentMethod.Type.CashAppPay.code),
-            currency = anyOrNull(),
-            isDecoupling = any(),
         )
     }
 

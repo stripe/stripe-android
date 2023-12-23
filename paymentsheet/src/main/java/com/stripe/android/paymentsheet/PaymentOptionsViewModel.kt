@@ -17,12 +17,12 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -93,7 +94,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
     internal val paymentOptionResult: SharedFlow<PaymentOptionResult> = _paymentOptionResult
 
     private val _error = MutableStateFlow<String?>(null)
-    internal val error: StateFlow<String?> = _error
+    override val error: StateFlow<String?> = _error
+
+    override val walletsState: StateFlow<WalletsState?> = MutableStateFlow(null).asStateFlow()
 
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
@@ -105,9 +108,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(),
         initialValue = null,
     )
-
-    private val isDecoupling: Boolean
-        get() = args.state.stripeIntent.clientSecret == null
 
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (args.state.isGooglePayReady) {
@@ -200,7 +200,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onUserCancel() {
-        reportDismiss(isDecoupling)
+        reportDismiss()
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Canceled(
                 mostRecentError = mostRecentError,
@@ -242,11 +242,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         selection.value?.let { paymentSelection ->
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
-            eventReporter.onSelectPaymentOption(
-                paymentSelection = paymentSelection,
-                currency = stripeIntent.value?.currency,
-                isDecoupling = isDecoupling,
-            )
+            eventReporter.onSelectPaymentOption(paymentSelection)
 
             when (paymentSelection) {
                 is PaymentSelection.Saved,

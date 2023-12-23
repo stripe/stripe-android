@@ -770,7 +770,15 @@ internal class PlaygroundTestDriver(
                             }.isSuccess
                         }
                     }
-
+                    is AuthorizeAction.Bacs.Confirm -> {}
+                    is AuthorizeAction.Bacs.ModifyDetails -> {
+                        buyButton.apply {
+                            scrollTo()
+                            waitProcessingComplete()
+                            isEnabled()
+                            isDisplayed()
+                        }
+                    }
                     null -> {}
                 }
             } else {
@@ -796,27 +804,8 @@ internal class PlaygroundTestDriver(
     }
 
     private fun doUSBankAccountAuthorization() {
-        selectors.apply {
-            if (testParameters.authorizationAction != null) {
-                if (testParameters.authorizationAction?.requiresBrowser == true) {
-                    // If a specific browser is requested we will use it, otherwise, we will
-                    // select the first browser found
-                    val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
-
-                    // If there are multiple browser there is a browser selector window
-                    selectBrowserPrompt.wait(4000)
-                    if (selectBrowserPrompt.exists()) {
-                        browserIconAtPrompt(selectedBrowser).click()
-                    }
-
-                    assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
-
-                    blockUntilUSBankAccountPageLoaded()
-                }
-                if (testParameters.authorizationAction == AuthorizeAction.Cancel) {
-                    selectors.authorizeAction?.click()
-                }
-            }
+        if (testParameters.authorizationAction == AuthorizeAction.Cancel) {
+            selectors.authorizeAction?.click()
         }
     }
 

@@ -7,7 +7,6 @@ import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
-import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @DrawableRes
 internal fun PaymentMethod.getSavedPaymentMethodIcon(): Int {
@@ -16,7 +15,7 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(): Int {
             val brand = card?.displayBrand?.type?.takeIf { it != Unknown } ?: card?.brand
             brand?.getCardBrandIcon()
         }
-        PaymentMethod.Type.SepaDebit -> StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_sepa_debit
+        PaymentMethod.Type.SepaDebit -> R.drawable.stripe_ic_paymentsheet_sepa
         PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
         else -> null
     } ?: R.drawable.stripe_ic_paymentsheet_card_unknown

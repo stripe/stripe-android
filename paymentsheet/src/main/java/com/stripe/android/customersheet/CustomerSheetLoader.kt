@@ -13,7 +13,6 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.utils.FeatureFlags
 import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -131,11 +130,7 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
                     isFinancialConnectionsAvailable,
                 )
 
-                val isCbcEligible = if (FeatureFlags.cardBrandChoice.isEnabled) {
-                    true
-                } else {
-                    (elementsSession?.isEligibleForCardBrandChoice ?: false) && FeatureFlags.cardBrandChoice.isEnabled
-                }
+                val isCbcEligible = elementsSession?.isEligibleForCardBrandChoice ?: false
 
                 Result.success(
                     CustomerSheetState.Full(

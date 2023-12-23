@@ -22,7 +22,7 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            isDecoupled = false,
+            isDeferred = false,
         )
 
         assertThat(
@@ -73,7 +73,7 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
-            isDecoupled = false,
+            isDeferred = false,
         )
 
         assertThat(
@@ -131,7 +131,7 @@ class PaymentSheetEventTest {
             duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
-            isDecoupled = false,
+            isDeferred = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -159,7 +159,7 @@ class PaymentSheetEventTest {
             duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
-            isDecoupled = false,
+            isDeferred = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -187,7 +187,7 @@ class PaymentSheetEventTest {
             duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
-            isDecoupled = false,
+            isDeferred = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -215,7 +215,7 @@ class PaymentSheetEventTest {
             duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
-            isDecoupled = false,
+            isDeferred = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -249,7 +249,7 @@ class PaymentSheetEventTest {
             duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
-            isDecoupled = false,
+            isDeferred = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -282,7 +282,7 @@ class PaymentSheetEventTest {
                 error = PaymentSheetConfirmationError.Stripe(APIException()),
             ),
             currency = "usd",
-            isDecoupled = false,
+            isDeferred = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -313,7 +313,7 @@ class PaymentSheetEventTest {
                 error = PaymentSheetConfirmationError.Stripe(APIException()),
             ),
             currency = "usd",
-            isDecoupled = false,
+            isDeferred = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -344,7 +344,7 @@ class PaymentSheetEventTest {
                 error = PaymentSheetConfirmationError.Stripe(APIException()),
             ),
             currency = "usd",
-            isDecoupled = false,
+            isDeferred = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -375,7 +375,7 @@ class PaymentSheetEventTest {
                 error = PaymentSheetConfirmationError.Stripe(APIException()),
             ),
             currency = "usd",
-            isDecoupled = false,
+            isDeferred = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -412,7 +412,7 @@ class PaymentSheetEventTest {
                 error = PaymentSheetConfirmationError.Stripe(APIException()),
             ),
             currency = "usd",
-            isDecoupled = false,
+            isDeferred = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -438,7 +438,7 @@ class PaymentSheetEventTest {
             mode = EventReporter.Mode.Custom,
             paymentSelection = PaymentSelection.GooglePay,
             currency = "usd",
-            isDecoupled = false,
+            isDeferred = false,
         )
         assertThat(
             event.eventName
@@ -494,7 +494,7 @@ class PaymentSheetEventTest {
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
                 configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
-                isDecoupled = false,
+                isDeferred = false,
             ).params
         ).isEqualTo(
             mapOf(
@@ -543,7 +543,7 @@ class PaymentSheetEventTest {
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
                 configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING,
-                isDecoupled = false,
+                isDeferred = false,
             ).params
         ).isEqualTo(
             mapOf(

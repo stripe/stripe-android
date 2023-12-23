@@ -5,11 +5,9 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.LinkPaymentLauncher.Companion.supportedFundingSources
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
@@ -19,6 +17,7 @@ import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.model.requireValidOrThrow
@@ -26,7 +25,6 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -64,16 +62,14 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration
     ): Result<PaymentSheetState.Full> = withContext(workContext) {
-        val isDecoupling = initializationMode is DeferredIntent
-
-        eventReporter.onLoadStarted(isDecoupling = isDecoupling)
+        eventReporter.onLoadStarted()
 
         val elementsSessionResult = retrieveElementsSession(
             initializationMode = initializationMode,
             configuration = paymentSheetConfiguration,
         )
 
-        reportLoadResult(elementsSessionResult, isDecoupling)
+        reportLoadResult(elementsSessionResult)
 
         elementsSessionResult.mapCatching { elementsSession ->
             create(
@@ -115,16 +111,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val stripeIntent = elementsSession.stripeIntent
         val merchantCountry = elementsSession.merchantCountry
 
-        val linkPassthroughModeEnabled = elementsSession.linkSettings?.linkPassthroughModeEnabled ?: false
-        val isLinkAvailable = (
-            stripeIntent.paymentMethodTypes.contains(Link.code) &&
-                stripeIntent.linkFundingSources.intersect(supportedFundingSources).isNotEmpty()
-            ) || linkPassthroughModeEnabled
-
         val savedSelection = async {
             prefsRepository.getSavedSelection(
                 isGooglePayAvailable = isGooglePayReady,
-                isLinkAvailable = isLinkAvailable,
+                isLinkAvailable = elementsSession.isLinkEnabled,
             )
         }
 
@@ -166,12 +156,12 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
 
         val linkState = async {
-            if (isLinkAvailable) {
+            if (elementsSession.isLinkEnabled) {
                 loadLinkState(
                     config = config,
                     stripeIntent = stripeIntent,
                     merchantCountry = merchantCountry,
-                    passthroughModeEnabled = linkPassthroughModeEnabled,
+                    passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
                 )
             } else {
                 null
@@ -187,8 +177,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 customerPaymentMethods = sortedPaymentMethods.await(),
                 isGooglePayReady = isGooglePayReady,
                 linkState = linkState.await(),
-                isEligibleForCardBrandChoice = FeatureFlags.cardBrandChoice.isEnabled &&
-                    elementsSession.isEligibleForCardBrandChoice,
+                isEligibleForCardBrandChoice = elementsSession.isEligibleForCardBrandChoice,
                 paymentSelection = initialPaymentSelection.await(),
             )
         } else {
@@ -241,9 +230,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             )
 
             if (!didParseServerResponse) {
-                eventReporter.onLpmSpecFailure(
-                    isDecoupling = initializationMode is DeferredIntent,
-                )
+                eventReporter.onLpmSpecFailure()
             }
 
             elementsSession.requireValidOrThrow()
@@ -346,22 +333,20 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private fun reportLoadResult(
         loaderResult: Result<ElementsSession>,
-        isDecoupling: Boolean,
     ) {
         loaderResult.fold(
             onSuccess = { elementsSession ->
                 elementsSession.sessionsError?.let { sessionsError ->
-                    eventReporter.onElementsSessionLoadFailed(isDecoupling, sessionsError)
+                    eventReporter.onElementsSessionLoadFailed(sessionsError)
                 }
-
-                eventReporter.onLoadSucceeded(isDecoupling = isDecoupling)
+                eventReporter.onLoadSucceeded(
+                    linkEnabled = elementsSession.isLinkEnabled,
+                    currency = elementsSession.stripeIntent.currency,
+                )
             },
             onFailure = { error ->
                 logger.error("Failure loading PaymentSheetState", error)
-                eventReporter.onLoadFailed(
-                    isDecoupling = isDecoupling,
-                    error = error,
-                )
+                eventReporter.onLoadFailed(error)
             }
         )
     }

@@ -7,9 +7,9 @@
   <!-- Label for Bacs account number field -->
   <string name="stripe_bacs_account_number">賬號</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="stripe_bacs_account_number_incomplete">您的帳號不完整。</string>
+  <string name="stripe_bacs_account_number_incomplete">您的賬號不完整。</string>
   <!-- Title for collected bank account information -->
-  <string name="stripe_bacs_bank_account_title">銀行帳戶</string>
+  <string name="stripe_bacs_bank_account_title">銀行賬戶</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
   <string name="stripe_bacs_confirm_mandate_label">我理解 Stripe 將代表 %s 收取直接扣款，且確認我是該賬戶持有人，且是唯一一個需要授權該賬戶扣款的人。</string>
   <!-- Label for Bacs sort code field -->
@@ -17,7 +17,7 @@
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
   <string name="stripe_bacs_sort_code_incomplete">您的分類代碼不完整。</string>
   <!-- Billing address section title for card form entry. -->
-  <string name="stripe_billing_details">帳單地址</string>
+  <string name="stripe_billing_details">賬單地址</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">BLIK 代碼</string>
   <!-- Label for Boleto Payment method Tax ID -->

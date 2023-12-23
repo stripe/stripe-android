@@ -50,7 +50,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.ui.GooglePayButton
+import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
@@ -72,7 +72,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -240,7 +239,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Re-enable once we have refactored the Google Pay button handling")
     @Test
     fun `Errors are cleared when checking out with Google Pay`() {
         val viewModel = createViewModel(isGooglePayAvailable = true)
@@ -260,7 +258,7 @@ internal class PaymentSheetActivityTest {
                 .assertExists()
 
             composeTestRule
-                .onNodeWithTag(GooglePayButton.TEST_TAG)
+                .onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG)
                 .performClick()
 
             composeTestRule
@@ -324,7 +322,7 @@ internal class PaymentSheetActivityTest {
             viewModel.updateSelection(newSelection)
 
             composeTestRule
-                .onNodeWithTag(GooglePayButton.TEST_TAG)
+                .onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG)
                 .performClick()
 
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
@@ -584,16 +582,10 @@ internal class PaymentSheetActivityTest {
 
             composeTestRule.waitForIdle()
 
-            testDispatcher.scheduler.apply {
-                advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
-                runCurrent()
-            }
-
             assertThat(finishProcessingCalled).isTrue()
         }
     }
 
-    @Ignore("Re-enable once we have refactored the Google Pay button handling")
     @Test
     fun `google pay flow updates the scroll view before and after`() {
         val viewModel = createViewModel(isGooglePayAvailable = true)
@@ -603,7 +595,7 @@ internal class PaymentSheetActivityTest {
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
 
             composeTestRule
-                .onNodeWithTag(GooglePayButton.TEST_TAG)
+                .onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG)
                 .performClick()
 
             composeTestRule.waitForIdle()
@@ -940,10 +932,7 @@ internal class PaymentSheetActivityTest {
             composeTestRule.waitForIdle()
         }
 
-        verify(eventReporter).onPressConfirmButton(
-            currency = "CAD",
-            isDecoupling = false,
-        )
+        verify(eventReporter).onPressConfirmButton()
     }
 
     private fun activityScenario(

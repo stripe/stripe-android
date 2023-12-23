@@ -54,8 +54,14 @@ import com.stripe.android.R as StripeR
 const val PAYMENT_OPTION_CARD_TEST_TAG = "PAYMENT_OPTION_CARD_TEST_TAG"
 
 private const val EDIT_ICON_SCALE = 0.6f
-private val editIconColor = Color(0xFF636366)
-private val editIconBackgroundColor = Color(0xFFE5E5EA)
+private val editIconColorLight = Color(0x99000000)
+private val editIconColorDark = Color.White
+private val editIconBackgroundColorLight = Color(0xFFE5E5EA)
+private val editIconBackgroundColorDark = Color(0xFF525252)
+
+// We use internal content padding to make sure that we have space to display
+// the remove badge on the payment method card.
+internal val SavedPaymentMethodsTopContentPadding = 12.dp
 
 @Composable
 internal fun PaymentOptionUi(
@@ -118,7 +124,7 @@ internal fun PaymentOptionUi(
             }
         },
         modifier = modifier
-            .padding(top = 12.dp)
+            .padding(top = SavedPaymentMethodsTopContentPadding)
             .requiredWidth(viewWidth)
             .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
     )
@@ -239,15 +245,29 @@ private fun ModifyBadge(
     onPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val shouldUseDarkColor = MaterialTheme.colors.background.shouldUseDarkDynamicColor()
+
+    val backgroundColor = if (shouldUseDarkColor) {
+        editIconBackgroundColorLight
+    } else {
+        editIconBackgroundColorDark
+    }
+
+    val iconColor = if (shouldUseDarkColor) {
+        editIconColorLight
+    } else {
+        editIconColorDark
+    }
+
     Image(
         painter = painterResource(R.drawable.stripe_ic_edit_symbol),
         contentDescription = onModifyAccessibilityDescription,
-        colorFilter = ColorFilter.tint(editIconColor),
+        colorFilter = ColorFilter.tint(iconColor),
         contentScale = FixedScale(EDIT_ICON_SCALE),
         modifier = modifier
             .size(20.dp)
             .clip(CircleShape)
-            .background(color = editIconBackgroundColor)
+            .background(color = backgroundColor)
             .clickable(onClick = onPressed),
     )
 }

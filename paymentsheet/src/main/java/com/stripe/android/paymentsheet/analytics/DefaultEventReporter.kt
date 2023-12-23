@@ -24,36 +24,48 @@ internal class DefaultEventReporter @Inject internal constructor(
     @IOContext private val workContext: CoroutineContext
 ) : EventReporter {
 
+    private var isDeferred: Boolean = false
+    private var linkEnabled: Boolean = false
+    private var currency: String? = null
+
     override fun onInit(
         configuration: PaymentSheet.Configuration,
-        isDecoupling: Boolean,
+        isDeferred: Boolean,
     ) {
+        this.isDeferred = isDeferred
+
         fireEvent(
             PaymentSheetEvent.Init(
                 mode = mode,
                 configuration = configuration,
-                isDecoupled = isDecoupling,
+                isDeferred = isDeferred,
             )
         )
     }
 
-    override fun onLoadStarted(isDecoupling: Boolean) {
+    override fun onLoadStarted() {
         durationProvider.start(DurationProvider.Key.Loading)
-        fireEvent(PaymentSheetEvent.LoadStarted(isDecoupling))
+        fireEvent(PaymentSheetEvent.LoadStarted(isDeferred))
     }
 
-    override fun onLoadSucceeded(isDecoupling: Boolean) {
+    override fun onLoadSucceeded(
+        linkEnabled: Boolean,
+        currency: String?,
+    ) {
+        this.currency = currency
+        this.linkEnabled = linkEnabled
+
         val duration = durationProvider.end(DurationProvider.Key.Loading)
+
         fireEvent(
             PaymentSheetEvent.LoadSucceeded(
                 duration = duration,
-                isDecoupled = isDecoupling,
+                isDeferred = isDeferred,
             )
         )
     }
 
     override fun onLoadFailed(
-        isDecoupling: Boolean,
         error: Throwable,
     ) {
         val duration = durationProvider.end(DurationProvider.Key.Loading)
@@ -61,35 +73,29 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.LoadFailed(
                 duration = duration,
                 error = error.asPaymentSheetLoadingException.type,
-                isDecoupled = isDecoupling,
+                isDeferred = isDeferred,
             )
         )
     }
 
-    override fun onElementsSessionLoadFailed(isDecoupling: Boolean, error: Throwable) {
+    override fun onElementsSessionLoadFailed(error: Throwable) {
         fireEvent(
             PaymentSheetEvent.ElementsSessionLoadFailed(
                 error = error.asPaymentSheetLoadingException.type,
-                isDecoupled = isDecoupling,
+                isDeferred = isDeferred,
             )
         )
     }
 
-    override fun onDismiss(
-        isDecoupling: Boolean,
-    ) {
+    override fun onDismiss() {
         fireEvent(
             PaymentSheetEvent.Dismiss(
-                isDecoupled = isDecoupling,
+                isDeferred = isDeferred,
             )
         )
     }
 
-    override fun onShowExistingPaymentOptions(
-        linkEnabled: Boolean,
-        currency: String?,
-        isDecoupling: Boolean,
-    ) {
+    override fun onShowExistingPaymentOptions() {
         durationProvider.start(DurationProvider.Key.Checkout)
 
         fireEvent(
@@ -97,16 +103,12 @@ internal class DefaultEventReporter @Inject internal constructor(
                 mode = mode,
                 linkEnabled = linkEnabled,
                 currency = currency,
-                isDecoupled = isDecoupling,
+                isDeferred = isDeferred,
             )
         )
     }
 
-    override fun onShowNewPaymentOptionForm(
-        linkEnabled: Boolean,
-        currency: String?,
-        isDecoupling: Boolean,
-    ) {
+    override fun onShowNewPaymentOptionForm() {
         durationProvider.start(DurationProvider.Key.Checkout)
 
         fireEvent(
@@ -114,20 +116,18 @@ internal class DefaultEventReporter @Inject internal constructor(
                 mode = mode,
                 linkEnabled = linkEnabled,
                 currency = currency,
-                isDecoupled = isDecoupling,
+                isDeferred = isDeferred,
             )
         )
     }
 
     override fun onSelectPaymentMethod(
         code: PaymentMethodCode,
-        currency: String?,
-        isDecoupling: Boolean,
     ) {
         fireEvent(
             PaymentSheetEvent.SelectPaymentMethod(
                 code = code,
-                isDecoupled = isDecoupling,
+                isDeferred = isDeferred,
                 currency = currency,
             )
         )
@@ -135,31 +135,28 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onSelectPaymentOption(
         paymentSelection: PaymentSelection,
-        currency: String?,
-        isDecoupling: Boolean,
     ) {
         fireEvent(
             PaymentSheetEvent.SelectPaymentOption(
                 mode = mode,
                 paymentSelection = paymentSelection,
                 currency = currency,
-                isDecoupled = isDecoupling,
+                isDeferred = isDeferred,
             )
         )
     }
 
-    override fun onPressConfirmButton(currency: String?, isDecoupling: Boolean) {
+    override fun onPressConfirmButton() {
         fireEvent(
             PaymentSheetEvent.PressConfirmButton(
                 currency = currency,
-                isDecoupled = isDecoupling,
+                isDeferred = isDeferred,
             )
         )
     }
 
     override fun onPaymentSuccess(
         paymentSelection: PaymentSelection?,
-        currency: String?,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) {
         // Wallets are treated as a saved payment method after confirmation, so we need
@@ -176,7 +173,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Success,
                 currency = currency,
-                isDecoupled = deferredIntentConfirmationType != null,
+                isDeferred = deferredIntentConfirmationType != null,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
             )
         )
@@ -184,8 +181,6 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onPaymentFailure(
         paymentSelection: PaymentSelection?,
-        currency: String?,
-        isDecoupling: Boolean,
         error: PaymentSheetConfirmationError,
     ) {
         val duration = durationProvider.end(DurationProvider.Key.Checkout)
@@ -197,28 +192,25 @@ internal class DefaultEventReporter @Inject internal constructor(
                 duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Failure(error),
                 currency = currency,
-                isDecoupled = isDecoupling,
+                isDeferred = isDeferred,
                 deferredIntentConfirmationType = null,
             )
         )
     }
 
-    override fun onLpmSpecFailure(
-        isDecoupling: Boolean,
-    ) {
+    override fun onLpmSpecFailure() {
         fireEvent(
-            PaymentSheetEvent.LpmSerializeFailureEvent(isDecoupled = isDecoupling)
+            PaymentSheetEvent.LpmSerializeFailureEvent(isDeferred = isDeferred)
         )
     }
 
     override fun onAutofill(
         type: String,
-        isDecoupling: Boolean,
     ) {
         fireEvent(
             PaymentSheetEvent.AutofillEvent(
                 type = type,
-                isDecoupled = isDecoupling,
+                isDeferred = isDeferred,
             )
         )
     }

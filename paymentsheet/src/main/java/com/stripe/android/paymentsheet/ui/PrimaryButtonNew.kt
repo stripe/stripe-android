@@ -38,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
@@ -251,6 +252,8 @@ private fun BoxScope.AnimatedCompleteProcessing(
         }
     )
 
+    val currentOnAnimationCompleted by rememberUpdatedState(onAnimationCompleted)
+
     if (!inInspectionMode) {
         LaunchedEffect(Unit) {
             delay(PRE_SUCCESS_ANIMATION_DELAY)
@@ -258,11 +261,15 @@ private fun BoxScope.AnimatedCompleteProcessing(
             alignment = CENTER_ALIGNED
         }
 
-        LaunchedEffect(animationCompleted, onAnimationCompleted) {
+        LaunchedEffect(animationCompleted, currentOnAnimationCompleted) {
             if (animationCompleted) {
                 delay(POST_SUCCESS_ANIMATION_DELAY)
-                onAnimationCompleted()
+                currentOnAnimationCompleted()
             }
+        }
+    } else {
+        LaunchedEffect(currentOnAnimationCompleted) {
+            currentOnAnimationCompleted()
         }
     }
 

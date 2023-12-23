@@ -756,6 +756,11 @@
     }
   },
   {
+    "type": "bacs_debit",
+    "async": true,
+    "fields": []
+  },
+  {
     "type": "revolut_pay",
     "async": false,
     "selector_icon": {

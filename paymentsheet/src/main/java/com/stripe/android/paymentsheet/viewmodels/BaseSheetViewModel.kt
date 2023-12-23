@@ -29,7 +29,6 @@ import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave.RequestReuse
-import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
@@ -37,6 +36,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPay
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
@@ -161,6 +161,8 @@ internal abstract class BaseSheetViewModel(
     protected val customPrimaryButtonUiState = MutableStateFlow<PrimaryButton.UIState?>(null)
 
     abstract val primaryButtonUiState: StateFlow<PrimaryButton.UIState?>
+    abstract val error: StateFlow<String?>
+    abstract val walletsState: StateFlow<WalletsState?>
 
     private val _mandateText = MutableStateFlow<MandateText?>(null)
     internal val mandateText: StateFlow<MandateText?> = _mandateText
@@ -269,18 +271,10 @@ internal abstract class BaseSheetViewModel(
                 // Nothing to do here
             }
             is PaymentSheetScreen.SelectSavedPaymentMethods -> {
-                eventReporter.onShowExistingPaymentOptions(
-                    linkEnabled = linkHandler.isLinkEnabled.value == true,
-                    currency = stripeIntent.value?.currency,
-                    isDecoupling = stripeIntent.value?.clientSecret == null,
-                )
+                eventReporter.onShowExistingPaymentOptions()
             }
             is AddFirstPaymentMethod -> {
-                eventReporter.onShowNewPaymentOptionForm(
-                    linkEnabled = linkHandler.isLinkEnabled.value == true,
-                    currency = stripeIntent.value?.currency,
-                    isDecoupling = stripeIntent.value?.clientSecret == null,
-                )
+                eventReporter.onShowNewPaymentOptionForm()
             }
             is PaymentSheetScreen.EditPaymentMethod -> {
                 // TODO(tillh-stripe) Add reporting
@@ -289,10 +283,7 @@ internal abstract class BaseSheetViewModel(
     }
 
     protected fun reportConfirmButtonPressed() {
-        eventReporter.onPressConfirmButton(
-            currency = stripeIntent.value?.currency,
-            isDecoupling = stripeIntent.value?.clientSecret == null,
-        )
+        eventReporter.onPressConfirmButton()
     }
 
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
@@ -307,16 +298,12 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    protected fun reportDismiss(isDecoupling: Boolean) {
-        eventReporter.onDismiss(isDecoupling = isDecoupling)
+    protected fun reportDismiss() {
+        eventReporter.onDismiss()
     }
 
     fun reportPaymentMethodTypeSelected(code: PaymentMethodCode) {
-        eventReporter.onSelectPaymentMethod(
-            code = code,
-            isDecoupling = stripeIntent.value?.clientSecret == null,
-            currency = stripeIntent.value?.currency,
-        )
+        eventReporter.onSelectPaymentMethod(code)
     }
 
     abstract fun clearErrorMessages()
@@ -532,15 +519,11 @@ internal abstract class BaseSheetViewModel(
         googlePayState: GooglePayState,
         supportedPaymentMethods: List<PaymentMethodCode>,
     ): Int? {
-        return if (screen != null) {
-            headerTextFactory.create(
-                screen = screen,
-                isWalletEnabled = isLinkAvailable || googlePayState is GooglePayState.Available,
-                types = supportedPaymentMethods,
-            )
-        } else {
-            null
-        }
+        return headerTextFactory.create(
+            screen = screen,
+            isWalletEnabled = isLinkAvailable || googlePayState is GooglePayState.Available,
+            types = supportedPaymentMethods,
+        )
     }
 
     abstract val shouldCompleteLinkFlowInline: Boolean
@@ -615,7 +598,7 @@ internal abstract class BaseSheetViewModel(
     }
 
     fun reportAutofillEvent(type: String) {
-        eventReporter.onAutofill(type, isDecoupling = stripeIntent.value?.clientSecret == null)
+        eventReporter.onAutofill(type)
     }
 
     abstract fun onPaymentResult(paymentResult: PaymentResult)

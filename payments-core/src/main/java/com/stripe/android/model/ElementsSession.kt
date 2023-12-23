@@ -2,7 +2,10 @@ package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.model.PaymentMethod.Type.Link
 import kotlinx.parcelize.Parcelize
+
+private val LinkSupportedFundingSources = setOf("card", "bank_account")
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
@@ -15,6 +18,16 @@ data class ElementsSession(
     val isGooglePayEnabled: Boolean,
     val sessionsError: Throwable? = null,
 ) : StripeModel {
+
+    val linkPassthroughModeEnabled: Boolean
+        get() = linkSettings?.linkPassthroughModeEnabled ?: false
+
+    val isLinkEnabled: Boolean
+        get() {
+            val allowsLink = Link.code in stripeIntent.paymentMethodTypes
+            val hasValidFundingSource = stripeIntent.linkFundingSources.any { it in LinkSupportedFundingSources }
+            return (allowsLink && hasValidFundingSource) || linkPassthroughModeEnabled
+        }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize

@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.content.Intent
+import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -21,6 +22,7 @@ import com.stripe.android.model.CvcTokenParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.PersonTokenParams
 import com.stripe.android.model.PiiTokenParams
 import com.stripe.android.model.PossibleBrands
@@ -106,6 +108,52 @@ suspend fun Stripe.createPaymentMethod(
             paymentMethodCreateParams,
             ApiRequest.Options(
                 apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            )
+        )
+    }
+}
+
+/**
+ * Update a [PaymentMethod] from a coroutine.
+ *
+ * See [Update a PaymentMethod](https://stripe.com/docs/api/payment_methods/update).
+ * `POST /v1/payment_methods/:id`
+ *
+ * @param paymentMethodId the ID of the [PaymentMethod] to be updated
+ * @param paymentMethodUpdateParams the [PaymentMethodUpdateParams] to be used
+ * @param ephemeralKeySecret the Customer Ephemeral Key secret to be used
+ * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+ * @param stripeAccountId Optional, the Connect account to associate with this request.
+ * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+ *
+ * @return a [PaymentMethod] object
+ *
+ * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+ * @throws InvalidRequestException your request has invalid parameters
+ * @throws APIConnectionException failure to connect to Stripe's API
+ * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
+ */
+@Throws(
+    AuthenticationException::class,
+    InvalidRequestException::class,
+    APIConnectionException::class,
+    APIException::class
+)
+suspend fun Stripe.updatePaymentMethod(
+    paymentMethodId: String,
+    paymentMethodUpdateParams: PaymentMethodUpdateParams,
+    ephemeralKeySecret: String,
+    idempotencyKey: String? = null,
+    stripeAccountId: String? = this.stripeAccountId
+): PaymentMethod {
+    return runApiRequest {
+        stripeRepository.updatePaymentMethod(
+            paymentMethodId,
+            paymentMethodUpdateParams,
+            ApiRequest.Options(
+                apiKey = ephemeralKeySecret,
                 stripeAccount = stripeAccountId,
                 idempotencyKey = idempotencyKey
             )
@@ -1004,4 +1052,24 @@ suspend fun Stripe.retrievePossibleBrands(
             PossibleBrands(brands = brands.distinct())
         }
     }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY)
+suspend fun Stripe.attachPaymentMethod(
+    paymentMethodId: String,
+    customerId: String,
+    ephemeralKeySecret: String,
+    idempotencyKey: String? = null,
+    stripeAccountId: String? = this.stripeAccountId,
+): Result<PaymentMethod> {
+    return stripeRepository.attachPaymentMethod(
+        customerId = customerId,
+        paymentMethodId = paymentMethodId,
+        productUsageTokens = emptySet(),
+        requestOptions = ApiRequest.Options(
+            apiKey = ephemeralKeySecret,
+            stripeAccount = stripeAccountId,
+            idempotencyKey = idempotencyKey,
+        )
+    )
 }

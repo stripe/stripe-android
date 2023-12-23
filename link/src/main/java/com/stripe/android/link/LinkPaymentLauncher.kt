@@ -5,7 +5,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.annotation.RestrictTo
 import com.stripe.android.link.injection.LinkAnalyticsComponent
-import com.stripe.android.model.ConsumerPaymentDetails
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -64,13 +63,5 @@ class LinkPaymentLauncher @Inject internal constructor(
         )
         linkActivityResultLauncher?.launch(args)
         analyticsHelper.onLinkLaunched()
-    }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    companion object {
-        val supportedFundingSources = setOf(
-            ConsumerPaymentDetails.Card.type,
-            ConsumerPaymentDetails.BankAccount.type,
-        )
     }
 }

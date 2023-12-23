@@ -106,7 +106,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         eventReporter.onInit(
             configuration = state.config,
-            isDecoupling = isDecoupling,
+            isDeferred = isDecoupling,
         )
 
         viewModel.paymentSelection = paymentSelectionUpdater(
