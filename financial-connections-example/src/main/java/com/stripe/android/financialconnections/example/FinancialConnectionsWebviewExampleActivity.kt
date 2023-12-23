@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.example
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -30,13 +31,15 @@ class FinancialConnectionsWebviewExampleActivity() : AppCompatActivity() {
         setSupportActionBar(toolbar)
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebview() {
         webView = findViewById(R.id.webview)
         with(webView) {
+            // This configuration is required for Financial Connections to work. example to work.
             settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
             settings.loadWithOverviewMode = true
             webViewClient = buildWebviewClient()
-            settings.domStorageEnabled = true
             webChromeClient = buildWebChromeClient()
             loadUrl(GLITCH_EXAMPLE_URL)
         }
