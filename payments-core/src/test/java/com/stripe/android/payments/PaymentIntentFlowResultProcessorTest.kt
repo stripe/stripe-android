@@ -311,7 +311,6 @@ internal class PaymentIntentFlowResultProcessorTest {
             Result.success(processingIntent),
             Result.failure(APIConnectionException()),
             Result.failure(APIConnectionException()),
-            Result.failure(APIConnectionException()),
             Result.success(succeededIntent),
         )
 
