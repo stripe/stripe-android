@@ -49,27 +49,23 @@
         </activity>
         <activity
             android:name=".FinancialConnectionsQrCodeActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            />
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name="com.stripe.android.financialconnections.example.FinancialConnectionsWebviewExampleActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:launchMode="singleTask"
-            android:exported="true" />
-
-        <activity
-            android:name="com.stripe.android.financialconnections.example.WebviewContainerActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:launchMode="singleTask"
             android:exported="true">
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <!-- Data structure to listen for "zzz-custom://open/customtab_return" URL -->
+                <!-- Observe Bank login completion redirect from custom tab back to webview app -->
+                <!-- This is the `return_url` passed when creating the session: -->
+                <!-- zzz-custom://open/customtab_return -->
                 <data
                     android:host="open"
                     android:pathPrefix="/customtab_return"

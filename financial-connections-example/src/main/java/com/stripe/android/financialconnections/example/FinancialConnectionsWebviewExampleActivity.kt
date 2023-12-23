@@ -1,76 +1,45 @@
 package com.stripe.android.financialconnections.example
 
-import android.app.Activity
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.ViewGroup
 import android.webkit.ConsoleMessage
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.FrameLayout
-import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 
-class FinancialConnectionsWebviewExampleActivity : AppCompatActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        WebView.setWebContentsDebuggingEnabled(true)
-        setContent {
-            Column(modifier = Modifier.padding(horizontal = 10.dp)) {
-                Button(
-                    onClick = { onButtonClick() },
-                ) {
-                    Text("Launch Webview-based app")
-                }
-                Divider(modifier = Modifier.padding(vertical = 5.dp))
-            }
-        }
-    }
-
-    private fun onButtonClick() {
-        val intent = Intent(
-            this,
-            WebviewContainerActivity::class.java
-        )
-        intent.putExtra("url", GLITCH_EXAMPLE_URL)
-        startActivity(intent)
-    }
-}
-
-class WebviewContainerActivity : Activity() {
+class FinancialConnectionsWebviewExampleActivity() : AppCompatActivity() {
 
     private lateinit var webView: WebView
+    private lateinit var toolbar: Toolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setContentView(R.layout.activity_financialconnetions_webview_example)
         super.onCreate(savedInstanceState)
-        webView = WebView(this).also {
-            it.settings.javaScriptEnabled = true
-            it.settings.loadWithOverviewMode = true
-            it.webViewClient = buildWebviewClient()
-            it.settings.domStorageEnabled = true
-            it.webChromeClient = buildWebChromeClient()
-            it.layoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
+        setupToolbar()
+        setupWebview()
+    }
+
+    private fun setupToolbar() {
+        toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+    }
+
+    private fun setupWebview() {
+        webView = findViewById(R.id.webview)
+        with(webView) {
+            settings.javaScriptEnabled = true
+            settings.loadWithOverviewMode = true
+            webViewClient = buildWebviewClient()
+            settings.domStorageEnabled = true
+            webChromeClient = buildWebChromeClient()
+            loadUrl(GLITCH_EXAMPLE_URL)
         }
-        val frameLayout = FrameLayout(this)
-        frameLayout.addView(webView)
-        webView.loadUrl(requireNotNull(intent.getStringExtra("url")))
-        setContentView(frameLayout)
     }
 
     private fun buildWebviewClient() = object : WebViewClient() {
@@ -87,7 +56,7 @@ class WebviewContainerActivity : Activity() {
                 else -> {
                     CustomTabsIntent.Builder()
                         .build()
-                        .launchUrl(this@WebviewContainerActivity, Uri.parse(url))
+                        .launchUrl(this@FinancialConnectionsWebviewExampleActivity, Uri.parse(url))
                     true
                 }
             }
@@ -95,6 +64,12 @@ class WebviewContainerActivity : Activity() {
     }
 
     private fun buildWebChromeClient() = object : WebChromeClient() {
+
+        override fun onProgressChanged(view: WebView, newProgress: Int) {
+            toolbar.title = "Loading..."
+            if (newProgress == 100) toolbar.title = "My webview-based app"
+        }
+
         override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
             Log.d(
                 "Webview",
