@@ -112,5 +112,4 @@ class WebviewContainerActivity : Activity() {
     }
 }
 
-private const val GLITCH_EXAMPLE_URL = "https://rich-familiar-angle.glitch.me/"
-
+private const val GLITCH_EXAMPLE_URL = "https://connections-webview-example.glitch.me/"
