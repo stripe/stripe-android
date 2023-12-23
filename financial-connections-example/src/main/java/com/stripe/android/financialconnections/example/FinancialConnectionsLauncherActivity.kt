@@ -103,18 +103,18 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
         }
 
         LazyColumn {
-            Section(
+            section(
                 title = "Recommended Integrations",
                 items = groupedItems.getOrElse(MenuItem.Section.CompleteFlow) { emptyList() },
             )
 
-            Section(
+            section(
                 title = "Alternatives",
                 badge = { NotRecommended() },
                 items = groupedItems.getOrElse(MenuItem.Section.Alternative) { emptyList() },
             )
 
-            Section(
+            section(
                 title = "Internal",
                 items = groupedItems.getOrElse(MenuItem.Section.Internal) { emptyList() },
             )
@@ -157,7 +157,8 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
         }
     }
 
-    private fun LazyListScope.Section(
+    @Suppress("MagicNumber")
+    private fun LazyListScope.section(
         title: String,
         items: List<MenuItem>,
         badge: @Composable () -> Unit = { },
