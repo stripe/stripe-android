@@ -13,8 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.browser.customtabs.CustomTabsIntent
 
-
-class FinancialConnectionsWebviewExampleActivity() : AppCompatActivity() {
+class FinancialConnectionsWebviewExampleActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
     private lateinit var toolbar: Toolbar
@@ -68,6 +67,7 @@ class FinancialConnectionsWebviewExampleActivity() : AppCompatActivity() {
 
     private fun buildWebChromeClient() = object : WebChromeClient() {
 
+        @Suppress("MagicNumber")
         override fun onProgressChanged(view: WebView, newProgress: Int) {
             toolbar.title = "Loading..."
             if (newProgress == 100) toolbar.title = "My webview-based app"
