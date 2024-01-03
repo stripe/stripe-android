@@ -67,6 +67,8 @@
   <string name="stripe_paymentsheet_buy_using_upi_id">Купить с помощью идентификатора UPI</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Австралийская система прямого списания средств BECS</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Прямое дебетование Bacs</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Карта</string>
   <!-- Label for Konbini Payment Method -->
