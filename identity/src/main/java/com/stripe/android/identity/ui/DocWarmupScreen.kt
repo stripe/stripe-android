@@ -52,7 +52,7 @@ internal fun DocWarmupScreen(
     ) {
         ScreenTransitionLaunchedEffect(
             identityViewModel = identityViewModel,
-            screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_SELFIE_WARMUP
+            screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_DOC_WARMUP
         )
         DocWarmupView(documentSelectPage = it.documentSelect) {
             identityViewModel.checkPermissionAndNavigate(navController, cameraPermissionEnsureable)
