@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemoveOperation
 import com.stripe.android.paymentsheet.ui.PaymentMethodUpdateOperation
@@ -42,6 +43,7 @@ import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.StandardTestDispatcher
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -52,22 +54,6 @@ import kotlin.coroutines.EmptyCoroutineContext
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal object CustomerSheetTestHelper {
     internal val application = ApplicationProvider.getApplicationContext<Application>()
-
-    private val editPaymentMethodInteractorFactory = object : ModifiableEditPaymentMethodViewInteractor.Factory {
-        override fun create(
-            initialPaymentMethod: PaymentMethod,
-            removeExecutor: PaymentMethodRemoveOperation,
-            updateExecutor: PaymentMethodUpdateOperation,
-            displayName: String
-        ): ModifiableEditPaymentMethodViewInteractor {
-            return DefaultEditPaymentMethodViewInteractor(
-                initialPaymentMethod = initialPaymentMethod,
-                displayName = "Card",
-                removeExecutor = removeExecutor,
-                updateExecutor = updateExecutor,
-            )
-        }
-    }
 
     internal val usBankAccountFormArguments = USBankAccountFormArguments(
         onBehalfOf = null,
@@ -221,7 +207,8 @@ internal object CustomerSheetTestHelper {
             paymentSelection = savedPaymentSelection,
             isGooglePayAvailable = isGooglePayAvailable,
         ),
-        editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory = editPaymentMethodInteractorFactory,
+        editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory =
+            createModifiableEditPaymentMethodViewInteractorFactory(),
     ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
             application = application,
@@ -256,6 +243,29 @@ internal object CustomerSheetTestHelper {
             editInteractorFactory = editInteractorFactory,
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
+        }
+    }
+
+    internal fun createModifiableEditPaymentMethodViewInteractorFactory(
+        workContext: CoroutineContext = StandardTestDispatcher(),
+    ): ModifiableEditPaymentMethodViewInteractor.Factory {
+        return object : ModifiableEditPaymentMethodViewInteractor.Factory {
+            override fun create(
+                initialPaymentMethod: PaymentMethod,
+                eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
+                removeExecutor: PaymentMethodRemoveOperation,
+                updateExecutor: PaymentMethodUpdateOperation,
+                displayName: String
+            ): ModifiableEditPaymentMethodViewInteractor {
+                return DefaultEditPaymentMethodViewInteractor(
+                    initialPaymentMethod = initialPaymentMethod,
+                    displayName = "Card",
+                    removeExecutor = removeExecutor,
+                    updateExecutor = updateExecutor,
+                    eventHandler = eventHandler,
+                    workContext = workContext
+                )
+            }
         }
     }
 }

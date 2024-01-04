@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.analytics
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
@@ -211,6 +212,73 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.AutofillEvent(
                 type = type,
                 isDeferred = isDeferred,
+            )
+        )
+    }
+
+    override fun onShowEditablePaymentOption() {
+        fireEvent(
+            PaymentSheetEvent.ShowEditablePaymentOption(
+                isDeferred = isDeferred
+            )
+        )
+    }
+
+    override fun onHideEditablePaymentOption() {
+        fireEvent(
+            PaymentSheetEvent.HideEditablePaymentOption(
+                isDeferred = isDeferred
+            )
+        )
+    }
+
+    override fun onShowPaymentOptionBrands(
+        source: EventReporter.CardBrandChoiceEventSource,
+        selectedBrand: CardBrand
+    ) {
+        fireEvent(
+            PaymentSheetEvent.ShowPaymentOptionBrands(
+                selectedBrand = selectedBrand,
+                source = when (source) {
+                    EventReporter.CardBrandChoiceEventSource.Add ->
+                        PaymentSheetEvent.ShowPaymentOptionBrands.Source.Add
+                    EventReporter.CardBrandChoiceEventSource.Edit ->
+                        PaymentSheetEvent.ShowPaymentOptionBrands.Source.Edit
+                },
+                isDeferred = isDeferred
+            )
+        )
+    }
+
+    override fun onHidePaymentOptionBrands(selectedBrand: CardBrand?) {
+        fireEvent(
+            PaymentSheetEvent.HidePaymentOptionBrands(
+                selectedBrand = selectedBrand,
+                isDeferred = isDeferred
+            )
+        )
+    }
+
+    override fun onUpdatePaymentMethodSucceeded(
+        selectedBrand: CardBrand
+    ) {
+        fireEvent(
+            PaymentSheetEvent.UpdatePaymentOptionSucceeded(
+                selectedBrand = selectedBrand,
+                isDeferred = isDeferred
+            )
+        )
+    }
+
+    override fun onUpdatePaymentMethodFailed(
+        selectedBrand: CardBrand,
+        error: Throwable,
+    ) {
+        fireEvent(
+            PaymentSheetEvent.UpdatePaymentOptionFailed(
+                selectedBrand = selectedBrand,
+                error = error,
+                isDeferred = isDeferred
             )
         )
     }

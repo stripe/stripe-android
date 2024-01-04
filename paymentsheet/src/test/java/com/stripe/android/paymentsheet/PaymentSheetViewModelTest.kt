@@ -31,6 +31,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -87,6 +88,7 @@ import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
@@ -194,7 +196,99 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `modifyPaymentMethod updates payment methods on successful update`() = runTest {
+    fun `correct event is sent when dropdown is opened in EditPaymentMethod`() = runTest {
+        val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+        val viewModel = createViewModel(
+            customerPaymentMethods = paymentMethods
+        )
+
+        viewModel.currentScreen.test {
+            awaitItem()
+
+            viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+            val currentScreen = awaitItem()
+
+            assertThat(currentScreen).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+
+            if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
+                val interactor = currentScreen.interactor
+
+                interactor.handleViewAction(
+                    EditPaymentMethodViewAction.OnBrandChoiceOptionsShown
+                )
+
+                verify(eventReporter).onShowPaymentOptionBrands(
+                    source = EventReporter.CardBrandChoiceEventSource.Edit,
+                    selectedBrand = CardBrand.CartesBancaires
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `correct event is sent when dropdown is dismissed in EditPaymentMethod`() = runTest {
+        val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+        val viewModel = createViewModel(
+            customerPaymentMethods = paymentMethods
+        )
+
+        viewModel.currentScreen.test {
+            awaitItem()
+
+            viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+            val currentScreen = awaitItem()
+
+            assertThat(currentScreen).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+
+            if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
+                val interactor = currentScreen.interactor
+
+                interactor.handleViewAction(
+                    EditPaymentMethodViewAction.OnBrandChoiceOptionsDismissed
+                )
+
+                verify(eventReporter).onHidePaymentOptionBrands(null)
+            }
+        }
+    }
+
+    @Test
+    fun `correct event is sent when dropdown is dismissed with change in EditPaymentMethod`() = runTest {
+        val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+        val viewModel = createViewModel(
+            customerPaymentMethods = paymentMethods
+        )
+
+        viewModel.currentScreen.test {
+            awaitItem()
+
+            viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+            val currentScreen = awaitItem()
+
+            assertThat(currentScreen).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+
+            if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
+                val interactor = currentScreen.interactor
+
+                interactor.handleViewAction(
+                    EditPaymentMethodViewAction.OnBrandChoiceChanged(
+                        EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa)
+                    )
+                )
+
+                verify(eventReporter).onHidePaymentOptionBrands(CardBrand.Visa)
+            }
+        }
+    }
+
+    @Test
+    fun `modifyPaymentMethod updates payment methods and sends event on successful update`() = runTest {
         val paymentMethods = PaymentMethodFixtures.createCards(5)
 
         val firstPaymentMethod = paymentMethods.first()
@@ -243,6 +337,8 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem()).isInstanceOf(SelectSavedPaymentMethods::class.java)
         }
 
+        verify(eventReporter).onUpdatePaymentMethodSucceeded(CardBrand.Visa)
+
         val idCaptor = argumentCaptor<String>()
         val paramsCaptor = argumentCaptor<PaymentMethodUpdateParams>()
 
@@ -266,6 +362,54 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewModel.paymentMethods.value).isEqualTo(
             listOf(updatedPaymentMethod) + paymentMethods.takeLast(4)
+        )
+    }
+
+    @Test
+    fun `modifyPaymentMethod sends event on failed update`() = runTest {
+        val paymentMethods = PaymentMethodFixtures.createCards(5)
+
+        val firstPaymentMethod = paymentMethods.first()
+
+        val customerRepository = spy(
+            FakeCustomerRepository(
+                onUpdatePaymentMethod = {
+                    Result.failure(Exception("No network found!"))
+                }
+            )
+        )
+        val viewModel = createViewModel(
+            customerPaymentMethods = paymentMethods,
+            customerRepository = customerRepository
+        )
+
+        viewModel.currentScreen.test {
+            awaitItem()
+
+            viewModel.modifyPaymentMethod(firstPaymentMethod)
+
+            val currentScreen = awaitItem()
+
+            assertThat(currentScreen).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+
+            if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
+                val interactor = currentScreen.interactor
+
+                interactor.handleViewAction(
+                    EditPaymentMethodViewAction.OnBrandChoiceChanged(
+                        EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa)
+                    )
+                )
+
+                interactor.handleViewAction(EditPaymentMethodViewAction.OnUpdatePressed)
+            }
+        }
+
+        verify(eventReporter).onUpdatePaymentMethodFailed(
+            selectedBrand = eq(CardBrand.Visa),
+            error = argThat {
+                message == "No network found!"
+            }
         )
     }
 
@@ -1171,6 +1315,35 @@ internal class PaymentSheetViewModelTest {
         viewModel.transitionToAddPaymentScreen()
 
         verifyNoMoreInteractions(eventReporter)
+    }
+
+    @Test
+    fun `Sends correct event when navigating to EditPaymentMethod screen`() = runTest {
+        val cards = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+        val viewModel = createViewModel(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            customerPaymentMethods = cards,
+        )
+
+        viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+        verify(eventReporter).onShowEditablePaymentOption()
+    }
+
+    @Test
+    fun `Sends correct event when navigating out of EditPaymentMethod screen`() = runTest {
+        val cards = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+        val viewModel = createViewModel(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            customerPaymentMethods = cards,
+        )
+
+        viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+        viewModel.handleBackPressed()
+
+        verify(eventReporter).onHideEditablePaymentOption()
     }
 
     @Test

@@ -3,11 +3,13 @@ package com.stripe.android.customersheet.analytics
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
+@Suppress("TooManyFunctions")
 internal class DefaultCustomerSheetEventReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
@@ -19,6 +21,19 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
                 screen = screen
             )
         )
+    }
+
+    override fun onScreenHidden(screen: CustomerSheetEventReporter.Screen) {
+        when (screen) {
+            CustomerSheetEventReporter.Screen.EditPaymentMethod -> {
+                fireEvent(
+                    CustomerSheetEvent.ScreenHidden(
+                        screen = screen
+                    )
+                )
+            }
+            else -> Unit
+        }
     }
 
     override fun onConfirmPaymentMethodSucceeded(type: String) {
@@ -87,6 +102,53 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
         fireEvent(
             CustomerSheetEvent.AttachPaymentMethodFailed(
                 style = style
+            )
+        )
+    }
+
+    override fun onShowPaymentOptionBrands(
+        source: CustomerSheetEventReporter.CardBrandChoiceEventSource,
+        selectedBrand: CardBrand
+    ) {
+        fireEvent(
+            CustomerSheetEvent.ShowPaymentOptionBrands(
+                source = when (source) {
+                    CustomerSheetEventReporter.CardBrandChoiceEventSource.Add ->
+                        CustomerSheetEvent.ShowPaymentOptionBrands.Source.Add
+                    CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit ->
+                        CustomerSheetEvent.ShowPaymentOptionBrands.Source.Edit
+                },
+                selectedBrand = selectedBrand
+            )
+        )
+    }
+
+    override fun onHidePaymentOptionBrands(selectedBrand: CardBrand?) {
+        fireEvent(
+            CustomerSheetEvent.HidePaymentOptionBrands(
+                selectedBrand = selectedBrand
+            )
+        )
+    }
+
+    override fun onUpdatePaymentMethodSucceeded(
+        selectedBrand: CardBrand,
+    ) {
+        fireEvent(
+            CustomerSheetEvent.UpdatePaymentOptionSucceeded(
+                selectedBrand = selectedBrand
+            )
+        )
+    }
+
+    override fun onUpdatePaymentMethodFailed(
+        selectedBrand: CardBrand,
+        error: Throwable,
+    ) {
+        fireEvent(
+            CustomerSheetEvent.UpdatePaymentOptionFailed(
+                selectedBrand = selectedBrand,
+                error = error
             )
         )
     }
