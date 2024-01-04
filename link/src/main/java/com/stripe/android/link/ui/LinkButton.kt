@@ -2,12 +2,14 @@
 
 package com.stripe.android.link.ui
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -25,7 +27,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -39,6 +43,7 @@ import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.utils.InlineContentTemplateBuilder
+import com.stripe.android.model.CardBrand
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.R as StripeR
 
@@ -54,6 +59,7 @@ private const val LINK_DIVIDER_SPACER_ID = "LinkDividerSpacer"
 private const val LINK_SPACER_ID = "LinkSpacer"
 private const val LINK_DIVIDER_ID = "LinkDivider"
 private const val LINK_ARROW_ID = "LinkArrow"
+private const val LINK_CARD_ID = "LinkCard"
 
 private const val LINK_EMAIL_TEXT_WEIGHT = 0.5f
 private const val LINK_EMAIL_FONT_SIZE = 15
@@ -69,25 +75,53 @@ const val LinkButtonTestTag = "LinkButtonTestTag"
 private fun LinkEmailButton() {
     LinkButton(
         enabled = true,
-        email = "theop@email.com",
+        label = LinkLabel.Email(email = "theop@email.com"),
         onClick = {}
     )
 }
 
 @Preview
 @Composable
-private fun LinkNoEmailButton() {
+private fun LinkCardButton() {
     LinkButton(
         enabled = true,
-        email = null,
+        label = LinkLabel.Card(
+            icon = CardBrand.Visa.icon,
+            lastFourDigits = "3155"
+        ),
+        onClick = {}
+    )
+}
+
+@Preview
+@Composable
+private fun LinkDefaultButton() {
+    LinkButton(
+        enabled = true,
+        label = LinkLabel.Default,
         onClick = {}
     )
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface LinkLabel {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    object Default : LinkLabel
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Email(val email: String) : LinkLabel
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Card(
+        @DrawableRes val icon: Int,
+        val lastFourDigits: String
+    ) : LinkLabel
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 fun LinkButton(
-    email: String?,
+    label: LinkLabel,
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -117,10 +151,13 @@ fun LinkButton(
                     bottom = LinkButtonVerticalPadding
                 )
             ) {
-                if (email == null) {
-                    SignedOutButtonContent()
-                } else {
-                    SignedInButtonContent(email = email)
+                when (label) {
+                    is LinkLabel.Default -> DefaultButtonContent()
+                    is LinkLabel.Email -> EmailButtonContent(email = label.email)
+                    is LinkLabel.Card -> CardButtonContent(
+                        icon = label.icon,
+                        lastFourDigits = label.lastFourDigits
+                    )
                 }
             }
         }
@@ -128,7 +165,7 @@ fun LinkButton(
 }
 
 @Composable
-private fun RowScope.SignedInButtonContent(email: String) {
+private fun RowScope.EmailButtonContent(email: String) {
     val annotatedEmail = remember(email) {
         buildAnnotatedString {
             append(email)
@@ -169,7 +206,7 @@ private fun RowScope.SignedInButtonContent(email: String) {
 
 @Suppress("UnusedReceiverParameter")
 @Composable
-private fun RowScope.SignedOutButtonContent() {
+private fun RowScope.DefaultButtonContent() {
     val iconizedText = buildAnnotatedString {
         append("Pay with") // TODO(jaynewstrom) Link: Add localization
         append(" ")
@@ -199,6 +236,70 @@ private fun RowScope.SignedOutButtonContent() {
         fontSize = 18.sp,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1
+    )
+}
+
+@Composable
+private fun RowScope.CardButtonContent(
+    @DrawableRes icon: Int,
+    lastFourDigits: String,
+) {
+    val annotatedLastFourDigits = remember(lastFourDigits) {
+        buildAnnotatedString {
+            appendInlineContent(
+                id = LINK_CARD_ID,
+                alternateText = "[icon]"
+            )
+            appendInlineContent(
+                id = LINK_SPACER_ID,
+                alternateText = "[spacer]"
+            )
+            append(lastFourDigits)
+        }
+    }
+
+    val annotatedArrow = remember {
+        buildAnnotatedString {
+            appendInlineContent(
+                id = LINK_SPACER_ID,
+                alternateText = "[spacer]"
+            )
+            appendInlineContent(
+                id = LINK_ARROW_ID,
+                alternateText = "[arrow]"
+            )
+        }
+    }
+
+    LinkIconAndDivider()
+    Text(
+        text = annotatedLastFourDigits,
+        fontSize = LINK_EMAIL_FONT_SIZE.sp,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.weight(LINK_EMAIL_TEXT_WEIGHT, fill = false),
+        inlineContent = InlineContentTemplateBuilder()
+            .addSpacer(id = LINK_SPACER_ID, width = 0.2.em)
+            .add(id = LINK_CARD_ID, width = 2.1.em, height = 1.3.em) {
+                Icon(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(LocalContentAlpha.current),
+                    painter = painterResource(id = icon),
+                    contentDescription = null,
+                    tint = Color.Unspecified,
+                )
+            }
+            .build(),
+        maxLines = 1
+    )
+    Text(
+        text = annotatedArrow,
+        fontSize = LINK_EMAIL_FONT_SIZE.sp,
+        maxLines = 1,
+        inlineContent = InlineContentTemplateBuilder()
+            .addSpacer(id = LINK_SPACER_ID, width = 0.4.em)
+            .add(id = LINK_ARROW_ID, width = 1.2.em, height = 0.8.em) { LinkArrow() }
+            .build()
     )
 }
 
