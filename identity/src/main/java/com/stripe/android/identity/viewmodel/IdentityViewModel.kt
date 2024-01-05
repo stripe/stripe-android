@@ -1306,21 +1306,21 @@ internal class IdentityViewModel constructor(
                 IdentityScanState.ScanType.DOC_FRONT -> {
                     oldState.copy(
                         docFrontRetryTimes =
-                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
                     )
                 }
 
                 IdentityScanState.ScanType.DOC_BACK -> {
                     oldState.copy(
                         docBackRetryTimes =
-                        oldState.docBackRetryTimes?.let { it + 1 } ?: 1
+                        oldState.docBackRetryTimes?.let { it + 1 } ?: 0
                     )
                 }
 
                 IdentityScanState.ScanType.SELFIE -> {
                     oldState.copy(
                         selfieRetryTimes =
-                        oldState.selfieRetryTimes?.let { it + 1 } ?: 1
+                        oldState.selfieRetryTimes?.let { it + 1 } ?: 0
                     )
                 }
             }
