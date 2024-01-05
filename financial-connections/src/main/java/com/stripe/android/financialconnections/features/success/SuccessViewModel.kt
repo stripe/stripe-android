@@ -12,7 +12,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDisconnectLink
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDone
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
@@ -167,12 +166,6 @@ internal class SuccessViewModel @Inject constructor(
 
     private suspend fun completeSession() {
         nativeAuthFlowCoordinator().emit(Complete())
-    }
-
-    fun onLearnMoreAboutDataAccessClick() {
-        viewModelScope.launch {
-            eventTracker.track(ClickLearnMoreDataAccess(PANE))
-        }
     }
 
     fun onDisconnectLinkClick() {

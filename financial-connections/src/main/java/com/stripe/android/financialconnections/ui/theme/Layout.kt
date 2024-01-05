@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.ui.theme
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -42,6 +43,7 @@ internal fun Layout(
     body: LazyListScope.() -> Unit,
     footer: @Composable () -> Unit = {},
     inModal: Boolean = false,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     showFooterShadowWhenScrollable: Boolean = true,
     lazyListState: LazyListState = rememberLazyListState()
 ) {
@@ -62,6 +64,7 @@ internal fun Layout(
             // Body content
             LazyColumn(
                 state = lazyListState,
+                verticalArrangement = verticalArrangement,
                 modifier = Modifier.padding(horizontal = 24.dp)
             ) {
                 body()

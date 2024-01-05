@@ -3,21 +3,22 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,7 +35,7 @@ import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.AccountItem
-import com.stripe.android.financialconnections.features.common.LoadingContent
+import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessText
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
@@ -44,11 +45,11 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.Layout
 
 @Composable
 internal fun AccountPickerScreen() {
@@ -90,122 +91,120 @@ private fun AccountPickerContent(
         }
     ) {
         when (val payload = state.payload) {
-            Uninitialized, is Loading -> AccountPickerLoading()
-            is Success -> when (payload().shouldSkipPane) {
-                // ensures account picker is not shown momentarily
-                // if account selection should be skipped.
-                true -> AccountPickerLoading()
-                false -> AccountPickerLoaded(
-                    submitEnabled = state.submitEnabled,
-                    submitLoading = state.submitLoading,
-                    accounts = payload().accounts,
-                    merchantDataAccessModel = payload().merchantDataAccess,
-                    requiresSingleAccountConfirmation = payload().requiresSingleAccountConfirmation,
-                    selectionMode = payload().selectionMode,
-                    selectedIds = state.selectedIds,
-                    onAccountClicked = onAccountClicked,
-                    onSubmit = onSubmit,
-                    onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick,
-                    subtitle = payload().subtitle
-                )
-            }
+            is Fail -> {
+                when (val error = payload.error) {
+                    is AccountNoneEligibleForPaymentMethodError ->
+                        NoSupportedPaymentMethodTypeAccountsErrorContent(
+                            exception = error,
+                            onSelectAnotherBank = onSelectAnotherBank
+                        )
 
-            is Fail -> when (val error = payload.error) {
-                is AccountNoneEligibleForPaymentMethodError ->
-                    NoSupportedPaymentMethodTypeAccountsErrorContent(
+                    is AccountLoadError -> NoAccountsAvailableErrorContent(
                         exception = error,
+                        onEnterDetailsManually = onEnterDetailsManually,
+                        onTryAgain = onLoadAccountsAgain,
                         onSelectAnotherBank = onSelectAnotherBank
                     )
 
-                is AccountLoadError -> NoAccountsAvailableErrorContent(
-                    exception = error,
-                    onEnterDetailsManually = onEnterDetailsManually,
-                    onTryAgain = onLoadAccountsAgain,
-                    onSelectAnotherBank = onSelectAnotherBank
-                )
-
-                else -> UnclassifiedErrorContent(
-                    error = error,
-                    onCloseFromErrorClick = onCloseFromErrorClick
-                )
+                    else -> UnclassifiedErrorContent(
+                        error,
+                        onCloseFromErrorClick = onCloseFromErrorClick
+                    )
+                }
             }
+
+            is Loading,
+            is Uninitialized,
+            is Success -> Layout(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                body = {
+                    payload()
+                        ?.takeIf { it.shouldSkipPane.not() }
+                        ?.let {
+                            loadedContent(
+                                payload = it,
+                                state = state,
+                                onAccountClicked = onAccountClicked
+                            )
+                        } ?: run { loadingContent() }
+                },
+                footer = {
+                    payload()
+                        ?.takeIf { it.shouldSkipPane.not() }
+                        ?.let {
+                            Footer(
+                                merchantDataAccessModel = it.merchantDataAccess,
+                                onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick,
+                                submitEnabled = state.submitEnabled,
+                                submitLoading = state.submitLoading,
+                                onSubmit = onSubmit,
+                                selectedIds = state.selectedIds
+                            )
+                        }
+                }
+
+            )
+        }
+    }
+}
+
+private fun LazyListScope.loadedContent(
+    payload: AccountPickerState.Payload,
+    state: AccountPickerState,
+    onAccountClicked: (PartnerAccount) -> Unit
+) {
+    item {
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(
+                when (payload.selectionMode) {
+                    SelectionMode.SINGLE -> R.string.stripe_account_picker_singleselect_account
+                    SelectionMode.MULTIPLE -> R.string.stripe_account_picker_multiselect_account
+                }
+            ),
+            style = FinancialConnectionsTheme.v3Typography.headingXLarge
+        )
+    }
+    items(payload.accounts, key = { it.id }) { account ->
+        AccountItem(
+            selected = state.selectedIds.contains(account.id),
+            onAccountClicked = onAccountClicked,
+            account = account,
+        )
+    }
+}
+
+private fun LazyListScope.loadingContent() {
+    item {
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = "Retrieving accounts",
+            style = FinancialConnectionsTheme.v3Typography.headingXLarge
+        )
+    }
+    items(3) {
+        LoadingShimmerEffect {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(72.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(it)
+            )
         }
     }
 }
 
 @Composable
-private fun AccountPickerLoading() {
-    LoadingContent(
-        title = stringResource(R.string.stripe_account_picker_loading_title),
-        content = stringResource(R.string.stripe_account_picker_loading_desc)
-    )
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-private fun AccountPickerLoaded(
+private fun Footer(
+    merchantDataAccessModel: MerchantDataAccessModel?,
+    onLearnMoreAboutDataAccessClick: () -> Unit,
     submitEnabled: Boolean,
     submitLoading: Boolean,
-    accounts: List<PartnerAccount>,
-    merchantDataAccessModel: MerchantDataAccessModel?,
-    requiresSingleAccountConfirmation: Boolean,
-    selectionMode: SelectionMode,
-    selectedIds: Set<String>,
-    onAccountClicked: (PartnerAccount) -> Unit,
     onSubmit: () -> Unit,
-    onLearnMoreAboutDataAccessClick: () -> Unit,
-    subtitle: TextResource?
+    selectedIds: Set<String>
 ) {
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(
-                top = 16.dp,
-                start = 24.dp,
-                end = 24.dp,
-                bottom = 24.dp
-            )
-    ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-        ) {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                text = stringResource(
-                    when (selectionMode) {
-                        SelectionMode.SINGLE -> R.string.stripe_account_picker_singleselect_account
-                        SelectionMode.MULTIPLE -> R.string.stripe_account_picker_multiselect_account
-                    }
-                ),
-                style = FinancialConnectionsTheme.typography.subtitle
-            )
-            subtitle?.let {
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    text = it.toText().toString(),
-                    style = FinancialConnectionsTheme.typography.body
-                )
-            }
-            Spacer(modifier = Modifier.size(24.dp))
-            when (selectionMode) {
-                SelectionMode.SINGLE -> SingleSelectContent(
-                    accounts = accounts,
-                    selectedIds = selectedIds,
-                    onAccountClicked = onAccountClicked
-                )
-
-                SelectionMode.MULTIPLE -> MultiSelectContent(
-                    accounts = accounts,
-                    selectedIds = selectedIds,
-                    onAccountClicked = onAccountClicked
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-        }
+    Column {
         merchantDataAccessModel?.let {
             MerchantDataAccessText(
                 it,
@@ -221,53 +220,11 @@ private fun AccountPickerLoaded(
                 .fillMaxWidth()
         ) {
             Text(
-                text = when (requiresSingleAccountConfirmation) {
-                    true -> stringResource(R.string.stripe_account_picker_cta_confirm)
-                    false -> pluralStringResource(
-                        count = selectedIds.size,
-                        id = R.plurals.stripe_account_picker_cta_link
-                    )
-                }
-            )
-        }
-    }
-}
+                text = pluralStringResource(
+                    count = selectedIds.size,
+                    id = R.plurals.stripe_account_picker_cta_link
+                )
 
-@Composable
-private fun SingleSelectContent(
-    accounts: List<PartnerAccount>,
-    selectedIds: Set<String>,
-    onAccountClicked: (PartnerAccount) -> Unit
-) {
-    LazyColumn(
-        contentPadding = PaddingValues(bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(accounts, key = { it.id }) { account ->
-            AccountItem(
-                selected = selectedIds.contains(account.id),
-                onAccountClicked = onAccountClicked,
-                account = account,
-            )
-        }
-    }
-}
-
-@Composable
-private fun MultiSelectContent(
-    accounts: List<PartnerAccount>,
-    selectedIds: Set<String>,
-    onAccountClicked: (PartnerAccount) -> Unit
-) {
-    LazyColumn(
-        contentPadding = PaddingValues(bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(accounts, key = { it.id }) { account ->
-            AccountItem(
-                selected = selectedIds.contains(account.id),
-                onAccountClicked = onAccountClicked,
-                account = account
             )
         }
     }

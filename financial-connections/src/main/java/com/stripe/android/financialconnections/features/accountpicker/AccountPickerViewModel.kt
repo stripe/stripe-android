@@ -9,7 +9,6 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
-import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLinkAccounts
@@ -32,7 +31,6 @@ import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
-import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -87,14 +85,6 @@ internal class AccountPickerViewModel @Inject constructor(
                     isStripeDirect = manifest.isStripeDirect ?: false,
                     dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
                 ),
-                /**
-                 * in the special case that this is single account and the institution would have
-                 * skipped account selection but _didn't_ (because we still saw this), we should
-                 * render specific text that tells the user to "confirm" their account.
-                 */
-                requiresSingleAccountConfirmation = activeAuthSession.institutionSkipAccountSelection == true &&
-                    manifest.singleAccount &&
-                    activeAuthSession.isOAuth,
                 singleAccount = manifest.singleAccount,
                 userSelectedSingleAccountInInstitution = manifest.singleAccount &&
                     activeAuthSession.institutionSkipAccountSelection == true &&
@@ -254,25 +244,6 @@ internal class AccountPickerViewModel @Inject constructor(
         loadAccounts()
     }
 
-    fun onSelectAllAccountsClicked() = withState { state ->
-        state.payload()?.let { payload ->
-            val selectedIds = state.selectedIds
-            val newIds = if (state.allAccountsSelected) {
-                // unselect all accounts
-                emptySet()
-            } else {
-                // select all accounts
-                payload.selectableAccounts.map { it.id }.toSet()
-            }
-            setState { copy(selectedIds = newIds) }
-            logAccountSelectionChanges(
-                idsBefore = selectedIds,
-                idsAfter = newIds,
-                isSingleAccount = payload.singleAccount
-            )
-        }
-    }
-
     fun onLearnMoreAboutDataAccessClick() {
         viewModelScope.launch {
             eventTracker.track(ClickLearnMoreDataAccess(Pane.ACCOUNT_PICKER))
@@ -324,7 +295,6 @@ internal data class AccountPickerState(
         val stripeDirect: Boolean,
         val businessName: String?,
         val userSelectedSingleAccountInInstitution: Boolean,
-        val requiresSingleAccountConfirmation: Boolean
     ) {
 
         val selectableAccounts
@@ -332,15 +302,6 @@ internal data class AccountPickerState(
 
         val shouldSkipPane: Boolean
             get() = skipAccountSelection || userSelectedSingleAccountInInstitution
-
-        val subtitle: TextResource?
-            get() = when {
-                requiresSingleAccountConfirmation -> TextResource.StringId(
-                    R.string.stripe_accountpicker_singleaccount_description
-                )
-
-                else -> null
-            }
     }
 
     enum class SelectionMode {
