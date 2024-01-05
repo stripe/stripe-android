@@ -67,6 +67,8 @@
   <string name="stripe_paymentsheet_buy_using_upi_id">Osta käyttämällä UPI-tunnusta</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS -suoraveloitus</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Bacs-suoraveloitus</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kortti</string>
   <!-- Label for Konbini Payment Method -->

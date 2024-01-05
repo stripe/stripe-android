@@ -2,6 +2,30 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.36.0 - 2023-12-18
+
+### PaymentSheet
+* [ADDED][7713](https://github.com/stripe/stripe-android/pull/7713) PaymentSheet now supports [card brand choice](https://stripe.com/docs/card-brand-choice) for eligible merchants and transactions. To provide a list of preferred networks, use `PaymentSheet.Configuration.preferredNetworks`.
+* [ADDED][7447](https://github.com/stripe/stripe-android/pull/7447) PaymentSheet now supports [Bacs Direct Debit](https://stripe.com/docs/payments/payment-methods/bacs-debit) for PaymentIntents.
+
+### CustomerSheet
+* [ADDED][7713](https://github.com/stripe/stripe-android/pull/7713) CustomerSheet now supports [card brand choice](https://stripe.com/docs/card-brand-choice) for eligible merchants and transactions. To provide a list of preferred networks, use `PaymentSheet.Configuration.preferredNetworks`.
+
+### Payments
+* [ADDED][7713](https://github.com/stripe/stripe-android/pull/7713) `CardInputWidget`, `CardMultilineWidget`, and `CardFormView` now support [card brand choice](https://stripe.com/docs/card-brand-choice) for eligible merchants. To provide a list of preferred networks, use `setPreferredNetworks()`.
+
+* [DEPRECATED][7723](https://github.com/stripe/stripe-android/pull/7723) `IssuingCardPinService` is deprecated and will be removed in a future release. [Please use Issuing Elements instead](https://stripe.com/docs/issuing/elements)
+
+## 20.35.2 - 2023-12-11
+
+### PaymentSheet
+* [FIXED][7683](https://github.com/stripe/stripe-android/pull/7683) Fixed an issue where PaymentSheet didn't correctly consider `BillingDetailsCollectionConfiguration` when transacting with Google Pay.
+
+## 20.35.1 - 2023-12-04
+
+### Identity
+* [CHANGED][7407](https://github.com/stripe/stripe-android/pull/7407) Updated the UX for Consent and DocSelection page.
+
 ## 20.35.0 - 2023-11-28
 
 ### PaymentSheet
@@ -20,6 +44,9 @@
 ### PaymentSheet
 * [FIXED][7570](https://github.com/stripe/stripe-android/pull/7570) Fixed an issue where compiling PaymentSheet with R8 would cause an irrelevant warning for missing classes from Financial Connections if the module wasn't included.
 * [FIXED][7571](https://github.com/stripe/stripe-android/pull/7571) Fixed an issue where CustomerSheet would throw an error related to invalid payment_method_types.
+
+### Financial Connections
+* [FIXED][7575](https://github.com/stripe/stripe-android/pull/7575) Don't show microdeposits screen if microdeposits are not required.
 
 ## 20.34.3 - 2023-10-31
 

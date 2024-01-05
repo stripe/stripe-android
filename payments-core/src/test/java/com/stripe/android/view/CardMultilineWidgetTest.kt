@@ -33,9 +33,7 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.CardElementTestHelper
-import com.stripe.android.utils.FeatureFlags
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -66,12 +64,6 @@ internal class CardMultilineWidgetTest {
     private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     private val accountRangeStore = DefaultCardAccountRangeStore(context)
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.cardBrandChoice,
-        isEnabled = false,
-    )
 
     @get:Rule
     val testActivityRule = createTestActivityRule<CardMultilineWidgetTestActivity>()
@@ -1207,8 +1199,6 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun `Returns the correct create params when user selects no brand in CBC flow`() {
-        featureFlagTestRule.setEnabled(true)
-
         runCardMultilineWidgetTest(isCbcEligible = true) {
             cardMultilineWidget.setCardNumber("4000002500001001")
             cardMultilineWidget.setExpiryDate(12, 2030)
@@ -1221,8 +1211,6 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun `Returns the correct create params when user selects a brand in CBC flow`() {
-        featureFlagTestRule.setEnabled(true)
-
         runCardMultilineWidgetTest(isCbcEligible = true) {
             cardMultilineWidget.setCardNumber("4000002500001001")
             cardMultilineWidget.setExpiryDate(12, 2030)

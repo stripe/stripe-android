@@ -11,6 +11,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
@@ -118,6 +119,7 @@ internal sealed class PaymentSelection : Parcelable {
 
         abstract val paymentMethodCreateParams: PaymentMethodCreateParams
         abstract val paymentMethodOptionsParams: PaymentMethodOptionsParams?
+        abstract val paymentMethodExtraParams: PaymentMethodExtraParams?
         abstract val customerRequestedSave: CustomerRequestedSave
 
         override val requiresConfirmation: Boolean
@@ -138,6 +140,7 @@ internal sealed class PaymentSelection : Parcelable {
             val brand: CardBrand,
             override val customerRequestedSave: CustomerRequestedSave,
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+            override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         ) : New() {
             @IgnoredOnParcel
             val last4: String = paymentMethodCreateParams.cardLast4().orEmpty()
@@ -152,6 +155,7 @@ internal sealed class PaymentSelection : Parcelable {
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             override val customerRequestedSave: CustomerRequestedSave,
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+            override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         ) : New() {
 
             override fun mandateText(
@@ -188,6 +192,9 @@ internal sealed class PaymentSelection : Parcelable {
             override val paymentMethodOptionsParams = null
 
             @IgnoredOnParcel
+            override val paymentMethodExtraParams = null
+
+            @IgnoredOnParcel
             @DrawableRes
             val iconResource = R.drawable.stripe_ic_paymentsheet_link
 
@@ -213,6 +220,7 @@ internal sealed class PaymentSelection : Parcelable {
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             override val customerRequestedSave: CustomerRequestedSave,
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+            override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         ) : New()
     }
 }

@@ -34,9 +34,7 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.CardElementTestHelper
-import com.stripe.android.utils.FeatureFlags
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
@@ -60,12 +58,6 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class CardInputWidgetTest {
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.cardBrandChoice,
-        isEnabled = false,
-    )
 
     @get:Rule
     val testActivityRule = createTestActivityRule<CardInputWidgetTestActivity>()
@@ -1690,8 +1682,6 @@ internal class CardInputWidgetTest {
 
     @Test
     fun `Adds no Networks field to card PM params if not CBC eligible`() {
-        featureFlagTestRule.setEnabled(true)
-
         runCardInputWidgetTest(isCbcEligible = false) {
             postalCodeEnabled = false
 
@@ -1707,8 +1697,6 @@ internal class CardInputWidgetTest {
 
     @Test
     fun `Adds correct Networks field to card PM params if customer does not select a network`() {
-        featureFlagTestRule.setEnabled(true)
-
         runCardInputWidgetTest(isCbcEligible = true) {
             postalCodeEnabled = false
 
@@ -1726,8 +1714,6 @@ internal class CardInputWidgetTest {
 
     @Test
     fun `Adds correct Networks field to card PM params if customer selects a network`() {
-        featureFlagTestRule.setEnabled(true)
-
         runCardInputWidgetTest(isCbcEligible = true) {
             postalCodeEnabled = false
 
@@ -1749,8 +1735,6 @@ internal class CardInputWidgetTest {
 
     @Test
     fun `Restores brand state correctly on activity recreation`() {
-        featureFlagTestRule.setEnabled(true)
-
         runCardInputWidgetTest(
             isCbcEligible = true,
             block = {

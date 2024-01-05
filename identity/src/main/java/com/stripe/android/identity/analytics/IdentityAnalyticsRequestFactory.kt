@@ -317,7 +317,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_LIVE_MODE = "live_mode"
 
         const val SCREEN_NAME_CONSENT = "consent"
-        const val SCREEN_NAME_DOC_SELECT = "document_select"
+        const val SCREEN_NAME_DOC_WARMUP = "document_warmup"
         const val SCREEN_NAME_SELFIE_WARMUP = "selfie_warmup"
         const val SCREEN_NAME_SELFIE = "selfie"
         const val SCREEN_NAME_LIVE_CAPTURE = "live_capture"

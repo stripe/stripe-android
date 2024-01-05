@@ -67,6 +67,8 @@
   <string name="stripe_paymentsheet_buy_using_upi_id">Ixtri billi tuża ID UPI</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Debitu Dirett BECS AU</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Debitu Dirett BACS</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kard</string>
   <!-- Label for Konbini Payment Method -->

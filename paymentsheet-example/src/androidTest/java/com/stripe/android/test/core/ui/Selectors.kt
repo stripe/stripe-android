@@ -2,7 +2,10 @@ package com.stripe.android.test.core.ui
 
 import android.content.pm.PackageManager
 import androidx.annotation.StringRes
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -27,6 +30,7 @@ import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.R as UiCoreR
 
@@ -122,6 +126,7 @@ internal class Selectors(
     private val checkoutMode =
         testParameters.playgroundSettingsSnapshot[CheckoutModeSettingsDefinition]
 
+    @OptIn(ExperimentalTestApi::class)
     val authorizeAction = when (testParameters.authorizationAction) {
         is AuthorizeAction.AuthorizePayment -> {
             object : UiAutomatorText(
@@ -161,6 +166,50 @@ internal class Selectors(
                 className = "android.widget.Button",
                 device = device
             ) {}
+        }
+
+        is AuthorizeAction.Bacs.Confirm -> {
+            object : UiAutomatorText(
+                label = testParameters.authorizationAction.text(checkoutMode),
+                className = "android.widget.Button",
+                device = device
+            ) {
+                override fun click() {
+                    composeTestRule.waitUntilExactlyOneExists(
+                        hasText(
+                            getResourceString(
+                                PaymentSheetR.string.stripe_paymentsheet_bacs_mandate_title
+                            )
+                        )
+                    )
+
+                    composeTestRule.onNodeWithText(
+                        getResourceString(PaymentSheetR.string.stripe_paymentsheet_confirm)
+                    ).performClick()
+                }
+            }
+        }
+
+        is AuthorizeAction.Bacs.ModifyDetails -> {
+            object : UiAutomatorText(
+                label = testParameters.authorizationAction.text(checkoutMode),
+                className = "android.widget.Button",
+                device = device
+            ) {
+                override fun click() {
+                    composeTestRule.waitUntilExactlyOneExists(
+                        hasText(getResourceString(PaymentSheetR.string.stripe_paymentsheet_bacs_mandate_title))
+                    )
+
+                    composeTestRule.onNodeWithText(
+                        getResourceString(
+                            PaymentSheetR
+                                .string
+                                .stripe_paymentsheet_bacs_modify_details_button_label
+                        )
+                    ).performClick()
+                }
+            }
         }
 
         else -> null
@@ -211,6 +260,18 @@ internal class Selectors(
 
     fun getAuAccountNumber() = composeTestRule.onNodeWithText(
         getResourceString(StripeR.string.stripe_becs_widget_account_number)
+    )
+
+    fun getBacsSortCode() = composeTestRule.onNodeWithText(
+        getResourceString(PaymentsUiCoreR.string.stripe_bacs_sort_code)
+    )
+
+    fun getBacsAccountNumber() = composeTestRule.onNodeWithText(
+        getResourceString(StripeR.string.stripe_becs_widget_account_number)
+    )
+
+    fun getBacsConfirmed() = composeTestRule.onNode(
+        isToggleable().and(hasTestTag("BACS_MANDATE_CHECKBOX"))
     )
 
     fun getBoletoTaxId() = composeTestRule.onNodeWithText(

@@ -12,7 +12,6 @@ import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import android.widget.LinearLayout
-import androidx.annotation.RestrictTo
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import androidx.core.os.bundleOf
@@ -410,8 +409,13 @@ class CardFormView @JvmOverloads constructor(
         }
     }
 
-    // TODO(tillh-stripe) Add docs and make public
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    /**
+     * A list of preferred networks that should be used to process payments made with a co-branded
+     * card if your user hasn't selected a network themselves.
+     *
+     * The first preferred network that matches any available network will be used. If no preferred
+     * network is applicable, Stripe will select the network.
+     */
     fun setPreferredNetworks(preferredNetworks: List<CardBrand>) {
         cardMultilineWidget.cardBrandView.merchantPreferredNetworks = preferredNetworks
     }

@@ -1,11 +1,9 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
 
@@ -19,8 +17,7 @@ internal fun Mandate(
             html = text,
             color = MaterialTheme.stripeColors.subtitle,
             style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
-            modifier = modifier
-                .padding(top = 8.dp),
+            modifier = modifier,
         )
     }
 }

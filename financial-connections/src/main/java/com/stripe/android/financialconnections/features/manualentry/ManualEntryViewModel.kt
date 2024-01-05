@@ -19,9 +19,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.model.PaymentAccountParams
-import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.Destination.ManualEntrySuccess
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
@@ -139,12 +138,19 @@ internal class ManualEntryViewModel @Inject constructor(
                     accountNumber = requireNotNull(state.account)
                 )
             ).also {
-                val args = Destination.ManualEntrySuccess.argMap(
-                    microdepositVerificationMethod = it.microdepositVerificationMethod,
-                    last4 = state.account.takeLast(4)
-                )
-                val destination = (it.nextPane ?: Pane.MANUAL_ENTRY_SUCCESS).destination
-                navigationManager.tryNavigateTo(destination(PANE, args))
+                if (sync.manifest.manualEntryUsesMicrodeposits) {
+                    navigationManager.tryNavigateTo(
+                        ManualEntrySuccess(
+                            referrer = PANE,
+                            args = ManualEntrySuccess.argMap(
+                                microdepositVerificationMethod = it.microdepositVerificationMethod,
+                                last4 = state.account.takeLast(4)
+                            )
+                        )
+                    )
+                } else {
+                    nativeAuthFlowCoordinator().emit(Complete())
+                }
             }
         }.execute { copy(linkPaymentAccount = it) }
     }
@@ -177,8 +183,7 @@ internal data class ManualEntryState(
     val routingError: Int? = null,
     val accountError: Int? = null,
     val accountConfirmError: Int? = null,
-    val linkPaymentAccount: Async<LinkAccountSessionPaymentAccount> = Uninitialized,
-
+    val linkPaymentAccount: Async<LinkAccountSessionPaymentAccount> = Uninitialized
 ) : MavericksState {
 
     data class Payload(

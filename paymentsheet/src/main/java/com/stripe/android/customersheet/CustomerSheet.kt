@@ -3,7 +3,6 @@ package com.stripe.android.customersheet
 import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -161,8 +160,14 @@ class CustomerSheet @Inject internal constructor(
          */
         val merchantDisplayName: String,
 
-        // TODO(tillh-stripe) Add docs
-        internal val preferredNetworks: List<CardBrand> = emptyList(),
+        /**
+         * A list of preferred networks that should be used to process payments made with a co-branded card if your user
+         * hasn't selected a network themselves.
+         *
+         * The first preferred network that matches an available network will be used. If no preferred network is
+         * applicable, Stripe will select the network.
+         */
+        val preferredNetworks: List<CardBrand> = emptyList(),
     ) {
 
         // Hide no-argument constructor init
@@ -217,8 +222,6 @@ class CustomerSheet @Inject internal constructor(
                 this.billingDetailsCollectionConfiguration = configuration
             }
 
-            // TODO(tillh-stripe): Make this function public prior to release
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun preferredNetworks(
                 preferredNetworks: List<CardBrand>
             ) = apply {

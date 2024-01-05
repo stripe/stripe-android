@@ -36,6 +36,11 @@ class BuyButton(
             .assertIsDisplayed()
     }
 
+    fun scrollTo() {
+        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+            .performScrollTo()
+    }
+
     fun waitProcessingComplete() {
         composeTestRule.waitUntil(timeoutMillis = processingCompleteTimeout.inWholeMilliseconds) {
             runCatching {

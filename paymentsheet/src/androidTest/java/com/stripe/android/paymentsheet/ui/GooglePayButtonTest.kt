@@ -9,7 +9,6 @@ import com.google.android.gms.wallet.button.ButtonConstants.ButtonType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.paymentsheet.MainActivity
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -18,10 +17,9 @@ class GooglePayButtonTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
-    @Ignore("Re-enable once we have refactored the Google Pay button handling")
     @Test
     fun handlesPressWhenEnabled() {
-        val testTag = GooglePayButton.TEST_TAG
+        val testTag = GOOGLE_PAY_BUTTON_TEST_TAG
         var didCallOnPressed = false
 
         composeTestRule.setContent {
@@ -45,10 +43,9 @@ class GooglePayButtonTest {
         assertThat(didCallOnPressed).isTrue()
     }
 
-    @Ignore("Re-enable once we have refactored the Google Pay button handling")
     @Test
     fun ignoresPressWhenDisabled() {
-        val testTag = GooglePayButton.TEST_TAG
+        val testTag = GOOGLE_PAY_BUTTON_TEST_TAG
         var didCallOnPressed = false
 
         composeTestRule.setContent {

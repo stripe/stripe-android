@@ -1648,6 +1648,47 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `Payment method user selection saved after returning to add screen`() = runTest(testDispatcher) {
+        featureFlagTestRule.setEnabled(true)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+        )
+
+        viewModel.viewState.test {
+            assertThat(
+                awaitViewState<AddPaymentMethod>().selectedPaymentMethod.code
+            ).isEqualTo("card")
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepository.hardCodedUsBankAccount
+                )
+            )
+
+            assertThat(
+                awaitViewState<AddPaymentMethod>().selectedPaymentMethod.code
+            ).isEqualTo("us_bank_account")
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
+
+            assertThat(
+                awaitViewState<SelectPaymentMethod>()
+            ).isInstanceOf(SelectPaymentMethod::class.java)
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            assertThat(
+                awaitViewState<AddPaymentMethod>().selectedPaymentMethod.code
+            ).isEqualTo("us_bank_account")
+        }
+    }
+
+    @Test
     fun `When the payment method form is us bank account, the primary button label is continue`() = runTest(testDispatcher) {
         featureFlagTestRule.setEnabled(true)
 
@@ -2551,6 +2592,35 @@ class CustomerSheetViewModelTest {
 
             val finalViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(finalViewState.savedPaymentMethods).containsExactlyElementsIn(listOf(updatedMethod))
+        }
+    }
+
+    @Test
+    fun `Removing the current and original payment selection results in the selection being null`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            isFinancialConnectionsAvailable = { true },
+            savedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD),
+            initialBackStack = listOf(
+                selectPaymentMethodViewState.copy(
+                    savedPaymentMethods = listOf(CARD_PAYMENT_METHOD, US_BANK_ACCOUNT),
+                    paymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD),
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            val initialViewState = awaitViewState<SelectPaymentMethod>()
+            assertThat(initialViewState.savedPaymentMethods)
+                .containsExactly(CARD_PAYMENT_METHOD, US_BANK_ACCOUNT).inOrder()
+            assertThat(initialViewState.paymentSelection)
+                .isEqualTo(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(CARD_PAYMENT_METHOD))
+
+            val finalViewState = awaitViewState<SelectPaymentMethod>()
+            assertThat(finalViewState.savedPaymentMethods).containsExactly(US_BANK_ACCOUNT).inOrder()
+            assertThat(finalViewState.paymentSelection).isNull()
         }
     }
 

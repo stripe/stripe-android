@@ -171,6 +171,7 @@ internal fun SelectPaymentMethod(
                 mandateText = viewState.mandateText,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(top = 8.dp)
                     .padding(horizontal = horizontalPadding),
             )
         }
@@ -289,6 +290,7 @@ internal fun AddPaymentMethodWithPaymentElement(
                 mandateText = viewState.mandateText,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(top = 8.dp)
                     .padding(horizontal = horizontalPadding),
             )
         }
@@ -311,6 +313,7 @@ internal fun AddPaymentMethodWithPaymentElement(
                 mandateText = viewState.mandateText,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(top = 8.dp)
                     .padding(horizontal = horizontalPadding),
             )
         }
