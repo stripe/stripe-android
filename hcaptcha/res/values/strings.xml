@@ -1,0 +1,4 @@
+<resources>
+    <string name="stripe_hcaptcha_logo_description" translatable="false">hcaptcha logo</string>
+    <string name="stripe_hcaptcha_loading_text">Verifying you are human</string>
+</resources>

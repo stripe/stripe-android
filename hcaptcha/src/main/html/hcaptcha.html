@@ -1,0 +1,205 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <title>hCaptcha Android</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+        html {
+            height: 100%;
+        }
+        body {
+            display: table;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+        }
+        #hcaptcha-container {
+            margin-top: 5px;
+            display: table-cell;
+            vertical-align: middle;
+        }
+        /* overwrite hCaptcha iframe overlay which adds a #FFF background with opacity 0.05 */
+        div > div:nth-child(2) {
+            opacity: 0 !important;
+        }
+    </style>
+</head>
+<body>
+<div id="hcaptcha-container"></div>
+<script type="text/javascript">
+    if (window.JSDI) {
+        JSON.parse(window.JSDI.getDebugInfo()).forEach(function (v) { window[v] = true; });
+        window.sysDebug = JSON.parse(window.JSDI.getSysDebug());
+    }
+</script>
+<script type="text/javascript">
+    // Android will inject this bridge object as `JSInterface`
+    // Browser is missing it, so we mock it
+    var BridgeObject = window.JSInterface || {
+        getConfig: function getConfig() {
+            return JSON.stringify({
+                siteKey: '10000000-ffff-ffff-ffff-000000000001',
+                locale: 'ro',
+                size: 'compact',
+                orientation: 'portrait',
+                theme: 'dark',
+                sentry: true,
+                rqdata: null,
+                jsSrc: 'https://js.hcaptcha.com/1/api.js',
+                endpoint: null,
+                assethost: null,
+                imghost: null,
+                reportapi: null
+            });
+        },
+        onPass: function onPass(token) {
+            return console.log("pass: token ".concat(token));
+        },
+        onError: function onError(errCode) {
+            return console.log("error: code ".concat(errCode));
+        },
+        onLoaded: function onLoaded() {
+            return console.log('cb: api is loaded');
+        },
+        onOpen: function onOpen() {
+            return console.log('cb: challenge is visible');
+        }
+    };
+    var bridgeConfig = JSON.parse(BridgeObject.getConfig());
+    var hCaptchaID = null;
+    /**
+     * Called programmatically from HCaptchaWebViewHelper.
+     */
+    function resetAndExecute() {
+        hcaptcha.reset();
+        hcaptcha.execute(hCaptchaID);
+    }
+    function reset() {
+        hcaptcha.reset();
+    }
+    function getTheme(bridgeConfig) {
+        var theme = bridgeConfig.theme;
+        var customTheme = bridgeConfig.customTheme;
+        if (customTheme) {
+            try {
+                return JSON.parse(customTheme);
+            } catch (e) {
+                console.error(e);
+                BridgeObject.onError(32);
+            }
+        }
+        return theme;
+    }
+    function getRenderConfig() {
+        return {
+            sitekey: bridgeConfig.siteKey,
+            size: bridgeConfig.size,
+            orientation: bridgeConfig.orientation,
+            theme: getTheme(bridgeConfig),
+            callback: function callback(token) {
+                return BridgeObject.onPass(token);
+            },
+            'chalexpired-callback': function chalexpiredCallback() {
+                return BridgeObject.onError(15);
+            },
+            'close-callback': function closeCallback() {
+                return BridgeObject.onError(30);
+            },
+            'error-callback': function errorCallback(error) {
+                switch(error) {
+                    case "rate-limited":
+                        return BridgeObject.onError(31);
+                    case "network-error":
+                        return BridgeObject.onError(7);
+                    case "invalid-data":
+                        return BridgeObject.onError(8);
+                    case "challenge-error":
+                        return BridgeObject.onError(9);
+                    case "internal-error":
+                        return BridgeObject.onError(10);
+                    default:
+                        // Error not handled? Log it for debugging purposes
+                        console.error(error);
+                        return BridgeObject.onError(29);
+                }
+            },
+            'open-callback': function openCallback() {
+                return BridgeObject.onOpen();
+            }
+        };
+    }
+    function onHcaptchaLoaded() {
+        try {
+            var renderConfig = getRenderConfig();
+            hCaptchaID = hcaptcha.render('hcaptcha-container', renderConfig);
+            BridgeObject.onLoaded();
+            var rqdata = bridgeConfig.rqdata;
+            if (rqdata) {
+                hcaptcha.setData(hCaptchaID, { rqdata: rqdata });
+            }
+            if (renderConfig.size === 'invisible' && !bridgeConfig.hideDialog) {
+                // We want to auto execute in case of `invisible` checkbox.
+                // But not in case of `hideDialog` since verification process
+                // might be desired to happen at a later time.
+                hcaptcha.execute(hCaptchaID);
+            }
+        } catch (e) {
+            console.error(e);
+            BridgeObject.onError(29);
+        }
+    }
+    function addQueryParamIfDefined(url, queryName, queryValue) {
+        if (queryValue !== undefined && queryValue !== null) {
+            var link = url.indexOf('?') !== -1 ? '&' : '?';
+            return url + link + queryName + '=' + encodeURIComponent(queryValue);
+        }
+        return url;
+    }
+    function loadApi() {
+        var siteKey = bridgeConfig.siteKey;
+        var locale = bridgeConfig.locale;
+        var sentry = bridgeConfig.sentry;
+        var jsSrc = bridgeConfig.jsSrc;
+        var endpoint = bridgeConfig.endpoint;
+        var assethost = bridgeConfig.assethost;
+        var imghost = bridgeConfig.imghost;
+        var reportapi = bridgeConfig.reportapi;
+        var host = bridgeConfig.host || siteKey + '.android-sdk.hcaptcha.com';
+        var scriptSrc = jsSrc + '?render=explicit&onload=' + onHcaptchaLoaded.name;
+        scriptSrc = addQueryParamIfDefined(scriptSrc, 'recaptchacompat', 'off');
+        scriptSrc = addQueryParamIfDefined(scriptSrc, 'hl', locale);
+        scriptSrc = addQueryParamIfDefined(scriptSrc, 'host', host);
+        scriptSrc = addQueryParamIfDefined(scriptSrc, 'sentry', sentry);
+        scriptSrc = addQueryParamIfDefined(scriptSrc, 'endpoint', endpoint);
+        scriptSrc = addQueryParamIfDefined(scriptSrc, 'assethost', assethost);
+        scriptSrc = addQueryParamIfDefined(scriptSrc, 'imghost', imghost);
+        scriptSrc = addQueryParamIfDefined(scriptSrc, 'reportapi', reportapi);
+        if (bridgeConfig.customTheme) {
+            scriptSrc = addQueryParamIfDefined(scriptSrc, 'custom', 'true');
+        }
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = scriptSrc;
+        script.onerror = function () {
+            // network issue
+            BridgeObject.onError(7);
+        };
+        document.head.appendChild(script);
+    }
+    var container = document.getElementById("hcaptcha-container");
+    container.addEventListener("click", function () {
+        if (window.hcaptcha) {
+            // Allows dismissal of checkbox view
+            window.hcaptcha.close();
+        } else {
+            BridgeObject.onError(30);
+        }
+    });
+    loadApi();
+</script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+<resources>
+	<string name="stripe_hcaptcha_loading_text">Verificare che tu sia umano</string>
+</resources>
