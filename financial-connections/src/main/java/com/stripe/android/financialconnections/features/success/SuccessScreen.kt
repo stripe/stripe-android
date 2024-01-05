@@ -30,13 +30,8 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
-import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutWithAccounts
 import com.stripe.android.financialconnections.features.common.LoadingContent
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
-import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
@@ -58,16 +53,12 @@ internal fun SuccessScreen() {
     BackHandler(enabled = true) {}
     state.value.payload()?.let { payload ->
         SuccessContent(
-            accessibleDataModel = payload.accessibleData,
             disconnectUrl = payload.disconnectUrl,
-            accounts = payload.accounts,
-            institution = payload.institution,
             successMessage = payload.successMessage,
             loading = state.value.completeSession is Loading,
             skipSuccessPane = payload.skipSuccessPane,
-            onDoneClick = viewModel::onDoneClick,
             accountFailedToLinkMessage = payload.accountFailedToLinkMessage,
-            onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick,
+            onDoneClick = viewModel::onDoneClick,
             onDisconnectLinkClick = viewModel::onDisconnectLinkClick
         ) { parentViewModel.onCloseNoConfirmationClick(Pane.SUCCESS) }
     }
@@ -75,16 +66,12 @@ internal fun SuccessScreen() {
 
 @Composable
 private fun SuccessContent(
-    accessibleDataModel: AccessibleDataCalloutModel,
     disconnectUrl: String,
-    accounts: List<PartnerAccount>,
-    institution: FinancialConnectionsInstitution,
     successMessage: TextResource,
     loading: Boolean,
     skipSuccessPane: Boolean,
     accountFailedToLinkMessage: TextResource?,
     onDoneClick: () -> Unit,
-    onLearnMoreAboutDataAccessClick: () -> Unit,
     onDisconnectLinkClick: () -> Unit,
     onCloseClick: () -> Unit,
 ) {
@@ -103,14 +90,10 @@ private fun SuccessContent(
         } else {
             SuccessLoaded(
                 scrollState = scrollState,
-                accounts = accounts,
-                accessibleDataModel = accessibleDataModel,
                 disconnectUrl = disconnectUrl,
-                institution = institution,
-                loading = loading,
                 successMessage = successMessage,
+                loading = loading,
                 accountFailedToLinkMessage = accountFailedToLinkMessage,
-                onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick,
                 onDisconnectLinkClick = onDisconnectLinkClick,
                 onDoneClick = onDoneClick
             )
@@ -130,14 +113,10 @@ private fun SuccessLoading() {
 @Suppress("LongMethod")
 private fun SuccessLoaded(
     scrollState: ScrollState,
-    accounts: List<PartnerAccount>,
-    accessibleDataModel: AccessibleDataCalloutModel,
     disconnectUrl: String,
     successMessage: TextResource,
-    institution: FinancialConnectionsInstitution,
     loading: Boolean,
     accountFailedToLinkMessage: TextResource?,
-    onLearnMoreAboutDataAccessClick: () -> Unit,
     onDisconnectLinkClick: () -> Unit,
     onDoneClick: () -> Unit
 ) {
@@ -176,15 +155,6 @@ private fun SuccessLoaded(
                 text = successMessage.toText().toString(),
                 style = FinancialConnectionsTheme.typography.body
             )
-            if (accounts.isNotEmpty()) {
-                Spacer(modifier = Modifier.size(24.dp))
-                AccessibleDataCalloutWithAccounts(
-                    model = accessibleDataModel,
-                    accounts = accounts,
-                    institution = institution,
-                    onLearnMoreClick = { onLearnMoreAboutDataAccessClick() }
-                )
-            }
             Spacer(modifier = Modifier.size(12.dp))
             AnnotatedText(
                 text = TextResource.StringId(R.string.stripe_success_pane_disconnect),
@@ -278,30 +248,7 @@ private fun SuccessLoadedFooter(
 internal fun SuccessScreenPreview() {
     FinancialConnectionsPreview {
         SuccessContent(
-            accessibleDataModel = AccessibleDataCalloutModel(
-                businessName = "My business",
-                permissions = listOf(
-                    FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
-                    FinancialConnectionsAccount.Permissions.BALANCES,
-                    FinancialConnectionsAccount.Permissions.OWNERSHIP,
-                    FinancialConnectionsAccount.Permissions.TRANSACTIONS
-                ),
-                isStripeDirect = true,
-                isNetworking = false,
-                dataPolicyUrl = ""
-            ),
             disconnectUrl = "",
-            accounts = previewAccounts(),
-            institution = FinancialConnectionsInstitution(
-                id = "id",
-                name = "name",
-                url = "url",
-                featured = true,
-                featuredOrder = null,
-                icon = null,
-                logo = null,
-                mobileHandoffCapable = false
-            ),
             successMessage = TextResource.PluralId(
                 value = R.plurals.stripe_success_pane_link_with_connected_account_name,
                 count = 2,
@@ -311,7 +258,6 @@ internal fun SuccessScreenPreview() {
             skipSuccessPane = false,
             accountFailedToLinkMessage = null,
             onDoneClick = {},
-            onLearnMoreAboutDataAccessClick = {},
             onDisconnectLinkClick = {}
         ) {}
     }
@@ -323,30 +269,7 @@ internal fun SuccessScreenPreview() {
 internal fun SuccessScreenPreviewFailedToLink() {
     FinancialConnectionsPreview {
         SuccessContent(
-            accessibleDataModel = AccessibleDataCalloutModel(
-                businessName = "My business",
-                permissions = listOf(
-                    FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
-                    FinancialConnectionsAccount.Permissions.BALANCES,
-                    FinancialConnectionsAccount.Permissions.OWNERSHIP,
-                    FinancialConnectionsAccount.Permissions.TRANSACTIONS
-                ),
-                isStripeDirect = true,
-                isNetworking = false,
-                dataPolicyUrl = ""
-            ),
             disconnectUrl = "",
-            accounts = previewAccounts(),
-            institution = FinancialConnectionsInstitution(
-                id = "id",
-                name = "name",
-                url = "url",
-                featured = true,
-                featuredOrder = null,
-                icon = null,
-                logo = null,
-                mobileHandoffCapable = false
-            ),
             successMessage = TextResource.Text("Hola"),
             loading = false,
             skipSuccessPane = false,
@@ -356,44 +279,7 @@ internal fun SuccessScreenPreviewFailedToLink() {
                 listOf("Random Business")
             ),
             onDoneClick = {},
-            onLearnMoreAboutDataAccessClick = {},
             onDisconnectLinkClick = {}
         ) {}
     }
 }
-
-@Composable
-private fun previewAccounts() = listOf(
-    PartnerAccount(
-        authorization = "Authorization",
-        category = FinancialConnectionsAccount.Category.CASH,
-        id = "id2",
-        name = "Account 2 - no acct numbers",
-        _allowSelection = true,
-        allowSelectionMessage = "",
-        subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
-        supportedPaymentMethodTypes = emptyList()
-    ),
-    PartnerAccount(
-        authorization = "Authorization",
-        category = FinancialConnectionsAccount.Category.CASH,
-        id = "id3",
-        name = "Account 3",
-        _allowSelection = true,
-        allowSelectionMessage = "",
-        displayableAccountNumbers = "1234",
-        subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
-        supportedPaymentMethodTypes = emptyList()
-    ),
-    PartnerAccount(
-        authorization = "Authorization",
-        category = FinancialConnectionsAccount.Category.CASH,
-        id = "id4",
-        name = "Account 4",
-        _allowSelection = true,
-        allowSelectionMessage = "",
-        displayableAccountNumbers = "1234",
-        subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-        supportedPaymentMethodTypes = emptyList()
-    )
-)

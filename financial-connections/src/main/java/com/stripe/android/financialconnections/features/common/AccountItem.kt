@@ -40,6 +40,9 @@ import com.stripe.android.uicore.format.CurrencyFormatter
 import com.stripe.android.uicore.text.MiddleEllipsisText
 import java.util.Locale
 
+private const val UNSELECTABLE_ALPHA = 0.5f
+private const val SELECTABLE_ALPHA = 1f
+
 /**
  * A single account item in an account picker list.
  *
@@ -47,7 +50,6 @@ import java.util.Locale
  * @param onAccountClicked callback when this account is clicked
  * @param account the account info to display
  * @param networkedAccount For networked accounts, extra info to display
- * @param selectorContent content to display on the left side of the account item
  */
 @Composable
 @Suppress("LongMethod")
@@ -73,7 +75,7 @@ internal fun AccountItem(
                 shape = shape
             )
             .clickableSingle(enabled = selectable) { onAccountClicked(account) }
-            .alpha(if (selectable) 1f else 0.5f)
+            .alpha(if (selectable) SELECTABLE_ALPHA else UNSELECTABLE_ALPHA)
             .padding(16.dp)
     ) {
         Row(
@@ -95,7 +97,6 @@ internal fun AccountItem(
                     style = v3Typography.labelLargeEmphasized
                 )
                 AccountSubtitle(selectable, account, networkedAccount)
-
             }
             Spacer(modifier = Modifier.size(12.dp))
             Icon(
@@ -135,7 +136,7 @@ private fun AccountSubtitle(
                     style = v3Typography.labelSmall,
                     modifier = Modifier
                         .background(
-                            color = v3Colors.border, //TODO change to offsetColor
+                            color = v3Colors.border, // TODO change to offsetColor
                             shape = RoundedCornerShape(4.dp)
                         )
                         .padding(horizontal = 4.dp, vertical = 2.dp)
@@ -171,7 +172,7 @@ private fun PartnerAccount.getFormattedBalance(): String? {
     }
 }
 
-
+@Suppress("LongMethod")
 @Composable
 @Preview
 internal fun AccountItemPreview() {
@@ -259,7 +260,6 @@ internal fun AccountItemPreview() {
                     )
                 )
             }
-
         }
     }
 }

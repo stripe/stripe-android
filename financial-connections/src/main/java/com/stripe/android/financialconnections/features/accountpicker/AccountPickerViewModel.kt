@@ -22,7 +22,7 @@ import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
-import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -80,11 +80,10 @@ internal class AccountPickerViewModel @Inject constructor(
                 skipAccountSelection = partnerAccountList.skipAccountSelection == true ||
                     activeAuthSession.skipAccountSelection == true,
                 accounts = accounts,
-                selectionMode = if (manifest.singleAccount) SelectionMode.RADIO else SelectionMode.CHECKBOXES,
-                accessibleData = AccessibleDataCalloutModel(
+                selectionMode = if (manifest.singleAccount) SelectionMode.SINGLE else SelectionMode.MULTIPLE,
+                merchantDataAccess = MerchantDataAccessModel(
                     businessName = manifest.businessName,
                     permissions = manifest.permissions,
-                    isNetworking = false,
                     isStripeDirect = manifest.isStripeDirect ?: false,
                     dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
                 ),
@@ -125,7 +124,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 )
 
                 // Auto-select the first selectable account.
-                payload.selectionMode == SelectionMode.RADIO -> setState {
+                payload.selectionMode == SelectionMode.SINGLE -> setState {
                     copy(
                         selectedIds = setOfNotNull(
                             payload.selectableAccounts.firstOrNull()?.id
@@ -165,8 +164,8 @@ internal class AccountPickerViewModel @Inject constructor(
         state.payload()?.let { payload ->
             val selectedIds = state.selectedIds
             val newSelectedIds = when (payload.selectionMode) {
-                SelectionMode.RADIO -> setOf(account.id)
-                SelectionMode.CHECKBOXES -> if (selectedIds.contains(account.id)) {
+                SelectionMode.SINGLE -> setOf(account.id)
+                SelectionMode.MULTIPLE -> if (selectedIds.contains(account.id)) {
                     selectedIds - account.id
                 } else {
                     selectedIds + account.id
@@ -320,7 +319,7 @@ internal data class AccountPickerState(
         val skipAccountSelection: Boolean,
         val accounts: List<PartnerAccount>,
         val selectionMode: SelectionMode,
-        val accessibleData: AccessibleDataCalloutModel,
+        val merchantDataAccess: MerchantDataAccessModel,
         val singleAccount: Boolean,
         val stripeDirect: Boolean,
         val businessName: String?,
@@ -345,6 +344,6 @@ internal data class AccountPickerState(
     }
 
     enum class SelectionMode {
-        RADIO, CHECKBOXES
+        SINGLE, MULTIPLE
     }
 }

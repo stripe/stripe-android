@@ -4,7 +4,7 @@ package com.stripe.android.financialconnections.features.accountpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.airbnb.mvrx.Success
-import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 
@@ -24,8 +24,8 @@ internal class AccountPickerPreviewParameterProvider :
             AccountPickerState.Payload(
                 skipAccountSelection = false,
                 accounts = partnerAccountList(),
-                selectionMode = AccountPickerState.SelectionMode.CHECKBOXES,
-                accessibleData = accessibleCallout(),
+                selectionMode = AccountPickerState.SelectionMode.MULTIPLE,
+                merchantDataAccess = accessibleCallout(),
                 singleAccount = false,
                 stripeDirect = false,
                 businessName = "Random business",
@@ -41,8 +41,8 @@ internal class AccountPickerPreviewParameterProvider :
             AccountPickerState.Payload(
                 skipAccountSelection = false,
                 accounts = partnerAccountList(),
-                selectionMode = AccountPickerState.SelectionMode.RADIO,
-                accessibleData = accessibleCallout(),
+                selectionMode = AccountPickerState.SelectionMode.SINGLE,
+                merchantDataAccess = accessibleCallout(),
                 singleAccount = true,
                 stripeDirect = false,
                 businessName = "Random business",
@@ -58,8 +58,8 @@ internal class AccountPickerPreviewParameterProvider :
             AccountPickerState.Payload(
                 skipAccountSelection = false,
                 accounts = partnerAccountList(),
-                selectionMode = AccountPickerState.SelectionMode.RADIO,
-                accessibleData = accessibleCallout(),
+                selectionMode = AccountPickerState.SelectionMode.SINGLE,
+                merchantDataAccess = accessibleCallout(),
                 singleAccount = true,
                 stripeDirect = false,
                 businessName = "Random business",
@@ -130,7 +130,7 @@ internal class AccountPickerPreviewParameterProvider :
         ),
     )
 
-    private fun accessibleCallout() = AccessibleDataCalloutModel(
+    private fun accessibleCallout() = MerchantDataAccessModel(
         businessName = "My business",
         permissions = listOf(
             FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
@@ -139,7 +139,6 @@ internal class AccountPickerPreviewParameterProvider :
             FinancialConnectionsAccount.Permissions.TRANSACTIONS
         ),
         isStripeDirect = false,
-        isNetworking = false,
         dataPolicyUrl = ""
     )
 }

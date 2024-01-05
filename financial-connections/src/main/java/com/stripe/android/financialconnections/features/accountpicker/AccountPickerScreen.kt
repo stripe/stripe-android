@@ -33,10 +33,10 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
-import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
-import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.common.AccountItem
 import com.stripe.android.financialconnections.features.common.LoadingContent
+import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
+import com.stripe.android.financialconnections.features.common.MerchantDataAccessText
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
@@ -60,13 +60,12 @@ internal fun AccountPickerScreen() {
         state = state.value,
         onAccountClicked = viewModel::onAccountClicked,
         onSubmit = viewModel::onSubmit,
-        onSelectAllAccountsClicked = viewModel::onSelectAllAccountsClicked,
         onSelectAnotherBank = viewModel::selectAnotherBank,
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
         onLoadAccountsAgain = viewModel::onLoadAccountsAgain,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.ACCOUNT_PICKER) },
-        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
-        onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick
+        onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick,
+        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
 
@@ -75,7 +74,6 @@ private fun AccountPickerContent(
     state: AccountPickerState,
     onAccountClicked: (PartnerAccount) -> Unit,
     onSubmit: () -> Unit,
-    onSelectAllAccountsClicked: () -> Unit,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
     onLoadAccountsAgain: () -> Unit,
@@ -101,16 +99,14 @@ private fun AccountPickerContent(
                     submitEnabled = state.submitEnabled,
                     submitLoading = state.submitLoading,
                     accounts = payload().accounts,
-                    allAccountsSelected = state.allAccountsSelected,
-                    subtitle = payload().subtitle,
+                    merchantDataAccessModel = payload().merchantDataAccess,
+                    requiresSingleAccountConfirmation = payload().requiresSingleAccountConfirmation,
+                    selectionMode = payload().selectionMode,
                     selectedIds = state.selectedIds,
                     onAccountClicked = onAccountClicked,
                     onSubmit = onSubmit,
-                    selectionMode = payload().selectionMode,
-                    accessibleDataCalloutModel = payload().accessibleData,
-                    requiresSingleAccountConfirmation = payload().requiresSingleAccountConfirmation,
-                    onSelectAllAccountsClicked = onSelectAllAccountsClicked,
-                    onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick
+                    onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick,
+                    subtitle = payload().subtitle
                 )
             }
 
@@ -151,13 +147,11 @@ private fun AccountPickerLoaded(
     submitEnabled: Boolean,
     submitLoading: Boolean,
     accounts: List<PartnerAccount>,
-    allAccountsSelected: Boolean,
-    accessibleDataCalloutModel: AccessibleDataCalloutModel?,
+    merchantDataAccessModel: MerchantDataAccessModel?,
     requiresSingleAccountConfirmation: Boolean,
     selectionMode: SelectionMode,
     selectedIds: Set<String>,
     onAccountClicked: (PartnerAccount) -> Unit,
-    onSelectAllAccountsClicked: () -> Unit,
     onSubmit: () -> Unit,
     onLearnMoreAboutDataAccessClick: () -> Unit,
     subtitle: TextResource?
@@ -180,12 +174,9 @@ private fun AccountPickerLoaded(
                 modifier = Modifier
                     .fillMaxWidth(),
                 text = stringResource(
-                    when (requiresSingleAccountConfirmation) {
-                        true -> R.string.stripe_account_picker_confirm_account
-                        false -> when (selectionMode) {
-                            SelectionMode.RADIO -> R.string.stripe_account_picker_singleselect_account
-                            SelectionMode.CHECKBOXES -> R.string.stripe_account_picker_multiselect_account
-                        }
+                    when (selectionMode) {
+                        SelectionMode.SINGLE -> R.string.stripe_account_picker_singleselect_account
+                        SelectionMode.MULTIPLE -> R.string.stripe_account_picker_multiselect_account
                     }
                 ),
                 style = FinancialConnectionsTheme.typography.subtitle
@@ -201,13 +192,13 @@ private fun AccountPickerLoaded(
             }
             Spacer(modifier = Modifier.size(24.dp))
             when (selectionMode) {
-                SelectionMode.RADIO -> SingleSelectContent(
+                SelectionMode.SINGLE -> SingleSelectContent(
                     accounts = accounts,
                     selectedIds = selectedIds,
                     onAccountClicked = onAccountClicked
                 )
 
-                SelectionMode.CHECKBOXES -> MultiSelectContent(
+                SelectionMode.MULTIPLE -> MultiSelectContent(
                     accounts = accounts,
                     selectedIds = selectedIds,
                     onAccountClicked = onAccountClicked
@@ -215,8 +206,8 @@ private fun AccountPickerLoaded(
             }
             Spacer(modifier = Modifier.weight(1f))
         }
-        accessibleDataCalloutModel?.let {
-            AccessibleDataCallout(
+        merchantDataAccessModel?.let {
+            MerchantDataAccessText(
                 it,
                 onLearnMoreAboutDataAccessClick
             )
@@ -295,7 +286,6 @@ internal fun AccountPickerPreview(
             state = state,
             onAccountClicked = {},
             onSubmit = {},
-            onSelectAllAccountsClicked = {},
             onSelectAnotherBank = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},

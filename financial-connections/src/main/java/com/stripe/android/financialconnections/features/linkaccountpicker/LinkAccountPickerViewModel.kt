@@ -20,7 +20,7 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
-import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -52,10 +52,9 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         observeAsyncs()
         suspend {
             val manifest = getManifest()
-            val accessibleData = AccessibleDataCalloutModel(
+            val merchantDataAccess = MerchantDataAccessModel(
                 businessName = manifest.businessName,
                 permissions = manifest.permissions,
-                isNetworking = true,
                 isStripeDirect = manifest.isStripeDirect ?: false,
                 dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
             )
@@ -83,7 +82,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 defaultCta = display.defaultCta,
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 // We always want to refer to Link rather than Stripe on Link panes.
-                accessibleData = accessibleData.copy(isStripeDirect = false)
+                merchantDataAccess = merchantDataAccess.copy(isStripeDirect = false)
             )
         }.execute { copy(payload = it) }
     }
@@ -199,7 +198,7 @@ internal data class LinkAccountPickerState(
         val title: String,
         val accounts: List<Pair<PartnerAccount, NetworkedAccount>>,
         val addNewAccount: AddNewAccount,
-        val accessibleData: AccessibleDataCalloutModel,
+        val merchantDataAccess: MerchantDataAccessModel,
         val consumerSessionClientSecret: String,
         val defaultCta: String,
         val nextPaneOnNewAccount: Pane?,

@@ -93,5 +93,4 @@ internal data class PartnerAccount(
 
     internal val redactedAccountNumbers: String
         get() = "••••${displayableAccountNumbers.orEmpty()}"
-
 }

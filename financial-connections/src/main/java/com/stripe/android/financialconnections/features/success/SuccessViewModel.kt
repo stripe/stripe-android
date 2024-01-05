@@ -19,7 +19,7 @@ import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
-import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -59,10 +59,9 @@ internal class SuccessViewModel @Inject constructor(
                     connectedAccountName = manifest.connectedAccountName,
                     count = accounts.size
                 ),
-                accessibleData = AccessibleDataCalloutModel(
+                merchantDataAccess = MerchantDataAccessModel(
                     businessName = manifest.businessName,
                     permissions = manifest.permissions,
-                    isNetworking = manifest.isNetworkingUserFlow == true && saveToLinkWithStripeSucceeded == true,
                     isStripeDirect = manifest.isStripeDirect ?: false,
                     dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
                 ),
@@ -207,7 +206,7 @@ internal data class SuccessState(
 ) : MavericksState {
 
     data class Payload(
-        val accessibleData: AccessibleDataCalloutModel,
+        val merchantDataAccess: MerchantDataAccessModel,
         val institution: FinancialConnectionsInstitution,
         val accounts: List<PartnerAccount>,
         val disconnectUrl: String,
