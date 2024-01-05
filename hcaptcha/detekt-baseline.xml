@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:HCaptchaDialogFragment.kt$HCaptchaDialogFragment$override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? ): View?</ID>
+    <ID>MagicNumber:HCaptchaDebugInfo.kt$HCaptchaDebugInfo$512</ID>
+    <ID>MagicNumber:HCaptchaDialogFragment.kt$HCaptchaDialogFragment$200</ID>
+    <ID>MagicNumber:HCaptchaError.kt$HCaptchaError.CHALLENGE_CLOSED$30</ID>
+    <ID>MagicNumber:HCaptchaError.kt$HCaptchaError.CHALLENGE_ERROR$9</ID>
+    <ID>MagicNumber:HCaptchaError.kt$HCaptchaError.ERROR$29</ID>
+    <ID>MagicNumber:HCaptchaError.kt$HCaptchaError.INSECURE_HTTP_REQUEST_ERROR$33</ID>
+    <ID>MagicNumber:HCaptchaError.kt$HCaptchaError.INTERNAL_ERROR$10</ID>
+    <ID>MagicNumber:HCaptchaError.kt$HCaptchaError.INVALID_CUSTOM_THEME$32</ID>
+    <ID>MagicNumber:HCaptchaError.kt$HCaptchaError.INVALID_DATA$8</ID>
+    <ID>MagicNumber:HCaptchaError.kt$HCaptchaError.NETWORK_ERROR$7</ID>
+    <ID>MagicNumber:HCaptchaError.kt$HCaptchaError.RATE_LIMITED$31</ID>
+    <ID>MagicNumber:HCaptchaError.kt$HCaptchaError.SESSION_TIMEOUT$15</ID>
+    <ID>MagicNumber:HCaptchaError.kt$HCaptchaError.TOKEN_TIMEOUT$16</ID>
+    <ID>NestedBlockDepth:HCaptchaDebugInfo.kt$HCaptchaDebugInfo$@Throws(IOException::class) private fun roBuildProps(): Map&lt;String, String></ID>
+    <ID>ReturnCount:HCaptchaDialogFragment.kt$HCaptchaDialogFragment$override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? ): View?</ID>
+    <ID>SerialVersionUIDInSerializableClass:HCaptchaError.kt$HCaptchaError : Serializable</ID>
+    <ID>SwallowedException:HCaptcha.kt$HCaptcha$e: AndroidRuntimeException</ID>
+    <ID>SwallowedException:HCaptchaDebugInfo.kt$HCaptchaDebugInfo$e: IOException</ID>
+    <ID>SwallowedException:HCaptchaDialogFragment.kt$HCaptchaDialogFragment$e: AssertionError</ID>
+    <ID>SwallowedException:HCaptchaDialogFragment.kt$HCaptchaDialogFragment$e: BadParcelableException</ID>
+    <ID>SwallowedException:HCaptchaDialogFragment.kt$HCaptchaDialogFragment$e: ClassCastException</ID>
+    <ID>SwallowedException:HCaptchaDialogFragment.kt$HCaptchaDialogFragment$e: IllegalStateException</ID>
+    <ID>SwallowedException:HCaptchaDialogFragment.kt$HCaptchaDialogFragment$e: InflateException</ID>
+    <ID>TooGenericExceptionThrown:HCaptchaError.kt$HCaptchaError.Companion$throw RuntimeException("Unsupported error id: $errorId")</ID>
+    <ID>TooManyFunctions:HCaptchaDialogFragment.kt$HCaptchaDialogFragment : DialogFragmentIHCaptchaVerifier</ID>
+    <ID>TooManyFunctions:Task.kt$Task&lt;TResult></ID>
+  </CurrentIssues>
+</SmellBaseline>

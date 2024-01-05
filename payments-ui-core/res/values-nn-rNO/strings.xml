@@ -67,6 +67,8 @@
   <string name="stripe_paymentsheet_buy_using_upi_id">Kjøp ved å bruke ein UPI ID</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS Direct Debit</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Bacs-direktedebitering</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kort</string>
   <!-- Label for Konbini Payment Method -->

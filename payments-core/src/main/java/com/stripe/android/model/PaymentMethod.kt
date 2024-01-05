@@ -804,6 +804,7 @@ constructor(
         @Parcelize
         data class Networks(
             val available: Set<String> = emptySet(),
+            @Deprecated("This field is deprecated and will be removed in a future release.")
             val selectionMandatory: Boolean = false,
             val preferred: String? = null
         ) : StripeModel

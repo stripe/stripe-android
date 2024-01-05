@@ -21,6 +21,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
@@ -30,9 +31,9 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.uicore.elements.ApiParameterDestination
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
+import com.stripe.android.uicore.elements.ParameterDestination
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -176,7 +177,7 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
 ): PaymentMethodCreateParams {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
         fieldValuePairs = fieldValuePairs.filter { entry ->
-            entry.key.apiParameterDestination == ApiParameterDestination.Params
+            entry.key.destination == ParameterDestination.Api.Params
         }.filterNot { entry ->
             entry.key == IdentifierSpec.SaveForFutureUse || entry.key == IdentifierSpec.CardBrand
         },
@@ -190,7 +191,18 @@ internal fun FormFieldValues.transformToPaymentMethodOptionsParams(
 ): PaymentMethodOptionsParams? {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodOptionsParams(
         fieldValuePairs = fieldValuePairs.filter { entry ->
-            entry.key.apiParameterDestination == ApiParameterDestination.Options
+            entry.key.destination == ParameterDestination.Api.Options
+        },
+        code = paymentMethod.code,
+    )
+}
+
+internal fun FormFieldValues.transformToExtraParams(
+    paymentMethod: LpmRepository.SupportedPaymentMethod
+): PaymentMethodExtraParams? {
+    return FieldValuesToParamsMapConverter.transformToPaymentMethodExtraParams(
+        fieldValuePairs = fieldValuePairs.filter { entry ->
+            entry.key.destination == ParameterDestination.Local.Extras
         },
         code = paymentMethod.code,
     )
@@ -202,6 +214,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
 ): PaymentSelection.New {
     val params = transformToPaymentMethodCreateParams(paymentMethod)
     val options = transformToPaymentMethodOptionsParams(paymentMethod)
+    val extras = transformToExtraParams(paymentMethod)
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
         PaymentSelection.New.Card(
             paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
@@ -219,6 +232,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
             paymentMethodCreateParams = params,
             paymentMethodOptionsParams = options,
+            paymentMethodExtraParams = extras,
             customerRequestedSave = userRequestedReuse,
         )
     }

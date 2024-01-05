@@ -11,7 +11,7 @@ internal class HeaderTextFactory(
 ) {
 
     fun create(
-        screen: PaymentSheetScreen,
+        screen: PaymentSheetScreen?,
         isWalletEnabled: Boolean,
         types: List<PaymentMethodCode>,
     ): Int? {
@@ -33,7 +33,8 @@ internal class HeaderTextFactory(
                     StripeR.string.stripe_title_update_card
                 }
                 is PaymentSheetScreen.Loading,
-                is PaymentSheetScreen.AddAnotherPaymentMethod -> {
+                is PaymentSheetScreen.AddAnotherPaymentMethod,
+                null -> {
                     null
                 }
             }
@@ -55,6 +56,9 @@ internal class HeaderTextFactory(
                 }
                 is PaymentSheetScreen.EditPaymentMethod -> {
                     StripeR.string.stripe_title_update_card
+                }
+                null -> {
+                    null
                 }
             }
         }

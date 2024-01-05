@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- title for accepted types of ids prefix -->
+  <string name="stripe_accepted_forms_of_id_include">Pièces d\'identité acceptées</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">Paramètres de l\'application</string>
   <!-- Description of back of driver's license image -->
@@ -51,6 +53,8 @@
   <string name="stripe_description_time_estimate">icône délai estimé pour finaliser la vérification</string>
   <!-- Label for Date of birth field -->
   <string name="stripe_dob">Date de naissance</string>
+  <!-- Title for doc front warmup page -->
+  <string name="stripe_doc_front_warmup_title">Préparez-vous à scanner votre pièce d\'identité</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">Permis de conduire</string>
   <!-- Text for error labels -->
@@ -85,6 +89,8 @@
   <string name="stripe_id_card">Carte d’identité</string>
   <!-- Label for ID number section -->
   <string name="stripe_id_number">Numéro d\'identification</string>
+  <!-- I'm ready button text -->
+  <string name="stripe_im_ready">Tout est prêt</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">Le numéro d\'identification que vous avez saisi est incomplet.</string>
   <!-- Label for the ID field to collect individual CPF for Brazilian ID -->

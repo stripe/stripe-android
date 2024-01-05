@@ -19,7 +19,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentDetails
@@ -72,12 +71,12 @@ import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
+import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import com.stripe.android.utils.RelayingPaymentSheetLoader
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -129,7 +128,11 @@ internal class DefaultFlowControllerTest {
 
     private val googlePayActivityLauncher =
         mock<ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>>()
-    val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
+
+    private val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
+
+    private val googlePayPaymentMethodLauncherFactory =
+        RecordingGooglePayPaymentMethodLauncherFactory(googlePayPaymentMethodLauncher)
 
     private val linkActivityResultLauncher =
         mock<ActivityResultLauncher<LinkActivityContract.Args>>()
@@ -1658,6 +1661,60 @@ internal class DefaultFlowControllerTest {
         }
     }
 
+    @Test
+    fun `Requires email and phone with Google Pay when collection mode is set to always`() = runTest {
+        val flowController = createFlowController()
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
+            )
+        )
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
+        )
+
+        flowController.confirm()
+
+        val googlePayLauncherConfig = requireNotNull(googlePayPaymentMethodLauncherFactory.config)
+        val isEmailRequired = googlePayLauncherConfig.isEmailRequired
+        val isPhoneRequired = googlePayLauncherConfig.billingAddressConfig.isPhoneNumberRequired
+
+        assertThat(isEmailRequired).isTrue()
+        assertThat(isPhoneRequired).isTrue()
+    }
+
+    @Test
+    fun `Does not require email and phone with Google Pay when collection mode is not set to always`() = runTest {
+        val flowController = createFlowController()
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                ),
+            )
+        )
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
+        )
+
+        flowController.confirm()
+
+        val googlePayLauncherConfig = requireNotNull(googlePayPaymentMethodLauncherFactory.config)
+        val isEmailRequired = googlePayLauncherConfig.isEmailRequired
+        val isPhoneRequired = googlePayLauncherConfig.billingAddressConfig.isPhoneNumberRequired
+
+        assertThat(isEmailRequired).isFalse()
+        assertThat(isPhoneRequired).isFalse()
+    }
+
     private suspend fun selectionSavedTest(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave =
             PaymentSelection.CustomerRequestedSave.NoRequest,
@@ -1774,7 +1831,7 @@ internal class DefaultFlowControllerTest {
         },
         enableLogging = ENABLE_LOGGING,
         productUsage = PRODUCT_USAGE,
-        googlePayPaymentMethodLauncherFactory = createGooglePayPaymentMethodLauncherFactory(),
+        googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
         prefsRepositoryFactory = { prefsRepository },
         bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
         linkLauncher = linkPaymentLauncher,
@@ -1794,19 +1851,6 @@ internal class DefaultFlowControllerTest {
             handle = SavedStateHandle(),
         )
     }
-
-    private fun createGooglePayPaymentMethodLauncherFactory() =
-        object : GooglePayPaymentMethodLauncherFactory {
-            override fun create(
-                lifecycleScope: CoroutineScope,
-                config: GooglePayPaymentMethodLauncher.Config,
-                readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
-                activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-                skipReadyCheck: Boolean
-            ): GooglePayPaymentMethodLauncher {
-                return googlePayPaymentMethodLauncher
-            }
-        }
 
     private fun createBacsPaymentSelection(): PaymentSelection {
         return PaymentSelection.New.GenericPaymentMethod(

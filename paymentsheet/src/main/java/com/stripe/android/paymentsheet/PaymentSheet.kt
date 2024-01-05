@@ -6,10 +6,10 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
-import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.CookieStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.parcelize.Parcelize
@@ -320,7 +321,7 @@ class PaymentSheet internal constructor(
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    data class Configuration internal constructor(
+    data class Configuration @JvmOverloads constructor(
         /**
          * Your customer-facing business name.
          *
@@ -429,36 +430,8 @@ class PaymentSheet internal constructor(
          * be used. If no preferred network is applicable, Stripe will select
          * the network.
          */
-        val preferredNetworks: List<CardBrand> = listOf(),
+        val preferredNetworks: List<CardBrand> = emptyList(),
     ) : Parcelable {
-        @JvmOverloads
-        constructor(
-            merchantDisplayName: String,
-            customer: CustomerConfiguration? = null,
-            googlePay: GooglePayConfiguration? = null,
-            primaryButtonColor: ColorStateList? = null,
-            defaultBillingDetails: BillingDetails? = null,
-            shippingDetails: AddressDetails? = null,
-            allowsDelayedPaymentMethods: Boolean = false,
-            allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
-            appearance: Appearance = Appearance(),
-            primaryButtonLabel: String? = null,
-            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
-                BillingDetailsCollectionConfiguration(),
-        ) : this(
-            merchantDisplayName = merchantDisplayName,
-            customer = customer,
-            googlePay = googlePay,
-            primaryButtonColor = primaryButtonColor,
-            defaultBillingDetails = defaultBillingDetails,
-            shippingDetails = shippingDetails,
-            allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
-            appearance = appearance,
-            primaryButtonLabel = primaryButtonLabel,
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-            preferredNetworks = listOf()
-        )
 
         /**
          * [Configuration] builder for cleaner object creation from Java.
@@ -527,10 +500,6 @@ class PaymentSheet internal constructor(
                 this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
             }
 
-            /*
-             * TODO(samer-stripe): Make this function public prior to release
-             */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun preferredNetworks(
                 preferredNetworks: List<CardBrand>
             ) = apply {
@@ -836,8 +805,32 @@ class PaymentSheet internal constructor(
          * The border color of the primary button.
          */
         @ColorInt
-        val border: Int
+        val border: Int,
+        /**
+         * The background color for the primary button when in a success state. Defaults
+         * to base green background color.
+         */
+        @ColorInt
+        val successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
+        /**
+         * The success color for the primary button text when in a success state. Defaults
+         * to `onBackground`.
+         */
+        @ColorInt
+        val onSuccessBackgroundColor: Int = onBackground,
     ) : Parcelable {
+        constructor(
+            background: Int?,
+            onBackground: Int,
+            border: Int
+        ) : this(
+            background = background,
+            onBackground = onBackground,
+            border = border,
+            successBackgroundColor = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
+            onSuccessBackgroundColor = onBackground,
+        )
+
         constructor(
             background: Color?,
             onBackground: Color,
@@ -845,21 +838,37 @@ class PaymentSheet internal constructor(
         ) : this(
             background = background?.toArgb(),
             onBackground = onBackground.toArgb(),
-            border = border.toArgb()
+            border = border.toArgb(),
+        )
+
+        constructor(
+            background: Color?,
+            onBackground: Color,
+            border: Color,
+            successBackgroundColor: Color = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR,
+            onSuccessBackgroundColor: Color = onBackground,
+        ) : this(
+            background = background?.toArgb(),
+            onBackground = onBackground.toArgb(),
+            border = border.toArgb(),
+            successBackgroundColor = successBackgroundColor.toArgb(),
+            onSuccessBackgroundColor = onSuccessBackgroundColor.toArgb(),
         )
 
         companion object {
             val defaultLight = PrimaryButtonColors(
                 background = null,
-                onBackground =
-                StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb()
+                onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
+                successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.successBackground.toArgb(),
+                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
             )
             val defaultDark = PrimaryButtonColors(
                 background = null,
-                onBackground =
-                StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb()
+                onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
+                successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.successBackground.toArgb(),
+                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
             )
         }
     }
@@ -1045,6 +1054,30 @@ class PaymentSheet internal constructor(
          */
         val attachDefaultsToPaymentMethod: Boolean = false,
     ) : Parcelable {
+
+        internal val collectsEmail: Boolean
+            get() = email == CollectionMode.Always
+
+        internal fun toBillingAddressConfig(): GooglePayPaymentMethodLauncher.BillingAddressConfig {
+            val collectAddress = address == AddressCollectionMode.Full
+            val collectPhone = phone == CollectionMode.Always
+
+            val format = when (address) {
+                AddressCollectionMode.Never,
+                AddressCollectionMode.Automatic -> {
+                    GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Min
+                }
+                AddressCollectionMode.Full -> {
+                    GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full
+                }
+            }
+
+            return GooglePayPaymentMethodLauncher.BillingAddressConfig(
+                isRequired = collectAddress || collectPhone,
+                format = format,
+                isPhoneNumberRequired = collectPhone,
+            )
+        }
 
         /**
          * Billing details fields collection options.

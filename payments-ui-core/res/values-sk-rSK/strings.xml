@@ -67,6 +67,8 @@
   <string name="stripe_paymentsheet_buy_using_upi_id">Zakúpiť prostredníctvom identifikačného čísla UPI</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS inkaso</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Bacs inkaso</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Karta</string>
   <!-- Label for Konbini Payment Method -->

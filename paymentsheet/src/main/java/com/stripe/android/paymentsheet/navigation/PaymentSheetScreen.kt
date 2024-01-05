@@ -4,13 +4,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
+import com.stripe.android.paymentsheet.SavedPaymentMethodsTopContentPadding
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import java.io.Closeable
+
+internal val PaymentSheetScreen.topContentPadding: Dp
+    get() = when (this) {
+        is PaymentSheetScreen.SelectSavedPaymentMethods -> {
+            SavedPaymentMethodsTopContentPadding
+        }
+        is PaymentSheetScreen.Loading,
+        is PaymentSheetScreen.AddFirstPaymentMethod,
+        is PaymentSheetScreen.AddAnotherPaymentMethod,
+        is PaymentSheetScreen.EditPaymentMethod -> {
+            0.dp
+        }
+    }
 
 internal sealed interface PaymentSheetScreen {
 

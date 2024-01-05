@@ -67,6 +67,8 @@
   <string name="stripe_paymentsheet_buy_using_upi_id">Mua bằng cách sử dụng ID UPI</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Ghi nợ trực tiếp AU Becs</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Ghi nợ Trực tiếp Bacs</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Thẻ</string>
   <!-- Label for Konbini Payment Method -->

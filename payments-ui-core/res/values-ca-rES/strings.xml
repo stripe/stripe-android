@@ -67,6 +67,8 @@
   <string name="stripe_paymentsheet_buy_using_upi_id">Compra amb un ID d\'UPI</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Domiciliació bancària AU BECS</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Dèbit directe Bacs</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Targeta</string>
   <!-- Label for Konbini Payment Method -->

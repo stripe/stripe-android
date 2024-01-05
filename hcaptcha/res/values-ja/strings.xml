@@ -1,0 +1,3 @@
+<resources>
+	<string name="stripe_hcaptcha_loading_text">あなたが人間であることを確認する</string>
+</resources>

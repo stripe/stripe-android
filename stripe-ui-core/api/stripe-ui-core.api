@@ -136,6 +136,7 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$$serializer
 
 public final class com/stripe/android/uicore/elements/IdentifierSpec$Companion {
 	public final fun Generic (Ljava/lang/String;)Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getBillingAddress ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getBlik ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getBlikCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getCardBrand ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
@@ -168,6 +169,22 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$Creator : a
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/uicore/elements/ParameterDestination$Api$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/uicore/elements/ParameterDestination$Api;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/uicore/elements/ParameterDestination$Api;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/uicore/elements/ParameterDestination$Local$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/uicore/elements/ParameterDestination$Local;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/uicore/elements/ParameterDestination$Local;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

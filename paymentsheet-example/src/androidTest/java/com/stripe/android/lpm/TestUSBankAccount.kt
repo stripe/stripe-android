@@ -39,7 +39,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
     }
 
     @Test
-    fun testUSBankAccountInCustomFlow() {
+    fun testUSBankAccountCancelAllowsUserToContinueInCustomFlow() {
         testDriver.confirmCustomUSBankAccount(
             testParameters = testParameters.copy(
                 authorizationAction = AuthorizeAction.Cancel,

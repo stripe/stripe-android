@@ -67,6 +67,8 @@
   <string name="stripe_paymentsheet_buy_using_upi_id">UPI ID를 사용하여 구매</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS 자동 이체</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Bacs 자동 이체</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">카드</string>
   <!-- Label for Konbini Payment Method -->

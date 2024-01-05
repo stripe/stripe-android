@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -110,6 +112,58 @@ class FormArgumentsTest {
                 IdentifierSpec.State to "Co. Dublin",
                 IdentifierSpec.PostalCode to "T37 F8HK",
                 IdentifierSpec.Country to "IE"
+            )
+        )
+    }
+
+    @Test
+    fun `Verify extra parameters are included if passed in`() {
+        val formArguments = FormArguments(
+            PaymentMethod.Type.BacsDebit.code,
+            showCheckbox = true,
+            showCheckboxControlledFields = true,
+            merchantName = "Merchant, Inc.",
+            amount = Amount(50, "USD"),
+            billingDetails = null,
+            initialPaymentMethodCreateParams = PaymentMethodCreateParams.create(
+                bacsDebit = PaymentMethodCreateParams.BacsDebit(
+                    accountNumber = "00012345",
+                    sortCode = "10-88-00"
+                ),
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = "Jenny Rosen",
+                    email = "jenny.rosen@example.com",
+                    address = Address(
+                        line1 = "123 Main Street",
+                        line2 = "APt 1",
+                        city = "Dublin",
+                        state = "Co. Dublin",
+                        postalCode = "T37 F8HK",
+                        country = "IE"
+                    )
+                )
+            ),
+            initialPaymentMethodExtraParams = PaymentMethodExtraParams.BacsDebit(
+                confirmed = true
+            ),
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible
+        )
+
+        assertThat(formArguments.getInitialValuesMap()).isEqualTo(
+            mapOf(
+                IdentifierSpec.Name to "Jenny Rosen",
+                IdentifierSpec.Email to "jenny.rosen@example.com",
+                IdentifierSpec.Phone to null,
+                IdentifierSpec.Line1 to "123 Main Street",
+                IdentifierSpec.Line2 to "APt 1",
+                IdentifierSpec.City to "Dublin",
+                IdentifierSpec.State to "Co. Dublin",
+                IdentifierSpec.PostalCode to "T37 F8HK",
+                IdentifierSpec.Country to "IE",
+                IdentifierSpec.Generic("type") to "bacs_debit",
+                IdentifierSpec.Generic("bacs_debit[account_number]") to "00012345",
+                IdentifierSpec.Generic("bacs_debit[sort_code]") to "10-88-00",
+                IdentifierSpec.BacsDebitConfirmed to "true"
             )
         )
     }

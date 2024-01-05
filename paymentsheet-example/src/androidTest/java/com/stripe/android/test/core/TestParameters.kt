@@ -129,4 +129,16 @@ internal sealed interface AuthorizeAction {
         override fun text(checkoutMode: CheckoutMode): String = ""
         override val requiresBrowser: Boolean = true
     }
+
+    sealed interface Bacs : AuthorizeAction {
+        object Confirm : Bacs {
+            override fun text(checkoutMode: CheckoutMode): String = "Confirm"
+            override val requiresBrowser: Boolean = false
+        }
+
+        object ModifyDetails : Bacs {
+            override fun text(checkoutMode: CheckoutMode): String = "Modify details"
+            override val requiresBrowser: Boolean = false
+        }
+    }
 }
