@@ -3,12 +3,14 @@ package com.stripe.android.paymentsheet.paymentdatacollection
 import android.os.Parcelable
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.convertToFormValuesMap
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.ParameterDestination
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -22,6 +24,7 @@ internal data class FormArguments(
     val billingDetails: PaymentSheet.BillingDetails? = null,
     val shippingDetails: AddressDetails? = null,
     val initialPaymentMethodCreateParams: PaymentMethodCreateParams? = null,
+    val initialPaymentMethodExtraParams: PaymentMethodExtraParams? = null,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
         PaymentSheet.BillingDetailsCollectionConfiguration(),
     val requiresMandate: Boolean = false,
@@ -31,6 +34,12 @@ internal data class FormArguments(
 internal fun FormArguments.getInitialValuesMap(): Map<IdentifierSpec, String?> {
     val initialValues = initialPaymentMethodCreateParams?.let {
         convertToFormValuesMap(it.toParamMap())
+    } ?: emptyMap()
+
+    val initialExtras = initialPaymentMethodExtraParams?.let {
+        convertToFormValuesMap(it.toParamMap()).mapKeys { entry ->
+            entry.key.copy(destination = ParameterDestination.Local.Extras)
+        }
     } ?: emptyMap()
 
     return mapOf(
@@ -43,5 +52,5 @@ internal fun FormArguments.getInitialValuesMap(): Map<IdentifierSpec, String?> {
         IdentifierSpec.State to this.billingDetails?.address?.state,
         IdentifierSpec.Country to this.billingDetails?.address?.country,
         IdentifierSpec.PostalCode to this.billingDetails?.address?.postalCode
-    ).plus(initialValues)
+    ).plus(initialValues).plus(initialExtras)
 }

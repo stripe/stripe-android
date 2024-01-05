@@ -67,6 +67,8 @@
   <string name="stripe_paymentsheet_buy_using_upi_id">UPI Numarası kullanarak satın alın</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS Otomatik Ödeme</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Bacs Otomatik Ödeme</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kart</string>
   <!-- Label for Konbini Payment Method -->

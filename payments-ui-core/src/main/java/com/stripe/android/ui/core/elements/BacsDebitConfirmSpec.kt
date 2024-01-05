@@ -10,19 +10,20 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
 class BacsDebitConfirmSpec : FormItemSpec() {
-    override val apiPath: IdentifierSpec = IdentifierSpec(
-        v1 = "bacs_debit[confirmed]",
-        ignoreField = true
-    )
+    override val apiPath: IdentifierSpec = IdentifierSpec.BacsDebitConfirmed
 
-    fun transform(merchantName: String) = CheckboxFieldElement(
+    fun transform(
+        merchantName: String,
+        initialValues: Map<IdentifierSpec, String?>
+    ) = CheckboxFieldElement(
         apiPath,
         CheckboxFieldController(
             labelResource = CheckboxFieldController.LabelResource(
                 R.string.stripe_bacs_confirm_mandate_label,
                 merchantName
             ),
-            debugTag = "BACS_MANDATE_CHECKBOX"
+            debugTag = "BACS_MANDATE_CHECKBOX",
+            initialValue = initialValues[this.apiPath].toBoolean()
         )
     )
 }

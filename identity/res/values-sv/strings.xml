@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- title for accepted types of ids prefix -->
+  <string name="stripe_accepted_forms_of_id_include">Godkända former av id-handlingar inkluderar</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">Appinställningar</string>
   <!-- Description of back of driver's license image -->
@@ -51,6 +53,8 @@
   <string name="stripe_description_time_estimate">ikon för beräknad tid för slutförande</string>
   <!-- Label for Date of birth field -->
   <string name="stripe_dob">Födelsedatum</string>
+  <!-- Title for doc front warmup page -->
+  <string name="stripe_doc_front_warmup_title">Gör dig redo att skanna ditt foto-id</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">Körkort</string>
   <!-- Text for error labels -->
@@ -85,6 +89,8 @@
   <string name="stripe_id_card">Id-handling</string>
   <!-- Label for ID number section -->
   <string name="stripe_id_number">ID-nummer</string>
+  <!-- I'm ready button text -->
+  <string name="stripe_im_ready">Jag är redo</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">ID-numret du angav är ofullständigt.</string>
   <!-- Label for the ID field to collect individual CPF for Brazilian ID -->

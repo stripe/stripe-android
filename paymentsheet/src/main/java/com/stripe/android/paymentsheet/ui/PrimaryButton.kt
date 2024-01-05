@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
@@ -30,6 +29,8 @@ import com.stripe.android.uicore.convertDpToPx
 import com.stripe.android.uicore.getBorderStrokeColor
 import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.getOnBackgroundColor
+import com.stripe.android.uicore.getOnSuccessBackgroundColor
+import com.stripe.android.uicore.getSuccessBackgroundColor
 
 /**
  * The primary call-to-action for a payment sheet screen.
@@ -72,11 +73,11 @@ internal class PrimaryButton @JvmOverloads constructor(
     private var borderStrokeColor =
         StripeThemeDefaults.primaryButtonStyle.getBorderStrokeColor(context)
 
-    internal var finishedBackgroundColor =
-        ContextCompat.getColor(
-            context,
-            R.color.stripe_paymentsheet_primary_button_success_background
-        )
+    private var finishedBackgroundColor =
+        StripeThemeDefaults.primaryButtonStyle.getSuccessBackgroundColor(context)
+
+    private var finishedOnBackgroundColor =
+        StripeThemeDefaults.primaryButtonStyle.getOnSuccessBackgroundColor(context)
 
     init {
         // This is only needed if the button is inside a fragment
@@ -103,6 +104,8 @@ internal class PrimaryButton @JvmOverloads constructor(
         )
         defaultTintList = tintList
         backgroundTintList = tintList
+        finishedBackgroundColor = primaryButtonStyle.getSuccessBackgroundColor(context)
+        finishedOnBackgroundColor = primaryButtonStyle.getOnSuccessBackgroundColor(context)
     }
 
     fun setDefaultLabelColor(@ColorInt color: Int) {
@@ -186,6 +189,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
         isClickable = false
         backgroundTintList = ColorStateList.valueOf(finishedBackgroundColor)
+        confirmedIcon.imageTintList = ColorStateList.valueOf(finishedOnBackgroundColor)
 
         animator.fadeOut(viewBinding.label)
         animator.fadeOut(viewBinding.confirmingIcon)

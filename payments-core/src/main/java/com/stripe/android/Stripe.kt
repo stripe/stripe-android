@@ -35,6 +35,7 @@ import com.stripe.android.model.CvcTokenParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.PersonTokenParams
 import com.stripe.android.model.PiiTokenParams
 import com.stripe.android.model.PossibleBrands
@@ -825,6 +826,43 @@ class Stripe internal constructor(
                 paymentMethodCreateParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
+            )
+        }
+    }
+
+    /**
+     * Update a [PaymentMethod] asynchronously.
+     *
+     * See [Update a PaymentMethod](https://stripe.com/docs/api/payment_methods/update).
+     * `POST /v1/payment_methods/:id`
+     *
+     * @param paymentMethodId the ID of the [PaymentMethod] to be updated
+     * @param paymentMethodUpdateParams the [PaymentMethodUpdateParams] to be used
+     * @param ephemeralKeySecret the Customer Ephemeral Key secret to be used
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @UiThread
+    @JvmOverloads
+    fun updatePaymentMethod(
+        paymentMethodId: String,
+        paymentMethodUpdateParams: PaymentMethodUpdateParams,
+        ephemeralKeySecret: String,
+        idempotencyKey: String? = null,
+        stripeAccountId: String? = this.stripeAccountId,
+        callback: ApiResultCallback<PaymentMethod>
+    ) {
+        executeAsyncForResult(callback) {
+            stripeRepository.updatePaymentMethod(
+                paymentMethodId,
+                paymentMethodUpdateParams,
+                ApiRequest.Options(
+                    apiKey = ephemeralKeySecret,
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )

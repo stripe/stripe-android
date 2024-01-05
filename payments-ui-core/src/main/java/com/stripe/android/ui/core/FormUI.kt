@@ -24,6 +24,8 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextElementUI
+import com.stripe.android.uicore.elements.CheckboxFieldElement
+import com.stripe.android.uicore.elements.CheckboxFieldUI
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPElement
@@ -75,6 +77,10 @@ fun FormUI(
                         element,
                         hiddenIdentifiers,
                         lastTextFieldIdentifier
+                    )
+                    is CheckboxFieldElement -> CheckboxFieldUI(
+                        controller = element.controller,
+                        enabled = enabled
                     )
                     is StaticTextElement -> StaticTextElementUI(element)
                     is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)

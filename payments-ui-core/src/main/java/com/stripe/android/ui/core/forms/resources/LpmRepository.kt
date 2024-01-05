@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.forms.AlipayRequirement
 import com.stripe.android.paymentsheet.forms.AlmaRequirement
 import com.stripe.android.paymentsheet.forms.AmazonPayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
+import com.stripe.android.paymentsheet.forms.BacsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
 import com.stripe.android.paymentsheet.forms.BlikRequirement
 import com.stripe.android.paymentsheet.forms.BoletoRequirement
@@ -47,6 +48,8 @@ import com.stripe.android.paymentsheet.forms.ZipRequirement
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
+import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
+import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
@@ -56,6 +59,7 @@ import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.MandateTextSpec
+import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.ui.core.elements.transform
@@ -468,6 +472,45 @@ class LpmRepository constructor(
             requirement = AuBecsDebitRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
+        PaymentMethod.Type.BacsDebit.code -> {
+            val localFields = listOfNotNull(
+                PlaceholderSpec(
+                    apiPath = IdentifierSpec.Name,
+                    field = PlaceholderSpec.PlaceholderField.Name
+                ),
+                PlaceholderSpec(
+                    apiPath = IdentifierSpec.Email,
+                    field = PlaceholderSpec.PlaceholderField.Email
+                ),
+                PlaceholderSpec(
+                    apiPath = IdentifierSpec.Phone,
+                    field = PlaceholderSpec.PlaceholderField.Phone
+                ),
+                BacsDebitBankAccountSpec(),
+                PlaceholderSpec(
+                    apiPath = IdentifierSpec.BillingAddress,
+                    field = PlaceholderSpec.PlaceholderField.BillingAddress
+                ),
+                BacsDebitConfirmSpec()
+            )
+
+            SupportedPaymentMethod(
+                code = "bacs_debit",
+                requiresMandate = true,
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_bacs_debit,
+                iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
+                lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+                darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+                tintIconOnSelection = true,
+                requirement = BacsDebitRequirement,
+                formSpec = LayoutSpec(items = sharedDataSpec.fields + localFields),
+                placeholderOverrideList = listOf(
+                    IdentifierSpec.Name,
+                    IdentifierSpec.Email,
+                    IdentifierSpec.BillingAddress
+                )
+            )
+        }
         PaymentMethod.Type.USBankAccount.code -> {
             val pmo = stripeIntent.getPaymentMethodOptions()[PaymentMethod.Type.USBankAccount.code]
             val verificationMethod = (pmo as? Map<*, *>)?.get("verification_method") as? String

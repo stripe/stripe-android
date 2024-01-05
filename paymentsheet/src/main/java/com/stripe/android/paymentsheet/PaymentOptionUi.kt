@@ -59,6 +59,10 @@ private val editIconColorDark = Color.White
 private val editIconBackgroundColorLight = Color(0xFFE5E5EA)
 private val editIconBackgroundColorDark = Color(0xFF525252)
 
+// We use internal content padding to make sure that we have space to display
+// the remove badge on the payment method card.
+internal val SavedPaymentMethodsTopContentPadding = 12.dp
+
 @Composable
 internal fun PaymentOptionUi(
     viewWidth: Dp,
@@ -120,7 +124,7 @@ internal fun PaymentOptionUi(
             }
         },
         modifier = modifier
-            .padding(top = 12.dp)
+            .padding(top = SavedPaymentMethodsTopContentPadding)
             .requiredWidth(viewWidth)
             .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
     )

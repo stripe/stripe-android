@@ -17,7 +17,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.utils.FeatureFlags
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +37,7 @@ internal class CardWidgetViewModel(
 
     init {
         viewModelScope.launch(dispatcher) {
-            _isCbcEligible.value = FeatureFlags.cardBrandChoice.isEnabled && determineCbcEligibility()
+            _isCbcEligible.value = determineCbcEligibility()
         }
     }
 

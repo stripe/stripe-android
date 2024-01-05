@@ -6,9 +6,19 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-enum class ApiParameterDestination {
-    Params,
-    Options
+sealed interface ParameterDestination : Parcelable {
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class Api : ParameterDestination {
+        Params,
+        Options
+    }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class Local : ParameterDestination {
+        Extras
+    }
 }
 
 /**
@@ -23,7 +33,7 @@ enum class ApiParameterDestination {
 data class IdentifierSpec(
     val v1: String,
     val ignoreField: Boolean = false,
-    val apiParameterDestination: ApiParameterDestination = ApiParameterDestination.Params,
+    val destination: ParameterDestination = ParameterDestination.Api.Params,
 ) : Parcelable {
     constructor() : this("")
 
@@ -44,6 +54,8 @@ data class IdentifierSpec(
         val CardExpMonth = IdentifierSpec("card[exp_month]")
 
         val CardExpYear = IdentifierSpec("card[exp_year]")
+
+        val BillingAddress = IdentifierSpec("billing_details[address]")
 
         val Email = IdentifierSpec("billing_details[email]")
 
@@ -75,15 +87,21 @@ data class IdentifierSpec(
         val Vpa = IdentifierSpec("upi[vpa]")
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val Blik = IdentifierSpec("blik", apiParameterDestination = ApiParameterDestination.Options)
+        val Blik = IdentifierSpec("blik", destination = ParameterDestination.Api.Options)
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val BlikCode = IdentifierSpec("blik[code]", apiParameterDestination = ApiParameterDestination.Options)
+        val BlikCode = IdentifierSpec("blik[code]", destination = ParameterDestination.Api.Options)
 
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val KonbiniConfirmationNumber = IdentifierSpec(
             v1 = "konbini[confirmation_number]",
-            apiParameterDestination = ApiParameterDestination.Options
+            destination = ParameterDestination.Api.Options
+        )
+
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val BacsDebitConfirmed = IdentifierSpec(
+            "bacs_debit[confirmed]",
+            destination = ParameterDestination.Local.Extras
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)

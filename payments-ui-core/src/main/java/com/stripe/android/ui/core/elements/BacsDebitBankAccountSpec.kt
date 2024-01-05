@@ -10,6 +10,9 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
 class BacsDebitBankAccountSpec : FormItemSpec() {
+    private val sortCodeIdentifier = IdentifierSpec.Generic(SORT_CODE_API_PATH)
+    private val accountNumberIdentifier = IdentifierSpec.Generic(ACCOUNT_NUMBER_API_PATH)
+
     override val apiPath: IdentifierSpec = IdentifierSpec()
 
     fun transform(
@@ -17,20 +20,25 @@ class BacsDebitBankAccountSpec : FormItemSpec() {
     ) = createSectionElement(
         listOf(
             SimpleTextElement(
-                IdentifierSpec.Generic("bacs_debit[sort_code]"),
+                sortCodeIdentifier,
                 SimpleTextFieldController(
                     BacsDebitSortCodeConfig(),
-                    initialValue = initialValues[this.apiPath]
+                    initialValue = initialValues[sortCodeIdentifier]
                 )
             ),
             SimpleTextElement(
-                IdentifierSpec.Generic("bacs_debit[account_number]"),
+                accountNumberIdentifier,
                 SimpleTextFieldController(
                     BacsDebitAccountNumberConfig(),
-                    initialValue = initialValues[this.apiPath]
+                    initialValue = initialValues[accountNumberIdentifier]
                 )
             )
         ),
         R.string.stripe_bacs_bank_account_title
     )
+
+    private companion object {
+        const val SORT_CODE_API_PATH = "bacs_debit[sort_code]"
+        const val ACCOUNT_NUMBER_API_PATH = "bacs_debit[account_number]"
+    }
 }

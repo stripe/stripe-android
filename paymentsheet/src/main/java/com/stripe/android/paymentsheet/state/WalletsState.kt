@@ -15,6 +15,8 @@ internal data class WalletsState(
     val googlePay: GooglePay?,
     val buttonsEnabled: Boolean,
     @StringRes val dividerTextResource: Int,
+    val onGooglePayPressed: () -> Unit,
+    val onLinkPressed: () -> Unit,
 ) {
 
     data class Link(
@@ -40,6 +42,8 @@ internal data class WalletsState(
             paymentMethodTypes: List<String>,
             googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?,
             screen: PaymentSheetScreen,
+            onGooglePayPressed: () -> Unit,
+            onLinkPressed: () -> Unit,
         ): WalletsState? {
             if (!screen.showsWalletsHeader) {
                 return null
@@ -77,6 +81,8 @@ internal data class WalletsState(
                     } else {
                         R.string.stripe_paymentsheet_or_pay_using
                     },
+                    onGooglePayPressed = onGooglePayPressed,
+                    onLinkPressed = onLinkPressed,
                 )
             } else {
                 null

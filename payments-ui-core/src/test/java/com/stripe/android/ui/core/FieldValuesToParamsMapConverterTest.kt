@@ -108,6 +108,28 @@ class FieldValuesToParamsMapConverterTest {
     }
 
     @Test
+    fun `transform to extra params if bacs`() {
+        val paymentMethodParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodExtraParams(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry(
+                        "joe",
+                        true
+                    ),
+                    IdentifierSpec.BacsDebitConfirmed to FormFieldEntry(
+                        "true",
+                        true
+                    )
+                ),
+                PaymentMethod.Type.BacsDebit.code
+            )
+
+        assertThat(
+            paymentMethodParams?.toParamMap().toString()
+        ).isEqualTo("{bacs_debit={confirmed=true}}")
+    }
+
+    @Test
     fun `test ignored fields`() {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(

@@ -90,7 +90,7 @@ internal fun String.routeToScreenName(): String = when (this) {
     ConsentDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_CONSENT
     DocWarmupDestination.ROUTE.route ->
-        IdentityAnalyticsRequestFactory.SCREEN_NAME_DOC_SELECT
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_DOC_WARMUP
     DocumentScanDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
     DocumentUploadDestination.ROUTE.route ->

@@ -1,0 +1,72 @@
+import groovy.text.SimpleTemplateEngine
+import java.util.stream.Collectors
+
+apply from: configs.androidLibrary
+
+apply plugin: 'checkstyle'
+apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+
+dependencies {
+    implementation libs.androidx.appCompat
+    implementation libs.kotlin.serialization
+
+    testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.test
+    testImplementation testLibs.mockito.inline
+    testImplementation testLibs.mockito.kotlin
+}
+
+android {
+    buildFeatures {
+        buildConfig true
+    }
+
+    testOptions {
+        animationsDisabled = true
+        unitTests {
+            returnDefaultValues = true
+            includeAndroidResources = true
+        }
+    }
+}
+
+// Generate the HTML class for hCaptcha
+android.libraryVariants.all { variant ->
+    def variantName = variant.name.capitalize()
+    def packageName = "com.stripe.hcaptcha"
+    def outputDir = file("${project.buildDir}/generated/source/hcaptcha/${variant.name}/${packageName.replaceAll('\\.', '/')}")
+    def generateTask = project.task("generate${variantName}JavaClassFromStaticHtml") {
+        group 'Generate'
+        description "Generate HTML java class"
+
+        doFirst {
+            def outputJavaClass = file("$outputDir/HCaptchaHtml.kt")
+            def template = file("$projectDir/src/main/html/HCaptchaHtml.java.tml").text
+            def html = file("$projectDir/src/main/html/hcaptcha.html")
+                    .readLines()
+                    .stream()
+                    .collect(Collectors.joining("\n"))
+
+            def engine = new SimpleTemplateEngine()
+            def src = engine.createTemplate(template).make([
+                    "htmlContent": html,
+                    "packageName": packageName
+            ])
+
+            outputDir.mkdirs()
+            outputJavaClass.write(src.toString())
+        }
+    }
+
+    // preBuild.dependsOn generateTask
+    variant.registerJavaGeneratingTask(generateTask, outputDir)
+}
+
+ext {
+    artifactId = "hcaptcha"
+    artifactName = "hcaptcha"
+    artifactDescrption = "The hcaptcha module of Stripe Payment Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

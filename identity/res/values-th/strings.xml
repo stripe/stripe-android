@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- title for accepted types of ids prefix -->
+  <string name="stripe_accepted_forms_of_id_include">รูปแบบเอกสารประจำตัวที่ยอมรับประกอบด้วย</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">การตั้งค่าแอป</string>
   <!-- Description of back of driver's license image -->
@@ -51,6 +53,8 @@
   <string name="stripe_description_time_estimate">ไอคอนการยืนยันเวลาในการดำเนินการโดยประมาณ</string>
   <!-- Label for Date of birth field -->
   <string name="stripe_dob">วันเกิด</string>
+  <!-- Title for doc front warmup page -->
+  <string name="stripe_doc_front_warmup_title">เตรียมพร้อมสแกนเอกสารประจำตัวที่มีรูปถ่าย</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">ใบอนุญาตขับขี่</string>
   <!-- Text for error labels -->
@@ -85,6 +89,8 @@
   <string name="stripe_id_card">บัตรประจำตัว</string>
   <!-- Label for ID number section -->
   <string name="stripe_id_number">หมายเลขประจำตัวประชาชน</string>
+  <!-- I'm ready button text -->
+  <string name="stripe_im_ready">ฉันพร้อมแล้ว</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">หมายเลขประจำตัวประชาชนที่คุณป้อนไม่ครบถ้วน</string>
   <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
