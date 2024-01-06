@@ -1,5 +1,8 @@
 package com.stripe.android.financialconnections.features.common
 
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.M
+import android.view.HapticFeedbackConstants.CONTEXT_CLICK
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +26,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -59,6 +63,7 @@ internal fun AccountItem(
     account: PartnerAccount,
     networkedAccount: NetworkedAccount? = null,
 ) {
+    val view = LocalView.current
     // networked account's allowSelection takes precedence over the account's.
     val selectable = networkedAccount?.allowSelection ?: account.allowSelection
     val shape = remember { RoundedCornerShape(16.dp) }
@@ -74,7 +79,10 @@ internal fun AccountItem(
                 },
                 shape = shape
             )
-            .clickableSingle(enabled = selectable) { onAccountClicked(account) }
+            .clickableSingle(enabled = selectable) {
+                if (SDK_INT >= M) view.performHapticFeedback(CONTEXT_CLICK)
+                onAccountClicked(account)
+            }
             .alpha(if (selectable) SELECTABLE_ALPHA else UNSELECTABLE_ALPHA)
             .padding(16.dp)
     ) {
