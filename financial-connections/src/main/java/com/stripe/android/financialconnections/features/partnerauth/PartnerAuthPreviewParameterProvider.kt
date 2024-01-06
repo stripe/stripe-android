@@ -22,6 +22,7 @@ internal class PartnerAuthPreviewParameterProvider :
     PreviewParameterProvider<SharedPartnerAuthState> {
     override val values = sequenceOf(
         canonical(),
+        prepaneLoading(),
         browserLoading()
     )
 
@@ -45,6 +46,14 @@ internal class PartnerAuthPreviewParameterProvider :
                 isStripeDirect = false
             )
         ),
+        authenticationStatus = Uninitialized,
+        viewEffect = null,
+        activeAuthSession = null,
+        pane = Pane.PARTNER_AUTH
+    )
+
+    private fun prepaneLoading() = SharedPartnerAuthState(
+        payload = Loading(),
         authenticationStatus = Uninitialized,
         viewEffect = null,
         activeAuthSession = null,
@@ -94,23 +103,14 @@ internal class PartnerAuthPreviewParameterProvider :
             "https://b.stripecdn.com/connections-statics-srv/assets/PrepaneAsset--account_numbers-capitalone-2x.gif"
         return OauthPrepane(
             title = "Sign in with Sample bank",
+            subtitle = "Next, you'll be prompted to log in and connect your accounts.",
             body = Body(
                 listOf(
-                    Entry.Text(
-                        "Some very large text will most likely go here!" +
-                            "Some very large text will most likely go here!"
-                    ),
                     Entry.Image(
                         Image(sampleImage)
                     ),
                     Entry.Text(
-                        "Some very large text will most likely go here!"
-                    ),
-                    Entry.Text(
-                        "Some very large text will most likely go here!"
-                    ),
-                    Entry.Text(
-                        "Some very large text will most likely go here!"
+                        "Dynamic content placeholder that will show below image."
                     )
                 )
             ),
@@ -118,7 +118,7 @@ internal class PartnerAuthPreviewParameterProvider :
                 icon = null,
                 text = "Continue!"
             ),
-            institutionIcon = null,
+            institutionIcon = Image("www.image.url"),
             partnerNotice = PartnerNotice(
                 partnerIcon = Image(sampleImage),
                 text = "Stripe works with partners like MX to reliably" +

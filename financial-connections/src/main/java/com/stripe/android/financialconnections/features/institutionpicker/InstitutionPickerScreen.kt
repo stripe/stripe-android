@@ -190,19 +190,17 @@ private fun LoadedContent(
             content = {
                 item { SearchTitle(modifier = Modifier.padding(horizontal = 8.dp)) }
                 item { Spacer(modifier = Modifier.height(24.dp)) }
-                if (payload.searchDisabled.not()) {
-                    stickyHeader(key = "searchRow") {
-                        SearchRow(
-                            focusRequester = searchInputFocusRequester,
-                            query = input,
-                            onQueryChanged = {
-                                input = it
-                                onQueryChanged(input.text)
-                            },
-                        )
-                    }
-                    item { Spacer(modifier = Modifier.height(16.dp)) }
+                stickyHeader(key = "searchRow") {
+                    SearchRow(
+                        focusRequester = searchInputFocusRequester,
+                        query = input,
+                        onQueryChanged = {
+                            input = it
+                            onQueryChanged(input.text)
+                        },
+                    )
                 }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
 
                 searchResults(
                     isInputEmpty = input.text.isBlank(),
