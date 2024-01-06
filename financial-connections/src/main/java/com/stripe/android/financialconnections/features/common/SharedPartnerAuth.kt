@@ -9,15 +9,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
@@ -34,7 +32,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
@@ -65,9 +62,11 @@ import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.Neutral900
 import com.stripe.android.uicore.image.StripeImage
 import kotlinx.coroutines.launch
 
@@ -132,9 +131,9 @@ private fun SharedPartnerAuthContent(
     val scope = rememberCoroutineScope()
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
-        sheetBackgroundColor = FinancialConnectionsTheme.colors.backgroundSurface,
+        sheetBackgroundColor = v3Colors.backgroundSurface,
         sheetShape = RoundedCornerShape(8.dp),
-        scrimColor = FinancialConnectionsTheme.colors.textSecondary.copy(alpha = 0.5f),
+        scrimColor = Neutral900.copy(alpha = 0.32f),
         sheetContent = {
             state.dataAccess?.let {
                 DataAccessBottomSheetContent(
@@ -159,6 +158,57 @@ private fun SharedPartnerAuthContent(
 }
 
 @Composable
+@Suppress("MagicNumber")
+private fun SharedPartnerLoading() {
+    LoadingShimmerEffect { shimmerBrush ->
+        Column(
+            Modifier.padding(horizontal = 24.dp)
+        ) {
+            Spacer(modifier = Modifier.size(16.dp))
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(shimmerBrush, RoundedCornerShape(8.dp))
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(32.dp)
+                    .background(shimmerBrush, RoundedCornerShape(8.dp))
+
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(16.dp)
+                    .background(shimmerBrush, RoundedCornerShape(8.dp))
+
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(.50f)
+                    .height(16.dp)
+                    .background(shimmerBrush, RoundedCornerShape(8.dp))
+
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .background(shimmerBrush, RoundedCornerShape(8.dp))
+
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+        }
+    }
+}
+
+@Composable
 private fun SharedPartnerAuthBody(
     state: SharedPartnerAuthState,
     onCloseClick: () -> Unit,
@@ -177,10 +227,7 @@ private fun SharedPartnerAuthBody(
         }
     ) {
         when (val payload = state.payload) {
-            Uninitialized, is Loading -> LoadingContent(
-                title = stringResource(id = R.string.stripe_partnerauth_loading_title),
-                content = stringResource(id = R.string.stripe_partnerauth_loading_desc)
-            )
+            Uninitialized, is Loading -> SharedPartnerLoading()
 
             is Fail -> ErrorContent(
                 error = payload.error,
@@ -240,19 +287,10 @@ private fun LoadedContent(
                 onClickableTextClick = onClickableTextClick,
             )
 
-            false -> LoadingContent(
-                title = stringResource(id = R.string.stripe_partnerauth_loading_title),
-                content = stringResource(id = R.string.stripe_partnerauth_loading_desc)
-            )
+            false -> SharedPartnerLoading()
         }
 
-        is Loading -> FullScreenGenericLoading()
-
-        is Success -> LoadingContent(
-            title = stringResource(R.string.stripe_account_picker_loading_title),
-            content = stringResource(R.string.stripe_account_picker_loading_desc)
-        )
-
+        is Loading, is Success -> FullScreenGenericLoading()
         is Fail -> {
             // TODO@carlosmuvi translate error type to specific error screen.
             InstitutionUnknownErrorContent(onSelectAnotherBank)
@@ -271,120 +309,111 @@ private fun InstitutionalPrePaneContent(
     val title = remember(content.title) {
         TextResource.Text(fromHtml(content.title))
     }
-    val scrollState = rememberScrollState()
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(
-                top = 16.dp,
-                start = 24.dp,
-                end = 24.dp,
-                bottom = 24.dp
-            )
-    ) {
-        content.institutionIcon?.default?.let {
-            InstitutionIcon(institutionIcon = it)
-            Spacer(modifier = Modifier.size(16.dp))
-        }
-        AnnotatedText(
-            text = title,
-            onClickableTextClick = { },
-            defaultStyle = FinancialConnectionsTheme.typography.subtitle,
-            annotationStyles = mapOf(
-                StringAnnotation.BOLD to FinancialConnectionsTheme.typography.subtitleEmphasized.toSpanStyle()
-            )
-        )
-        Column(
-            modifier = Modifier
-                .padding(top = 16.dp, bottom = 16.dp)
-                .weight(1f)
-                .verticalScroll(scrollState)
-        ) {
-            // CONTENT
-            content.body.entries.forEachIndexed { index, bodyItem ->
-                when (bodyItem) {
-                    is Entry.Image -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = FinancialConnectionsTheme.colors.backgroundContainer
-                                )
+    val subtitle = remember(content.subtitle) {
+        TextResource.Text(fromHtml(content.subtitle))
+    }
+    Layout(
+        body = {
+            content.institutionIcon?.default?.let {
+                item {
+                    Spacer(modifier = Modifier.size(16.dp))
+                    InstitutionIcon(institutionIcon = it)
+                    Spacer(modifier = Modifier.size(16.dp))
+                }
+            }
 
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.stripe_prepane_phone_bg),
-                                contentDescription = "Test",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .width(PHONE_BACKGROUND_HEIGHT_DP.dp)
-                                    .height(PHONE_BACKGROUND_WIDTH_DP.dp)
+            item {
+                AnnotatedText(
+                    text = title,
+                    onClickableTextClick = { },
+                    defaultStyle = v3Typography.headingLarge.copy(
+                        color = v3Colors.textDefault
+                    ),
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+            }
+
+            item {
+                AnnotatedText(
+                    text = subtitle,
+                    onClickableTextClick = { },
+                    defaultStyle = v3Typography.bodyMedium.copy(
+                        color = v3Colors.textDefault
+                    ),
+                )
+                Spacer(modifier = Modifier.size(24.dp))
+            }
+
+            itemsIndexed(content.body.entries) { index, bodyItem ->
+                when (bodyItem) {
+                    is Entry.Image -> Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                shape = RoundedCornerShape(8.dp),
+                                color = v3Colors.background
                             )
-                            GifWebView(
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .width(PHONE_BACKGROUND_HEIGHT_DP.dp)
-                                    .height(PHONE_BACKGROUND_WIDTH_DP.dp)
-                                    .padding(horizontal = 16.dp),
-                                bodyItem.content.default!!
-                            )
-                        }
+
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.stripe_prepane_phone_bg),
+                            contentDescription = "Test",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .width(PHONE_BACKGROUND_HEIGHT_DP.dp)
+                                .height(PHONE_BACKGROUND_WIDTH_DP.dp)
+                        )
+                        GifWebView(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .width(PHONE_BACKGROUND_HEIGHT_DP.dp)
+                                .height(PHONE_BACKGROUND_WIDTH_DP.dp)
+                                .padding(horizontal = 16.dp),
+                            bodyItem.content.default!!
+                        )
                     }
 
                     is Entry.Text -> AnnotatedText(
                         text = TextResource.Text(fromHtml(bodyItem.content)),
                         onClickableTextClick = onClickableTextClick,
-                        defaultStyle = FinancialConnectionsTheme.typography.body,
-                        annotationStyles = mapOf(
-                            StringAnnotation.BOLD to FinancialConnectionsTheme.typography.bodyEmphasized.toSpanStyle(),
-                            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = FinancialConnectionsTheme.colors.textBrand)
-                        )
+                        defaultStyle = v3Typography.bodyMedium
                     )
                 }
                 if (index != content.body.entries.lastIndex) {
                     Spacer(modifier = Modifier.size(16.dp))
                 }
             }
-            Box(modifier = Modifier.weight(1f))
-            content.partnerNotice?.let {
-                Spacer(modifier = Modifier.size(16.dp))
-                PartnerCallout(
-                    partnerNotice = content.partnerNotice,
-                    onClickableTextClick = onClickableTextClick
-                )
-            }
-        }
-        FinancialConnectionsButton(
-            onClick = onContinueClick,
-            modifier = Modifier
-                .semantics { testTagsAsResourceId = true }
-                .testTag("prepane_cta")
-                .fillMaxWidth()
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+        },
+        footer = {
+            FinancialConnectionsButton(
+                onClick = onContinueClick,
+                modifier = Modifier
+                    .semantics { testTagsAsResourceId = true }
+                    .testTag("prepane_cta")
+                    .fillMaxWidth()
             ) {
-                Text(
-                    text = content.cta.text,
-                    textAlign = TextAlign.Center
-                )
-                content.cta.icon?.default?.let {
-                    Spacer(modifier = Modifier.size(12.dp))
-                    StripeImage(
-                        url = it,
-                        contentDescription = null,
-                        imageLoader = LocalImageLoader.current,
-                        errorContent = { },
-                        modifier = Modifier.size(16.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = content.cta.text,
+                        textAlign = TextAlign.Center
                     )
+                    content.cta.icon?.default?.let {
+                        Spacer(modifier = Modifier.size(12.dp))
+                        StripeImage(
+                            url = it,
+                            contentDescription = null,
+                            imageLoader = LocalImageLoader.current,
+                            errorContent = { },
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
         }
-    }
+    )
 }
 
 @Composable

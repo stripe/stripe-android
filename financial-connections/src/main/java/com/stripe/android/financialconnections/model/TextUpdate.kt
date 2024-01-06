@@ -58,7 +58,10 @@ internal data class OauthPrepane(
     val dataAccessNotice: DataAccessNotice? = null,
     @SerialName("title")
     @Serializable(with = MarkdownToHtmlSerializer::class)
-    val title: String
+    val title: String,
+    @SerialName("subtitle")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val subtitle: String
 ) : Parcelable
 
 @Serializable
@@ -204,8 +207,7 @@ internal data class LegalDetailsNotice(
     val cta: String,
     @SerialName("disclaimer")
     @Serializable(with = MarkdownToHtmlSerializer::class)
-    val disclaimer: String? = null,
-
+    val disclaimer: String? = null
 ) : Parcelable
 
 @Serializable
