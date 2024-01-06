@@ -141,13 +141,14 @@ private fun AccountSubtitle(
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
                     text = it,
+                    color = v3Colors.textSubdued,
                     style = v3Typography.labelSmall,
                     modifier = Modifier
                         .background(
-                            color = v3Colors.border, // TODO change to offsetColor
+                            color = v3Colors.backgroundOffset,
                             shape = RoundedCornerShape(4.dp)
                         )
-                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                        .padding(horizontal = 6.dp, vertical = 4.dp)
 
                 )
             }

@@ -174,6 +174,7 @@ private fun LazyListScope.loadedContent(
     }
 }
 
+@Suppress("MagicNumber")
 private fun LazyListScope.loadingContent() {
     item {
         Text(

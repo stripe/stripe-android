@@ -68,6 +68,7 @@ private val V3Colors = FinancialConnectionsV3Colors(
     buttonSecondaryPressed = Color(0xFFEBEEF1),
     background = Color(0xFFF5F6F8),
     backgroundSurface = Color(0xFFFFFFFF),
+    backgroundOffset = Color(0xFFF6F8FA),
     backgroundBrand = Color(0xFFF5F6F8),
     border = Color(0xFFD8DEE4),
     borderBrand = Color(0xFF675DFF)
