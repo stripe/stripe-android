@@ -5,7 +5,7 @@
 ## 20.36.1 - 2024-01-08
 
 *** Identity
-* [FIXED][7757](https://github.com/stripe/stripe-android/pull/7757) Fixed a crash when user retries selfie scan .
+* [FIXED][7757](https://github.com/stripe/stripe-android/pull/7757) Fixed a crash when retrying the selfie scan.
 
 ## 20.36.0 - 2023-12-18
 
