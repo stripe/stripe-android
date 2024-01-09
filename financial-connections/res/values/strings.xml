@@ -51,6 +51,7 @@
     <string name="stripe_data_accessible_type_transactions">transactions</string>
     <string name="stripe_data_accessible_type_ownership">account ownership details</string>
     <string name="stripe_success_pane_done">Done</string>
+    <string name="stripe_success_pane_done_with_merchant">Back to %1$s</string>
     <string name="stripe_success_pane_disconnect">You can <annotation clickable="disconnect">disconnect your account</annotation> any time.</string>
     <string name="stripe_prepane_partner_callout">Stripe works with partners like %1$s to reliably offer access to thousands of financial institutions. <annotation clickable="privacy_center">Learn more</annotation></string>
     <string name="stripe_account_picker_error_no_payment_method_title">No payment accounts available</string>

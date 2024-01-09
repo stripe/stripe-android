@@ -15,17 +15,11 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
-import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
-import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
-import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.PartnerAccount
-import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.TextResource.PluralId
@@ -35,9 +29,7 @@ import javax.inject.Inject
 @Suppress("LongParameterList")
 internal class SuccessViewModel @Inject constructor(
     initialState: SuccessState,
-    getCachedAccounts: GetCachedAccounts,
     getManifest: GetManifest,
-    private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
@@ -47,34 +39,9 @@ internal class SuccessViewModel @Inject constructor(
         observeAsyncs()
         suspend {
             val manifest = getManifest()
-            val accounts = getCachedAccounts()
-            val saveToLinkWithStripeSucceeded: Boolean? = saveToLinkWithStripeSucceeded.get()
             SuccessState.Payload(
                 skipSuccessPane = manifest.skipSuccessPane ?: false,
-                successMessage = getSuccessMessages(
-                    isLinkWithStripe = manifest.isLinkWithStripe,
-                    isNetworkingUserFlow = manifest.isNetworkingUserFlow,
-                    saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
-                    businessName = manifest.businessName,
-                    connectedAccountName = manifest.connectedAccountName,
-                    count = accounts.size
-                ),
-                accessibleData = AccessibleDataCalloutModel(
-                    businessName = manifest.businessName,
-                    permissions = manifest.permissions,
-                    isNetworking = manifest.isNetworkingUserFlow == true && saveToLinkWithStripeSucceeded == true,
-                    isStripeDirect = manifest.isStripeDirect ?: false,
-                    dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
-                ),
-                accounts = accounts,
-                institution = manifest.activeInstitution!!,
                 businessName = manifest.businessName,
-                disconnectUrl = FinancialConnectionsUrlResolver.getDisconnectUrl(manifest),
-                accountFailedToLinkMessage = getFailedToLinkMessage(
-                    businessName = manifest.businessName,
-                    saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
-                    count = accounts.size
-                )
             )
         }.execute {
             copy(payload = it)
@@ -207,13 +174,7 @@ internal data class SuccessState(
 ) : MavericksState {
 
     data class Payload(
-        val accessibleData: AccessibleDataCalloutModel,
-        val institution: FinancialConnectionsInstitution,
-        val accounts: List<PartnerAccount>,
-        val disconnectUrl: String,
         val businessName: String?,
         val skipSuccessPane: Boolean,
-        val successMessage: TextResource,
-        val accountFailedToLinkMessage: TextResource?
     )
 }
