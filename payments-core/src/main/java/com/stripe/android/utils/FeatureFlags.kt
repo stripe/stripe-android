@@ -6,6 +6,7 @@ import com.stripe.android.BuildConfig
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object FeatureFlags {
     val customerSheetACHv2 = FeatureFlag()
+    val useLpmFoundations = FeatureFlag()
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
