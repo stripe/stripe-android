@@ -68,6 +68,9 @@ constructor(
         this.imageLoader = imageLoader
     }
 
+    /**
+     * A [Painter] to draw the icon associated with this [PaymentOption].
+     */
     val iconPainter: Painter
         @Composable
         get() = rememberDrawablePainter(icon())
