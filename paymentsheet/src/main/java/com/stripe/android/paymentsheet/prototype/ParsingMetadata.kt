@@ -1,20 +1,23 @@
 package com.stripe.android.paymentsheet.prototype
 
+import android.os.Parcelable
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.ui.core.elements.SharedDataSpec
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 internal class ParsingMetadata(
     val stripeIntent: StripeIntent,
     val configuration: PaymentSheet.Configuration,
-    val sharedDataSpecs: List<SharedDataSpec>,
+    // TODO: New type for LUXE Spec.
+//    val sharedDataSpecs: List<SharedDataSpec>,
     val isDeferred: Boolean,
-    val financialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable()
-) {
+    val financialConnectionsAvailable: Boolean,
+): Parcelable {
+    @IgnoredOnParcel
     val merchantName: String = configuration.merchantDisplayName
 
     fun hasIntentToSetup(): Boolean {

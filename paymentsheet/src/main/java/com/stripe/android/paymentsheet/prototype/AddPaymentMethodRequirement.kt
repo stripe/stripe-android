@@ -9,7 +9,7 @@ internal enum class AddPaymentMethodRequirement {
         override fun meetsRequirements(metadata: ParsingMetadata): Boolean = false
     },
 
-    /** A special case that indicates the payment method is unsupported by PaymentSheet when using SetupIntents or SFU. */
+    /** Indicates the payment method is unsupported by PaymentSheet when using SetupIntents or SFU. */
     UnsupportedForSetup {
         override fun meetsRequirements(metadata: ParsingMetadata): Boolean {
             return !metadata.hasIntentToSetup()
@@ -27,7 +27,7 @@ internal enum class AddPaymentMethodRequirement {
         }
     },
 
-    /** Requires that the user declare support for asynchronous payment methods. */
+    /** Requires that the developer declare support for asynchronous payment methods. */
     MerchantSupportsDelayedPaymentMethods {
         override fun meetsRequirements(metadata: ParsingMetadata): Boolean {
             return metadata.configuration.allowsDelayedPaymentMethods
@@ -37,7 +37,7 @@ internal enum class AddPaymentMethodRequirement {
     /** Requires that the FinancialConnections SDK has been linked. */
     FinancialConnectionsSdk {
         override fun meetsRequirements(metadata: ParsingMetadata): Boolean {
-            return metadata.financialConnectionsAvailable()
+            return metadata.financialConnectionsAvailable
         }
     },
 

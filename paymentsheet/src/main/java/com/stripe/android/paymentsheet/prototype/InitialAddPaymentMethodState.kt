@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.prototype
 
 import com.stripe.android.paymentsheet.prototype.uielement.DropdownItem
-import com.stripe.android.ui.core.elements.DropdownSpec
 
 internal class InitialAddPaymentMethodState(
     val state: UiState.Value?,
@@ -44,9 +43,11 @@ internal class InitialAddPaymentMethodStateBuilder(
     }
 
     fun parseDropdownItems(v1ApiPath: String): List<DropdownItem>? {
-        val spec = metadata.sharedDataSpecs.firstOrNull { it.type == paymentMethodDefinition.type.code }
-        val dropdownSpec = spec?.fields?.firstOrNull { it.apiPath.v1 == v1ApiPath } as? DropdownSpec?
-        return dropdownSpec?.items?.map { DropdownItem(it.apiValue.orEmpty(), it.displayText) }
+        // TODO:
+//        val spec = metadata.sharedDataSpecs.firstOrNull { it.type == paymentMethodDefinition.type.code }
+//        val dropdownSpec = spec?.fields?.firstOrNull { it.apiPath.v1 == v1ApiPath } as? DropdownSpec?
+//        return dropdownSpec?.items?.map { DropdownItem(it.apiValue.orEmpty(), it.displayText) }
+        return null
     }
 
     fun build(): InitialAddPaymentMethodState {

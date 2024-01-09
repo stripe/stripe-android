@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.prototype.uielement.ContactInformationUiE
 import com.stripe.android.paymentsheet.prototype.uielement.MandateUiElementDefinition
 
 internal data class AddPaymentMethodUiDefinition(
+    val identifier: String,
     val addPaymentMethodSelectorUiDefinition: AddPaymentMethodSelectorUiDefinition,
     val uiElementsDefinitions: List<UiElementDefinition>,
 )
@@ -45,17 +46,18 @@ internal class AddPaymentMethodUiDefinitionBuilder(
     fun selector(builder: AddPaymentMethodSelectorUiDefinitionBuilder.() -> Unit) {
         addPaymentMethodSelectorUiDefinition = AddPaymentMethodSelectorUiDefinitionBuilder().apply {
             // Default the icon image URLs to what the spec returns.
-            val selectorIcon = metadata.sharedDataSpecs.firstOrNull { spec ->
-                spec.type == paymentMethodDefinition.type.code
-            }?.selectorIcon
-            if (selectorIcon != null) {
-                if (selectorIcon.lightThemePng != null) {
-                    lightThemeIconUrl = selectorIcon.lightThemePng
-                }
-                if (selectorIcon.darkThemePng != null) {
-                    darkThemeIconUrl = selectorIcon.darkThemePng
-                }
-            }
+            // TODO:
+//            val selectorIcon = metadata.sharedDataSpecs.firstOrNull { spec ->
+//                spec.type == paymentMethodDefinition.type.code
+//            }?.selectorIcon
+//            if (selectorIcon != null) {
+//                if (selectorIcon.lightThemePng != null) {
+//                    lightThemeIconUrl = selectorIcon.lightThemePng
+//                }
+//                if (selectorIcon.darkThemePng != null) {
+//                    darkThemeIconUrl = selectorIcon.darkThemePng
+//                }
+//            }
         }.also(builder).build()
     }
 
@@ -109,6 +111,7 @@ internal class AddPaymentMethodUiDefinitionBuilder(
         }
 
         return AddPaymentMethodUiDefinition(
+            identifier = paymentMethodDefinition.type.code,
             addPaymentMethodSelectorUiDefinition = addPaymentMethodSelectorUiDefinition,
             uiElementsDefinitions = elementDefinitionList,
         )

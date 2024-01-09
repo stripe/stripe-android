@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.prototype
 
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
@@ -12,12 +14,14 @@ internal class Foo {
         configuration: PaymentSheet.Configuration,
         sharedDataSpecs: List<SharedDataSpec>,
         isDeferred: Boolean,
+        financialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable()
     ): UiState {
         val metadata = ParsingMetadata(
             stripeIntent = stripeIntent,
             configuration = configuration,
-            sharedDataSpecs = sharedDataSpecs,
+//            sharedDataSpecs = sharedDataSpecs,
             isDeferred = isDeferred,
+            financialConnectionsAvailable = financialConnectionsAvailable.invoke(),
         )
         val paymentMethodDefinitionMap = PaymentMethodDefinitionRegistry.all.associateBy { it.type.code }
         return UiState.create(
