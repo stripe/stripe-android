@@ -7,7 +7,7 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 internal class LpmFoundationsFlowController : PaymentSheet.FlowController {
     override var shippingDetails: AddressDetails?
         get() = TODO("Not yet implemented")
-        set(value) {
+        set(_) {
             TODO("Not yet implemented")
         }
 
