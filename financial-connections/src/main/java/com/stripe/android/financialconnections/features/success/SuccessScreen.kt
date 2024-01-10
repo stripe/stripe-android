@@ -2,17 +2,18 @@ package com.stripe.android.financialconnections.features.success
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -93,6 +94,10 @@ private fun SuccessContent(
     }
 }
 
+const val ENTER_TRANSITION_DURATION_MS = 1000
+const val CHECK_ALPHA_DURATION_MS = 250
+const val SLIDE_IN_ANIMATION_FRACTION = 4
+
 @Composable
 fun SuccessLoaded(
     loading: Boolean,
@@ -103,9 +108,8 @@ fun SuccessLoaded(
     var showSpinner by remember { mutableStateOf(true) }
 
     if (skipSuccessPane.not()) {
-        // Show the spinner for a bit before hiding it (or keep it showing if skipping success pane)
         LaunchedEffect(true) {
-            delay(1500)
+            delay(ENTER_TRANSITION_DURATION_MS.toLong())
             showSpinner = false
         }
     }
@@ -117,11 +121,9 @@ fun SuccessLoaded(
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
-            SuccessItem(
-                showSpinner = showSpinner
-            )
+            SpinnerToSuccessAnimation(showSpinner = showSpinner)
         }
-        SuccessLoadedFooter(
+        SuccessFooter(
             modifier = Modifier.alpha(if (showSpinner) 0f else 1f),
             merchantName = merchantName,
             loading = loading,
@@ -131,45 +133,59 @@ fun SuccessLoaded(
 }
 
 @Composable
-fun SuccessItem(
+fun SpinnerToSuccessAnimation(
     showSpinner: Boolean
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
     ) {
-        // Animate the entire column fading in
-        if (showSpinner) {
+        // Define the animation specs
+        val enterTransition = fadeIn(animationSpec = tween(ENTER_TRANSITION_DURATION_MS))
+        val exitTransition = fadeOut(animationSpec = tween(ENTER_TRANSITION_DURATION_MS))
+
+        // Delay the appearance of the check icon
+        val checkAlpha: Float by animateFloatAsState(
+            targetValue = if (showSpinner) 0f else 1f,
+            animationSpec = tween(
+                delayMillis = CHECK_ALPHA_DURATION_MS,
+                durationMillis = CHECK_ALPHA_DURATION_MS,
+                easing = LinearEasing,
+            ),
+            label = "check_icon_alpha"
+        )
+
+        // Animate the loader icon
+        AnimatedVisibility(
+            visible = showSpinner,
+            enter = enterTransition,
+            exit = exitTransition,
+        ) {
             V3LoadingSpinner(
                 modifier = Modifier.size(56.dp)
             )
         }
+
         AnimatedVisibility(
             visible = !showSpinner,
-            enter = fadeIn(),
+            enter = enterTransition + slideInVertically(initialOffsetY = { it / SLIDE_IN_ANIMATION_FRACTION }),
+            exit = exitTransition
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                val offsetY by animateDpAsState(
-                    targetValue = if (!showSpinner) 0.dp else 56.dp,
-                    animationSpec = tween(
-                        durationMillis = 5000,
-                        easing = LinearOutSlowInEasing
-                    ), label = "bottom_up_animation"
-                )
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .size(56.dp)
-                        .offset(y = offsetY) // apply the animated offset here
                         .background(v3Colors.iconBrand, CircleShape)
                 ) {
                     Icon(
+                        modifier = Modifier.alpha(checkAlpha),
                         imageVector = Icons.Default.Check,
                         contentDescription = "Success",
-                        tint = Color.White // Replace with your desired icon color
+                        tint = Color.White
                     )
                 }
                 Text(
@@ -186,7 +202,7 @@ fun SuccessItem(
 }
 
 @Composable
-private fun SuccessLoadedFooter(
+private fun SuccessFooter(
     modifier: Modifier = Modifier,
     loading: Boolean,
     merchantName: String?,
@@ -231,4 +247,3 @@ internal fun SuccessScreenPreview() {
         ) {}
     }
 }
-
