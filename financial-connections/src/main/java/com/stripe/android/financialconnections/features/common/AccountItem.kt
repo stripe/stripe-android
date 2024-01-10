@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -43,9 +44,6 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.uicore.format.CurrencyFormatter
 import com.stripe.android.uicore.text.MiddleEllipsisText
 import java.util.Locale
-
-private const val UNSELECTABLE_ALPHA = 0.5f
-private const val SELECTABLE_ALPHA = 1f
 
 /**
  * A single account item in an account picker list.
@@ -83,7 +81,7 @@ internal fun AccountItem(
                 if (SDK_INT >= M) view.performHapticFeedback(CONTEXT_CLICK)
                 onAccountClicked(account)
             }
-            .alpha(if (selectable) SELECTABLE_ALPHA else UNSELECTABLE_ALPHA)
+            .alpha(if (selectable) 1f else ContentAlpha.disabled)
             .padding(16.dp)
     ) {
         Row(
