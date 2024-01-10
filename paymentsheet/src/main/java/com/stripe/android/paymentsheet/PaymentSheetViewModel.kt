@@ -68,6 +68,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,6 +84,8 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as StripeR
+
+private const val AwaitingPaymentResultKey = "AwaitingPaymentResult"
 
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
@@ -182,7 +185,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             null -> GooglePayButtonType.Pay
         }
 
-    private var pendingPaymentResult: InternalPaymentResult? = null
+    private var pendingPaymentResultChannel = Channel<InternalPaymentResult>(capacity = 1)
 
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
@@ -323,13 +326,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         result.fold(
-            onSuccess = ::handlePaymentSheetStateLoaded,
-            onFailure = ::handlePaymentSheetStateLoadFailure,
+            onSuccess = { handlePaymentSheetStateLoaded(it) },
+            onFailure = { handlePaymentSheetStateLoadFailure(it) },
         )
     }
 
-    private fun handlePaymentSheetStateLoadFailure(error: Throwable) {
-        val pendingResult = pendingPaymentResult
+    private suspend fun handlePaymentSheetStateLoadFailure(error: Throwable) {
+        val pendingResult = awaitPaymentResult()
 
         if (pendingResult is InternalPaymentResult.Completed) {
             // If we just received a transaction result after process death, we don't error. Instead, we dismiss
@@ -340,11 +343,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             setStripeIntent(null)
             onFatal(error)
         }
-
-        pendingPaymentResult = null
     }
 
-    private fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
+    private suspend fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
         cbcEligibility = when (state.isEligibleForCardBrandChoice) {
             true -> CardBrandChoiceEligibility.Eligible(
                 preferredNetworks = state.config.preferredNetworks
@@ -367,7 +368,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         linkHandler.setupLink(linkState)
 
-        val pendingFailedPaymentResult = pendingPaymentResult as? InternalPaymentResult.Failed
+        val pendingFailedPaymentResult = awaitPaymentResult() as? InternalPaymentResult.Failed
         val errorMessage = pendingFailedPaymentResult?.throwable?.stripeErrorMessage(getApplication())
 
         resetViewState(errorMessage)
@@ -479,6 +480,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         it.confirm(confirmStripeIntentParams)
                     }
                 }
+                storeAwaitingPaymentResult(true)
             },
             onFailure = ::onFatal
         )
@@ -500,6 +502,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         it.handleNextActionForSetupIntent(clientSecret)
                     }
                 }
+                storeAwaitingPaymentResult(true)
             },
             onFailure = ::onFatal
         )
@@ -617,9 +620,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         if (intent == null) {
             // We're recovering from process death. Wait for the pending payment result
             // to be handled after re-loading.
-            pendingPaymentResult = launcherResult
+            pendingPaymentResultChannel.trySend(launcherResult)
             return
         }
+
+        storeAwaitingPaymentResult(false)
 
         when (launcherResult) {
             is InternalPaymentResult.Completed -> {
@@ -770,6 +775,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             PaymentSheetScreen.AddFirstPaymentMethod
         }
         return listOf(target)
+    }
+
+    private suspend fun awaitPaymentResult(): InternalPaymentResult? {
+        val shouldAwait = savedStateHandle.remove<Boolean>(AwaitingPaymentResultKey) ?: false
+        return if (shouldAwait) {
+            pendingPaymentResultChannel.receive()
+        } else {
+            null
+        }
+    }
+
+    private fun storeAwaitingPaymentResult(isAwaiting: Boolean) {
+        savedStateHandle[AwaitingPaymentResultKey] = isAwaiting
     }
 
     internal class Factory(
