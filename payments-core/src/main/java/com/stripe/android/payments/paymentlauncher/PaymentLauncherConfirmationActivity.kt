@@ -1,6 +1,5 @@
 package com.stripe.android.payments.paymentlauncher
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -32,7 +31,6 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
     @VisibleForTesting
     internal val viewModel: PaymentLauncherViewModel by viewModels { viewModelFactory }
 
-    @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
