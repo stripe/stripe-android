@@ -158,8 +158,8 @@ private fun LazyListScope.loadedContent(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(
                 when (payload.selectionMode) {
-                    SelectionMode.SINGLE -> R.string.stripe_account_picker_singleselect_account
-                    SelectionMode.MULTIPLE -> R.string.stripe_account_picker_multiselect_account
+                    SelectionMode.Single -> R.string.stripe_account_picker_singleselect_account
+                    SelectionMode.Multiple -> R.string.stripe_account_picker_multiselect_account
                 }
             ),
             style = FinancialConnectionsTheme.v3Typography.headingXLarge

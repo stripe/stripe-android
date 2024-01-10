@@ -56,7 +56,7 @@ internal class AccountPickerPreviewParameterProvider :
             AccountPickerState.Payload(
                 skipAccountSelection = false,
                 accounts = partnerAccountList(),
-                selectionMode = AccountPickerState.SelectionMode.MULTIPLE,
+                selectionMode = AccountPickerState.SelectionMode.Multiple,
                 merchantDataAccess = accessibleCallout(),
                 singleAccount = false,
                 stripeDirect = false,
@@ -72,7 +72,7 @@ internal class AccountPickerPreviewParameterProvider :
             AccountPickerState.Payload(
                 skipAccountSelection = false,
                 accounts = partnerAccountList(),
-                selectionMode = AccountPickerState.SelectionMode.SINGLE,
+                selectionMode = AccountPickerState.SelectionMode.Single,
                 merchantDataAccess = accessibleCallout(),
                 singleAccount = true,
                 stripeDirect = false,

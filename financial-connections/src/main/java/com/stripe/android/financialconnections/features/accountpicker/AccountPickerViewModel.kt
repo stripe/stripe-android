@@ -78,7 +78,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 skipAccountSelection = partnerAccountList.skipAccountSelection == true ||
                     activeAuthSession.skipAccountSelection == true,
                 accounts = accounts,
-                selectionMode = if (manifest.singleAccount) SelectionMode.SINGLE else SelectionMode.MULTIPLE,
+                selectionMode = if (manifest.singleAccount) SelectionMode.Single else SelectionMode.Multiple,
                 merchantDataAccess = MerchantDataAccessModel(
                     businessName = manifest.businessName,
                     permissions = manifest.permissions,
@@ -114,7 +114,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 )
 
                 // Auto-select the first selectable account.
-                payload.selectionMode == SelectionMode.SINGLE -> setState {
+                payload.selectionMode == SelectionMode.Single -> setState {
                     copy(
                         selectedIds = setOfNotNull(
                             payload.selectableAccounts.firstOrNull()?.id
@@ -154,8 +154,8 @@ internal class AccountPickerViewModel @Inject constructor(
         state.payload()?.let { payload ->
             val selectedIds = state.selectedIds
             val newSelectedIds = when (payload.selectionMode) {
-                SelectionMode.SINGLE -> setOf(account.id)
-                SelectionMode.MULTIPLE -> if (selectedIds.contains(account.id)) {
+                SelectionMode.Single -> setOf(account.id)
+                SelectionMode.Multiple -> if (selectedIds.contains(account.id)) {
                     selectedIds - account.id
                 } else {
                     selectedIds + account.id
@@ -283,9 +283,6 @@ internal data class AccountPickerState(
     val submitEnabled: Boolean
         get() = selectedIds.isNotEmpty()
 
-    val allAccountsSelected: Boolean
-        get() = payload()?.selectableAccounts?.count() == selectedIds.count()
-
     data class Payload(
         val skipAccountSelection: Boolean,
         val accounts: List<PartnerAccount>,
@@ -305,6 +302,6 @@ internal data class AccountPickerState(
     }
 
     enum class SelectionMode {
-        SINGLE, MULTIPLE
+        Single, Multiple
     }
 }
