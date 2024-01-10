@@ -30,10 +30,11 @@ internal data class Address(
 // of "King Street 123" instead of "123 King Street"
 // Reference for country formats:
 // https://docs.google.com/spreadsheets/d/1tIZO0-Iqvs_8CA9UL3S9qYvoTzjPdrHZr-hdetz6Uuo/edit#gid=696373988
-internal val STREET_NAME_FIRST_COUNTRIES = listOf(
+internal val STREET_NAME_FIRST_COUNTRIES = setOf(
     "BE",
     "BR",
     "CH",
+    "DE",
     "ES",
     "ID",
     "IT",
@@ -42,7 +43,7 @@ internal val STREET_NAME_FIRST_COUNTRIES = listOf(
     "NO",
     "PL",
     "RU",
-    "SE"
+    "SE",
 )
 
 internal fun Place.filter(type: Place.Type): AddressComponent? {
