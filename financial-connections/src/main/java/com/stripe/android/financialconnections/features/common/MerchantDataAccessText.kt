@@ -2,17 +2,24 @@
 
 package com.stripe.android.financialconnections.features.common
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Permissions
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
@@ -86,20 +93,56 @@ internal data class MerchantDataAccessModel(
 @Composable
 internal fun MerchantDataAccessTextPreview() {
     FinancialConnectionsPreview {
-        MerchantDataAccessText(
-            MerchantDataAccessModel(
-                businessName = "My business",
-                permissions = listOf(
-                    Permissions.PAYMENT_METHOD,
-                    Permissions.BALANCES,
-                    Permissions.OWNERSHIP,
-                    Permissions.TRANSACTIONS,
-                    Permissions.ACCOUNT_NUMBERS
-                ),
-                isStripeDirect = false,
-                dataPolicyUrl = ""
-            ),
-            onLearnMoreClick = {}
-        )
+        FinancialConnectionsScaffold(
+            topBar = { /*TODO*/ }) {
+            Column(
+                Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = CenterHorizontally
+            ) {
+                // all permissions
+                MerchantDataAccessText(
+                    MerchantDataAccessModel(
+                        businessName = "My business",
+                        permissions = listOf(
+                            Permissions.PAYMENT_METHOD,
+                            Permissions.BALANCES,
+                            Permissions.OWNERSHIP,
+                            Permissions.TRANSACTIONS,
+                            Permissions.ACCOUNT_NUMBERS
+                        ),
+                        isStripeDirect = false,
+                        dataPolicyUrl = ""
+                    ),
+                    onLearnMoreClick = {}
+                )
+                // one permission
+                MerchantDataAccessText(
+                    MerchantDataAccessModel(
+                        businessName = "My business",
+                        permissions = listOf(
+                            Permissions.TRANSACTIONS,
+                        ),
+                        isStripeDirect = false,
+                        dataPolicyUrl = ""
+                    ),
+                    onLearnMoreClick = {}
+                )
+                // two permissions
+                MerchantDataAccessText(
+                    MerchantDataAccessModel(
+                        businessName = "My business",
+                        permissions = listOf(
+                            Permissions.TRANSACTIONS,
+                            Permissions.OWNERSHIP,
+                        ),
+                        isStripeDirect = false,
+                        dataPolicyUrl = ""
+                    ),
+                    onLearnMoreClick = {}
+                )
+            }
+        }
+
     }
 }
