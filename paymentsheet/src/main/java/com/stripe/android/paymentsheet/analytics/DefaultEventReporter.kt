@@ -250,10 +250,19 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onHidePaymentOptionBrands(selectedBrand: CardBrand?) {
+    override fun onHidePaymentOptionBrands(
+        source: EventReporter.CardBrandChoiceEventSource,
+        selectedBrand: CardBrand?
+    ) {
         fireEvent(
             PaymentSheetEvent.HidePaymentOptionBrands(
                 selectedBrand = selectedBrand,
+                source = when (source) {
+                    EventReporter.CardBrandChoiceEventSource.Add ->
+                        PaymentSheetEvent.HidePaymentOptionBrands.Source.Add
+                    EventReporter.CardBrandChoiceEventSource.Edit ->
+                        PaymentSheetEvent.HidePaymentOptionBrands.Source.Edit
+                },
                 isDeferred = isDeferred
             )
         )

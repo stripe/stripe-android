@@ -251,7 +251,10 @@ internal class PaymentSheetViewModelTest {
                     EditPaymentMethodViewAction.OnBrandChoiceOptionsDismissed
                 )
 
-                verify(eventReporter).onHidePaymentOptionBrands(null)
+                verify(eventReporter).onHidePaymentOptionBrands(
+                    source = EventReporter.CardBrandChoiceEventSource.Edit,
+                    selectedBrand = null
+                )
             }
         }
     }
@@ -282,7 +285,10 @@ internal class PaymentSheetViewModelTest {
                     )
                 )
 
-                verify(eventReporter).onHidePaymentOptionBrands(CardBrand.Visa)
+                verify(eventReporter).onHidePaymentOptionBrands(
+                    source = EventReporter.CardBrandChoiceEventSource.Edit,
+                    selectedBrand = CardBrand.Visa
+                )
             }
         }
     }

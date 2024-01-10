@@ -331,16 +331,8 @@ internal class CustomerSheetViewModel @Inject constructor(
             )
         } else {
             backStack.update {
-                it.lastOrNull()?.let { viewState ->
-                    when (viewState) {
-                        is CustomerSheetViewState.AddPaymentMethod ->
-                            eventReporter.onScreenHidden(CustomerSheetEventReporter.Screen.AddPaymentMethod)
-                        is CustomerSheetViewState.SelectPaymentMethod ->
-                            eventReporter.onScreenHidden(CustomerSheetEventReporter.Screen.SelectPaymentMethod)
-                        is CustomerSheetViewState.EditPaymentMethod ->
-                            eventReporter.onScreenHidden(CustomerSheetEventReporter.Screen.EditPaymentMethod)
-                        else -> Unit
-                    }
+                it.last().eventReporterScreen?.let { screen ->
+                    eventReporter.onScreenHidden(screen)
                 }
 
                 it.dropLast(1)
@@ -543,7 +535,10 @@ internal class CustomerSheetViewModel @Inject constructor(
                                 )
                             }
                             is EditPaymentMethodViewInteractor.Event.HideBrands -> {
-                                eventReporter.onHidePaymentOptionBrands(event.brand)
+                                eventReporter.onHidePaymentOptionBrands(
+                                    source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                                    selectedBrand = event.brand
+                                )
                             }
                         }
                     },
@@ -1193,6 +1188,14 @@ internal class CustomerSheetViewModel @Inject constructor(
             }
         }
     }
+
+    private val CustomerSheetViewState.eventReporterScreen: CustomerSheetEventReporter.Screen?
+        get() = when (this) {
+            is CustomerSheetViewState.AddPaymentMethod -> CustomerSheetEventReporter.Screen.AddPaymentMethod
+            is CustomerSheetViewState.SelectPaymentMethod -> CustomerSheetEventReporter.Screen.SelectPaymentMethod
+            is CustomerSheetViewState.EditPaymentMethod -> CustomerSheetEventReporter.Screen.EditPaymentMethod
+            else -> null
+        }
 
     object Factory : ViewModelProvider.Factory {
 

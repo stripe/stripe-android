@@ -2757,7 +2757,10 @@ class CustomerSheetViewModelTest {
                 EditPaymentMethodViewAction.OnBrandChoiceOptionsDismissed
             )
 
-            verify(eventReporter).onHidePaymentOptionBrands(null)
+            verify(eventReporter).onHidePaymentOptionBrands(
+                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                selectedBrand = null
+            )
         }
     }
 
@@ -2788,7 +2791,10 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            verify(eventReporter).onHidePaymentOptionBrands(CardBrand.Visa)
+            verify(eventReporter).onHidePaymentOptionBrands(
+                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                selectedBrand = CardBrand.Visa
+            )
         }
     }
 

@@ -234,6 +234,7 @@ class CustomerSheetEventReporterTest {
     @Test
     fun `onHidePaymentOptionBrands() should fire analytics request with expected event value`() {
         eventReporter.onHidePaymentOptionBrands(
+            source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
             selectedBrand = CardBrand.CartesBancaires,
         )
 

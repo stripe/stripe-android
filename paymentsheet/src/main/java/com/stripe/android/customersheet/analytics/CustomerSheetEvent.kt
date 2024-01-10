@@ -118,14 +118,19 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
     }
 
     class HidePaymentOptionBrands(
+        source: Source,
         selectedBrand: CardBrand?
     ) : CustomerSheetEvent() {
         override val eventName: String = CS_HIDE_PAYMENT_OPTION_BRANDS
 
         override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_CBC_EVENT_SOURCE to VALUE_EDIT_CBC_EVENT_SOURCE,
+            FIELD_CBC_EVENT_SOURCE to source.value,
             FIELD_SELECTED_CARD_BRAND to selectedBrand?.code
         )
+
+        enum class Source(val value: String) {
+            Edit(VALUE_EDIT_CBC_EVENT_SOURCE), Add(VALUE_ADD_CBC_EVENT_SOURCE)
+        }
     }
 
     class UpdatePaymentOptionSucceeded(

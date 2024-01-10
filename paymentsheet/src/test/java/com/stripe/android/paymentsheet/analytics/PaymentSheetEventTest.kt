@@ -598,9 +598,33 @@ class PaymentSheetEventTest {
     }
 
     @Test
-    fun `HidePaymentOptionBrands event should return expected toString()`() {
+    fun `HidePaymentOptionBrands event with add source should return expected toString()`() {
         val event = PaymentSheetEvent.HidePaymentOptionBrands(
             selectedBrand = CardBrand.CartesBancaires,
+            source = PaymentSheetEvent.HidePaymentOptionBrands.Source.Add,
+            isDeferred = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_close_cbc_dropdown"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "cbc_event_source" to "add",
+                "selected_card_brand" to "cartes_bancaires",
+                "is_decoupled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `HidePaymentOptionBrands event with edit source should return expected toString()`() {
+        val event = PaymentSheetEvent.HidePaymentOptionBrands(
+            selectedBrand = CardBrand.CartesBancaires,
+            source = PaymentSheetEvent.HidePaymentOptionBrands.Source.Edit,
             isDeferred = false,
         )
         assertThat(

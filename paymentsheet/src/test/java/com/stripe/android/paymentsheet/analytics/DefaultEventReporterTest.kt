@@ -275,6 +275,7 @@ class DefaultEventReporterTest {
         }
 
         customEventReporter.onHidePaymentOptionBrands(
+            source = EventReporter.CardBrandChoiceEventSource.Edit,
             selectedBrand = CardBrand.CartesBancaires,
         )
 

@@ -9,7 +9,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-@Suppress("TooManyFunctions")
 internal class DefaultCustomerSheetEventReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
@@ -123,9 +122,18 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
         )
     }
 
-    override fun onHidePaymentOptionBrands(selectedBrand: CardBrand?) {
+    override fun onHidePaymentOptionBrands(
+        source: CustomerSheetEventReporter.CardBrandChoiceEventSource,
+        selectedBrand: CardBrand?
+    ) {
         fireEvent(
             CustomerSheetEvent.HidePaymentOptionBrands(
+                source = when (source) {
+                    CustomerSheetEventReporter.CardBrandChoiceEventSource.Add ->
+                        CustomerSheetEvent.HidePaymentOptionBrands.Source.Add
+                    CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit ->
+                        CustomerSheetEvent.HidePaymentOptionBrands.Source.Edit
+                },
                 selectedBrand = selectedBrand
             )
         )

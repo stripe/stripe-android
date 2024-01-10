@@ -471,7 +471,10 @@ internal abstract class BaseSheetViewModel(
                                 )
                             }
                             is EditPaymentMethodViewInteractor.Event.HideBrands -> {
-                                eventReporter.onHidePaymentOptionBrands(event.brand)
+                                eventReporter.onHidePaymentOptionBrands(
+                                    source = EventReporter.CardBrandChoiceEventSource.Edit,
+                                    selectedBrand = event.brand
+                                )
                             }
                         }
                     },

@@ -127,6 +127,7 @@ internal interface EventReporter {
      * have also chosen a new card brand selection as well.
      */
     fun onHidePaymentOptionBrands(
+        source: CardBrandChoiceEventSource,
         selectedBrand: CardBrand?,
     )
 

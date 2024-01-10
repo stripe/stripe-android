@@ -2,7 +2,6 @@ package com.stripe.android.customersheet.analytics
 
 import com.stripe.android.model.CardBrand
 
-@Suppress("TooManyFunctions")
 internal interface CustomerSheetEventReporter {
 
     /**
@@ -74,6 +73,7 @@ internal interface CustomerSheetEventReporter {
      * option support card brand choice selection.
      */
     fun onHidePaymentOptionBrands(
+        source: CardBrandChoiceEventSource,
         selectedBrand: CardBrand?,
     )
 
