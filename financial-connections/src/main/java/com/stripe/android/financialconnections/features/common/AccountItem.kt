@@ -85,12 +85,11 @@ internal fun AccountItem(
             .padding(16.dp)
     ) {
         Row(
-            horizontalArrangement = Arrangement.Start,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             networkedAccount?.icon?.default?.let {
                 InstitutionIcon(institutionIcon = it)
-                Spacer(modifier = Modifier.size(12.dp))
             }
             Column(
                 Modifier.weight(1f)
@@ -104,7 +103,6 @@ internal fun AccountItem(
                 )
                 AccountSubtitle(selectable, account, networkedAccount)
             }
-            Spacer(modifier = Modifier.size(12.dp))
             Icon(
                 modifier = Modifier
                     .size(16.dp)
