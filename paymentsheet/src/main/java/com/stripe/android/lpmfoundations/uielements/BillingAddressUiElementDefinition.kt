@@ -9,6 +9,8 @@ import com.stripe.android.lpmfoundations.UiState
 internal class BillingAddressUiElementDefinition(
     val availableCountries: Set<String>
 ) : UiElementDefinition {
+    override fun isValid(uiState: UiState.Snapshot): Boolean = false
+
     override fun renderer(uiState: UiState): UiRenderer {
         return BillingAddressUi()
     }

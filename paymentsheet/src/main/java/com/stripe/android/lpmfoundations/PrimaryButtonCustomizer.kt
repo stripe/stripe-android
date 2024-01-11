@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.flowOf
 /**
  * Provides the ability to customize the behavior of the primary button (for example the buy button in PaymentSheet).
  */
-internal interface PrimaryButtonCustomizer {
+internal fun interface PrimaryButtonCustomizer {
     /**
      * Return a flow that customizes the [State] of the primary button.
      *

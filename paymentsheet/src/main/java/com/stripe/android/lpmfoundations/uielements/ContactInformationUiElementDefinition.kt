@@ -10,6 +10,8 @@ import com.stripe.android.lpmfoundations.UiState
 internal class ContactInformationUiElementDefinition(
     val requiredContactInformationCollectionModes: MutableSet<ContactInformationCollectionMode>
 ) : UiElementDefinition {
+    override fun isValid(uiState: UiState.Snapshot): Boolean = false
+
     override fun renderer(uiState: UiState): UiRenderer {
         return ContactInformationUiRenderer()
     }

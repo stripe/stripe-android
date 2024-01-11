@@ -16,6 +16,8 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 
 internal class MandateUiElementDefinition(private val text: ResolvableString) : UiElementDefinition {
+    override fun isValid(uiState: UiState.Snapshot): Boolean = true
+
     override fun renderer(uiState: UiState): UiRenderer {
         return MandateUiRenderer(text)
     }
