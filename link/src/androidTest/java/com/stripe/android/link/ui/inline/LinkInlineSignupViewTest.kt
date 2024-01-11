@@ -151,6 +151,6 @@ internal class LinkInlineSignupViewTest {
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag(ProgressIndicatorTestTag)
     private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
     private fun onNameField() = composeTestRule.onNodeWithText("Full name")
-    private fun onSaveMyInfo() = composeTestRule.onNodeWithText("Save my info", substring = true)
+    private fun onSaveMyInfo() = composeTestRule.onNodeWithText("Save your info", substring = true)
     private fun onInlineLinkLogo() = composeTestRule.onNodeWithTag("LinkLogoIcon", useUnmergedTree = true)
 }
