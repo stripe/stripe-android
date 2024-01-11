@@ -126,7 +126,6 @@ class HCaptcha private constructor(
          * @param activity The current activity
          * @return new [HCaptcha] object
          */
-        @JvmOverloads
         fun getClient(
             activity: FragmentActivity,
             internalConfig: HCaptchaInternalConfig = HCaptchaInternalConfig()

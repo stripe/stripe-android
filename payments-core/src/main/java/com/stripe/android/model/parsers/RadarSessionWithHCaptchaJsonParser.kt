@@ -2,13 +2,13 @@ package com.stripe.android.model.parsers
 
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
-import com.stripe.android.model.RadarSession
+import com.stripe.android.model.RadarSessionWithHCaptcha
 import org.json.JSONObject
 
-internal class RadarSessionJsonParser : ModelJsonParser<RadarSession> {
-    override fun parse(json: JSONObject): RadarSession? {
+internal class RadarSessionWithHCaptchaJsonParser : ModelJsonParser<RadarSessionWithHCaptcha> {
+    override fun parse(json: JSONObject): RadarSessionWithHCaptcha? {
         return StripeJsonUtils.optString(json, FIELD_ID)?.let {
-            RadarSession(
+            RadarSessionWithHCaptcha(
                 id = it,
                 passiveCaptchaSiteKey = StripeJsonUtils.optString(json, FIELD_PASSIVE_CAPTCHA_SITE_KEY),
                 passiveCaptchaRqdata = StripeJsonUtils.optString(json, FIELD_PASSIVE_CAPTCHA_RQDATA)

@@ -1,3 +1,4 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 package com.stripe.android.hcaptcha
 
 import androidx.annotation.RestrictTo

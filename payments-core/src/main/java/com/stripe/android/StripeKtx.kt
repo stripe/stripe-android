@@ -520,6 +520,8 @@ suspend fun Stripe.createRadarSession(
                     stripeAccount = stripeAccountId
                 )
             )
+        }.map { radarSession ->
+            RadarSession(id = radarSession.id)
         }
     }
 }

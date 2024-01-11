@@ -5,11 +5,11 @@ import com.stripe.android.model.RadarSession
 import org.json.JSONObject
 import kotlin.test.Test
 
-class RadarSessionJsonParserTest {
+class RadarSessionWithHCaptchaJsonParserTest {
 
     @Test
     fun `parse should return expected object`() {
-        assertThat(RadarSessionJsonParser().parse(JSON))
+        assertThat(RadarSessionWithHCaptchaJsonParser().parse(JSON))
             .isEqualTo(
                 RadarSession(
                     id = "rse_abc123",

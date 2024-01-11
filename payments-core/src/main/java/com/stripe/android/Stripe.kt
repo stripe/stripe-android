@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
-import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -1717,6 +1716,8 @@ class Stripe internal constructor(
                         stripeAccount = stripeAccountId
                     )
                 )
+            }.map { radarSession ->
+                RadarSession(id = radarSession.id)
             }
         }
     }
@@ -1902,8 +1903,7 @@ class Stripe internal constructor(
         )
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    inline fun <T, R> Result<T>.flatMap(block: (T) -> (Result<R>)): Result<R> {
+    internal inline fun <T, R> Result<T>.flatMap(block: (T) -> (Result<R>)): Result<R> {
         return this.mapCatching {
             block(it).getOrThrow()
         }

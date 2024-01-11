@@ -28,6 +28,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.RadarSession
+import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
@@ -252,7 +253,7 @@ interface StripeRepository {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
-    ): Result<RadarSession>
+    ): Result<RadarSessionWithHCaptcha>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun attachHCaptchaToRadarSession(
@@ -260,7 +261,7 @@ interface StripeRepository {
         hcaptchaToken: String,
         hcaptchaEKey: String?,
         requestOptions: ApiRequest.Options
-    ): Result<RadarSession>
+    ): Result<RadarSessionWithHCaptcha>
 
     // Link endpoints
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

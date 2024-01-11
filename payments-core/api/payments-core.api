@@ -1605,9 +1605,6 @@ public final class com/stripe/android/googlepaylauncher/injection/GooglePayPayme
 	public static synthetic fun create$default (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherFactory;Lkotlinx/coroutines/CoroutineScope;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Landroidx/activity/result/ActivityResultLauncher;ZILjava/lang/Object;)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;
 }
 
-public final class com/stripe/android/hcaptcha/HCaptchaInterfaceKt {
-}
-
 public final class com/stripe/android/model/AccountParams : com/stripe/android/model/TokenParams {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -4946,17 +4943,13 @@ public final class com/stripe/android/model/PossibleBrands$Creator : android/os/
 public final class com/stripe/android/model/RadarSession : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/RadarSession;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/RadarSession;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/RadarSession;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/model/RadarSession;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/RadarSession;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/RadarSession;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getId ()Ljava/lang/String;
-	public final fun getPassiveCaptchaRqdata ()Ljava/lang/String;
-	public final fun getPassiveCaptchaSiteKey ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -4967,6 +4960,14 @@ public final class com/stripe/android/model/RadarSession$Creator : android/os/Pa
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/RadarSession;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/RadarSession;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/RadarSessionWithHCaptcha$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/RadarSessionWithHCaptcha;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/RadarSessionWithHCaptcha;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

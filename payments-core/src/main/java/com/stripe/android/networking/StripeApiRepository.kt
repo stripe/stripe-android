@@ -66,7 +66,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodUpdateParams
-import com.stripe.android.model.RadarSession
+import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
@@ -90,7 +90,7 @@ import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.parsers.PaymentMethodMessageJsonParser
 import com.stripe.android.model.parsers.PaymentMethodsListJsonParser
-import com.stripe.android.model.parsers.RadarSessionJsonParser
+import com.stripe.android.model.parsers.RadarSessionWithHCaptchaJsonParser
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import com.stripe.android.model.parsers.SourceJsonParser
 import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
@@ -975,7 +975,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
-    ): Result<RadarSession> {
+    ): Result<RadarSessionWithHCaptcha> {
         val validation = runCatching {
             require(Stripe.advancedFraudSignalsEnabled) {
                 "Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session."
@@ -995,7 +995,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     options = requestOptions,
                     params = params,
                 ),
-                jsonParser = RadarSessionJsonParser(),
+                jsonParser = RadarSessionWithHCaptchaJsonParser(),
             ) {
                 fireAnalyticsRequest(
                     paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.RadarSessionCreate)
@@ -1011,7 +1011,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         hcaptchaToken: String,
         hcaptchaEKey: String?,
         requestOptions: ApiRequest.Options
-    ): Result<RadarSession> {
+    ): Result<RadarSessionWithHCaptcha> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = getApiUrl("radar/session/%s/attach_hcaptcha_token", radarSessionToken),
@@ -1026,7 +1026,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     } ?: emptyMap()
                 )
             ),
-            jsonParser = RadarSessionJsonParser(),
+            jsonParser = RadarSessionWithHCaptchaJsonParser(),
         )
     }
 
