@@ -40,7 +40,7 @@ internal object PayPalPaymentMethodDefinition : PaymentMethodDefinition {
                         // TODO(jaynewstrom): Show the dialog, when the dialog is acknowledged, set the needs to show
                         //  mandate to false.
                         state.update(payPalKey) {
-                            it.copy(needsToShowMandate = false)
+                            copy(needsToShowMandate = false)
                         }
                     }
                 } else {

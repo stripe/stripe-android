@@ -73,10 +73,10 @@ internal class UiState private constructor(
     /**
      * A helper method to make updating [Value]s that are data classes easier.
      */
-    fun <V : Value> update(key: Key<V>, block: (V) -> V) {
+    fun <V : Value> update(key: Key<V>, block: V.() -> V) {
         @Suppress("UNCHECKED_CAST")
         val mutableStateFlow = state[key] as MutableStateFlow<V>
-        mutableStateFlow.value = block(mutableStateFlow.value)
+        mutableStateFlow.value = mutableStateFlow.value.block()
     }
 
     /**
