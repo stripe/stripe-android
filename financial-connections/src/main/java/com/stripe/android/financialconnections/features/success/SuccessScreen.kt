@@ -51,6 +51,10 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import kotlinx.coroutines.delay
 
+const val ENTER_TRANSITION_DURATION_MS = 1000
+const val CHECK_ALPHA_DURATION_MS = 250
+const val SLIDE_IN_ANIMATION_FRACTION = 4
+
 @Composable
 internal fun SuccessScreen() {
     val viewModel: SuccessViewModel = mavericksViewModel()
@@ -93,10 +97,6 @@ private fun SuccessContent(
         )
     }
 }
-
-const val ENTER_TRANSITION_DURATION_MS = 1000
-const val CHECK_ALPHA_DURATION_MS = 250
-const val SLIDE_IN_ANIMATION_FRACTION = 4
 
 @Composable
 fun SuccessLoaded(
@@ -155,7 +155,7 @@ fun SpinnerToSuccessAnimation(
             label = "check_icon_alpha"
         )
 
-        // Animate the loader icon
+        // Fade out loading spinner
         AnimatedVisibility(
             visible = showSpinner,
             enter = enterTransition,
@@ -166,6 +166,7 @@ fun SpinnerToSuccessAnimation(
             )
         }
 
+        // Fade in + slide success content.
         AnimatedVisibility(
             visible = !showSpinner,
             enter = enterTransition + slideInVertically(initialOffsetY = { it / SLIDE_IN_ANIMATION_FRACTION }),
