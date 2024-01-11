@@ -1,7 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.RadarSession
+import com.stripe.android.model.RadarSessionWithHCaptcha
 import org.json.JSONObject
 import kotlin.test.Test
 
@@ -11,7 +11,7 @@ class RadarSessionWithHCaptchaJsonParserTest {
     fun `parse should return expected object`() {
         assertThat(RadarSessionWithHCaptchaJsonParser().parse(JSON))
             .isEqualTo(
-                RadarSession(
+                RadarSessionWithHCaptcha(
                     id = "rse_abc123",
                     passiveCaptchaSiteKey = null,
                     passiveCaptchaRqdata = null

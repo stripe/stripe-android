@@ -27,7 +27,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodUpdateParams
-import com.stripe.android.model.RadarSession
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
