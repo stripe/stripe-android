@@ -914,7 +914,8 @@ public final class com/stripe/android/Stripe {
 	public static synthetic fun createPiiTokenSynchronous$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/Token;
 	public final fun createRadarSession (Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createRadarSession (Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
-	public static synthetic fun createRadarSession$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;ILjava/lang/Object;)V
+	public final fun createRadarSession (Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;Landroidx/appcompat/app/AppCompatActivity;)V
+	public static synthetic fun createRadarSession$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;Landroidx/appcompat/app/AppCompatActivity;ILjava/lang/Object;)V
 	public final fun createSource (Lcom/stripe/android/model/SourceParams;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createSource (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createSource (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
@@ -1041,7 +1042,9 @@ public final class com/stripe/android/StripeKtxKt {
 	public static synthetic fun createPersonToken$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/PersonTokenParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun createPiiToken (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun createPiiToken$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun createRadarSession (Lcom/stripe/android/Stripe;Landroidx/fragment/app/FragmentActivity;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun createRadarSession (Lcom/stripe/android/Stripe;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun createRadarSession$default (Lcom/stripe/android/Stripe;Landroidx/fragment/app/FragmentActivity;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun createSource (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun createSource$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun getAuthenticateSourceResult (Lcom/stripe/android/Stripe;ILandroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -1600,6 +1603,9 @@ public final class com/stripe/android/googlepaylauncher/GooglePayRepository$Disa
 
 public final class com/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherFactory$DefaultImpls {
 	public static synthetic fun create$default (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherFactory;Lkotlinx/coroutines/CoroutineScope;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Landroidx/activity/result/ActivityResultLauncher;ZILjava/lang/Object;)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;
+}
+
+public final class com/stripe/android/hcaptcha/HCaptchaInterfaceKt {
 }
 
 public final class com/stripe/android/model/AccountParams : com/stripe/android/model/TokenParams {
@@ -4940,13 +4946,17 @@ public final class com/stripe/android/model/PossibleBrands$Creator : android/os/
 public final class com/stripe/android/model/RadarSession : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/model/RadarSession;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/RadarSession;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/RadarSession;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/RadarSession;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/RadarSession;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/RadarSession;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getId ()Ljava/lang/String;
+	public final fun getPassiveCaptchaRqdata ()Ljava/lang/String;
+	public final fun getPassiveCaptchaSiteKey ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
