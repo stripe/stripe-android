@@ -24,8 +24,8 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.testing.AbsPaymentController
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.AbsPaymentController
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
