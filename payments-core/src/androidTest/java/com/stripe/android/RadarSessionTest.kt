@@ -3,7 +3,7 @@ package com.stripe.android
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.RadarSession
+import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.AbsPaymentController
@@ -19,8 +19,8 @@ import java.lang.RuntimeException
 
 class RadarSessionTest {
     private val mockApiRepository: StripeRepository = object : AbsFakeStripeRepository() {
-        override suspend fun createRadarSession(requestOptions: ApiRequest.Options): Result<RadarSession> {
-            return Result.success(RadarSession("rse_id", HCAPTCHA_SITE_KEY, "rqdata"))
+        override suspend fun createRadarSession(requestOptions: ApiRequest.Options): Result<RadarSessionWithHCaptcha> {
+            return Result.success(RadarSessionWithHCaptcha("rse_id", HCAPTCHA_SITE_KEY, "rqdata"))
         }
 
         override suspend fun attachHCaptchaToRadarSession(
@@ -28,9 +28,9 @@ class RadarSessionTest {
             hcaptchaToken: String,
             hcaptchaEKey: String?,
             requestOptions: ApiRequest.Options
-        ): Result<RadarSession> {
+        ): Result<RadarSessionWithHCaptcha> {
             if (hcaptchaToken == "10000000-aaaa-bbbb-cccc-000000000001") {
-                return Result.success(RadarSession("rse_id", HCAPTCHA_SITE_KEY, "rqdata"))
+                return Result.success(RadarSessionWithHCaptcha("rse_id", HCAPTCHA_SITE_KEY, "rqdata"))
             } else {
                 throw RuntimeException("Incorrect hCaptcha token: $hcaptchaToken")
             }

@@ -24,7 +24,6 @@
     <ID>EmptyFunctionBlock:PaymentSessionViewModel.kt$PaymentSessionViewModel${ }</ID>
     <ID>EmptyFunctionBlock:StripeTextWatcher.kt$StripeTextWatcher${ }</ID>
     <ID>ExplicitGarbageCollectionCall:WeakMapInjectorRegistryTest.kt$WeakMapInjectorRegistryTest$gc()</ID>
-    <ID>ImportOrdering:com.stripe.android.googlepaylauncher.GooglePayLauncherViewModelTest.kt:3</ID>
     <ID>LargeClass:CardInputWidget.kt$CardInputWidget : LinearLayoutCardWidget</ID>
     <ID>LargeClass:CardInputWidgetTest.kt$CardInputWidgetTest</ID>
     <ID>LargeClass:CardMultilineWidgetTest.kt$CardMultilineWidgetTest</ID>
