@@ -188,14 +188,20 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         val isNetworkingSignupPane =
             manifest?.isNetworkingUserFlow == true && pane == NETWORKING_LINK_SIGNUP_PANE
         val description = when {
-            isNetworkingSignupPane && businessName != null -> TextResource.StringId(
-                value = R.string.stripe_close_dialog_networking_desc,
-                args = listOf(businessName)
-            )
-
-            else -> TextResource.StringId(
-                value = R.string.stripe_close_dialog_desc
-            )
+            isNetworkingSignupPane -> when (businessName) {
+                null -> TextResource.StringId(R.string.stripe_close_dialog_networking_desc_no_business)
+                else -> TextResource.StringId(
+                    value = R.string.stripe_close_dialog_networking_desc,
+                    args = listOf(businessName)
+                )
+            }
+            else -> when (businessName) {
+                null -> TextResource.StringId(R.string.stripe_exit_modal_desc_no_business)
+                else -> TextResource.StringId(
+                    value = R.string.stripe_exit_modal_desc,
+                    args = listOf(businessName)
+                )
+            }
         }
         eventTracker.track(ClickNavBarClose(pane))
         setState { copy(exitModal = CloseDialog(description = description, loading = false)) }

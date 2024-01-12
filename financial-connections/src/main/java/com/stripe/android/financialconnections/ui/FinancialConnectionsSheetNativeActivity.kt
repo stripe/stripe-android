@@ -158,6 +158,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     exitModal?.let {
                         ExitModal(
                             loading = it.loading,
+                            description = it.description,
                             onCancel = { coroutineScope.launch { bottomState.hide() } },
                             onExit = viewModel::onCloseConfirm
                         )
@@ -187,7 +188,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     }
                 }
             )
-
         }
     }
 
