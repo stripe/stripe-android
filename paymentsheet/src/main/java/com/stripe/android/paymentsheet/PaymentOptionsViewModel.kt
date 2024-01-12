@@ -16,6 +16,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
@@ -36,7 +37,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -96,7 +97,43 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     override val error: StateFlow<String?> = _error
 
-    override val walletsState: StateFlow<WalletsState?> = MutableStateFlow(null).asStateFlow()
+    private val linkEmailFlow: StateFlow<String?> = linkConfigurationCoordinator.emailFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = null,
+    )
+
+    override val walletsState: StateFlow<WalletsState?> = combine(
+        linkHandler.isLinkEnabled,
+        linkEmailFlow,
+        buttonsEnabled,
+        supportedPaymentMethodsFlow,
+        backStack,
+    ) { isLinkAvailable, linkEmail, buttonsEnabled, paymentMethodTypes, stack ->
+        WalletsState.create(
+            isLinkAvailable = isLinkAvailable,
+            linkEmail = linkEmail,
+            googlePayState = GooglePayState.NotAvailable,
+            googlePayButtonState = null,
+            buttonsEnabled = buttonsEnabled,
+            paymentMethodTypes = paymentMethodTypes,
+            googlePayLauncherConfig = null,
+            googlePayButtonType = GooglePayButtonType.Pay,
+            screen = stack.last(),
+            isCompleteFlow = false,
+            onGooglePayPressed = {
+                error("Google Pay shouldn't be enabled in the custom flow.")
+            },
+            onLinkPressed = {
+                updateSelection(PaymentSelection.Link)
+                onUserSelection()
+            },
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000L),
+        initialValue = null,
+    )
 
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
@@ -296,7 +333,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun determineInitialBackStack(): List<PaymentSheetScreen> {
-        val target = if (args.state.hasPaymentOptions) {
+        val target = if (args.state.showSavedPaymentMethods) {
             SelectSavedPaymentMethods
         } else {
             AddFirstPaymentMethod

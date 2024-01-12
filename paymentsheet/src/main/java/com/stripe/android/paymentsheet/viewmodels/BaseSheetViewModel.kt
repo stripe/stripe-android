@@ -135,13 +135,16 @@ internal abstract class BaseSheetViewModel(
             initialValue = PaymentSheetScreen.Loading,
         )
 
-    internal val headerText: Flow<Int?> = combine(
-        currentScreen,
-        linkHandler.isLinkEnabled.filterNotNull(),
-        googlePayState,
-        supportedPaymentMethodsFlow,
-    ) { screen, isLinkAvailable, googlePay, supportedPaymentMethods ->
-        mapToHeaderTextResource(screen, isLinkAvailable, googlePay, supportedPaymentMethods)
+    abstract val walletsState: StateFlow<WalletsState?>
+
+    internal val headerText: Flow<Int?> by lazy {
+        combine(
+            currentScreen,
+            walletsState,
+            supportedPaymentMethodsFlow,
+        ) { screen, walletsState, supportedPaymentMethods ->
+            mapToHeaderTextResource(screen, walletsState, supportedPaymentMethods)
+        }
     }
 
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
@@ -163,7 +166,6 @@ internal abstract class BaseSheetViewModel(
 
     abstract val primaryButtonUiState: StateFlow<PrimaryButton.UIState?>
     abstract val error: StateFlow<String?>
-    abstract val walletsState: StateFlow<WalletsState?>
 
     private val _mandateText = MutableStateFlow<MandateText?>(null)
     internal val mandateText: StateFlow<MandateText?> = _mandateText
@@ -551,13 +553,12 @@ internal abstract class BaseSheetViewModel(
 
     private fun mapToHeaderTextResource(
         screen: PaymentSheetScreen?,
-        isLinkAvailable: Boolean,
-        googlePayState: GooglePayState,
+        walletsState: WalletsState?,
         supportedPaymentMethods: List<PaymentMethodCode>,
     ): Int? {
         return headerTextFactory.create(
             screen = screen,
-            isWalletEnabled = isLinkAvailable || googlePayState is GooglePayState.Available,
+            isWalletEnabled = walletsState != null,
             types = supportedPaymentMethods,
         )
     }

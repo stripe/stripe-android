@@ -246,6 +246,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             googlePayLauncherConfig = googlePayLauncherConfig,
             googlePayButtonType = googlePayButtonType,
             screen = stack.last(),
+            isCompleteFlow = true,
             onGooglePayPressed = this::checkoutWithGooglePay,
             onLinkPressed = linkHandler::launchLink,
         )
