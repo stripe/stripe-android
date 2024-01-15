@@ -231,7 +231,11 @@ private fun Dropdown(
     Box(
         modifier = Modifier
             .clickable {
-                expanded = true
+                if (!expanded) {
+                    expanded = true
+
+                    viewActionHandler.invoke(EditPaymentMethodViewAction.OnBrandChoiceOptionsShown)
+                }
             }
             .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
     ) {
@@ -271,6 +275,8 @@ private fun Dropdown(
             },
             onDismiss = {
                 expanded = false
+
+                viewActionHandler.invoke(EditPaymentMethodViewAction.OnBrandChoiceOptionsDismissed)
             }
         )
     }

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemoveOperation
@@ -39,6 +40,7 @@ internal class FakeEditPaymentMethodInteractor(
     object Factory : ModifiableEditPaymentMethodViewInteractor.Factory {
         override fun create(
             initialPaymentMethod: PaymentMethod,
+            eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
             displayName: String

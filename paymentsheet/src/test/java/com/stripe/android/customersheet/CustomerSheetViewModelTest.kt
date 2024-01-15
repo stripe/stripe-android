@@ -13,6 +13,7 @@ import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMeth
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.addPaymentMethodViewState
+import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createModifiableEditPaymentMethodViewInteractorFactory
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.selectPaymentMethodViewState
 import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
@@ -22,6 +23,7 @@ import com.stripe.android.financialconnections.model.PaymentAccount
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
+import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT
 import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.SetupIntentFixtures
@@ -32,6 +34,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnBrandChoiceChanged
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemoveConfirmed
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemovePressed
@@ -52,6 +55,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -1262,6 +1267,40 @@ class CustomerSheetViewModelTest {
         viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
 
         verify(eventReporter).onScreenPresented(CustomerSheetEventReporter.Screen.AddPaymentMethod)
+    }
+
+    @Test
+    fun `When edit payment screen is presented, event is reported`() {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+        )
+
+        viewModel.handleViewAction(
+            CustomerSheetViewAction.OnModifyItem(paymentMethod = CARD_PAYMENT_METHOD)
+        )
+
+        verify(eventReporter).onScreenPresented(CustomerSheetEventReporter.Screen.EditPaymentMethod)
+    }
+
+    @Test
+    fun `When edit payment screen is hidden, event is reported`() {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+        )
+
+        viewModel.handleViewAction(
+            CustomerSheetViewAction.OnModifyItem(paymentMethod = CARD_PAYMENT_METHOD)
+        )
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
+
+        verify(eventReporter).onScreenHidden(CustomerSheetEventReporter.Screen.EditPaymentMethod)
     }
 
     @Test
@@ -2536,24 +2575,87 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `Updating payment method in edit screen goes through expected states`() = runTest(testDispatcher) {
+    fun `Updating payment method in edit screen goes through expected states & reports event`() =
+        runTest(testDispatcher) {
+            val eventReporter: CustomerSheetEventReporter = mock()
+            val paymentMethods = PaymentMethodFactory.cards(size = 1)
+
+            val firstMethod = paymentMethods.single()
+
+            val updatedMethod = firstMethod.copy(
+                card = firstMethod.card?.copy(
+                    networks = PaymentMethod.Card.Networks(
+                        available = setOf("visa", "cartes_bancaires"),
+                        preferred = "visa"
+                    )
+                )
+            )
+
+            val customerAdapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.Success(paymentMethods),
+                onUpdatePaymentMethod = { _, _ ->
+                    CustomerAdapter.Result.Success(updatedMethod)
+                }
+            )
+
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                initialBackStack = listOf(
+                    selectPaymentMethodViewState.copy(
+                        savedPaymentMethods = paymentMethods,
+                    )
+                ),
+                eventReporter = eventReporter,
+                customerPaymentMethods = paymentMethods,
+                customerAdapter = customerAdapter,
+                editInteractorFactory = createModifiableEditPaymentMethodViewInteractorFactory(
+                    workContext = testDispatcher
+                ),
+            )
+
+            viewModel.viewState.test {
+                assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+                viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(firstMethod))
+
+                val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
+                editViewState.editPaymentMethodInteractor.handleViewAction(
+                    OnBrandChoiceChanged(
+                        EditPaymentMethodViewState.CardBrandChoice(
+                            brand = CardBrand.Visa
+                        )
+                    )
+                )
+                editViewState.editPaymentMethodInteractor.handleViewAction(OnUpdatePressed)
+
+                // Confirm that nothing has changed yet. We're waiting to update the payment method
+                // once we return to the SPM screen.
+                val updatedViewState = awaitViewState<SelectPaymentMethod>()
+                assertThat(updatedViewState.savedPaymentMethods).containsExactlyElementsIn(paymentMethods)
+
+                // Simulate the delay
+                testDispatcher.scheduler.advanceUntilIdle()
+
+                verify(eventReporter).onUpdatePaymentMethodSucceeded(CardBrand.Visa)
+
+                val finalViewState = awaitViewState<SelectPaymentMethod>()
+                assertThat(finalViewState.savedPaymentMethods).containsExactlyElementsIn(listOf(updatedMethod))
+            }
+        }
+
+    @Test
+    fun `Failed update payment method in edit screen reports event`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
         val paymentMethods = PaymentMethodFactory.cards(size = 1)
 
         val firstMethod = paymentMethods.single()
 
-        val updatedMethod = firstMethod.copy(
-            card = firstMethod.card?.copy(
-                networks = PaymentMethod.Card.Networks(
-                    available = setOf("visa", "cartes_bancaires"),
-                    preferred = "visa"
-                )
-            )
-        )
-
         val customerAdapter = FakeCustomerAdapter(
             paymentMethods = CustomerAdapter.Result.Success(paymentMethods),
             onUpdatePaymentMethod = { _, _ ->
-                CustomerAdapter.Result.Success(updatedMethod)
+                CustomerAdapter.Result.failure(
+                    Exception("No network found!"),
+                    "No network found!"
+                )
             }
         )
 
@@ -2564,8 +2666,12 @@ class CustomerSheetViewModelTest {
                     savedPaymentMethods = paymentMethods,
                 )
             ),
+            eventReporter = eventReporter,
             customerPaymentMethods = paymentMethods,
             customerAdapter = customerAdapter,
+            editInteractorFactory = createModifiableEditPaymentMethodViewInteractorFactory(
+                workContext = testDispatcher
+            ),
         )
 
         viewModel.viewState.test {
@@ -2582,16 +2688,113 @@ class CustomerSheetViewModelTest {
             )
             editViewState.editPaymentMethodInteractor.handleViewAction(OnUpdatePressed)
 
-            // Confirm that nothing has changed yet. We're waiting to update the payment method
-            // once we return to the SPM screen.
-            val updatedViewState = awaitViewState<SelectPaymentMethod>()
-            assertThat(updatedViewState.savedPaymentMethods).containsExactlyElementsIn(paymentMethods)
-
             // Simulate the delay
             testDispatcher.scheduler.advanceUntilIdle()
 
-            val finalViewState = awaitViewState<SelectPaymentMethod>()
-            assertThat(finalViewState.savedPaymentMethods).containsExactlyElementsIn(listOf(updatedMethod))
+            verify(eventReporter).onUpdatePaymentMethodFailed(
+                eq(CardBrand.Visa),
+                argThat {
+                    message == "No network found!"
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `Showing payment option brands in edit screen reports event`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+        val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+            initialBackStack = listOf(
+                selectPaymentMethodViewState.copy(
+                    savedPaymentMethods = paymentMethods,
+                )
+            ),
+            customerPaymentMethods = paymentMethods
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.single()))
+
+            val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
+            editViewState.editPaymentMethodInteractor.handleViewAction(
+                EditPaymentMethodViewAction.OnBrandChoiceOptionsShown
+            )
+
+            verify(eventReporter).onShowPaymentOptionBrands(
+                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                selectedBrand = CardBrand.CartesBancaires
+            )
+        }
+    }
+
+    @Test
+    fun `Hiding payment option brands in edit screen reports event`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+        val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+            initialBackStack = listOf(
+                selectPaymentMethodViewState.copy(
+                    savedPaymentMethods = paymentMethods,
+                )
+            ),
+            customerPaymentMethods = paymentMethods,
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.single()))
+
+            val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
+            editViewState.editPaymentMethodInteractor.handleViewAction(
+                EditPaymentMethodViewAction.OnBrandChoiceOptionsDismissed
+            )
+
+            verify(eventReporter).onHidePaymentOptionBrands(
+                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                selectedBrand = null
+            )
+        }
+    }
+
+    @Test
+    fun `Changing payment option brand in edit screen reports event`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+        val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+            initialBackStack = listOf(
+                selectPaymentMethodViewState.copy(
+                    savedPaymentMethods = paymentMethods,
+                )
+            ),
+            customerPaymentMethods = paymentMethods,
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.single()))
+
+            val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
+            editViewState.editPaymentMethodInteractor.handleViewAction(
+                OnBrandChoiceChanged(
+                    EditPaymentMethodViewState.CardBrandChoice(brand = CardBrand.Visa)
+                )
+            )
+
+            verify(eventReporter).onHidePaymentOptionBrands(
+                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                selectedBrand = CardBrand.Visa
+            )
         }
     }
 
