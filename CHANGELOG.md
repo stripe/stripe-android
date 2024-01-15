@@ -6,6 +6,9 @@
 Dependencies updated:
 * [7603](https://github.com/stripe/stripe-android/pull/7603) Bumped compile SDK from 33 to 34.
 
+### Payments
+* [FIXED][7777](https://github.com/stripe/stripe-android/pull/7777) Fixed an issue in `PaymentSession` where tapping the `Add card` button stopped working after it was clicked once.
+
 ## 20.36.1 - 2024-01-08
 
 ### Identity
