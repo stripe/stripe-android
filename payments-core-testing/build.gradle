@@ -3,6 +3,7 @@ apply from: configs.androidLibrary
 dependencies {
     implementation project(":payments-core")
 
+    implementation libs.androidx.activity
     implementation libs.androidx.viewModel
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid

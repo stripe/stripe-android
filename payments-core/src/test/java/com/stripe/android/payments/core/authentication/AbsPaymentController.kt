@@ -1,4 +1,4 @@
-package com.stripe.android.payments.core.authentication
+package com.stripe.android.testing
 
 import android.content.Intent
 import androidx.activity.result.ActivityResultCallback
@@ -16,7 +16,7 @@ import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.view.AuthActivityStarterHost
 
-internal abstract class AbsPaymentController : PaymentController {
+abstract class AbsPaymentController : PaymentController {
     override suspend fun startConfirmAndAuth(
         host: AuthActivityStarterHost,
         confirmStripeIntentParams: ConfirmStripeIntentParams,
