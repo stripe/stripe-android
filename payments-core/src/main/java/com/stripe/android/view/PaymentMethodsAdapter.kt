@@ -13,9 +13,6 @@ import com.stripe.android.databinding.StripeAddPaymentMethodRowBinding
 import com.stripe.android.databinding.StripeGooglePayRowBinding
 import com.stripe.android.databinding.StripeMaskedCardRowBinding
 import com.stripe.android.model.PaymentMethod
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * A [RecyclerView.Adapter] that holds a set of [MaskedCardView] items for a given set
@@ -41,9 +38,6 @@ internal class PaymentMethodsAdapter constructor(
 
     internal var listener: Listener? = null
     private val googlePayCount = 1.takeIf { shouldShowGooglePay } ?: 0
-
-    private val _addPaymentMethodArgs = MutableStateFlow<AddPaymentMethodActivityStarter.Args?>(null)
-    val addPaymentMethodArgs: StateFlow<AddPaymentMethodActivityStarter.Args?> = _addPaymentMethodArgs.asStateFlow()
 
     internal val addCardArgs = AddPaymentMethodActivityStarter.Args.Builder()
         .setBillingAddressFields(intentArgs.billingAddressFields)
@@ -145,12 +139,12 @@ internal class PaymentMethodsAdapter constructor(
             }
             is ViewHolder.AddCardPaymentMethodViewHolder -> {
                 holder.itemView.setOnClickListener {
-                    _addPaymentMethodArgs.value = addCardArgs
+                    listener?.onAddPaymentMethodClick(addCardArgs)
                 }
             }
             is ViewHolder.AddFpxPaymentMethodViewHolder -> {
                 holder.itemView.setOnClickListener {
-                    _addPaymentMethodArgs.value = addFpxArgs
+                    listener?.onAddPaymentMethodClick(addFpxArgs)
                 }
             }
         }
@@ -371,6 +365,7 @@ internal class PaymentMethodsAdapter constructor(
     internal interface Listener {
         fun onPaymentMethodClick(paymentMethod: PaymentMethod)
         fun onGooglePayClick()
+        fun onAddPaymentMethodClick(args: AddPaymentMethodActivityStarter.Args)
         fun onDeletePaymentMethodAction(paymentMethod: PaymentMethod)
     }
 
