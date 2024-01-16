@@ -85,9 +85,9 @@ private fun SuccessContent(
     onCloseClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    var showSpinner by remember { mutableStateOf(!overrideAnimationForPreview) }
+    var showSpinner by remember { mutableStateOf(overrideAnimationForPreview.not()) }
 
-    if (payload.skipSuccessPane.not() && overrideAnimationForPreview.not()) {
+    if (payload.skipSuccessPane.not()) {
         LaunchedEffect(true) {
             delay(ENTER_TRANSITION_DURATION_MS.toLong())
             showSpinner = false
