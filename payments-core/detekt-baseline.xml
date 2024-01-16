@@ -55,6 +55,7 @@
     <ID>LongMethod:Stripe3ds2TransactionActivity.kt$Stripe3ds2TransactionActivity$public override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:StripeApiRepositoryTest.kt$StripeApiRepositoryTest$@Test fun getPaymentMethods_whenPopulated_returnsExpectedList()</ID>
     <ID>LongMethod:WebIntentAuthenticator.kt$WebIntentAuthenticator$override suspend fun performAuthentication( host: AuthActivityStarterHost, authenticatable: StripeIntent, requestOptions: ApiRequest.Options )</ID>
+    <ID>MagicNumber:AnimationConstants.kt$34</ID>
     <ID>MagicNumber:BecsDebitBsbEditText.kt$BecsDebitBsbEditText$3</ID>
     <ID>MagicNumber:BecsDebitBsbEditText.kt$BecsDebitBsbEditText.&lt;no name provided>$4</ID>
     <ID>MagicNumber:BecsDebitWidget.kt$BecsDebitWidget$4</ID>

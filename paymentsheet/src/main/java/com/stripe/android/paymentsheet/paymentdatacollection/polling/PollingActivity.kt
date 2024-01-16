@@ -18,7 +18,7 @@ import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.utils.AnimationConstants
+import com.stripe.android.utils.fadeOut
 import kotlin.time.Duration.Companion.seconds
 
 internal class PollingActivity : AppCompatActivity() {
@@ -91,6 +91,10 @@ internal class PollingActivity : AppCompatActivity() {
             Intent().putExtras(result.toBundle())
         )
         finish()
-        overridePendingTransition(0, AnimationConstants.FADE_OUT)
+    }
+
+    override fun finish() {
+        super.finish()
+        fadeOut()
     }
 }
