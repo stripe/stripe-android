@@ -12,6 +12,8 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.C
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_ADD_PAYMENT_METHOD_VIA_SETUP_INTENT_CANCELED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_ADD_PAYMENT_METHOD_VIA_SETUP_INTENT_FAILED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_ADD_PAYMENT_METHOD_VIA_SETUP_INTENT_SUCCEEDED
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_HIDE_EDITABLE_PAYMENT_OPTION
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_HIDE_PAYMENT_OPTION_BRANDS
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_FAILED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_SUCCEEDED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_DONE_TAPPED
@@ -19,9 +21,14 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.C
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_REMOVE_PM_FAILED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_REMOVE_PM_SUCCEEDED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_SCREEN_PRESENTED
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SHOW_EDITABLE_PAYMENT_OPTION
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SHOW_PAYMENT_OPTION_BRANDS
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_UPDATE_PAYMENT_METHOD
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_UPDATE_PAYMENT_METHOD_FAILED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.FIELD_PAYMENT_METHOD_TYPE
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -66,6 +73,23 @@ class CustomerSheetEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == CS_SELECT_PAYMENT_METHOD_SCREEN_PRESENTED
+            }
+        )
+
+        eventReporter.onScreenPresented(screen = CustomerSheetEventReporter.Screen.EditPaymentMethod)
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_SHOW_EDITABLE_PAYMENT_OPTION
+            }
+        )
+    }
+
+    @Test
+    fun `onScreenHidden should fire analytics request with expected event value`() {
+        eventReporter.onScreenHidden(screen = CustomerSheetEventReporter.Screen.EditPaymentMethod)
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_HIDE_EDITABLE_PAYMENT_OPTION
             }
         )
     }
@@ -187,6 +211,68 @@ class CustomerSheetEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == CS_ADD_PAYMENT_METHOD_VIA_CREATE_ATTACH_FAILED
+            }
+        )
+    }
+
+    @Test
+    fun `onShowPaymentOptionBrands() should fire analytics request with expected event value`() {
+        eventReporter.onShowPaymentOptionBrands(
+            source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+            selectedBrand = CardBrand.Visa
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_SHOW_PAYMENT_OPTION_BRANDS &&
+                    req.params["cbc_event_source"] == "edit" &&
+                    req.params["selected_card_brand"] == "visa"
+            }
+        )
+    }
+
+    @Test
+    fun `onHidePaymentOptionBrands() should fire analytics request with expected event value`() {
+        eventReporter.onHidePaymentOptionBrands(
+            source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+            selectedBrand = CardBrand.CartesBancaires,
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_HIDE_PAYMENT_OPTION_BRANDS &&
+                    req.params["cbc_event_source"] == "edit" &&
+                    req.params["selected_card_brand"] == "cartes_bancaires"
+            }
+        )
+    }
+
+    @Test
+    fun `onUpdatePaymentMethodSucceeded() should fire analytics request with expected event value`() {
+        eventReporter.onUpdatePaymentMethodSucceeded(
+            selectedBrand = CardBrand.CartesBancaires,
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_UPDATE_PAYMENT_METHOD &&
+                    req.params["selected_card_brand"] == "cartes_bancaires"
+            }
+        )
+    }
+
+    @Test
+    fun `onUpdatePaymentMethodFailed() should fire analytics request with expected event value`() {
+        eventReporter.onUpdatePaymentMethodFailed(
+            selectedBrand = CardBrand.CartesBancaires,
+            error = Exception("No network available!")
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_UPDATE_PAYMENT_METHOD_FAILED &&
+                    req.params["selected_card_brand"] == "cartes_bancaires" &&
+                    req.params["error_message"] == "No network available!"
             }
         )
     }

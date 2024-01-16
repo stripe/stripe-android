@@ -18,7 +18,7 @@ import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.utils.AnimationConstants
+import com.stripe.android.utils.fadeOut
 
 internal class CustomerSheetActivity : AppCompatActivity() {
 
@@ -97,6 +97,6 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
+        fadeOut()
     }
 }

@@ -38,6 +38,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.toPaymentSelection
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
@@ -267,7 +268,7 @@ internal abstract class BaseSheetViewModel(
 
     private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
-            is PaymentSheetScreen.Loading, AddAnotherPaymentMethod -> {
+            is PaymentSheetScreen.Loading, AddAnotherPaymentMethod, is PaymentSheetScreen.EditPaymentMethod -> {
                 // Nothing to do here
             }
             is PaymentSheetScreen.SelectSavedPaymentMethods -> {
@@ -276,8 +277,16 @@ internal abstract class BaseSheetViewModel(
             is AddFirstPaymentMethod -> {
                 eventReporter.onShowNewPaymentOptionForm()
             }
+        }
+    }
+
+    private fun reportPaymentSheetHidden(hiddenScreen: PaymentSheetScreen) {
+        when (hiddenScreen) {
             is PaymentSheetScreen.EditPaymentMethod -> {
-                // TODO(tillh-stripe) Add reporting
+                eventReporter.onHideEditablePaymentOption()
+            }
+            else -> {
+                // Events for hiding other screens not supported
             }
         }
     }
@@ -447,10 +456,28 @@ internal abstract class BaseSheetViewModel(
     }
 
     fun modifyPaymentMethod(paymentMethod: PaymentMethod) {
+        eventReporter.onShowEditablePaymentOption()
+
         transitionTo(
             PaymentSheetScreen.EditPaymentMethod(
                 editInteractorFactory.create(
                     initialPaymentMethod = paymentMethod,
+                    eventHandler = { event ->
+                        when (event) {
+                            is EditPaymentMethodViewInteractor.Event.ShowBrands -> {
+                                eventReporter.onShowPaymentOptionBrands(
+                                    source = EventReporter.CardBrandChoiceEventSource.Edit,
+                                    selectedBrand = event.brand
+                                )
+                            }
+                            is EditPaymentMethodViewInteractor.Event.HideBrands -> {
+                                eventReporter.onHidePaymentOptionBrands(
+                                    source = EventReporter.CardBrandChoiceEventSource.Edit,
+                                    selectedBrand = event.brand
+                                )
+                            }
+                        }
+                    },
                     displayName = providePaymentMethodName(paymentMethod.type?.code),
                     removeExecutor = { method ->
                         removePaymentMethodInEditScreen(method)
@@ -510,6 +537,15 @@ internal abstract class BaseSheetViewModel(
                 }
 
             handleBackPressed()
+
+            eventReporter.onUpdatePaymentMethodSucceeded(
+                selectedBrand = brand
+            )
+        }.onFailure { error ->
+            eventReporter.onUpdatePaymentMethodFailed(
+                selectedBrand = brand,
+                error = error,
+            )
         }
     }
 
@@ -568,7 +604,11 @@ internal abstract class BaseSheetViewModel(
         backStack.update { screens ->
             val modifiableScreens = screens.toMutableList()
 
-            modifiableScreens.removeLast().onClose()
+            val lastScreen = modifiableScreens.removeLast()
+
+            lastScreen.onClose()
+
+            reportPaymentSheetHidden(lastScreen)
 
             modifiableScreens.toList()
         }

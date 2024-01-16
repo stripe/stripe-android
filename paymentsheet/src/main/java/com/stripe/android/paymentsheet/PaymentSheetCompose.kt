@@ -9,6 +9,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import com.stripe.android.lpmfoundations.LpmFoundationsPaymentSheetLauncher
+import com.stripe.android.utils.FeatureFlags
 import com.stripe.android.utils.rememberActivity
 
 /**
@@ -36,13 +38,17 @@ fun rememberPaymentSheet(
         "PaymentSheet must be created in the context of an Activity"
     }
 
-    return remember {
-        val launcher = DefaultPaymentSheetLauncher(
-            activityResultLauncher = activityResultLauncher,
-            activity = activity,
-            application = context.applicationContext as Application,
-            lifecycleOwner = lifecycleOwner,
-        )
+    return remember(FeatureFlags.useLpmFoundations.isEnabled) {
+        val launcher = if (FeatureFlags.useLpmFoundations.isEnabled) {
+            LpmFoundationsPaymentSheetLauncher()
+        } else {
+            DefaultPaymentSheetLauncher(
+                activityResultLauncher = activityResultLauncher,
+                activity = activity,
+                application = context.applicationContext as Application,
+                lifecycleOwner = lifecycleOwner,
+            )
+        }
         PaymentSheet(launcher)
     }
 }

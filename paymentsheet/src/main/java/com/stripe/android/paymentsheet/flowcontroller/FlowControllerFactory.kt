@@ -5,9 +5,11 @@ import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
+import com.stripe.android.lpmfoundations.LpmFoundationsFlowController
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.utils.FeatureFlags
 
 internal class FlowControllerFactory(
     private val viewModelStoreOwner: ViewModelStoreOwner,
@@ -43,13 +45,18 @@ internal class FlowControllerFactory(
         paymentResultCallback = paymentResultCallback,
     )
 
-    fun create(): PaymentSheet.FlowController =
-        DefaultFlowController.getInstance(
-            viewModelStoreOwner = viewModelStoreOwner,
-            lifecycleOwner = lifecycleOwner,
-            activityResultRegistryOwner = activityResultRegistryOwner,
-            statusBarColor = statusBarColor,
-            paymentOptionCallback = paymentOptionCallback,
-            paymentResultCallback = paymentResultCallback
-        )
+    fun create(): PaymentSheet.FlowController {
+        return if (FeatureFlags.useLpmFoundations.isEnabled) {
+            LpmFoundationsFlowController()
+        } else {
+            DefaultFlowController.getInstance(
+                viewModelStoreOwner = viewModelStoreOwner,
+                lifecycleOwner = lifecycleOwner,
+                activityResultRegistryOwner = activityResultRegistryOwner,
+                statusBarColor = statusBarColor,
+                paymentOptionCallback = paymentOptionCallback,
+                paymentResultCallback = paymentResultCallback
+            )
+        }
+    }
 }

@@ -162,6 +162,10 @@ internal class IdentityScanViewModel(
         _scannerState.update { State.Scanning() }
     }
 
+    fun resetScannerState() {
+        _scannerState.update { State.Initializing }
+    }
+
     internal class IdentityScanViewModelFactory @Inject constructor(
         private val context: Context,
         private val modelPerformanceTracker: ModelPerformanceTracker,

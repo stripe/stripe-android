@@ -10,7 +10,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.utils.AnimationConstants
+import com.stripe.android.utils.fadeOut
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.launch
 
@@ -35,8 +35,6 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        setFadeAnimations()
 
         val args = runCatching {
             requireNotNull(starterArgs) {
@@ -82,11 +80,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        setFadeAnimations()
-    }
-
-    private fun setFadeAnimations() {
-        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
+        fadeOut()
     }
 
     /**

@@ -6,6 +6,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalInspectionMode
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
+import app.cash.paparazzi.detectEnvironment
 import com.airbnb.android.showkase.models.Showkase
 import com.airbnb.android.showkase.models.ShowkaseBrowserComponent
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -34,7 +35,11 @@ class PaparazziSampleScreenshotTest {
     }
 
     @get:Rule
-    val paparazzi = Paparazzi()
+    val paparazzi = Paparazzi(
+        environment = detectEnvironment().run {
+            copy(compileSdkVersion = 33, platformDir = platformDir.replace("34", "33"))
+        },
+    )
 
     @Test
     fun preview_tests(

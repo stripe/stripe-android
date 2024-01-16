@@ -46,31 +46,62 @@ class DefaultEditPaymentMethodViewInteractorTest {
     }
 
     @Test
-    fun `on selection changed, 'canUpdate' should be true & selected brand should be changed`() = runTest {
-        val interactor = createInteractor()
+    fun `on selection options shown, should report event specific to showing payment option brands`() = runTest {
+        val eventHandler = mock<(EditPaymentMethodViewInteractor.Event) -> Unit>()
+        val interactor = createInteractor(eventHandler = eventHandler)
 
         interactor.handleViewAction(
-            EditPaymentMethodViewAction.OnBrandChoiceChanged(VISA_BRAND_CHOICE)
+            EditPaymentMethodViewAction.OnBrandChoiceOptionsShown
         )
 
-        interactor.viewState.test {
-            val state = awaitItem()
-
-            assertThat(state).isEqualTo(
-                EditPaymentMethodViewState(
-                    status = EditPaymentMethodViewState.Status.Idle,
-                    last4 = "4242",
-                    canUpdate = true,
-                    selectedBrand = VISA_BRAND_CHOICE,
-                    availableBrands = listOf(
-                        VISA_BRAND_CHOICE,
-                        CARTES_BANCAIRES_BRAND_CHOICE
-                    ),
-                    displayName = "Card",
-                )
-            )
-        }
+        verify(eventHandler).invoke(
+            EditPaymentMethodViewInteractor.Event.ShowBrands(brand = CardBrand.CartesBancaires)
+        )
     }
+
+    @Test
+    fun `on selection options hidden without change, should report event specific to hiding payment option brands`() =
+        runTest {
+            val eventHandler = mock<(EditPaymentMethodViewInteractor.Event) -> Unit>()
+            val interactor = createInteractor(eventHandler = eventHandler)
+
+            interactor.handleViewAction(
+                EditPaymentMethodViewAction.OnBrandChoiceOptionsDismissed
+            )
+
+            verify(eventHandler).invoke(EditPaymentMethodViewInteractor.Event.HideBrands(brand = null))
+        }
+
+    @Test
+    fun `on selection changed, should report event, 'canUpdate' should be true & selected brand should be changed`() =
+        runTest {
+            val eventHandler = mock<(EditPaymentMethodViewInteractor.Event) -> Unit>()
+            val interactor = createInteractor(eventHandler = eventHandler)
+
+            interactor.handleViewAction(
+                EditPaymentMethodViewAction.OnBrandChoiceChanged(VISA_BRAND_CHOICE)
+            )
+
+            verify(eventHandler).invoke(EditPaymentMethodViewInteractor.Event.HideBrands(brand = CardBrand.Visa))
+
+            interactor.viewState.test {
+                val state = awaitItem()
+
+                assertThat(state).isEqualTo(
+                    EditPaymentMethodViewState(
+                        status = EditPaymentMethodViewState.Status.Idle,
+                        last4 = "4242",
+                        canUpdate = true,
+                        selectedBrand = VISA_BRAND_CHOICE,
+                        availableBrands = listOf(
+                            VISA_BRAND_CHOICE,
+                            CARTES_BANCAIRES_BRAND_CHOICE
+                        ),
+                        displayName = "Card",
+                    )
+                )
+            }
+        }
 
     @Test
     fun `on selection changed & reverted, 'canUpdate' should be false`() = runTest {
@@ -229,6 +260,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
     }
 
     private fun createInteractor(
+        eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit = {},
         onRemove: PaymentMethodRemoveOperation = { null },
         onUpdate: PaymentMethodUpdateOperation = { _, _ -> Result.success(CARD_WITH_NETWORKS_PAYMENT_METHOD) },
         workContext: CoroutineContext = UnconfinedTestDispatcher()
@@ -236,6 +268,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
         return DefaultEditPaymentMethodViewInteractor(
             initialPaymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD,
             displayName = "Card",
+            eventHandler = eventHandler,
             removeExecutor = onRemove,
             updateExecutor = onUpdate,
             viewStateSharingStarted = SharingStarted.Eagerly,

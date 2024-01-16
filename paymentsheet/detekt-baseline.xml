@@ -85,6 +85,8 @@
     <ID>NestedBlockDepth:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$private fun generatePaymentIntentScenarios(): List&lt;PaymentIntentTestInput></ID>
     <ID>ReturnCount:AddressUtils.kt$internal fun CharSequence.levenshtein(other: CharSequence): Int</ID>
     <ID>ThrowsCount:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Configuration.validate()</ID>
+    <ID>TooManyFunctions:CustomerSheetEventReporter.kt$CustomerSheetEventReporter</ID>
+    <ID>TooManyFunctions:DefaultCustomerSheetEventReporter.kt$DefaultCustomerSheetEventReporter : CustomerSheetEventReporter</ID>
     <ID>TooManyFunctions:DefaultEventReporter.kt$DefaultEventReporter : EventReporter</ID>
     <ID>TooManyFunctions:DefaultFlowController.kt$DefaultFlowController : FlowController</ID>
     <ID>TooManyFunctions:EventReporter.kt$EventReporter</ID>
