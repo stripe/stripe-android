@@ -14,8 +14,6 @@ internal data class SynchronizeSessionResponse(
     val text: TextUpdate? = null,
     @SerialName("visual")
     val visual: VisualUpdate,
-    @SerialName("custom_success_message")
-    val customSuccessMessage: String? = null,
 ) : Parcelable
 
 @Serializable
