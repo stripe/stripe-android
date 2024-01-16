@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -51,9 +52,9 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import kotlinx.coroutines.delay
 
-const val ENTER_TRANSITION_DURATION_MS = 1000
-const val CHECK_ALPHA_DURATION_MS = 250
-const val SLIDE_IN_ANIMATION_FRACTION = 4
+private const val ENTER_TRANSITION_DURATION_MS = 1000
+private const val CHECK_ALPHA_DURATION_MS = 250
+private const val SLIDE_IN_ANIMATION_FRACTION = 4
 
 @Composable
 internal fun SuccessScreen() {
@@ -66,6 +67,7 @@ internal fun SuccessScreen() {
             loading = state.value.completeSession is Loading,
             skipSuccessPane = payload.skipSuccessPane,
             merchantName = payload.businessName,
+            accountsCount = payload.accountsCount,
             onDoneClick = viewModel::onDoneClick,
         ) { parentViewModel.onCloseNoConfirmationClick(Pane.SUCCESS) }
     }
@@ -75,36 +77,12 @@ internal fun SuccessScreen() {
 private fun SuccessContent(
     loading: Boolean,
     skipSuccessPane: Boolean,
+    accountsCount: Int,
     merchantName: String?,
     onDoneClick: () -> Unit,
     onCloseClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                showBack = false,
-                onCloseClick = onCloseClick,
-                elevation = scrollState.elevation
-            )
-        }
-    ) {
-        SuccessLoaded(
-            skipSuccessPane = skipSuccessPane,
-            loading = loading,
-            merchantName = merchantName,
-            onDoneClick = onDoneClick
-        )
-    }
-}
-
-@Composable
-fun SuccessLoaded(
-    loading: Boolean,
-    skipSuccessPane: Boolean,
-    merchantName: String?,
-    onDoneClick: () -> Unit
-) {
     var showSpinner by remember { mutableStateOf(true) }
 
     if (skipSuccessPane.not()) {
@@ -114,27 +92,41 @@ fun SuccessLoaded(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            SpinnerToSuccessAnimation(showSpinner = showSpinner)
+    FinancialConnectionsScaffold(
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                showBack = false,
+                onCloseClick = onCloseClick,
+                elevation = scrollState.elevation
+            )
         }
-        SuccessFooter(
-            modifier = Modifier.alpha(if (showSpinner) 0f else 1f),
-            merchantName = merchantName,
-            loading = loading,
-            onDoneClick = onDoneClick
-        )
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                SpinnerToSuccessAnimation(
+                    accountsCount = accountsCount,
+                    showSpinner = showSpinner
+                )
+            }
+            SuccessFooter(
+                modifier = Modifier.alpha(if (showSpinner) 0f else 1f),
+                merchantName = merchantName,
+                loading = loading,
+                onDoneClick = onDoneClick
+            )
+        }
     }
 }
 
 @Composable
-fun SpinnerToSuccessAnimation(
-    showSpinner: Boolean
+private fun SpinnerToSuccessAnimation(
+    showSpinner: Boolean,
+    accountsCount: Int
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -185,16 +177,16 @@ fun SpinnerToSuccessAnimation(
                     Icon(
                         modifier = Modifier.alpha(checkAlpha),
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Success",
+                        contentDescription = stringResource(id = R.string.stripe_success_pane_title),
                         tint = Color.White
                     )
                 }
                 Text(
-                    "Success",
+                    stringResource(id = R.string.stripe_success_pane_title),
                     style = v3Typography.headingXLarge
                 )
                 Text(
-                    "Your account is connected.",
+                    pluralStringResource(id = R.plurals.stripe_success_pane_desc, count = accountsCount),
                     style = v3Typography.bodyMedium
                 )
             }
@@ -243,6 +235,7 @@ internal fun SuccessScreenPreview() {
         SuccessContent(
             loading = false,
             skipSuccessPane = false,
+            accountsCount = 1,
             merchantName = "Test Merchant",
             onDoneClick = {},
         ) {}

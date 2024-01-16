@@ -38,7 +38,6 @@
         <item quantity="one">Link account</item>
         <item quantity="other">Link accounts</item>
     </plurals>
-    <string name="stripe_success_title">Success!</string>
     <string name="stripe_search">Search</string>
     <string name="stripe_account_picker_dropdown_hint">Choose one</string>
     <string name="stripe_data_accessible_callout_stripe_direct"><annotation bold="accessible_data">Data accessible to Stripe: </annotation>%2$s. <annotation clickable="learn_more">Learn more</annotation></string>
@@ -50,6 +49,11 @@
     <string name="stripe_data_accessible_type_balances">balances</string>
     <string name="stripe_data_accessible_type_transactions">transactions</string>
     <string name="stripe_data_accessible_type_ownership">account ownership details</string>
+    <string name="stripe_success_pane_title">Success</string>
+    <plurals name="stripe_success_pane_desc">
+        <item quantity="one">Your account was connected</item>
+        <item quantity="other">Your accounts were connected</item>
+    </plurals>
     <string name="stripe_success_pane_done">Done</string>
     <string name="stripe_success_pane_done_with_merchant">Back to %1$s</string>
     <string name="stripe_success_pane_disconnect">You can <annotation clickable="disconnect">disconnect your account</annotation> any time.</string>
@@ -81,7 +85,6 @@
     <string name="stripe_manualentrysuccess_desc_descriptorcode">Expect a $0.01 deposit to the account ending in ••••%1$s in 1–2 business days and an email with additional instructions to verify your bank account.</string>
     <string name="stripe_manualentrysuccess_desc_noaccount_descriptorcode">Expect a $0.01 deposit to your account in 1–2 business days and an email with additional instructions to verify your bank account.</string>
     <string name="stripe_manualentrysuccess_table_title">••••%1$s BANK STATEMENT</string>
-    <string name="stripe_success_pane_link_more_accounts">Link another account</string>
     <plurals name="stripe_attachlinkedpaymentaccount_title">
         <item quantity="one">Linking account</item>
         <item quantity="other">Linking accounts</item>

@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.success
 
-import androidx.annotation.VisibleForTesting
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
@@ -9,26 +8,26 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDisconnectLink
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDone
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
+import com.stripe.android.financialconnections.features.common.useContinueWithMerchantText
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
-import com.stripe.android.financialconnections.ui.TextResource
-import com.stripe.android.financialconnections.ui.TextResource.PluralId
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @Suppress("LongParameterList")
 internal class SuccessViewModel @Inject constructor(
     initialState: SuccessState,
+    getCachedAccounts: GetCachedAccounts,
     getManifest: GetManifest,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
@@ -39,9 +38,12 @@ internal class SuccessViewModel @Inject constructor(
         observeAsyncs()
         suspend {
             val manifest = getManifest()
+            val accounts = getCachedAccounts()
             SuccessState.Payload(
                 skipSuccessPane = manifest.skipSuccessPane ?: false,
-                businessName = manifest.businessName,
+                accountsCount = accounts.size,
+                // We just want to use the business name if the feature is enabled in the manifest.
+                businessName = manifest.businessName?.takeIf { manifest.useContinueWithMerchantText() },
             )
         }.execute {
             copy(payload = it)
@@ -62,69 +64,6 @@ internal class SuccessViewModel @Inject constructor(
                 }
             }
         )
-    }
-
-    @VisibleForTesting
-    fun getFailedToLinkMessage(
-        businessName: String?,
-        saveToLinkWithStripeSucceeded: Boolean?,
-        count: Int
-    ): TextResource? = when {
-        saveToLinkWithStripeSucceeded != false -> null
-        businessName != null -> PluralId(
-            value = R.plurals.stripe_success_networking_save_to_link_failed,
-            count = count,
-            args = listOf(businessName)
-        )
-
-        else -> PluralId(
-            R.plurals.stripe_success_pane_networking_save_to_link_failed_no_business,
-            count,
-        )
-    }
-
-    @VisibleForTesting
-    internal fun getSuccessMessages(
-        isLinkWithStripe: Boolean?,
-        isNetworkingUserFlow: Boolean?,
-        saveToLinkWithStripeSucceeded: Boolean?,
-        connectedAccountName: String?,
-        businessName: String?,
-        count: Int
-    ): TextResource = when {
-        isLinkWithStripe == true ||
-            (isNetworkingUserFlow == true && saveToLinkWithStripeSucceeded == true) -> when {
-            businessName != null && connectedAccountName != null -> PluralId(
-                value = R.plurals.stripe_success_pane_link_with_connected_account_name,
-                count = count,
-                args = listOf(connectedAccountName, businessName)
-            )
-
-            businessName != null -> PluralId(
-                value = R.plurals.stripe_success_pane_link_with_business_name,
-                count = count,
-                args = listOf(businessName)
-            )
-
-            else -> PluralId(
-                R.plurals.stripe_success_pane_link_with_no_business_name,
-                count,
-            )
-        }
-
-        businessName != null && connectedAccountName != null -> PluralId(
-            R.plurals.stripe_success_pane_has_connected_account_name,
-            count = count,
-            args = listOf(connectedAccountName, businessName)
-        )
-
-        businessName != null -> PluralId(
-            R.plurals.stripe_success_pane_has_business_name,
-            count,
-            args = listOf(businessName)
-        )
-
-        else -> PluralId(R.plurals.stripe_success_pane_no_business_name, count)
     }
 
     fun onDoneClick() = viewModelScope.launch {
@@ -175,6 +114,7 @@ internal data class SuccessState(
 
     data class Payload(
         val businessName: String?,
-        val skipSuccessPane: Boolean,
+        val accountsCount: Int,
+        val skipSuccessPane: Boolean
     )
 }
