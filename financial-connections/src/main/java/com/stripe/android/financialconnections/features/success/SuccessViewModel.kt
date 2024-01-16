@@ -8,9 +8,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDisconnectLink
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDone
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
@@ -76,18 +74,6 @@ internal class SuccessViewModel @Inject constructor(
         nativeAuthFlowCoordinator().emit(Complete())
     }
 
-    fun onLearnMoreAboutDataAccessClick() {
-        viewModelScope.launch {
-            eventTracker.track(ClickLearnMoreDataAccess(PANE))
-        }
-    }
-
-    fun onDisconnectLinkClick() {
-        viewModelScope.launch {
-            eventTracker.track(ClickDisconnectLink(PANE))
-        }
-    }
-
     companion object : MavericksViewModelFactory<SuccessViewModel, SuccessState> {
 
         override fun create(
@@ -108,6 +94,8 @@ internal class SuccessViewModel @Inject constructor(
 }
 
 internal data class SuccessState(
+    // Just enabled on Compose Previews: allows to preview the post-animation state.
+    val overrideAnimationForPreview: Boolean = false,
     val payload: Async<Payload> = Uninitialized,
     val completeSession: Async<FinancialConnectionsSession> = Uninitialized
 ) : MavericksState {

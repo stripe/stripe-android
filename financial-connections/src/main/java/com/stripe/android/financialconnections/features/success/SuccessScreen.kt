@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,12 +36,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.V3LoadingSpinner
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -60,14 +64,13 @@ private const val SLIDE_IN_ANIMATION_FRACTION = 4
 internal fun SuccessScreen() {
     val viewModel: SuccessViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
-    val state = viewModel.collectAsState()
+    val state: State<SuccessState> = viewModel.collectAsState()
     BackHandler(enabled = true) {}
     state.value.payload()?.let { payload ->
         SuccessContent(
-            loading = state.value.completeSession is Loading,
-            skipSuccessPane = payload.skipSuccessPane,
-            merchantName = payload.businessName,
-            accountsCount = payload.accountsCount,
+            overrideAnimationForPreview = state.value.overrideAnimationForPreview,
+            completeSessionAsync = state.value.completeSession,
+            payload = payload,
             onDoneClick = viewModel::onDoneClick,
         ) { parentViewModel.onCloseNoConfirmationClick(Pane.SUCCESS) }
     }
@@ -75,17 +78,16 @@ internal fun SuccessScreen() {
 
 @Composable
 private fun SuccessContent(
-    loading: Boolean,
-    skipSuccessPane: Boolean,
-    accountsCount: Int,
-    merchantName: String?,
+    overrideAnimationForPreview: Boolean,
+    completeSessionAsync: Async<FinancialConnectionsSession>,
+    payload: SuccessState.Payload,
     onDoneClick: () -> Unit,
     onCloseClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    var showSpinner by remember { mutableStateOf(true) }
+    var showSpinner by remember { mutableStateOf(!overrideAnimationForPreview) }
 
-    if (skipSuccessPane.not()) {
+    if (payload.skipSuccessPane.not() && overrideAnimationForPreview.not()) {
         LaunchedEffect(true) {
             delay(ENTER_TRANSITION_DURATION_MS.toLong())
             showSpinner = false
@@ -109,14 +111,14 @@ private fun SuccessContent(
                 contentAlignment = Alignment.Center
             ) {
                 SpinnerToSuccessAnimation(
-                    accountsCount = accountsCount,
+                    accountsCount = payload.accountsCount,
                     showSpinner = showSpinner
                 )
             }
             SuccessFooter(
                 modifier = Modifier.alpha(if (showSpinner) 0f else 1f),
-                merchantName = merchantName,
-                loading = loading,
+                merchantName = payload.businessName,
+                loading = completeSessionAsync is Loading,
                 onDoneClick = onDoneClick
             )
         }
@@ -230,14 +232,15 @@ private fun SuccessFooter(
 )
 @Suppress("LongMethod")
 @Composable
-internal fun SuccessScreenPreview() {
+internal fun SuccessScreenPreview(
+    @PreviewParameter(SuccessPreviewParameterProvider::class) state: SuccessState
+) {
     FinancialConnectionsPreview {
         SuccessContent(
-            loading = false,
-            skipSuccessPane = false,
-            accountsCount = 1,
-            merchantName = "Test Merchant",
-            onDoneClick = {},
+            overrideAnimationForPreview = state.overrideAnimationForPreview,
+            completeSessionAsync = state.completeSession,
+            payload = state.payload()!!,
+            onDoneClick = {}
         ) {}
     }
 }
