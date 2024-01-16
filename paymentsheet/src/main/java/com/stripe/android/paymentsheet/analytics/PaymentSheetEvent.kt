@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -140,6 +141,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                         .name,
                 )
 
+                val preferredNetworks = configuration.preferredNetworks.takeIf { brands ->
+                    brands.isNotEmpty()
+                }?.joinToString { brand ->
+                    brand.code
+                }
+
                 @Suppress("DEPRECATION")
                 val configurationMap = mapOf(
                     FIELD_CUSTOMER to (configuration.customer != null),
@@ -150,6 +157,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_APPEARANCE to appearanceConfigMap,
                     FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
                         billingDetailsCollectionConfigMap,
+                    FIELD_PREFERRED_NETWORKS to preferredNetworks
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -303,6 +311,80 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = emptyMap()
     }
 
+    class ShowEditablePaymentOption(
+        override val isDeferred: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_open_edit_screen"
+
+        override val additionalParams: Map<String, Any?> = emptyMap()
+    }
+
+    class HideEditablePaymentOption(
+        override val isDeferred: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_cancel_edit_screen"
+
+        override val additionalParams: Map<String, Any?> = emptyMap()
+    }
+
+    class ShowPaymentOptionBrands(
+        source: Source,
+        selectedBrand: CardBrand,
+        override val isDeferred: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_open_cbc_dropdown"
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_CBC_EVENT_SOURCE to source.value,
+            FIELD_SELECTED_CARD_BRAND to selectedBrand.code
+        )
+
+        enum class Source(val value: String) {
+            Edit(VALUE_EDIT_CBC_EVENT_SOURCE), Add(VALUE_ADD_CBC_EVENT_SOURCE)
+        }
+    }
+
+    class HidePaymentOptionBrands(
+        source: Source,
+        selectedBrand: CardBrand?,
+        override val isDeferred: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_close_cbc_dropdown"
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_CBC_EVENT_SOURCE to source.value,
+            FIELD_SELECTED_CARD_BRAND to selectedBrand?.code
+        )
+
+        enum class Source(val value: String) {
+            Edit(VALUE_EDIT_CBC_EVENT_SOURCE), Add(VALUE_ADD_CBC_EVENT_SOURCE)
+        }
+    }
+
+    class UpdatePaymentOptionSucceeded(
+        selectedBrand: CardBrand,
+        override val isDeferred: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_update_card"
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_SELECTED_CARD_BRAND to selectedBrand.code
+        )
+    }
+
+    class UpdatePaymentOptionFailed(
+        selectedBrand: CardBrand,
+        error: Throwable,
+        override val isDeferred: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_update_card_failed"
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_SELECTED_CARD_BRAND to selectedBrand.code,
+            FIELD_ERROR_MESSAGE to error.message,
+        )
+    }
+
     private fun standardParams(
         isDecoupled: Boolean,
     ): Map<String, Any?> = mapOf(
@@ -329,6 +411,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_GOOGLE_PAY = "googlepay"
         const val FIELD_PRIMARY_BUTTON_COLOR = "primary_button_color"
         const val FIELD_BILLING = "default_billing_details"
+        const val FIELD_PREFERRED_NETWORKS = "preferred_networks"
         const val FIELD_DELAYED_PMS = "allows_delayed_payment_methods"
         const val FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION = "mpe_config"
         const val FIELD_APPEARANCE = "appearance"
@@ -354,6 +437,11 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_CURRENCY = "currency"
         const val FIELD_SELECTED_LPM = "selected_lpm"
         const val FIELD_ERROR_MESSAGE = "error_message"
+        const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
+        const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
+
+        const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
+        const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
     }
 }
 

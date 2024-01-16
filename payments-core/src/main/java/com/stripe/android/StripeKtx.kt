@@ -3,6 +3,7 @@ package com.stripe.android
 import android.content.Intent
 import androidx.annotation.RestrictTo
 import androidx.annotation.Size
+import androidx.fragment.app.FragmentActivity
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
@@ -13,6 +14,7 @@ import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.exception.CardException
+import com.stripe.android.hcaptcha.performPassiveHCaptcha
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.BankAccountTokenParams
 import com.stripe.android.model.CardParams
@@ -481,14 +483,46 @@ suspend fun Stripe.createFile(
     APIConnectionException::class,
     APIException::class
 )
-suspend fun Stripe.createRadarSession(): RadarSession {
+@JvmOverloads
+suspend fun Stripe.createRadarSession(
+    activity: FragmentActivity? = null
+): RadarSession {
     return runApiRequest {
         stripeRepository.createRadarSession(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId,
             )
-        )
+        ).flatMap { radarSession ->
+            val siteKey = radarSession.passiveCaptchaSiteKey
+            if (siteKey.isNullOrEmpty()) {
+                return@flatMap Result.success(radarSession)
+            } else if (activity == null && BuildConfig.DEBUG) {
+                throw IllegalStateException(
+                    "An activity was not provided when creating a radar session. Please provide a valid activity."
+                )
+            } else if (activity == null) {
+                return@flatMap Result.success(radarSession)
+            }
+
+            val hCaptchaToken = performPassiveHCaptcha(
+                activity = activity,
+                siteKey = siteKey,
+                rqdata = radarSession.passiveCaptchaRqdata
+            )
+
+            return@flatMap stripeRepository.attachHCaptchaToRadarSession(
+                radarSessionToken = radarSession.id,
+                hcaptchaToken = hCaptchaToken,
+                hcaptchaEKey = null, // TODO (awush): we don't yet get this value from hCaptcha
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        }.map { radarSession ->
+            RadarSession(id = radarSession.id)
+        }
     }
 }
 

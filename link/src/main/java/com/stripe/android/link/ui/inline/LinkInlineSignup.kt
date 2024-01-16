@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
@@ -60,6 +59,8 @@ import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.Section
+import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.elements.menu.Checkbox
@@ -214,14 +215,14 @@ internal fun LinkInlineSignup(
                         visible = expanded
                     ) {
                         Column {
-                            Divider(
-                                color =
-                                MaterialTheme.stripeColors.componentBorder.copy(alpha = 0.1f)
-                            )
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp)
+                                    .padding(
+                                        start = 16.dp,
+                                        end = 16.dp,
+                                        bottom = 16.dp
+                                    )
                             ) {
                                 EmailCollectionSection(
                                     enabled = enabled,
@@ -282,21 +283,6 @@ internal fun LinkInlineSignup(
                                     }
                                 }
                             }
-                            Divider(
-                                color =
-                                MaterialTheme.stripeColors.componentBorder.copy(alpha = 0.1f)
-                            )
-                            Row(modifier = Modifier.padding(16.dp)) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.stripe_link_logo),
-                                    contentDescription = stringResource(id = R.string.stripe_link),
-                                    modifier = Modifier
-                                        .semantics {
-                                            testTag = "LinkLogoIcon"
-                                        },
-                                    tint = MaterialTheme.linkColors.inlineLinkLogo
-                                )
-                            }
                         }
                     }
                 }
@@ -305,6 +291,7 @@ internal fun LinkInlineSignup(
     }
 }
 
+@Suppress("SpreadOperator")
 @Composable
 internal fun EmailCollectionSection(
     enabled: Boolean,
@@ -312,39 +299,59 @@ internal fun EmailCollectionSection(
     signUpState: SignUpState,
     focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp),
-        contentAlignment = Alignment.CenterEnd
+    val error by emailController.error.collectAsState(null)
+
+    Section(
+        title = null,
+        error = error?.let {
+            it.formatArgs?.let { args ->
+                stringResource(
+                    it.errorMessage,
+                    *args
+                )
+            } ?: stringResource(it.errorMessage)
+        }
     ) {
-        TextFieldSection(
-            textFieldController = emailController,
-            imeAction = if (signUpState == SignUpState.InputtingPhoneOrName) {
-                ImeAction.Next
-            } else {
-                ImeAction.Done
-            },
-            enabled = enabled && signUpState != SignUpState.VerifyingEmail,
-            modifier = Modifier
-                .focusRequester(focusRequester)
-        )
-        if (signUpState == SignUpState.VerifyingEmail) {
-            CircularProgressIndicator(
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextField(
+                textFieldController = emailController,
+                imeAction = if (signUpState == SignUpState.InputtingPhoneOrName) {
+                    ImeAction.Next
+                } else {
+                    ImeAction.Done
+                },
+                enabled = enabled && signUpState != SignUpState.VerifyingEmail,
                 modifier = Modifier
-                    .size(32.dp)
-                    .padding(
-                        start = 0.dp,
-                        top = 8.dp,
-                        end = 16.dp,
-                        bottom = 8.dp
-                    )
-                    .semantics {
-                        testTag = ProgressIndicatorTestTag
-                    },
-                color = MaterialTheme.linkColors.progressIndicator,
-                strokeWidth = 2.dp
+                    .focusRequester(focusRequester)
+                    .weight(1f)
             )
+            if (signUpState == SignUpState.VerifyingEmail) {
+                CircularProgressIndicator(
+                    progress = 0.7f,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .padding(start = 0.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
+                        .semantics {
+                            testTag = ProgressIndicatorTestTag
+                        },
+                    color = MaterialTheme.linkColors.progressIndicator,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Icon(
+                    painter = painterResource(id = R.drawable.stripe_link_logo),
+                    contentDescription = stringResource(id = R.string.stripe_link),
+                    modifier = Modifier
+                        .padding(end = 12.dp)
+                        .semantics {
+                            testTag = "LinkLogoIcon"
+                        },
+                    tint = MaterialTheme.linkColors.inlineLinkLogo
+                )
+            }
         }
     }
 }

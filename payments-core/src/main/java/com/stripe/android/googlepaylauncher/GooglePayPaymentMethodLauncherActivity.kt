@@ -11,7 +11,7 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.PaymentData
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.utils.AnimationConstants
+import com.stripe.android.utils.fadeOut
 import kotlinx.coroutines.launch
 
 /**
@@ -169,7 +169,7 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
     }
 
     private fun setFadeAnimations() {
-        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
+        fadeOut()
     }
 
     private fun googlePayStatusCodeToErrorCode(googlePayStatusCode: Int):
