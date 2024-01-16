@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import androidx.annotation.Keep
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -103,11 +104,57 @@ internal interface EventReporter {
         type: String,
     )
 
+    /**
+     * The customer has chosen to show the edit screen for an editable payment option.
+     */
+    fun onShowEditablePaymentOption()
+
+    /**
+     * The customer has chosen to hide the edit screen for an editable payment option.
+     */
+    fun onHideEditablePaymentOption()
+
+    /**
+     * The customer has chosen to show the payment option brands for an editable payment option.
+     */
+    fun onShowPaymentOptionBrands(
+        source: CardBrandChoiceEventSource,
+        selectedBrand: CardBrand,
+    )
+
+    /**
+     * The customer has chosen to hide the payment option brands for an editable payment option. The customer may
+     * have also chosen a new card brand selection as well.
+     */
+    fun onHidePaymentOptionBrands(
+        source: CardBrandChoiceEventSource,
+        selectedBrand: CardBrand?,
+    )
+
+    /**
+     * The customer has successfully updated a payment method with a new card brand selection.
+     */
+    fun onUpdatePaymentMethodSucceeded(
+        selectedBrand: CardBrand,
+    )
+
+    /**
+     * The customer has failed to update a payment method with a new card brand selection.
+     */
+    fun onUpdatePaymentMethodFailed(
+        selectedBrand: CardBrand,
+        error: Throwable,
+    )
+
     enum class Mode(val code: String) {
         Complete("complete"),
         Custom("custom");
 
         @Keep
         override fun toString(): String = code
+    }
+
+    enum class CardBrandChoiceEventSource {
+        Edit, Add
     }
 }

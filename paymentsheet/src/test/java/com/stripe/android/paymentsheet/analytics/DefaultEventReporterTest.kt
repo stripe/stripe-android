@@ -7,6 +7,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -213,6 +214,114 @@ class DefaultEventReporterTest {
                 req.params["event"] == "mc_custom_paymentoption_savedpm_select" &&
                     req.params["currency"] == "usd" &&
                     req.params["locale"] == "en_US"
+            }
+        )
+    }
+
+    @Test
+    fun `onShowEditablePaymentOption() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onShowEditablePaymentOption()
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_open_edit_screen"
+            }
+        )
+    }
+
+    @Test
+    fun `onHideEditablePaymentOption() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onHideEditablePaymentOption()
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cancel_edit_screen"
+            }
+        )
+    }
+
+    @Test
+    fun `onShowPaymentOptionBrands() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onShowPaymentOptionBrands(
+            source = EventReporter.CardBrandChoiceEventSource.Edit,
+            selectedBrand = CardBrand.Visa
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_open_cbc_dropdown" &&
+                    req.params["cbc_event_source"] == "edit" &&
+                    req.params["selected_card_brand"] == "visa"
+            }
+        )
+    }
+
+    @Test
+    fun `onHidePaymentOptionBrands() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onHidePaymentOptionBrands(
+            source = EventReporter.CardBrandChoiceEventSource.Edit,
+            selectedBrand = CardBrand.CartesBancaires,
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_close_cbc_dropdown" &&
+                    req.params["cbc_event_source"] == "edit" &&
+                    req.params["selected_card_brand"] == "cartes_bancaires"
+            }
+        )
+    }
+
+    @Test
+    fun `onUpdatePaymentMethodSucceeded() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onUpdatePaymentMethodSucceeded(
+            selectedBrand = CardBrand.CartesBancaires,
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_update_card" &&
+                    req.params["selected_card_brand"] == "cartes_bancaires"
+            }
+        )
+    }
+
+    @Test
+    fun `onUpdatePaymentMethodFailed() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onUpdatePaymentMethodFailed(
+            selectedBrand = CardBrand.CartesBancaires,
+            error = Exception("No network available!")
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_update_card_failed" &&
+                    req.params["selected_card_brand"] == "cartes_bancaires" &&
+                    req.params["error_message"] == "No network available!"
             }
         )
     }

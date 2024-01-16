@@ -1,6 +1,7 @@
 package com.stripe.android.identity.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
@@ -15,7 +16,8 @@ import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 /**
- * LaunchedEffect to notify [IdentityViewModel] based on [IdentityScanViewModel.State].
+ * Effect to notify [IdentityViewModel] based on [IdentityScanViewModel.State] and reset
+ * [IdentityScanViewModel.scannerState].
  * TODO(IDPROD-6662) - decouple any logic related to IdentityViewModel and handle them inside IdentityScanViewModel.
  */
 @Composable
@@ -65,6 +67,12 @@ internal fun LiveCaptureLaunchedEffect(
             navController.navigateTo(
                 CouldNotCaptureDestination(fromSelfie = scannerState.fromSelfie)
             )
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            identityScanViewModel.resetScannerState()
         }
     }
 }
