@@ -5,6 +5,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.StripeIntentFixtures
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.FakeAndroidKeyStore
 import kotlinx.coroutines.flow.flowOf
@@ -25,11 +26,14 @@ class LinkConfigurationCoordinatorTest {
         stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,
         merchantCountryCode = "US",
-        customerName = CUSTOMER_NAME,
-        customerEmail = CUSTOMER_EMAIL,
-        customerPhone = CUSTOMER_PHONE,
-        customerBillingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
+        customerInfo = LinkConfiguration.CustomerInfo(
+            name = CUSTOMER_NAME,
+            email = CUSTOMER_EMAIL,
+            phone = CUSTOMER_PHONE,
+            billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
+        ),
         shippingValues = null,
+        signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
         passthroughModeEnabled = false,
     )
 

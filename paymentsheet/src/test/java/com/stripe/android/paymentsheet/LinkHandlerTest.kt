@@ -13,6 +13,7 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -460,12 +461,15 @@ private fun runLinkTest(
 private fun defaultLinkConfiguration(): LinkConfiguration {
     return LinkConfiguration(
         stripeIntent = mock(),
+        signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
         merchantName = "Merchant, Inc",
         merchantCountryCode = "US",
-        customerName = "Name",
-        customerEmail = "customer@email.com",
-        customerPhone = "1234567890",
-        customerBillingCountryCode = "US",
+        customerInfo = LinkConfiguration.CustomerInfo(
+            name = "Name",
+            email = "customer@email.com",
+            phone = "1234567890",
+            billingCountryCode = "US",
+        ),
         shippingValues = null,
         passthroughModeEnabled = false,
     )

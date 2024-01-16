@@ -45,7 +45,7 @@ internal class LinkAccountManager @Inject constructor(
         // If we already fetched an account, return its status
         value?.accountStatus
             // If a customer email was passed in, lookup the account.
-            ?: config.customerEmail?.let { customerEmail ->
+            ?: config.customerInfo?.email?.let { customerEmail ->
                 lookupConsumer(customerEmail).map {
                     it?.accountStatus
                 }.getOrElse {

@@ -277,7 +277,8 @@ internal fun LinkInlineSignup(
                                         }
 
                                         LinkTerms(
-                                            modifier = Modifier.padding(top = 8.dp),
+                                            isOptional = false,
+                                            modifier = Modifier.padding(top = 4.dp),
                                             textAlign = TextAlign.Start,
                                         )
                                     }
@@ -293,7 +294,7 @@ internal fun LinkInlineSignup(
 
 @Suppress("SpreadOperator")
 @Composable
-internal fun EmailCollectionSection(
+private fun EmailCollectionSection(
     enabled: Boolean,
     emailController: TextFieldController,
     signUpState: SignUpState,

@@ -18,6 +18,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.SectionController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,28 +33,41 @@ internal class InlineSignupViewModel @Inject constructor(
     private val config: LinkConfiguration,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
-    private val logger: Logger
+    private val logger: Logger,
 ) : ViewModel() {
 
-    private val prefilledEmail = config.customerEmail
-    private val prefilledPhone = config.customerPhone.orEmpty()
-    private val prefilledName = config.customerName
+    private val prefilledEmail = config.customerInfo?.email
+    private val prefilledPhone = config.customerInfo?.phone.orEmpty()
+    private val prefilledName = config.customerInfo?.name
 
-    val emailController = EmailConfig.createController(prefilledEmail)
+    val emailController = EmailConfig.createController(
+        initialValue = prefilledEmail,
+        showOptionalLabel = config.showOptionalLabel,
+    )
 
     val phoneController = PhoneNumberController.createPhoneNumberController(
         initialValue = prefilledPhone,
-        initiallySelectedCountryCode = config.customerBillingCountryCode,
+        initiallySelectedCountryCode = config.customerInfo?.billingCountryCode,
     )
 
     val nameController = NameConfig.createController(prefilledName)
+
+    val sectionController: SectionController = SectionController(
+        label = null,
+        sectionFieldErrorControllers = listOfNotNull(
+            emailController,
+            phoneController,
+            nameController.takeIf { requiresNameCollection },
+        ),
+    )
 
     /**
      * Emits the email entered in the form if valid, null otherwise.
      */
     private val consumerEmail: StateFlow<String?> =
-        emailController.formFieldValue.map { it.takeIf { it.isComplete }?.value }
-            .stateIn(viewModelScope, SharingStarted.Lazily, prefilledEmail)
+        emailController.formFieldValue.map {
+            it.takeIf { it.isComplete }?.value
+        }.stateIn(viewModelScope, SharingStarted.Lazily, prefilledEmail)
 
     /**
      * Emits the phone number entered in the form if valid, null otherwise.
@@ -74,6 +88,7 @@ internal class InlineSignupViewModel @Inject constructor(
             InlineSignupViewState(
                 userInput = null,
                 merchantName = config.merchantName,
+                signupMode = config.signupMode,
                 isExpanded = false,
                 apiFailed = false,
                 signUpState = SignUpState.InputtingEmail
@@ -97,6 +112,10 @@ internal class InlineSignupViewModel @Inject constructor(
 
     private var debouncer = Debouncer()
 
+    init {
+        watchUserInput()
+    }
+
     fun toggleExpanded() {
         _viewState.update { oldState ->
             oldState.copy(isExpanded = !oldState.isExpanded)
@@ -104,7 +123,6 @@ internal class InlineSignupViewModel @Inject constructor(
         // First time user checks the box, start listening to inputs
         if (_viewState.value.isExpanded && !hasExpanded) {
             hasExpanded = true
-            watchUserInput()
             linkEventsReporter.onInlineSignupCheckboxChecked()
         }
     }

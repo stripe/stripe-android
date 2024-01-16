@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -101,12 +102,13 @@ internal fun AddPaymentMethod(
             val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
                 ?.intentConfiguration
                 ?.onBehalfOf
+
             PaymentElement(
                 formViewModelSubComponentBuilderProvider = sheetViewModel.formViewModelSubComponentBuilderProvider,
                 enabled = !processing,
                 supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
                 selectedItem = selectedItem,
-                showLinkInlineSignup = showLinkInlineSignup,
+                linkSignupMode = showLinkInlineSignup,
                 linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
                 showCheckboxFlow = showCheckboxFlow,
                 onItemSelectedListener = { selectedLpm ->
@@ -159,17 +161,23 @@ private fun BaseSheetViewModel.showLinkInlineSignupView(
     paymentMethodCode: String,
     linkAccountStatus: AccountStatus?,
     showSaveToCustomerCheckbox: Boolean,
-): Boolean {
+): LinkSignupMode? {
     val validStatusStates = setOf(
-        AccountStatus.Verified,
         AccountStatus.SignedOut,
     )
     val linkInlineSelectionValid = linkHandler.linkInlineSelection.value != null
-    val ableToShowLink = linkHandler.isLinkEnabled.value == true && stripeIntent.value
-        ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
+    val ableToShowLink = linkHandler.isLinkEnabled.value == true &&
+        stripeIntent.value?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
         paymentMethodCode == PaymentMethod.Type.Card.code &&
         (linkAccountStatus in validStatusStates || linkInlineSelectionValid)
-    return !showSaveToCustomerCheckbox && ableToShowLink
+
+    return if (!showSaveToCustomerCheckbox && ableToShowLink) {
+        LinkSignupMode.InsteadOfSaveForFutureUse
+    } else if (ableToShowLink) {
+        LinkSignupMode.AlongsideSaveForFutureUse
+    } else {
+        null
+    }
 }
 
 internal fun FormFieldValues.transformToPaymentMethodCreateParams(

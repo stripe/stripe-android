@@ -16,6 +16,8 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkInlineSignup
+import com.stripe.android.link.ui.inline.LinkOptionalInlineSignup
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentMethodsUI
 import com.stripe.android.paymentsheet.R
@@ -36,7 +38,7 @@ internal fun PaymentElement(
     enabled: Boolean,
     supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
     selectedItem: LpmRepository.SupportedPaymentMethod,
-    showLinkInlineSignup: Boolean,
+    linkSignupMode: LinkSignupMode?,
     linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     showCheckboxFlow: Flow<Boolean>,
     onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit,
@@ -90,15 +92,29 @@ internal fun PaymentElement(
             }
         }
 
-        if (showLinkInlineSignup && linkConfigurationCoordinator != null) {
-            LinkInlineSignup(
-                linkConfigurationCoordinator = linkConfigurationCoordinator,
-                enabled = enabled,
-                onStateChanged = onLinkSignupStateChanged,
-                modifier = Modifier
-                    .padding(horizontal = horizontalPadding, vertical = 6.dp)
-                    .fillMaxWidth()
-            )
+        if (linkConfigurationCoordinator != null && linkSignupMode != null) {
+            when (linkSignupMode) {
+                LinkSignupMode.InsteadOfSaveForFutureUse -> {
+                    LinkInlineSignup(
+                        linkConfigurationCoordinator = linkConfigurationCoordinator,
+                        enabled = enabled,
+                        onStateChanged = onLinkSignupStateChanged,
+                        modifier = Modifier
+                            .padding(horizontal = horizontalPadding, vertical = 6.dp)
+                            .fillMaxWidth(),
+                    )
+                }
+                LinkSignupMode.AlongsideSaveForFutureUse -> {
+                    LinkOptionalInlineSignup(
+                        linkConfigurationCoordinator = linkConfigurationCoordinator,
+                        enabled = enabled,
+                        onStateChanged = onLinkSignupStateChanged,
+                        modifier = Modifier
+                            .padding(horizontal = horizontalPadding, vertical = 6.dp)
+                            .fillMaxWidth(),
+                    )
+                }
+            }
         }
     }
 }
