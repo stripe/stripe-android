@@ -2,9 +2,7 @@
 
 package com.stripe.android.financialconnections.features.manualentry
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,14 +21,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -157,77 +154,54 @@ private fun ManualEntryLoaded(
                     bottom = 24.dp
                 )
         ) {
-            var currentCheck: Int? by remember { mutableStateOf(R.drawable.stripe_check_base) }
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.stripe_manualentry_title),
-                color = FinancialConnectionsTheme.colors.textPrimary,
-                style = FinancialConnectionsTheme.typography.subtitle
+                color = FinancialConnectionsTheme.v3Colors.textDefault,
+                style = FinancialConnectionsTheme.v3Typography.headingXLarge
             )
-            Spacer(modifier = Modifier.size(24.dp))
-            Box {
-                Image(
-                    painter = painterResource(id = R.drawable.stripe_check_base),
-                    contentDescription = "Image of bank check referencing routing number"
-                )
-                currentCheck?.let {
-                    Image(
-                        painter = painterResource(id = it),
-                        contentDescription = "Image of bank check referencing routing number"
-                    )
-                }
-            }
-            if (linkPaymentAccountStatus is Fail) {
-                Text(
-                    text = (linkPaymentAccountStatus.error as? StripeException)?.message
-                        ?: stringResource(R.string.stripe_error_generic_title),
-                    color = FinancialConnectionsTheme.colors.textCritical,
-                    style = FinancialConnectionsTheme.typography.body
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-            }
+            Spacer(modifier = Modifier.size(16.dp))
             if (payload.verifyWithMicrodeposits) {
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
                     text = stringResource(R.string.stripe_manualentry_microdeposits_desc),
-                    color = FinancialConnectionsTheme.colors.textPrimary,
-                    style = FinancialConnectionsTheme.typography.body
+                    color = FinancialConnectionsTheme.v3Colors.textDefault,
+                    style = FinancialConnectionsTheme.v3Typography.bodyMedium
                 )
             }
             Spacer(modifier = Modifier.size(8.dp))
 
             InputWithError(
                 label = R.string.stripe_manualentry_routing,
-                hint = "123456789",
                 inputWithError = routing,
                 testTag = "RoutingInput",
                 onInputChanged = onRoutingEntered,
-                onFocusGained = { currentCheck = R.drawable.stripe_check_routing }
             )
-            Spacer(modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.size(16.dp))
             InputWithError(
                 label = R.string.stripe_manualentry_account,
-                hint = "000123456789",
                 inputWithError = account,
                 testTag = "AccountInput",
                 onInputChanged = onAccountEntered,
-                onFocusGained = { currentCheck = R.drawable.stripe_check_account }
             )
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(
-                text = stringResource(R.string.stripe_manualentry_account_type_disclaimer),
-                color = FinancialConnectionsTheme.colors.textSecondary,
-                style = FinancialConnectionsTheme.typography.caption
-            )
-            Spacer(modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.size(16.dp))
             InputWithError(
                 label = R.string.stripe_manualentry_accountconfirm,
-                hint = "000123456789",
                 inputWithError = accountConfirm,
                 testTag = "ConfirmAccountInput",
                 onInputChanged = onAccountConfirmEntered,
-                onFocusGained = { currentCheck = R.drawable.stripe_check_account }
             )
+            if (linkPaymentAccountStatus is Fail) {
+                Spacer(modifier = Modifier.size(16.dp))
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    text = (linkPaymentAccountStatus.error as? StripeException)?.message
+                        ?: stringResource(R.string.stripe_error_generic_title),
+                    style = FinancialConnectionsTheme.v3Typography.bodyMedium,
+                    color = FinancialConnectionsTheme.v3Colors.textCritical,
+                )
+            }
             Spacer(modifier = Modifier.weight(1f))
         }
         // Footer
@@ -260,16 +234,9 @@ private fun InputWithError(
     inputWithError: Pair<String?, Int?>,
     label: Int,
     testTag: String,
-    hint: String,
-    onFocusGained: () -> Unit,
     onInputChanged: (String) -> Unit
 ) {
     var textValue by remember { mutableStateOf(TextFieldValue()) }
-    Text(
-        text = stringResource(id = label),
-        color = FinancialConnectionsTheme.colors.textSecondary,
-        style = FinancialConnectionsTheme.typography.body
-    )
     Spacer(modifier = Modifier.size(4.dp))
     FinancialConnectionsOutlinedTextField(
         value = textValue,
@@ -278,9 +245,9 @@ private fun InputWithError(
         ),
         placeholder = {
             Text(
-                text = hint,
-                style = FinancialConnectionsTheme.typography.body,
-                color = FinancialConnectionsTheme.colors.textDisabled
+                text = stringResource(id = label),
+                style = FinancialConnectionsTheme.v3Typography.labelLarge,
+                color = FinancialConnectionsTheme.v3Colors.textSubdued
             )
         },
         isError = inputWithError.second != null,
@@ -291,14 +258,13 @@ private fun InputWithError(
         modifier = Modifier
             .semantics { testTagsAsResourceId = true }
             .testTag(testTag)
-            .onFocusChanged { if (it.isFocused) onFocusGained() }
     )
     if (inputWithError.second != null) {
+        Spacer(modifier = Modifier.size(4.dp))
         Text(
             text = stringResource(id = inputWithError.second!!),
-            color = FinancialConnectionsTheme.colors.textCritical,
-            style = FinancialConnectionsTheme.typography.captionEmphasized,
-            modifier = Modifier.padding(start = 16.dp)
+            color = FinancialConnectionsTheme.v3Colors.textCritical,
+            style = FinancialConnectionsTheme.v3Typography.labelSmall,
         )
     }
 }
@@ -312,9 +278,9 @@ internal fun ManualEntryPreview(
 ) {
     FinancialConnectionsPreview {
         ManualEntryContent(
-            routing = "" to null,
-            account = "" to null,
-            accountConfirm = "" to null,
+            routing = state.routing to state.routingError,
+            account = state.account to state.accountError,
+            accountConfirm = state.accountConfirm to state.accountConfirmError,
             isValidForm = true,
             payload = state.payload,
             linkPaymentAccountStatus = state.linkPaymentAccount,
