@@ -914,7 +914,8 @@ public final class com/stripe/android/Stripe {
 	public static synthetic fun createPiiTokenSynchronous$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/Token;
 	public final fun createRadarSession (Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createRadarSession (Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
-	public static synthetic fun createRadarSession$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;ILjava/lang/Object;)V
+	public final fun createRadarSession (Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;Landroidx/appcompat/app/AppCompatActivity;)V
+	public static synthetic fun createRadarSession$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;Landroidx/appcompat/app/AppCompatActivity;ILjava/lang/Object;)V
 	public final fun createSource (Lcom/stripe/android/model/SourceParams;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createSource (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createSource (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
@@ -1041,7 +1042,9 @@ public final class com/stripe/android/StripeKtxKt {
 	public static synthetic fun createPersonToken$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/PersonTokenParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun createPiiToken (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun createPiiToken$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun createRadarSession (Lcom/stripe/android/Stripe;Landroidx/fragment/app/FragmentActivity;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun createRadarSession (Lcom/stripe/android/Stripe;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun createRadarSession$default (Lcom/stripe/android/Stripe;Landroidx/fragment/app/FragmentActivity;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun createSource (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun createSource$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun getAuthenticateSourceResult (Lcom/stripe/android/Stripe;ILandroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -4957,6 +4960,14 @@ public final class com/stripe/android/model/RadarSession$Creator : android/os/Pa
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/RadarSession;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/RadarSession;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/RadarSessionWithHCaptcha$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/RadarSessionWithHCaptcha;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/RadarSessionWithHCaptcha;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

@@ -215,9 +215,10 @@ ext.testLibs = [
         ],
         mavericks            : "com.airbnb.android:mavericks-testing:${versions.mavericks}",
         mockito              : [
-                core  : "org.mockito:mockito-core:${versions.mockito}",
-                inline: "org.mockito:mockito-inline:${versions.mockito}",
-                kotlin: "org.mockito.kotlin:mockito-kotlin:${versions.mockitoKotlin}",
+                android: "org.mockito:mockito-android:${versions.mockito}",
+                core   : "org.mockito:mockito-core:${versions.mockito}",
+                inline : "org.mockito:mockito-inline:${versions.mockito}",
+                kotlin : "org.mockito.kotlin:mockito-kotlin:${versions.mockitoKotlin}",
         ],
         okhttpMockWebServer  : "com.squareup.okhttp3:mockwebserver:${versions.okhttp}",
         okhttpTls            : "com.squareup.okhttp3:okhttp-tls:${versions.okhttp}",
