@@ -21,6 +21,9 @@ internal interface PlaygroundSettingDefinition<T> {
     ) {
     }
 
+    fun configure(value: T) {
+    }
+
     fun valueUpdated(value: T, playgroundSettings: PlaygroundSettings) {}
 
     fun saveable(): Saveable<T>? {

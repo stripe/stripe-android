@@ -29,6 +29,10 @@ internal data class PlaygroundState(
         return snapshot.paymentSheetConfiguration(this)
     }
 
+    fun configureGlobals() {
+        snapshot.configureGlobals()
+    }
+
     companion object {
         fun CheckoutResponse.asPlaygroundState(
             snapshot: PlaygroundSettings.Snapshot,

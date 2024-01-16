@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.CookieStore
+import com.stripe.android.lpmfoundations.LpmFoundationsPaymentSheetLauncher
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -22,6 +23,7 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
+import com.stripe.android.utils.FeatureFlags
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -40,7 +42,11 @@ class PaymentSheet internal constructor(
         activity: ComponentActivity,
         callback: PaymentSheetResultCallback
     ) : this(
-        DefaultPaymentSheetLauncher(activity, callback)
+        if (FeatureFlags.useLpmFoundations.isEnabled) {
+            LpmFoundationsPaymentSheetLauncher()
+        } else {
+            DefaultPaymentSheetLauncher(activity, callback)
+        }
     )
 
     /**
@@ -57,7 +63,11 @@ class PaymentSheet internal constructor(
         createIntentCallback: CreateIntentCallback,
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
-        DefaultPaymentSheetLauncher(activity, paymentResultCallback)
+        if (FeatureFlags.useLpmFoundations.isEnabled) {
+            LpmFoundationsPaymentSheetLauncher()
+        } else {
+            DefaultPaymentSheetLauncher(activity, paymentResultCallback)
+        }
     ) {
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
     }
@@ -72,7 +82,11 @@ class PaymentSheet internal constructor(
         fragment: Fragment,
         callback: PaymentSheetResultCallback
     ) : this(
-        DefaultPaymentSheetLauncher(fragment, callback)
+        if (FeatureFlags.useLpmFoundations.isEnabled) {
+            LpmFoundationsPaymentSheetLauncher()
+        } else {
+            DefaultPaymentSheetLauncher(fragment, callback)
+        }
     )
 
     /**
@@ -89,7 +103,11 @@ class PaymentSheet internal constructor(
         createIntentCallback: CreateIntentCallback,
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
-        DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
+        if (FeatureFlags.useLpmFoundations.isEnabled) {
+            LpmFoundationsPaymentSheetLauncher()
+        } else {
+            DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
+        }
     ) {
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
     }

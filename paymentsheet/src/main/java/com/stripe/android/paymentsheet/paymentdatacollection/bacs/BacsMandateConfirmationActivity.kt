@@ -20,7 +20,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.utils.AnimationConstants
+import com.stripe.android.utils.fadeOut
 import kotlinx.coroutines.flow.collectLatest
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
@@ -104,7 +104,7 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
+        fadeOut()
     }
 
     private fun renderEdgeToEdge() {
