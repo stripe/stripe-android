@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Add a payment method</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Save your info for secure 1-click checkout with Link</string>
+  <string name="stripe_inline_sign_up_header">Save my info for secure 1-click checkout</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Log out of Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -17,9 +17,11 @@
   <!-- Title for the Link signup screen -->
   <string name="stripe_sign_up_header">Secure 1⁠-⁠click checkout</string>
   <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
-  <string name="stripe_sign_up_message">Pay faster at %s and thousands of businesses.</string>
+  <string name="stripe_sign_up_message">Pay faster at %s and thousands of merchants.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[By joining Link, you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[By providing your email, you agree to create a Link account and save your payment info to Link, according to the <terms>Link Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Change email</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
