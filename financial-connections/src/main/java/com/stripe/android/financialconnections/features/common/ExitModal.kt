@@ -36,12 +36,7 @@ internal fun ExitModal(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                top = 24.dp,
-                start = 16.dp,
-                end = 16.dp,
-                bottom = 16.dp
-            ),
+            .padding(24.dp),
     ) {
         Box(
             contentAlignment = Alignment.Center,
