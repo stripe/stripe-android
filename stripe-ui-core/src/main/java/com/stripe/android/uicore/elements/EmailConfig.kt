@@ -52,9 +52,13 @@ class EmailConfig : TextFieldConfig {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        fun createController(initialValue: String?) = SimpleTextFieldController(
-            EmailConfig(),
-            initialValue = initialValue
+        fun createController(
+            initialValue: String?,
+            showOptionalLabel: Boolean = false,
+        ) = SimpleTextFieldController(
+            textFieldConfig = EmailConfig(),
+            initialValue = initialValue,
+            showOptionalLabel = showOptionalLabel,
         )
 
         // This is copied from Patterns.EMAIL_ADDRESS because it is not defined for unit tests

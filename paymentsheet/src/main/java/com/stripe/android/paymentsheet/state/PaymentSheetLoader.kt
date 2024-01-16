@@ -6,6 +6,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -18,6 +19,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.currency
+import com.stripe.android.paymentsheet.model.getPMAddForm
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.model.requireValidOrThrow
@@ -293,14 +295,36 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val merchantName = config.merchantDisplayName
 
+        val layoutDescriptor = LpmRepository.HardcodedCard.getPMAddForm(stripeIntent, config)
+
+        val linkSignupMode = if (layoutDescriptor.showCheckbox) {
+            LinkSignupMode.AlongsideSaveForFutureUse
+        } else {
+            LinkSignupMode.InsteadOfSaveForFutureUse
+        }
+
+        val customerInfo = when (linkSignupMode) {
+            LinkSignupMode.InsteadOfSaveForFutureUse -> {
+                LinkConfiguration.CustomerInfo(
+                    name = config.defaultBillingDetails?.name,
+                    email = customerEmail,
+                    phone = customerPhone,
+                    billingCountryCode = config.defaultBillingDetails?.address?.country,
+                )
+            }
+            LinkSignupMode.AlongsideSaveForFutureUse -> {
+                // No customer info, because we don't want to prefill the form
+                // in this flow.
+                null
+            }
+        }
+
         return LinkConfiguration(
             stripeIntent = stripeIntent,
+            signupMode = linkSignupMode,
             merchantName = merchantName,
             merchantCountryCode = merchantCountry,
-            customerEmail = customerEmail,
-            customerPhone = customerPhone,
-            customerName = config.defaultBillingDetails?.name,
-            customerBillingCountryCode = config.defaultBillingDetails?.address?.country,
+            customerInfo = customerInfo,
             shippingValues = shippingAddress,
             passthroughModeEnabled = passthroughModeEnabled,
         )
