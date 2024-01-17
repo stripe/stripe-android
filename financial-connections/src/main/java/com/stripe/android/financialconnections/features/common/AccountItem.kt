@@ -81,7 +81,7 @@ internal fun AccountItem(
                 if (SDK_INT >= M) view.performHapticFeedback(CONTEXT_CLICK)
                 onAccountClicked(account)
             }
-            .alpha(if (selectable) ContentAlpha.high else ContentAlpha.disabled)
+            .alpha(if (selectable) 1f else ContentAlpha.disabled)
             .padding(16.dp)
     ) {
         Row(
@@ -106,7 +106,7 @@ internal fun AccountItem(
             Icon(
                 modifier = Modifier
                     .size(16.dp)
-                    .alpha(if (selected) ContentAlpha.high else ContentAlpha.disabled),
+                    .alpha(if (selected) 1f else 0f),
                 imageVector = Icons.Default.Check,
                 tint = v3Colors.iconBrand,
                 contentDescription = "Selected"
