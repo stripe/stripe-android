@@ -4,7 +4,6 @@ package com.stripe.android.link.ui.inline
 
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -47,7 +45,6 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.SignUpState
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -63,9 +60,7 @@ import com.stripe.android.uicore.stripeShapes
 @Composable
 private fun PreviewInitial() {
     DefaultLinkTheme {
-        Surface(
-            color = Color.Red,
-        ) {
+        Surface {
             LinkOptionalInlineSignup(
                 sectionController = SectionController(null, emptyList()),
                 emailController = EmailConfig.createController(""),
@@ -85,9 +80,7 @@ private fun PreviewInitial() {
 @Composable
 private fun PreviewFilledOut() {
     DefaultLinkTheme {
-        Surface(
-            color = Color.Red,
-        ) {
+        Surface {
             LinkOptionalInlineSignup(
                 sectionController = SectionController(null, emptyList()),
                 emailController = EmailConfig.createController("email@me.co"),
@@ -162,88 +155,84 @@ private fun LinkOptionalInlineSignup(
     CompositionLocalProvider(
         LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
     ) {
-        StripeTheme {
-            Column(
-                modifier = modifier.background(color = MaterialTheme.stripeColors.component),
+        Column(modifier) {
+            val sectionError by sectionController.error.collectAsState(null)
+
+            Section(
+                title = null,
+                error = sectionError?.errorMessage?.let { stringResource(it) },
             ) {
-                val sectionError by sectionController.error.collectAsState(null)
+                EmailCollection(
+                    enabled = enabled,
+                    emailController = emailController,
+                    signUpState = signUpState,
+                )
 
-                Section(
-                    title = null,
-                    error = sectionError?.errorMessage?.let { stringResource(it) },
+                AnimatedVisibility(
+                    visible = signUpState != SignUpState.InputtingPhoneOrName && errorMessage != null,
                 ) {
-                    EmailCollection(
-                        enabled = enabled,
-                        emailController = emailController,
-                        signUpState = signUpState,
+                    ErrorText(
+                        text = errorMessage
+                            ?.getMessage(LocalContext.current.resources)
+                            .orEmpty(),
+                        modifier = Modifier.fillMaxWidth()
                     )
+                }
 
-                    AnimatedVisibility(
-                        visible = signUpState != SignUpState.InputtingPhoneOrName && errorMessage != null,
-                    ) {
-                        ErrorText(
-                            text = errorMessage
-                                ?.getMessage(LocalContext.current.resources)
-                                .orEmpty(),
-                            modifier = Modifier.fillMaxWidth()
+                AnimatedVisibility(visible = signUpState == SignUpState.InputtingPhoneOrName) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Divider(
+                            color = MaterialTheme.stripeColors.componentDivider,
+                            thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
+                            modifier = Modifier.padding(
+                                horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
+                            )
                         )
-                    }
 
-                    AnimatedVisibility(visible = signUpState == SignUpState.InputtingPhoneOrName) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Divider(
-                                color = MaterialTheme.stripeColors.componentDivider,
-                                thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                                modifier = Modifier.padding(
-                                    horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
-                                )
+                        PhoneNumberElementUI(
+                            enabled = enabled,
+                            controller = phoneNumberController,
+                            requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
+                            imeAction = if (requiresNameCollection) {
+                                ImeAction.Next
+                            } else {
+                                ImeAction.Done
+                            }
+                        )
+
+                        Divider(
+                            color = MaterialTheme.stripeColors.componentDivider,
+                            thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
+                            modifier = Modifier.padding(
+                                horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
                             )
+                        )
 
-                            PhoneNumberElementUI(
+                        if (requiresNameCollection) {
+                            TextField(
+                                textFieldController = nameController,
+                                imeAction = ImeAction.Done,
                                 enabled = enabled,
-                                controller = phoneNumberController,
-                                requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
-                                imeAction = if (requiresNameCollection) {
-                                    ImeAction.Next
-                                } else {
-                                    ImeAction.Done
-                                }
                             )
+                        }
 
-                            Divider(
-                                color = MaterialTheme.stripeColors.componentDivider,
-                                thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                                modifier = Modifier.padding(
-                                    horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
-                                )
+                        AnimatedVisibility(visible = errorMessage != null) {
+                            ErrorText(
+                                text = errorMessage
+                                    ?.getMessage(LocalContext.current.resources)
+                                    .orEmpty(),
+                                modifier = Modifier.fillMaxWidth()
                             )
-
-                            if (requiresNameCollection) {
-                                TextField(
-                                    textFieldController = nameController,
-                                    imeAction = ImeAction.Done,
-                                    enabled = enabled,
-                                )
-                            }
-
-                            AnimatedVisibility(visible = errorMessage != null) {
-                                ErrorText(
-                                    text = errorMessage
-                                        ?.getMessage(LocalContext.current.resources)
-                                        .orEmpty(),
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
                         }
                     }
                 }
-
-                LinkTerms(
-                    isOptional = true,
-                    modifier = Modifier.padding(top = 4.dp),
-                    textAlign = TextAlign.Start,
-                )
             }
+
+            LinkTerms(
+                isOptional = true,
+                modifier = Modifier.padding(top = 4.dp),
+                textAlign = TextAlign.Start,
+            )
         }
     }
 }
