@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.addCallback
@@ -36,16 +34,9 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
         BacsMandateConfirmationViewModel.Factory(starterArgs)
     }
 
-    @SuppressLint("SourceLockedOrientationActivity")
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
-            // In Oreo, Activities where `android:windowIsTranslucent=true` can't request
-            // orientation. See https://stackoverflow.com/a/50832408/11103900
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        }
 
         renderEdgeToEdge()
 

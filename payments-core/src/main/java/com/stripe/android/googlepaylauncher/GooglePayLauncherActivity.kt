@@ -1,6 +1,5 @@
 package com.stripe.android.googlepaylauncher
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
@@ -39,7 +38,6 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
 
     private lateinit var args: GooglePayLauncherContract.Args
 
-    @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
