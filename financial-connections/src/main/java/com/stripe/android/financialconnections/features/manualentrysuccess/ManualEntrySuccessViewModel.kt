@@ -38,7 +38,8 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
             SuccessState.Payload(
                 businessName = manifest.businessName,
                 customSuccessMessage = TextResource.StringId(
-                    R.string.stripe_success_pane_desc_microdeposits, listOf(last4 ?: "")
+                    value = R.string.stripe_success_pane_desc_microdeposits,
+                    args = listOf(last4 ?: "")
                 ),
                 accountsCount = 1, // on manual entry just one account is connected,
                 skipSuccessPane = manifest.skipSuccessPane ?: false
