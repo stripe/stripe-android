@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import android.app.Application
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
@@ -8,6 +9,7 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
+import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -713,16 +715,13 @@ class CustomerAdapterTest {
             }
         )
 
-        CustomerSessionViewModel(
-            application = application
-        ).createCustomerSessionComponent(
+        CustomerSheetHacks.initialize(
+            lifecycleOwner = TestLifecycleOwner(),
+            adapter = adapter,
             configuration = CustomerSheet.Configuration(
                 merchantDisplayName = "Example",
                 googlePayEnabled = true
             ),
-            customerAdapter = adapter,
-            callback = {},
-            statusBarColor = { null },
         )
 
         val result = adapter.retrieveSelectedPaymentOption()
@@ -745,16 +744,13 @@ class CustomerAdapterTest {
             }
         )
 
-        CustomerSessionViewModel(
-            application = application
-        ).createCustomerSessionComponent(
+        CustomerSheetHacks.initialize(
+            lifecycleOwner = TestLifecycleOwner(),
+            adapter = adapter,
             configuration = CustomerSheet.Configuration(
                 merchantDisplayName = "Example",
-                googlePayEnabled = false
+                googlePayEnabled = false,
             ),
-            customerAdapter = adapter,
-            callback = {},
-            statusBarColor = { null },
         )
 
         val result = adapter.retrieveSelectedPaymentOption()

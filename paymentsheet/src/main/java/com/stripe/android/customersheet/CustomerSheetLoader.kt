@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.core.injection.IS_LIVE_MODE
+import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
@@ -22,6 +23,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal interface CustomerSheetLoader {
@@ -29,14 +31,33 @@ internal interface CustomerSheetLoader {
 }
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-internal class DefaultCustomerSheetLoader @Inject constructor(
+internal class DefaultCustomerSheetLoader(
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val elementsSessionRepository: ElementsSessionRepository,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
     private val lpmRepository: LpmRepository,
-    private val customerAdapter: CustomerAdapter,
+    private val customerAdapterProvider: Provider<CustomerAdapter>,
 ) : CustomerSheetLoader {
+
+    @Inject constructor(
+        @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
+        googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
+        elementsSessionRepository: ElementsSessionRepository,
+        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
+        lpmRepository: LpmRepository,
+    ) : this(
+        isLiveModeProvider = isLiveModeProvider,
+        googlePayRepositoryFactory = googlePayRepositoryFactory,
+        elementsSessionRepository = elementsSessionRepository,
+        isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
+        lpmRepository = lpmRepository,
+        customerAdapterProvider = CustomerSheetHacks::requireAdapter,
+    )
+
+    private val customerAdapter: CustomerAdapter
+        get() = customerAdapterProvider.get()
+
     override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full> {
         val elementsSession = if (customerAdapter.canCreateSetupIntents) {
             retrieveElementsSession(configuration).getOrElse {

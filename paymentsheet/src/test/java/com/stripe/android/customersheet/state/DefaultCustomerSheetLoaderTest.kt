@@ -550,8 +550,8 @@ class DefaultCustomerSheetLoaderTest {
             },
             elementsSessionRepository = elementsSessionRepository,
             lpmRepository = lpmRepository,
-            customerAdapter = customerAdapter,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
+            customerAdapterProvider = { customerAdapter },
         )
     }
 

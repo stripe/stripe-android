@@ -121,7 +121,7 @@ internal object CustomerSheetTestHelper {
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
     )
 
-    internal fun mockedFormViewModel(
+    private fun mockedFormViewModel(
         configuration: CustomerSheet.Configuration,
         lpmRepository: LpmRepository,
     ): Provider<FormViewModelSubcomponent.Builder> {
@@ -218,10 +218,10 @@ internal object CustomerSheetTestHelper {
             workContext = workContext,
             originalPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
+            customerAdapterProvider = { customerAdapter },
             formViewModelSubcomponentBuilderProvider = formViewModelSubcomponentBuilderProvider,
             resources = application.resources,
             stripeRepository = stripeRepository,
-            customerAdapter = customerAdapter,
             lpmRepository = lpmRepository,
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },
@@ -238,7 +238,7 @@ internal object CustomerSheetTestHelper {
                     return mock()
                 }
             },
-            statusBarColor = { null },
+            statusBarColor = null,
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,

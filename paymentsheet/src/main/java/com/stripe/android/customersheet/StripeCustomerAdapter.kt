@@ -4,6 +4,7 @@ import android.content.Context
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
+import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -38,7 +39,7 @@ internal class StripeCustomerAdapter @Inject constructor(
     private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey? = null
 
     private val isGooglePayAvailable: Boolean
-        get() = CustomerSessionViewModel.component.configuration.googlePayEnabled
+        get() = CustomerSheetHacks.requireConfiguration().googlePayEnabled
 
     override val canCreateSetupIntents: Boolean
         get() = setupIntentClientSecretProvider != null

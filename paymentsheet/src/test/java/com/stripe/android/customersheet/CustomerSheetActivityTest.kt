@@ -41,7 +41,13 @@ internal class CustomerSheetActivityTest {
     private val contract = CustomerSheetContract()
     private val intent = contract.createIntent(
         context = context,
-        input = CustomerSheetContract.Args
+        input = CustomerSheetContract.Args(
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                googlePayEnabled = true,
+            ),
+            statusBarColor = null,
+        ),
     )
     private val page = CustomerSheetPage(composeTestRule)
 
@@ -208,7 +214,7 @@ internal class CustomerSheetActivityTest {
 
         return injectableActivityScenario {
             injectActivity {
-                this.viewModelProvider = viewModelFactoryFor(viewModel)
+                this.viewModelFactoryProducer = { viewModelFactoryFor(viewModel) }
             }
         }
     }
