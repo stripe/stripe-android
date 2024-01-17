@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.addCallback
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
@@ -121,22 +122,14 @@ class PaymentMethodsActivity : AppCompatActivity() {
             }
         }
 
-        observePaymentMethodData()
-
-        setupRecyclerView()
-
         val addPaymentMethodLauncher = registerForActivityResult(
             AddPaymentMethodContract(),
             ::onAddPaymentMethodResult
         )
 
-        lifecycleScope.launch {
-            adapter.addPaymentMethodArgs.collect { args ->
-                if (args != null) {
-                    addPaymentMethodLauncher.launch(args)
-                }
-            }
-        }
+        observePaymentMethodData()
+
+        setupRecyclerView(addPaymentMethodLauncher)
 
         setSupportActionBar(viewBinding.toolbar)
 
@@ -158,7 +151,9 @@ class PaymentMethodsActivity : AppCompatActivity() {
         viewBinding.recycler.requestFocusFromTouch()
     }
 
-    private fun setupRecyclerView() {
+    private fun setupRecyclerView(
+        addPaymentMethodLauncher: ActivityResultLauncher<AddPaymentMethodActivityStarter.Args>,
+    ) {
         val deletePaymentMethodDialogFactory = DeletePaymentMethodDialogFactory(
             this,
             adapter,
@@ -170,6 +165,10 @@ class PaymentMethodsActivity : AppCompatActivity() {
         adapter.listener = object : PaymentMethodsAdapter.Listener {
             override fun onPaymentMethodClick(paymentMethod: PaymentMethod) {
                 viewBinding.recycler.tappedPaymentMethod = paymentMethod
+            }
+
+            override fun onAddPaymentMethodClick(args: AddPaymentMethodActivityStarter.Args) {
+                addPaymentMethodLauncher.launch(args)
             }
 
             override fun onGooglePayClick() {
