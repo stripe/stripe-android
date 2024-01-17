@@ -1076,6 +1076,12 @@ class PaymentSheet internal constructor(
         internal val collectsEmail: Boolean
             get() = email == CollectionMode.Always
 
+        internal val collectsAnything: Boolean
+            get() = name == CollectionMode.Always ||
+                phone == CollectionMode.Always ||
+                email == CollectionMode.Always ||
+                address == AddressCollectionMode.Full
+
         internal fun toBillingAddressConfig(): GooglePayPaymentMethodLauncher.BillingAddressConfig {
             val collectAddress = address == AddressCollectionMode.Full
             val collectPhone = phone == CollectionMode.Always
