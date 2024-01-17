@@ -188,17 +188,23 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         val isNetworkingSignupPane =
             manifest?.isNetworkingUserFlow == true && pane == NETWORKING_LINK_SIGNUP_PANE
         val description = when {
-            isNetworkingSignupPane && businessName != null -> TextResource.StringId(
-                value = R.string.stripe_close_dialog_networking_desc,
-                args = listOf(businessName)
-            )
-
-            else -> TextResource.StringId(
-                value = R.string.stripe_close_dialog_desc
-            )
+            isNetworkingSignupPane -> when (businessName) {
+                null -> TextResource.StringId(R.string.stripe_close_dialog_networking_desc_no_business)
+                else -> TextResource.StringId(
+                    value = R.string.stripe_close_dialog_networking_desc,
+                    args = listOf(businessName)
+                )
+            }
+            else -> when (businessName) {
+                null -> TextResource.StringId(R.string.stripe_exit_modal_desc_no_business)
+                else -> TextResource.StringId(
+                    value = R.string.stripe_exit_modal_desc,
+                    args = listOf(businessName)
+                )
+            }
         }
         eventTracker.track(ClickNavBarClose(pane))
-        setState { copy(closeDialog = CloseDialog(description = description)) }
+        setState { copy(exitModal = CloseDialog(description = description, loading = false)) }
     }
 
     fun onBackClick(pane: Pane?) {
@@ -218,11 +224,14 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         closeAuthFlowError = error
     )
 
-    fun onCloseConfirm() = closeAuthFlow(
-        closeAuthFlowError = null
-    )
+    fun onCloseConfirm() {
+        withState { state ->
+            state.exitModal?.let { setState { copy(exitModal = it.copy(loading = true)) } }
+        }
+        closeAuthFlow(closeAuthFlowError = null)
+    }
 
-    fun onCloseDismiss() = setState { copy(closeDialog = null) }
+    fun onCloseDismiss() = setState { copy(exitModal = null) }
 
     /**
      * [NavHost] handles back presses except for when backstack is empty, where it delegates
@@ -374,7 +383,7 @@ internal data class FinancialConnectionsSheetNativeState(
     @PersistState
     val firstInit: Boolean,
     val configuration: FinancialConnectionsSheet.Configuration,
-    val closeDialog: CloseDialog?,
+    val exitModal: CloseDialog?,
     val reducedBranding: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
     val completed: Boolean,
@@ -387,6 +396,7 @@ internal data class FinancialConnectionsSheetNativeState(
      */
     data class CloseDialog(
         val description: TextResource,
+        val loading: Boolean
     )
 
     /**
@@ -400,7 +410,7 @@ internal data class FinancialConnectionsSheetNativeState(
         completed = false,
         initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,
-        closeDialog = null,
+        exitModal = null,
         viewEffect = null
     )
 }

@@ -58,18 +58,18 @@
     </plurals>
     <string name="stripe_account_picker_error_no_account_available_title">There was a problem accessing your %1$s account</string>
     <string name="stripe_account_picker_error_no_account_available_desc">Please select another bank or try again</string>
-    <string name="stripe_manualentry_title">Enter bank account details</string>
+    <string name="stripe_manualentry_title">Enter bank details</string>
     <string name="stripe_manualentry_routing">Routing number</string>
     <string name="stripe_manualentry_account">Account number</string>
     <string name="stripe_manualentry_accountconfirm">Confirm account number</string>
-    <string name="stripe_manualentry_cta">Continue</string>
+    <string name="stripe_manualentry_cta">Submit</string>
     <string name="stripe_validation_routing_too_short">Please enter 9 digits for your routing number.</string>
     <string name="stripe_validation_no_us_routing">Invalid routing number.</string>
     <string name="stripe_validation_routing_required">Routing number required.</string>
     <string name="stripe_validation_account_required">Account number required.</string>
     <string name="stripe_validation_account_too_long">Invalid bank account number: must be at most 17 digits long.</string>
     <string name="stripe_validation_account_confirm_mismatch">Your account numbers don\'t match.</string>
-    <string name="stripe_manualentry_microdeposits_desc">Your bank information will be verified with micro-deposits to your account.</string>
+    <string name="stripe_manualentry_microdeposits_desc">Your bank information will be verified via micro–deposits to your account, typically within 1–2 business days. Only checking accounts are supported.</string>
     <string name="stripe_manualentry_account_type_disclaimer">Please enter a checking account.</string>
     <string name="stripe_manualentrysuccess_title">Micro-deposits initiated</string>
     <string name="stripe_manualentrysuccess_title_descriptorcode">Micro-deposit initiated</string>
@@ -94,9 +94,6 @@
     <string name="stripe_attachlinkedpaymentaccount_error_title">Your account number couldn’t be accessed at this time</string>
     <string name="stripe_attachlinkedpaymentaccount_error_desc">Please enter your bank details manually</string>
     <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Please enter your bank details manually or select another bank.</string>
-    <string name="stripe_close_dialog_title">Are you sure you want to cancel?</string>
-    <string name="stripe_close_dialog_desc">You haven\'t finished linking your bank account.</string>
-    <string name="stripe_close_dialog_networking_desc">If you cancel now, your account will be linked to %1$s but it will not be saved to Link.</string>
     <string name="stripe_close_dialog_confirm">Yes, cancel</string>
     <string name="stripe_close_dialog_back">Back</string>
     <string name="stripe_error_cta_close">Close</string>
@@ -132,6 +129,13 @@
     <string name="stripe_verification.maxAttemptsExceeded">We\'re experiencing high volumes. Try again in an hour and if you need immediate assistance, please contact us.</string>
     <string name="stripe_verification.unexpectedError">Something went wrong.</string>
     <string name="stripe_link_account_picker_disconnected">Disconnected</string>
+    <string name="stripe_exit_modal_title">Exit without connecting?</string>
+    <string name="stripe_exit_modal_desc">Your bank account won’t be connected to %1$s and all progress will be lost.</string>
+    <string name="stripe_exit_modal_desc_no_business">Your bank account won’t be connected to this business and all progress will be lost.</string>
+    <string name="stripe_close_dialog_networking_desc">If you cancel now, your account will be linked to %1$s but it will not be saved to Link.</string>
+    <string name="stripe_close_dialog_networking_desc_no_business">If you cancel now, your account will be linked to this business but it will not be saved to Link.</string>
+    <string name="stripe_exit_modal_cta_accept">Yes</string>
+    <string name="stripe_exit_modal_cta_cancel">Cancel</string>
     <plurals name="stripe_success_networking_save_to_link_failed">
         <item quantity="one">Your account was connected to %1$s but could not be saved to Link with Stripe at this time.</item>
         <item quantity="other">Your accounts were connected to %1$s but could not be saved to Link with Stripe at this time.</item>

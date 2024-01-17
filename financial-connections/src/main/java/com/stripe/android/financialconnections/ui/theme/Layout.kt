@@ -72,7 +72,12 @@ internal fun Layout(
         }
         // Footer content (bottom aligned)
         Box(
-            modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
+            modifier = Modifier.padding(
+                top = 16.dp,
+                bottom = 24.dp,
+                start = 24.dp,
+                end = 24.dp,
+            ),
             content = { footer() }
         )
     }
