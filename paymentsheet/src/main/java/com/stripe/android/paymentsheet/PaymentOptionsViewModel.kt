@@ -97,12 +97,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     override val error: StateFlow<String?> = _error
 
-    private val linkEmailFlow: StateFlow<String?> = linkConfigurationCoordinator.emailFlow.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
-
     override val walletsState: StateFlow<WalletsState?> = combine(
         linkHandler.isLinkEnabled,
         linkEmailFlow,

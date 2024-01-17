@@ -170,6 +170,12 @@ internal abstract class BaseSheetViewModel(
     private val _mandateText = MutableStateFlow<MandateText?>(null)
     internal val mandateText: StateFlow<MandateText?> = _mandateText
 
+    protected val linkEmailFlow: StateFlow<String?> = linkConfigurationCoordinator.emailFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = null,
+    )
+
     /**
      * This should be initialized from the starter args, and then from that point forward it will be
      * the last valid new payment method entered by the user.

@@ -221,12 +221,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         initialValue = null,
     )
 
-    private val linkEmailFlow: StateFlow<String?> = linkConfigurationCoordinator.emailFlow.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
-
     override val walletsState: StateFlow<WalletsState?> = combineStateFlows(
         linkHandler.isLinkEnabled,
         linkEmailFlow,

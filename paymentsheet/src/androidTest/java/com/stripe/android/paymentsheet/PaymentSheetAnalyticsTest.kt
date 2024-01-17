@@ -106,7 +106,7 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_custom_init_default")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
-        validateAnalyticsRequest(eventName = "mc_custom_sheet_savedpm_show")
+        validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
 
         testContext.configureFlowController {
             configureWithPaymentIntent(
@@ -123,7 +123,6 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_custom_paymentoption_newpm_select")
 
-        page.addPaymentMethod()
         page.fillOutCardDetails()
 
         networkRule.enqueue(
