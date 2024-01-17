@@ -33,12 +33,14 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Loading
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.V3LoadingSpinner
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -49,6 +51,7 @@ import kotlinx.coroutines.delay
 private const val ENTER_TRANSITION_DURATION_MS = 1000
 private const val CHECK_ALPHA_DURATION_MS = 250
 private const val SLIDE_IN_ANIMATION_FRACTION = 4
+
 @Composable
 internal fun SuccessContent(
     overrideAnimationForPreview: Boolean,
@@ -76,7 +79,11 @@ internal fun SuccessContent(
             )
         }
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+        ) {
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -84,6 +91,7 @@ internal fun SuccessContent(
                 contentAlignment = Alignment.Center
             ) {
                 SpinnerToSuccessAnimation(
+                    customSuccessMessage = payload.customSuccessMessage,
                     accountsCount = payload.accountsCount,
                     showSpinner = showSpinner
                 )
@@ -98,11 +106,11 @@ internal fun SuccessContent(
     }
 }
 
-
 @Composable
 private fun SpinnerToSuccessAnimation(
     showSpinner: Boolean,
-    accountsCount: Int
+    accountsCount: Int,
+    customSuccessMessage: TextResource?
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -140,33 +148,53 @@ private fun SpinnerToSuccessAnimation(
             enter = enterTransition + slideInVertically(initialOffsetY = { it / SLIDE_IN_ANIMATION_FRACTION }),
             exit = exitTransition
         ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(56.dp)
-                        .background(FinancialConnectionsTheme.v3Colors.iconBrand, CircleShape)
-                ) {
-                    Icon(
-                        modifier = Modifier.alpha(checkAlpha),
-                        imageVector = Icons.Default.Check,
-                        contentDescription = stringResource(id = R.string.stripe_success_pane_title),
-                        tint = Color.White
-                    )
-                }
-                Text(
-                    stringResource(id = R.string.stripe_success_pane_title),
-                    style = FinancialConnectionsTheme.v3Typography.headingXLarge
-                )
-                Text(
-                    pluralStringResource(id = R.plurals.stripe_success_pane_desc, count = accountsCount),
-                    style = FinancialConnectionsTheme.v3Typography.bodyMedium
-                )
-            }
+            SuccessCompletedContent(
+                checkAlpha = checkAlpha,
+                customSuccessMessage = customSuccessMessage,
+                accountsCount = accountsCount
+            )
         }
+    }
+}
+
+@Composable
+private fun SuccessCompletedContent(
+    checkAlpha: Float,
+    customSuccessMessage: TextResource?,
+    accountsCount: Int
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(56.dp)
+                .background(FinancialConnectionsTheme.v3Colors.iconBrand, CircleShape)
+        ) {
+            Icon(
+                modifier = Modifier.alpha(checkAlpha),
+                imageVector = Icons.Default.Check,
+                contentDescription = stringResource(id = R.string.stripe_success_pane_title),
+                tint = Color.White
+            )
+        }
+        Text(
+            stringResource(id = R.string.stripe_success_pane_title),
+            style = FinancialConnectionsTheme.v3Typography.headingXLarge,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = customSuccessMessage
+                ?.toText()?.toString()
+                ?: pluralStringResource(
+                    id = R.plurals.stripe_success_pane_desc,
+                    count = accountsCount
+                ),
+            style = FinancialConnectionsTheme.v3Typography.bodyMedium,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
@@ -177,13 +205,7 @@ private fun SuccessFooter(
     merchantName: String?,
     onDoneClick: () -> Unit
 ) {
-    Box(
-        modifier.padding(
-            bottom = 24.dp,
-            start = 24.dp,
-            end = 24.dp
-        )
-    ) {
+    Box(modifier) {
         FinancialConnectionsButton(
             loading = loading,
             onClick = onDoneClick,

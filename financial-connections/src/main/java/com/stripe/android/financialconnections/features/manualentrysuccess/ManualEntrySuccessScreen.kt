@@ -4,11 +4,11 @@ package com.stripe.android.financialconnections.features.manualentrysuccess
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.navigation.NavBackStackEntry
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.success.SuccessContent
-import com.stripe.android.financialconnections.features.success.SuccessState
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 
@@ -17,20 +17,16 @@ internal fun ManualEntrySuccessScreen(
     backStackEntry: NavBackStackEntry,
 ) {
     val parentViewModel = parentViewModel()
-    val viewModel: ManualEntrySuccessViewModel = mavericksViewModel()
+    val viewModel: ManualEntrySuccessViewModel = mavericksViewModel(argsFactory = { backStackEntry.arguments })
+    val state: State<ManualEntrySuccessState> = viewModel.collectAsState()
     BackHandler(true) {}
-    val completeAuthSessionAsync = viewModel
-        .collectAsState(ManualEntrySuccessState::completeSession)
-    SuccessContent(
-        overrideAnimationForPreview = false,
-        completeSessionAsync = completeAuthSessionAsync.value,
-        payload = SuccessState.Payload(
-            businessName = "test",
-            accountsCount = 3,
-            skipSuccessPane = false,
-        ),
-        onDoneClick = { viewModel.onSubmit() },
-        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.MANUAL_ENTRY_SUCCESS) }
-    )
+    state.value.payload()?.let { payload ->
+        SuccessContent(
+            overrideAnimationForPreview = false,
+            completeSessionAsync = state.value.completeSession,
+            payload = payload,
+            onDoneClick = { viewModel.onSubmit() },
+            onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.MANUAL_ENTRY_SUCCESS) }
+        )
+    }
 }
-

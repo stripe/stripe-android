@@ -48,13 +48,13 @@
     <string name="stripe_data_accessible_type_transactions">transactions</string>
     <string name="stripe_data_accessible_type_ownership">account ownership details</string>
     <string name="stripe_success_pane_title">Success</string>
+    <string name="stripe_success_pane_desc_microdeposits">You can expect micro–deposits to account ••••%1$s in 1–2 days and an email with further instructions.</string>
     <plurals name="stripe_success_pane_desc">
         <item quantity="one">Your account was connected</item>
         <item quantity="other">Your accounts were connected</item>
     </plurals>
     <string name="stripe_success_pane_done">Done</string>
     <string name="stripe_success_pane_done_with_merchant">Back to %1$s</string>
-    <string name="stripe_success_pane_disconnect">You can <annotation clickable="disconnect">disconnect your account</annotation> any time.</string>
     <string name="stripe_prepane_partner_callout">Stripe works with partners like %1$s to reliably offer access to thousands of financial institutions. <annotation clickable="privacy_center">Learn more</annotation></string>
     <string name="stripe_account_picker_error_no_payment_method_title">No payment accounts available</string>
     <plurals name="stripe_account_picker_error_no_payment_method_desc">
@@ -75,14 +75,6 @@
     <string name="stripe_validation_account_too_long">Invalid bank account number: must be at most 17 digits long.</string>
     <string name="stripe_validation_account_confirm_mismatch">Your account numbers don\'t match.</string>
     <string name="stripe_manualentry_microdeposits_desc">Your bank information will be verified via micro–deposits to your account, typically within 1–2 business days. Only checking accounts are supported.</string>
-    <string name="stripe_manualentry_account_type_disclaimer">Please enter a checking account.</string>
-    <string name="stripe_manualentrysuccess_title">Micro-deposits initiated</string>
-    <string name="stripe_manualentrysuccess_title_descriptorcode">Micro-deposit initiated</string>
-    <string name="stripe_manualentrysuccess_desc">Expect two small deposits to the account ending in ••••%1$s in 1–2 business days and an email with additional instructions to verify your bank account.</string>
-    <string name="stripe_manualentrysuccess_desc_noaccount">Expect two small deposits to your account in 1–2 business days and an email with additional instructions to verify your bank account.</string>
-    <string name="stripe_manualentrysuccess_desc_descriptorcode">Expect a $0.01 deposit to the account ending in ••••%1$s in 1–2 business days and an email with additional instructions to verify your bank account.</string>
-    <string name="stripe_manualentrysuccess_desc_noaccount_descriptorcode">Expect a $0.01 deposit to your account in 1–2 business days and an email with additional instructions to verify your bank account.</string>
-    <string name="stripe_manualentrysuccess_table_title">••••%1$s BANK STATEMENT</string>
     <plurals name="stripe_attachlinkedpaymentaccount_title">
         <item quantity="one">Linking account</item>
         <item quantity="other">Linking accounts</item>
@@ -107,8 +99,6 @@
     <string name="stripe_accounts_error_desc_no_retry">Please select another bank.</string>
     <string name="stripe_accountpicker_singleaccount_description">Select the account you\'d like to link.</string>
     <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
-    <string name="stripe_success_pane_skip_title">Finishing up</string>
-    <string name="stripe_success_pane_skip_desc">Hold on, we\'re almost done…</string>
     <string name="stripe_networking_signup_phone_number_disclaimer">We’ll use this to verify and manage your account.</string>
     <string name="stripe_networking_link_login_warmup_email_label">Continue as</string>
     <string name="stripe_networking_link_login_warmup_skip">Not you? <annotation clickable="skip_login">Continue without signing in</annotation></string>

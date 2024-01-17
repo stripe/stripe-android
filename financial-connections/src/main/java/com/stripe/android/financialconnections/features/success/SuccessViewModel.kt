@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.features.common.useContinueWithMe
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -40,6 +41,7 @@ internal class SuccessViewModel @Inject constructor(
             SuccessState.Payload(
                 skipSuccessPane = manifest.skipSuccessPane ?: false,
                 accountsCount = accounts.size,
+                customSuccessMessage = null,
                 // We just want to use the business name if the feature is enabled in the manifest.
                 businessName = manifest.businessName?.takeIf { manifest.useContinueWithMerchantText() },
             )
@@ -102,6 +104,7 @@ internal data class SuccessState(
 
     data class Payload(
         val businessName: String?,
+        val customSuccessMessage: TextResource?,
         val accountsCount: Int,
         val skipSuccessPane: Boolean
     )
