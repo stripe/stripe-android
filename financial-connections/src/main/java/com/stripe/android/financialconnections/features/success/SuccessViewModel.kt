@@ -12,14 +12,13 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDisconnectLink
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDone
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
-import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -59,10 +58,9 @@ internal class SuccessViewModel @Inject constructor(
                     connectedAccountName = manifest.connectedAccountName,
                     count = accounts.size
                 ),
-                accessibleData = AccessibleDataCalloutModel(
+                merchantDataAccess = MerchantDataAccessModel(
                     businessName = manifest.businessName,
                     permissions = manifest.permissions,
-                    isNetworking = manifest.isNetworkingUserFlow == true && saveToLinkWithStripeSucceeded == true,
                     isStripeDirect = manifest.isStripeDirect ?: false,
                     dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
                 ),
@@ -170,12 +168,6 @@ internal class SuccessViewModel @Inject constructor(
         nativeAuthFlowCoordinator().emit(Complete())
     }
 
-    fun onLearnMoreAboutDataAccessClick() {
-        viewModelScope.launch {
-            eventTracker.track(ClickLearnMoreDataAccess(PANE))
-        }
-    }
-
     fun onDisconnectLinkClick() {
         viewModelScope.launch {
             eventTracker.track(ClickDisconnectLink(PANE))
@@ -207,7 +199,7 @@ internal data class SuccessState(
 ) : MavericksState {
 
     data class Payload(
-        val accessibleData: AccessibleDataCalloutModel,
+        val merchantDataAccess: MerchantDataAccessModel,
         val institution: FinancialConnectionsInstitution,
         val accounts: List<PartnerAccount>,
         val disconnectUrl: String,

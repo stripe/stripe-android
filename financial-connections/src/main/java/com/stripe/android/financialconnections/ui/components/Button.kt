@@ -2,6 +2,9 @@
 
 package com.stripe.android.financialconnections.ui.components
 
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.R
+import android.view.HapticFeedbackConstants.CONFIRM
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,6 +32,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -50,12 +54,16 @@ internal fun FinancialConnectionsButton(
     loading: Boolean = false,
     content: @Composable (RowScope.() -> Unit)
 ) {
+    val view = LocalView.current
     val multipleEventsCutter = remember { MultipleEventsCutter.get() }
     CompositionLocalProvider(LocalRippleTheme provides type.rippleTheme()) {
         Button(
             onClick = {
                 multipleEventsCutter.processEvent {
-                    if (loading.not()) onClick()
+                    if (loading.not()) {
+                        if (SDK_INT >= R) view.performHapticFeedback(CONFIRM)
+                        onClick()
+                    }
                 }
             },
             modifier = modifier,
