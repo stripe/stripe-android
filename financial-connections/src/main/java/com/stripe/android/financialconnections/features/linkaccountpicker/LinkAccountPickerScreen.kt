@@ -42,10 +42,9 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
 import com.stripe.android.financialconnections.features.common.AccountItem
-import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingContent
+import com.stripe.android.financialconnections.features.common.MerchantDataAccessText
 import com.stripe.android.financialconnections.features.common.PaneFooter
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.Payload
@@ -177,8 +176,8 @@ private fun LinkAccountPickerLoaded(
             Spacer(modifier = Modifier.size(16.dp))
         }
         PaneFooter(elevation = scrollState.elevation) {
-            AccessibleDataCallout(
-                payload.accessibleData,
+            MerchantDataAccessText(
+                payload.merchantDataAccess,
                 onLearnMoreAboutDataAccessClick
             )
             Spacer(modifier = Modifier.size(12.dp))
@@ -207,9 +206,7 @@ private fun NetworkedAccountItem(
         onAccountClicked = onAccountClicked,
         account = partnerAccount,
         networkedAccount = networkedAccount
-    ) {
-        InstitutionIcon(institutionIcon = partnerAccount.institution?.icon?.default)
-    }
+    )
 }
 
 @Composable

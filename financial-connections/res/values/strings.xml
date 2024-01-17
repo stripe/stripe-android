@@ -35,16 +35,14 @@
     <string name="stripe_account_picker_multiselect_account">Select accounts</string>
     <string name="stripe_account_picker_cta_confirm">Confirm</string>
     <plurals name="stripe_account_picker_cta_link">
-        <item quantity="one">Link account</item>
-        <item quantity="other">Link accounts</item>
+        <item quantity="one">Connect account</item>
+        <item quantity="other">Connect accounts</item>
     </plurals>
     <string name="stripe_search">Search</string>
     <string name="stripe_account_picker_dropdown_hint">Choose one</string>
-    <string name="stripe_data_accessible_callout_stripe_direct"><annotation bold="accessible_data">Data accessible to Stripe: </annotation>%2$s. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="stripe_data_accessible_callout_through_stripe"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Stripe. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="stripe_data_accessible_callout_through_stripe_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Stripe. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="stripe_data_accessible_callout_through_link"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Link. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="stripe_data_accessible_callout_through_link_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Link. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="stripe_data_accessible_callout_stripe">Stripe can access %2$s. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="stripe_data_accessible_callout_business">%1$s can access %2$s. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="stripe_data_accessible_callout_no_business">This business can access %2$s. <annotation clickable="learn_more">Learn more</annotation></string>
     <string name="stripe_data_accessible_type_accountdetails">account details</string>
     <string name="stripe_data_accessible_type_balances">balances</string>
     <string name="stripe_data_accessible_type_transactions">transactions</string>

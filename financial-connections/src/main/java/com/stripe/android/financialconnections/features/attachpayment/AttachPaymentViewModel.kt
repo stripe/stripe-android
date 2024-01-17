@@ -7,7 +7,6 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PollAttachPaymentsSucceeded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
@@ -45,14 +44,6 @@ internal class AttachPaymentViewModel @Inject constructor(
         suspend {
             val sync = getOrFetchSync()
             val manifest = requireNotNull(sync.manifest)
-            AttachPaymentState.Payload(
-                businessName = manifest.businessName,
-                accountsCount = getCachedAccounts().size
-            )
-        }.execute { copy(payload = it) }
-        suspend {
-            val sync = getOrFetchSync()
-            val manifest = requireNotNull(sync.manifest)
             val consumerSession = getCachedConsumerSession()
             val authSession = requireNotNull(manifest.activeAuthSession)
             val activeInstitution = requireNotNull(manifest.activeInstitution)
@@ -81,20 +72,6 @@ internal class AttachPaymentViewModel @Inject constructor(
     }
 
     private fun logErrors() {
-        onAsync(
-            AttachPaymentState::payload,
-            onFail = {
-                eventTracker.logError(
-                    logger = logger,
-                    pane = PANE,
-                    extraMessage = "Error retrieving accounts to attach payment",
-                    error = it
-                )
-            },
-            onSuccess = {
-                eventTracker.track(FinancialConnectionsAnalyticsEvent.PaneLoaded(PANE))
-            }
-        )
         onAsync(
             AttachPaymentState::linkPaymentAccount,
             onSuccess = {
@@ -138,11 +115,5 @@ internal class AttachPaymentViewModel @Inject constructor(
 }
 
 internal data class AttachPaymentState(
-    val payload: Async<Payload> = Uninitialized,
     val linkPaymentAccount: Async<LinkAccountSessionPaymentAccount> = Uninitialized
-) : MavericksState {
-    data class Payload(
-        val accountsCount: Int,
-        val businessName: String?
-    )
-}
+) : MavericksState

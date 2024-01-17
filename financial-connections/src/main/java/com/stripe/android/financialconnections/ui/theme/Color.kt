@@ -96,6 +96,7 @@ internal data class FinancialConnectionsV3Colors(
     val buttonSecondaryPressed: Color,
     val backgroundSurface: Color,
     val background: Color,
+    val backgroundOffset: Color,
     val backgroundBrand: Color,
     val border: Color,
     val borderBrand: Color

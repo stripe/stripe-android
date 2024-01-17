@@ -4,7 +4,7 @@ package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.airbnb.mvrx.Success
-import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
@@ -30,7 +30,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 title = display().title,
                 accounts = partnerAccountList(),
                 addNewAccount = requireNotNull(display().addNewAccount),
-                accessibleData = accessibleCallout(),
+                merchantDataAccess = accessibleCallout(),
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
@@ -46,7 +46,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 title = display().title,
                 accounts = partnerAccountList(),
                 addNewAccount = requireNotNull(display().addNewAccount),
-                accessibleData = accessibleCallout(),
+                merchantDataAccess = accessibleCallout(),
                 consumerSessionClientSecret = "secret",
                 defaultCta = display().defaultCta,
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
@@ -155,7 +155,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
         ),
     )
 
-    private fun accessibleCallout() = AccessibleDataCalloutModel(
+    private fun accessibleCallout() = MerchantDataAccessModel(
         businessName = "My business",
         permissions = listOf(
             FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
@@ -164,7 +164,6 @@ internal class LinkAccountPickerPreviewParameterProvider :
             FinancialConnectionsAccount.Permissions.TRANSACTIONS
         ),
         isStripeDirect = true,
-        isNetworking = true,
         dataPolicyUrl = ""
     )
 
