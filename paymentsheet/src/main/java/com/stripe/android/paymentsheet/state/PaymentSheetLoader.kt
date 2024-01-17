@@ -158,7 +158,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
 
         val linkState = async {
-            if (elementsSession.isLinkEnabled) {
+            if (elementsSession.isLinkEnabled && !config.billingDetailsCollectionConfiguration.collectsAnything) {
                 loadLinkState(
                     config = config,
                     stripeIntent = stripeIntent,
