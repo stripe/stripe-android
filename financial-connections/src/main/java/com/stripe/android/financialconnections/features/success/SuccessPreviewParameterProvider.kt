@@ -11,12 +11,10 @@ internal class SuccessPreviewParameterProvider :
     PreviewParameterProvider<SuccessState> {
     override val values = sequenceOf(
         canonical(),
-        animationCompleted(),
-        animationCompletedCustomMessage()
+        customMessage()
     )
 
     private fun canonical() = SuccessState(
-        overrideAnimationForPreview = false,
         payload = Success(
             SuccessState.Payload(
                 skipSuccessPane = false,
@@ -28,21 +26,7 @@ internal class SuccessPreviewParameterProvider :
         completeSession = Uninitialized,
     )
 
-    private fun animationCompleted() = SuccessState(
-        overrideAnimationForPreview = true,
-        payload = Success(
-            SuccessState.Payload(
-                skipSuccessPane = false,
-                accountsCount = 1,
-                customSuccessMessage = null,
-                businessName = "Stripe",
-            )
-        ),
-        completeSession = Uninitialized,
-    )
-
-    private fun animationCompletedCustomMessage() = SuccessState(
-        overrideAnimationForPreview = true,
+    private fun customMessage() = SuccessState(
         payload = Success(
             SuccessState.Payload(
                 skipSuccessPane = false,
