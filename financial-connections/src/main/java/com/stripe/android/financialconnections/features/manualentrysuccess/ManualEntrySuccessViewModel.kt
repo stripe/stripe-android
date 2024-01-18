@@ -42,7 +42,7 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
                     args = listOf(last4 ?: "")
                 ),
                 accountsCount = 1, // on manual entry just one account is connected,
-                skipSuccessPane = manifest.skipSuccessPane ?: false
+                skipSuccessPane = false
             ).also {
                 eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY_SUCCESS))
             }
