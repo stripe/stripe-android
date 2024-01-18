@@ -1,22 +1,20 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
@@ -31,7 +29,6 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
-import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
@@ -46,11 +43,12 @@ import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
@@ -106,7 +104,6 @@ private fun NetworkingLinkSignupContent(
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> NetworkingLinkSignupLoaded(
-                scrollState = scrollState,
                 validForm = state.valid(),
                 payload = payload(),
                 lookupAccountSync = state.lookupAccount,
@@ -125,9 +122,9 @@ private fun NetworkingLinkSignupContent(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun NetworkingLinkSignupLoaded(
-    scrollState: ScrollState,
     validForm: Boolean,
     payload: Payload,
     saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
@@ -137,58 +134,49 @@ private fun NetworkingLinkSignupLoaded(
     onSaveToLink: () -> Unit,
     onSkipClick: () -> Unit
 ) {
-    Column(
-        Modifier.fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(scrollState)
-                .padding(
-                    top = 0.dp,
-                    start = 24.dp,
-                    end = 24.dp,
-                    bottom = 24.dp
-                )
-        ) {
-            Spacer(modifier = Modifier.size(16.dp))
-            Title(payload.content.title)
-            Spacer(modifier = Modifier.size(8.dp))
-            payload.content.body.bullets.forEach {
+    Layout(
+        body = {
+            item {
+                Title(payload.content.title)
+                Spacer(modifier = Modifier.size(24.dp))
+            }
+            items(payload.content.body.bullets) {
                 ListItem(
                     bullet = BulletUI.from(it),
                     onClickableTextClick = onClickableTextClick
                 )
-                Spacer(modifier = Modifier.size(8.dp))
+                Spacer(modifier = Modifier.size(16.dp))
             }
-            EmailSection(
-                showFullForm = showFullForm,
-                loading = lookupAccountSync is Loading,
-                emailController = payload.emailController,
-                enabled = true,
-            )
-            if (showFullForm) {
-                PhoneNumberSection(
-                    payload = payload,
-                    onClickableTextClick = onClickableTextClick
+            item {
+                EmailSection(
+                    showFullForm = showFullForm,
+                    loading = lookupAccountSync is Loading,
+                    emailController = payload.emailController,
+                    enabled = true,
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
-            Spacer(modifier = Modifier.height(16.dp))
+
             if (showFullForm) {
-                SaveToLinkCta(
-                    text = payload.content.cta,
-                    aboveCta = payload.content.aboveCta,
-                    onClickableTextClick = onClickableTextClick,
-                    saveAccountToLinkSync = saveAccountToLinkSync,
-                    validForm = validForm,
-                    onSaveToLink = onSaveToLink
-                )
+                item { PhoneNumberSection(payload = payload) }
             }
-            Spacer(modifier = Modifier.size(12.dp))
-            SkipCta(payload.content.skipCta, onSkipClick)
+        },
+        footer = {
+            Column {
+                if (showFullForm) {
+                    SaveToLinkCta(
+                        text = payload.content.cta,
+                        aboveCta = payload.content.aboveCta,
+                        onClickableTextClick = onClickableTextClick,
+                        saveAccountToLinkSync = saveAccountToLinkSync,
+                        validForm = validForm,
+                        onSaveToLink = onSaveToLink
+                    )
+                }
+                Spacer(modifier = Modifier.size(12.dp))
+                SkipCta(payload.content.skipCta, onSkipClick)
+            }
         }
-    }
+    )
 }
 
 @Composable
@@ -217,17 +205,9 @@ private fun SaveToLinkCta(
             modifier = Modifier.fillMaxWidth(),
             text = TextResource.Text(fromHtml(aboveCta)),
             onClickableTextClick = onClickableTextClick,
-            defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
+            defaultStyle = v3Typography.labelSmall.copy(
                 textAlign = TextAlign.Center,
-                color = FinancialConnectionsTheme.colors.textSecondary
-            ),
-            annotationStyles = mapOf(
-                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
-                    .toSpanStyle()
-                    .copy(color = FinancialConnectionsTheme.colors.textBrand),
-                StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
-                    .toSpanStyle()
-                    .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+                color = v3Colors.textDefault
             )
         )
         Spacer(modifier = Modifier.size(8.dp))
@@ -246,8 +226,7 @@ private fun SaveToLinkCta(
 
 @Composable
 private fun PhoneNumberSection(
-    payload: Payload,
-    onClickableTextClick: (String) -> Unit
+    payload: Payload
 ) {
     Column {
         StripeThemeForConnections {
@@ -258,21 +237,6 @@ private fun PhoneNumberSection(
                 enabled = true,
             )
         }
-        AnnotatedText(
-            text = TextResource.StringId(R.string.stripe_networking_signup_phone_number_disclaimer),
-            onClickableTextClick = onClickableTextClick,
-            defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-                color = FinancialConnectionsTheme.colors.textSecondary
-            ),
-            annotationStyles = mapOf(
-                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
-                    .toSpanStyle()
-                    .copy(color = FinancialConnectionsTheme.colors.textBrand),
-                StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
-                    .toSpanStyle()
-                    .copy(color = FinancialConnectionsTheme.colors.textSecondary),
-            )
-        )
     }
 }
 
@@ -280,12 +244,7 @@ private fun PhoneNumberSection(
 private fun Title(title: String) {
     AnnotatedText(
         text = TextResource.Text(fromHtml(title)),
-        defaultStyle = FinancialConnectionsTheme.typography.subtitle,
-        annotationStyles = mapOf(
-            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.subtitle
-                .toSpanStyle()
-                .copy(color = FinancialConnectionsTheme.colors.textBrand),
-        ),
+        defaultStyle = v3Typography.headingLarge,
         onClickableTextClick = {},
     )
 }
@@ -323,7 +282,7 @@ internal fun EmailSection(
                             end = 16.dp,
                             bottom = 8.dp
                         ),
-                    color = FinancialConnectionsTheme.colors.iconBrand,
+                    color = v3Colors.iconBrand,
                     strokeWidth = 2.dp
                 )
             }
