@@ -49,6 +49,7 @@
     <string name="stripe_data_accessible_type_ownership">account ownership details</string>
     <string name="stripe_success_pane_title">Success</string>
     <string name="stripe_success_pane_desc_microdeposits">You can expect micro–deposits to account ••••%1$s in 1–2 days and an email with further instructions.</string>
+    <string name="stripe_success_pane_desc_microdeposits_no_account">You can expect micro–deposits to your account in 1–2 days and an email with further instructions.</string>
     <plurals name="stripe_success_pane_desc">
         <item quantity="one">Your account was connected</item>
         <item quantity="other">Your accounts were connected</item>

@@ -19,7 +19,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
-import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.financialconnections.ui.TextResource.StringId
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,13 +34,12 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
     init {
         suspend {
             val manifest = getManifest()
-            val last4 = Destination.ManualEntrySuccess.last4(initialState.args)
             SuccessState.Payload(
                 businessName = manifest.businessName,
-                customSuccessMessage = TextResource.StringId(
-                    value = R.string.stripe_success_pane_desc_microdeposits,
-                    args = listOf(last4 ?: "")
-                ),
+                customSuccessMessage = when (val last4 = initialState.last4) {
+                    null -> StringId(R.string.stripe_success_pane_desc_microdeposits_no_account)
+                    else -> StringId(R.string.stripe_success_pane_desc_microdeposits, listOf(last4))
+                },
                 accountsCount = 1, // on manual entry just one account is connected,
                 skipSuccessPane = false
             ).also {
@@ -76,14 +75,14 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
 }
 
 internal data class ManualEntrySuccessState(
-    val args: Bundle?,
+    val last4: String?,
     val payload: Async<SuccessState.Payload>,
     val completeSession: Async<FinancialConnectionsSession>
 ) : MavericksState {
 
     @Suppress("unused") // used by mavericks to create initial state.
     constructor(args: Bundle?) : this(
-        args = args,
+        last4 = Destination.ManualEntrySuccess.last4(args),
         payload = Uninitialized,
         completeSession = Uninitialized
     )
