@@ -22,7 +22,6 @@ internal fun ManualEntrySuccessScreen(
     BackHandler(true) {}
     state.payload()?.let { payload ->
         SuccessContent(
-            overrideAnimationForPreview = false,
             completeSessionAsync = state.completeSession,
             payload = payload,
             onDoneClick = viewModel::onSubmit,

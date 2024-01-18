@@ -35,12 +35,15 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Loading
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.V3LoadingSpinner
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
@@ -55,11 +58,28 @@ private const val SLIDE_IN_ANIMATION_FRACTION = 4
 
 @Composable
 internal fun SuccessContent(
-    overrideAnimationForPreview: Boolean,
     completeSessionAsync: Async<FinancialConnectionsSession>,
     payload: SuccessState.Payload,
     onDoneClick: () -> Unit,
     onCloseClick: () -> Unit,
+) {
+    SuccessContentInternal(
+        // Just enabled on Compose Previews: allows to preview the post-animation state.
+        overrideAnimationForPreview = false,
+        payload = payload,
+        onCloseClick = onCloseClick,
+        completeSessionAsync = completeSessionAsync,
+        onDoneClick = onDoneClick
+    )
+}
+
+@Composable
+private fun SuccessContentInternal(
+    overrideAnimationForPreview: Boolean,
+    payload: SuccessState.Payload,
+    onCloseClick: () -> Unit,
+    completeSessionAsync: Async<FinancialConnectionsSession>,
+    onDoneClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     var showSpinner by remember { mutableStateOf(overrideAnimationForPreview.not()) }
@@ -220,5 +240,45 @@ private fun SuccessFooter(
                 }
             )
         }
+    }
+}
+
+@Preview(
+    group = "Success",
+    name = "Loading"
+)
+@Suppress("LongMethod")
+@Composable
+internal fun SuccessScreenPreview(
+    @PreviewParameter(SuccessPreviewParameterProvider::class) state: SuccessState
+) {
+    FinancialConnectionsPreview {
+        SuccessContentInternal(
+            overrideAnimationForPreview = false,
+            completeSessionAsync = state.completeSession,
+            payload = state.payload()!!,
+            onDoneClick = {},
+            onCloseClick = {}
+        )
+    }
+}
+
+@Preview(
+    group = "Success",
+    name = "Animation completed"
+)
+@Suppress("LongMethod")
+@Composable
+internal fun SuccessScreenAnimationCompletedPreview(
+    @PreviewParameter(SuccessPreviewParameterProvider::class) state: SuccessState
+) {
+    FinancialConnectionsPreview {
+        SuccessContentInternal(
+            overrideAnimationForPreview = true,
+            completeSessionAsync = state.completeSession,
+            payload = state.payload()!!,
+            onDoneClick = {},
+            onCloseClick = {}
+        )
     }
 }

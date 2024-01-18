@@ -96,8 +96,6 @@ internal class SuccessViewModel @Inject constructor(
 }
 
 internal data class SuccessState(
-    // Just enabled on Compose Previews: allows to preview the post-animation state.
-    val overrideAnimationForPreview: Boolean = false,
     val payload: Async<Payload> = Uninitialized,
     val completeSession: Async<FinancialConnectionsSession> = Uninitialized
 ) : MavericksState {
