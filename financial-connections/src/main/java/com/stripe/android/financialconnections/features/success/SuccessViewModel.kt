@@ -42,7 +42,7 @@ internal class SuccessViewModel @Inject constructor(
                 skipSuccessPane = manifest.skipSuccessPane ?: false,
                 accountsCount = accounts.size,
                 customSuccessMessage = null,
-                // We just want to use the business name if the feature is enabled in the manifest.
+                // We just want to use the business name in the CTA if the feature is enabled in the manifest.
                 businessName = manifest.businessName?.takeIf { manifest.useContinueWithMerchantText() },
             )
         }.execute {
