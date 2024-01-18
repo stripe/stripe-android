@@ -15,9 +15,6 @@ internal class SuccessPreviewParameterProvider :
         animationCompletedCustomMessage()
     )
 
-    override val count: Int
-        get() = super.count
-
     private fun canonical() = SuccessState(
         overrideAnimationForPreview = false,
         payload = Success(
