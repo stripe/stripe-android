@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -174,7 +175,7 @@ private fun SuccessCompletedContent(
                 .background(FinancialConnectionsTheme.v3Colors.iconBrand, CircleShape)
         ) {
             Icon(
-                modifier = Modifier.alpha(checkAlpha),
+                modifier = Modifier.graphicsLayer { alpha = checkAlpha },
                 imageVector = Icons.Default.Check,
                 contentDescription = stringResource(id = R.string.stripe_success_pane_title),
                 tint = Color.White
