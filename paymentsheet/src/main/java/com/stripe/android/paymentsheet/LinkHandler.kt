@@ -7,6 +7,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.account.CookieStore
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.AccountStatus
@@ -34,6 +35,7 @@ internal class LinkHandler @Inject constructor(
     private val linkLauncher: LinkPaymentLauncher,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle,
+    private val cookieStore: CookieStore,
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
 ) {
     sealed class ProcessingState {
@@ -173,6 +175,11 @@ internal class LinkHandler @Inject constructor(
                 configuration,
                 paymentMethodCreateParams
             ).getOrNull()
+
+            if (linkPaymentDetails != null) {
+                cookieStore.markLinkAsUsed()
+            }
+
             _processingState.emit(
                 ProcessingState.PaymentDetailsCollected(
                     when (linkPaymentDetails) {

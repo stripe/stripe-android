@@ -5,6 +5,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.account.CookieStore
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.model.ElementsSession
@@ -58,6 +59,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val eventReporter: EventReporter,
     @IOContext private val workContext: CoroutineContext,
     private val accountStatusProvider: LinkAccountStatusProvider,
+    private val cookieStore: CookieStore,
 ) : PaymentSheetLoader {
 
     override suspend fun load(
@@ -296,8 +298,11 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val merchantName = config.merchantDisplayName
 
         val layoutDescriptor = LpmRepository.HardcodedCard.getPMAddForm(stripeIntent, config)
+        val hasUsedLink = cookieStore.hasUsedLink()
 
-        val linkSignupMode = if (layoutDescriptor.showCheckbox) {
+        val linkSignupMode = if (hasUsedLink) {
+            null
+        } else if (layoutDescriptor.showCheckbox) {
             LinkSignupMode.AlongsideSaveForFutureUse
         } else {
             LinkSignupMode.InsteadOfSaveForFutureUse
@@ -312,7 +317,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                     billingCountryCode = config.defaultBillingDetails?.address?.country,
                 )
             }
-            LinkSignupMode.AlongsideSaveForFutureUse -> {
+            LinkSignupMode.AlongsideSaveForFutureUse,
+            null -> {
                 // No customer info, because we don't want to prefill the form
                 // in this flow.
                 null

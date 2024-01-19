@@ -20,7 +20,7 @@ class CookieStore @Inject internal constructor(
      * Clear all local data.
      */
     fun clear() {
-        store.delete(SIGNED_UP_EMAIL)
+        store.clear()
     }
 
     /**
@@ -28,24 +28,35 @@ class CookieStore @Inject internal constructor(
      * user won't be automatically redirected to the verification screen next time.
      */
     internal fun logout() {
-        store.delete(SIGNED_UP_EMAIL)
+        store.delete(SignedUpEmail)
     }
 
     /**
      * Store the email that has recently signed up on this device so that the user is remembered.
      */
-    internal fun storeNewUserEmail(email: String) =
-        store.write(SIGNED_UP_EMAIL, email)
+    internal fun storeNewUserEmail(email: String) {
+        store.write(SignedUpEmail, email)
+    }
 
     /**
      * Retrieve the email that has recently signed up on this device.
      */
-    internal fun getNewUserEmail() =
-        store.read(SIGNED_UP_EMAIL).also {
-            store.delete(SIGNED_UP_EMAIL)
+    internal fun getNewUserEmail(): String? {
+        return store.read(SignedUpEmail).also {
+            store.delete(SignedUpEmail)
         }
+    }
+
+    fun markLinkAsUsed() {
+        store.write(HasUsedLink, true)
+    }
+
+    fun hasUsedLink(): Boolean {
+        return store.read(HasUsedLink, defaultValue = false)
+    }
 
     internal companion object {
-        const val SIGNED_UP_EMAIL = "signed_up_email"
+        const val SignedUpEmail = "signed_up_email"
+        const val HasUsedLink = "signed_up_email"
     }
 }

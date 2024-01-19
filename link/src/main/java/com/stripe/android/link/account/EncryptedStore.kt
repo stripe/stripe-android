@@ -1,6 +1,7 @@
 package com.stripe.android.link.account
 
 import android.content.Context
+import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import javax.inject.Inject
@@ -23,26 +24,29 @@ internal class EncryptedStore @Inject constructor(context: Context) {
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
-    /**
-     * Write a key-value pair to the encrypted SharedPreferences
-     */
-    fun write(key: String, value: String) = with(sharedPreferences.edit()) {
+    fun write(key: String, value: String) = sharedPreferences.edit {
         putString(key, value)
-        apply()
     }
 
-    /**
-     * Read a String value from the encrypted SharedPreferences.
-     * Returns null if value doesn't exist.
-     */
-    fun read(key: String) = sharedPreferences.getString(key, null)
+    fun write(key: String, value: Boolean) = sharedPreferences.edit {
+        putBoolean(key, value)
+    }
 
-    /**
-     * Delete a value from the encrypted SharedPreferences.
-     */
-    fun delete(key: String) = with(sharedPreferences.edit()) {
-        remove(key)
-        apply()
+    fun read(key: String): String? = sharedPreferences.getString(key, null)
+
+    fun read(
+        key: String,
+        defaultValue: Boolean,
+    ): Boolean = sharedPreferences.getBoolean(key, defaultValue)
+
+    fun delete(key: String) {
+        sharedPreferences.edit {
+            remove(key)
+        }
+    }
+
+    fun clear() {
+        sharedPreferences.edit { clear() }
     }
 
     private companion object {

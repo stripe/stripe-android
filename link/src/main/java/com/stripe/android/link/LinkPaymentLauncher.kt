@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.annotation.RestrictTo
+import com.stripe.android.link.account.CookieStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,6 +17,7 @@ import javax.inject.Singleton
 class LinkPaymentLauncher @Inject internal constructor(
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
     private val linkActivityContract: LinkActivityContract,
+    private val cookieStore: CookieStore,
 ) {
     private val analyticsHelper = linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
 
@@ -40,6 +42,7 @@ class LinkPaymentLauncher @Inject internal constructor(
         linkActivityResultLauncher = activityResultCaller.registerForActivityResult(
             linkActivityContract
         ) { linkActivityResult ->
+            cookieStore.markLinkAsUsed()
             analyticsHelper.onLinkResult(linkActivityResult)
             callback(linkActivityResult)
         }
