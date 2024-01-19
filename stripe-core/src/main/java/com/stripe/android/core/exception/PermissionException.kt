@@ -14,4 +14,6 @@ class PermissionException(
     stripeError,
     requestId,
     HttpURLConnection.HTTP_FORBIDDEN
-)
+) {
+    override fun analyticsValue(): String = "permissionError"
+}

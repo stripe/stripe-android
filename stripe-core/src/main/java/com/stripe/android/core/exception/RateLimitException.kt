@@ -17,4 +17,6 @@ class RateLimitException(
     HTTP_TOO_MANY_REQUESTS,
     cause,
     message
-)
+) {
+    override fun analyticsValue(): String = "rateLimitError"
+}

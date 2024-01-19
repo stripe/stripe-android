@@ -17,4 +17,6 @@ class InvalidRequestException(
     statusCode,
     cause,
     message
-)
+) {
+    override fun analyticsValue(): String = "invalidRequestError"
+}

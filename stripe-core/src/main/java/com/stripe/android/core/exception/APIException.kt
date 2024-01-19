@@ -24,4 +24,6 @@ class APIException(
         message = throwable.message,
         cause = throwable
     )
+
+    override fun analyticsValue(): String = "apiError"
 }

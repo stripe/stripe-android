@@ -18,4 +18,6 @@ constructor(
     stripeError,
     requestId,
     HttpURLConnection.HTTP_UNAUTHORIZED
-)
+) {
+    override fun analyticsValue(): String = "authError"
+}

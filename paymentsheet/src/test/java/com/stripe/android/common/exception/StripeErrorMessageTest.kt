@@ -30,7 +30,7 @@ internal class StripeErrorMessageTest {
 
     @Test
     fun testLocalStripeException() {
-        assertThatStripeErrorMessage(LocalStripeException("Hi mom"))
+        assertThatStripeErrorMessage(LocalStripeException("Hi mom", null))
             .isEqualTo("Hi mom")
     }
 
@@ -60,7 +60,7 @@ internal class StripeErrorMessageTest {
 
     @Test
     fun testLocalStripeExceptionWithResolvableString() {
-        assertThatResolvableStripeErrorMessage(LocalStripeException("Hi mom"))
+        assertThatResolvableStripeErrorMessage(LocalStripeException("Hi mom", null))
             .isEqualTo(resolvableString("Hi mom"))
     }
 

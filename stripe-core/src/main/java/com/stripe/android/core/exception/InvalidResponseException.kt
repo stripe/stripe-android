@@ -21,4 +21,6 @@ class InvalidResponseException(
     statusCode,
     cause,
     message
-)
+) {
+    override fun analyticsValue(): String = "invalidResponseError"
+}

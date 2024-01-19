@@ -56,7 +56,9 @@ internal class PollingReachedMaxRetriesException(
 ) : StripeException(
     message = "reached max number of retries ${pollingOptions.maxNumberOfRetries}.",
     statusCode = HttpURLConnection.HTTP_ACCEPTED
-)
+) {
+    override fun analyticsValue(): String = "pollingReachedMaxRetriesError"
+}
 
 /**
  * returns true if exception represents a [HttpURLConnection.HTTP_ACCEPTED] API response.

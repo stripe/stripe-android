@@ -8,4 +8,6 @@ class AppInitializationError(message: String) : StripeException(
     requestId = null,
     statusCode = 0,
     stripeError = null
-)
+) {
+    override fun analyticsValue(): String? = null
+}

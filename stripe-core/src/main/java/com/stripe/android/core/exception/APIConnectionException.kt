@@ -13,6 +13,8 @@ class APIConnectionException(
     cause = cause,
     message = message
 ) {
+    override fun analyticsValue(): String = "connectionError"
+
     companion object {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @JvmSynthetic

@@ -21,4 +21,6 @@ class CardException(
     val param: String? = stripeError.param
     val declineCode: String? = stripeError.declineCode
     val charge: String? = stripeError.charge
+
+    override fun analyticsValue(): String = "cardError"
 }

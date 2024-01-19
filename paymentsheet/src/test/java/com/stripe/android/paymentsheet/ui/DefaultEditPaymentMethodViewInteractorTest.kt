@@ -169,7 +169,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
     fun `on remove pressed, should fail removal process`() = runTest {
         val onRemove: (paymentMethod: PaymentMethod) -> Throwable? = mock {
             onGeneric { invoke(any()) }.thenAnswer {
-                LocalStripeException("Failed to remove")
+                LocalStripeException("Failed to remove", null)
             }
         }
 
@@ -237,7 +237,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
         val onUpdate: (paymentMethod: PaymentMethod, brand: CardBrand) -> Result<PaymentMethod> = mock {
             onGeneric { invoke(any(), any()) }.thenAnswer {
                 Result.failure<PaymentMethod>(
-                    LocalStripeException("Failed to update")
+                    LocalStripeException("Failed to update", null)
                 )
             }
         }
