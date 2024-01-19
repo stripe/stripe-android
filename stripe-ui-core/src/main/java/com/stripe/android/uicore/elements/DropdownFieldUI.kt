@@ -33,7 +33,6 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.platform.LocalInputModeManager
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -95,7 +94,6 @@ fun DropDown(
     Box(
         modifier = modifier
             .wrapContentSize(Alignment.TopStart)
-            .background(MaterialTheme.stripeColors.component)
     ) {
         // Click handling happens on the box, so that it is a single accessible item
         Box(
@@ -116,14 +114,6 @@ fun DropDown(
                         selectedItemLabel,
                         color = currentTextColor
                     )
-                    if (!shouldDisableDropdownWithSingleItem) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.stripe_ic_chevron_down),
-                            contentDescription = null,
-                            modifier = Modifier.height(24.dp),
-                            tint = MaterialTheme.stripeColors.placeholderText
-                        )
-                    }
                 }
             } else {
                 Row(
@@ -147,16 +137,6 @@ fun DropDown(
                             Text(
                                 selectedItemLabel,
                                 color = currentTextColor
-                            )
-                        }
-                    }
-                    if (!shouldDisableDropdownWithSingleItem) {
-                        Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.stripe_ic_chevron_down),
-                                contentDescription = null,
-                                modifier = Modifier.height(24.dp),
-                                tint = currentTextColor
                             )
                         }
                     }

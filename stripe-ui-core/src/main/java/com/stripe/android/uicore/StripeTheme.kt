@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
+import com.stripe.android.uicore.theme.LocalSailColors
+import com.stripe.android.uicore.theme.sailColors
 import java.lang.Float.max
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -335,6 +337,7 @@ fun StripeTheme(
         LocalColors provides colors,
         LocalShapes provides shapes,
         LocalTypography provides typography,
+        LocalSailColors provides sailColors,
         LocalInspectionMode provides inspectionMode,
     ) {
         MaterialTheme(
