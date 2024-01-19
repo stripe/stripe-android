@@ -10,14 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -152,88 +149,84 @@ private fun LinkOptionalInlineSignup(
     errorMessage: ErrorMessage?,
     modifier: Modifier = Modifier
 ) {
-    CompositionLocalProvider(
-        LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
-    ) {
-        Column(modifier) {
-            val sectionError by sectionController.error.collectAsState(null)
+    Column(modifier) {
+        val sectionError by sectionController.error.collectAsState(null)
 
-            Section(
-                title = null,
-                error = sectionError?.errorMessage?.let { stringResource(it) },
+        Section(
+            title = null,
+            error = sectionError?.errorMessage?.let { stringResource(it) },
+        ) {
+            EmailCollection(
+                enabled = enabled,
+                emailController = emailController,
+                signUpState = signUpState,
+            )
+
+            AnimatedVisibility(
+                visible = signUpState != SignUpState.InputtingPhoneOrName && errorMessage != null,
             ) {
-                EmailCollection(
-                    enabled = enabled,
-                    emailController = emailController,
-                    signUpState = signUpState,
+                ErrorText(
+                    text = errorMessage
+                        ?.getMessage(LocalContext.current.resources)
+                        .orEmpty(),
+                    modifier = Modifier.fillMaxWidth()
                 )
+            }
 
-                AnimatedVisibility(
-                    visible = signUpState != SignUpState.InputtingPhoneOrName && errorMessage != null,
-                ) {
-                    ErrorText(
-                        text = errorMessage
-                            ?.getMessage(LocalContext.current.resources)
-                            .orEmpty(),
-                        modifier = Modifier.fillMaxWidth()
+            AnimatedVisibility(visible = signUpState == SignUpState.InputtingPhoneOrName) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Divider(
+                        color = MaterialTheme.stripeColors.componentDivider,
+                        thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
+                        modifier = Modifier.padding(
+                            horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
+                        )
                     )
-                }
 
-                AnimatedVisibility(visible = signUpState == SignUpState.InputtingPhoneOrName) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Divider(
-                            color = MaterialTheme.stripeColors.componentDivider,
-                            thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                            modifier = Modifier.padding(
-                                horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
-                            )
+                    PhoneNumberElementUI(
+                        enabled = enabled,
+                        controller = phoneNumberController,
+                        requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
+                        imeAction = if (requiresNameCollection) {
+                            ImeAction.Next
+                        } else {
+                            ImeAction.Done
+                        }
+                    )
+
+                    Divider(
+                        color = MaterialTheme.stripeColors.componentDivider,
+                        thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
+                        modifier = Modifier.padding(
+                            horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
                         )
+                    )
 
-                        PhoneNumberElementUI(
+                    if (requiresNameCollection) {
+                        TextField(
+                            textFieldController = nameController,
+                            imeAction = ImeAction.Done,
                             enabled = enabled,
-                            controller = phoneNumberController,
-                            requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
-                            imeAction = if (requiresNameCollection) {
-                                ImeAction.Next
-                            } else {
-                                ImeAction.Done
-                            }
                         )
+                    }
 
-                        Divider(
-                            color = MaterialTheme.stripeColors.componentDivider,
-                            thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                            modifier = Modifier.padding(
-                                horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
-                            )
+                    AnimatedVisibility(visible = errorMessage != null) {
+                        ErrorText(
+                            text = errorMessage
+                                ?.getMessage(LocalContext.current.resources)
+                                .orEmpty(),
+                            modifier = Modifier.fillMaxWidth()
                         )
-
-                        if (requiresNameCollection) {
-                            TextField(
-                                textFieldController = nameController,
-                                imeAction = ImeAction.Done,
-                                enabled = enabled,
-                            )
-                        }
-
-                        AnimatedVisibility(visible = errorMessage != null) {
-                            ErrorText(
-                                text = errorMessage
-                                    ?.getMessage(LocalContext.current.resources)
-                                    .orEmpty(),
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
                     }
                 }
             }
-
-            LinkTerms(
-                isOptional = true,
-                modifier = Modifier.padding(top = 4.dp),
-                textAlign = TextAlign.Start,
-            )
         }
+
+        LinkTerms(
+            isOptional = true,
+            modifier = Modifier.padding(top = 4.dp),
+            textAlign = TextAlign.Start,
+        )
     }
 }
 
