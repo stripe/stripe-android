@@ -80,9 +80,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
 
 private const val AwaitingPaymentResultKey = "AwaitingPaymentResult"
@@ -480,7 +482,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         it.confirm(confirmStripeIntentParams)
                     }
                 }
-                storeAwaitingPaymentResult(true)
+                storeAwaitingPaymentResult()
             },
             onFailure = ::onFatal
         )
@@ -502,7 +504,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         it.handleNextActionForSetupIntent(clientSecret)
                     }
                 }
-                storeAwaitingPaymentResult(true)
+                storeAwaitingPaymentResult()
             },
             onFailure = ::onFatal
         )
@@ -623,8 +625,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             pendingPaymentResultChannel.trySend(launcherResult)
             return
         }
-
-        storeAwaitingPaymentResult(false)
 
         when (launcherResult) {
             is InternalPaymentResult.Completed -> {
@@ -780,14 +780,16 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private suspend fun awaitPaymentResult(): InternalPaymentResult? {
         val shouldAwait = savedStateHandle.remove<Boolean>(AwaitingPaymentResultKey) ?: false
         return if (shouldAwait) {
-            pendingPaymentResultChannel.receive()
+            withTimeoutOrNull(1.seconds) {
+                pendingPaymentResultChannel.receive()
+            }
         } else {
             null
         }
     }
 
-    private fun storeAwaitingPaymentResult(isAwaiting: Boolean) {
-        savedStateHandle[AwaitingPaymentResultKey] = isAwaiting
+    private fun storeAwaitingPaymentResult() {
+        savedStateHandle[AwaitingPaymentResultKey] = true
     }
 
     internal class Factory(
