@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -63,9 +64,10 @@ internal class LinkHandler @Inject constructor(
     private val _isLinkEnabled = MutableStateFlow<Boolean?>(null)
     val isLinkEnabled: StateFlow<Boolean?> = _isLinkEnabled
 
-    private val linkConfiguration = MutableStateFlow<LinkConfiguration?>(null)
+    private val _linkConfiguration = MutableStateFlow<LinkConfiguration?>(null)
+    val linkConfiguration: StateFlow<LinkConfiguration?> = _linkConfiguration.asStateFlow()
 
-    val accountStatus: Flow<AccountStatus> = linkConfiguration
+    val accountStatus: Flow<AccountStatus> = _linkConfiguration
         .filterNotNull()
         .flatMapLatest(linkConfigurationCoordinator::getAccountStatusFlow)
 
@@ -89,7 +91,7 @@ internal class LinkHandler @Inject constructor(
 
         if (state == null) return
 
-        linkConfiguration.value = state.configuration
+        _linkConfiguration.value = state.configuration
     }
 
     suspend fun payWithLinkInline(
@@ -101,7 +103,7 @@ internal class LinkHandler @Inject constructor(
             savedStateHandle[SAVE_PROCESSING] = true
             _processingState.emit(ProcessingState.Started)
 
-            val configuration = requireNotNull(linkConfiguration.value)
+            val configuration = requireNotNull(_linkConfiguration.value)
 
             when (linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()) {
                 AccountStatus.Verified -> {
@@ -180,7 +182,7 @@ internal class LinkHandler @Inject constructor(
     }
 
     fun launchLink() {
-        val config = linkConfiguration.value ?: return
+        val config = _linkConfiguration.value ?: return
 
         linkLauncher.present(
             config,

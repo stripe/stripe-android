@@ -9,9 +9,9 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class LinkConfiguration constructor(
+data class LinkConfiguration(
     val stripeIntent: StripeIntent,
-    val signupMode: LinkSignupMode,
+    val signupMode: LinkSignupMode?,
     val merchantName: String,
     val merchantCountryCode: String?,
     val customerInfo: CustomerInfo?,
