@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.ui.LinkButton
+import com.stripe.android.link.ui.LinkLabel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentOptionsPrimaryButtonBinding
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentSheetPrimaryButtonBinding
@@ -186,7 +187,7 @@ internal fun Wallet(
             }
 
             LinkButton(
-                email = null,
+                label = LinkLabel.Default,
                 enabled = state.buttonsEnabled,
                 onClick = onLinkPressed,
             )
