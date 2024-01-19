@@ -138,7 +138,7 @@ internal class DefaultStripeNetworkClientTest {
             val client = DefaultStripeNetworkClient(
                 workContext = testDispatcher,
                 connectionFactory = connectionFactory,
-                retryDelaySupplier = RetryDelaySupplier(0)
+                retryDelaySupplier = ExponentialBackoffRetryDelaySupplier(0)
             )
 
             val response = client.executeRequest(FakeStripeRequest())
@@ -161,7 +161,7 @@ internal class DefaultStripeNetworkClientTest {
             val client = DefaultStripeNetworkClient(
                 workContext = testDispatcher,
                 connectionFactory = connectionFactory,
-                retryDelaySupplier = RetryDelaySupplier(0),
+                retryDelaySupplier = ExponentialBackoffRetryDelaySupplier(0),
                 logger = mockLogger
             )
 
@@ -182,7 +182,7 @@ internal class DefaultStripeNetworkClientTest {
             val executor = DefaultStripeNetworkClient(
                 workContext = testDispatcher,
                 connectionFactory = connectionFactory,
-                retryDelaySupplier = RetryDelaySupplier(0)
+                retryDelaySupplier = ExponentialBackoffRetryDelaySupplier(0)
             )
 
             val response = executor.executeRequest(FakeStripeRequest())

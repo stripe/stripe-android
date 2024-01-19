@@ -3,11 +3,11 @@ package com.stripe.android.core.networking
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
-class RetryDelaySupplierTest {
+class ExponentialBackoffRetryDelaySupplierTest {
 
     @Test
     fun `getDelayMillis() should return expected value`() {
-        val supplier = RetryDelaySupplier()
+        val supplier = ExponentialBackoffRetryDelaySupplier()
 
         // coerce to 3 remaining retries
         assertThat(

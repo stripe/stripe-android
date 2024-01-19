@@ -15,7 +15,7 @@ import kotlin.coroutines.CoroutineContext
 class DefaultStripeNetworkClient @JvmOverloads constructor(
     private val workContext: CoroutineContext = Dispatchers.IO,
     private val connectionFactory: ConnectionFactory = ConnectionFactory.Default,
-    private val retryDelaySupplier: RetryDelaySupplier = RetryDelaySupplier(),
+    private val retryDelaySupplier: RetryDelaySupplier = ExponentialBackoffRetryDelaySupplier(),
     private val maxRetries: Int = DEFAULT_MAX_RETRIES,
     private val logger: Logger = Logger.noop()
 ) : StripeNetworkClient {
