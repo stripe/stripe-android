@@ -16,12 +16,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -54,7 +53,6 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.SignUpState
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
@@ -158,83 +156,115 @@ internal fun LinkInlineSignup(
         }
     }
 
-    CompositionLocalProvider(
-        LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
+    val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
+
+    Box(
+        modifier = modifier
+            .border(
+                border = MaterialTheme.getBorderStroke(isSelected = false),
+                shape = MaterialTheme.stripeShapes.roundedCornerShape,
+            )
+            .background(
+                color = MaterialTheme.stripeColors.component,
+                shape = MaterialTheme.stripeShapes.roundedCornerShape,
+            ),
     ) {
-        StripeTheme {
-            Box(
-                modifier = modifier
-                    .border(
-                        border = MaterialTheme.getBorderStroke(isSelected = false),
-                        shape = MaterialTheme.stripeShapes.roundedCornerShape,
-                    )
-                    .background(
-                        color = MaterialTheme.stripeColors.component,
-                        shape = MaterialTheme.stripeShapes.roundedCornerShape,
-                    )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.stripeShapes.roundedCornerShape)
+                .alpha(contentAlpha),
+        ) {
+            Column(
+                modifier = Modifier.clickable(enabled = enabled) { toggleExpanded() },
             ) {
-                Column(
+                Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(MaterialTheme.stripeShapes.roundedCornerShape)
+                        .padding(16.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.clickable { toggleExpanded() },
-                    ) {
-                        Row(
+                    Checkbox(
+                        checked = expanded,
+                        onCheckedChange = null, // needs to be null for accessibility on row click to work
+                        modifier = Modifier.padding(end = 8.dp),
+                        enabled = enabled
+                    )
+                    Column {
+                        Text(
+                            text = stringResource(id = R.string.stripe_inline_sign_up_header),
+                            style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colors.onSurface
+                                .copy(alpha = contentAlpha)
+                        )
+                        Text(
+                            text = stringResource(R.string.stripe_sign_up_message, merchantName),
                             modifier = Modifier
-                                .padding(16.dp)
-                        ) {
-                            Checkbox(
-                                checked = expanded,
-                                onCheckedChange = null, // needs to be null for accessibility on row click to work
-                                modifier = Modifier.padding(end = 8.dp),
-                                enabled = enabled
-                            )
-                            Column {
-                                Text(
-                                    text = stringResource(id = R.string.stripe_inline_sign_up_header),
-                                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colors.onSurface
-                                        .copy(alpha = LocalContentAlpha.current)
-                                )
-                                Text(
-                                    text = stringResource(R.string.stripe_sign_up_message, merchantName),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 4.dp),
-                                    style = MaterialTheme.typography.body1,
-                                    color = MaterialTheme.colors.onSurface
-                                        .copy(alpha = LocalContentAlpha.current)
-                                )
-                            }
-                        }
+                                .fillMaxWidth()
+                                .padding(top = 4.dp),
+                            style = MaterialTheme.typography.body1,
+                            color = MaterialTheme.colors.onSurface
+                                .copy(alpha = contentAlpha)
+                        )
                     }
+                }
+            }
 
-                    AnimatedVisibility(
-                        visible = expanded
+            AnimatedVisibility(
+                visible = expanded
+            ) {
+                Column {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                start = 16.dp,
+                                end = 16.dp,
+                                bottom = 16.dp
+                            )
                     ) {
-                        Column {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(
-                                        start = 16.dp,
-                                        end = 16.dp,
-                                        bottom = 16.dp
-                                    )
-                            ) {
-                                EmailCollectionSection(
+                        EmailCollectionSection(
+                            enabled = enabled,
+                            emailController = emailController,
+                            signUpState = signUpState,
+                            focusRequester = focusRequester
+                        )
+
+                        AnimatedVisibility(
+                            visible = signUpState != SignUpState.InputtingPhoneOrName &&
+                                errorMessage != null
+                        ) {
+                            ErrorText(
+                                text = errorMessage
+                                    ?.getMessage(LocalContext.current.resources)
+                                    .orEmpty(),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                        AnimatedVisibility(
+                            visible = signUpState == SignUpState.InputtingPhoneOrName
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                PhoneNumberCollectionSection(
                                     enabled = enabled,
-                                    emailController = emailController,
-                                    signUpState = signUpState,
-                                    focusRequester = focusRequester
+                                    phoneNumberController = phoneNumberController,
+                                    requestFocusWhenShown =
+                                    phoneNumberController.initialPhoneNumber.isEmpty(),
+                                    imeAction = if (requiresNameCollection) {
+                                        ImeAction.Next
+                                    } else {
+                                        ImeAction.Done
+                                    }
                                 )
 
-                                AnimatedVisibility(
-                                    visible = signUpState != SignUpState.InputtingPhoneOrName &&
-                                        errorMessage != null
-                                ) {
+                                if (requiresNameCollection) {
+                                    TextFieldSection(
+                                        textFieldController = nameController,
+                                        imeAction = ImeAction.Done,
+                                        enabled = enabled
+                                    )
+                                }
+
+                                AnimatedVisibility(visible = errorMessage != null) {
                                     ErrorText(
                                         text = errorMessage
                                             ?.getMessage(LocalContext.current.resources)
@@ -243,46 +273,11 @@ internal fun LinkInlineSignup(
                                     )
                                 }
 
-                                AnimatedVisibility(
-                                    visible = signUpState == SignUpState.InputtingPhoneOrName
-                                ) {
-                                    Column(modifier = Modifier.fillMaxWidth()) {
-                                        PhoneNumberCollectionSection(
-                                            enabled = enabled,
-                                            phoneNumberController = phoneNumberController,
-                                            requestFocusWhenShown =
-                                            phoneNumberController.initialPhoneNumber.isEmpty(),
-                                            imeAction = if (requiresNameCollection) {
-                                                ImeAction.Next
-                                            } else {
-                                                ImeAction.Done
-                                            }
-                                        )
-
-                                        if (requiresNameCollection) {
-                                            TextFieldSection(
-                                                textFieldController = nameController,
-                                                imeAction = ImeAction.Done,
-                                                enabled = enabled
-                                            )
-                                        }
-
-                                        AnimatedVisibility(visible = errorMessage != null) {
-                                            ErrorText(
-                                                text = errorMessage
-                                                    ?.getMessage(LocalContext.current.resources)
-                                                    .orEmpty(),
-                                                modifier = Modifier.fillMaxWidth()
-                                            )
-                                        }
-
-                                        LinkTerms(
-                                            isOptional = false,
-                                            modifier = Modifier.padding(top = 4.dp),
-                                            textAlign = TextAlign.Start,
-                                        )
-                                    }
-                                }
+                                LinkTerms(
+                                    isOptional = false,
+                                    modifier = Modifier.padding(top = 4.dp),
+                                    textAlign = TextAlign.Start,
+                                )
                             }
                         }
                     }
