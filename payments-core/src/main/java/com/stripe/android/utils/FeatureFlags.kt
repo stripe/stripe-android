@@ -5,18 +5,17 @@ import com.stripe.android.BuildConfig
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object FeatureFlags {
-    val customerSheetACHv2 = FeatureFlag(defaultValueInDebugMode = true)
-    val useLpmFoundations = FeatureFlag(defaultValueInDebugMode = false)
+    val customerSheetACHv2 = FeatureFlag()
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FeatureFlag(private val defaultValueInDebugMode: Boolean) {
+class FeatureFlag {
 
     private var overrideInTest: Boolean? = null
 
     val isEnabled: Boolean
         get() = if (BuildConfig.DEBUG) {
-            overrideInTest ?: defaultValueInDebugMode
+            overrideInTest ?: true
         } else {
             false
         }
