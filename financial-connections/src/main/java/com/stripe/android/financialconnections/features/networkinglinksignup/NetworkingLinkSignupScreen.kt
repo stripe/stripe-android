@@ -7,18 +7,26 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -37,6 +45,7 @@ import com.stripe.android.financialconnections.features.common.LegalDetailsBotto
 import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupViewModel.Companion.PANE
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -47,6 +56,7 @@ import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
+import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
@@ -67,11 +77,15 @@ internal fun NetworkingLinkSignupScreen() {
     val state = viewModel.collectAsState()
     BackHandler(enabled = true) {}
     val uriHandler = LocalUriHandler.current
+    val bottomSheetState: ModalBottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden
+    )
 
     state.value.viewEffect?.let { viewEffect ->
         LaunchedEffect(viewEffect) {
             when (viewEffect) {
                 is OpenUrl -> uriHandler.openUri(viewEffect.url)
+                is ViewEffect.OpenBottomSheet -> bottomSheetState.show()
             }
             viewModel.onViewEffectLaunched()
         }
@@ -79,6 +93,7 @@ internal fun NetworkingLinkSignupScreen() {
 
     NetworkingLinkSignupContent(
         state = state.value,
+        bottomSheetState = bottomSheetState,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
@@ -89,6 +104,7 @@ internal fun NetworkingLinkSignupScreen() {
 
 @Composable
 private fun NetworkingLinkSignupContent(
+    bottomSheetState: ModalBottomSheetState,
     state: NetworkingLinkSignupState,
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
@@ -97,7 +113,6 @@ private fun NetworkingLinkSignupContent(
     onSkipClick: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val bottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
@@ -125,7 +140,6 @@ private fun NetworkingLinkSignupContent(
             )
         }
     )
-
 }
 
 @Composable
@@ -137,9 +151,11 @@ private fun NetworkingLinkSignupMainContent(
     onSkipClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
+    val lazyListState = rememberLazyListState()
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
+                elevation = lazyListState.elevation,
                 showBack = false,
                 onCloseClick = onCloseClick,
             )
@@ -148,6 +164,7 @@ private fun NetworkingLinkSignupMainContent(
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> NetworkingLinkSignupLoaded(
+                lazyListState = lazyListState,
                 validForm = state.valid(),
                 payload = payload(),
                 lookupAccountSync = state.lookupAccount,
@@ -168,6 +185,7 @@ private fun NetworkingLinkSignupMainContent(
 
 @Composable
 private fun NetworkingLinkSignupLoaded(
+    lazyListState: LazyListState,
     validForm: Boolean,
     payload: Payload,
     saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
@@ -178,6 +196,7 @@ private fun NetworkingLinkSignupLoaded(
     onSkipClick: () -> Unit
 ) {
     Layout(
+        lazyListState = lazyListState,
         body = {
             item {
                 Title(payload.content.title)
@@ -271,9 +290,12 @@ private fun SaveToLinkCta(
 private fun PhoneNumberSection(
     payload: Payload
 ) {
+    var focused by remember { mutableStateOf(false) }
     Column {
         StripeThemeForConnections {
             PhoneNumberCollectionSection(
+                modifier = Modifier.onFocusChanged { focused = it.isFocused },
+                isSelected = focused,
                 requestFocusWhenShown = payload.phoneController.initialPhoneNumber.isEmpty(),
                 phoneNumberController = payload.phoneController,
                 imeAction = ImeAction.Default,
@@ -299,6 +321,7 @@ internal fun EmailSection(
     showFullForm: Boolean,
     loading: Boolean
 ) {
+    var focused by remember { mutableStateOf(false) }
     StripeThemeForConnections {
         Box(
             modifier = Modifier
@@ -307,12 +330,10 @@ internal fun EmailSection(
             contentAlignment = Alignment.CenterEnd
         ) {
             TextFieldSection(
+                modifier = Modifier.onFocusChanged { focused = it.isFocused },
+                isSelected = focused,
                 textFieldController = emailController,
-                imeAction = if (showFullForm) {
-                    ImeAction.Next
-                } else {
-                    ImeAction.Done
-                },
+                imeAction = if (showFullForm) ImeAction.Next else ImeAction.Done,
                 enabled = enabled
             )
             if (loading) {
@@ -342,6 +363,9 @@ internal fun NetworkingLinkSignupScreenPreview(
     FinancialConnectionsPreview {
         NetworkingLinkSignupContent(
             state = state,
+            bottomSheetState = rememberModalBottomSheetState(
+                initialValue = ModalBottomSheetValue.Hidden
+            ),
             onCloseClick = {},
             onSaveToLink = {},
             onClickableTextClick = {},
