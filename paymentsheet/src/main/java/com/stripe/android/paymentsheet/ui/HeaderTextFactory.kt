@@ -48,11 +48,13 @@ internal class HeaderTextFactory(
                 }
                 is PaymentSheetScreen.AddFirstPaymentMethod,
                 is PaymentSheetScreen.AddAnotherPaymentMethod -> {
-                    if (types.singleOrNull() == PaymentMethod.Type.Card.code) {
+                    val title = if (types.singleOrNull() == PaymentMethod.Type.Card.code) {
                         StripeR.string.stripe_title_add_a_card
                     } else {
                         R.string.stripe_paymentsheet_choose_payment_method
                     }
+
+                    title.takeUnless { isWalletEnabled }
                 }
                 is PaymentSheetScreen.EditPaymentMethod -> {
                     StripeR.string.stripe_title_update_card
