@@ -128,7 +128,9 @@ internal data class NetworkingLinkSignupPane(
     val cta: String,
     @SerialName("skip_cta")
     @Serializable(with = MarkdownToHtmlSerializer::class)
-    val skipCta: String
+    val skipCta: String,
+    @SerialName("legal_details_notice")
+    val legalDetailsNotice: LegalDetailsNotice? = null
 ) : Parcelable
 
 @Serializable

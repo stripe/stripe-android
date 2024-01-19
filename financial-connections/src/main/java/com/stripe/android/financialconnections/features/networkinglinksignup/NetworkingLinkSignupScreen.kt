@@ -8,13 +8,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
@@ -30,6 +33,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
+import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
 import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
@@ -43,17 +47,18 @@ import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.Neutral900
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun NetworkingLinkSignupScreen() {
@@ -91,13 +96,52 @@ private fun NetworkingLinkSignupContent(
     onSaveToLink: () -> Unit,
     onSkipClick: () -> Unit
 ) {
-    val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
+    val bottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+
+    ModalBottomSheetLayout(
+        sheetState = bottomSheetState,
+        sheetBackgroundColor = v3Colors.backgroundSurface,
+        sheetShape = RoundedCornerShape(8.dp),
+        scrimColor = Neutral900.copy(alpha = 0.32f),
+        sheetContent = {
+            when (val legalDetails = state.payload()?.content?.legalDetailsNotice) {
+                null -> {}
+                else -> LegalDetailsBottomSheetContent(
+                    legalDetails = legalDetails,
+                    onConfirmModalClick = { coroutineScope.launch { bottomSheetState.hide() } },
+                    onClickableTextClick = onClickableTextClick
+                )
+            }
+        },
+        content = {
+            NetworkingLinkSignupMainContent(
+                onCloseClick = onCloseClick,
+                state = state,
+                onSaveToLink = onSaveToLink,
+                onClickableTextClick = onClickableTextClick,
+                onSkipClick = onSkipClick,
+                onCloseFromErrorClick = onCloseFromErrorClick
+            )
+        }
+    )
+
+}
+
+@Composable
+private fun NetworkingLinkSignupMainContent(
+    onCloseClick: () -> Unit,
+    state: NetworkingLinkSignupState,
+    onSaveToLink: () -> Unit,
+    onClickableTextClick: (String) -> Unit,
+    onSkipClick: () -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit
+) {
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
                 showBack = false,
                 onCloseClick = onCloseClick,
-                elevation = scrollState.elevation
             )
         }
     ) {
@@ -122,7 +166,6 @@ private fun NetworkingLinkSignupContent(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun NetworkingLinkSignupLoaded(
     validForm: Boolean,
