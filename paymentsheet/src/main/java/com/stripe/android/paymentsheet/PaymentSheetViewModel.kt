@@ -16,6 +16,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -76,6 +77,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -84,6 +86,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
 
@@ -573,7 +576,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch {
-            val stripeIntent = requireNotNull(stripeIntent.value)
+            val stripeIntent = awaitStripeIntent().getOrElse {
+                onFatal(it)
+                return@launch
+            }
 
             val nextStep = intentConfirmationInterceptor.intercept(
                 initializationMode = args.initializationMode,
@@ -605,9 +611,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
-            runCatching {
-                requireNotNull(stripeIntent.value)
-            }.fold(
+            awaitStripeIntent().fold(
                 onSuccess = { stripeIntent ->
                     processPayment(stripeIntent, paymentResult)
                 },
@@ -790,6 +794,21 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun storeAwaitingPaymentResult() {
         savedStateHandle[AwaitingPaymentResultKey] = true
+    }
+
+    private suspend fun awaitStripeIntent(timeout: Duration = 10.seconds): Result<StripeIntent> {
+        val channel = Channel<StripeIntent>(capacity = 1)
+        viewModelScope.launch {
+            stripeIntent.filterNotNull().collect {
+                channel.send(it)
+            }
+        }
+
+        val stripeIntent = withTimeoutOrNull(timeout) { channel.receive() }
+
+        return stripeIntent?.let {
+            Result.success(it)
+        } ?: Result.failure(APIConnectionException())
     }
 
     internal class Factory(
