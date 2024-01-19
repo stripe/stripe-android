@@ -5,7 +5,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.account.CookieStore
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.model.ElementsSession
@@ -59,7 +59,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val eventReporter: EventReporter,
     @IOContext private val workContext: CoroutineContext,
     private val accountStatusProvider: LinkAccountStatusProvider,
-    private val cookieStore: CookieStore,
+    private val linkStore: LinkStore,
 ) : PaymentSheetLoader {
 
     override suspend fun load(
@@ -298,7 +298,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val merchantName = config.merchantDisplayName
 
         val layoutDescriptor = LpmRepository.HardcodedCard.getPMAddForm(stripeIntent, config)
-        val hasUsedLink = cookieStore.hasUsedLink()
+        val hasUsedLink = linkStore.hasUsedLink()
 
         val linkSignupMode = if (hasUsedLink) {
             null
