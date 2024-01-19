@@ -55,20 +55,6 @@ internal class PlaygroundSettings private constructor(
             return PlaygroundSettings(mutableSettings)
         }
 
-        fun configureGlobals() {
-            settings.onEach { (settingDefinition, value) ->
-                settingDefinition.configure(value)
-            }
-        }
-
-        private fun <T> PlaygroundSettingDefinition<T>.configure(
-            value: Any?,
-        ) {
-            @Suppress("UNCHECKED_CAST")
-            configure(
-                value = value as T,
-            )
-        }
         fun paymentSheetConfiguration(
             playgroundState: PlaygroundState
         ): PaymentSheet.Configuration {
@@ -215,7 +201,6 @@ internal class PlaygroundSettings private constructor(
             AutomaticPaymentMethodsSettingsDefinition,
             PrimaryButtonLabelSettingsDefinition,
             PreferredNetworkSettingsDefinition,
-            LpmFoundationsSettingDefinition,
             IntegrationTypeSettingsDefinition,
         )
 
