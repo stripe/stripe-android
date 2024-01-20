@@ -54,6 +54,14 @@
         <item quantity="one">Your account was connected</item>
         <item quantity="other">Your accounts were connected</item>
     </plurals>
+    <plurals name="stripe_success_pane_desc_link_success">
+        <item quantity="one">Your account was connected and saved with Link</item>
+        <item quantity="other">Your accounts were connected and saved with Link</item>
+    </plurals>
+    <plurals name="stripe_success_pane_desc_link_error">
+        <item quantity="one">Your account was connected <annotation bold="bold">but couldn\'t be saved with Link</annotation></item>
+        <item quantity="other">Your accounts were connected <annotation bold="bold">but couldn\'t be saved with Link</annotation></item>
+    </plurals>
     <string name="stripe_success_pane_done">Done</string>
     <string name="stripe_success_pane_done_with_merchant">Back to %1$s</string>
     <string name="stripe_prepane_partner_callout">Stripe works with partners like %1$s to reliably offer access to thousands of financial institutions. <annotation clickable="privacy_center">Learn more</annotation></string>

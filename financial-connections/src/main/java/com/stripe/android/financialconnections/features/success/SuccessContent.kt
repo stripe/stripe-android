@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,11 +44,14 @@ import com.stripe.android.financialconnections.features.common.V3LoadingSpinner
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
+import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import kotlinx.coroutines.delay
 
 private const val ENTER_TRANSITION_DURATION_MS = 1000
@@ -203,18 +205,24 @@ private fun SuccessCompletedContent(
         }
         Text(
             stringResource(id = R.string.stripe_success_pane_title),
-            style = FinancialConnectionsTheme.v3Typography.headingXLarge,
+            style = v3Typography.headingXLarge,
             textAlign = TextAlign.Center
         )
-        Text(
-            text = customSuccessMessage
-                ?.toText()?.toString()
-                ?: pluralStringResource(
-                    id = R.plurals.stripe_success_pane_desc,
-                    count = accountsCount
-                ),
-            style = FinancialConnectionsTheme.v3Typography.bodyMedium,
-            textAlign = TextAlign.Center
+        AnnotatedText(
+            text = customSuccessMessage ?: TextResource.PluralId(
+                value = R.plurals.stripe_success_pane_desc,
+                count = accountsCount,
+                args = emptyList()
+            ),
+            defaultStyle = v3Typography.bodyMedium.copy(
+                textAlign = TextAlign.Center
+            ),
+            annotationStyles = mapOf(
+                StringAnnotation.BOLD to v3Typography.bodyMediumEmphasized.copy(
+                    textAlign = TextAlign.Center,
+                ).toSpanStyle()
+            ),
+            onClickableTextClick = {}
         )
     }
 }
