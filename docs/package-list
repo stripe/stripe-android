@@ -43,6 +43,7 @@ com.stripe.android.cards
 com.stripe.android.exception
 com.stripe.android.googlepaylauncher
 com.stripe.android.googlepaylauncher.injection
+com.stripe.android.hcaptcha
 com.stripe.android.model
 com.stripe.android.model.parsers
 com.stripe.android.model.wallets
