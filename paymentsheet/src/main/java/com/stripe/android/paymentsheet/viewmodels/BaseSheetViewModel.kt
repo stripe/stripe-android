@@ -7,14 +7,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntent
@@ -237,18 +235,7 @@ internal abstract class BaseSheetViewModel(
         initialValue = PaymentSheetTopBarStateFactory.createDefault(),
     )
 
-    val linkSignupMode: StateFlow<LinkSignupMode?> = combine(
-        linkHandler.linkConfiguration,
-        linkHandler.linkInlineSelection,
-        linkHandler.accountStatus,
-        stripeIntent,
-    ) { linkConfig, linkInlineSelection, linkAccountStatus, stripeIntent ->
-        val linkInlineSelectionValid = linkInlineSelection != null
-        val validFundingSource = stripeIntent?.linkFundingSources?.contains(Card.code) == true
-        val notLoggedIn = linkAccountStatus == AccountStatus.SignedOut
-        val ableToShowLink = validFundingSource && (notLoggedIn || linkInlineSelectionValid)
-        linkConfig?.signupMode.takeIf { ableToShowLink }
-    }.stateIn(
+    val linkSignupMode: StateFlow<LinkSignupMode?> = linkHandler.linkSignupMode.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = null,
