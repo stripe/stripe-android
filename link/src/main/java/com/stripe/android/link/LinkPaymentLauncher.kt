@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.annotation.RestrictTo
+import com.stripe.android.link.LinkActivityResult.Completed
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import javax.inject.Inject
@@ -31,9 +32,11 @@ class LinkPaymentLauncher @Inject internal constructor(
         linkActivityResultLauncher = activityResultRegistry.register(
             "LinkPaymentLauncher",
             linkActivityContract,
-        )  { linkActivityResult ->
+        ) { linkActivityResult ->
             analyticsHelper.onLinkResult(linkActivityResult)
-            linkStore.markLinkAsUsed()
+            if (linkActivityResult is Completed) {
+                linkStore.markLinkAsUsed()
+            }
             callback(linkActivityResult)
         }
     }
@@ -46,7 +49,9 @@ class LinkPaymentLauncher @Inject internal constructor(
             linkActivityContract
         ) { linkActivityResult ->
             analyticsHelper.onLinkResult(linkActivityResult)
-            linkStore.markLinkAsUsed()
+            if (linkActivityResult is Completed) {
+                linkStore.markLinkAsUsed()
+            }
             callback(linkActivityResult)
         }
     }
