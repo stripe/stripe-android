@@ -22,5 +22,6 @@ class InvalidResponseException(
     cause,
     message
 ) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun analyticsValue(): String = "invalidResponseError"
 }

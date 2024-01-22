@@ -9,5 +9,6 @@ class LocalStripeException(
 ) : StripeException(
     message = displayMessage
 ) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun analyticsValue(): String = analyticsValue ?: "unknown"
 }

@@ -1,5 +1,6 @@
 package com.stripe.android.core.exception
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.StripeError
 
 /**
@@ -18,5 +19,6 @@ class InvalidRequestException(
     cause,
     message
 ) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun analyticsValue(): String = "invalidRequestError"
 }

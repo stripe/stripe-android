@@ -1,5 +1,6 @@
 package com.stripe.android.exception
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.StripeException
 import java.net.HttpURLConnection
@@ -22,5 +23,6 @@ class CardException(
     val declineCode: String? = stripeError.declineCode
     val charge: String? = stripeError.charge
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun analyticsValue(): String = "cardError"
 }

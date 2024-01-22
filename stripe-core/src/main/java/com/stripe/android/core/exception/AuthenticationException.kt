@@ -19,5 +19,6 @@ constructor(
     requestId,
     HttpURLConnection.HTTP_UNAUTHORIZED
 ) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun analyticsValue(): String = "authError"
 }

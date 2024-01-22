@@ -1,5 +1,6 @@
 package com.stripe.android.core.exception
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.StripeError
 import java.net.HttpURLConnection
 
@@ -15,5 +16,6 @@ class PermissionException(
     requestId,
     HttpURLConnection.HTTP_FORBIDDEN
 ) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun analyticsValue(): String = "permissionError"
 }

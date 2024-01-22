@@ -7,5 +7,6 @@ import androidx.annotation.RestrictTo
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class MaxRetryReachedException(message: String? = null) : StripeException(message = message) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun analyticsValue(): String = "maxRetryReachedError"
 }
