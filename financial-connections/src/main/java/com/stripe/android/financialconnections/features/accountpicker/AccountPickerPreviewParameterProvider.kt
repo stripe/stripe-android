@@ -151,7 +151,6 @@ internal class AccountPickerPreviewParameterProvider :
             FinancialConnectionsAccount.Permissions.OWNERSHIP,
             FinancialConnectionsAccount.Permissions.TRANSACTIONS
         ),
-        isStripeDirect = false,
-        dataPolicyUrl = ""
+        isStripeDirect = false
     )
 }

@@ -44,6 +44,7 @@ internal class SuccessViewModelTest {
         eventTracker = eventTracker,
         initialState = state,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
+        saveToLinkWithStripeSucceeded = mock(),
         getCachedAccounts = getCachedAccounts,
     )
 

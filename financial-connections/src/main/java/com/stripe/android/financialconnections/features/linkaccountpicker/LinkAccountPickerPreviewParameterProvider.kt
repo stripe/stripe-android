@@ -3,9 +3,13 @@
 package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.model.AddNewAccount
+import com.stripe.android.financialconnections.model.Bullet
+import com.stripe.android.financialconnections.model.DataAccessNotice
+import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -19,6 +23,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
     PreviewParameterProvider<LinkAccountPickerState> {
     override val values = sequenceOf(
         canonical(),
+        loading(),
         accountSelected(),
         oneAccount()
     )
@@ -28,6 +33,27 @@ internal class LinkAccountPickerPreviewParameterProvider :
             LinkAccountPickerState.Payload(
                 title = display().title,
                 accounts = partnerAccountList(),
+                dataAccessNotice = dataAccessNotice(),
+                addNewAccount = requireNotNull(display().addNewAccount),
+                merchantDataAccess = accessibleCallout(),
+                consumerSessionClientSecret = "secret",
+                defaultCta = display().defaultCta,
+                nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
+                partnerToCoreAuths = emptyMap(),
+            )
+        ),
+    )
+
+    private fun loading() = LinkAccountPickerState(
+        payload = Loading(),
+    )
+
+    private fun oneAccount() = LinkAccountPickerState(
+        payload = Success(
+            LinkAccountPickerState.Payload(
+                title = display().title,
+                accounts = partnerAccountList().subList(0, 1),
+                dataAccessNotice = dataAccessNotice(),
                 addNewAccount = requireNotNull(display().addNewAccount),
                 merchantDataAccess = accessibleCallout(),
                 consumerSessionClientSecret = "secret",
@@ -44,22 +70,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             LinkAccountPickerState.Payload(
                 title = display().title,
                 accounts = partnerAccountList(),
-                addNewAccount = requireNotNull(display().addNewAccount),
-                merchantDataAccess = accessibleCallout(),
-                consumerSessionClientSecret = "secret",
-                defaultCta = display().defaultCta,
-                nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
-                partnerToCoreAuths = emptyMap(),
-            )
-        ),
-    )
-
-    private fun oneAccount() = LinkAccountPickerState(
-        selectedAccountId = partnerAccountList().first().first.id,
-        payload = Success(
-            LinkAccountPickerState.Payload(
-                title = display().title,
-                accounts = partnerAccountList().take(1),
+                dataAccessNotice = dataAccessNotice(),
                 addNewAccount = requireNotNull(display().addNewAccount),
                 merchantDataAccess = accessibleCallout(),
                 consumerSessionClientSecret = "secret",
@@ -176,6 +187,29 @@ internal class LinkAccountPickerPreviewParameterProvider :
         ),
     )
 
+    private fun dataAccessNotice() = DataAccessNotice(
+        icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+        title = "Goldilocks uses Stripe to link your accounts",
+        subtitle = "Goldilocks will use your account and routing number, balances and transactions:",
+        body = DataAccessNoticeBody(
+            bullets = listOf(
+                Bullet(
+                    icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+                    title = "Account details",
+                    content = "Account number, routing number, account type, account nickname."
+                ),
+                Bullet(
+                    icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+                    title = "Account details",
+                    content = "Account number, routing number, account type, account nickname."
+                ),
+            )
+        ),
+        disclaimer = "Learn more about data access",
+        connectedAccountNotice = "Connected account placeholder",
+        cta = "OK"
+    )
+
     private fun accessibleCallout() = MerchantDataAccessModel(
         businessName = "My business",
         permissions = listOf(
@@ -185,7 +219,6 @@ internal class LinkAccountPickerPreviewParameterProvider :
             FinancialConnectionsAccount.Permissions.TRANSACTIONS
         ),
         isStripeDirect = true,
-        dataPolicyUrl = ""
     )
 
     fun display() = ReturningNetworkingUserAccountPicker(

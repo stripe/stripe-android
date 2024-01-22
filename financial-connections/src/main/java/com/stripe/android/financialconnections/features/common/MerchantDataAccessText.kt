@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,7 +26,6 @@ internal fun MerchantDataAccessText(
     model: MerchantDataAccessModel,
     onLearnMoreClick: () -> Unit
 ) {
-    val uriHandler = LocalUriHandler.current
     val permissionsReadable = remember(model.permissions) { model.permissions.toStringRes() }
     AnnotatedText(
         text = TextResource.StringId(
@@ -44,7 +42,6 @@ internal fun MerchantDataAccessText(
             )
         ),
         onClickableTextClick = {
-            uriHandler.openUri(model.dataPolicyUrl)
             onLearnMoreClick()
         },
         defaultStyle = FinancialConnectionsTheme.v3Typography.labelSmall.copy(
@@ -83,7 +80,6 @@ internal data class MerchantDataAccessModel(
     val businessName: String?,
     val permissions: List<Permissions>,
     val isStripeDirect: Boolean,
-    val dataPolicyUrl: String
 )
 
 @Preview(
@@ -113,7 +109,6 @@ internal fun MerchantDataAccessTextPreview() {
                             Permissions.ACCOUNT_NUMBERS
                         ),
                         isStripeDirect = false,
-                        dataPolicyUrl = ""
                     ),
                     onLearnMoreClick = {}
                 )
@@ -125,7 +120,6 @@ internal fun MerchantDataAccessTextPreview() {
                             Permissions.TRANSACTIONS,
                         ),
                         isStripeDirect = false,
-                        dataPolicyUrl = ""
                     ),
                     onLearnMoreClick = {}
                 )
@@ -138,7 +132,6 @@ internal fun MerchantDataAccessTextPreview() {
                             Permissions.OWNERSHIP,
                         ),
                         isStripeDirect = false,
-                        dataPolicyUrl = ""
                     ),
                     onLearnMoreClick = {}
                 )

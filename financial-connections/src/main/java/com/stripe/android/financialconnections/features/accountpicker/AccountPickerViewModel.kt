@@ -22,7 +22,6 @@ import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAc
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
-import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -82,8 +81,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 merchantDataAccess = MerchantDataAccessModel(
                     businessName = manifest.businessName,
                     permissions = manifest.permissions,
-                    isStripeDirect = manifest.isStripeDirect ?: false,
-                    dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
+                    isStripeDirect = manifest.isStripeDirect ?: false
                 ),
                 singleAccount = manifest.singleAccount,
                 userSelectedSingleAccountInInstitution = manifest.singleAccount &&

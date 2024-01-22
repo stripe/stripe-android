@@ -65,7 +65,7 @@ internal fun AccountItem(
     val view = LocalView.current
     // networked account's allowSelection takes precedence over the account's.
     val selectable = networkedAccount?.allowSelection ?: account.allowSelection
-    val shape = remember { RoundedCornerShape(16.dp) }
+    val shape = remember { RoundedCornerShape(12.dp) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
