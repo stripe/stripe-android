@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.37.0 - 2024-01-22
+
 ### Payments
 * [CHANGED][7722](https://github.com/stripe/stripe-android/pull/7722) Added passive hCaptcha on Radar session creation endpoint. In order to enable hCaptcha on this endpoint, you must provide an activity to this method call (see the new optional activity parameter).
 * [FIXED][7777](https://github.com/stripe/stripe-android/pull/7777) Fixed an issue in `PaymentSession` where tapping the `Add card` button stopped working after it was clicked once.
