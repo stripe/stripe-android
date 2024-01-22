@@ -27,12 +27,14 @@ import com.stripe.android.uicore.stripeColors
 fun Section(
     @StringRes title: Int?,
     error: String?,
+    isSelected: Boolean = false,
     contentOutsideCard: @Composable () -> Unit = {},
     contentInCard: @Composable () -> Unit
 ) {
     Column(modifier = Modifier.padding(top = 8.dp)) {
         SectionTitle(title)
         SectionCard(
+            isSelected = isSelected,
             content = contentInCard,
             modifier = Modifier.padding(bottom = 8.dp)
         )

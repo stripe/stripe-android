@@ -20,6 +20,7 @@ import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.features.common.getBusinessName
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -43,7 +44,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.security.InvalidParameterException
 import java.util.Date
 import javax.inject.Inject
 
@@ -214,12 +214,17 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         if (URLUtil.isNetworkUrl(uri)) {
             setState { copy(viewEffect = OpenUrl(uri, date.time)) }
         } else {
-            eventTracker.logError(
-                extraMessage = "Error clicking text",
-                logger = logger,
-                pane = PANE,
-                error = InvalidParameterException("Unrecognized clickable text: $uri")
-            )
+            val managedUri = NetworkingLinkSignupClickableText.values()
+                .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
+            when (managedUri) {
+                NetworkingLinkSignupClickableText.LEGAL_DETAILS -> {
+                    setState {
+                        copy(viewEffect = OpenBottomSheet(date.time))
+                    }
+                }
+
+                null -> logger.error("Unrecognized clickable text: $uri")
+            }
         }
     }
 
@@ -285,5 +290,13 @@ internal data class NetworkingLinkSignupState(
             val url: String,
             val id: Long
         ) : ViewEffect()
+
+        data class OpenBottomSheet(
+            val id: Long
+        ) : ViewEffect()
     }
+}
+
+private enum class NetworkingLinkSignupClickableText(val value: String) {
+    LEGAL_DETAILS("stripe://legal-details-notice"),
 }
