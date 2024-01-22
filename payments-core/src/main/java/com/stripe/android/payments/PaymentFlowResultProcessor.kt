@@ -12,6 +12,7 @@ import com.stripe.android.core.exception.MaxRetryReachedException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.LinearRetryDelaySupplier
 import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -36,7 +37,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     protected val stripeRepository: StripeRepository,
     private val logger: Logger,
     private val workContext: CoroutineContext,
-    private val retryDelaySupplier: RetryDelaySupplier = RetryDelaySupplier()
+    private val retryDelaySupplier: RetryDelaySupplier = LinearRetryDelaySupplier()
 ) {
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
 
@@ -229,11 +230,11 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         }
 
         while (shouldRetry(stripeIntentResult) && remainingRetries > 1) {
-            val delayMs = retryDelaySupplier.getDelayMillis(
+            val delayDuration = retryDelaySupplier.getDelay(
                 MAX_RETRIES,
                 remainingRetries
             )
-            delay(delayMs)
+            delay(delayDuration)
             stripeIntentResult = if (shouldCallRefreshIntent(originalIntent)) {
                 refreshStripeIntent(
                     clientSecret = clientSecret,
@@ -290,7 +291,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 
     internal companion object {
         val EXPAND_PAYMENT_METHOD = listOf("payment_method")
-        const val MAX_RETRIES = 3
+        const val MAX_RETRIES = 5
     }
 }
 

@@ -4,6 +4,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.LINEAR_DELAY
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.RetryDelaySupplier
@@ -15,6 +16,7 @@ import com.stripe.android.stripe3ds2.transaction.ChallengeResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -27,7 +29,7 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-    private val retryDelaySupplier: RetryDelaySupplier,
+    @Named(LINEAR_DELAY) private val retryDelaySupplier: RetryDelaySupplier,
     private val logger: Logger,
     @IOContext private val workContext: CoroutineContext
 ) : Stripe3ds2ChallengeResultProcessor {
@@ -172,7 +174,7 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
      * and [remainingRetries] is greater than 0, retry after a delay.
      * After [remainingRetries] are exhausted, stop attempts.
      *
-     * The delay logic can be found in [RetryDelaySupplier.getDelayMillis].
+     * The delay logic can be found in [RetryDelaySupplier.getDelay].
      *
      * @param challengeResult the result of the 3DS2 challenge flow.
      * @param remainingRetries the number of retry attempts remaining. Defaults to [MAX_RETRIES].
@@ -196,7 +198,7 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
 
         return if (shouldRetry) {
             delay(
-                retryDelaySupplier.getDelayMillis(
+                retryDelaySupplier.getDelay(
                     MAX_RETRIES,
                     remainingRetries
                 )
