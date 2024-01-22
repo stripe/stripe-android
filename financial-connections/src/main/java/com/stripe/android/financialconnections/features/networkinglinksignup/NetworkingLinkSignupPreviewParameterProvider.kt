@@ -60,7 +60,6 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
         saveAccountToLink = Uninitialized
     )
 
-
     private fun invalidEmail() = NetworkingLinkSignupState(
         payload = Success(
             NetworkingLinkSignupState.Payload(
