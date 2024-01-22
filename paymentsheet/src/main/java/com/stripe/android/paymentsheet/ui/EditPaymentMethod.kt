@@ -56,7 +56,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
-import com.stripe.android.uicore.elements.TextFieldColors
+import com.stripe.android.uicore.elements.textFieldColors
 import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
@@ -93,7 +93,7 @@ internal fun EditPaymentMethodUi(
         modifier = modifier.padding(horizontal = padding)
     ) {
         SectionCard {
-            val colors = TextFieldColors(false)
+            val colors = textFieldColors(false)
 
             TextField(
                 modifier = Modifier.fillMaxWidth(),
