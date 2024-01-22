@@ -78,6 +78,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -797,14 +798,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun awaitStripeIntent(timeout: Duration = 10.seconds): Result<StripeIntent> {
-        val channel = Channel<StripeIntent>(capacity = 1)
-        viewModelScope.launch {
-            stripeIntent.filterNotNull().collect {
-                channel.send(it)
-            }
+        val stripeIntent = withTimeoutOrNull(timeout) {
+            stripeIntent.filterNotNull().first()
         }
-
-        val stripeIntent = withTimeoutOrNull(timeout) { channel.receive() }
 
         return stripeIntent?.let {
             Result.success(it)
