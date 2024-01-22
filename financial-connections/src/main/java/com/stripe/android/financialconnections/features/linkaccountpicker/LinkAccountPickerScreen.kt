@@ -4,32 +4,29 @@ package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -45,7 +42,6 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.AccountItem
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessText
-import com.stripe.android.financialconnections.features.common.PaneFooter
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.Payload
 import com.stripe.android.financialconnections.model.AddNewAccount
@@ -62,7 +58,9 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.components.elevation
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.uicore.image.StripeImage
 
 @Composable
@@ -92,7 +90,7 @@ private fun LinkAccountPickerContent(
     onSelectAccountClick: () -> Unit,
     onAccountClick: (PartnerAccount) -> Unit
 ) {
-    val scrollState = rememberScrollState()
+    val scrollState = rememberLazyListState()
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
@@ -141,57 +139,58 @@ private fun LinkAccountPickerLoaded(
     onSelectAccountClick: () -> Unit,
     onNewBankAccountClick: () -> Unit,
     onAccountClick: (PartnerAccount) -> Unit,
-    scrollState: ScrollState,
+    scrollState: LazyListState,
     cta: String?
 ) {
-    Column(
-        Modifier
-            .fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(scrollState)
-                .padding(horizontal = 24.dp)
-                .weight(1f)
-        ) {
-            Spacer(modifier = Modifier.size(16.dp))
-            Title(payload.title)
-            Spacer(modifier = Modifier.size(24.dp))
-            payload.accounts.forEach { account ->
+    Layout(
+        lazyListState = scrollState,
+        body = {
+            item {
+                AnnotatedText(
+                    text = TextResource.Text(payload.title),
+                    defaultStyle = v3Typography.headingLarge,
+                    onClickableTextClick = {}
+                )
+                Spacer(modifier = Modifier.size(24.dp))
+            }
+            items(payload.accounts) {
                 NetworkedAccountItem(
-                    selected = account.first.id == selectedAccountId,
-                    account = account,
+                    selected = it.first.id == selectedAccountId,
+                    account = it,
                     onAccountClicked = { selected ->
                         if (selectNetworkedAccountAsync !is Loading) onAccountClick(selected)
                     }
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.size(16.dp))
             }
-            SelectNewAccount(
-                text = payload.addNewAccount,
-                onClick = {
-                    if (selectNetworkedAccountAsync !is Loading) onNewBankAccountClick()
+            item {
+                SelectNewAccount(
+                    text = payload.addNewAccount,
+                    onClick = {
+                        if (selectNetworkedAccountAsync !is Loading) onNewBankAccountClick()
+                    }
+                )
+            }
+        },
+        footer = {
+            Column {
+                MerchantDataAccessText(
+                    payload.merchantDataAccess,
+                    onLearnMoreAboutDataAccessClick
+                )
+                Spacer(modifier = Modifier.size(12.dp))
+                FinancialConnectionsButton(
+                    enabled = selectedAccountId != null,
+                    loading = selectNetworkedAccountAsync is Loading,
+                    onClick = onSelectAccountClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(text = cta ?: stringResource(R.string.stripe_link_account_picker_cta))
                 }
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-        }
-        PaneFooter(elevation = scrollState.elevation) {
-            MerchantDataAccessText(
-                payload.merchantDataAccess,
-                onLearnMoreAboutDataAccessClick
-            )
-            Spacer(modifier = Modifier.size(12.dp))
-            FinancialConnectionsButton(
-                enabled = selectedAccountId != null,
-                loading = selectNetworkedAccountAsync is Loading,
-                onClick = onSelectAccountClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(text = cta ?: stringResource(R.string.stripe_link_account_picker_cta))
             }
         }
-    }
+    )
 }
 
 @Composable
@@ -214,31 +213,31 @@ private fun SelectNewAccount(
     onClick: () -> Unit,
     text: AddNewAccount
 ) {
-    val shape = remember { RoundedCornerShape(8.dp) }
+    val shape = remember { RoundedCornerShape(16.dp) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
             .border(
                 width = 1.dp,
-                color = FinancialConnectionsTheme.colors.borderDefault,
+                color = v3Colors.border,
                 shape = shape
             )
-            .clickableSingle { onClick() }
             .padding(16.dp)
+            .clickableSingle { onClick() }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
             SelectNewAccountIcon(
                 icon = text.icon?.default,
-                contentDescription = text.body ?: "",
+                contentDescription = text.body,
             )
             Spacer(modifier = Modifier.size(16.dp))
             Text(
-                text = text.body ?: "",
-                style = FinancialConnectionsTheme.typography.body,
-                color = FinancialConnectionsTheme.colors.textBrand
+                text = text.body,
+                style = v3Typography.labelLargeEmphasized,
+                color = v3Colors.textDefault
             )
         }
     }
@@ -249,46 +248,37 @@ fun SelectNewAccountIcon(
     icon: String?,
     contentDescription: String,
 ) {
-    Box {
-        val brandColor = FinancialConnectionsTheme.colors.textBrand
-        val modifier = Modifier
-            .size(12.dp)
+    Box(
+        modifier = Modifier
+            .size(56.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(v3Colors.backgroundOffset)
+    ) {
+        val iconModifier = Modifier
+            .size(20.dp)
+            .padding(0.dp)
             .align(Alignment.Center)
         val placeholderImage = @Composable {
             Image(
-                modifier = modifier,
-                imageVector = Icons.Filled.Add,
-                contentScale = ContentScale.FillBounds,
-                colorFilter = ColorFilter.tint(brandColor),
+                painter = painterResource(R.drawable.stripe_ic_add),
+                modifier = iconModifier,
+                colorFilter = ColorFilter.tint(v3Colors.textBrand),
                 contentDescription = contentDescription
             )
         }
-        Canvas(modifier = Modifier.size(24.dp)) {
-            drawCircle(color = brandColor.copy(alpha = 0.1f))
-        }
         when {
-            icon.isNullOrEmpty() -> placeholderImage()
+            LocalInspectionMode.current ||
+                icon.isNullOrEmpty() -> placeholderImage()
+
             else -> StripeImage(
                 url = icon,
                 imageLoader = LocalImageLoader.current,
                 contentDescription = null,
-                modifier = modifier.padding(),
+                modifier = iconModifier.padding(),
                 errorContent = { placeholderImage() }
             )
         }
     }
-}
-
-@Composable
-private fun Title(
-    title: String
-) {
-    AnnotatedText(
-        text = TextResource.Text(title),
-        defaultStyle = FinancialConnectionsTheme.typography.subtitle,
-        annotationStyles = emptyMap(),
-        onClickableTextClick = {}
-    )
 }
 
 @Composable

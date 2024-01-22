@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.features.common.MerchantDataAcces
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.NetworkedAccount
@@ -18,11 +19,9 @@ internal class LinkAccountPickerPreviewParameterProvider :
     PreviewParameterProvider<LinkAccountPickerState> {
     override val values = sequenceOf(
         canonical(),
-        accountSelected()
+        accountSelected(),
+        oneAccount()
     )
-
-    override val count: Int
-        get() = super.count
 
     private fun canonical() = LinkAccountPickerState(
         payload = Success(
@@ -55,6 +54,22 @@ internal class LinkAccountPickerPreviewParameterProvider :
         ),
     )
 
+    private fun oneAccount() = LinkAccountPickerState(
+        selectedAccountId = partnerAccountList().first().first.id,
+        payload = Success(
+            LinkAccountPickerState.Payload(
+                title = display().title,
+                accounts = partnerAccountList().take(1),
+                addNewAccount = requireNotNull(display().addNewAccount),
+                merchantDataAccess = accessibleCallout(),
+                consumerSessionClientSecret = "secret",
+                defaultCta = display().defaultCta,
+                nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
+                partnerToCoreAuths = emptyMap(),
+            )
+        ),
+    )
+
     private fun partnerAccountList() = listOf(
         PartnerAccount(
             authorization = "Authorization",
@@ -64,6 +79,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             balanceAmount = 1000,
             status = Status.ACTIVE,
             displayableAccountNumbers = "1234",
+            institution = institution(),
             currency = "USD",
             _allowSelection = true,
             allowSelectionMessage = "",
@@ -87,6 +103,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             balanceAmount = 1000,
             status = Status.ACTIVE,
             displayableAccountNumbers = "1234",
+            institution = institution(),
             currency = "USD",
             _allowSelection = true,
             allowSelectionMessage = "",
@@ -103,6 +120,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             id = "id2",
             name = "With balance disabled",
             balanceAmount = 1000,
+            institution = institution(),
             _allowSelection = false,
             allowSelectionMessage = "Disconnected",
             subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
@@ -117,6 +135,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             id = "id3",
             name = "No balance",
             displayableAccountNumbers = "1234",
+            institution = institution(),
             subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
             _allowSelection = true,
             allowSelectionMessage = "",
@@ -131,6 +150,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             id = "id4",
             name = "No balance disabled",
             displayableAccountNumbers = "1234",
+            institution = institution(),
             subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
             _allowSelection = false,
             allowSelectionMessage = "Disconnected",
@@ -145,6 +165,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             id = "id5",
             name = "Very long institution that is already linked",
             displayableAccountNumbers = "1234",
+            institution = institution(),
             linkedAccountId = "linkedAccountId",
             _allowSelection = true,
             subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
@@ -177,5 +198,15 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 default = "https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--add-purple-3x.png"
             ),
         )
+    )
+
+    fun institution() = FinancialConnectionsInstitution(
+        name = "Bank of America",
+        featured = true,
+        mobileHandoffCapable = true,
+        id = "in_123",
+        icon = Image(
+            default = "https://b.stripecdn.com/connections-statics-srv/assets/InstitutionIcons/bankofamerica.png"
+        ),
     )
 }

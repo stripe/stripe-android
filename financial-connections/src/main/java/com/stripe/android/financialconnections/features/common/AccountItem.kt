@@ -297,5 +297,3 @@ internal fun AccountItemPreview() {
         }
     }
 }
-
-
