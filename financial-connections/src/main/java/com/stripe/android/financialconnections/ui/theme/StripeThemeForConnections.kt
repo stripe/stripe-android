@@ -13,7 +13,8 @@ internal fun StripeThemeForConnections(
     StripeTheme(
         colors = stripeDefaultColors.copy(
             materialColors = stripeDefaultColors.materialColors.copy(
-                primary = FinancialConnectionsTheme.colors.iconBrand
+                primary = FinancialConnectionsTheme.v3Colors.iconBrand,
+                error = FinancialConnectionsTheme.v3Colors.textCritical,
             )
         ),
         shapes = StripeThemeDefaults.shapes.copy(
