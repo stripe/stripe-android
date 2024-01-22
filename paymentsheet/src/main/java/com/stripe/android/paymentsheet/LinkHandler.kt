@@ -7,6 +7,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.AccountStatus
@@ -34,6 +35,7 @@ internal class LinkHandler @Inject constructor(
     private val linkLauncher: LinkPaymentLauncher,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle,
+    private val linkStore: LinkStore,
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
 ) {
     sealed class ProcessingState {
@@ -173,26 +175,29 @@ internal class LinkHandler @Inject constructor(
                 configuration,
                 paymentMethodCreateParams
             ).getOrNull()
-            _processingState.emit(
-                ProcessingState.PaymentDetailsCollected(
-                    when (linkPaymentDetails) {
-                        is LinkPaymentDetails.New -> {
-                            PaymentSelection.New.LinkInline(linkPaymentDetails)
-                        }
-                        is LinkPaymentDetails.Saved -> {
-                            PaymentSelection.Saved(
-                                paymentMethod = PaymentMethod.Builder()
-                                    .setId(linkPaymentDetails.paymentDetails.id)
-                                    .setCode(paymentMethodCreateParams.typeCode)
-                                    .setType(Card)
-                                    .build(),
-                                walletType = PaymentSelection.Saved.WalletType.Link,
-                            )
-                        }
-                        null -> null
-                    }
-                )
-            )
+
+            val paymentSelection = when (linkPaymentDetails) {
+                is LinkPaymentDetails.New -> {
+                    PaymentSelection.New.LinkInline(linkPaymentDetails)
+                }
+                is LinkPaymentDetails.Saved -> {
+                    PaymentSelection.Saved(
+                        paymentMethod = PaymentMethod.Builder()
+                            .setId(linkPaymentDetails.paymentDetails.id)
+                            .setCode(paymentMethodCreateParams.typeCode)
+                            .setType(PaymentMethod.Type.Card)
+                            .build(),
+                        walletType = PaymentSelection.Saved.WalletType.Link,
+                    )
+                }
+                null -> null
+            }
+
+            if (paymentSelection != null) {
+                linkStore.markLinkAsUsed()
+            }
+
+            _processingState.emit(ProcessingState.PaymentDetailsCollected(paymentSelection))
         }
     }
 
@@ -217,13 +222,14 @@ internal class LinkHandler @Inject constructor(
         if (paymentMethod != null) {
             // If payment was completed inside the Link UI, dismiss immediately.
             _processingState.tryEmit(ProcessingState.PaymentMethodCollected(paymentMethod))
+            linkStore.markLinkAsUsed()
         } else if (cancelPaymentFlow) {
             // We launched the user straight into Link, but they decided to exit out of it.
             _processingState.tryEmit(ProcessingState.Cancelled)
         } else {
-            _processingState.tryEmit(
-                ProcessingState.CompletedWithPaymentResult(result.convertToPaymentResult())
-            )
+            val paymentResult = result.convertToPaymentResult()
+            _processingState.tryEmit(ProcessingState.CompletedWithPaymentResult(paymentResult))
+            linkStore.markLinkAsUsed()
         }
     }
 
