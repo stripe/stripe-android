@@ -62,6 +62,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
 import com.stripe.android.uicore.BuildConfig
+import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.stripeColors
 import kotlinx.coroutines.delay
@@ -334,12 +335,16 @@ fun AnimatedIcons(
 
     val composableScope = rememberCoroutineScope()
 
+    val isRunningInTestHarness = LocalInstrumentationTest.current
+
     val target by produceState(initialValue = icons.first()) {
-        composableScope.launch {
-            while (true) {
-                icons.forEach {
-                    delay(1000)
-                    value = it
+        if (!isRunningInTestHarness) {
+            composableScope.launch {
+                while (true) {
+                    icons.forEach {
+                        delay(1000)
+                        value = it
+                    }
                 }
             }
         }

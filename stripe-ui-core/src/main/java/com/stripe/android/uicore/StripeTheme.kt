@@ -312,6 +312,9 @@ val LocalColors = staticCompositionLocalOf { StripeTheme.getColors(false) }
 val LocalShapes = staticCompositionLocalOf { StripeTheme.shapesMutable }
 val LocalTypography = staticCompositionLocalOf { StripeTheme.typographyMutable }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalInstrumentationTest = staticCompositionLocalOf { false }
+
 /**
  * Base Theme for Stripe Composables.
  * CAUTION: This theme is mutable by merchant configurations. You shouldn't be passing colors,
@@ -326,7 +329,17 @@ fun StripeTheme(
     content: @Composable () -> Unit
 ) {
     val isRobolectricTest = runCatching {
-        Build.FINGERPRINT.lowercase() == "robolectric"
+        BuildConfig.DEBUG && Build.FINGERPRINT.lowercase() == "robolectric"
+    }.getOrDefault(false)
+
+    val isInstrumentationTest = runCatching {
+        BuildConfig.DEBUG && run {
+            // InstrumentationRegistry.getInstrumentation()
+            val registry = Class.forName("androidx.test.platform.app.InstrumentationRegistry")
+            val instrumentationMethod = registry.getDeclaredMethod("getInstrumentation")
+            instrumentationMethod.invoke(null) // This will throw if we're not in an instrumentation test.
+            true
+        }
     }.getOrDefault(false)
 
     val inspectionMode = LocalInspectionMode.current || isRobolectricTest
@@ -336,6 +349,7 @@ fun StripeTheme(
         LocalShapes provides shapes,
         LocalTypography provides typography,
         LocalInspectionMode provides inspectionMode,
+        LocalInstrumentationTest provides isInstrumentationTest,
     ) {
         MaterialTheme(
             colors = colors.materialColors,
