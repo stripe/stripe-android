@@ -331,7 +331,7 @@ fun StripeTheme(
 
     val isInstrumentationTest = runCatching {
         BuildConfig.DEBUG && run {
-            // InstrumentationRegistry.getInstrumentation().context != null
+            // InstrumentationRegistry.getInstrumentation()
             val registry = Class.forName("androidx.test.platform.app.InstrumentationRegistry")
             val instrumentationMethod = registry.getDeclaredMethod("getInstrumentation")
             instrumentationMethod.invoke(null) // This will throw if we're not in an instrumentation test.
