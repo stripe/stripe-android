@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.navigation
 
+import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -178,15 +179,7 @@ internal sealed class Destination(
             KEY_LAST4 to last4
         )
 
-        fun microdeposits(backStackEntry: NavBackStackEntry): MicrodepositVerificationMethod =
-            backStackEntry.arguments
-                ?.getString(KEY_MICRODEPOSITS)
-                ?.let { value ->
-                    MicrodepositVerificationMethod.values().firstOrNull { it.value == value }
-                } ?: MicrodepositVerificationMethod.UNKNOWN
-
-        fun last4(backStackEntry: NavBackStackEntry): String? =
-            backStackEntry.arguments?.getString(KEY_LAST4)
+        fun last4(args: Bundle?): String? = args?.getString(KEY_LAST4)
 
         override fun invoke(
             referrer: Pane?,
