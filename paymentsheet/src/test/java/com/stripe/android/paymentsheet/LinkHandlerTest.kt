@@ -23,6 +23,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SELECTION
+import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -395,13 +396,73 @@ class LinkHandlerTest {
         processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
         accountStatusTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
     }
+
+    @Test
+    fun `Hides Link inline signup if no valid funding source`() = runLinkInlineTest(
+        linkConfiguration = defaultLinkConfiguration(
+            linkFundingSources = listOf("us_bank_account"),
+        ),
+    ) {
+        handler.setupLink(
+            state = LinkState(
+                loginState = LinkState.LoginState.LoggedOut,
+                configuration = configuration,
+            )
+        )
+
+        accountStatusFlow.emit(AccountStatus.SignedOut)
+
+        handler.linkSignupMode.test {
+            assertThat(awaitItem()).isNull()
+        }
+
+        accountStatusTurbine.cancelAndIgnoreRemainingEvents()
+    }
+
+    @Test
+    fun `Hides Link inline signup if user already has an account`() = runLinkInlineTest {
+        handler.setupLink(
+            state = LinkState(
+                loginState = LinkState.LoginState.NeedsVerification,
+                configuration = configuration,
+            )
+        )
+
+        accountStatusFlow.emit(AccountStatus.NeedsVerification)
+
+        handler.linkSignupMode.test {
+            assertThat(awaitItem()).isNull()
+        }
+
+        accountStatusTurbine.cancelAndIgnoreRemainingEvents()
+    }
+
+    @Test
+    fun `Shows Link inline signup if user has no account`() = runLinkInlineTest {
+        handler.setupLink(
+            state = LinkState(
+                loginState = LinkState.LoginState.LoggedOut,
+                configuration = configuration,
+            )
+        )
+
+        accountStatusFlow.emit(AccountStatus.SignedOut)
+
+        handler.linkSignupMode.test {
+            assertThat(awaitItem()).isNotNull()
+        }
+
+        accountStatusTurbine.cancelAndIgnoreRemainingEvents()
+    }
 }
 
 // Used to run through both complete flow, and custom flow for link inline tests.
 private fun runLinkInlineTest(
     accountStatusFlow: MutableSharedFlow<AccountStatus> = MutableSharedFlow(replay = 1),
     shouldCompleteLinkFlowValues: List<Boolean> = listOf(true, false),
-    linkConfiguration: LinkConfiguration = defaultLinkConfiguration(),
+    linkConfiguration: LinkConfiguration = defaultLinkConfiguration(
+        linkFundingSources = listOf("card"),
+    ),
     testBlock: suspend LinkInlineTestData.() -> Unit,
 ) {
     for (shouldCompleteLinkFlowValue in shouldCompleteLinkFlowValues) {
@@ -458,9 +519,13 @@ private fun runLinkTest(
     }
 }
 
-private fun defaultLinkConfiguration(): LinkConfiguration {
+private fun defaultLinkConfiguration(
+    linkFundingSources: List<String> = emptyList(),
+): LinkConfiguration {
     return LinkConfiguration(
-        stripeIntent = mock(),
+        stripeIntent = PaymentIntentFactory.create(
+            linkFundingSources = linkFundingSources,
+        ),
         signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
         merchantName = "Merchant, Inc",
         merchantCountryCode = "US",
