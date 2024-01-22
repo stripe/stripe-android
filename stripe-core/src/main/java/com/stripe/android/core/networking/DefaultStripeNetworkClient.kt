@@ -48,7 +48,7 @@ class DefaultStripeNetworkClient @JvmOverloads constructor(
             )
 
             delay(
-                retryDelaySupplier.getDelayMillis(
+                retryDelaySupplier.getDelay(
                     DEFAULT_MAX_RETRIES,
                     remainingRetries
                 )

@@ -174,7 +174,7 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
      * and [remainingRetries] is greater than 0, retry after a delay.
      * After [remainingRetries] are exhausted, stop attempts.
      *
-     * The delay logic can be found in [RetryDelaySupplier.getDelayMillis].
+     * The delay logic can be found in [RetryDelaySupplier.getDelay].
      *
      * @param challengeResult the result of the 3DS2 challenge flow.
      * @param remainingRetries the number of retry attempts remaining. Defaults to [MAX_RETRIES].
@@ -198,7 +198,7 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
 
         return if (shouldRetry) {
             delay(
-                retryDelaySupplier.getDelayMillis(
+                retryDelaySupplier.getDelay(
                     MAX_RETRIES,
                     remainingRetries
                 )

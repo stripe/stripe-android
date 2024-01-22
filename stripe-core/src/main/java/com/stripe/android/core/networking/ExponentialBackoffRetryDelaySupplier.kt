@@ -1,40 +1,45 @@
 package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.pow
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ExponentialBackoffRetryDelaySupplier(
-    private val incrementSeconds: Long
+    private val incrementDuration: Duration
 ) : RetryDelaySupplier {
 
     @Inject
-    constructor() : this(DEFAULT_INCREMENT_SECONDS)
+    constructor() : this(DEFAULT_INCREMENT_SECONDS.toDuration(DurationUnit.SECONDS))
 
     /**
      * Calculate an exponential backoff delay before retrying the next completion request
      * using the equation:
      * ```
-     * incrementSeconds ^ ((maxRetries - remainingRetries) + 1)
+     * incrementDuration ^ ((maxRetries - remainingRetries) + 1)
      * ```
      *
-     * For example, if [maxRetries] is 3:
+     * For example, if [maxRetries] is 3 and [incrementDuration] is 2 seconds:
      * - Delay 2 seconds before the first retry
      * - Delay 4 seconds before the second retry
      * - Delay 8 seconds before the third retry
      */
-    override fun getDelayMillis(
+    @OptIn(kotlin.time.ExperimentalTime::class)
+    override fun getDelay(
         maxRetries: Int,
         remainingRetries: Int
-    ): Long {
+    ): Duration {
         val retryAttempt = maxRetries - remainingRetries.coerceIn(1, maxRetries) + 1
-        return TimeUnit.SECONDS.toMillis(
-            incrementSeconds.toDouble().pow(retryAttempt).toLong()
-        )
+
+        return incrementDuration
+            .toDouble(DurationUnit.SECONDS)
+            .pow(retryAttempt)
+            .toDuration(DurationUnit.SECONDS)
     }
 
     private companion object {

@@ -1,29 +1,31 @@
 package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LinearRetryDelaySupplier(
-    private val delay: Long
+    private val delay: Duration
 ) : RetryDelaySupplier {
 
     @Inject
-    constructor() : this(DEFAULT_DELAY)
+    constructor() : this(DEFAULT_DELAY.toDuration(DurationUnit.SECONDS))
 
     /**
      * Gets a linear delay time regardless of provided parameters
      *
-     * @return static delay in milliseconds
+     * @return static delay as a [Duration] object
      */
-    override fun getDelayMillis(
+    override fun getDelay(
         maxRetries: Int,
         remainingRetries: Int
-    ): Long {
-        return TimeUnit.SECONDS.toMillis(delay)
+    ): Duration {
+        return delay
     }
 
     private companion object {

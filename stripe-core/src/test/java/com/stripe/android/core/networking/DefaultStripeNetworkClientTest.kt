@@ -29,6 +29,7 @@ import java.net.UnknownHostException
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import kotlin.time.Duration
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -138,7 +139,7 @@ internal class DefaultStripeNetworkClientTest {
             val client = DefaultStripeNetworkClient(
                 workContext = testDispatcher,
                 connectionFactory = connectionFactory,
-                retryDelaySupplier = ExponentialBackoffRetryDelaySupplier(0)
+                retryDelaySupplier = ExponentialBackoffRetryDelaySupplier(Duration.ZERO)
             )
 
             val response = client.executeRequest(FakeStripeRequest())
@@ -161,7 +162,7 @@ internal class DefaultStripeNetworkClientTest {
             val client = DefaultStripeNetworkClient(
                 workContext = testDispatcher,
                 connectionFactory = connectionFactory,
-                retryDelaySupplier = ExponentialBackoffRetryDelaySupplier(0),
+                retryDelaySupplier = ExponentialBackoffRetryDelaySupplier(Duration.ZERO),
                 logger = mockLogger
             )
 
@@ -182,7 +183,7 @@ internal class DefaultStripeNetworkClientTest {
             val executor = DefaultStripeNetworkClient(
                 workContext = testDispatcher,
                 connectionFactory = connectionFactory,
-                retryDelaySupplier = ExponentialBackoffRetryDelaySupplier(0)
+                retryDelaySupplier = ExponentialBackoffRetryDelaySupplier(Duration.ZERO)
             )
 
             val response = executor.executeRequest(FakeStripeRequest())

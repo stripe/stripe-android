@@ -230,11 +230,11 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         }
 
         while (shouldRetry(stripeIntentResult) && remainingRetries > 1) {
-            val delayMs = retryDelaySupplier.getDelayMillis(
+            val delayDuration = retryDelaySupplier.getDelay(
                 MAX_RETRIES,
                 remainingRetries
             )
-            delay(delayMs)
+            delay(delayDuration)
             stripeIntentResult = if (shouldCallRefreshIntent(originalIntent)) {
                 refreshStripeIntent(
                     clientSecret = clientSecret,
