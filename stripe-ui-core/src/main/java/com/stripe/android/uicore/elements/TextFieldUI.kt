@@ -50,7 +50,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalAutofill
 import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -63,6 +62,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
 import com.stripe.android.uicore.BuildConfig
+import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.stripeColors
 import kotlinx.coroutines.delay
@@ -335,7 +335,7 @@ fun AnimatedIcons(
 
     val composableScope = rememberCoroutineScope()
 
-    val isRunningInTestHarness = LocalInspectionMode.current
+    val isRunningInTestHarness = LocalInstrumentationTest.current
 
     val target by produceState(initialValue = icons.first()) {
         if (!isRunningInTestHarness) {

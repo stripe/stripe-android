@@ -311,6 +311,8 @@ fun StripeTypography.toComposeTypography(): Typography {
 val LocalColors = staticCompositionLocalOf { StripeTheme.getColors(false) }
 val LocalShapes = staticCompositionLocalOf { StripeTheme.shapesMutable }
 val LocalTypography = staticCompositionLocalOf { StripeTheme.typographyMutable }
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalInstrumentationTest = staticCompositionLocalOf { false }
 
 /**
  * Base Theme for Stripe Composables.
@@ -339,13 +341,14 @@ fun StripeTheme(
         }
     }.getOrDefault(false)
 
-    val inspectionMode = LocalInspectionMode.current || isRobolectricTest || isInstrumentationTest
+    val inspectionMode = LocalInspectionMode.current || isRobolectricTest
 
     CompositionLocalProvider(
         LocalColors provides colors,
         LocalShapes provides shapes,
         LocalTypography provides typography,
         LocalInspectionMode provides inspectionMode,
+        LocalInstrumentationTest provides isInstrumentationTest,
     ) {
         MaterialTheme(
             colors = colors.materialColors,
