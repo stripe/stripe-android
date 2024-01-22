@@ -1,8 +1,5 @@
 package com.stripe.android.paymentsheet.analytics
 
-import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.StripeException
 
 internal sealed class PaymentSheetConfirmationError : Throwable() {
@@ -12,7 +9,7 @@ internal sealed class PaymentSheetConfirmationError : Throwable() {
     data class Stripe(override val cause: Throwable) : PaymentSheetConfirmationError() {
 
         override val analyticsValue: String
-            get() = StripeException.create(cause).analyticsValue
+            get() = StripeException.create(cause).analyticsValue() ?: "unknown"
     }
 
     data class GooglePay(val errorCode: Int) : PaymentSheetConfirmationError() {
@@ -27,11 +24,3 @@ internal sealed class PaymentSheetConfirmationError : Throwable() {
             get() = "invalidState"
     }
 }
-
-internal val StripeException.analyticsValue: String
-    get() = when (this) {
-        is APIException -> "apiError"
-        is APIConnectionException -> "connectionError"
-        is InvalidRequestException -> "invalidRequestError"
-        else -> "unknown"
-    }

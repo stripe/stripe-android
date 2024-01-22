@@ -100,7 +100,10 @@ internal class StripeBrowserLauncherViewModel(
 
     fun getFailureIntent(args: PaymentBrowserAuthContract.Args): Intent {
         val url = Uri.parse(args.url)
-        val exception = LocalStripeException(displayMessage = resolveErrorMessage)
+        val exception = LocalStripeException(
+            displayMessage = resolveErrorMessage,
+            analyticsValue = "failedBrowserLaunchError",
+        )
 
         return Intent().putExtras(
             PaymentFlowResult.Unvalidated(

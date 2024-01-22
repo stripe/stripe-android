@@ -4,7 +4,6 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.analytics.analyticsValue
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.Unknown
 
 internal sealed class PaymentSheetLoadingException : Throwable() {
@@ -80,7 +79,7 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
     ) : PaymentSheetLoadingException() {
 
         override val type: String
-            get() = StripeException.create(cause).analyticsValue
+            get() = StripeException.create(cause).analyticsValue() ?: "unknown"
 
         override val message: String? = cause.message
 
