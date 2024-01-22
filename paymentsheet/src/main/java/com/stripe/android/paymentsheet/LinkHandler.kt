@@ -176,30 +176,28 @@ internal class LinkHandler @Inject constructor(
                 paymentMethodCreateParams
             ).getOrNull()
 
-            if (linkPaymentDetails != null) {
+            val paymentSelection = when (linkPaymentDetails) {
+                is LinkPaymentDetails.New -> {
+                    PaymentSelection.New.LinkInline(linkPaymentDetails)
+                }
+                is LinkPaymentDetails.Saved -> {
+                    PaymentSelection.Saved(
+                        paymentMethod = PaymentMethod.Builder()
+                            .setId(linkPaymentDetails.paymentDetails.id)
+                            .setCode(paymentMethodCreateParams.typeCode)
+                            .setType(PaymentMethod.Type.Card)
+                            .build(),
+                        walletType = PaymentSelection.Saved.WalletType.Link,
+                    )
+                }
+                null -> null
+            }
+
+            if (paymentSelection != null) {
                 linkStore.markLinkAsUsed()
             }
 
-            _processingState.emit(
-                ProcessingState.PaymentDetailsCollected(
-                    when (linkPaymentDetails) {
-                        is LinkPaymentDetails.New -> {
-                            PaymentSelection.New.LinkInline(linkPaymentDetails)
-                        }
-                        is LinkPaymentDetails.Saved -> {
-                            PaymentSelection.Saved(
-                                paymentMethod = PaymentMethod.Builder()
-                                    .setId(linkPaymentDetails.paymentDetails.id)
-                                    .setCode(paymentMethodCreateParams.typeCode)
-                                    .setType(Card)
-                                    .build(),
-                                walletType = PaymentSelection.Saved.WalletType.Link,
-                            )
-                        }
-                        null -> null
-                    }
-                )
-            )
+            _processingState.emit(ProcessingState.PaymentDetailsCollected(paymentSelection))
         }
     }
 
@@ -224,13 +222,14 @@ internal class LinkHandler @Inject constructor(
         if (paymentMethod != null) {
             // If payment was completed inside the Link UI, dismiss immediately.
             _processingState.tryEmit(ProcessingState.PaymentMethodCollected(paymentMethod))
+            linkStore.markLinkAsUsed()
         } else if (cancelPaymentFlow) {
             // We launched the user straight into Link, but they decided to exit out of it.
             _processingState.tryEmit(ProcessingState.Cancelled)
         } else {
-            _processingState.tryEmit(
-                ProcessingState.CompletedWithPaymentResult(result.convertToPaymentResult())
-            )
+            val paymentResult = result.convertToPaymentResult()
+            _processingState.tryEmit(ProcessingState.CompletedWithPaymentResult(paymentResult))
+            linkStore.markLinkAsUsed()
         }
     }
 

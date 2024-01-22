@@ -10,6 +10,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.AccountStatus
@@ -129,6 +130,7 @@ class LinkHandlerTest {
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.CompleteWithoutLink)
             verify(linkAnalyticsHelper).onLinkPopupSkipped()
             verify(linkLauncher, never()).present(eq(configuration))
+            verify(linkStore, never()).markLinkAsUsed()
         }
 
         handler.accountStatus.test {
@@ -161,6 +163,7 @@ class LinkHandlerTest {
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
             assertThat(awaitItem()).isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
             verify(linkLauncher, never()).present(eq(configuration))
+            verify(linkStore).markLinkAsUsed()
         }
 
         handler.accountStatus.test {
@@ -194,6 +197,7 @@ class LinkHandlerTest {
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.CompleteWithoutLink)
             verify(linkAnalyticsHelper).onLinkPopupSkipped()
             verify(linkLauncher, never()).present(eq(configuration))
+            verify(linkStore, never()).markLinkAsUsed()
         }
 
         processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
@@ -230,6 +234,7 @@ class LinkHandlerTest {
             assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Verified)
             verify(linkAnalyticsHelper).onLinkPopupSkipped()
             verify(linkLauncher, never()).present(eq(configuration))
+            verify(linkStore, never()).markLinkAsUsed()
         }
 
         processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
@@ -255,23 +260,6 @@ class LinkHandlerTest {
             ensureAllEventsConsumed() // Begin with no events.
             whenever(linkConfigurationCoordinator.signInWithUserInput(any(), any()))
                 .thenReturn(Result.success(true))
-            whenever(linkConfigurationCoordinator.attachNewCardToAccount(any(), any()))
-                .thenReturn(
-                    Result.success(
-                        LinkPaymentDetails.New(
-                            paymentDetails = ConsumerPaymentDetails.Card(
-                                id = "pm_123",
-                                expiryYear = 2050,
-                                expiryMonth = 4,
-                                brand = CardBrand.Visa,
-                                last4 = "4242",
-                                cvcCheck = CvcCheck.Pass,
-                            ),
-                            paymentMethodCreateParams = mock(),
-                            originalParams = mock(),
-                        )
-                    )
-                )
             testScope.launch {
                 handler.payWithLinkInline(userInput, cardSelection(), shouldCompleteLinkFlow)
             }
@@ -283,6 +271,7 @@ class LinkHandlerTest {
             assertThat(awaitItem()).isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
             assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Verified)
             verify(linkLauncher, never()).present(eq(configuration))
+            verify(linkStore).markLinkAsUsed()
         }
 
         processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
@@ -292,7 +281,16 @@ class LinkHandlerTest {
     fun `payWithLinkInline collects payment details in passthrough mode`() = runLinkInlineTest(
         accountStatusFlow = MutableSharedFlow(replay = 0),
         shouldCompleteLinkFlowValues = listOf(false),
-        linkConfiguration = defaultLinkConfiguration().copy(passthroughModeEnabled = true)
+        linkConfiguration = defaultLinkConfiguration().copy(passthroughModeEnabled = true),
+        attachNewCardToAccountResult = Result.success(
+            LinkPaymentDetails.Saved(
+                paymentDetails = ConsumerPaymentDetails.Passthrough(
+                    id = "pm_123",
+                    last4 = "4242"
+                ),
+                paymentMethodCreateParams = mock(),
+            )
+        ),
     ) {
         val userInput = UserInput.SignIn(email = "example@example.com")
 
@@ -308,18 +306,6 @@ class LinkHandlerTest {
             ensureAllEventsConsumed() // Begin with no events.
             whenever(linkConfigurationCoordinator.signInWithUserInput(any(), any()))
                 .thenReturn(Result.success(true))
-            whenever(linkConfigurationCoordinator.attachNewCardToAccount(any(), any()))
-                .thenReturn(
-                    Result.success(
-                        LinkPaymentDetails.Saved(
-                            paymentDetails = ConsumerPaymentDetails.Passthrough(
-                                id = "pm_123",
-                                last4 = "4242"
-                            ),
-                            paymentMethodCreateParams = mock(),
-                        )
-                    )
-                )
             testScope.launch {
                 handler.payWithLinkInline(userInput, cardSelection(), shouldCompleteLinkFlow)
             }
@@ -463,10 +449,24 @@ private fun runLinkInlineTest(
     linkConfiguration: LinkConfiguration = defaultLinkConfiguration(
         linkFundingSources = listOf("card"),
     ),
+    attachNewCardToAccountResult: Result<LinkPaymentDetails> = Result.success(
+        LinkPaymentDetails.New(
+            paymentDetails = ConsumerPaymentDetails.Card(
+                id = "pm_123",
+                expiryYear = 2050,
+                expiryMonth = 4,
+                brand = CardBrand.Visa,
+                last4 = "4242",
+                cvcCheck = CvcCheck.Pass,
+            ),
+            paymentMethodCreateParams = mock(),
+            originalParams = mock(),
+        )
+    ),
     testBlock: suspend LinkInlineTestData.() -> Unit,
 ) {
     for (shouldCompleteLinkFlowValue in shouldCompleteLinkFlowValues) {
-        runLinkTest(accountStatusFlow, linkConfiguration) {
+        runLinkTest(accountStatusFlow, linkConfiguration, attachNewCardToAccountResult) {
             with(LinkInlineTestData(shouldCompleteLinkFlowValue, this)) {
                 testBlock()
             }
@@ -477,16 +477,19 @@ private fun runLinkInlineTest(
 private fun runLinkTest(
     accountStatusFlow: MutableSharedFlow<AccountStatus> = MutableSharedFlow(replay = 1),
     linkConfiguration: LinkConfiguration = defaultLinkConfiguration(),
+    attachNewCardToAccountResult: Result<LinkPaymentDetails>? = null,
     testBlock: suspend LinkTestData.() -> Unit
 ): Unit = runTest {
     val linkLauncher = mock<LinkPaymentLauncher>()
     val linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>()
     val savedStateHandle = SavedStateHandle()
     val linkAnalyticsHelper = mock<LinkAnalyticsHelper>()
+    val linkStore = mock<LinkStore>()
     val handler = LinkHandler(
         linkLauncher = linkLauncher,
         linkConfigurationCoordinator = linkConfigurationCoordinator,
         savedStateHandle = savedStateHandle,
+        linkStore = linkStore,
         linkAnalyticsComponentBuilder = mock<LinkAnalyticsComponent.Builder>().stub {
             val component = object : LinkAnalyticsComponent {
                 override val linkAnalyticsHelper: LinkAnalyticsHelper = linkAnalyticsHelper
@@ -498,6 +501,7 @@ private fun runLinkTest(
     val accountStatusTurbine = handler.accountStatus.testIn(backgroundScope)
 
     whenever(linkConfigurationCoordinator.getAccountStatusFlow(eq(linkConfiguration))).thenReturn(accountStatusFlow)
+    whenever(linkConfigurationCoordinator.attachNewCardToAccount(eq(linkConfiguration), any())).thenReturn(attachNewCardToAccountResult)
 
     with(
         LinkTestDataImpl(
@@ -505,6 +509,7 @@ private fun runLinkTest(
             handler = handler,
             linkLauncher = linkLauncher,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
+            linkStore = linkStore,
             savedStateHandle = savedStateHandle,
             configuration = linkConfiguration,
             accountStatusFlow = accountStatusFlow,
@@ -560,6 +565,7 @@ private class LinkTestDataImpl(
     override val handler: LinkHandler,
     override val linkLauncher: LinkPaymentLauncher,
     override val linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    override val linkStore: LinkStore,
     override val savedStateHandle: SavedStateHandle,
     override val configuration: LinkConfiguration,
     override val accountStatusFlow: MutableSharedFlow<AccountStatus>,
@@ -573,6 +579,7 @@ private interface LinkTestData {
     val handler: LinkHandler
     val linkLauncher: LinkPaymentLauncher
     val linkConfigurationCoordinator: LinkConfigurationCoordinator
+    val linkStore: LinkStore
     val savedStateHandle: SavedStateHandle
     val configuration: LinkConfiguration
     val accountStatusFlow: MutableSharedFlow<AccountStatus>

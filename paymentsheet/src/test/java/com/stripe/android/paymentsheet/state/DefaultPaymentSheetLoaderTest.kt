@@ -889,6 +889,7 @@ internal class DefaultPaymentSheetLoaderTest {
             eventReporter = eventReporter,
             workContext = testDispatcher,
             accountStatusProvider = { linkAccountState },
+            linkStore = mock(),
         )
     }
 
