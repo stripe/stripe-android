@@ -311,6 +311,7 @@ fun StripeTypography.toComposeTypography(): Typography {
 val LocalColors = staticCompositionLocalOf { StripeTheme.getColors(false) }
 val LocalShapes = staticCompositionLocalOf { StripeTheme.shapesMutable }
 val LocalTypography = staticCompositionLocalOf { StripeTheme.typographyMutable }
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val LocalInstrumentationTest = staticCompositionLocalOf { false }
 
