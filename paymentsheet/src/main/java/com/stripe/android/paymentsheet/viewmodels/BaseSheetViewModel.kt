@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -232,6 +233,12 @@ internal abstract class BaseSheetViewModel(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
         initialValue = PaymentSheetTopBarStateFactory.createDefault(),
+    )
+
+    val linkSignupMode: StateFlow<LinkSignupMode?> = linkHandler.linkSignupMode.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = null,
     )
 
     init {

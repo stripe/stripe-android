@@ -14,9 +14,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
-import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -47,7 +45,7 @@ internal fun AddPaymentMethod(
     val showCheckboxFlow = remember { MutableStateFlow(false) }
 
     val processing by sheetViewModel.processing.collectAsState(false)
-    val linkAccountStatus by linkHandler.accountStatus.collectAsState(initial = null)
+    val linkSignupMode by sheetViewModel.linkSignupMode.collectAsState()
 
     var selectedPaymentMethodCode: String by rememberSaveable {
         mutableStateOf(sheetViewModel.initiallySelectedPaymentMethodType)
@@ -63,11 +61,9 @@ internal fun AddPaymentMethod(
         sheetViewModel.createFormArguments(selectedItem)
     }
 
-    val showLinkInlineSignup = sheetViewModel.showLinkInlineSignupView(
-        selectedPaymentMethodCode,
-        linkAccountStatus,
-        arguments.showCheckbox,
-    )
+    val linkInlineSignupMode = remember(linkSignupMode, selectedPaymentMethodCode) {
+        linkSignupMode.takeIf { selectedPaymentMethodCode == PaymentMethod.Type.Card.code }
+    }
 
     LaunchedEffect(arguments) {
         showCheckboxFlow.emit(arguments.showCheckbox)
@@ -108,7 +104,7 @@ internal fun AddPaymentMethod(
                 enabled = !processing,
                 supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
                 selectedItem = selectedItem,
-                linkSignupMode = showLinkInlineSignup,
+                linkSignupMode = linkInlineSignupMode,
                 linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
                 showCheckboxFlow = showCheckboxFlow,
                 onItemSelectedListener = { selectedLpm ->
@@ -156,29 +152,6 @@ private val BaseSheetViewModel.initiallySelectedPaymentMethodType: PaymentMethod
         is PaymentSelection.New.GenericPaymentMethod -> selection.paymentMethodCreateParams.typeCode
         else -> supportedPaymentMethods.first().code
     }
-
-private fun BaseSheetViewModel.showLinkInlineSignupView(
-    paymentMethodCode: String,
-    linkAccountStatus: AccountStatus?,
-    showSaveToCustomerCheckbox: Boolean,
-): LinkSignupMode? {
-    val validStatusStates = setOf(
-        AccountStatus.SignedOut,
-    )
-    val linkInlineSelectionValid = linkHandler.linkInlineSelection.value != null
-    val ableToShowLink = linkHandler.isLinkEnabled.value == true &&
-        stripeIntent.value?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
-        paymentMethodCode == PaymentMethod.Type.Card.code &&
-        (linkAccountStatus in validStatusStates || linkInlineSelectionValid)
-
-    return if (!showSaveToCustomerCheckbox && ableToShowLink) {
-        LinkSignupMode.InsteadOfSaveForFutureUse
-    } else if (ableToShowLink) {
-        LinkSignupMode.AlongsideSaveForFutureUse
-    } else {
-        null
-    }
-}
 
 internal fun FormFieldValues.transformToPaymentMethodCreateParams(
     paymentMethod: LpmRepository.SupportedPaymentMethod
