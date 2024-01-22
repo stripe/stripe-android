@@ -308,22 +308,19 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             LinkSignupMode.InsteadOfSaveForFutureUse
         }
 
-        val customerInfo = when (linkSignupMode) {
-            LinkSignupMode.InsteadOfSaveForFutureUse -> {
-                LinkConfiguration.CustomerInfo(
-                    name = config.defaultBillingDetails?.name,
-                    email = customerEmail,
-                    phone = customerPhone,
-                    billingCountryCode = config.defaultBillingDetails?.address?.country,
-                )
-            }
+        val shouldAutofillBillingDetails = when (linkSignupMode) {
+            LinkSignupMode.InsteadOfSaveForFutureUse -> true
             LinkSignupMode.AlongsideSaveForFutureUse,
-            null -> {
-                // No customer info, because we don't want to prefill the form
-                // in this flow.
-                null
-            }
+            null -> false
         }
+
+        val customerInfo = LinkConfiguration.CustomerInfo(
+            name = config.defaultBillingDetails?.name,
+            email = customerEmail,
+            phone = customerPhone,
+            billingCountryCode = config.defaultBillingDetails?.address?.country,
+            shouldAutofill = shouldAutofillBillingDetails,
+        )
 
         return LinkConfiguration(
             stripeIntent = stripeIntent,

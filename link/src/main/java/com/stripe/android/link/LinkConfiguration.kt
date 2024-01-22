@@ -14,7 +14,7 @@ data class LinkConfiguration(
     val signupMode: LinkSignupMode?,
     val merchantName: String,
     val merchantCountryCode: String?,
-    val customerInfo: CustomerInfo?,
+    val customerInfo: CustomerInfo,
     val shippingValues: Map<IdentifierSpec, String?>?,
     val passthroughModeEnabled: Boolean,
 ) : Parcelable {
@@ -29,5 +29,6 @@ data class LinkConfiguration(
         val email: String?,
         val phone: String?,
         val billingCountryCode: String?,
+        val shouldAutofill: Boolean,
     ) : Parcelable
 }

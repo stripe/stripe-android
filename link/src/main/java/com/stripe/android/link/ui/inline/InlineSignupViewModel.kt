@@ -36,9 +36,10 @@ internal class InlineSignupViewModel @Inject constructor(
     private val logger: Logger,
 ) : ViewModel() {
 
-    private val prefilledEmail = config.customerInfo?.email
-    private val prefilledPhone = config.customerInfo?.phone.orEmpty()
-    private val prefilledName = config.customerInfo?.name
+    private val shouldPrefill = config.customerInfo.shouldAutofill
+    private val prefilledEmail = config.customerInfo.email.takeIf { shouldPrefill }
+    private val prefilledPhone = config.customerInfo.phone.takeIf { shouldPrefill }.orEmpty()
+    private val prefilledName = config.customerInfo.name.takeIf { shouldPrefill }
 
     val emailController = EmailConfig.createController(
         initialValue = prefilledEmail,
@@ -47,7 +48,7 @@ internal class InlineSignupViewModel @Inject constructor(
 
     val phoneController = PhoneNumberController.createPhoneNumberController(
         initialValue = prefilledPhone,
-        initiallySelectedCountryCode = config.customerInfo?.billingCountryCode,
+        initiallySelectedCountryCode = config.customerInfo.billingCountryCode,
     )
 
     val nameController = NameConfig.createController(prefilledName)

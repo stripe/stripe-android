@@ -514,6 +514,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 email = null,
                 phone = null,
                 billingCountryCode = "CA",
+                shouldAutofill = true,
             ),
             shippingValues = null,
             passthroughModeEnabled = false,
@@ -799,7 +800,7 @@ internal class DefaultPaymentSheetLoaderTest {
             ),
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.customerInfo).isNull()
+        assertThat(result.linkState?.configuration?.customerInfo?.shouldAutofill).isFalse()
     }
 
     @Test

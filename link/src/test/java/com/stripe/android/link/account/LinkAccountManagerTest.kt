@@ -334,6 +334,7 @@ class LinkAccountManagerTest {
                 email = customerEmail,
                 phone = null,
                 billingCountryCode = null,
+                shouldAutofill = true,
             ),
             merchantName = "Merchant",
             merchantCountryCode = "US",
