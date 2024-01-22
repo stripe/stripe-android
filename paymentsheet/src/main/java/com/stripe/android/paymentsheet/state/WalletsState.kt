@@ -42,10 +42,11 @@ internal data class WalletsState(
             paymentMethodTypes: List<String>,
             googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?,
             screen: PaymentSheetScreen,
+            isCompleteFlow: Boolean,
             onGooglePayPressed: () -> Unit,
             onLinkPressed: () -> Unit,
         ): WalletsState? {
-            if (!screen.showsWalletsHeader) {
+            if (!screen.showsWalletsHeader(isCompleteFlow)) {
                 return null
             }
 

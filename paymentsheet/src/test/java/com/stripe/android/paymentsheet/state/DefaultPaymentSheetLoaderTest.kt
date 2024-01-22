@@ -9,6 +9,8 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.inline.LinkSignupMode.AlongsideSaveForFutureUse
+import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
 import com.stripe.android.model.PaymentIntentFixtures
@@ -504,12 +506,15 @@ internal class DefaultPaymentSheetLoaderTest {
 
         val expectedLinkConfig = LinkConfiguration(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            signupMode = InsteadOfSaveForFutureUse,
             merchantName = "Merchant",
             merchantCountryCode = null,
-            customerName = "Till",
-            customerEmail = null,
-            customerPhone = null,
-            customerBillingCountryCode = "CA",
+            customerInfo = LinkConfiguration.CustomerInfo(
+                name = "Till",
+                email = null,
+                phone = null,
+                billingCountryCode = "CA",
+            ),
             shippingValues = null,
             passthroughModeEnabled = false,
         )
@@ -575,8 +580,7 @@ internal class DefaultPaymentSheetLoaderTest {
             ),
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.customerPhone)
-            .isEqualTo(shippingDetails.phoneNumber)
+        assertThat(result.linkState?.configuration?.customerInfo?.phone).isEqualTo(shippingDetails.phoneNumber)
     }
 
     @Test
@@ -587,6 +591,9 @@ internal class DefaultPaymentSheetLoaderTest {
                     on { email } doReturn "email@stripe.com"
                 }
             ),
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = StripeIntent.Usage.OffSession,
+            )
         )
 
         val result = loader.load(
@@ -599,8 +606,7 @@ internal class DefaultPaymentSheetLoaderTest {
             ),
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.customerEmail)
-            .isEqualTo("email@stripe.com")
+        assertThat(result.linkState?.configuration?.customerInfo?.email).isEqualTo("email@stripe.com")
     }
 
     @Test
@@ -774,6 +780,85 @@ internal class DefaultPaymentSheetLoaderTest {
         assertThat(result.isEligibleForCardBrandChoice).isTrue()
     }
 
+    @Test
+    fun `Provides no Link signup prefill if showing alongside save-for-future-use`() = runTest {
+        val loader = createPaymentSheetLoader(
+            linkAccountState = AccountStatus.NeedsVerification,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "some_secret",
+                ),
+            ),
+        ).getOrThrow()
+
+        assertThat(result.linkState?.configuration?.customerInfo).isNull()
+    }
+
+    @Test
+    fun `Returns correct Link signup mode if not saving for future use`() = runTest {
+        val loader = createPaymentSheetLoader(
+            linkAccountState = AccountStatus.Error,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+        ).getOrThrow()
+
+        assertThat(result.linkState?.configuration?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+    }
+
+    @Test
+    fun `Returns correct Link signup mode if saving for future use`() = runTest {
+        val loader = createPaymentSheetLoader(
+            linkAccountState = AccountStatus.NeedsVerification,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "some_secret",
+                ),
+            ),
+        ).getOrThrow()
+
+        assertThat(result.linkState?.configuration?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
+    }
+
+    @Test
+    fun `Disables Link if BDCC collects anything`() = runTest {
+        val loader = createPaymentSheetLoader()
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
+            ),
+        ).getOrThrow()
+
+        assertThat(result.linkState).isNull()
+    }
+
     private fun createPaymentSheetLoader(
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -804,6 +889,7 @@ internal class DefaultPaymentSheetLoaderTest {
             eventReporter = eventReporter,
             workContext = testDispatcher,
             accountStatusProvider = { linkAccountState },
+            linkStore = mock(),
         )
     }
 

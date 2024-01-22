@@ -5,6 +5,7 @@ import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.RetryDelayModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -16,7 +17,8 @@ import javax.inject.Singleton
         StripeRepositoryModule::class,
         Stripe3ds2TransactionModule::class,
         CoroutineContextModule::class,
-        CoreCommonModule::class
+        CoreCommonModule::class,
+        RetryDelayModule::class
     ]
 )
 internal interface Stripe3ds2TransactionViewModelFactoryComponent {

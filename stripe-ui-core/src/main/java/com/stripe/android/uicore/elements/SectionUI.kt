@@ -91,8 +91,9 @@ fun SectionCard(
 /**
  * This is how error string for the section are displayed.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
-internal fun SectionError(error: String) {
+fun SectionError(error: String) {
     Text(
         text = error,
         color = MaterialTheme.colors.error,

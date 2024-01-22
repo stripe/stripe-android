@@ -23,7 +23,7 @@ internal sealed interface PaymentSheetState : Parcelable {
         val paymentSelection: PaymentSelection?,
     ) : PaymentSheetState {
 
-        val hasPaymentOptions: Boolean
-            get() = isGooglePayReady || linkState != null || customerPaymentMethods.isNotEmpty()
+        val showSavedPaymentMethods: Boolean
+            get() = customerPaymentMethods.isNotEmpty() || isGooglePayReady
     }
 }

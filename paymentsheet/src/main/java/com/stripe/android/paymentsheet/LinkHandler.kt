@@ -7,11 +7,14 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -21,6 +24,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -30,6 +35,7 @@ internal class LinkHandler @Inject constructor(
     private val linkLauncher: LinkPaymentLauncher,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle,
+    private val linkStore: LinkStore,
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
 ) {
     sealed class ProcessingState {
@@ -63,11 +69,24 @@ internal class LinkHandler @Inject constructor(
     private val _isLinkEnabled = MutableStateFlow<Boolean?>(null)
     val isLinkEnabled: StateFlow<Boolean?> = _isLinkEnabled
 
-    private val linkConfiguration = MutableStateFlow<LinkConfiguration?>(null)
+    private val _linkConfiguration = MutableStateFlow<LinkConfiguration?>(null)
+    val linkConfiguration: StateFlow<LinkConfiguration?> = _linkConfiguration.asStateFlow()
 
-    val accountStatus: Flow<AccountStatus> = linkConfiguration
+    val accountStatus: Flow<AccountStatus> = _linkConfiguration
         .filterNotNull()
         .flatMapLatest(linkConfigurationCoordinator::getAccountStatusFlow)
+
+    val linkSignupMode: Flow<LinkSignupMode?> = combine(
+        linkConfiguration,
+        linkInlineSelection,
+        accountStatus,
+    ) { linkConfig, linkInlineSelection, linkAccountStatus ->
+        val linkInlineSelectionValid = linkInlineSelection != null
+        val validFundingSource = linkConfig?.stripeIntent?.linkFundingSources?.contains(Card.code) == true
+        val notLoggedIn = linkAccountStatus == AccountStatus.SignedOut
+        val ableToShowLink = validFundingSource && (notLoggedIn || linkInlineSelectionValid)
+        linkConfig?.signupMode.takeIf { ableToShowLink }
+    }
 
     private val linkAnalyticsHelper: LinkAnalyticsHelper by lazy {
         linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
@@ -89,7 +108,7 @@ internal class LinkHandler @Inject constructor(
 
         if (state == null) return
 
-        linkConfiguration.value = state.configuration
+        _linkConfiguration.value = state.configuration
     }
 
     suspend fun payWithLinkInline(
@@ -101,7 +120,7 @@ internal class LinkHandler @Inject constructor(
             savedStateHandle[SAVE_PROCESSING] = true
             _processingState.emit(ProcessingState.Started)
 
-            val configuration = requireNotNull(linkConfiguration.value)
+            val configuration = requireNotNull(_linkConfiguration.value)
 
             when (linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()) {
                 AccountStatus.Verified -> {
@@ -156,31 +175,34 @@ internal class LinkHandler @Inject constructor(
                 configuration,
                 paymentMethodCreateParams
             ).getOrNull()
-            _processingState.emit(
-                ProcessingState.PaymentDetailsCollected(
-                    when (linkPaymentDetails) {
-                        is LinkPaymentDetails.New -> {
-                            PaymentSelection.New.LinkInline(linkPaymentDetails)
-                        }
-                        is LinkPaymentDetails.Saved -> {
-                            PaymentSelection.Saved(
-                                paymentMethod = PaymentMethod.Builder()
-                                    .setId(linkPaymentDetails.paymentDetails.id)
-                                    .setCode(paymentMethodCreateParams.typeCode)
-                                    .setType(PaymentMethod.Type.Card)
-                                    .build(),
-                                walletType = PaymentSelection.Saved.WalletType.Link,
-                            )
-                        }
-                        null -> null
-                    }
-                )
-            )
+
+            val paymentSelection = when (linkPaymentDetails) {
+                is LinkPaymentDetails.New -> {
+                    PaymentSelection.New.LinkInline(linkPaymentDetails)
+                }
+                is LinkPaymentDetails.Saved -> {
+                    PaymentSelection.Saved(
+                        paymentMethod = PaymentMethod.Builder()
+                            .setId(linkPaymentDetails.paymentDetails.id)
+                            .setCode(paymentMethodCreateParams.typeCode)
+                            .setType(PaymentMethod.Type.Card)
+                            .build(),
+                        walletType = PaymentSelection.Saved.WalletType.Link,
+                    )
+                }
+                null -> null
+            }
+
+            if (paymentSelection != null) {
+                linkStore.markLinkAsUsed()
+            }
+
+            _processingState.emit(ProcessingState.PaymentDetailsCollected(paymentSelection))
         }
     }
 
     fun launchLink() {
-        val config = linkConfiguration.value ?: return
+        val config = _linkConfiguration.value ?: return
 
         linkLauncher.present(
             config,
@@ -200,13 +222,14 @@ internal class LinkHandler @Inject constructor(
         if (paymentMethod != null) {
             // If payment was completed inside the Link UI, dismiss immediately.
             _processingState.tryEmit(ProcessingState.PaymentMethodCollected(paymentMethod))
+            linkStore.markLinkAsUsed()
         } else if (cancelPaymentFlow) {
             // We launched the user straight into Link, but they decided to exit out of it.
             _processingState.tryEmit(ProcessingState.Cancelled)
         } else {
-            _processingState.tryEmit(
-                ProcessingState.CompletedWithPaymentResult(result.convertToPaymentResult())
-            )
+            val paymentResult = result.convertToPaymentResult()
+            _processingState.tryEmit(ProcessingState.CompletedWithPaymentResult(paymentResult))
+            linkStore.markLinkAsUsed()
         }
     }
 

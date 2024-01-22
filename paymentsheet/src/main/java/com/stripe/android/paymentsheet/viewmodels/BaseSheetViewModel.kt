@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -135,13 +136,16 @@ internal abstract class BaseSheetViewModel(
             initialValue = PaymentSheetScreen.Loading,
         )
 
-    internal val headerText: Flow<Int?> = combine(
-        currentScreen,
-        linkHandler.isLinkEnabled.filterNotNull(),
-        googlePayState,
-        supportedPaymentMethodsFlow,
-    ) { screen, isLinkAvailable, googlePay, supportedPaymentMethods ->
-        mapToHeaderTextResource(screen, isLinkAvailable, googlePay, supportedPaymentMethods)
+    abstract val walletsState: StateFlow<WalletsState?>
+
+    internal val headerText: Flow<Int?> by lazy {
+        combine(
+            currentScreen,
+            walletsState,
+            supportedPaymentMethodsFlow,
+        ) { screen, walletsState, supportedPaymentMethods ->
+            mapToHeaderTextResource(screen, walletsState, supportedPaymentMethods)
+        }
     }
 
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
@@ -163,10 +167,15 @@ internal abstract class BaseSheetViewModel(
 
     abstract val primaryButtonUiState: StateFlow<PrimaryButton.UIState?>
     abstract val error: StateFlow<String?>
-    abstract val walletsState: StateFlow<WalletsState?>
 
     private val _mandateText = MutableStateFlow<MandateText?>(null)
     internal val mandateText: StateFlow<MandateText?> = _mandateText
+
+    protected val linkEmailFlow: StateFlow<String?> = linkConfigurationCoordinator.emailFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = null,
+    )
 
     /**
      * This should be initialized from the starter args, and then from that point forward it will be
@@ -224,6 +233,12 @@ internal abstract class BaseSheetViewModel(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
         initialValue = PaymentSheetTopBarStateFactory.createDefault(),
+    )
+
+    val linkSignupMode: StateFlow<LinkSignupMode?> = linkHandler.linkSignupMode.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = null,
     )
 
     init {
@@ -551,13 +566,12 @@ internal abstract class BaseSheetViewModel(
 
     private fun mapToHeaderTextResource(
         screen: PaymentSheetScreen?,
-        isLinkAvailable: Boolean,
-        googlePayState: GooglePayState,
+        walletsState: WalletsState?,
         supportedPaymentMethods: List<PaymentMethodCode>,
     ): Int? {
         return headerTextFactory.create(
             screen = screen,
-            isWalletEnabled = isLinkAvailable || googlePayState is GooglePayState.Available,
+            isWalletEnabled = walletsState != null,
             types = supportedPaymentMethods,
         )
     }

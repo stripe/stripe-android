@@ -40,13 +40,14 @@ internal class DefaultEventReporter @Inject internal constructor(
                 mode = mode,
                 configuration = configuration,
                 isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
             )
         )
     }
 
     override fun onLoadStarted() {
         durationProvider.start(DurationProvider.Key.Loading)
-        fireEvent(PaymentSheetEvent.LoadStarted(isDeferred))
+        fireEvent(PaymentSheetEvent.LoadStarted(isDeferred, linkEnabled))
     }
 
     override fun onLoadSucceeded(
@@ -62,6 +63,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.LoadSucceeded(
                 duration = duration,
                 isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
             )
         )
     }
@@ -75,6 +77,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 duration = duration,
                 error = error.asPaymentSheetLoadingException.type,
                 isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
             )
         )
     }
@@ -84,6 +87,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.ElementsSessionLoadFailed(
                 error = error.asPaymentSheetLoadingException.type,
                 isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
             )
         )
     }
@@ -92,6 +96,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.Dismiss(
                 isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
             )
         )
     }
@@ -130,6 +135,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 code = code,
                 isDeferred = isDeferred,
                 currency = currency,
+                linkEnabled = linkEnabled,
             )
         )
     }
@@ -143,6 +149,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 paymentSelection = paymentSelection,
                 currency = currency,
                 isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
             )
         )
     }
@@ -152,6 +159,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.PressConfirmButton(
                 currency = currency,
                 isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
             )
         )
     }
@@ -175,6 +183,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 result = PaymentSheetEvent.Payment.Result.Success,
                 currency = currency,
                 isDeferred = deferredIntentConfirmationType != null,
+                linkEnabled = linkEnabled,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
             )
         )
@@ -194,6 +203,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 result = PaymentSheetEvent.Payment.Result.Failure(error),
                 currency = currency,
                 isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
                 deferredIntentConfirmationType = null,
             )
         )
@@ -201,7 +211,10 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onLpmSpecFailure() {
         fireEvent(
-            PaymentSheetEvent.LpmSerializeFailureEvent(isDeferred = isDeferred)
+            PaymentSheetEvent.LpmSerializeFailureEvent(
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+            )
         )
     }
 
@@ -212,6 +225,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.AutofillEvent(
                 type = type,
                 isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
             )
         )
     }
@@ -219,7 +233,8 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onShowEditablePaymentOption() {
         fireEvent(
             PaymentSheetEvent.ShowEditablePaymentOption(
-                isDeferred = isDeferred
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
             )
         )
     }
@@ -227,7 +242,8 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onHideEditablePaymentOption() {
         fireEvent(
             PaymentSheetEvent.HideEditablePaymentOption(
-                isDeferred = isDeferred
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
             )
         )
     }
@@ -245,7 +261,8 @@ internal class DefaultEventReporter @Inject internal constructor(
                     EventReporter.CardBrandChoiceEventSource.Edit ->
                         PaymentSheetEvent.ShowPaymentOptionBrands.Source.Edit
                 },
-                isDeferred = isDeferred
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
             )
         )
     }
@@ -263,7 +280,8 @@ internal class DefaultEventReporter @Inject internal constructor(
                     EventReporter.CardBrandChoiceEventSource.Edit ->
                         PaymentSheetEvent.HidePaymentOptionBrands.Source.Edit
                 },
-                isDeferred = isDeferred
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
             )
         )
     }
@@ -274,7 +292,8 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.UpdatePaymentOptionSucceeded(
                 selectedBrand = selectedBrand,
-                isDeferred = isDeferred
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
             )
         )
     }
@@ -287,7 +306,8 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.UpdatePaymentOptionFailed(
                 selectedBrand = selectedBrand,
                 error = error,
-                isDeferred = isDeferred
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
             )
         )
     }

@@ -63,7 +63,6 @@ internal class FlowControllerTest {
             )
         }
 
-        page.addPaymentMethod()
         page.fillOutCardDetails()
 
         networkRule.enqueue(
@@ -154,7 +153,6 @@ internal class FlowControllerTest {
                 )
             }
 
-            page.addPaymentMethod()
             page.fillOutCardDetails()
 
             networkRule.enqueue(
@@ -219,7 +217,6 @@ internal class FlowControllerTest {
             )
         }
 
-        page.addPaymentMethod()
         page.fillOutCardDetails()
         page.clickPrimaryButton()
 
@@ -337,7 +334,6 @@ internal class FlowControllerTest {
             )
         }
 
-        page.addPaymentMethod()
         page.fillOutCardDetails()
 
         networkRule.enqueue(
@@ -418,7 +414,6 @@ internal class FlowControllerTest {
             )
         }
 
-        page.addPaymentMethod()
         page.fillOutCardDetails()
 
         networkRule.enqueue(
@@ -473,7 +468,6 @@ internal class FlowControllerTest {
             )
         }
 
-        page.addPaymentMethod()
         page.fillOutCardDetails()
 
         networkRule.enqueue(
@@ -533,7 +527,6 @@ internal class FlowControllerTest {
             )
         }
 
-        page.addPaymentMethod()
         page.fillOutCardDetails()
 
         networkRule.enqueue(

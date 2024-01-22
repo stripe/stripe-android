@@ -74,6 +74,15 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            val paymentSheet = rememberPaymentSheet(
+                paymentResultCallback = viewModel::onPaymentSheetResult,
+                createIntentCallback = viewModel::createIntentCallback
+            )
+            val flowController = rememberPaymentSheetFlowController(
+                paymentOptionCallback = viewModel::onPaymentOptionSelected,
+                paymentResultCallback = viewModel::onPaymentSheetResult,
+                createIntentCallback = viewModel::createIntentCallback
+            )
             val addressLauncher = rememberAddressLauncher(
                 callback = viewModel::onAddressLauncherResult
             )
@@ -90,6 +99,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     AppearanceButton()
 
                     QrCodeButton(playgroundSettings = localPlaygroundSettings)
+
+                    ClearLinkDataButton()
                 },
                 bottomBarContent = {
                     ReloadButton(playgroundSettings = localPlaygroundSettings)
@@ -101,6 +112,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                         Column {
                             PlaygroundStateUi(
                                 playgroundState = playgroundState,
+                                paymentSheet = paymentSheet,
+                                flowController = flowController,
                                 addressLauncher = addressLauncher,
                             )
                         }
@@ -151,6 +164,19 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     }
 
     @Composable
+    private fun ClearLinkDataButton() {
+        val context = LocalContext.current
+        Button(
+            onClick = {
+                PaymentSheet.resetCustomer(context)
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Clear Link customer")
+        }
+    }
+
+    @Composable
     private fun ReloadButton(playgroundSettings: PlaygroundSettings) {
         Button(
             onClick = {
@@ -169,6 +195,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     @Composable
     private fun PlaygroundStateUi(
         playgroundState: PlaygroundState?,
+        paymentSheet: PaymentSheet,
+        flowController: PaymentSheet.FlowController,
         addressLauncher: AddressLauncher
     ) {
         if (playgroundState == null) {
@@ -180,14 +208,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             playgroundState = playgroundState,
         )
 
-        playgroundState.configureGlobals()
-
         when (playgroundState.integrationType) {
             IntegrationType.PaymentSheet -> {
-                val paymentSheet = rememberPaymentSheet(
-                    paymentResultCallback = viewModel::onPaymentSheetResult,
-                    createIntentCallback = viewModel::createIntentCallback
-                )
                 PaymentSheetUi(
                     paymentSheet = paymentSheet,
                     playgroundState = playgroundState,
@@ -195,11 +217,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             }
 
             IntegrationType.FlowController -> {
-                val flowController = rememberPaymentSheetFlowController(
-                    paymentOptionCallback = viewModel::onPaymentOptionSelected,
-                    paymentResultCallback = viewModel::onPaymentSheetResult,
-                    createIntentCallback = viewModel::createIntentCallback
-                )
                 FlowControllerUi(
                     flowController = flowController,
                     playgroundState = playgroundState,

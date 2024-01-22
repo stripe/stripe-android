@@ -20,6 +20,8 @@
   <string name="stripe_sign_up_message">Pay faster at %s and thousands of businesses.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[By joining Link, you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[By providing your email, you agree to create a Link account and save your payment info to Link, according to the <terms>Link Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Change email</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->

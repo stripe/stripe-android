@@ -12,13 +12,15 @@ import kotlin.time.DurationUnit
 internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     val params: Map<String, Any?>
-        get() = standardParams(isDeferred) + additionalParams
+        get() = standardParams(isDeferred, linkEnabled) + additionalParams
 
     protected abstract val isDeferred: Boolean
+    protected abstract val linkEnabled: Boolean
     protected abstract val additionalParams: Map<String, Any?>
 
     class LoadStarted(
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_started"
         override val additionalParams: Map<String, Any?> = emptyMap()
@@ -27,6 +29,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class LoadSucceeded(
         duration: Duration?,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val additionalParams: Map<String, Any?> = mapOf(
@@ -38,6 +41,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         duration: Duration?,
         error: String,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_failed"
         override val additionalParams: Map<String, Any?> = mapOf(
@@ -49,6 +53,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class ElementsSessionLoadFailed(
         error: String,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_elements_session_load_failed"
         override val additionalParams: Map<String, Any?> = mapOf(
@@ -60,6 +65,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         private val mode: EventReporter.Mode,
         private val configuration: PaymentSheet.Configuration,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
 
         override val eventName: String
@@ -167,6 +173,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class Dismiss(
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_dismiss"
         override val additionalParams: Map<String, Any> = emptyMap()
@@ -174,26 +181,24 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class ShowNewPaymentOptionForm(
         mode: EventReporter.Mode,
-        linkEnabled: Boolean,
         currency: String?,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "sheet_newpm_show")
         override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_LINK_ENABLED to linkEnabled,
             FIELD_CURRENCY to currency,
         )
     }
 
     class ShowExistingPaymentOptions(
         mode: EventReporter.Mode,
-        linkEnabled: Boolean,
         currency: String?,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "sheet_savedpm_show")
         override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_LINK_ENABLED to linkEnabled,
             FIELD_CURRENCY to currency,
         )
     }
@@ -202,6 +207,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         code: String,
         currency: String?,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_carousel_payment_method_tapped"
         override val additionalParams: Map<String, Any?> = mapOf(
@@ -215,6 +221,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         paymentSelection: PaymentSelection?,
         currency: String?,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String =
             formatEventName(mode, "paymentoption_${analyticsValue(paymentSelection)}_select")
@@ -226,6 +233,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class PressConfirmButton(
         currency: String?,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_confirm_button_tapped"
         override val additionalParams: Map<String, Any?> = mapOf(
@@ -240,6 +248,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         private val paymentSelection: PaymentSelection?,
         currency: String?,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
         private val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) : PaymentSheetEvent() {
 
@@ -293,6 +302,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class LpmSerializeFailureEvent(
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "luxe_serialize_failure"
         override val additionalParams: Map<String, Any?> = emptyMap()
@@ -301,6 +311,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class AutofillEvent(
         type: String,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         private fun String.toSnakeCase() = replace(
             "(?<=.)(?=\\p{Upper})".toRegex(),
@@ -313,6 +324,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class ShowEditablePaymentOption(
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_open_edit_screen"
 
@@ -321,6 +333,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class HideEditablePaymentOption(
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_cancel_edit_screen"
 
@@ -331,6 +344,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         source: Source,
         selectedBrand: CardBrand,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_open_cbc_dropdown"
 
@@ -348,6 +362,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         source: Source,
         selectedBrand: CardBrand?,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_close_cbc_dropdown"
 
@@ -364,6 +379,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class UpdatePaymentOptionSucceeded(
         selectedBrand: CardBrand,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_update_card"
 
@@ -376,6 +392,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         selectedBrand: CardBrand,
         error: Throwable,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_update_card_failed"
 
@@ -387,8 +404,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     private fun standardParams(
         isDecoupled: Boolean,
+        linkEnabled: Boolean,
     ): Map<String, Any?> = mapOf(
         FIELD_IS_DECOUPLED to isDecoupled,
+        FIELD_LINK_ENABLED to linkEnabled,
     )
 
     internal companion object {

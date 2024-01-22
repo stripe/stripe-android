@@ -16,12 +16,25 @@ import com.stripe.android.link.ui.signup.SignUpState
 data class InlineSignupViewState internal constructor(
     val userInput: UserInput?,
     val merchantName: String,
+    val signupMode: LinkSignupMode?,
     internal val isExpanded: Boolean,
     internal val apiFailed: Boolean,
     internal val signUpState: SignUpState
 ) {
+
     /**
      * Whether the view is active and the payment should be processed through Link.
      */
-    val useLink = isExpanded && !apiFailed
+    val useLink: Boolean
+        get() = when (signupMode) {
+            LinkSignupMode.AlongsideSaveForFutureUse -> userInput != null && !apiFailed
+            LinkSignupMode.InsteadOfSaveForFutureUse -> isExpanded && !apiFailed
+            null -> false
+        }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class LinkSignupMode {
+    InsteadOfSaveForFutureUse,
+    AlongsideSaveForFutureUse,
 }
