@@ -14,54 +14,76 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
     PreviewParameterProvider<NetworkingLinkSignupState> {
     override val values = sequenceOf(
         default(),
-        emailEntered()
+        emailEntered(),
+        invalidEmail()
     )
 
-    internal fun default(): NetworkingLinkSignupState {
-        return NetworkingLinkSignupState(
-            payload = Success(
-                NetworkingLinkSignupState.Payload(
-                    merchantName = "Test",
-                    emailController = EmailConfig.createController(""),
-                    phoneController = PhoneNumberController.createPhoneNumberController(
-                        initialValue = "",
-                        initiallySelectedCountryCode = null,
-                    ),
-                    content = networkingLinkSignupPane()
-                )
-            ),
-            validEmail = null,
-            validPhone = null,
-            lookupAccount = Uninitialized,
-            saveAccountToLink = Uninitialized
-        )
-    }
+    private fun default() = NetworkingLinkSignupState(
+        payload = Success(
+            NetworkingLinkSignupState.Payload(
+                merchantName = "Test",
+                emailController = EmailConfig.createController(""),
+                phoneController = PhoneNumberController.createPhoneNumberController(
+                    initialValue = "",
+                    initiallySelectedCountryCode = null,
+                ),
+                content = networkingLinkSignupPane()
+            )
+        ),
+        validEmail = null,
+        validPhone = null,
+        lookupAccount = Uninitialized,
+        saveAccountToLink = Uninitialized
+    )
 
-    internal fun emailEntered(): NetworkingLinkSignupState {
-        return NetworkingLinkSignupState(
-            payload = Success(
-                NetworkingLinkSignupState.Payload(
-                    merchantName = "Test",
-                    emailController = EmailConfig.createController("email"),
-                    phoneController = PhoneNumberController.createPhoneNumberController(
-                        initialValue = "",
-                        initiallySelectedCountryCode = null,
-                    ),
-                    content = networkingLinkSignupPane()
-                )
-            ),
-            validEmail = "test@test.com",
-            validPhone = null,
-            lookupAccount = Success(
-                ConsumerSessionLookup(
-                    exists = false,
-                    consumerSession = null,
-                    errorMessage = null
-                )
-            ),
-            saveAccountToLink = Uninitialized
-        )
-    }
+    private fun emailEntered() = NetworkingLinkSignupState(
+        payload = Success(
+            NetworkingLinkSignupState.Payload(
+                merchantName = "Test",
+                emailController = EmailConfig.createController("valid@email.com"),
+                phoneController = PhoneNumberController.createPhoneNumberController(
+                    initialValue = "",
+                    initiallySelectedCountryCode = null,
+                ),
+                content = networkingLinkSignupPane()
+            )
+        ),
+        validEmail = "test@test.com",
+        validPhone = null,
+        lookupAccount = Success(
+            ConsumerSessionLookup(
+                exists = false,
+                consumerSession = null,
+                errorMessage = null
+            )
+        ),
+        saveAccountToLink = Uninitialized
+    )
+
+
+    private fun invalidEmail() = NetworkingLinkSignupState(
+        payload = Success(
+            NetworkingLinkSignupState.Payload(
+                merchantName = "Test",
+                emailController = EmailConfig.createController("invalid_email.com"),
+                phoneController = PhoneNumberController.createPhoneNumberController(
+                    initialValue = "",
+                    initiallySelectedCountryCode = null,
+                ),
+                content = networkingLinkSignupPane()
+            )
+        ),
+        validEmail = "test@test.com",
+        validPhone = null,
+        lookupAccount = Success(
+            ConsumerSessionLookup(
+                exists = false,
+                consumerSession = null,
+                errorMessage = null
+            )
+        ),
+        saveAccountToLink = Uninitialized
+    )
 
     private fun networkingLinkSignupPane() = NetworkingLinkSignupPane(
         aboveCta = "By saving your account to Link, you agree to Link’s Terms and Privacy Policy",
