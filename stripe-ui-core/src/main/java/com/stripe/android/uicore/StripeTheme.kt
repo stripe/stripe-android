@@ -326,10 +326,20 @@ fun StripeTheme(
     content: @Composable () -> Unit
 ) {
     val isRobolectricTest = runCatching {
-        Build.FINGERPRINT.lowercase() == "robolectric"
+        BuildConfig.DEBUG && Build.FINGERPRINT.lowercase() == "robolectric"
     }.getOrDefault(false)
 
-    val inspectionMode = LocalInspectionMode.current || isRobolectricTest
+    val isInstrumentationTest = runCatching {
+        BuildConfig.DEBUG && run {
+            // InstrumentationRegistry.getInstrumentation().context != null
+            val registry = Class.forName("androidx.test.platform.app.InstrumentationRegistry")
+            val instrumentationMethod = registry.getDeclaredMethod("getInstrumentation")
+            instrumentationMethod.invoke(null) // This will throw if we're not in an instrumentation test.
+            true
+        }
+    }.getOrDefault(false)
+
+    val inspectionMode = LocalInspectionMode.current || isRobolectricTest || isInstrumentationTest
 
     CompositionLocalProvider(
         LocalColors provides colors,

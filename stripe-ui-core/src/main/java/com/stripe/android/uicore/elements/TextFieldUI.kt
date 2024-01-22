@@ -50,6 +50,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalAutofill
 import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -334,12 +335,16 @@ fun AnimatedIcons(
 
     val composableScope = rememberCoroutineScope()
 
+    val isRunningInTestHarness = LocalInspectionMode.current
+
     val target by produceState(initialValue = icons.first()) {
-        composableScope.launch {
-            while (true) {
-                icons.forEach {
-                    delay(1000)
-                    value = it
+        if (!isRunningInTestHarness) {
+            composableScope.launch {
+                while (true) {
+                    icons.forEach {
+                        delay(1000)
+                        value = it
+                    }
                 }
             }
         }
