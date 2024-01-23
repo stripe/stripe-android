@@ -135,56 +135,84 @@ private fun AccountPickerContent(
                 )
             }
         },
-    ) {
-        FinancialConnectionsScaffold(
-            topBar = {
-                FinancialConnectionsTopAppBar(
-                    showBack = false,
-                    onCloseClick = onCloseClick,
-                    elevation = lazyListState.elevation
-                )
-            }
-        ) {
-            when (val payload = state.payload) {
-                is Fail -> {
-                    when (val error = payload.error) {
-                        is AccountNoneEligibleForPaymentMethodError ->
-                            NoSupportedPaymentMethodTypeAccountsErrorContent(
-                                exception = error,
-                                onSelectAnotherBank = onSelectAnotherBank
-                            )
+        content = {
+            AccountPickerMainContent(
+                onCloseClick,
+                lazyListState,
+                state,
+                onSelectAnotherBank,
+                onEnterDetailsManually,
+                onLoadAccountsAgain,
+                onCloseFromErrorClick,
+                onAccountClicked,
+                onClickableTextClick,
+                onSubmit
+            )
+        },
+    )
+}
 
-                        is AccountLoadError -> NoAccountsAvailableErrorContent(
+@Composable
+private fun AccountPickerMainContent(
+    onCloseClick: () -> Unit,
+    lazyListState: LazyListState,
+    state: AccountPickerState,
+    onSelectAnotherBank: () -> Unit,
+    onEnterDetailsManually: () -> Unit,
+    onLoadAccountsAgain: () -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit,
+    onAccountClicked: (PartnerAccount) -> Unit,
+    onClickableTextClick: (String) -> Unit,
+    onSubmit: () -> Unit
+) {
+    FinancialConnectionsScaffold(
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                showBack = false,
+                onCloseClick = onCloseClick,
+                elevation = lazyListState.elevation
+            )
+        }
+    ) {
+        when (val payload = state.payload) {
+            is Fail -> {
+                when (val error = payload.error) {
+                    is AccountNoneEligibleForPaymentMethodError ->
+                        NoSupportedPaymentMethodTypeAccountsErrorContent(
                             exception = error,
-                            onEnterDetailsManually = onEnterDetailsManually,
-                            onTryAgain = onLoadAccountsAgain,
                             onSelectAnotherBank = onSelectAnotherBank
                         )
 
-                        else -> UnclassifiedErrorContent(
-                            error,
-                            onCloseFromErrorClick = onCloseFromErrorClick
-                        )
-                    }
-                }
+                    is AccountLoadError -> NoAccountsAvailableErrorContent(
+                        exception = error,
+                        onEnterDetailsManually = onEnterDetailsManually,
+                        onTryAgain = onLoadAccountsAgain,
+                        onSelectAnotherBank = onSelectAnotherBank
+                    )
 
-                is Loading,
-                is Uninitialized,
-                is Success -> AccountPickerMainContent(
-                    payload = payload,
-                    state = state,
-                    onAccountClicked = onAccountClicked,
-                    onClickableTextClick = onClickableTextClick,
-                    lazyListState = lazyListState,
-                    onSubmit = onSubmit
-                )
+                    else -> UnclassifiedErrorContent(
+                        error,
+                        onCloseFromErrorClick = onCloseFromErrorClick
+                    )
+                }
             }
+
+            is Loading,
+            is Uninitialized,
+            is Success -> AccountPickerLoaded(
+                payload = payload,
+                state = state,
+                onAccountClicked = onAccountClicked,
+                onClickableTextClick = onClickableTextClick,
+                lazyListState = lazyListState,
+                onSubmit = onSubmit
+            )
         }
     }
 }
 
 @Composable
-private fun AccountPickerMainContent(
+private fun AccountPickerLoaded(
     payload: Async<AccountPickerState.Payload>,
     state: AccountPickerState,
     lazyListState: LazyListState,

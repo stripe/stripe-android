@@ -155,42 +155,66 @@ private fun LinkAccountPickerContent(
                 )
             }
         },
-    ) {
-        FinancialConnectionsScaffold(
-            topBar = {
-                FinancialConnectionsTopAppBar(
-                    showBack = false,
-                    elevation = scrollState.elevation,
-                    onCloseClick = onCloseClick
-                )
-            }
-        ) {
-            when (val payload = state.payload) {
-                Uninitialized,
-                is Loading,
-                is Success -> LinkAccountPickerMainContent(
-                    scrollState = scrollState,
-                    payload = payload,
-                    cta = state.cta,
-                    selectedAccountId = state.selectedAccountId,
-                    selectNetworkedAccountAsync = state.selectNetworkedAccountAsync,
-                    onClickableTextClick = onClickableTextClick,
-                    onSelectAccountClick = onSelectAccountClick,
-                    onNewBankAccountClick = onNewBankAccountClick,
-                    onAccountClick = onAccountClick
-                )
+        content = {
+            LinkAccountPickerMainContent(
+                scrollState = scrollState,
+                onCloseClick = onCloseClick,
+                state = state,
+                onClickableTextClick = onClickableTextClick,
+                onSelectAccountClick = onSelectAccountClick,
+                onNewBankAccountClick = onNewBankAccountClick,
+                onAccountClick = onAccountClick,
+                onCloseFromErrorClick = onCloseFromErrorClick
+            )
+        },
+    )
+}
 
-                is Fail -> UnclassifiedErrorContent(
-                    error = payload.error,
-                    onCloseFromErrorClick = onCloseFromErrorClick
-                )
-            }
+@Composable
+private fun LinkAccountPickerMainContent(
+    scrollState: LazyListState,
+    onCloseClick: () -> Unit,
+    state: LinkAccountPickerState,
+    onClickableTextClick: (String) -> Unit,
+    onSelectAccountClick: () -> Unit,
+    onNewBankAccountClick: () -> Unit,
+    onAccountClick: (PartnerAccount) -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit
+) {
+    FinancialConnectionsScaffold(
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                showBack = false,
+                elevation = scrollState.elevation,
+                onCloseClick = onCloseClick
+            )
+        }
+    ) {
+        when (val payload = state.payload) {
+            Uninitialized,
+            is Loading,
+            is Success -> LinkAccountPickerLoaded(
+                scrollState = scrollState,
+                payload = payload,
+                cta = state.cta,
+                selectedAccountId = state.selectedAccountId,
+                selectNetworkedAccountAsync = state.selectNetworkedAccountAsync,
+                onClickableTextClick = onClickableTextClick,
+                onSelectAccountClick = onSelectAccountClick,
+                onNewBankAccountClick = onNewBankAccountClick,
+                onAccountClick = onAccountClick
+            )
+
+            is Fail -> UnclassifiedErrorContent(
+                error = payload.error,
+                onCloseFromErrorClick = onCloseFromErrorClick
+            )
         }
     }
 }
 
 @Composable
-private fun LinkAccountPickerMainContent(
+private fun LinkAccountPickerLoaded(
     scrollState: LazyListState,
     payload: Async<Payload>,
     selectedAccountId: String?,
