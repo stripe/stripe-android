@@ -19,6 +19,17 @@ internal class DefaultLinkEventsReporter @Inject constructor(
     private val logger: Logger,
     private val durationProvider: DurationProvider,
 ) : LinkEventsReporter {
+    override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) {
+        val sessionStateValue = when (state) {
+            LinkEventsReporter.SessionState.RequiresSignUp -> VALUE_REQUIRES_SIGN_UP
+            LinkEventsReporter.SessionState.RequiresVerification -> VALUE_REQUIRES_VERIFICATION
+            LinkEventsReporter.SessionState.Verified -> VALUE_VERIFIED
+        }
+
+        val params = mapOf(FIELD_SESSION_STATE to sessionStateValue)
+
+        fireEvent(LinkEvent.SignUpFailureInvalidSessionState, params)
+    }
 
     override fun onInlineSignupCheckboxChecked() {
         fireEvent(LinkEvent.SignUpCheckboxChecked)
@@ -34,12 +45,16 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.SignUpComplete, durationInSecondsFromStart(duration))
     }
 
-    override fun onSignupFailure(isInline: Boolean) {
-        fireEvent(LinkEvent.SignUpFailure)
+    override fun onSignupFailure(isInline: Boolean, error: Throwable) {
+        val params = mapOf(FIELD_ERROR_MESSAGE to (error.message ?: error.toString()))
+
+        fireEvent(LinkEvent.SignUpFailure, params)
     }
 
-    override fun onAccountLookupFailure() {
-        fireEvent(LinkEvent.AccountLookupFailure)
+    override fun onAccountLookupFailure(error: Throwable) {
+        val params = mapOf(FIELD_ERROR_MESSAGE to (error.message ?: error.toString()))
+
+        fireEvent(LinkEvent.AccountLookupFailure, params)
     }
 
     override fun onPopupShow() {
@@ -55,7 +70,8 @@ internal class DefaultLinkEventsReporter @Inject constructor(
     }
 
     override fun onPopupError(error: Throwable) {
-        val params = mapOf("error" to (error.message ?: error.toString()))
+        val params = mapOf(FIELD_ERROR_MESSAGE to (error.message ?: error.toString()))
+
         fireEvent(LinkEvent.PopupError, params)
     }
 
@@ -86,5 +102,14 @@ internal class DefaultLinkEventsReporter @Inject constructor(
                 )
             )
         }
+    }
+
+    private companion object {
+        private const val FIELD_SESSION_STATE = "sessionState"
+        private const val VALUE_REQUIRES_SIGN_UP = "requiresSignUp"
+        private const val VALUE_REQUIRES_VERIFICATION = "requiresVerification"
+        private const val VALUE_VERIFIED = "verified"
+
+        private const val FIELD_ERROR_MESSAGE = "error_message"
     }
 }

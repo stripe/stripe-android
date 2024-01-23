@@ -4,11 +4,13 @@ import androidx.annotation.RestrictTo
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal interface LinkEventsReporter {
+    fun onInvalidSessionState(state: SessionState)
+
     fun onInlineSignupCheckboxChecked()
     fun onSignupStarted(isInline: Boolean = false)
     fun onSignupCompleted(isInline: Boolean = false)
-    fun onSignupFailure(isInline: Boolean = false)
-    fun onAccountLookupFailure()
+    fun onSignupFailure(isInline: Boolean = false, error: Throwable)
+    fun onAccountLookupFailure(error: Throwable)
 
     fun onPopupShow()
     fun onPopupSuccess()
@@ -16,4 +18,8 @@ internal interface LinkEventsReporter {
     fun onPopupError(error: Throwable)
     fun onPopupLogout()
     fun onPopupSkipped()
+
+    enum class SessionState {
+        RequiresSignUp, RequiresVerification, Verified
+    }
 }
