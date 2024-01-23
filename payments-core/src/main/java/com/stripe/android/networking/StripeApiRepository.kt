@@ -336,11 +336,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Refresh a [PaymentIntent] using its client_secret
+     * Refresh a [SetupIntent] using its client_secret
      *
-     * Analytics event: [PaymentAnalyticsEvent.PaymentIntentRefresh]
+     * Analytics event: [PaymentAnalyticsEvent.SetupIntentRefresh]
      *
-     * @param clientSecret client_secret of the PaymentIntent to retrieve
+     * @param clientSecret client_secret of the SetupIntent to retrieve
      */
     override suspend fun refreshSetupIntent(
         clientSecret: String,
