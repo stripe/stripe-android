@@ -8,9 +8,14 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
+import com.stripe.android.financialconnections.model.Bullet
+import com.stripe.android.financialconnections.model.DataAccessNotice
+import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.PartnerAccount
 
 internal class AccountPickerPreviewParameterProvider :
@@ -56,7 +61,8 @@ internal class AccountPickerPreviewParameterProvider :
             AccountPickerState.Payload(
                 skipAccountSelection = false,
                 accounts = partnerAccountList(),
-                selectionMode = AccountPickerState.SelectionMode.Multiple,
+                dataAccessNotice = dataAccessNotice(),
+                selectionMode = SelectionMode.Multiple,
                 merchantDataAccess = accessibleCallout(),
                 singleAccount = false,
                 stripeDirect = false,
@@ -72,7 +78,8 @@ internal class AccountPickerPreviewParameterProvider :
             AccountPickerState.Payload(
                 skipAccountSelection = false,
                 accounts = partnerAccountList(),
-                selectionMode = AccountPickerState.SelectionMode.Single,
+                dataAccessNotice = dataAccessNotice(),
+                selectionMode = SelectionMode.Single,
                 merchantDataAccess = accessibleCallout(),
                 singleAccount = true,
                 stripeDirect = false,
@@ -81,6 +88,29 @@ internal class AccountPickerPreviewParameterProvider :
             )
         ),
         selectedIds = setOf("id1"),
+    )
+
+    private fun dataAccessNotice() = DataAccessNotice(
+        icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+        title = "Goldilocks uses Stripe to link your accounts",
+        subtitle = "Goldilocks will use your account and routing number, balances and transactions:",
+        body = DataAccessNoticeBody(
+            bullets = listOf(
+                Bullet(
+                    icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+                    title = "Account details",
+                    content = "Account number, routing number, account type, account nickname."
+                ),
+                Bullet(
+                    icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+                    title = "Account details",
+                    content = "Account number, routing number, account type, account nickname."
+                ),
+            )
+        ),
+        disclaimer = "Learn more about data access",
+        connectedAccountNotice = "Connected account placeholder",
+        cta = "OK"
     )
 
     private fun partnerAccountList() = listOf(

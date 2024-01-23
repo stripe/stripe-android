@@ -66,7 +66,7 @@ class LinkAccountPickerViewModelTest {
         updateLocalManifest = updateLocalManifest,
         updateCachedAccounts = updateCachedAccounts,
         initialState = state,
-        uriUtils = mock(),
+        handleClickableUrl = mock(),
         coreAuthorizationPendingNetworkingRepair = mock()
     )
 

@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.linkaccountpicker
 
-import android.webkit.URLUtil
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
@@ -10,6 +9,7 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
@@ -21,9 +21,9 @@ import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
+import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupViewModel
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -34,7 +34,7 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
-import com.stripe.android.financialconnections.utils.UriUtils
+import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
@@ -43,7 +43,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     initialState: LinkAccountPickerState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
-    private val uriUtils: UriUtils,
+    private val handleClickableUrl: HandleClickableUrl,
     private val fetchNetworkedAccounts: FetchNetworkedAccounts,
     private val selectNetworkedAccount: SelectNetworkedAccount,
     private val updateLocalManifest: UpdateLocalManifest,
@@ -122,24 +122,20 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     }
 
     fun onClickableTextClick(uri: String) = viewModelScope.launch {
-        // if clicked uri contains an eventName query param, track click event.
-        uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
-            eventTracker.track(Click(eventName, pane = NetworkingLinkSignupViewModel.PANE))
-        }
         val date = Date()
-        if (URLUtil.isNetworkUrl(uri)) {
-            setState { copy(viewEffect = OpenUrl(uri, date.time)) }
-        } else {
-            val managedUri = LinkAccountPickerClickableText.values()
-                .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
-            when (managedUri) {
-                LinkAccountPickerClickableText.DATA -> setState {
-                    copy(viewEffect = OpenBottomSheet(date.time))
+        handleClickableUrl(
+            currentPane = PANE,
+            uri = uri,
+            onNetworkUrlClicked = {
+                setState { copy(viewEffect = OpenUrl(uri, date.time)) }
+            },
+            knownDeeplinkActions = mapOf(
+                DATA.value to {
+                    eventTracker.track(ClickLearnMoreDataAccess(PANE))
+                    setState { copy(viewEffect = OpenBottomSheet(date.time)) }
                 }
-
-                null -> logger.error("Unrecognized clickable text: $uri")
-            }
-        }
+            )
+        )
     }
 
     fun onNewBankAccountClick() = viewModelScope.launch {

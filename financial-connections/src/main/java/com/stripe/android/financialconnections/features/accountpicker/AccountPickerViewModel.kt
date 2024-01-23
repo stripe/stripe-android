@@ -20,8 +20,12 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
+import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -30,8 +34,10 @@ import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import kotlinx.coroutines.launch
+import java.util.Date
 import javax.inject.Inject
 
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -41,6 +47,7 @@ internal class AccountPickerViewModel @Inject constructor(
     private val selectAccounts: SelectAccounts,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
+    private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
 ) : MavericksViewModel<AccountPickerState>(initialState) {
@@ -55,6 +62,7 @@ internal class AccountPickerViewModel @Inject constructor(
         suspend {
             val state = awaitState()
             val sync = getOrFetchSync()
+            val dataAccessNotice = sync.text?.consent?.dataAccessNotice
             val manifest = sync.manifest
             val activeAuthSession = requireNotNull(manifest.activeAuthSession)
             val (partnerAccountList, millis) = measureTimeMillis {
@@ -78,6 +86,7 @@ internal class AccountPickerViewModel @Inject constructor(
                     activeAuthSession.skipAccountSelection == true,
                 accounts = accounts,
                 selectionMode = if (manifest.singleAccount) SelectionMode.Single else SelectionMode.Multiple,
+                dataAccessNotice = dataAccessNotice,
                 merchantDataAccess = MerchantDataAccessModel(
                     businessName = manifest.businessName,
                     permissions = manifest.permissions,
@@ -242,10 +251,25 @@ internal class AccountPickerViewModel @Inject constructor(
         loadAccounts()
     }
 
-    fun onLearnMoreAboutDataAccessClick() {
-        viewModelScope.launch {
-            eventTracker.track(ClickLearnMoreDataAccess(Pane.ACCOUNT_PICKER))
-        }
+    fun onClickableTextClick(uri: String) = viewModelScope.launch {
+        val date = Date()
+        handleClickableUrl(
+            currentPane = PANE,
+            uri = uri,
+            onNetworkUrlClicked = {
+                setState { copy(viewEffect = ViewEffect.OpenUrl(uri, date.time)) }
+            },
+            knownDeeplinkActions = mapOf(
+                DATA.value to {
+                    eventTracker.track(ClickLearnMoreDataAccess(PANE))
+                    setState { copy(viewEffect = OpenBottomSheet(date.time)) }
+                }
+            )
+        )
+    }
+
+    fun onViewEffectLaunched() {
+        setState { copy(viewEffect = null) }
     }
 
     companion object :
@@ -273,6 +297,7 @@ internal data class AccountPickerState(
     val canRetry: Boolean = true,
     val selectAccounts: Async<PartnerAccountsList> = Uninitialized,
     val selectedIds: Set<String> = emptySet(),
+    val viewEffect: ViewEffect? = null
 ) : MavericksState {
 
     val submitLoading: Boolean
@@ -284,6 +309,7 @@ internal data class AccountPickerState(
     data class Payload(
         val skipAccountSelection: Boolean,
         val accounts: List<PartnerAccount>,
+        val dataAccessNotice: DataAccessNotice?,
         val selectionMode: SelectionMode,
         val merchantDataAccess: MerchantDataAccessModel,
         val singleAccount: Boolean,
@@ -302,4 +328,19 @@ internal data class AccountPickerState(
     enum class SelectionMode {
         Single, Multiple
     }
+
+    sealed class ViewEffect {
+        data class OpenUrl(
+            val url: String,
+            val id: Long
+        ) : ViewEffect()
+
+        data class OpenBottomSheet(
+            val id: Long
+        ) : ViewEffect()
+    }
+}
+
+internal enum class AccountPickerClickableText(val value: String) {
+    DATA("stripe://data-access-notice"),
 }

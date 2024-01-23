@@ -397,7 +397,6 @@ internal fun LinkAccountPickerScreenPreview(
             onClickableTextClick = {},
             onNewBankAccountClick = {},
             onSelectAccountClick = {},
-
             onAccountClick = {}
         )
     }
