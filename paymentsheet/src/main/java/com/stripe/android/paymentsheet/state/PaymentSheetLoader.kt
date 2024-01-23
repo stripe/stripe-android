@@ -319,7 +319,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             email = customerEmail,
             phone = customerPhone,
             billingCountryCode = config.defaultBillingDetails?.address?.country,
-            shouldAutofill = shouldAutofillBillingDetails,
+            shouldPrefill = shouldAutofillBillingDetails,
         )
 
         return LinkConfiguration(

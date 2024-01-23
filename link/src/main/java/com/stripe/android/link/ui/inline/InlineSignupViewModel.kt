@@ -36,7 +36,7 @@ internal class InlineSignupViewModel @Inject constructor(
     private val logger: Logger,
 ) : ViewModel() {
 
-    private val shouldPrefill = config.customerInfo.shouldAutofill
+    private val shouldPrefill = config.customerInfo.shouldPrefill
     private val prefilledEmail = config.customerInfo.email.takeIf { shouldPrefill }
     private val prefilledPhone = config.customerInfo.phone.takeIf { shouldPrefill }.orEmpty()
     private val prefilledName = config.customerInfo.name.takeIf { shouldPrefill }

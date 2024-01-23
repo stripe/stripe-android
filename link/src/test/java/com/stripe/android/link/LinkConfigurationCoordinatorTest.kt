@@ -31,7 +31,7 @@ class LinkConfigurationCoordinatorTest {
             email = CUSTOMER_EMAIL,
             phone = CUSTOMER_PHONE,
             billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
-            shouldAutofill = true,
+            shouldPrefill = true,
         ),
         shippingValues = null,
         signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,

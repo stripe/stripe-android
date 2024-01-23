@@ -29,6 +29,6 @@ data class LinkConfiguration(
         val email: String?,
         val phone: String?,
         val billingCountryCode: String?,
-        val shouldAutofill: Boolean,
+        val shouldPrefill: Boolean,
     ) : Parcelable
 }

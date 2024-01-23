@@ -539,7 +539,7 @@ private fun defaultLinkConfiguration(
             email = "customer@email.com",
             phone = "1234567890",
             billingCountryCode = "US",
-            shouldAutofill = false,
+            shouldPrefill = false,
         ),
         shippingValues = null,
         passthroughModeEnabled = false,
