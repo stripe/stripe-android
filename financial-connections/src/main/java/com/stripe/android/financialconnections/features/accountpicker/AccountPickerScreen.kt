@@ -118,7 +118,6 @@ private fun AccountPickerContent(
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
-
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
     ModalBottomSheetLayout(
