@@ -514,6 +514,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 email = null,
                 phone = null,
                 billingCountryCode = "CA",
+                shouldPrefill = true,
             ),
             shippingValues = null,
             passthroughModeEnabled = false,
@@ -781,6 +782,24 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
+    fun `Provides Link signup prefill if showing instead of save-for-future-use`() = runTest {
+        val loader = createPaymentSheetLoader(
+            linkAccountState = AccountStatus.SignedOut,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+            ),
+        ).getOrThrow()
+
+        assertThat(result.linkState?.configuration?.customerInfo?.shouldPrefill).isTrue()
+    }
+
+    @Test
     fun `Provides no Link signup prefill if showing alongside save-for-future-use`() = runTest {
         val loader = createPaymentSheetLoader(
             linkAccountState = AccountStatus.NeedsVerification,
@@ -799,7 +818,7 @@ internal class DefaultPaymentSheetLoaderTest {
             ),
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.customerInfo).isNull()
+        assertThat(result.linkState?.configuration?.customerInfo?.shouldPrefill).isFalse()
     }
 
     @Test
