@@ -331,6 +331,9 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(requiresActionIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
             )

@@ -216,6 +216,14 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun testGetRefreshSetupIntentUrl() {
+        assertEquals(
+            "https://api.stripe.com/v1/setup_intents/pi123/refresh",
+            StripeApiRepository.getRefreshSetupIntentUrl("pi123")
+        )
+    }
+
+    @Test
     fun testConfirmPaymentIntentUrl() {
         assertThat(StripeApiRepository.getConfirmPaymentIntentUrl("pi123"))
             .isEqualTo("https://api.stripe.com/v1/payment_intents/pi123/confirm")
@@ -1710,6 +1718,34 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRefresh)
+        }
+
+    @Test
+    fun verifyRefreshSetupIntent() =
+        runTest {
+            val clientSecret = "seti_1234_secret_5678"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(
+                    StripeResponse(
+                        200,
+                        SetupIntentFixtures.CASH_APP_PAY_REQUIRES_ACTION_JSON.toString(),
+                        emptyMap()
+                    )
+                )
+
+            create().refreshSetupIntent(
+                clientSecret,
+                ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            ).getOrThrow()
+
+            verify(stripeNetworkClient).executeRequest(
+                argWhere<ApiRequest> {
+                    it.options.apiKey == ApiKeyFixtures.FAKE_PUBLISHABLE_KEY &&
+                        it.params?.get("client_secret") == clientSecret
+                }
+            )
+
+            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.SetupIntentRefresh)
         }
 
     @Test
