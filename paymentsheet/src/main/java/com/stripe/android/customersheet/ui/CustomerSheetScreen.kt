@@ -263,6 +263,7 @@ internal fun AddPaymentMethodWithPaymentElement(
                 linkSignupMode = null,
                 linkConfigurationCoordinator = null,
                 showCheckboxFlow = flowOf(false),
+                processingWithLinkFlow = flowOf(false),
                 onItemSelectedListener = {
                     viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
                 },

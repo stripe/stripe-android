@@ -60,8 +60,14 @@ class TransformSpecToElements(
     private val context: Context,
     private val cbcEligibility: CardBrandChoiceEligibility
 ) {
-    fun transform(list: List<FormItemSpec>): List<FormElement> =
-        list.mapNotNull {
+
+    fun transform(
+        list: List<FormItemSpec>,
+        forceEmpty: Boolean = false,
+    ): List<FormElement> {
+        val initialValues = this.initialValues.takeUnless { forceEmpty } ?: emptyMap()
+
+        return list.mapNotNull {
             when (it) {
                 is SaveForFutureUseSpec -> it.transform(
                     saveForFutureUseInitialValue,
@@ -112,4 +118,5 @@ class TransformSpecToElements(
                 is CashAppPayMandateTextSpec -> it.transform(merchantName)
             }
         }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
+    }
 }

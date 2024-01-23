@@ -9,3 +9,9 @@ import androidx.annotation.RestrictTo
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val IS_FLOW_CONTROLLER = "IS_FLOW_CONTROLLER"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val ShowCheckboxFlow = "ShowCheckboxFlow"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val ProcessingWithLinkFlow = "ProcessingWithLinkFlow"

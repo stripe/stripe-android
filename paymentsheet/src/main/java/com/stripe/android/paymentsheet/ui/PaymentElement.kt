@@ -41,6 +41,7 @@ internal fun PaymentElement(
     linkSignupMode: LinkSignupMode?,
     linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     showCheckboxFlow: Flow<Boolean>,
+    processingWithLinkFlow: Flow<Boolean>,
     onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit,
     onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
     formArguments: FormArguments,
@@ -86,6 +87,7 @@ internal fun PaymentElement(
                     enabled = enabled,
                     onFormFieldValuesChanged = onFormFieldValuesChanged,
                     showCheckboxFlow = showCheckboxFlow,
+                    processingWithLinkFlow = processingWithLinkFlow,
                     formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
                     modifier = Modifier.padding(horizontal = horizontalPadding)
                 )

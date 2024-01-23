@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.PaymentSelection.Saved.WalletType
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
@@ -42,10 +43,13 @@ internal fun AddPaymentMethod(
 ) {
     val context = LocalContext.current
     val linkHandler = sheetViewModel.linkHandler
+
     val showCheckboxFlow = remember { MutableStateFlow(false) }
+    val processingWithLinkFlow = remember { MutableStateFlow(false) }
 
     val processing by sheetViewModel.processing.collectAsState(false)
     val linkSignupMode by sheetViewModel.linkSignupMode.collectAsState()
+    val selection by sheetViewModel.selection.collectAsState()
 
     var selectedPaymentMethodCode: String by rememberSaveable {
         mutableStateOf(sheetViewModel.initiallySelectedPaymentMethodType)
@@ -67,6 +71,13 @@ internal fun AddPaymentMethod(
 
     LaunchedEffect(arguments) {
         showCheckboxFlow.emit(arguments.showCheckbox)
+    }
+
+    LaunchedEffect(processing, selection) {
+        val isProcessingLink = selection?.let {
+            it is PaymentSelection.Saved && it.walletType == WalletType.Link
+        } ?: false
+        processingWithLinkFlow.emit(processing && isProcessingLink)
     }
 
     val stripeIntent = sheetViewModel.stripeIntent.collectAsState()
@@ -107,6 +118,7 @@ internal fun AddPaymentMethod(
                 linkSignupMode = linkInlineSignupMode,
                 linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
                 showCheckboxFlow = showCheckboxFlow,
+                processingWithLinkFlow = processingWithLinkFlow,
                 onItemSelectedListener = { selectedLpm ->
                     if (selectedItem != selectedLpm) {
                         selectedPaymentMethodCode = selectedLpm.code

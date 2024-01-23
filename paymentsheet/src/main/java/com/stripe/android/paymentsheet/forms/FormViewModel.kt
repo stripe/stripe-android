@@ -10,6 +10,8 @@ import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.connectBillingDetailsFields
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
+import com.stripe.android.paymentsheet.injection.ProcessingWithLinkFlow
+import com.stripe.android.paymentsheet.injection.ShowCheckboxFlow
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getInitialValuesMap
@@ -24,6 +26,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
@@ -32,6 +35,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
 
 /**
@@ -45,13 +49,16 @@ import javax.inject.Provider
 internal class FormViewModel @Inject internal constructor(
     context: Context,
     val formArguments: FormArguments,
-    lpmRepository: LpmRepository,
+    private val lpmRepository: LpmRepository,
     addressRepository: AddressRepository,
-    val showCheckboxFlow: Flow<Boolean>
+    @Named(ShowCheckboxFlow) val showCheckboxFlow: Flow<Boolean>,
+    @Named(ProcessingWithLinkFlow) val processingWithLinkFlow: Flow<Boolean>,
 ) : ViewModel() {
+
     internal class Factory(
         val config: FormArguments,
         val showCheckboxFlow: Flow<Boolean>,
+        val processingWithLinkFlow: Flow<Boolean>,
         private val formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
     ) : ViewModelProvider.Factory {
 
@@ -60,39 +67,29 @@ internal class FormViewModel @Inject internal constructor(
             return formViewModelSubComponentBuilderProvider.get()
                 .formArguments(config)
                 .showCheckboxFlow(showCheckboxFlow)
+                .processingWithLinkFlow(processingWithLinkFlow)
                 .build().viewModel as T
         }
     }
 
-    val elementsFlow = run {
-        var specs = requireNotNull(
-            lpmRepository.fromCode(formArguments.paymentMethodCode)
-        ).formSpec.items
-
-        // Cards & Bacs debit are a special case and already contain specs based on the configuration.
-        if (formArguments.paymentMethodCode != PaymentMethod.Type.Card.code) {
-            specs = specsForConfiguration(
-                configuration = formArguments.billingDetailsCollectionConfiguration,
-                placeholderOverrideList = formArguments.requiredFields,
-                requiresMandate = formArguments.requiresMandate,
-                specs = specs,
-            )
-        }
-
-        flowOf(
-            TransformSpecToElements(
-                addressRepository = addressRepository,
-                initialValues = formArguments.getInitialValuesMap(),
-                amount = formArguments.amount,
-                saveForFutureUseInitialValue = formArguments.showCheckboxControlledFields,
-                merchantName = formArguments.merchantName,
-                context = context,
-                shippingValues = formArguments.shippingDetails
-                    ?.toIdentifierMap(formArguments.billingDetails),
-                cbcEligibility = formArguments.cbcEligibility,
-            ).transform(specs)
+    private val transformSpecToElements: TransformSpecToElements by lazy {
+        TransformSpecToElements(
+            addressRepository = addressRepository,
+            initialValues = formArguments.getInitialValuesMap(),
+            amount = formArguments.amount,
+            saveForFutureUseInitialValue = formArguments.showCheckboxControlledFields,
+            merchantName = formArguments.merchantName,
+            context = context,
+            shippingValues = formArguments.shippingDetails
+                ?.toIdentifierMap(formArguments.billingDetails),
+            cbcEligibility = formArguments.cbcEligibility,
         )
     }
+
+    val elements: List<FormElement> = buildElements()
+
+    private val _elementsFlow = MutableStateFlow(elements)
+    val elementsFlow = _elementsFlow.asStateFlow()
 
     private val saveForFutureUseElement = elementsFlow
         .map { elementsList ->
@@ -119,6 +116,34 @@ internal class FormViewModel @Inject internal constructor(
         viewModelScope.launch {
             connectBillingDetailsFields(elementsFlow)
         }
+
+        viewModelScope.launch {
+            processingWithLinkFlow.collect(this@FormViewModel::processingWithLink)
+        }
+    }
+
+    private fun processingWithLink(processingWithLink: Boolean) {
+        _elementsFlow.value = buildElements(forceEmptyState = processingWithLink)
+    }
+
+    private fun buildElements(
+        forceEmptyState: Boolean = false,
+    ): List<FormElement> {
+        var specs = requireNotNull(
+            lpmRepository.fromCode(formArguments.paymentMethodCode)
+        ).formSpec.items
+
+        // Cards & Bacs debit are a special case and already contain specs based on the configuration.
+        if (formArguments.paymentMethodCode != PaymentMethod.Type.Card.code) {
+            specs = specsForConfiguration(
+                configuration = formArguments.billingDetailsCollectionConfiguration,
+                placeholderOverrideList = formArguments.requiredFields,
+                requiresMandate = formArguments.requiresMandate,
+                specs = specs,
+            )
+        }
+
+        return transformSpecToElements.transform(specs, forceEmpty = forceEmptyState)
     }
 
     @VisibleForTesting

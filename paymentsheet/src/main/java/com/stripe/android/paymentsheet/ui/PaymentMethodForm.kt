@@ -24,6 +24,7 @@ internal fun PaymentMethodForm(
     enabled: Boolean,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     showCheckboxFlow: Flow<Boolean>,
+    processingWithLinkFlow: Flow<Boolean>,
     formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     modifier: Modifier = Modifier,
 ) {
@@ -32,6 +33,7 @@ internal fun PaymentMethodForm(
         factory = FormViewModel.Factory(
             config = args,
             showCheckboxFlow = showCheckboxFlow,
+            processingWithLinkFlow = processingWithLinkFlow,
             formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
         )
     )
