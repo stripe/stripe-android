@@ -79,7 +79,7 @@ workflows:
     meta:
       bitrise.io:
         stack: linux-docker-android-20.04
-        machine_type_id: standard
+        machine_type_id: elite
   build-connections-debug:
     envs:
       - BUILD_VARIANT: debug
