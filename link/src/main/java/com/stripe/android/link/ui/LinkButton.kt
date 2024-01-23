@@ -68,7 +68,7 @@ const val LinkButtonTestTag = "LinkButtonTestTag"
 @Composable
 private fun LinkEmailButton() {
     LinkButton(
-        enabled = true,
+        enabled = false,
         email = "theop@email.com",
         onClick = {}
     )
@@ -148,9 +148,12 @@ private fun RowScope.SignedInButtonContent(email: String) {
         }
     }
 
+    val color = MaterialTheme.linkColors.buttonLabel.copy(alpha = LocalContentAlpha.current)
+
     LinkIconAndDivider()
     Text(
         text = annotatedEmail,
+        color = color,
         fontSize = LINK_EMAIL_FONT_SIZE.sp,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier.weight(LINK_EMAIL_TEXT_WEIGHT, fill = false),
@@ -158,6 +161,7 @@ private fun RowScope.SignedInButtonContent(email: String) {
     )
     Text(
         text = annotatedArrow,
+        color = color,
         fontSize = LINK_EMAIL_FONT_SIZE.sp,
         maxLines = 1,
         inlineContent = InlineContentTemplateBuilder()
