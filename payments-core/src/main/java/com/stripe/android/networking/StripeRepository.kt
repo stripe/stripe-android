@@ -94,6 +94,12 @@ interface StripeRepository {
     ): Result<SetupIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun refreshSetupIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
+    ): Result<SetupIntent>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun cancelSetupIntentSource(
         setupIntentId: String,
         sourceId: String,

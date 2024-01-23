@@ -336,6 +336,39 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
+     * Refresh a [PaymentIntent] using its client_secret
+     *
+     * Analytics event: [PaymentAnalyticsEvent.PaymentIntentRefresh]
+     *
+     * @param clientSecret client_secret of the PaymentIntent to retrieve
+     */
+    override suspend fun refreshSetupIntent(
+        clientSecret: String,
+        options: ApiRequest.Options
+    ): Result<SetupIntent> {
+        val setupIntentId = runCatching {
+            SetupIntent.ClientSecret(clientSecret).setupIntentId
+        }.getOrElse {
+            return Result.failure(it)
+        }
+
+        fireFraudDetectionDataRequest()
+
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getRefreshSetupIntentUrl(setupIntentId),
+                options = options,
+                params = createClientSecretParam(clientSecret, emptyList()),
+            ),
+            jsonParser = SetupIntentJsonParser(),
+        ) {
+            fireAnalyticsRequest(
+                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.SetupIntentRefresh)
+            )
+        }
+    }
+
+    /**
      * Analytics event: [PaymentAnalyticsEvent.PaymentIntentCancelSource]
      */
     override suspend fun cancelPaymentIntentSource(
@@ -1835,6 +1868,18 @@ class StripeApiRepository @JvmOverloads internal constructor(
         @JvmSynthetic
         internal fun getRefreshPaymentIntentUrl(paymentIntentId: String): String {
             return getApiUrl("payment_intents/%s/refresh", paymentIntentId)
+        }
+
+        /**
+         * This is an undocumented API and is only used for certain SIs which have a delay to
+         * transfer its status out of "requires_action" after user performs the confirmation.
+         *
+         * @return `https://api.stripe.com/v1/setup_intents/:id/refresh`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getRefreshSetupIntentUrl(paymentIntentId: String): String {
+            return getApiUrl("setup_intents/%s/refresh", paymentIntentId)
         }
 
         /**

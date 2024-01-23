@@ -41,6 +41,7 @@ internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
     SetupIntentRetrieve("setup_intent_retrieval"),
     SetupIntentRetrieveOrdered("setup_intent_retrieval_ordered"),
     SetupIntentCancelSource("setup_intent_cancel_source"),
+    SetupIntentRefresh("setup_intent_refresh"),
 
     // File
     FileCreate("create_file"),
