@@ -91,7 +91,7 @@ internal sealed interface PaymentSheetScreen {
         override val canNavigateBack: Boolean = true
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
-            return true
+            return isCompleteFlow
         }
 
         @Composable
