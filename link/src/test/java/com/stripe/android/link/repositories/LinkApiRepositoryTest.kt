@@ -359,7 +359,7 @@ class LinkApiRepositoryTest {
                 PaymentMethodCreateParams.createLink(
                     "pm_123",
                     consumerSessionSecret,
-                    null
+                    mapOf("card" to mapOf("cvc" to "123"))
                 )
             )
     }
