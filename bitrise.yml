@@ -76,6 +76,10 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
+    meta:
+      bitrise.io:
+        stack: linux-docker-android-20.04
+        machine_type_id: standard
   build-connections-debug:
     envs:
       - BUILD_VARIANT: debug
@@ -248,6 +252,10 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest -x :example:connectedAndroidTest -x :financial-connections:connectedAndroidTest -x :financial-connections-example:connectedAndroidTest -x :camera-core:connectedAndroidTest -x :stripecardscan:connectedAndroidTest -x :stripecardscan-example:connectedAndroidTest
+    meta:
+      bitrise.io:
+        stack: linux-docker-android-20.04
+        machine_type_id: elite
   run-paymentsheet-instrumentation-tests:
     before_run:
       - start_emulator
@@ -347,6 +355,10 @@ workflows:
       - script@1:
           inputs:
             - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk
+    meta:
+      bitrise.io:
+        stack: linux-docker-android-20.04
+        machine_type_id: elite
   start_emulator:
     steps:
       - avd-manager@1:
