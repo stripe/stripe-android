@@ -3,7 +3,6 @@ package com.stripe.android.lpm
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
@@ -15,6 +14,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CountrySettin
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.test.core.TestParameters
+import com.stripe.android.test.core.ui.ComposeButton
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -99,8 +99,9 @@ internal class TestSepaDebit : BasePlaygroundTest() {
             customerId = playgroundState?.customerConfig?.id,
             testParameters = testParameters,
             afterBuyAction = {
-                rules.compose.onNode(hasTestTag("SEPA_MANDATE_CONTINUE_BUTTON"))
-                    .performClick()
+                ComposeButton(rules.compose, hasTestTag("SEPA_MANDATE_CONTINUE_BUTTON"))
+                    .waitForEnabled()
+                    .click()
             }
         )
     }

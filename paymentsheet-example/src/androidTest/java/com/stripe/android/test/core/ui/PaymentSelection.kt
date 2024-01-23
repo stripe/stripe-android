@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.paymentsheet.TEST_TAG_LIST
+import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 
 class PaymentSelection(val composeTestRule: ComposeTestRule, @StringRes val label: Int) {
     fun click() {
@@ -20,7 +21,7 @@ class PaymentSelection(val composeTestRule: ComposeTestRule, @StringRes val labe
         try {
             // If we don't find the node, it means that there's only one payment method available
             // and we don't show the payment method carousel as a result.
-            composeTestRule.waitUntil(5000) {
+            composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
                 composeTestRule
                     .onAllNodesWithTag(TEST_TAG_LIST)
                     .fetchSemanticsNodes().size == 1

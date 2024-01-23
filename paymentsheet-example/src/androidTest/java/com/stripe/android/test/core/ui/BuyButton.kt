@@ -7,12 +7,12 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 class BuyButton(
     private val composeTestRule: ComposeTestRule,
-    private val processingCompleteTimeout: Duration = 5.seconds,
+    private val processingCompleteTimeout: Duration = DEFAULT_UI_TIMEOUT,
 ) {
 
     fun click() {

@@ -9,7 +9,7 @@ import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import kotlin.time.Duration.Companion.seconds
+import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 
 internal class ComposeButton(
     private val composeTestRule: ComposeTestRule,
@@ -19,11 +19,20 @@ internal class ComposeButton(
         composeTestRule.onNode(matcher).tryPerformScrollTo().performClick()
     }
 
-    fun waitForEnabled() {
-        composeTestRule.waitUntil(timeoutMillis = 5.seconds.inWholeMilliseconds) {
+    fun waitForEnabled(): ComposeButton {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             val combinedMatcher = matcher.and(isEnabled()).and(hasClickAction())
             composeTestRule.onAllNodes(combinedMatcher).fetchSemanticsNodes().isNotEmpty()
         }
+        return this
+    }
+
+    fun waitFor(semanticsMatcher: SemanticsMatcher): ComposeButton {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            val combinedMatcher = matcher.and(semanticsMatcher)
+            composeTestRule.onAllNodes(combinedMatcher).fetchSemanticsNodes().isNotEmpty()
+        }
+        return this
     }
 
     private fun SemanticsNodeInteraction.tryPerformScrollTo(): SemanticsNodeInteraction {
