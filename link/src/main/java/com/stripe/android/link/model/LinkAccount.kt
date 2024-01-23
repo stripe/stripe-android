@@ -7,8 +7,6 @@ import com.stripe.android.model.ConsumerSession
  */
 internal class LinkAccount(private val consumerSession: ConsumerSession) {
 
-    val redactedPhoneNumber = consumerSession.redactedPhoneNumber
-
     val clientSecret = consumerSession.clientSecret
 
     val email = consumerSession.emailAddress

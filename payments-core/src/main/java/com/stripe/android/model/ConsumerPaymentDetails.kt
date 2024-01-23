@@ -2,9 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.view.DateUtils
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -23,22 +21,8 @@ data class ConsumerPaymentDetails internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Card(
         override val id: String,
-        val expiryYear: Int,
-        val expiryMonth: Int,
-        val brand: CardBrand,
         val last4: String,
-        val cvcCheck: CvcCheck,
-        val billingAddress: BillingAddress? = null
     ) : PaymentDetails(id, Companion.type) {
-
-        val requiresCardDetailsRecollection: Boolean
-            get() = isExpired || cvcCheck.requiresRecollection
-
-        val isExpired: Boolean
-            get() = !DateUtils.isExpiryDataValid(
-                expiryMonth = expiryMonth,
-                expiryYear = expiryYear
-            )
 
         companion object {
             const val type = "card"
@@ -85,11 +69,4 @@ data class ConsumerPaymentDetails internal constructor(
             const val type = "bank_account"
         }
     }
-
-    @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class BillingAddress(
-        val countryCode: CountryCode?,
-        val postalCode: String?
-    ) : Parcelable
 }
