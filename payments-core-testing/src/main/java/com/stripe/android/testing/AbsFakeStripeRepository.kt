@@ -96,6 +96,13 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun refreshSetupIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
+    ): Result<SetupIntent> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun cancelSetupIntentSource(
         setupIntentId: String,
         sourceId: String,
