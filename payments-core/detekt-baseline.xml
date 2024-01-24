@@ -48,7 +48,6 @@
     <ID>LongMethod:PaymentFlowResultProcessor.kt$PaymentFlowResultProcessor$suspend fun processResult( unvalidatedResult: PaymentFlowResult.Unvalidated ): Result&lt;S></ID>
     <ID>LongMethod:PaymentIntentJsonParser.kt$PaymentIntentJsonParser$override fun parse(json: JSONObject): PaymentIntent?</ID>
     <ID>LongMethod:PaymentMethodJsonParser.kt$PaymentMethodJsonParser$override fun parse(json: JSONObject): PaymentMethod</ID>
-    <ID>LongMethod:PaymentMethodsActivity.kt$PaymentMethodsActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:SourceParamsTest.kt$SourceParamsTest$@Test fun `createKlarna() should create expected params`()</ID>
     <ID>LongMethod:StaticCardAccountRangeSourceTest.kt$StaticCardAccountRangeSourceTest$@Test fun `getAccountRange() should return expected AccountRange`()</ID>
     <ID>LongMethod:Stripe3ds2ChallengeResultProcessor.kt$DefaultStripe3ds2ChallengeResultProcessor$override suspend fun process( challengeResult: ChallengeResult ): PaymentFlowResult.Unvalidated</ID>
@@ -206,6 +205,7 @@
     <ID>SwallowedException:ActivityUtils.kt$e: IllegalArgumentException</ID>
     <ID>SwallowedException:DefaultPaymentAuthenticatorRegistry.kt$e: Exception</ID>
     <ID>SwallowedException:PaymentUtils.kt$PaymentUtils$e: ClassCastException</ID>
+    <ID>SwallowedException:StripeBrowserLauncherActivity.kt$StripeBrowserLauncherActivity$e: ActivityNotFoundException</ID>
     <ID>ThrowsCount:StripeApiRepository.kt$StripeApiRepository$@Throws( InvalidRequestException::class, AuthenticationException::class, CardException::class, APIException::class ) private fun handleApiError(response: StripeResponse&lt;String>)</ID>
     <ID>TooGenericExceptionCaught:DefaultPaymentAuthenticatorRegistry.kt$e: Exception</ID>
     <ID>TooGenericExceptionThrown:DefaultAlipayRepository.kt$DefaultAlipayRepository$throw RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")</ID>
