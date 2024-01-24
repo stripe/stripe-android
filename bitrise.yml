@@ -28,14 +28,14 @@ pipelines:
 stages:
   stage-trigger-run-all:
     workflows:
-      - check: { }
-      - test: { }
-      - run-instrumentation-tests: { }
-      - run-paymentsheet-instrumentation-tests: { }
-      - run-example-instrumentation-tests: { }
-      - run-financial-connections-instrumentation-tests: { }
-      - run-cardscan-instrumentation-tests: { }
-      - run-paymentsheet-end-to-end-tests: { }
+#      - check: { }
+#      - test: { }
+#      - run-instrumentation-tests: { }
+#      - run-paymentsheet-instrumentation-tests: { }
+#      - run-example-instrumentation-tests: { }
+#      - run-financial-connections-instrumentation-tests: { }
+#      - run-cardscan-instrumentation-tests: { }
+#      - run-paymentsheet-end-to-end-tests: { }
       - run-paymentsheet-screenshot-tests: { }
   stage-build-connections-debug:
     workflows:

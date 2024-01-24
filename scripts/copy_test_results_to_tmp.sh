@@ -17,3 +17,4 @@ touch "/tmp/test_results/.keep"
 
 copy_test_results ".*/build/reports/tests/testDebugUnitTest$"
 copy_test_results ".*/build/reports/androidTests/connected$"
+copy_test_results ".*/screenshots/debug$"
