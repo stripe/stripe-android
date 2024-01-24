@@ -31,12 +31,12 @@ stages:
 #      - check: { }
 #      - test: { }
 #      - run-instrumentation-tests: { }
-      - run-paymentsheet-instrumentation-tests: { }
+#      - run-paymentsheet-instrumentation-tests: { }
 #      - run-example-instrumentation-tests: { }
 #      - run-financial-connections-instrumentation-tests: { }
 #      - run-cardscan-instrumentation-tests: { }
 #      - run-paymentsheet-end-to-end-tests: { }
-#      - run-paymentsheet-screenshot-tests: { }
+      - run-paymentsheet-screenshot-tests: { }
   stage-build-connections-debug:
     workflows:
       - build-connections-debug: { }
@@ -268,7 +268,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew paymentsheet-example:executeScreenshotTests -Precord -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot
+            - content: ./gradlew paymentsheet-example:executeScreenshotTests -Precord -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot -Dorg.gradle.jvmargs="--add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.nio.channels=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED"
   run-paymentsheet-instrumentation-tests:
     before_run:
       - start_emulator
