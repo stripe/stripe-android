@@ -271,6 +271,10 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew paymentsheet-example:executeScreenshotTests -Precord -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot -Dorg.gradle.jvmargs="--add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.nio.channels=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED"
+      - script@1:
+          title: Check updated screenshots
+          inputs:
+            - content: ruby check_for_changed_paymentsheet_screenshots.rb
   run-paymentsheet-instrumentation-tests:
     before_run:
       - start_emulator
