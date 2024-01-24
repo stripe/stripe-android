@@ -1,6 +1,7 @@
 package com.stripe.android.link.analytics
 
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
@@ -20,13 +21,7 @@ internal class DefaultLinkEventsReporter @Inject constructor(
     private val durationProvider: DurationProvider,
 ) : LinkEventsReporter {
     override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) {
-        val sessionStateValue = when (state) {
-            LinkEventsReporter.SessionState.RequiresSignUp -> VALUE_REQUIRES_SIGN_UP
-            LinkEventsReporter.SessionState.RequiresVerification -> VALUE_REQUIRES_VERIFICATION
-            LinkEventsReporter.SessionState.Verified -> VALUE_VERIFIED
-        }
-
-        val params = mapOf(FIELD_SESSION_STATE to sessionStateValue)
+        val params = mapOf(FIELD_SESSION_STATE to state.analyticsValue)
 
         fireEvent(LinkEvent.SignUpFailureInvalidSessionState, params)
     }
@@ -46,13 +41,13 @@ internal class DefaultLinkEventsReporter @Inject constructor(
     }
 
     override fun onSignupFailure(isInline: Boolean, error: Throwable) {
-        val params = mapOf(FIELD_ERROR_MESSAGE to (error.message ?: error.toString()))
+        val params = mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage)
 
         fireEvent(LinkEvent.SignUpFailure, params)
     }
 
     override fun onAccountLookupFailure(error: Throwable) {
-        val params = mapOf(FIELD_ERROR_MESSAGE to (error.message ?: error.toString()))
+        val params = mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage)
 
         fireEvent(LinkEvent.AccountLookupFailure, params)
     }
@@ -70,7 +65,7 @@ internal class DefaultLinkEventsReporter @Inject constructor(
     }
 
     override fun onPopupError(error: Throwable) {
-        val params = mapOf(FIELD_ERROR_MESSAGE to (error.message ?: error.toString()))
+        val params = mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage)
 
         fireEvent(LinkEvent.PopupError, params)
     }
@@ -103,6 +98,13 @@ internal class DefaultLinkEventsReporter @Inject constructor(
             )
         }
     }
+
+    private val LinkEventsReporter.SessionState.analyticsValue
+        get() = when (this) {
+            LinkEventsReporter.SessionState.RequiresSignUp -> VALUE_REQUIRES_SIGN_UP
+            LinkEventsReporter.SessionState.RequiresVerification -> VALUE_REQUIRES_VERIFICATION
+            LinkEventsReporter.SessionState.Verified -> VALUE_VERIFIED
+        }
 
     private companion object {
         private const val FIELD_SESSION_STATE = "sessionState"
