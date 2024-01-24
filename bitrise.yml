@@ -274,7 +274,7 @@ workflows:
       - script@1:
           title: Check updated screenshots
           inputs:
-            - content: ruby check_for_changed_paymentsheet_screenshots.rb
+            - content: ruby scripts/check_for_changed_paymentsheet_screenshots.rb
   run-paymentsheet-instrumentation-tests:
     before_run:
       - start_emulator
