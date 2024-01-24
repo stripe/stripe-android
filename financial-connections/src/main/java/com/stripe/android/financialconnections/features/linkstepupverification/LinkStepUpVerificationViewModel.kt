@@ -118,6 +118,17 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
                 )
             },
         )
+        onAsync(
+            LinkStepUpVerificationState::confirmVerification,
+            onFail = { error ->
+                eventTracker.logError(
+                    extraMessage = "Error confirming verification",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
+            },
+        )
     }
 
     private fun onOTPEntered(otp: String) = suspend {

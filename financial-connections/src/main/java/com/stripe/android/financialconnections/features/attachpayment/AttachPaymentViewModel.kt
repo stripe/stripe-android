@@ -56,10 +56,10 @@ internal class AttachPaymentViewModel @Inject constructor(
                     activeInstitution = activeInstitution,
                     consumerSessionClientSecret = consumerSession?.clientSecret,
                     params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
-                ).also {
-                    val nextPane = it.nextPane ?: Pane.SUCCESS
-                    navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
-                }
+                )
+            }
+            if (manifest.isNetworkingUserFlow == true && manifest.accountholderIsLinkConsumer == true) {
+                result.networkingSuccessful?.let { saveToLinkWithStripeSucceeded.set(it) }
             }
             eventTracker.track(
                 PollAttachPaymentsSucceeded(
@@ -67,6 +67,8 @@ internal class AttachPaymentViewModel @Inject constructor(
                     duration = millis
                 )
             )
+            val nextPane = result.nextPane ?: Pane.SUCCESS
+            navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
             result
         }.execute { copy(linkPaymentAccount = it) }
     }
@@ -74,11 +76,7 @@ internal class AttachPaymentViewModel @Inject constructor(
     private fun logErrors() {
         onAsync(
             AttachPaymentState::linkPaymentAccount,
-            onSuccess = {
-                runCatching { saveToLinkWithStripeSucceeded.set(true) }
-            },
             onFail = {
-                runCatching { saveToLinkWithStripeSucceeded.set(false) }
                 eventTracker.logError(
                     logger = logger,
                     pane = PANE,
