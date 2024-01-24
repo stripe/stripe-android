@@ -250,6 +250,8 @@ workflows:
           inputs:
             - content: ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest -x :example:connectedAndroidTest -x :financial-connections:connectedAndroidTest -x :financial-connections-example:connectedAndroidTest -x :camera-core:connectedAndroidTest -x :stripecardscan:connectedAndroidTest -x :stripecardscan-example:connectedAndroidTest
   run-paymentsheet-screenshot-tests:
+    envs:
+      - INCLUDE_SCREENSHOT_ON_FAILURE: true
     before_run:
       - start_screenshot_emulator
       - prepare_all
