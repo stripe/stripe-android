@@ -41,7 +41,9 @@ internal class CustomerSheetActivity : AppCompatActivity() {
      * [CustomerSessionScope], which would make it out of sync with what the [viewModels]
      * implementation caches.
      */
-    private val viewModel: CustomerSheetViewModel by viewModels(factoryProducer = viewModelFactoryProducer)
+    private val viewModel: CustomerSheetViewModel by viewModels(
+        factoryProducer = { viewModelFactoryProducer() },
+    )
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
