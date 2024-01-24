@@ -21,7 +21,7 @@ internal fun InstitutionIcon(institutionIcon: String?) {
     val previewMode = LocalInspectionMode.current
     val iconModifier = Modifier
         .size(56.dp)
-        .shadow(2.dp, RoundedCornerShape(6.dp), clip = true)
+        .shadow(2.dp, RoundedCornerShape(12.dp), clip = true)
     when {
         previewMode || institutionIcon == null -> InstitutionPlaceholder(iconModifier)
         else -> StripeImage(

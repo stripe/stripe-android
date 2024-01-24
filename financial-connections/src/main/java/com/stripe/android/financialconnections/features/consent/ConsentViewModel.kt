@@ -1,12 +1,10 @@
 package com.stripe.android.financialconnections.features.consent
 
-import android.webkit.URLUtil
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
@@ -19,12 +17,12 @@ import com.stripe.android.financialconnections.features.consent.ConsentState.Vie
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO
-import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.experimentAssignment
 import com.stripe.android.financialconnections.utils.trackExposure
 import kotlinx.coroutines.launch
@@ -37,7 +35,7 @@ internal class ConsentViewModel @Inject constructor(
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val uriUtils: UriUtils,
+    private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger
 ) : MavericksViewModel<ConsentState>(initialState) {
 
@@ -82,45 +80,37 @@ internal class ConsentViewModel @Inject constructor(
         }.execute { copy(acceptConsent = it) }
     }
 
-    fun onClickableTextClick(uri: String) {
-        // if clicked uri contains an eventName query param, track click event.
-        viewModelScope.launch {
-            uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
-                eventTracker.track(Click(eventName, pane = Pane.CONSENT))
-            }
-            val date = Date()
-            if (URLUtil.isNetworkUrl(uri)) {
-                setState { copy(viewEffect = OpenUrl(uri, date.time)) }
-            } else {
-                val managedUri = ConsentClickableText.values()
-                    .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
-                when (managedUri) {
-                    ConsentClickableText.DATA -> {
-                        setState {
-                            copy(
-                                currentBottomSheet = BottomSheetContent.DATA,
-                                viewEffect = ViewEffect.OpenBottomSheet(date.time)
-                            )
-                        }
+    fun onClickableTextClick(uri: String) = viewModelScope.launch {
+        val date = Date()
+        handleClickableUrl(
+            currentPane = Pane.CONSENT,
+            uri = uri,
+            onNetworkUrlClicked = { setState { copy(viewEffect = OpenUrl(uri, date.time)) } },
+            knownDeeplinkActions = mapOf(
+                // Clicked on the "Data Access" link -> Open the Data Access bottom sheet
+                ConsentClickableText.DATA.value to {
+                    setState {
+                        copy(
+                            currentBottomSheet = BottomSheetContent.DATA,
+                            viewEffect = ViewEffect.OpenBottomSheet(date.time)
+                        )
                     }
-
-                    ConsentClickableText.MANUAL_ENTRY -> {
-                        navigationManager.tryNavigateTo(ManualEntry(referrer = Pane.CONSENT))
+                },
+                // Clicked on the "Legal details" link -> Open the Legal Details bottom sheet
+                ConsentClickableText.LEGAL_DETAILS.value to {
+                    setState {
+                        copy(
+                            viewEffect = ViewEffect.OpenBottomSheet(date.time),
+                            currentBottomSheet = BottomSheetContent.LEGAL
+                        )
                     }
-
-                    ConsentClickableText.LEGAL_DETAILS -> {
-                        setState {
-                            copy(
-                                currentBottomSheet = BottomSheetContent.LEGAL,
-                                viewEffect = ViewEffect.OpenBottomSheet(date.time)
-                            )
-                        }
-                    }
-
-                    null -> logger.error("Unrecognized clickable text: $uri")
-                }
-            }
-        }
+                },
+                // Clicked on the "Manual entry" link -> Navigate to the Manual Entry screen
+                ConsentClickableText.MANUAL_ENTRY.value to {
+                    navigationManager.tryNavigateTo(Destination.ManualEntry(referrer = Pane.CONSENT))
+                },
+            )
+        )
     }
 
     fun onViewEffectLaunched() {

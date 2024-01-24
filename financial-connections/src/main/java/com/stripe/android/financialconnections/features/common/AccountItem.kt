@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat.getLocales
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -64,7 +65,7 @@ internal fun AccountItem(
     val view = LocalView.current
     // networked account's allowSelection takes precedence over the account's.
     val selectable = networkedAccount?.allowSelection ?: account.allowSelection
-    val shape = remember { RoundedCornerShape(16.dp) }
+    val shape = remember { RoundedCornerShape(12.dp) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -88,7 +89,7 @@ internal fun AccountItem(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            networkedAccount?.icon?.default?.let {
+            account.institution?.icon?.default?.let {
                 InstitutionIcon(institutionIcon = it)
             }
             Column(
@@ -194,6 +195,13 @@ internal fun AccountItemPreview() {
                         id = "id",
                         name = "Regular Checking (Unselected)",
                         allowSelectionMessage = "allowSelectionMessage",
+                        institution = FinancialConnectionsInstitution(
+                            id = "id",
+                            name = "Bank of America",
+                            featured = false,
+                            mobileHandoffCapable = false,
+                            icon = Image(default = "www.image.com")
+                        ),
                         authorization = "",
                         currency = "USD",
                         category = FinancialConnectionsAccount.Category.CASH,
@@ -209,6 +217,13 @@ internal fun AccountItemPreview() {
                         id = "id",
                         name = "Regular Checking (Selected)",
                         allowSelectionMessage = "allowSelectionMessage",
+                        institution = FinancialConnectionsInstitution(
+                            id = "id",
+                            name = "Bank of America",
+                            featured = false,
+                            mobileHandoffCapable = false,
+                            icon = Image(default = "www.image.com")
+                        ),
                         authorization = "",
                         currency = "USD",
                         category = FinancialConnectionsAccount.Category.CASH,
@@ -227,9 +242,16 @@ internal fun AccountItemPreview() {
                     onAccountClicked = { },
                     account = PartnerAccount(
                         id = "id",
-                        name = "Regular Checking (Selected)",
+                        name = "Regular Checking (Disabled)",
                         _allowSelection = false,
                         allowSelectionMessage = null,
+                        institution = FinancialConnectionsInstitution(
+                            id = "id",
+                            name = "Bank of America",
+                            featured = false,
+                            mobileHandoffCapable = false,
+                            icon = Image(default = "www.image.com")
+                        ),
                         authorization = "",
                         currency = "USD",
                         category = FinancialConnectionsAccount.Category.CASH,
@@ -248,9 +270,16 @@ internal fun AccountItemPreview() {
                     onAccountClicked = { },
                     account = PartnerAccount(
                         id = "id",
-                        name = "Regular Checking (Selected)",
+                        name = "Regular Checking (Disabled)",
                         _allowSelection = false,
                         allowSelectionMessage = "Unselectable with custom message",
+                        institution = FinancialConnectionsInstitution(
+                            id = "id",
+                            name = "Bank of America",
+                            featured = false,
+                            mobileHandoffCapable = false,
+                            icon = Image(default = "www.image.com")
+                        ),
                         authorization = "",
                         currency = "USD",
                         category = FinancialConnectionsAccount.Category.CASH,

@@ -46,6 +46,7 @@ internal class AccountPickerViewModelTest {
         getOrFetchSync = getSync,
         navigationManager = navigationManager,
         logger = Logger.noop(),
+        handleClickableUrl = mock(),
         pollAuthorizationSessionAccounts = pollAuthorizationSessionAccounts
     )
 

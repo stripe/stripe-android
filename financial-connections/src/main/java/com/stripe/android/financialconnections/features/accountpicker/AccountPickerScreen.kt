@@ -12,18 +12,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
@@ -33,8 +43,12 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect.OpenBottomSheet
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.common.AccountItem
+import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessText
@@ -48,24 +62,45 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
+import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.Neutral900
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun AccountPickerScreen() {
     val viewModel: AccountPickerViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
-    BackHandler(true) {}
     val state: State<AccountPickerState> = viewModel.collectAsState()
+    BackHandler(true) {}
+
+    val bottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
+    )
+    val uriHandler = LocalUriHandler.current
+
+    state.value.viewEffect?.let { viewEffect ->
+        LaunchedEffect(viewEffect) {
+            when (viewEffect) {
+                is OpenUrl -> uriHandler.openUri(viewEffect.url)
+                is OpenBottomSheet -> bottomSheetState.show()
+            }
+            viewModel.onViewEffectLaunched()
+        }
+    }
+
     AccountPickerContent(
         state = state.value,
+        bottomSheetState = bottomSheetState,
         onAccountClicked = viewModel::onAccountClicked,
         onSubmit = viewModel::onSubmit,
         onSelectAnotherBank = viewModel::selectAnotherBank,
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
         onLoadAccountsAgain = viewModel::onLoadAccountsAgain,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.ACCOUNT_PICKER) },
-        onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick,
+        onClickableTextClick = viewModel::onClickableTextClick,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
@@ -73,20 +108,69 @@ internal fun AccountPickerScreen() {
 @Composable
 private fun AccountPickerContent(
     state: AccountPickerState,
+    bottomSheetState: ModalBottomSheetState,
     onAccountClicked: (PartnerAccount) -> Unit,
+    onClickableTextClick: (String) -> Unit,
     onSubmit: () -> Unit,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
     onLoadAccountsAgain: () -> Unit,
     onCloseClick: () -> Unit,
-    onLearnMoreAboutDataAccessClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    val lazyListState = rememberLazyListState()
+    ModalBottomSheetLayout(
+        sheetState = bottomSheetState,
+        sheetBackgroundColor = FinancialConnectionsTheme.v3Colors.backgroundSurface,
+        sheetShape = RoundedCornerShape(8.dp),
+        scrimColor = Neutral900.copy(alpha = 0.32f),
+        sheetContent = {
+            when (val dataAccessNotice = state.payload()?.dataAccessNotice) {
+                null -> Unit
+                else -> DataAccessBottomSheetContent(
+                    dataDialog = dataAccessNotice,
+                    onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
+                    onClickableTextClick = onClickableTextClick
+                )
+            }
+        },
+        content = {
+            AccountPickerMainContent(
+                onCloseClick,
+                lazyListState,
+                state,
+                onSelectAnotherBank,
+                onEnterDetailsManually,
+                onLoadAccountsAgain,
+                onCloseFromErrorClick,
+                onAccountClicked,
+                onClickableTextClick,
+                onSubmit
+            )
+        },
+    )
+}
+
+@Composable
+private fun AccountPickerMainContent(
+    onCloseClick: () -> Unit,
+    lazyListState: LazyListState,
+    state: AccountPickerState,
+    onSelectAnotherBank: () -> Unit,
+    onEnterDetailsManually: () -> Unit,
+    onLoadAccountsAgain: () -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit,
+    onAccountClicked: (PartnerAccount) -> Unit,
+    onClickableTextClick: (String) -> Unit,
+    onSubmit: () -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
                 showBack = false,
-                onCloseClick = onCloseClick
+                onCloseClick = onCloseClick,
+                elevation = lazyListState.elevation
             )
         }
     ) {
@@ -115,37 +199,57 @@ private fun AccountPickerContent(
 
             is Loading,
             is Uninitialized,
-            is Success -> Layout(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                body = {
-                    payload()
-                        ?.takeIf { it.shouldSkipPane.not() }
-                        ?.let {
-                            loadedContent(
-                                payload = it,
-                                state = state,
-                                onAccountClicked = onAccountClicked
-                            )
-                        } ?: run { loadingContent() }
-                },
-                footer = {
-                    payload()
-                        ?.takeIf { it.shouldSkipPane.not() }
-                        ?.let {
-                            Footer(
-                                merchantDataAccessModel = it.merchantDataAccess,
-                                onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick,
-                                submitEnabled = state.submitEnabled,
-                                submitLoading = state.submitLoading,
-                                onSubmit = onSubmit,
-                                selectedIds = state.selectedIds
-                            )
-                        }
-                }
-
+            is Success -> AccountPickerLoaded(
+                payload = payload,
+                state = state,
+                onAccountClicked = onAccountClicked,
+                onClickableTextClick = onClickableTextClick,
+                lazyListState = lazyListState,
+                onSubmit = onSubmit
             )
         }
     }
+}
+
+@Composable
+private fun AccountPickerLoaded(
+    payload: Async<AccountPickerState.Payload>,
+    state: AccountPickerState,
+    lazyListState: LazyListState,
+    onAccountClicked: (PartnerAccount) -> Unit,
+    onClickableTextClick: (String) -> Unit,
+    onSubmit: () -> Unit
+) {
+    Layout(
+        lazyListState = lazyListState,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        body = {
+            payload()
+                ?.takeIf { it.shouldSkipPane.not() }
+                ?.let {
+                    loadedContent(
+                        payload = it,
+                        state = state,
+                        onAccountClicked = onAccountClicked
+                    )
+                } ?: run { loadingContent() }
+        },
+        footer = {
+            payload()
+                ?.takeIf { it.shouldSkipPane.not() }
+                ?.let {
+                    Footer(
+                        merchantDataAccessModel = it.merchantDataAccess,
+                        onClickableTextClick = onClickableTextClick,
+                        submitEnabled = state.submitEnabled,
+                        submitLoading = state.submitLoading,
+                        onSubmit = onSubmit,
+                        selectedIds = state.selectedIds
+                    )
+                }
+        }
+
+    )
 }
 
 private fun LazyListScope.loadedContent(
@@ -199,7 +303,7 @@ private fun LazyListScope.loadingContent() {
 @Composable
 private fun Footer(
     merchantDataAccessModel: MerchantDataAccessModel?,
-    onLearnMoreAboutDataAccessClick: () -> Unit,
+    onClickableTextClick: (String) -> Unit,
     submitEnabled: Boolean,
     submitLoading: Boolean,
     onSubmit: () -> Unit,
@@ -208,8 +312,8 @@ private fun Footer(
     Column {
         merchantDataAccessModel?.let {
             MerchantDataAccessText(
-                it,
-                onLearnMoreAboutDataAccessClick
+                model = it,
+                onLearnMoreClick = { onClickableTextClick(DATA.value) }
             )
         }
         Spacer(modifier = Modifier.size(12.dp))
@@ -248,7 +352,12 @@ internal fun AccountPickerPreview(
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
             onCloseClick = {},
-            onLearnMoreAboutDataAccessClick = {}
-        ) {}
+            onCloseFromErrorClick = {},
+            onClickableTextClick = {},
+            bottomSheetState = rememberModalBottomSheetState(
+                initialValue = ModalBottomSheetValue.Hidden,
+                skipHalfExpanded = true
+            ),
+        )
     }
 }
