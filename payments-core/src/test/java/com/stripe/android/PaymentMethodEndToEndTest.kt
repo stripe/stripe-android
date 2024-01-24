@@ -110,6 +110,7 @@ internal class PaymentMethodEndToEndTest {
                 fingerprint = "FFDMA0xfhBjWSZLu",
                 last4 = "6789",
                 linkedAccount = null,
+                financialConnectionsAccount = null,
                 networks = PaymentMethod.USBankAccount.USBankNetworks(
                     preferred = "ach",
                     supported = listOf("ach", "us_domestic_wire")

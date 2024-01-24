@@ -1003,7 +1003,13 @@ constructor(
          *
          * [us_bank_account.linkedAccount](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-linked_account)
          */
-        @JvmField val linkedAccount: String?,
+        @Deprecated(
+            message = "Renamed to 'financialConnectionsAccount', " +
+                "'linkedAccount' will be removed in a future major update",
+            replaceWith = ReplaceWith(expression = "financialConnectionsAccount")
+        )
+        @JvmField
+        val linkedAccount: String?,
 
         /**
          * Contains information about US bank account networks that can be used
@@ -1017,7 +1023,14 @@ constructor(
          *
          * [us_bank_account.routingNumber](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-routing_number)
          */
-        @JvmField val routingNumber: String?
+        @JvmField val routingNumber: String?,
+
+        /**
+         * The ID of the Financial Connections Account used to create the payment method
+         *
+         * [us_bank_account.financial_connections_account](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-financial_connections_account)
+         */
+        @JvmField val financialConnectionsAccount: String?,
     ) : TypeData() {
         override val type: Type get() = Type.USBankAccount
 
