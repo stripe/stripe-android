@@ -33,7 +33,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         surface = Color.CYAN,
         component = Color.YELLOW,
         componentBorder = Color.RED,
-        componentDivider = Color.GREEN,
+        componentDivider = Color.BLACK,
         onComponent = Color.BLUE,
         onSurface = Color.GRAY,
         subtitle = Color.WHITE,
@@ -96,6 +96,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
 
     @Test
     fun testPaymentSheetNewCustomerDark() {
+        forceDarkMode()
         testDriver.screenshotRegression(
             testParams
         )
