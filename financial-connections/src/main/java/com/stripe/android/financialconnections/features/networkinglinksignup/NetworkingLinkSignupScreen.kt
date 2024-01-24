@@ -304,7 +304,7 @@ private fun PhoneNumberSection(
 private fun Title(title: String) {
     AnnotatedText(
         text = TextResource.Text(fromHtml(title)),
-        defaultStyle = v3Typography.headingLarge,
+        defaultStyle = v3Typography.headingXLarge,
         onClickableTextClick = {},
     )
 }
