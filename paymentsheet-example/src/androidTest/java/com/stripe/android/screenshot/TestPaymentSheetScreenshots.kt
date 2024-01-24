@@ -33,7 +33,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
         surface = Color.CYAN,
         component = Color.YELLOW,
         componentBorder = Color.RED,
-        componentDivider = Color.BLACK,
+        componentDivider = Color.GREEN,
         onComponent = Color.BLUE,
         onSurface = Color.GRAY,
         subtitle = Color.WHITE,
