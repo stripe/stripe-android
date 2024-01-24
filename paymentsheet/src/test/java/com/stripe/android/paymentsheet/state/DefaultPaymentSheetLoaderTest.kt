@@ -720,6 +720,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 paymentMethod = PAYMENT_METHODS.first()
             ),
             linkEnabled = true,
+            googlePaySupported = true,
             currency = "usd",
         )
     }
@@ -767,6 +768,7 @@ internal class DefaultPaymentSheetLoaderTest {
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
             linkEnabled = true,
+            googlePaySupported = true,
             currency = "usd",
         )
     }
@@ -939,6 +941,7 @@ internal class DefaultPaymentSheetLoaderTest {
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = paymentSelection,
             linkEnabled = true,
+            googlePaySupported = true,
             currency = "usd",
         )
     }

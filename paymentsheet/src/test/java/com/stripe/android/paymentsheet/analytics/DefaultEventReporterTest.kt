@@ -90,6 +90,7 @@ class DefaultEventReporterTest {
             argWhere { req ->
                 req.params["event"] == "mc_complete_sheet_savedpm_show" &&
                     req.params["link_enabled"] == true &&
+                    req.params["google_pay_enabled"] == true &&
                     req.params["currency"] == "usd" &&
                     req.params["locale"] == "en_US"
             }
@@ -99,7 +100,7 @@ class DefaultEventReporterTest {
     @Test
     fun `onShowNewPaymentOptionForm() should fire analytics request with expected event value`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
-            simulateSuccessfulSetup(linkEnabled = false)
+            simulateSuccessfulSetup(linkEnabled = false, googlePayReady = false)
         }
 
         completeEventReporter.onShowNewPaymentOptionForm()
@@ -108,6 +109,7 @@ class DefaultEventReporterTest {
             argWhere { req ->
                 req.params["event"] == "mc_complete_sheet_newpm_show" &&
                     req.params["link_enabled"] == false &&
+                    req.params["google_pay_enabled"] == false &&
                     req.params["currency"] == "usd" &&
                     req.params["locale"] == "en_US"
             }
@@ -513,12 +515,14 @@ class DefaultEventReporterTest {
     private fun EventReporter.simulateSuccessfulSetup(
         paymentSelection: PaymentSelection = PaymentSelection.GooglePay,
         linkEnabled: Boolean = true,
+        googlePayReady: Boolean = true,
         currency: String? = "usd",
     ) {
         onInit(configuration, isDeferred = false)
         onLoadStarted()
         onLoadSucceeded(
             paymentSelection = paymentSelection,
+            googlePaySupported = googlePayReady,
             linkEnabled = linkEnabled,
             currency = currency
         )
