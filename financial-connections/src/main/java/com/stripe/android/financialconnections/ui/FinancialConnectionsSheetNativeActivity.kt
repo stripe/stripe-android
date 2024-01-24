@@ -8,9 +8,7 @@ import androidx.activity.addCallback
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue.Hidden
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -24,7 +22,6 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavHostController
@@ -46,8 +43,8 @@ import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.financialconnections.ui.theme.Neutral900
 import com.stripe.android.financialconnections.utils.argsOrNull
 import com.stripe.android.financialconnections.utils.viewModelLazy
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -149,11 +146,8 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 viewModel.onBackClick(navController.currentDestination?.pane)
                 if (navController.popBackStack().not()) viewModel.onBackPressed()
             }
-            ModalBottomSheetLayout(
+            FinancialConnectionsModalBottomSheetLayout(
                 sheetState = bottomState,
-                sheetBackgroundColor = FinancialConnectionsTheme.v3Colors.backgroundSurface,
-                sheetShape = RoundedCornerShape(8.dp),
-                scrimColor = Neutral900.copy(alpha = 0.32f),
                 sheetContent = {
                     exitModal?.let {
                         ExitModal(
