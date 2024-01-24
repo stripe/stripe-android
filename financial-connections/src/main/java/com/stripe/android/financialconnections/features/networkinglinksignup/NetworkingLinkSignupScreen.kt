@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
@@ -54,6 +52,7 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.elevation
@@ -62,7 +61,6 @@ import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import com.stripe.android.financialconnections.ui.theme.Layout
-import com.stripe.android.financialconnections.ui.theme.Neutral900
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
@@ -114,11 +112,8 @@ private fun NetworkingLinkSignupContent(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    ModalBottomSheetLayout(
+    FinancialConnectionsModalBottomSheetLayout(
         sheetState = bottomSheetState,
-        sheetBackgroundColor = v3Colors.backgroundSurface,
-        sheetShape = RoundedCornerShape(8.dp),
-        scrimColor = Neutral900.copy(alpha = 0.32f),
         sheetContent = {
             when (val legalDetails = state.payload()?.content?.legalDetailsNotice) {
                 null -> {}
