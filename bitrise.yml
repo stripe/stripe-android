@@ -36,6 +36,7 @@ stages:
       - run-financial-connections-instrumentation-tests: { }
       - run-cardscan-instrumentation-tests: { }
       - run-paymentsheet-end-to-end-tests: { }
+      - run-paymentsheet-screenshot-tests: { }
   stage-build-connections-debug:
     workflows:
       - build-connections-debug: { }
@@ -248,9 +249,9 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest -x :example:connectedAndroidTest -x :financial-connections:connectedAndroidTest -x :financial-connections-example:connectedAndroidTest -x :camera-core:connectedAndroidTest -x :stripecardscan:connectedAndroidTest -x :stripecardscan-example:connectedAndroidTest
-  run-paymentsheet-snapshot-tests:
+  run-paymentsheet-screenshot-tests:
     before_run:
-      - start_snapshot_emulator
+      - start_screenshot_emulator
       - prepare_all
     after_run:
       - conclude_all
