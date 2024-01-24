@@ -96,7 +96,6 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
 
     @Test
     fun testPaymentSheetNewCustomerDark() {
-        forceDarkMode()
         testDriver.screenshotRegression(
             testParams
         )
