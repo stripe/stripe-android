@@ -248,6 +248,26 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest -x :example:connectedAndroidTest -x :financial-connections:connectedAndroidTest -x :financial-connections-example:connectedAndroidTest -x :camera-core:connectedAndroidTest -x :stripecardscan:connectedAndroidTest -x :stripecardscan-example:connectedAndroidTest
+  run-paymentsheet-snapshot-tests:
+    before_run:
+      - start_snapshot_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Assemble Instrumentation tests
+          timeout: 600
+          inputs:
+            - content: ./gradlew :paymentsheet:assembleAndroidTest
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - script@1:
+          title: Execute instrumentation tests
+          timeout: 1200
+          inputs:
+            - content: ./gradlew paymentsheet-example:executeScreenshotTests -Precord -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot
   run-paymentsheet-instrumentation-tests:
     before_run:
       - start_emulator
@@ -360,6 +380,25 @@ workflows:
                -no-snapshot
                -no-audio
                -no-window
+  start_screenshot_emulator:
+    steps:
+      - avd-manager@1:
+          inputs:
+            - profile: "Nexus 6"
+            - abi: "x86_64"
+            - api_level: 28
+            - start_command_flags: >
+                -camera-back none
+                -camera-front none
+                -netdelay none
+                -netspeed full
+                -memory 2048
+                -no-snapshot
+                -no-audio
+                -no-window
+                -no-snapshot-save
+                -gpu swiftshader_indirect
+                -no-boot-anim
   prepare_all:
     steps:
       - activate-ssh-key@4:
