@@ -10,5 +10,5 @@ if stdout.empty?
     exit true
 end
 
-puts "Screenshot tests failed.\n\nScreenshots are in the artifacts tab in bitrise."
+puts "Screenshot tests failed.\n\n#{stdout}\n\nScreenshots are in the artifacts tab in bitrise."
 exit false
