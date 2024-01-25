@@ -278,7 +278,7 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 bankName = StripeJsonUtils.optString(json, FIELD_BANK_NAME),
                 fingerprint = StripeJsonUtils.optString(json, FIELD_FINGERPRINT),
                 last4 = StripeJsonUtils.optString(json, FIELD_LAST4),
-                linkedAccount = StripeJsonUtils.optString(json, FIELD_LINKED_ACCOUNT),
+                financialConnectionsAccount = StripeJsonUtils.optString(json, FIELD_FINANCIAL_CONNECTIONS_ACCOUNT),
                 networks = if (json.has(FIELD_NETWORKS)) {
                     PaymentMethod.USBankAccount.USBankNetworks(
                         StripeJsonUtils.optString(json.optJSONObject(FIELD_NETWORKS), FIELD_NETWORKS_PREFERRED),
@@ -299,7 +299,7 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             private const val FIELD_BANK_NAME = "bank_name"
             private const val FIELD_FINGERPRINT = "fingerprint"
             private const val FIELD_LAST4 = "last4"
-            private const val FIELD_LINKED_ACCOUNT = "linked_account"
+            private const val FIELD_FINANCIAL_CONNECTIONS_ACCOUNT = "financial_connections_account"
             private const val FIELD_NETWORKS = "networks"
             private const val FIELD_NETWORKS_PREFERRED = "preferred"
             private const val FIELD_NETWORKS_SUPPORTED = "supported"

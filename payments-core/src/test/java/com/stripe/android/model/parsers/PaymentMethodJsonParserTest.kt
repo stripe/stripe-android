@@ -114,4 +114,18 @@ class PaymentMethodJsonParserTest {
         assertThat(PaymentMethodJsonParser().parse(PaymentMethodFixtures.IDEAL_JSON).type)
             .isEqualTo(PaymentMethod.Type.Ideal)
     }
+
+    @Test
+    fun parse_withUsBankAccount_returnsExpectedObject() {
+        val usBankAccount = PaymentMethodJsonParser().parse(
+            PaymentMethodFixtures.US_BANK_ACCOUNT_WITH_FCA
+        )
+
+        assertThat(usBankAccount.type)
+            .isEqualTo(PaymentMethod.Type.USBankAccount)
+        assertThat(usBankAccount.usBankAccount?.linkedAccount)
+            .isEqualTo("fca_111")
+        assertThat(usBankAccount.usBankAccount?.financialConnectionsAccount)
+            .isEqualTo("fca_111")
+    }
 }

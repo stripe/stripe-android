@@ -23,9 +23,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -236,6 +240,7 @@ private fun NetworkingLinkSignupLoaded(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SkipCta(text: String, onSkipClick: () -> Unit) {
     FinancialConnectionsButton(
@@ -243,6 +248,8 @@ private fun SkipCta(text: String, onSkipClick: () -> Unit) {
         onClick = onSkipClick,
         modifier = Modifier
             .fillMaxWidth()
+            .semantics { testTagsAsResourceId = true }
+            .testTag("skip_cta")
     ) {
         Text(text = text)
     }
