@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+* [FIXED][7832](https://github.com/stripe/stripe-android/pull/7832) Fixed an issue with `FlowController` when a custom `ViewModelProvider.Factory` is specified.π  
+
 ## 20.37.1 - 2024-01-25
 
 ### PaymentSheet
