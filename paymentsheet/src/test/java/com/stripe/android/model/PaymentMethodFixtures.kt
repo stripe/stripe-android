@@ -334,7 +334,8 @@ internal object PaymentMethodFixtures {
                 "fingerprint": "FFDMA0xfhBjWSZLu",
                 "last4": "6789",
                 "routing_number": "110000000",
-                "linked_account": "la_account_123"
+                "linked_account": "la_account_123",
+                "financial_connections_account": "la_account_123"
             },
             "billing_details": {
                 "address": {

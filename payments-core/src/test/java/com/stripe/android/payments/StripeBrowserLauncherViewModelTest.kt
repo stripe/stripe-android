@@ -36,18 +36,11 @@ class StripeBrowserLauncherViewModelTest {
         val viewModel = createViewModel()
         val launchIntent = viewModel.createLaunchIntent(ARGS)
 
-        val browserIntent = requireNotNull(launchIntent?.getParcelableExtra<Intent>(Intent.EXTRA_INTENT))
+        val browserIntent = requireNotNull(launchIntent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT))
 
         assertThat(browserIntent.action).isEqualTo(Intent.ACTION_VIEW)
         assertThat(browserIntent.data).isEqualTo(Uri.parse("https://bank.com"))
-        assertThat(launchIntent?.getStringExtra(Intent.EXTRA_TITLE)).isEqualTo("Verify your payment")
-    }
-
-    @Test
-    fun `createLaunchIntent() returns null if intent can't be resolved`() {
-        val viewModel = createViewModel(canResolveIntent = false)
-        val launchIntent = viewModel.createLaunchIntent(ARGS)
-        assertThat(launchIntent).isNull()
+        assertThat(launchIntent.getStringExtra(Intent.EXTRA_TITLE)).isEqualTo("Verify your payment")
     }
 
     @Test
@@ -105,7 +98,6 @@ class StripeBrowserLauncherViewModelTest {
 
     private fun createViewModel(
         browserCapabilities: BrowserCapabilities = BrowserCapabilities.CustomTabs,
-        canResolveIntent: Boolean = true,
     ): StripeBrowserLauncherViewModel {
         return StripeBrowserLauncherViewModel(
             analyticsRequestExecutor = analyticsRequestExecutor,
@@ -114,7 +106,6 @@ class StripeBrowserLauncherViewModelTest {
             intentChooserTitle = "Verify your payment",
             resolveErrorMessage = "Unable to resolve things",
             savedStateHandle = savedStateHandle,
-            intentResolver = { canResolveIntent },
         )
     }
 
