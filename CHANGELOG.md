@@ -2,6 +2,14 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.37.1 - 2024-01-25
+
+### PaymentSheet
+* [FIXED][7822](https://github.com/stripe/stripe-android/pull/7822) Fixed an issue where the SDK was unable to follow URL redirects in some cases.
+
+### Payments
+* [FIXED][7822](https://github.com/stripe/stripe-android/pull/7822) Fixed an issue where the SDK was unable to follow URL redirects in some cases.
+
 ## 20.37.0 - 2024-01-22
 
 ### Payments
