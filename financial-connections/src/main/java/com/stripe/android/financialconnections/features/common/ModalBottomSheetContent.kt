@@ -2,8 +2,6 @@
 
 package com.stripe.android.financialconnections.features.common
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,32 +9,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
-import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
-import com.stripe.android.financialconnections.ui.theme.Brand50
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import com.stripe.android.financialconnections.ui.theme.Layout
-import com.stripe.android.uicore.image.StripeImage
 
 @Composable
 internal fun DataAccessBottomSheetContent(
@@ -144,22 +135,7 @@ private fun ModalBottomSheetContent(
             item {
                 icon?.default?.let {
                     Spacer(modifier = Modifier.size(24.dp))
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .size(56.dp)
-                            .background(color = Brand50, shape = CircleShape)
-                    ) {
-                        StripeImage(
-                            url = it,
-                            imageLoader = LocalImageLoader.current,
-                            debugPainter = painterResource(id = R.drawable.stripe_logo),
-                            contentDescription = "Web Icon",
-                            modifier = Modifier
-                                .size(20.dp),
-                            contentScale = ContentScale.Crop // Adjust the scaling if needed
-                        )
-                    }
+                    CircleIcon(url = it)
                     Spacer(modifier = Modifier.size(24.dp))
                 }
                 AnnotatedText(

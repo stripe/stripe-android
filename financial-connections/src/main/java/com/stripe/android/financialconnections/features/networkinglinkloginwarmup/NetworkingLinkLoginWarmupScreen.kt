@@ -3,21 +3,19 @@
 package com.stripe.android.financialconnections.features.networkinglinkloginwarmup
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,7 +29,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
@@ -39,18 +39,22 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.common.CircleIcon
+import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupState.Payload
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupViewModel.Companion.PANE
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.TextResource.StringId
-import com.stripe.android.financialconnections.ui.components.AnnotatedText
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.components.StringAnnotation
-import com.stripe.android.financialconnections.ui.components.clickableSingle
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.LinkColors
 
 @Composable
 internal fun NetworkingLinkLoginWarmupScreen() {
@@ -61,7 +65,7 @@ internal fun NetworkingLinkLoginWarmupScreen() {
         state = state.value,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
-        onClickableTextClick = viewModel::onClickableTextClick,
+        onSkipClicked = viewModel::onSkipClicked,
         onContinueClick = viewModel::onContinueClick,
     )
 }
@@ -72,9 +76,9 @@ private fun NetworkingLinkLoginWarmupContent(
     onCloseClick: () -> Unit,
     onContinueClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
-    onClickableTextClick: (String) -> Unit,
+    onSkipClicked: () -> Unit,
 ) {
-    val scrollState = rememberScrollState()
+    val lazyListState = rememberLazyListState()
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
@@ -84,181 +88,165 @@ private fun NetworkingLinkLoginWarmupContent(
         }
     ) {
         when (val payload = state.payload) {
-            Uninitialized, is Loading -> NetworkingLinkLoginWarmupLoading()
-            is Success -> when (val disableNetworking = state.disableNetworkingAsync) {
-                is Loading -> NetworkingLinkLoginWarmupLoading()
-                is Uninitialized,
-                is Success -> NetworkingLinkLoginWarmupLoaded(
-                    scrollState = scrollState,
-                    payload = payload(),
-                    onClickableTextClick = onClickableTextClick,
-                    onContinueClick = onContinueClick
-                )
-
-                is Fail -> UnclassifiedErrorContent(
-                    error = disableNetworking.error,
-                    onCloseFromErrorClick = onCloseFromErrorClick
-                )
-            }
+            Uninitialized,
+            is Loading -> FullScreenGenericLoading()
 
             is Fail -> UnclassifiedErrorContent(
                 error = payload.error,
                 onCloseFromErrorClick = onCloseFromErrorClick
             )
+
+            is Success -> NetworkingLinkLoginWarmupLoaded(
+                lazyListState = lazyListState,
+                payload = payload(),
+                disableNetworkingAsync = state.disableNetworkingAsync,
+                onSkipClicked = onSkipClicked,
+                onCloseFromErrorClick = onCloseFromErrorClick,
+                onContinueClick = onContinueClick
+            )
         }
     }
 }
 
-@Composable
-private fun NetworkingLinkLoginWarmupLoading() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(
-            color = FinancialConnectionsTheme.colors.iconBrand
-        )
-    }
-}
-
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun NetworkingLinkLoginWarmupLoaded(
-    scrollState: ScrollState,
+    lazyListState: LazyListState,
     payload: Payload,
-    onClickableTextClick: (String) -> Unit,
+    disableNetworkingAsync: Async<FinancialConnectionsSessionManifest>,
+    onCloseFromErrorClick: (Throwable) -> Unit,
+    onSkipClicked: () -> Unit,
     onContinueClick: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(
-                top = 0.dp,
-                start = 24.dp,
-                end = 24.dp,
-                bottom = 24.dp
-            )
-    ) {
-        Spacer(modifier = Modifier.size(16.dp))
-        Title(
-            onClickableTextClick = onClickableTextClick
+    if (disableNetworkingAsync is Fail) {
+        UnclassifiedErrorContent(
+            error = disableNetworkingAsync.error,
+            onCloseFromErrorClick = onCloseFromErrorClick
         )
-        Spacer(modifier = Modifier.size(8.dp))
-        Description(onClickableTextClick)
-        Spacer(modifier = Modifier.size(24.dp))
-        ExistingEmailSection(
-            email = payload.email,
-            onContinueClick = onContinueClick
+    } else {
+        Layout(
+            lazyListState = lazyListState,
+            body = {
+                item {
+                    CircleIcon(painterResource(id = R.drawable.stripe_ic_person))
+                    Spacer(modifier = Modifier.size(16.dp))
+                    Text(
+                        text = stringResource(R.string.stripe_networking_link_login_warmup_title),
+                        style = v3Typography.headingLarge,
+                    )
+                    Spacer(modifier = Modifier.size(16.dp))
+                    Text(
+                        text = stringResource(R.string.stripe_networking_link_login_warmup_description),
+                        style = v3Typography.bodyMedium,
+                    )
+                }
+                item {
+                    Spacer(modifier = Modifier.size(24.dp))
+                    ExistingEmailSection(
+                        email = payload.email
+                    )
+                }
+            },
+            footer = {
+                Footer(
+                    disableNetworkingAsync = disableNetworkingAsync,
+                    onContinueClick = onContinueClick,
+                    onSkipClicked = onSkipClicked
+                )
+            }
         )
-        Spacer(modifier = Modifier.size(20.dp))
-        SkipSignIn(onClickableTextClick)
     }
 }
 
 @Composable
-private fun SkipSignIn(onClickableTextClick: (String) -> Unit) {
-    AnnotatedText(
-        text = StringId(R.string.stripe_networking_link_login_warmup_skip),
-        defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-            color = FinancialConnectionsTheme.colors.textSecondary
-        ),
-        annotationStyles = mapOf(
-            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
-                .toSpanStyle()
-                .copy(color = FinancialConnectionsTheme.colors.textBrand),
-        ),
-        onClickableTextClick = onClickableTextClick,
-    )
-}
-
-@Composable
-private fun Description(onClickableTextClick: (String) -> Unit) {
-    AnnotatedText(
-        text = StringId(R.string.stripe_networking_link_login_warmup_description),
-        defaultStyle = FinancialConnectionsTheme.typography.body.copy(
-            color = FinancialConnectionsTheme.colors.textSecondary
-        ),
-        annotationStyles = mapOf(
-            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.body
-                .toSpanStyle()
-                .copy(color = FinancialConnectionsTheme.colors.textBrand),
-        ),
-        onClickableTextClick = onClickableTextClick,
-    )
-}
-
-@Composable
-private fun Title(onClickableTextClick: (String) -> Unit) {
-    AnnotatedText(
-        text = StringId(R.string.stripe_networking_link_login_warmup_title),
-        defaultStyle = FinancialConnectionsTheme.typography.subtitle,
-        annotationStyles = mapOf(
-            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.subtitle
-                .toSpanStyle()
-                .copy(color = FinancialConnectionsTheme.colors.textBrand),
-        ),
-        onClickableTextClick = onClickableTextClick,
-    )
+@OptIn(ExperimentalComposeUiApi::class)
+private fun Footer(
+    disableNetworkingAsync: Async<FinancialConnectionsSessionManifest>,
+    onContinueClick: () -> Unit,
+    onSkipClicked: () -> Unit
+) {
+    Column {
+        FinancialConnectionsButton(
+            loading = false,
+            enabled = disableNetworkingAsync !is Loading,
+            type = Type.Primary,
+            onClick = onContinueClick,
+            modifier = Modifier
+                .semantics { testTagsAsResourceId = true }
+                .testTag("existing_email-button")
+                .fillMaxWidth()
+        ) {
+            Text(text = stringResource(id = R.string.stripe_networking_link_login_warmup_cta_continue))
+        }
+        Spacer(modifier = Modifier.size(16.dp))
+        FinancialConnectionsButton(
+            loading = false,
+            enabled = disableNetworkingAsync !is Loading,
+            type = Type.Secondary,
+            onClick = { onSkipClicked() },
+            modifier = Modifier
+                .semantics { testTagsAsResourceId = true }
+                .testTag("skip-button")
+                .fillMaxWidth()
+        ) {
+            Text(text = stringResource(id = R.string.stripe_networking_link_login_warmup_cta_skip))
+        }
+    }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun ExistingEmailSection(
-    email: String,
-    onContinueClick: () -> Unit
+    email: String
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .semantics { testTagsAsResourceId = true }
-            .testTag("existing_email-button")
-            .clickableSingle { onContinueClick() }
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(12.dp))
             .border(
                 width = 1.dp,
-                color = FinancialConnectionsTheme.colors.borderDefault,
-                shape = RoundedCornerShape(8.dp)
+                color = v3Colors.border,
+                shape = RoundedCornerShape(12.dp)
             )
-            .padding(12.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        Column(
-            Modifier.weight(1f)
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(32.dp)
+                .background(color = LinkColors.Brand200, shape = CircleShape)
         ) {
             Text(
-                text = stringResource(id = R.string.stripe_networking_link_login_warmup_email_label),
-                style = FinancialConnectionsTheme.typography.caption,
-                color = FinancialConnectionsTheme.colors.textSecondary
-            )
-            Text(
-                text = email,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = FinancialConnectionsTheme.typography.body,
-                color = FinancialConnectionsTheme.colors.textPrimary
+                text = email.getOrElse(0) { 'A' }.uppercaseChar().toString(),
+                style = v3Typography.bodySmall,
+                color = LinkColors.Brand600
             )
         }
-        Icon(
-            painter = painterResource(id = R.drawable.stripe_ic_arrow_right_circle),
-            tint = FinancialConnectionsTheme.colors.textBrand,
-            contentDescription = null
+        Spacer(modifier = Modifier.size(12.dp))
+        Text(
+            modifier = Modifier.weight(1f),
+            text = email,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = v3Typography.bodySmall,
+            color = v3Colors.textDefault
         )
     }
 }
 
 @Composable
 @Preview(group = "NetworkingLinkLoginWarmup Pane", name = "Canonical")
-internal fun NetworkingLinkLoginWarmupScreenEnteringEmailPreview() {
+internal fun NetworkingLinkLoginWarmupScreenPreview(
+    @PreviewParameter(NetworkingLinkLoginWarmupPreviewParameterProvider::class) state: NetworkingLinkLoginWarmupState
+) {
     FinancialConnectionsPreview {
         NetworkingLinkLoginWarmupContent(
-            state = NetworkingLinkLoginWarmupState(
-                payload = Success(
-                    Payload(
-                        merchantName = "Test",
-                        email = "verylongemailthatshouldellipsize@gmail.com",
-                    )
-                ),
-            ),
+            state = state,
             onCloseClick = {},
-            onClickableTextClick = {},
             onContinueClick = {},
+            onSkipClicked = {},
             onCloseFromErrorClick = {}
         )
     }
