@@ -107,7 +107,6 @@ internal object PaymentMethodFixtures {
             bankName = "Stripe Bank",
             fingerprint = "UkSG0Hf",
             last4 = "2345",
-            linkedAccount = null,
             financialConnectionsAccount = null,
             networks = null,
             routingNumber = "110000000"
@@ -425,48 +424,7 @@ internal object PaymentMethodFixtures {
         """.trimIndent()
     )
 
-    val US_BANK_ACCOUNT_WITH_FCA_AND_LA = JSONObject(
-        """
-        {
-            "id": "pm_123456",
-            "object": "payment_method",
-            "billing_details": {
-                "address": {
-                    "city": "Seattle",
-                    "country": "US",
-                    "line1": "123 Main St.",
-                    "line2": null,
-                    "postal_code": "99999",
-                    "state": "AL"
-                },
-                "email": "jenny@example.com",
-                "name": "Jenny Rosen",
-                "phone": null
-            },
-            "created": 1706132691,
-            "customer": null,
-            "livemode": false,
-            "type": "us_bank_account",
-            "us_bank_account": {
-                "account_holder_type": "individual",
-                "account_type": "checking",
-                "bank_name": "STRIPE TEST BANK",
-                "financial_connections_account": "fca_111",
-                "fingerprint": "FFDMA0xfhBjWSZLu",
-                "last4": "6789",
-                "linked_account": "fca_111",
-                "networks":{ 
-                    "preferred": "ach",
-                    "supported": ["ach","us_domestic_wire"]},
-                    "routing_number": "110000000", 
-                    "status_details": null
-                }
-            }
-        }
-        """.trimIndent()
-    )
-
-    val US_BANK_ACCOUNT_WITH_FCA_WITHOUT_LA = JSONObject(
+    val US_BANK_ACCOUNT_WITH_FCA = JSONObject(
         """
         {
             "id": "pm_123456",

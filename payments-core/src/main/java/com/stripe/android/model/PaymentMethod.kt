@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 
@@ -999,17 +1000,11 @@ constructor(
         @JvmField val last4: String?,
 
         /**
-         * The token of the Linked Account used to create the payment method
+         * The ID of the Financial Connections Account used to create the payment method
          *
-         * [us_bank_account.linkedAccount](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-linked_account)
+         * [us_bank_account.financial_connections_account](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-financial_connections_account)
          */
-        @Deprecated(
-            message = "Renamed to 'financialConnectionsAccount', " +
-                "'linkedAccount' will be removed in a future major update",
-            replaceWith = ReplaceWith(expression = "financialConnectionsAccount")
-        )
-        @JvmField
-        val linkedAccount: String?,
+        @JvmField val financialConnectionsAccount: String?,
 
         /**
          * Contains information about US bank account networks that can be used
@@ -1024,14 +1019,21 @@ constructor(
          * [us_bank_account.routingNumber](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-routing_number)
          */
         @JvmField val routingNumber: String?,
-
-        /**
-         * The ID of the Financial Connections Account used to create the payment method
-         *
-         * [us_bank_account.financial_connections_account](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-financial_connections_account)
-         */
-        @JvmField val financialConnectionsAccount: String?,
     ) : TypeData() {
+        /**
+         * The token of the Linked Account used to create the payment method
+         *
+         * [us_bank_account.linkedAccount](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-linked_account)
+         */
+        @Deprecated(
+            message = "Renamed to 'financialConnectionsAccount', " +
+                "'linkedAccount' will be removed in a future major update",
+            replaceWith = ReplaceWith(expression = "financialConnectionsAccount")
+        )
+        @IgnoredOnParcel
+        @JvmField
+        val linkedAccount: String? = financialConnectionsAccount
+
         override val type: Type get() = Type.USBankAccount
 
         @Parcelize

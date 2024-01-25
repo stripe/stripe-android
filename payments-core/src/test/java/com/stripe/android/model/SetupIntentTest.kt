@@ -73,7 +73,6 @@ class SetupIntentTest {
                 bankName = "STRIPE TEST BANK",
                 fingerprint = "FFDMA0xfhBjWSZLu",
                 last4 = "6789",
-                linkedAccount = null,
                 financialConnectionsAccount = null,
                 networks = PaymentMethod.USBankAccount.USBankNetworks("ach", listOf("ach")),
                 routingNumber = "110000000"

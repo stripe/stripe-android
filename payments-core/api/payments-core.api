@@ -3809,9 +3809,8 @@ public final class com/stripe/android/model/PaymentMethod$USBankAccount : com/st
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankNetworks;
 	public final fun component8 ()Ljava/lang/String;
-	public final fun component9 ()Ljava/lang/String;
-	public final fun copy (Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankAccountHolderType;Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankAccountType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankNetworks;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$USBankAccount;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$USBankAccount;Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankAccountHolderType;Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankAccountType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankNetworks;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$USBankAccount;
+	public final fun copy (Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankAccountHolderType;Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankAccountType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankNetworks;Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$USBankAccount;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$USBankAccount;Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankAccountHolderType;Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankAccountType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankNetworks;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$USBankAccount;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getType ()Lcom/stripe/android/model/PaymentMethod$Type;
