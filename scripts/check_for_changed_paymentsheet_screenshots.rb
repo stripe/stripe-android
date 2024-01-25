@@ -10,5 +10,6 @@ if stdout.empty?
     exit true
 end
 
-puts "Screenshot tests failed.\n\n#{stdout}\n\nScreenshots are in the artifacts tab in bitrise."
+artifacts_link = "#{BITRISE_BUILD_URL}?tab=artifacts"
+puts "Screenshot tests failed.\n\n#{stdout}\n\nScreenshots are in the artifacts tab in bitrise - #{artifacts_link}"
 exit false
