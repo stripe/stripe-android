@@ -32,7 +32,7 @@ import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Provider
 import com.stripe.android.R as PaymentsCoreR
 
@@ -262,8 +262,8 @@ internal fun AddPaymentMethodWithPaymentElement(
                 selectedItem = viewState.selectedPaymentMethod,
                 linkSignupMode = null,
                 linkConfigurationCoordinator = null,
-                showCheckboxFlow = flowOf(false),
-                processingWithLinkFlow = flowOf(false),
+                showCheckboxFlow = MutableStateFlow(false),
+                processingWithLinkFlow = MutableStateFlow(false),
                 onItemSelectedListener = {
                     viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
                 },

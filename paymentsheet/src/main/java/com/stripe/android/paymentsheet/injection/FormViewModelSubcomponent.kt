@@ -4,7 +4,7 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import dagger.BindsInstance
 import dagger.Subcomponent
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
 
 @Subcomponent
@@ -19,12 +19,12 @@ internal interface FormViewModelSubcomponent {
 
         @BindsInstance
         fun showCheckboxFlow(
-            @Named(ShowCheckboxFlow) saveForFutureUseVisibleFlow: Flow<Boolean>,
+            @Named(ShowCheckboxFlow) saveForFutureUseVisibleFlow: StateFlow<Boolean>,
         ): Builder
 
         @BindsInstance
         fun processingWithLinkFlow(
-            @Named(ProcessingWithLinkFlow) processingWithLinkFlow: Flow<Boolean>,
+            @Named(ProcessingWithLinkFlow) processingWithLinkFlow: StateFlow<Boolean>,
         ): Builder
 
         fun build(): FormViewModelSubcomponent

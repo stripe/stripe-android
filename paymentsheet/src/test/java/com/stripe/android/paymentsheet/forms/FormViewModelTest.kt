@@ -750,28 +750,30 @@ internal class FormViewModelTest {
             )
 
             val elements = formViewModel.elementsFlow.first()
+
             val countryElement = elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .filterIsInstance<AddressElement>()
-                .firstOrNull()
-                ?.countryElement
+                .first()
+                .countryElement
+
             val phoneElement = elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .filterIsInstance<PhoneNumberElement>()
-                .firstOrNull()
+                .first()
 
-            assertThat(countryElement).isNotNull()
-            assertThat(phoneElement).isNotNull()
-            countryElement?.controller?.onRawValueChange("CA")
-            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
-                .isEqualTo("CA")
-            phoneElement?.controller?.onValueChange("+13105551234")
-            countryElement?.controller?.onRawValueChange("US")
-            // Phone number shouldn't change because it is already filled.
-            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
-                .isEqualTo("CA")
+            phoneElement.controller.countryDropdownController.rawFieldValue.test {
+                assertThat(awaitItem()).isEqualTo("US")
+
+                countryElement.controller.onRawValueChange("CA")
+                assertThat(awaitItem()).isEqualTo("CA")
+
+                phoneElement.controller.onValueChange("+13105551234")
+                countryElement.controller.onRawValueChange("US")
+                // Phone number shouldn't change because it is already filled.
+            }
         }
 
     @Test
@@ -811,23 +813,24 @@ internal class FormViewModelTest {
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .filterIsInstance<CountryElement>()
-                .firstOrNull()
+                .first()
+
             val phoneElement = elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .filterIsInstance<PhoneNumberElement>()
-                .firstOrNull()
+                .first()
 
-            assertThat(countryElement).isNotNull()
-            assertThat(phoneElement).isNotNull()
-            countryElement?.controller?.onRawValueChange("CA")
-            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
-                .isEqualTo("CA")
-            phoneElement?.controller?.onValueChange("+13105551234")
-            countryElement?.controller?.onRawValueChange("US")
-            // Phone number shouldn't change because it is already filled.
-            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
-                .isEqualTo("CA")
+            phoneElement.controller.countryDropdownController.rawFieldValue.test {
+                assertThat(awaitItem()).isEqualTo("US")
+
+                countryElement.controller.onRawValueChange("CA")
+                assertThat(awaitItem()).isEqualTo("CA")
+
+                phoneElement.controller.onValueChange("+13105551234")
+                countryElement.controller.onRawValueChange("US")
+                // Phone number shouldn't change because it is already filled.
+            }
         }
 
     @Test

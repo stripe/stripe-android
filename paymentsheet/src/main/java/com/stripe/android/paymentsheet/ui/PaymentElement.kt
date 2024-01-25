@@ -28,7 +28,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.image.StripeImageLoader
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
 import javax.inject.Provider
 
@@ -40,8 +40,8 @@ internal fun PaymentElement(
     selectedItem: LpmRepository.SupportedPaymentMethod,
     linkSignupMode: LinkSignupMode?,
     linkConfigurationCoordinator: LinkConfigurationCoordinator?,
-    showCheckboxFlow: Flow<Boolean>,
-    processingWithLinkFlow: Flow<Boolean>,
+    showCheckboxFlow: StateFlow<Boolean>,
+    processingWithLinkFlow: StateFlow<Boolean>,
     onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit,
     onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
     formArguments: FormArguments,

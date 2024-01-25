@@ -24,8 +24,8 @@ import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
@@ -51,14 +51,14 @@ internal class FormViewModel @Inject internal constructor(
     val formArguments: FormArguments,
     private val lpmRepository: LpmRepository,
     addressRepository: AddressRepository,
-    @Named(ShowCheckboxFlow) val showCheckboxFlow: Flow<Boolean>,
-    @Named(ProcessingWithLinkFlow) val processingWithLinkFlow: Flow<Boolean>,
+    @Named(ShowCheckboxFlow) val showCheckboxFlow: StateFlow<Boolean>,
+    @Named(ProcessingWithLinkFlow) val processingWithLinkFlow: StateFlow<Boolean>,
 ) : ViewModel() {
 
     internal class Factory(
         val config: FormArguments,
-        val showCheckboxFlow: Flow<Boolean>,
-        val processingWithLinkFlow: Flow<Boolean>,
+        val showCheckboxFlow: StateFlow<Boolean>,
+        val processingWithLinkFlow: StateFlow<Boolean>,
         private val formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
     ) : ViewModelProvider.Factory {
 
@@ -85,7 +85,8 @@ internal class FormViewModel @Inject internal constructor(
         )
     }
 
-    private val _elementsFlow = MutableStateFlow(buildElements())
+    private val elements = buildElements()
+    private val _elementsFlow = MutableStateFlow(elements)
     val elementsFlow = _elementsFlow.asStateFlow()
 
     private val saveForFutureUseElement = elementsFlow
@@ -111,7 +112,7 @@ internal class FormViewModel @Inject internal constructor(
 
     init {
         viewModelScope.launch {
-            connectBillingDetailsFields(elementsFlow)
+            connectBillingDetailsFields(elements)
         }
 
         viewModelScope.launch {
@@ -120,7 +121,9 @@ internal class FormViewModel @Inject internal constructor(
     }
 
     private fun processingWithLink(processingWithLink: Boolean) {
-        _elementsFlow.value = buildElements(forceEmptyState = processingWithLink)
+        if (processingWithLink != processingWithLinkFlow.value) {
+            _elementsFlow.value = buildElements(forceEmptyState = processingWithLink)
+        }
     }
 
     private fun buildElements(

@@ -7,7 +7,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -17,7 +17,7 @@ internal fun formViewModelSubcomponentBuilder(
     context: Context,
     lpmRepository: LpmRepository,
 ): Provider<FormViewModelSubcomponent.Builder> {
-    val formViewModelProvider: (FormArguments, Flow<Boolean>, Flow<Boolean>) -> FormViewModel = { args, showCheckbox, processingWithLinkFlow ->
+    val formViewModelProvider: (FormArguments, StateFlow<Boolean>, StateFlow<Boolean>) -> FormViewModel = { args, showCheckbox, processingWithLinkFlow ->
         FormViewModel(
             context = context,
             formArguments = args,
@@ -33,8 +33,8 @@ internal fun formViewModelSubcomponentBuilder(
     val mockFormBuilder = object : FormViewModelSubcomponent.Builder {
 
         private lateinit var formArguments: FormArguments
-        private lateinit var showCheckboxFlow: Flow<Boolean>
-        private lateinit var processingWithLinkFlow: Flow<Boolean>
+        private lateinit var showCheckboxFlow: StateFlow<Boolean>
+        private lateinit var processingWithLinkFlow: StateFlow<Boolean>
 
         override fun formArguments(args: FormArguments): FormViewModelSubcomponent.Builder {
             formArguments = args
@@ -42,13 +42,15 @@ internal fun formViewModelSubcomponentBuilder(
         }
 
         override fun showCheckboxFlow(
-            saveForFutureUseVisibleFlow: Flow<Boolean>,
+            saveForFutureUseVisibleFlow: StateFlow<Boolean>,
         ): FormViewModelSubcomponent.Builder {
             showCheckboxFlow = saveForFutureUseVisibleFlow
             return this
         }
 
-        override fun processingWithLinkFlow(processingWithLinkFlow: Flow<Boolean>): FormViewModelSubcomponent.Builder {
+        override fun processingWithLinkFlow(
+            processingWithLinkFlow: StateFlow<Boolean>,
+        ): FormViewModelSubcomponent.Builder {
             this.processingWithLinkFlow = processingWithLinkFlow
             return this
         }

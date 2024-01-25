@@ -15,6 +15,7 @@ import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Provider
 
 @Composable
@@ -23,8 +24,8 @@ internal fun PaymentMethodForm(
     args: FormArguments,
     enabled: Boolean,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
-    showCheckboxFlow: Flow<Boolean>,
-    processingWithLinkFlow: Flow<Boolean>,
+    showCheckboxFlow: StateFlow<Boolean>,
+    processingWithLinkFlow: StateFlow<Boolean>,
     formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     modifier: Modifier = Modifier,
 ) {

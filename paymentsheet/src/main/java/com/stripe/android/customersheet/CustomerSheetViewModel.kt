@@ -60,7 +60,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -1128,7 +1127,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     ): () -> Unit {
         val formViewModel = formViewModelSubcomponentBuilderProvider.get()
             .formArguments(formArguments)
-            .showCheckboxFlow(flowOf(false))
+            .showCheckboxFlow(MutableStateFlow(false))
             .build()
             .viewModel
 
