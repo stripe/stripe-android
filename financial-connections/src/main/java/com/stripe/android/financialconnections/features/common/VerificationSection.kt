@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
@@ -22,6 +24,8 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementUI
@@ -36,6 +40,14 @@ internal fun VerificationSection(
     Column {
         StripeThemeForConnections {
             OTPElementUI(
+                boxShape = RoundedCornerShape(12.dp),
+                otpInputPlaceholder = "",
+                boxSpacing = 8.dp,
+                middleSpacing = 8.dp,
+                boxTextStyle = v3Typography.headingXLarge.copy(
+                    color = v3Colors.textDefault,
+                    textAlign = TextAlign.Center
+                ),
                 focusRequester = focusRequester,
                 enabled = enabled,
                 element = otpElement

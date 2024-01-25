@@ -41,7 +41,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 @Composable
 internal fun Layout(
     body: LazyListScope.() -> Unit,
-    footer: @Composable () -> Unit = {},
+    footer: (@Composable () -> Unit)? = null,
     inModal: Boolean = false,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     showFooterShadowWhenScrollable: Boolean = true,
@@ -71,15 +71,17 @@ internal fun Layout(
             }
         }
         // Footer content (bottom aligned)
-        Box(
-            modifier = Modifier.padding(
-                top = 16.dp,
-                bottom = 24.dp,
-                start = 24.dp,
-                end = 24.dp,
-            ),
-            content = { footer() }
-        )
+        footer?.let {
+            Box(
+                modifier = Modifier.padding(
+                    top = 16.dp,
+                    bottom = 24.dp,
+                    start = 24.dp,
+                    end = 24.dp,
+                ),
+                content = { it() }
+            )
+        }
     }
 }
 

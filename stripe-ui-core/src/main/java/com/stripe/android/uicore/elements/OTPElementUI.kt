@@ -6,13 +6,11 @@ import android.view.KeyEvent
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -24,7 +22,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -34,6 +32,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -49,6 +48,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.StripeTheme
@@ -90,6 +90,11 @@ fun OTPElementUI(
     enabled: Boolean,
     element: OTPElement,
     modifier: Modifier = Modifier,
+    boxShape: Shape = MaterialTheme.shapes.medium,
+    boxTextStyle: TextStyle = defaultTextStyle(),
+    boxSpacing: Dp = 8.dp,
+    middleSpacing: Dp = 20.dp,
+    otpInputPlaceholder: String = "●",
     colors: OTPElementColors = OTPElementColors(
         selectedBorder = MaterialTheme.colors.primary,
         placeholder = MaterialTheme.stripeColors.placeholderText
@@ -100,22 +105,22 @@ fun OTPElementUI(
 
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        var focusedElementIndex by remember { mutableStateOf(-1) }
+        var focusedElementIndex by remember { mutableIntStateOf(-1) }
 
         (0 until element.controller.otpLength).map { index ->
             val isSelected = focusedElementIndex == index
 
-            // Add extra spacing in the middle
-            if (index == element.controller.otpLength / 2) {
-                Spacer(modifier = Modifier.width(12.dp))
+            when (index) {
+                0 -> Unit
+                element.controller.otpLength / 2 -> Spacer(modifier = Modifier.width(middleSpacing))
+                else -> Spacer(modifier = Modifier.width(boxSpacing))
             }
 
             SectionCard(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 4.dp),
+                    .weight(1f),
+                shape = boxShape,
                 backgroundColor = if (enabled) {
                     MaterialTheme.stripeColors.component
                 } else {
@@ -168,6 +173,8 @@ fun OTPElementUI(
                     index = index,
                     focusManager = focusManager,
                     modifier = textFieldModifier,
+                    placeholder = otpInputPlaceholder,
+                    textStyle = boxTextStyle,
                     enabled = enabled,
                     colors = colors
                 )
@@ -181,12 +188,14 @@ fun OTPElementUI(
 private fun OTPInputBox(
     value: String,
     isSelected: Boolean,
+    textStyle: TextStyle,
     element: OTPElement,
     index: Int,
     focusManager: FocusManager,
     modifier: Modifier,
     enabled: Boolean,
-    colors: OTPElementColors
+    colors: OTPElementColors,
+    placeholder: String
 ) {
     // Need to use BasicTextField instead of TextField to be able to customize the
     // internal contentPadding
@@ -205,13 +214,7 @@ private fun OTPInputBox(
         },
         modifier = modifier,
         enabled = enabled,
-        textStyle = TextStyle(
-            fontFamily = FontFamily.Default,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 24.sp,
-            color = MaterialTheme.stripeColors.onComponent,
-            textAlign = TextAlign.Center
-        ),
+        textStyle = textStyle,
         cursorBrush = SolidColor(MaterialTheme.stripeColors.textCursor),
         keyboardOptions = KeyboardOptions(
             keyboardType = element.controller.keyboardType
@@ -228,7 +231,7 @@ private fun OTPInputBox(
                 innerTextField = innerTextField,
                 placeholder = {
                     Text(
-                        text = if (!isSelected) "●" else "",
+                        text = if (!isSelected) placeholder else "",
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center
                     )
@@ -252,6 +255,15 @@ private fun OTPInputBox(
         }
     )
 }
+
+@Composable
+private fun defaultTextStyle() = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontWeight = FontWeight.SemiBold,
+    fontSize = 24.sp,
+    color = MaterialTheme.stripeColors.onComponent,
+    textAlign = TextAlign.Center
+)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class OTPElementColors(
