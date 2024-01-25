@@ -43,6 +43,7 @@ import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -139,7 +140,8 @@ internal object CustomerSheetTestHelper {
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
                 workContext = Dispatchers.Unconfined,
             ),
-            showCheckboxFlow = mock()
+            showCheckboxFlow = flowOf(false),
+            processingWithLinkFlow = flowOf(false),
         )
         val mockFormBuilder = mock<FormViewModelSubcomponent.Builder>()
         val mockFormSubcomponent = mock<FormViewModelSubcomponent>()
@@ -148,6 +150,7 @@ internal object CustomerSheetTestHelper {
         whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
         whenever(mockFormBuilder.formArguments(any())).thenReturn(mockFormBuilder)
         whenever(mockFormBuilder.showCheckboxFlow(any())).thenReturn(mockFormBuilder)
+        whenever(mockFormBuilder.processingWithLinkFlow(any())).thenReturn(mockFormBuilder)
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 

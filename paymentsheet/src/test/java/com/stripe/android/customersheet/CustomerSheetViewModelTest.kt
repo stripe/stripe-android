@@ -451,8 +451,8 @@ class CustomerSheetViewModelTest {
             assertThat(awaitItem())
                 .isInstanceOf(SelectPaymentMethod::class.java)
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
-            assertThat(awaitItem())
-                .isInstanceOf(AddPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
         }
     }
 
@@ -535,6 +535,7 @@ class CustomerSheetViewModelTest {
             val addPaymentMethodViewState = awaitViewState<AddPaymentMethod>()
 
             assertThat(addPaymentMethodViewState.isFirstPaymentMethod).isTrue()
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
         }
     }
 
@@ -1128,8 +1129,8 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
 
-            assertThat(awaitItem())
-                .isInstanceOf(AddPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
 
@@ -1724,6 +1725,8 @@ class CustomerSheetViewModelTest {
             assertThat(
                 awaitViewState<AddPaymentMethod>().selectedPaymentMethod.code
             ).isEqualTo("us_bank_account")
+
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
         }
     }
 
@@ -2438,6 +2441,8 @@ class CustomerSheetViewModelTest {
 
             val newViewState = awaitViewState<AddPaymentMethod>()
             assertThat(newViewState.formViewData.completeFormValues).isNull()
+
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
         }
     }
 

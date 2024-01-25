@@ -17,13 +17,14 @@ internal fun formViewModelSubcomponentBuilder(
     context: Context,
     lpmRepository: LpmRepository,
 ): Provider<FormViewModelSubcomponent.Builder> {
-    val formViewModelProvider: (FormArguments, Flow<Boolean>) -> FormViewModel = { args, showCheckbox ->
+    val formViewModelProvider: (FormArguments, Flow<Boolean>, Flow<Boolean>) -> FormViewModel = { args, showCheckbox, processingWithLinkFlow ->
         FormViewModel(
             context = context,
             formArguments = args,
             lpmRepository = lpmRepository,
             addressRepository = AddressRepository(context.resources, Dispatchers.Unconfined),
             showCheckboxFlow = showCheckbox,
+            processingWithLinkFlow = processingWithLinkFlow,
         )
     }
 
@@ -33,6 +34,7 @@ internal fun formViewModelSubcomponentBuilder(
 
         private lateinit var formArguments: FormArguments
         private lateinit var showCheckboxFlow: Flow<Boolean>
+        private lateinit var processingWithLinkFlow: Flow<Boolean>
 
         override fun formArguments(args: FormArguments): FormViewModelSubcomponent.Builder {
             formArguments = args
@@ -46,9 +48,14 @@ internal fun formViewModelSubcomponentBuilder(
             return this
         }
 
+        override fun processingWithLinkFlow(processingWithLinkFlow: Flow<Boolean>): FormViewModelSubcomponent.Builder {
+            this.processingWithLinkFlow = processingWithLinkFlow
+            return this
+        }
+
         override fun build(): FormViewModelSubcomponent {
             return mock {
-                on { viewModel } doReturn formViewModelProvider(formArguments, showCheckboxFlow)
+                on { viewModel } doReturn formViewModelProvider(formArguments, showCheckboxFlow, processingWithLinkFlow)
             }
         }
     }

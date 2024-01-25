@@ -80,15 +80,12 @@ internal class FormViewModel @Inject internal constructor(
             saveForFutureUseInitialValue = formArguments.showCheckboxControlledFields,
             merchantName = formArguments.merchantName,
             context = context,
-            shippingValues = formArguments.shippingDetails
-                ?.toIdentifierMap(formArguments.billingDetails),
+            shippingValues = formArguments.shippingDetails?.toIdentifierMap(formArguments.billingDetails),
             cbcEligibility = formArguments.cbcEligibility,
         )
     }
 
-    val elements: List<FormElement> = buildElements()
-
-    private val _elementsFlow = MutableStateFlow(elements)
+    private val _elementsFlow = MutableStateFlow(buildElements())
     val elementsFlow = _elementsFlow.asStateFlow()
 
     private val saveForFutureUseElement = elementsFlow

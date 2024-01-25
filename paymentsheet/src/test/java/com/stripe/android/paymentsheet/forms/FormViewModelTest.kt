@@ -65,6 +65,7 @@ internal class FormViewModelTest {
     val lpmRepository = LpmRepository(LpmRepository.LpmRepositoryArguments(context.resources))
 
     val showCheckboxFlow = MutableStateFlow(false)
+    val processingWithLinkFlow = MutableStateFlow(false)
 
     private fun createLpmRepositorySupportedPaymentMethod(
         paymentMethodType: PaymentMethod.Type,
@@ -939,7 +940,8 @@ internal class FormViewModelTest {
         formArguments = arguments,
         lpmRepository = lpmRepository,
         addressRepository = createAddressRepository(),
-        showCheckboxFlow = showCheckboxFlow
+        showCheckboxFlow = showCheckboxFlow,
+        processingWithLinkFlow = processingWithLinkFlow,
     )
 }
 
