@@ -10,7 +10,8 @@ if stdout.empty?
     exit true
 end
 
-artifacts_link = "#{BITRISE_BUILD_URL}?tab=artifacts"
+bitrise_build_url = ENV["BITRISE_BUILD_URL"]
+artifacts_link = "#{bitrise_build_url}?tab=artifacts"
 puts "Screenshot tests failed.\n\n#{stdout}\n\nUpdated screenshots here:"
 puts artifacts_link
 exit false
