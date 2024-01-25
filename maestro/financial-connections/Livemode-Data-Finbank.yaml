@@ -26,7 +26,7 @@ tags:
 # LOG IN WITH TEST FINBANK INSTITUTION
 - extendedWaitUntil:
     visible:
-      text: "Image of FinBank logo"
+      text: "Banking Userid "
     timeout: 30000
 - tapOn: "Banking Userid "
 - inputText: "f_i_n"
