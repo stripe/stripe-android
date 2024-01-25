@@ -58,7 +58,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
             ApiKeyFixtures.sessionManifest().copy(nextPane = expectedNextPane)
         )
 
-        viewModel.onClickableTextClick("skip_login")
+        viewModel.onSkipClicked()
 
         verify(disableNetworking).invoke()
         navigationManager.assertNavigatedTo(

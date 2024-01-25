@@ -20,6 +20,11 @@ import com.stripe.android.uicore.image.StripeImage
 
 private val iconSize = 20.dp
 
+/**
+ * A circular icon with a branded background color.
+ *
+ * @param painter the [Painter] to use for the icon
+ */
 @Composable
 internal fun CircleIcon(painter: Painter) {
     CircleBox {
@@ -27,6 +32,13 @@ internal fun CircleIcon(painter: Painter) {
     }
 }
 
+/**
+ * A circular icon with a branded background color.
+ *
+ * @param url the URL to use for the icon
+ * @param errorPainter the [Painter] to use for the icon if the URL fails to load. If null,
+ *        no icon will be rendered inside the circle.
+ */
 @Composable
 internal fun CircleIcon(
     url: String,
