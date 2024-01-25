@@ -11,6 +11,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
@@ -751,6 +752,7 @@ internal class DefaultFlowController @Inject internal constructor(
         ): PaymentSheet.FlowController {
             val flowControllerViewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
+                factory = SavedStateViewModelFactory()
             )[FlowControllerViewModel::class.java]
 
             val flowControllerStateComponent = flowControllerViewModel.flowControllerStateComponent
