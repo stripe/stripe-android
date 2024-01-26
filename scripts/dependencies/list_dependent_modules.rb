@@ -15,6 +15,10 @@ def list_dependent_modules
     module_names.select do |module_name|
         module_folder_path = module_name.sub(":", "/")
         module_build_file_path = "#{module_folder_path}/build.gradle"
-        File.exist?(module_build_file_path)
+        if RUBY_VERSION.split('.').first == "2"
+            File.exists?(module_build_file_path)
+        else
+            File.exist?(module_build_file_path)
+        end
     end
 end
