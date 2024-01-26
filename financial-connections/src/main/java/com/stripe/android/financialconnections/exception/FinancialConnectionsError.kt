@@ -14,4 +14,6 @@ internal abstract class FinancialConnectionsError(
     stripeException.statusCode,
     stripeException.cause,
     stripeException.message
-)
+) {
+    override fun analyticsValue(): String = "fcError"
+}
