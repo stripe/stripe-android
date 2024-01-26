@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.exception
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.StripeException
 
 /**
@@ -15,7 +14,4 @@ internal abstract class FinancialConnectionsError(
     stripeException.statusCode,
     stripeException.cause,
     stripeException.message
-) {
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    override fun analyticsValue(): String? = null
-}
+)

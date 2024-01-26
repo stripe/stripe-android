@@ -9,7 +9,7 @@ internal sealed class PaymentSheetConfirmationError : Throwable() {
     data class Stripe(override val cause: Throwable) : PaymentSheetConfirmationError() {
 
         override val analyticsValue: String
-            get() = StripeException.create(cause).analyticsValue() ?: "unknown"
+            get() = StripeException.create(cause).analyticsValue()
     }
 
     data class GooglePay(val errorCode: Int) : PaymentSheetConfirmationError() {

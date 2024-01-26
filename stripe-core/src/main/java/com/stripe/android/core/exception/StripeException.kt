@@ -20,7 +20,7 @@ abstract class StripeException(
     val isClientError = statusCode in 400..499
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    abstract fun analyticsValue(): String?
+    open fun analyticsValue(): String = "stripeException"
 
     override fun toString(): String {
         return listOfNotNull(
