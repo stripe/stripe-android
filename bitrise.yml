@@ -345,7 +345,7 @@ workflows:
     steps:
       - avd-manager@1:
           inputs:
-            - profile: "pixel_3a"
+            - profile: "pixel_6"
             - abi: "x86_64"
             - api_level: 33
             - tag: "google_apis"
