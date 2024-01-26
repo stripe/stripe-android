@@ -1,16 +1,18 @@
 #!/usr/bin/env ruby
 
-require_relative 'check_module_dependencies'
-require_relative 'list_dependent_modules'
+require 'open3'
 
-modules = list_dependent_modules
-has_changes = false
+diff_command = 'git status --porcelain */dependencies/dependencies.txt'
+stdout, _, _ = Open3.capture3(diff_command)
 
-modules.each do |module_name|
-    has_changes = check_module_dependencies(module_name)
-    if has_changes
-        break
-    end
+if stdout.empty?
+    puts "No differences in dependencies found."
+    exit true
 end
 
-exit has_changes
+bitrise_build_url = ENV["BITRISE_BUILD_URL"]
+artifacts_link = "#{bitrise_build_url}?tab=artifacts"
+puts "Dependencies check failed.\n\n#{stdout}\n\nUpdated dependencies here:"
+puts artifacts_link
+puts "\n\nYou can also regenerate them locally via `ruby scripts/dependencies/update_transitive_dependencies.rb`"
+exit false

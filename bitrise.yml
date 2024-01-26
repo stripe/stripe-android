@@ -341,6 +341,20 @@ workflows:
       - script@1:
           inputs:
             - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk
+  check-dependencies:
+    envs:
+      - INCLUDE_DEPENDENCIES_ON_FAILURE: true
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          inputs:
+            - content: ruby scripts/dependencies/update_transitive_dependencies.rb
+      - script@1:
+          inputs:
+            - content: ruby scripts/dependencies/check_transitive_dependencies.rb
   start_connections_emulator:
     steps:
       - avd-manager@1:
