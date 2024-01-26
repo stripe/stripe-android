@@ -45,6 +45,11 @@ internal val Red500 = Color(0xffDF1B41)
 internal val Green400 = Color(0xff3FA40D)
 internal val Green500 = Color(0xff228403)
 
+internal object LinkColors {
+    val Brand200 = Color(0xffA6FBDD)
+    val Brand600 = Color(0xff1AC59B)
+}
+
 /**
  * Financial Connections custom Color Palette
  */

@@ -109,10 +109,10 @@
     <string name="stripe_accountpicker_singleaccount_description">Select the account you\'d like to link.</string>
     <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
     <string name="stripe_networking_signup_phone_number_disclaimer">We’ll use this to verify and manage your account.</string>
-    <string name="stripe_networking_link_login_warmup_email_label">Continue as</string>
-    <string name="stripe_networking_link_login_warmup_skip">Not you? <annotation clickable="skip_login">Continue without signing in</annotation></string>
-    <string name="stripe_networking_link_login_warmup_description">It looks like you have a Link account. Signing in will let you quickly access your saved bank accounts.</string>
-    <string name="stripe_networking_link_login_warmup_title">Sign in to Link</string>
+    <string name="stripe_networking_link_login_warmup_description">Use information you previously saved with your Link account.</string>
+    <string name="stripe_networking_link_login_warmup_title">Continue with Link</string>
+    <string name="stripe_networking_link_login_warmup_cta_continue">Continue with Link</string>
+    <string name="stripe_networking_link_login_warmup_cta_skip">Not now</string>
     <string name="stripe_networking_verification_title">Save your account to Link</string>
     <string name="stripe_networking_verification_desc">Enter the code sent to %1$s</string>
     <string name="stripe_networking_verification_email">Signing in as %1$s</string>

@@ -75,12 +75,7 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
         navigationManager.tryNavigateTo(Destination.NetworkingLinkVerification(referrer = PANE))
     }
 
-    fun onClickableTextClick(text: String) = when (text) {
-        CLICKABLE_TEXT_SKIP_LOGIN -> onSkipClicked()
-        else -> logger.error("Unknown clicked text $text")
-    }
-
-    private fun onSkipClicked() {
+    fun onSkipClicked() {
         suspend {
             eventTracker.track(Click("click.skip_sign_in", PANE))
             disableNetworking().also {
@@ -100,8 +95,6 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
         MavericksViewModelFactory<NetworkingLinkLoginWarmupViewModel, NetworkingLinkLoginWarmupState> {
 
         internal val PANE = Pane.NETWORKING_LINK_LOGIN_WARMUP
-
-        private const val CLICKABLE_TEXT_SKIP_LOGIN = "skip_login"
 
         override fun create(
             viewModelContext: ViewModelContext,
